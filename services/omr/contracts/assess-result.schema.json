@@ -1,0 +1,83 @@
+{
+  "$ref": "#/definitions/assess-result",
+  "definitions": {
+    "assess-result": {
+      "type": "object",
+      "properties": {
+        "imageSha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "quality": {
+          "type": "object",
+          "properties": {
+            "ok": {
+              "type": "boolean"
+            },
+            "sharpness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glare": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "fiducialsFound": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "rejectReason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": ["blurry", "glare", "fiducials_missing", "cropped", "no_separable_marks"]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "illuminationFlattened": {
+              "type": "boolean"
+            },
+            "marksReadability": {
+              "type": "string",
+              "enum": ["readable", "likely_blank", "unreadable"]
+            }
+          },
+          "required": ["ok", "sharpness", "glare", "fiducialsFound", "rejectReason"],
+          "additionalProperties": false
+        },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["qr", "rut_bubbles", "none"]
+            },
+            "raw": {
+              "type": ["string", "null"]
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "qrRaw": {
+              "type": ["string", "null"]
+            }
+          },
+          "required": ["mode", "raw", "confidence"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["imageSha256", "quality", "identity"],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

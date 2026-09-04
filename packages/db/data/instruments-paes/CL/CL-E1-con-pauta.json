@@ -1,0 +1,2195 @@
+{
+ "instrument": {
+  "name": "PAES CL — Ensayo 1 (Tanda 1) · IV° Medio 2026",
+  "subject": "Competencia Lectora",
+  "subjectCode": "LANG",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "CL",
+   "tanda": "Tanda 1",
+   "mencion": null,
+   "appliedOn": "2026-03-23",
+   "basadoEn": "Selección DEMRE ADM REG 2025 + Complemento RV"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "LECTURA 1: preguntas 1 a 8",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Fragmento del discurso de la poeta Wislawa Szymborska al recibir el Premio Nobel de Literatura en el año 1996. DISCURSO DE RECEPCIÓN DEL PREMIO NOBEL DE LITERATURA Se dice que en un discurso lo más difícil es siempre la primera frase… Pues ya la dije… Pero presiento que las que siguen van a ser igualmente difíciles, la tercera, la sexta, la décima, hasta la última, ya que debo hablar sobre poesía. Muy raras veces me he expresado acerca de este tema, casi nunca, y siempre con la convicción de que no lo hago muy bien. Por eso mi discurso no va a ser demasiado largo. Toda imperfección resulta más fácil de aguantar si se sirve en pequeñas dosis. El poeta contemporáneo es escéptico y Figura 1. Wislawa Szymborska. desconfía incluso ‒o más bien principalmente‒ de sí mismo. Con desgano confiesa públicamente que es poeta ‒como si se tratara de algo vergonzoso‒. En estos tiempos bulliciosos es más fácil que admitamos los vicios propios, con tal de causar efectos fuertes; mucho más difícil es reconocer las virtudes, ya que están escondidas más profundamente, y hasta uno mismo no cree tanto en ellas. En las encuestas o en los encuentros con amigos ocasionales, cuando el poeta se ve forzado a definir su profesión, acude al término genérico “escritor” o al de alguna otra profesión que adicionalmente ejerza. El empleado público o los eventuales compañeros de viaje reciben con cierta perplejidad e inquietud la noticia de que están tratando con un poeta. Sospecho que los filósofos también producen semejante inquietud. No obstante, ellos se encuentran en mejor situación, ya que generalmente pueden adornar su profesión con algún grado académico. Profesor de Filosofía ‒ya suena mucho más serio‒. No existen profesores de poesía, lo que haría suponer que esta actividad requiere de estudios especializados, exámenes presentados en fechas precisas, disertaciones teóricas rematadas con bibliografía y notas y, finalmente, los diplomas recibidos con solemnidad. Todo esto, a su vez, significaría que para graduarse de poeta no bastarían las hojas de papel, aun cuando estuvieran llenas de excelentes versos, sino que se necesitaría, sobre todo, un papel con sello y firma. Recordemos que justamente esta fue la razón por la que condenaron al destierro a Josef Brodsky1, orgullo de la poesía rusa, quien más tarde fue galardonado con el Premio Nobel. A Brodsky se le clasificó como “parásito”, por no contar con un certificado oficial que le permitiera ser poeta… Hace un par de años tuve el honor y 1 Poeta ruso de origen judío. Fue perseguido por las autoridades de la URSS y finalmente expulsado del país. la alegría de conocerlo en persona. Me di cuenta de que solamente a él, entre todos los poetas que he conocido, le gustaba llamarse a sí mismo “poeta”; pronunciaba esta palabra sin conflictos internos y hasta con cierta desafiante desenvoltura. Pienso que se debía al recuerdo de las violentas humillaciones que sufrió en su juventud. En países más dichosos, los poetas, obviamente, quieren ser publicados, leídos y entendidos, pero ya no hacen nada o casi nada en su vida cotidiana para destacar entre la gente. Sin embargo, hace poco, en las primeras décadas de nuestro siglo, a los poetas les gustaba escandalizar con su ropa extravagante y con un comportamiento excéntrico. Aquellos no eran más que espectáculos para el público, ya que siempre tenía que llegar el momento en que el poeta cerraba la puerta, se quitaba toda esa parafernalia: capas y oropeles2, y se detenía en el silencio, en espera de sí mismo frente a una hoja de papel en blanco, que en el fondo es lo único que importa. Hay algo que resulta muy característico. Continuamente se filman películas biográficas sobre grandes científicos y artistas. La tarea de los directores más ambiciosos es mostrar en forma verosímil el proceso creativo que condujo a importantes descubrimientos científicos o a la creación de grandes obras de arte. Se puede, con aceptables resultados, mostrar el trabajo de algunos científicos: laboratorios, instrumentos diversos y aparatos puestos en marcha logran por unos momentos mantener la atención de los espectadores. Además, resultan muy dramáticas las escenas de suspenso, cuando un experimento repetido miles de veces logró dar finalmente, merced a una mínima modificación, con el resultado tan esperado. Espectaculares pueden ser las películas sobre pintores, ya que es posible reconstruir todas las fases de creación de un cuadro ‒desde la primera raya hasta la última pincelada‒. Las películas sobre los compositores se llenan con su música: desde los primeros compases, que el creador escucha en su interior, hasta la obra madura ya terminada y repartida entre varios instrumentos. Todo sigue siendo muy ingenuo y no dice nada sobre el extraño estado de ánimo que se conoce comúnmente como inspiración, pero por lo menos hay algo para ver y oír. El peor de los casos es el de los poetas. Su trabajo resulta irremediablemente poco fotogénico. Uno permanece sentado a la mesa o acostado en un sofá, con la vista inmóvil, fija en un punto de la pared o en el techo; de vez en cuando escribe siete versos, de los cuales, después que transcurre un cuarto de hora, va a quitar uno y de nuevo pasa una hora en la que no ocurrirá nada. ¿Qué clase de espectador podría soportar una cosa semejante? He mencionado la inspiración. A la pregunta de qué cosa es, suponiendo que sea algo, los poetas contemporáneos responden de modo evasivo. Y no porque nunca hayan sentido los beneficios de este impulso interior, más bien se debe a otra causa: no es fácil explicar a los demás algo que ni siquiera se comprende bien. Yo misma he evadido el asunto cuando me lo han preguntado. Y contesto lo siguiente: la inspiración no es privilegio exclusivo de los poetas ni de los artistas en general. Hay, hubo, habrá siempre un número de personas en quienes de vez en cuando se despierta la inspiración. A este grupo pertenecen los que escogen su trabajo y lo cumplen con amor e imaginación. Hay médicos 2 Cosas de poco valor que aparentan valer mucho. así, hay maestros, hay también jardineros y centenares de oficios más. Su trabajo puede ser una aventura sin fin, a condición de que sepan encontrar en él nuevos desafíos cada vez. Sin importar los esfuerzos y fracasos, su inquietud no desfallece. De cada problema resuelto surge un enjambre de nuevas preguntas. La inspiración, cualquier cosa que sea, nace de un perpetuo “no lo sé”. […] Por lo anterior, estimo altamente estas dos pequeñas palabras: “no sé”. Pequeñas, pero dotadas de alas para el vuelo. Nos agrandan la vida hasta una dimensión que no cabe en nosotros mismos y hasta el tamaño en el que está suspendida nuestra Tierra diminuta. Si Isaac Newton no se hubiera dicho “no sé”, las manzanas en su jardín podrían seguir cayendo como granizo, y él, en el mejor de los casos, solamente se inclinaría para recogerlas y comérselas. Si mi compatriota Marie Sklodowska-Curie3 no se hubiera dicho “no sé”, probablemente se habría quedado como maestra de química en un colegio para señoritas de buena familia y en este trabajo, por otra parte muy decente, se le hubiera ido la vida. Pero siguió repitiéndose “no sé” y justo estas palabras la trajeron dos veces a Estocolmo, donde se otorgan los premios Nobel a personas de espíritu inquieto y en búsqueda constante. También el poeta, si es un verdadero poeta, tiene que repetirse perpetuamente “no sé”. Con cada verso intenta responder, pero en el momento en que pone el punto final, le asaltan las dudas y empieza a advertir que su respuesta es temporal y en ningún caso satisfactoria. Entonces prueba otra vez y otra vez, para que a las sucesivas muestras de su insatisfacción consigo mismo los historiadores de la literatura las sujeten con un clip enorme para denominarlas “La Obra”. Szymborska, W. (s.f.). Discurso de recepción del Premio Nobel de Literatura. En Ersilias. Escritura y poesía visual. https://www.ersilias.com/discurso-de-wislawa-szymborska-al-recoger-el-premio-nobel-de-literatura-de- 1996/ 3 Física y química polaca, más conocida como Marie Curie o Madame Curie.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "En el primer párrafo, ¿con qué propósito la emisora utiliza la expresión “Toda imperfección resulta más fácil de aguantar si se sirve en pequeñas dosis”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para admitir que es indigna del premio otorgado.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para justificar la extensión de su propio discurso.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Para reconocer la inexperiencia que la inseguriza.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para transmitir que conoce los intereses de la audiencia.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la idea central que se desarrolla en el segundo párrafo?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Los poetas reconocen con dificultad las virtudes de su quehacer.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Los poetas prefieren ser reconocidos públicamente como escritores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los poetas parecen ser menos serios que los profesores de Filosofía.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los poetas provocan inquietud al revelar su profesión a otras personas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "¿Con qué propósito la emisora relata la anécdota sobre Brodsky?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para revelar la crítica al estilo de vida que tienen los poetas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para destacar la figura de los poetas como seres irreverentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para ilustrar la idea de que los poetas se avergüenzan de su oficio.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para validar la idea de que se puede ser poeta sin una certificación.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la crítica de la emisora a las películas biográficas sobre artistas y científicos?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que excluyen los momentos clave de sus trayectorias vitales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que omiten el origen de sus procesos creativos e intelectuales.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Que desestiman sus méritos en la búsqueda del reconocimiento.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que banalizan sus experiencias mediante la música y el dramatismo.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "Según el quinto párrafo, ¿cuál es la ambición de quienes dirigen películas sobre grandes científicos y artistas?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Recrear los procesos creativos de científicos y artistas.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Retratar la biografía de científicos y artistas con exactitud.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Transmitir la satisfacción de científicos y artistas por sus obras.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Destacar las repercusiones de la labor de científicos y artistas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "Según la emisora, ¿de dónde proviene la inspiración?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Del interés en la aventura.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Del conocimiento del oficio.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Del compromiso con el trabajo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Del cuestionamiento constante.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "¿Con qué propósito la emisora menciona a Isaac Newton y a Marie Sklodowska- Curie?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para comparar los procesos creativos de los científicos con los de los artistas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para destacar las consecuencias de la observación de la naturaleza para los creadores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para mostrar los resultados obtenidos por personalidades con espíritu inquieto.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Para describir las anécdotas que inspiraron a personas en búsqueda constante.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "¿Qué estado anímico de la emisora se interpreta al inicio del discurso?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Nerviosismo, porque ignora el tema que va a desarrollar en su discurso.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Agobio, porque reconoce que la elaboración de su discurso fue desprolija.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Pesimismo, porque cree que su exposición es insuficiente para un discurso.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Incomodidad, porque plantea su falta de práctica frente al tema del discurso.",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 2,
+   "name": "LECTURA 2: preguntas 9 a 16",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Fragmento del artículo académico de la revista El correo de la Unesco, publicado el año 1991. UN OASIS DE DICHA Por Martine Mauriras-Bousquet “El hombre solamente es verdaderamente hombre cuando juega” Friedrich von Schiller Si se introduce en un laberinto una rata bien alimentada y sin ningún motivo particular de inquietud, el animal se pone a recorrer sus nuevos dominios, a explorarlos sin ninguna razón evidente, puesto que no tiene hambre ni miedo, sino más bien por curiosidad, por ganas de jugar. De este modo se familiariza al parecer con el plano del laberinto. Por ello, si se la introduce en ayunas en el mismo laberinto tras haber puesto en él comida, la rata descubre en seguida el camino que conduce al alimento, mucho antes que otra rata que no haya estado allí antes jugando y no haya podido averiguar cuál es su configuración. La pulsión de juego (también llamada pulsión de curiosidad o pulsión de exploración, tres denominaciones que los etólogos 4 utilizan casi indiferentemente) proporciona una clara ventaja, tanto a la especie como al individuo, en los procesos de selección natural. El que tiene la costumbre de explorar su entorno sin un objetivo p reciso multiplica las ocasiones de informarse y estará, por consiguiente, mejor preparado para hacer frente a las situaciones imprevistas. En distinto grado, todos los animales juegan, exploran y se mueven sin motivo aparente, pero solo algunos conservan la capacidad juvenil de jugar una vez llegados a la edad adulta, como sucede, en particular, con algunas aves (los cuervos), los roedores, los carnívoros superiores, los primates y, evidentemente, el ser humano. Hay que señalar que las especies realmente aptas para el juego son también las más “cosmopolitas”, las que han sabido adaptarse a climas muy variados, aumentando así sus posibilidades de supervivencia. Si esto es biológicamente cierto, no lo es menos por lo que hace a la sociedad y la cultura. Para poder subsistir en un determinado territorio, una sociedad necesita grandes dosis de obstinación, de esfuerzos, de orden, de formidable egoísmo... de seriedad, en definitiva. Pero estas cualidades (o defectos) no bastan para progresar. No es la seriedad sino el juego, la curiosidad y la exploración –factores de creación e invención– los que sustentan los mitos, los ritos de la vida en sociedad y la ciencia misma. 4 Científicos que estudian el comportamiento de los animales en su medio natural y en los laboratorios. Algunos de los sabios más eminentes, entre los que cabe citar al azar a Kepler, Ampère, Darwin, Gauss, Pasteur, Maxwell, Planck, Poincaré y Einstein, han explicado que, en pleno descubrimiento, eran presa de la misma excitación y el mismo placer que siente un niño cuando juega. Pues bien, si la investigación fundamental en la que esos hombres se distinguieron es la madre de la tecnología moderna, preciso es admitir la idea, paradójica a primera vista, de que el progreso, al igual que la cultura, tiene su origen en el juego. Los juegos no son sino los fósiles del juego Se trata aquí, evidentemente, de un tipo de juego bastante alejado del bridge5 o el fútbol. El problema es, en buena medida, semántico: para aludir al juego existen en inglés dos vocablos “game” y “play”. En español, al igual que en alemán, en francés y en otras muchas lenguas, solo hay una palabra, deficiencia que origina confusiones sin cuento. Por ello, antes de cualquier afirmación o debate sobre el juego, hay que dejar sentado que “juegos” en plural (más o menos equivalente a “game” en inglés) y “juego” en singular (que sería más bien la traducción de “play”) designan dos realidades totalmente distintas. Los juegos son instituciones sociales, fragmentos del juego. E l juego es una actitud existencial, una manera concreta de abordar la vida, que se puede aplicar a todo sin corresponder específicamente a nada. El bridge, el fútbol, el escondite, los dados o el baile son juegos; pero jugar a las cartas o bailar no generan automáticamente ese modo peculiar de vida que es el juego ni el placer característico que lo acompaña. Todo el mundo sabe que es perfectamente posible participar en un torneo de bridge o en un baile y ser presa de mortal aburrimiento. Ningún juego instituido garantiza el juego. En cambio, muchas actividades que no suelen considerarse juegos pueden muy bien ser vividas lúdicamente: un viaje, una charla animada, la creación o el disfrute de una obra de arte, el conocimiento del prójimo, un paseo, el trabajo mismo, todo puede vivirse como un juego sin que lo sea de manera constante. Cuando rememoramos nuestra infancia, por ejemplo, nos damos cuenta de que los recuerdos más vivos de exaltación lúdica no siempre se relacionan con juegos propiamente dichos, sino con momentos de vida intensa ligados a circunstancias fortuitas: la exploración de una casa, un paseo por un barrio desconocido, el descubrimiento de la naturaleza, etc. Algunos de los pensadores más destacados de nuestro tiempo, de Martin Heidegger a Georges Bataille, de Johan Huizinga a Roger Caillois, de Konrad Lorenz a Gregory Bateson, han mostrado gran interés por el problema del juego. En el pensamiento contemporáneo se ha ido abriendo paso progresivamente una idea bastante clara del lugar que ocupa el juego en el fenómeno humano y en la visión general del mundo; la mayoría de los filósofos, antropólogos o etólogos seguramente coincidirían hoy en 5 Juego de naipes de cuatro jugadores formando parejas. definir el juego como una actividad dotada de su propia razón de ser y que tiene su finalidad en sí misma. Cuanto más auténtico es el juego –por ejemplo, el juego exaltado del niño– más liberado de toda contingencia se siente el jugador. El juego es gratuidad absoluta y, en términos del filósofo alemán Eugen Fink, un “oasis de dicha” en el desierto de la vida considerada “seria”. El juego es deseo Jugar es pedir por un momento a la vida que no sea otra cosa que lo que es ni que tenga otra finalidad más que ella misma. El juego es deseo de aquello con lo que se juega, no deseo de algo que falta y que hay que conseguir, sino deseo de lo que está aquí y ahora, del instante que pasa y del que va a surgir. Dicho de otro modo, el juego es puro apetito de vivir, no un determinado tipo de vida que la moda o la costumbre hacen deseable, sino la realidad tal cual es, la vida como viene. Tomemos como ejemplo el turista que en nuestros días realiza un viaje. Casi siempre se fija unos objetivos precisos: quiere visitar lugares extraordinarios y monumentos de cuya belleza le han hablado. Va en busca de curiosidades, de un deslumbramiento que espera encontrar en lo pintoresco o lo exótico. Su viaje, que pretende ser de placer, obedece en realidad a diversos imperativos y es, pues, una actividad eminentemente seria aunque no sea remunerada, en último término, una especie de deber de vacaciones. Sin embargo, el viajero que parte a la aventura, el viajero jugador, se guardará bien de planificar todo e irá donde su deseo lo lleve. No tratará de coleccionar los recuerdos cual si fueran mariposas clavadas con alfileres en una caja de cristal, sino que buscará una ocasión de renovar su persona y su vida. Mauriras-Bousquet, M. (1991). Un oasis de dicha. El correo de la Unesco: una ventana abierta sobre el mundo. El juego, XLIV(5), 13-18.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "En el primer párrafo, ¿qué estrategia utiliza la emisora para introducir el tema del juego?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Una narración que contiene un mensaje acerca del juego.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Una metáfora que profundiza sobre el sentido del juego.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Una anécdota que indaga las características del juego.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una comparación que explica las ventajas del juego.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la idea principal del tercer párrafo?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El juego motiva la exploración en los animales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El juego es exclusivo de las especies juveniles.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El juego favorece la adaptación de las especies.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El juego es una actividad transversal a los animales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "¿Con qué finalidad se explican los vocablos “game” y “play” en la lectura?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para describir el origen de la palabra “juego” en el idioma inglés.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para evidenciar la existencia de distintos significados de la palabra “juego”.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Para mostrar la forma en que el lenguaje determina el juego en una cultura.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para respaldar la influencia del inglés en la creación de distintos tipos de juegos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la idea principal de la sección “Los juegos no son sino los fósiles del juego”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La autenticidad del juego tiene su origen en la infancia.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El juego depende de la forma de experimentar los hechos.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La distinción en torno al juego es propia de ciertos idiomas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El juego es una problemática de interés para los intelectuales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "¿Qué afirma la emisora sobre el bridge?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que es un juego peculiar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que es un juego aburrido.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que es un juego instituido.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que es un juego auténtico.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "En el siguiente segmento, ¿qué se infiere sobre la emisora a partir de la expresión subrayada? «Algunos de los sabios más eminentes, entre los que cabe citar al azar a Kepler, Ampère, Darwin, Gauss, Pasteur, Maxwell, Planck, Poincaré y Einstein, han explicado que, en pleno descubrimiento, eran presa de la misma excitación y el mismo placer que siente un niño cuando juega».",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Considera que un criterio para nombrar sabios es la calidad de sus opiniones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Piensa que muchos otros sabios destacados se han referido al valor del juego.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Estudia la influencia de la casualidad en el trabajo de los sabios sobre el juego.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Comparte la perspectiva teórica sobre el juego de los sabios que menciona después.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "En relación con el turista, ¿qué representa la referencia a las mariposas clavadas con alfileres en una caja?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La búsqueda de renovación vital a través de un viaje.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La intención de cumplir el deseo de realizar un viaje.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El daño a la naturaleza al guardar recuerdos de viaje.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El anhelo de conservación de una experiencia de viaje.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "A partir de la lectura, ¿qué condición es necesaria para que cualquier vivencia pueda transformarse en un “oasis de dicha”?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La autenticidad de la experiencia.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La experimentación del placer.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La apreciación de la belleza.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La activación del recuerdo. Lectura 3:4:preguntas",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 3,
+   "name": "LECTURA preguntas17",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "25aa23 31 Fragmento del primer capítulo del libro Introducción a la Psicología, escrito por Charles Morris y Albert Maisto, publicado el año 2005. ¿QUÉ ES LA PSICOLOGÍA? “La mayoría de los psicólogos estudian los problemas mentales y emocionales y trabajan como psicoterapeutas”. ¿Es esta afirmación verdadera o falsa? Responder la pregunta “¿Qué es la psicología?” no es tan simple como podría pensarse. La mayoría de los psicólogos contemporáneos estaría de acuerdo en que la psicología es la ciencia de la conducta y los procesos mentales. Pero esta definición general no refleja la amplitud, profundidad o lo apasionante del campo. Los psicólogos pretenden explicar cómo percibimos, aprendemos, recordamos, resolvemos problemas, nos comunicamos, sentimos y nos relacionamos con otras personas, desde el nacimiento hasta la muerte, en relaciones íntimas y en grupos. Intentan entender, medir y explicar la naturaleza de la inteligencia, la motivación y la personalidad, así como las diferencias individuales y de grupo. Los psicólogos pueden concentrarse en las perturbaciones mentales y emocionales, los problemas personales y sociales, la psicoterapia, o en mejorar la moral y las relaciones de grupo. Al final del siglo XX, la psicología se expandió considerablemente. Surgieron nuevas tecnologías de investigación, nuevos campos de indagación y nuevos enfoques del estudio de la conducta y los procesos mentales. Esos avances dieron lugar a una mayor especialización dentro de la psicología, a una creciente colaboración con otras ciencias y al equivalente académico de una crisis de identidad. Como resultado, la psicología se redefine de manera continua. Quizá la mejor manera de introducirse al mundo de la psicología sea observar los temas que interesan a los psicólogos. Los campos de la psicología La psicología contemporánea es menos un campo unificado único que “un paraguas para una confederación amplia de subdisciplinas” (Evans, 1999). La Asociación Americana de Psicología (APA) está integrada por 53 divisiones que representan los principales campos de indagación psicológica, de investigación especializada e intereses profesionales. A continuación veremos algunos de los subcampos principales que tienen su propio enfoque, así como sus propios modelos de conducta y procesos mentales. Psicología del desarrollo Los psicólogos del desarrollo estudian el crecimiento humano mental y físico desde el periodo prenatal hasta la niñez, adolescencia, adultez y vejez. Se interesan tanto en los patrones universales de desarrollo como en las variaciones culturales e individuales. Los psicólogos infantiles se concentran en los bebés y los niños. Se interesan en temas como si los bebés nacen con personalidades y temperamentos distintos, la forma en que los bebés se apegan a sus padres y cuidadores, la manera en que los niños adquieren el lenguaje y desarrollan la moral, la forma y el momento en que emergen diferencias sexuales en la conducta, y la manera de evaluar los cambios en el significado e importancia de la amistad durante la niñez. Los psicólogos de la adolescencia se especializan en los años que comprenden esta etapa, incluyendo la forma en que la pubertad, los cambios en las relaciones con los pares y los padres, y la búsqueda de identidad hacen que este sea un periodo difícil para algunos jóvenes. Los psicólogos del ciclo vital se enfocan en los años adultos y las diferentes maneras en que los individuos se ajustan a las relaciones y la paternidad, la madurez, la jubilación y, eventualmente, la inminencia de la muerte. Neurociencia y psicología fisiológica Los psicofisiólogos y los neurocientíficos investigan las bases biológicas de la conducta, los pensamientos y las emociones humanas. En particular, estudian los efectos de sustancias naturales que actúan como mensajeros químicos, principalmente hormonas, y de mensajeros químicos sintéticos, que incluyen los medicamentos psicoactivos (como los antidepresivos) y las “drogas sociales” (como el alcohol). ¿Por qué late más rápido el corazón cuando nos sentimos amenazados o por qué sudan nuestras palmas cuando estamos nerviosos? También estudian cómo se desarrollan, funcionan y, en ocasiones, fallan el cerebro y el sistema nervioso. ¿Deja de crecer el cerebro en determinado momento o continúa cambiando durante parte o la totalidad del ciclo de vida? ¿Hay algunas áreas del cerebro más activas cuando la gente resuelve problemas matemáticos? ¿Hay otras que se activan más cuando la gente juega o escucha música? Los genetistas conductuales investigan el impacto de la herencia en los rasgos y conductas normales y anormales. ¿En qué grado es hereditaria la inteligencia? ¿Qué hay acerca de la timidez? ¿Hay familias que tienen tendencia a padecer enfermedades como el alcoholismo y la depresión? ¿En qué medida están enraizadas en la biología las diferencias en la forma en que los hombres y las mujeres piensan, actúan y responden a las situaciones? Psicología experimental Los psicólogos experimentales realizan investigación sobre procesos psicológicos básicos incluyendo el aprendizaje, la memoria, la sensación, la percepción, la cognición, la motivación y la emoción. Se interesan en responder preguntas como: ¿De qué manera recuerda la gente y qué la hace olvidar? ¿Cómo tomamos decisiones y resolvemos problemas? ¿Los hombres y las mujeres se aproximan a los problemas complejos de maneras diferentes? ¿Por qué algunas personas están más motivadas que otras? ¿Son universales las emociones? Es decir, ¿la gente de culturas diferentes experimenta las mismas emociones en situaciones similares? O por el contrario, ¿culturas diferentes enfatizan algunas emociones y desechan o pasan por alto otras? Psicología de la personalidad Los psicólogos de la personalidad estudian las diferencias entre los individuos en rasgos como la ansiedad, la sociabilidad, la autoestima, la necesidad de logro y la agresividad. Los psicólogos en este campo intentan determinar qué ocasiona que algunas personas sean malhumoradas y nerviosas, mientras que otras son alegres y de trato fácil, y por qué algunas personas son tranquilas y cautelosas, en tanto que otras son inquietas e impulsivas. También estudian si existen diferencias consistentes entre los hombres y las mujeres, o entre los miembros de diferentes grupos raciales y culturales, en características como la sociabilidad, la ansiedad y la escrupulosidad. Los temas actuales para los psicólogos de la personalidad incluyen: ¿La personalidad es innata y estable o es aprendida y sujeta a cambio? ¿Las diferentes culturas tienden a producir distintos “tipos de personalidad”, es decir, grupos de rasgos que por lo regular se presentan juntos? ¿Cuál es la mejor manera de evaluar o medir la personalidad? Psicología clínica y consejería Cuando se le pide que describa a un “psicólogo”, mucha gente piensa en un terapeuta que ve a pacientes (o “clientes”) en su consultorio, una clínica o un hospital. Esta idea popular es en parte correcta. Casi la mitad de todos los psicólogos se especializa en psicología clínica o consejería. Los psicólogos clínicos se interesan fundamentalmente en el diagnóstico, causa y tratamiento de los trastornos psicológicos. Los psicólogos consejeros se interesan principalmente en los problemas “normales” de ajuste que la mayoría de nosotros enfrenta en algún momento, como la elección de una carrera o los problemas conyugales. Los psicólogos clínicos y los consejeros a menudo dividen su tiempo entre atender a pacientes y realizar investigación sobre las causas de los trastornos psicológicos y la efectividad de diferentes tipos de psicoterapia y consejería. Morris, C. y Maisto, A. (2005). ¿Qué es la psicología? En Introducción a la Psicología (pp. 4-7). Pearson Educación. 17",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "En la lectura, ¿qué función cumple la afirmación que da inicio al primer párrafo?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "25",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Criticar el rol limitado de la psicoterapia para el tratamiento de afecciones mentales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Problematizar la idea generalizada sobre el campo de acción de la psicología.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Relativizar el real aporte de los psicoterapeutas al desarrollo de la disciplina.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cuestionar la existencia de múltiples ámbitos de estudio en la psicología. 18",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "¿Qué función cumple la mención sobre la Asociación Americana de Psicología (APA) en la sección “Los campos de la psicología”?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "26",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ejemplificar una división de la psicología.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Citar información científica especializada.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Sustentar la existencia de las subdisciplinas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Destacar la profesionalización de la psicología. 19",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes opciones corresponde a la idea principal de la sección “Neurociencia y psicología fisiológica”?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "27",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La neurociencia y la psicología fisiológica investigan las bases biológicas de la conducta, los pensamientos y las emociones humanas.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La neurociencia y la psicología fisiológica investigan el impacto de la herencia en los rasgos y conductas normales y anormales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La neurociencia y la psicología fisiológica estudian cómo se desarrollan, funcionan y, en ocasiones, fallan el cerebro y el sistema nervioso.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La neurociencia y la psicología fisiológica estudian los efectos de sustancias naturales que actúan como mensajeros químicos, principalmente hormonas, y de mensajeros químicos sintéticos. 20",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "¿Qué estrategia utilizan los emisores para organizar la información sobre los subcampos “Neurociencia y psicología fisiológica”, “Psicología experimental” y “Psicología de la personalidad”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "28",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Definición de los conceptos clave del subcampo y discusión a través de interrogantes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Delimitación del quehacer de la especialidad y profundización a través de preguntas.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Explicación de la evolución de la subdisciplina y proyección a través de preguntas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Descripción de estudios complementarios del área y reflexión a través de interrogantes. 21",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "¿Qué campo de estudio tienen en común la psicología de la personalidad y la experimental?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "29",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las formas de desarrollo del aprendizaje humano.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las causas de la sociabilidad en distintos individuos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La manera en que los individuos utilizan la memoria.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La influencia de lo cultural en la conducta humana. 22",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "Una persona está experimentando dificultades para adaptarse a su nuevo trabajo. A partir de la información entregada en la lectura, ¿a qué especialista podría acudir en primera instancia para superar esta situación?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "30",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A un psicólogo de la personalidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A un psicólogo experimental.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A un psicólogo consejero.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "A un psicólogo clínico. 23",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la postura de los emisores frente a la psicología?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "31",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Integradora, porque unifican las distintas áreas de la psicología.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Reivindicativa, porque amplían la visión simplificada de la psicología.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Analítica, porque relacionan los subcampos a la psicología en general.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Crítica, porque cuestionan el aporte de la psicología a la investigación. Lectura 4:6:",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 4,
+   "name": "LECTURA pregunta 24 41",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "preguntas a 32 a 49 Fragmento del manual de estudio escrito por Jaume Colomer, publicado el año 2010. Módulo 1 Introducción a la gestión de las artes escénicas 1. Delimitación del objeto de análisis 1.1. Los lenguajes de las artes escénicas Las artes escénicas incluyen un conjunto de lenguajes artísticos que tienen en común el hecho escénico. Podemos considerar el arte como la expresión de percepciones, sentimientos y emociones sobre la realidad, a través de una gran diversidad de lenguajes que se derivaron de las acciones rituales de carácter mágico de muchas religiones primitivas y, con el tiempo, fueron perdiendo su dimensión religiosa para adquirir una nueva dimensión cultural. Una parte de las artes tiene su punto de mira en la búsqueda de la belleza. El concepto de “bellas artes”, propuesto por Charles Batteux el año 1746, se aplicó originariamente a la danza, la música, la escultura, la pintura, la poesía y también a la floricultura. Más adelante se amplió a la arquitectura, a la retórica y a otros géneros literarios. A partir del siglo XX también al cine, a la fotografía y a la historieta. Actualmente, se considera que también deben formar parte de las bellas artes la televisión, la moda, la publicidad, la animación, los videojuegos y las artes escénicas. Las artes escénicas, aunque no forman parte oficialmente de las bellas artes, tienen de facto esta consideración en muchos ámbitos sociales. Los lenguajes artísticos, como conjuntos de símbolos, requieren el dominio de sus respectivas técnicas (“técnica” deriva de tekné, término que en la Grecia Clásica se usaba para denominar al arte). Se considera el arte como el resultado de una acción creativa a partir de un lenguaje o técnica expresiva determinada. Incluso se usa el concepto en diversos ámbitos sociales para expresar la capacidad creativa en cualquier actividad humana, como “el arte de vivir”, el “arte de los negocios” o incluso “el arte de la guerra”. En este sentido, podríamos considerar que arte es cualquier creación humana. Las artes escénicas forman parte del universo de las artes y, parcialmente, del subconjunto de las artes de lo bello. Agrupan a un conjunto muy diverso de lenguajes que tienen en común el hecho escénico. Sin ánimo de exhaustividad, podemos considerar que forman parte de las artes escénicas las siguientes expresiones artísticas: el teatro (teatro de texto, teatro visual, teatro musical, teatro de objetos, teatro de sombras…), la danza (clásica, contemporánea, tradicional, popular, flamenco, nuevas tendencias…), la lírica (ópera, opereta, zarzuela…), el circo (en cualquiera de sus formatos y estilos), el cabaret, la magia, etc. En las creaciones escénicas, se puede usar un solo lenguaje o un conjun to de ellos. La mezcla de lenguajes y formatos artísticos ha desarrollado una gran diversidad de géneros escénicos que se entrelazan y confunden. El cabaret, por ejemplo, es un formato escénico de proximidad en el que se combinan canciones, acciones dramáticas, monólogos y otros elementos en interacción continua con los espectadores y con una cierta intención de transgresión moral y política. La música, en nuestro contexto 6, no forma parte de las artes escénicas porque su expresión no está supeditada a la escena ni a ninguna materialidad, aunque, como lenguaje, puede formar parte de un espectáculo escénico (el teatro musical por ejemplo). Lo mismo pasa con las artes visuales y audiovisuales, que también pueden formar parte de espectáculos. Sin embargo, el valor añadido que aportan a una puesta en escena no las convierte en artes escénicas. Lo que tienen en común todos los lenguajes y formatos que hemos incluido en la descripción de las artes escénicas es el hecho escénico, concepto abstracto que es necesario definir. 1.2. El hecho escénico Podemos considerar el hecho escénico como “aquello que ocurre cuando intérpretes y espectadores se encuentran” (McAuley, 2002). Además del intérprete y del espectador, hay un tercer elemento imprescindible: el escenario. El espectador no es receptor pasivo, sino sujeto activo en un proceso de comunicación donde el intérprete toma la iniciativa. El intérprete es un creador, aunque no sea el autor literario ni sea suya la idea de partida, pero crea una expresión y la transmite, con su técnica, a un espectador que le contesta con su mirada, su respiración, sus gestos, su complicidad… La interacción con los espectadores hace que cada representación se configure de una manera singular y que sea una experiencia única e irrepetible. Las artes escénicas, y todas las artes en vivo, buscan la singularidad de cada experiencia y huyen de la producción seriada. Según McAuley (2002), “el teatro requiere de la presencia real tanto del actor como del espectador, este último es un agente activo, un participante, más que un simple espectador”. En este sentido, la representación es un acontecimiento de participantes vivos que debe tener sede en un lugar “concreto” que implica “un intercambio de energías entre ambos” y se convierte en un evento social. La autora añade que “los actores reciben la energía que se desprende de la sola presencia de los espectadores, y los espectadores a su vez reciben energía de los actores que están en el escenario, así como de los demás espectadores” (McAuley, 2002). La energía se transmite básicamente por el intercambio de miradas. 6 En otros contextos, la música es considerada un arte de la escena, porque habitualmente se interpreta en espacios escénicos y, además, forma parte de las artes en vivo. La comunicación interactiva entre unos intérpretes y unos espectadores crea una atmósfera relacional donde pasan cosas en un plano distinto al de la realidad cotidiana. Una representación es una experiencia vital de una comunidad virtual que contribuye al desarrollo personal de los intérpretes y los espectadores. Lo que se representa es tanto real (hay unos intérpretes en el escenario y un público en la sala) como irreal (los personajes del evento escénico). El espectador puede aprender a ser espectador avanzado. Según argumenta Anne Ubersfield (1997), a medida que el espectador va conociendo los símbolos y mecanismos de una representación, incrementa el placer intrínseco de la actividad sin llegar, en ningún caso, a perder el atractivo y la magia de la expresión y la comunicación escénica. El hecho escénico se consigue con la creación de un espacio escénico, tercer elemento constitutivo del hecho escénico. 1.3. El espacio escénico El espacio escénico es el espacio mental que se crea en un hecho escénico. Nuestra materialidad obliga a la percepción espacial de la experiencia vital. Los hechos no pueden existir sin espacios. Aunque el espacio escénico es una construcción mental, exige que se ubique en un espacio físico aislado del entorno cotidiano donde pueda crearse el contexto de la acción. La escena es el espacio de la acción. El teatro, del griego theatron, es “el lugar para contemplar”. El espacio del teatro se divide en “espacio del público” (la sala y los espacios sociales adjuntos) y el “espacio de los actores” (los camerinos y el escenario). El centro vital del edificio es donde se encuentran ambos espacios, donde se acopla el escenario con la sala y conforma el espacio de representación. Aunque esta división de espacios se da físicamente en los teatros a la italiana, funcionalmente también se da en espacios de un solo volumen. El espacio escénico es, inicialmente, un espacio vacío. Vacío de los elementos de la cotidianidad. Vacío de luz y de objetos. Los elementos escenográficos que pueda contener deben ayudar a crear el espacio mental necesario para desarrollar el hecho escénico. El espacio escénico es un espacio mental similar al espacio ritual sagrado de muchas religiones. El hecho escénico, derivado del ritual religioso, mantiene la misma condición espacial. El espacio vacío puede ubicarse en un equipamiento especializado o en una infraestructura multifuncional, pero debe ofrecer un espacio vacío. Su carencia de contenido se va llenando con elementos escenográficos y con las construcciones mentales que surgen de la interacción entre intérpretes y espectadores. Colomer, J. (2010). Módulo 1: Introducción a la gestión de las artes escénicas. PID_00164153, Master interuniversitario en gestión cultural (pp. 3-6). Universidad de Cataluña, Universidad de Girona y Universidad de las Islas Baleares. 24",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el aporte teórico de Charles Batteux a la concepción de arte?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "41",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Entregó una definición de las artes escénicas como “bellas artes”.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Promovió la valoración de las bellas artes entre los espectadores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Incorporó la clasificación de “bellas artes” dentro de las manifestaciones artísticas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Generó las distintas clasificaciones para manifestaciones artísticas consideradas bellas. 25",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes expresiones es categorizada oficialmente como “bellas artes”?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "42",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El cabaret.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El teatro.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El cine.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El circo. 26",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "En el tercer párrafo, ¿cuál de las siguientes opciones representa la idea central respecto del arte?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "43",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es una creación humana que utiliza un lenguaje expresivo.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Es una manifestación del dominio de una técnica determinada.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Es una forma de expresión usada en distintos ámbitos sociales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es una conceptualización que tuvo su origen en la Grecia Clásica. 27",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "¿Por qué el emisor excluye la música de las artes escénicas?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "44",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque es cuestionada desde la perspectiva de su valor.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque puede expresarse sin necesidad de soporte material.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Porque tiene un lenguaje distinto del que se utiliza en el espectáculo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque es complementaria a la puesta en escena de una representación. 28",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "¿Por qué razón el emisor afirma que el espectador tiene un rol activo en el teatro?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "45",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque perfecciona sus conocimientos para apreciar el hecho escénico.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque interactúa con los actores para dar vida a la representación.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Porque participa de los eventos sociales que rodean a una obra.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque accede a un plano distinto al de la realidad cotidiana. 29",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Según la lectura, ¿cuál es el centro vital del espacio escénico?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "46",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El espacio mental.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El espacio del público.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El espacio de los actores.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El espacio de representación. 30",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "¿Con qué propósito se hace referencia al “theatron”?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "47",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para introducir la descripción del espacio del teatro.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Para caracterizar la construcción mental del espacio escénico.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para demostrar que el concepto de espacio escénico es antiguo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para comprobar que los griegos inventaron el espacio del teatro. 31",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede inferir del rol del espectador en el teatro?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "48",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que necesita estar preparado para dialogar con los actores.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que requiere estar familiarizado con los objetos del escenario.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que completa activamente el espacio escénico con su imaginario.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que percibe el hecho escénico como una experiencia de tipo sagrado. 32",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "Considerando el tratamiento del tema, ¿qué tono adopta el emisor?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "49",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Reflexivo, porque analiza los componentes de las artes escénicas.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Comprometido, porque promueve la revalorización de las artes escénicas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Crítico, porque cuestiona la exclusión de algunas manifestaciones artísticas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Escéptico, porque desconfía de la categorización de las manifestaciones artísticas.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 5,
+   "name": "LECTURA 7: preguntas 50 a 57",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Fragmento de la cartilla informativa de la Superintendencia de Seguridad Social, extraída el año 2022. Ruta de la Seguridad Social. Guía informativa de derechos y beneficios Estación 1. Mi Primer Contrato de Trabajo Aspectos contractuales Contrato de trabajo El contrato de trabajo es un acuerdo firmado por un trabajador o trabajadora a través del cual se compromete a prestar servicios bajo la subordinación y dependencia de un organismo empleador, a cambio de una remuneración. Existe si ambas partes están de acuerdo en las obligaciones y los derechos que dan origen a la relación laboral. Es importante tener presente que dicho contrato debe estar escrito y tramitado dentro de los primeros 15 días de iniciada la relación contractual, o cinco días si se trata de contratos por obra, trabajo o servicio determinado o de duración inferior a 30 días. Este contrato debe contener: lugar y fecha del contrato, individualización de las partes (trabajador o trabajadora y organismo empleador), determinación de los servicios y dónde se prestarán, remuneraciones, jornada de trabajo y plazo del contrato. ¿Tienes dudas acerca de tu contrato de trabajo? En la Dirección del Trabajo te darán asesoría gratuita: http://www.dt.gob.cl/. Fono consulta: 6004504000. ¡No olvides firmar tu contrato! Estación 2. Cotizaciones previsionales ¿Qué es la Previsión Social? Es la encargada de garantizar los derechos sociales a las personas que desarrollan su vida laboral en Chile, en caso que esta se viera interrumpida por algún tipo de contingencia, tal como enfermedad, cesantía, vejez, invalidez o sobrevivencia, es decir, todo lo que les impida seguir generando recursos para su sustento y el de su familia. Se deben considerar las siguientes cotizaciones: 1. Cotizaciones para pensiones en una Administradora de Fondos de Pensiones (AFP): el 10 % de tu remuneración imponible es destinada a tu cuenta de capitalización individual de ahorros para tu jubilación. Más un 1,53 % adicional del Seguro de Invalidez y Sobrevivencia, más las comisiones de tu AFP. 2. Cotización para salud en una Isapre o FONASA: el 7 % de tu remuneración imponible correspondiente a cotización de salud, que se paga en FONASA (Fondo Nacional de Salud) de carácter estatal o en la ISAPRE (Institución de Salud Previsional) del sector privado elegida por el trabajador o la trabajadora. Las Isapres ofrecen planes de cobertura cuyo valor puede ser igual o mayor al 7 % de la remuneración. 3. Cotización para el Seguro de Cesantía en la Administradora del Fondo de Cesantía (AFC): el 3 % de tu remuneración imponible está destinado a tu cuenta individual de ahorro para cesantía y al Fondo de Cesantía Solidario, la mayor parte de esta cotización la financia tu organismo empleador. Podrás acceder a los beneficios cuando quedes cesante y si cumples ciertos requisitos. Si eres menor de 18 años no te cotizarán para este seguro. 4. Seguro de accidentes del trabajo y accidentes profesionales, Mutualidad o Instituto de Seguridad Laboral (ISL): el equivalente al 0,9 % de tu remuneración imponible, más un adicional según el riesgo de accidente y enfermedad de la empresa que te contrata, es para financiar las acciones de prevención de riesgos, prestaciones médicas y económicas ante un accidente de trabajo o enfermedad profesional (esta cotización la financia tu organismo empleador). Este seguro lo administran las Mutualidades, que son instituciones privadas sin fines de lucro o el Instituto de Seguridad Laboral (ISL), que es el administrador público del seguro. Es tu organismo empleador el que elige a qué Mutualidad se adhiere. También deben cotizar para este seguro los trabajadores y trabajadoras independientes que emiten boletas de honorarios, cuya cotización se retiene en el proceso de Declaración Anual de la Renta. Si estos trabajadores o trabajadoras no se encuentran adheridos a una Mutualidad, se entienden afiliados al ISL y deberán registrarse en estas entidades. Será tu organismo empleador el encargado de pagar, cuando y donde corresponda, las cotizaciones señaladas. Es importante que sepas que puedes acceder al Subsidio Previsional a trabajadores y trabajadoras jóvenes que te ayudará a aumentar tus ahorros, solicítalo en cualquier oficina del Instituto de Previsión Social. Más información en: www.ips.gob.cl. La Seguridad Social es un Derecho Humano y se materializa en cada país a través de la previsión social. Para la Organización Internacional del Trabajo (OIT), “la Seguridad Social es la protección que una sociedad proporciona a los individuos y los hogares para asegurar el acceso a la asistencia médica y garantizar la seguridad del ingreso, en particular, en caso de vejez, desempleo, enfermedad, invalidez, accidentes del trabajo, maternidad o pérdida del sostén de familia”. El cargo de las cotizaciones se divide de la siguiente manera: Cotizaciones obligatorias Porcentaje Cotización para pensión por vejez - DL 3500 10 % Comisión AFP (variable según AFP) 0,4 % - 1,45 %* Seguro de Invalidez y Sobrevivencia 1,53 % Cotización para Salud 7% Seguro de Accidentes del Trabajo y Enfermedades 0,9 %** Profesionales Seguro para el Acompañamiento de Niños y Niñas 0,02 % - 0,03 %*** Seguro de Cesantía (contrato plazo fijo) 2,4 % Seguro de Cesantía (contrato plazo indefinido) 3% *La comisión de la AFP es variable, y depende de la AFP que elija el afiliado/a. **Porcentaje base. Adicionalmente, podría haber mayores cobros según el riesgo asociado a la actividad económica que desarrolla la empresa o el trabajador/a. ***Cobro del 0,03 % desde enero de 2020. El Subsidio al Empleo Joven es un aporte en dinero otorgado por el Estado para aumentar la remuneración de los trabajadores y trabajadoras que tengan entre 18 y menos de 25 años de edad que perciban bajos salarios, es decir, que pertenezcan al 40 % más vulnerable de la población. Este beneficio apoya además a quienes los contratan. El bono al Trabajo de la Mujer (Subsidio al Empleo de la Mujer) es un aporte en dinero otorgado por el Estado a las mujeres trabajadoras que tengan entre 25 y 59 años de edad que cumplan con los requisitos de postulación. Para postular y obtener más información ingresa a: http://www.subsidioempleojoven.cl. Tus cotizaciones previsionales deben ser por el total de tu remuneración imponible. Estación 3. Término de la relación laboral Término de la relación laboral Un contrato de trabajo puede terminar de las siguientes formas:  Mutuo acuerdo.  Renuncia del trabajador o trabajadora.  Muerte del trabajador o trabajadora.  Vencimiento del plazo del contrato o conclusión del trabajo o servicio.  Caso fortuito o fuerza mayor.  Autodespido.  Despido por causa del trabajador o trabajadora o por necesidades de la empresa. En el caso del despido, este puede ser por causas atribuibles al trabajador o trabajadora determinadas en la ley o a necesidades de la empresa:  En caso de que la causal de despido sea “necesidades de la empresa” y si tú tienes contrato indefinido, como trabajador o trabajadora tienes derecho a indemnización equivalente a tu remuneración por cada año trabajado con ese organismo empleador, contado desde la celebración del contrato con tope de 11 meses.  Deben notificarte del despido con 30 días de anticipación, con copia a la Inspección del Trabajo respectiva, lo que podrá ser reemplazado por una indemnización en dinero efectivo equivalente al último sueldo.  Las causales atribuibles al trabajador o trabajadora no tienen derecho a indemnización y deberán notificarse al trabajador o trabajadora por escrito en los plazos establecidos en el artículo 162 del Código del Trabajo. Cabe señalar que la causal “necesidades de la empresa” no podrá ser invocada para trabajadores o trabajadoras con licencia médica y licencia médica por embarazo, recuerda que en este caso existe fuero maternal. Además, la invalidez total o parcial no es justa causa para el término del contrato, por tanto, tendrás derecho a la indemnización de la causal “necesidades de la empresa”. Tu desvinculación no se hará efectiva hasta que el organismo empleador tenga tus cotizaciones previsionales pagadas al día, salvo si la causal fue renuncia voluntaria o mutuo acuerdo. Para aclarar tus dudas, tener más información o presentar consultas y reclamos, ingresa a: www.dt.cl. Superintendencia de Seguridad Social. (s.f.). Ruta de la Seguridad Social. Guía informativa de derechos y beneficios. https://www.suseso.cl/606/articles-18635_archivo_01.pdf 33",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "De acuerdo con el apartado “Estación 2”, ¿qué es una cotización?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "50",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es la comisión que cobra la AFP por administrar una parte del sueldo del trabajador o trabajadora afiliado.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Es un monto de dinero que se descuenta del sueldo del trabajador o trabajadora para cubrir su seguridad social.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Es el costo de la cobertura que ofrecen las Isapres para asegurar la atención médica de los trabajadores y trabajadoras afiliados.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es un porcentaje de sueldo que voluntariamente entregan los trabajadores y trabajadoras para resguardar su estabilidad laboral. 34",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes cotizaciones es financiada tanto por el empleador como por el trabajador?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "51",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cotización para Salud.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Cotización para la AFP.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Cotización para pensión por vejez.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cotización para el Seguro de Cesantía. 35",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "Según la lectura, ¿cuál de los siguientes beneficios favorece tanto al trabajador o trabajadora como al empleador?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "52",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Subsidio al Empleo Joven.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Bono al Trabajo de la Mujer.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Seguro de Invalidez y Sobrevivencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Subsidio Previsional a trabajadores y trabajadoras jóvenes. 36",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "¿Qué pregunta sintetiza el contenido del último cuadro de la lectura?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "53",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Qué excepciones existen para invocar la causal “necesidades de la empresa”?",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "¿Qué requisitos debe cumplir el empleador para aplicar la causal “necesidades de la empresa”?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Cuáles son los argumentos del empleador para despedir por la causal “necesidades de la empresa”?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Cómo se hace efectiva la desvinculación de un trabajador que es despedido por la causal “necesidades de la empresa”? 37",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "En relación con el último cuadro de la lectura, ¿qué se infiere sobre los trabajadores y trabajadoras con respecto a la causal “necesidades de la empresa”?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "54",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que existen obligaciones legales que los trabajadores y trabajadoras deben cumplir después de dar por terminado un contrato.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que los trabajadores y trabajadoras deben tener sus cotizaciones pagadas al día en caso de aplicar esta causal de despido.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que existen normas que protegen a los trabajadores y trabajadoras ante la aplicación de esta causal de despido.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que los trabajadores y trabajadoras tienen derecho a una indemnización independientemente del motivo de su despido. 38",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "¿Qué aporta la información destacada al final de cada estación?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "55",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ofrece una orientación para ampliar el contenido de cada estación.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Ofrece una evidencia de las situaciones planteadas en cada estación.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ofrece una síntesis del contenido desarrollado en cada estación.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Ofrece una explicación para aclarar la información de cada estación. 39",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "Con respecto a la Seguridad Social, ¿cuál es el propósito de la cartilla informativa?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "56",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Detallar las responsabilidades contractuales que debe asumir un empleador.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Describir los beneficios previsionales que deben otorgarse a los trabajadores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Explicar los derechos que posee una persona que firma un contrato laboral.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Presentar las leyes que protegen a las personas que ingresan al mundo laboral. 40",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "La cartilla informativa pretende ser un aporte para los trabajadores y trabajadoras. Para cumplir este propósito, ¿qué responsabilidad deben asumir con respecto a su Seguridad Social?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "57",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Orientar al empleador en la elección de las instituciones aseguradoras según sus beneficios para la cotización.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Informar a las instituciones estatales sobre el monto a pagar por parte del empleador.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Supervisar el correcto pago de las cotizaciones previsionales por parte del empleador.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Elegir las instituciones previsionales según la conveniencia del porcentaje de cotización.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 6,
+   "name": "Lectura 6: pregunta 41 a 48",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Fragmento del artículo académico escrito por Rodrigo Booth, publicado el año 2002. LA TENSIÓN PUERTO-BALNEARIO EN VALPARAÍSO Reconocida actualmente como una ciudad eminentemente portuaria, el ocio balneario 7 que acogió la rada8 de Valparaíso durante el siglo XIX ha sido olvidado por la memoria colectiva. La percepción de la población porteña hacia un borde costero que siempre entendieron exclusivamente productivo se ha visto potenciada por la escasa preocupación que los investigadores han demostrado por el estudio de estos temas. Al respecto, se ha establecido solo una escueta descripción de algunas prácticas y espacios hedonistas en la costa (Méndez, 1987; Urbina, 1999 y Huerta, 2001), omitiendo al balneario como un elemento crucial en la conformación de la cultura urbana chilena. Por su parte, recientes publicaciones orientadas hacia la descripción de los elementos materiales existentes en la rada durante el siglo XIX han obviado la importancia de playas y balnearios que compartían el espacio con las faenas portuarias (Schmutzer, 2000). Sin embargo, un sinnúmero de testimonios nos permite afirmar que Valparaíso manifestó, durante gran parte del siglo XIX, una unión entre los usos asociados a la industrialización y los de ocio marítimo, albergando simultáneamente balnearios e infraestructura portuaria. En contraposición a lo ocurrido en otras ciudades costeras como Barcelona (Tatjer, 1996), la evolución de los usos del puerto chileno se orientó, desde la extensión de la vía férrea por el frente de mar, hacia un marcado monopolio portuario-industrial propiciado por el Estado. 1. Los balnearios en la rada de Valparaíso Resurgidos desde el siglo XVIII en Inglaterra, Francia y Alemania (Corbin, 1993), es reconocible la influencia de los inmigrantes anglosajones en la inserción de los nuevos usos placenteros del mar en Chile. Aunque fueron probablemente miembros de aquella filiación quienes iniciaron las inversiones en el rubro balneario, la moda se expandió rápidamente hacia los habitantes locales, quienes no solo comenzaron a hacer uso del baño de mar, sino que también se comprometieron con su desarrollo. Entre las primeras referencias que hemos obtenido, se destaca el caso de Santiago French. En 1830 publicó en castellano y en inglés un aviso comercial en donde convoca “a sus amigos y al público, que ha dispuesto en su Fonda de la Marina unos baños para quienes gustaren servirse de ellos” (El Mercurio de Valparaíso, 17 de noviembre de 1830). Un llamado a la población de lengua inglesa nos parece un claro ejemplo de la influencia que destacábamos. Además de permitirnos afirmar que desde temprano la rada porteña acogió usos diferentes de los portuarios, dicho testimonio nos da cuenta también de la relación existente entre baños de mar y la naciente actividad turística. 7 Término que hace referencia a un lugar dedicado al reposo y la curación a través de la utilización de las aguas, sobre todo termales o minerales. 8 Entrada natural de mar en la costa donde las naves pueden estar ancladas al abrigo de algunos vientos. Si bien la ausencia de fotografías y la escasez de otros testimonios gráficos y escritos dificultan el conocimiento de la infraestructura balnearia, algunos indicios nos permiten pensar que, durante la primera mitad del siglo XIX, el despliegue del ocio balneario se mantuvo sumido en la precariedad material. Hacia mediados de 1850, llamaron la atención del alemán Paul Treutler las prácticas playeras desarrolladas en Valparaíso. Consignadas sus impresiones en un libro publicado algunas décadas más tarde (1882), el viajero visitó los “baños-flotantes” que estaban ubicados en la calle del Cabo, en el centro de la ciudad. Su construcción consistía en dos embarcaciones desmanteladas unidas por cadenas y ancladas a la rada, a las que se podía llegar luego de cruzar un puente. Sobre ellas se había instalado una gran barraca de madera utilizada como camarines. A pesar de la simpleza de las instalaciones, este lugar era visitado por la alta sociedad porteña, quienes no utilizaban la arena de la playa, sino que tomaban los baños de mar entrando en camarotes: “un cajón perforado, sumergido en el mar hasta que el agua alcanzara el pecho, de modo que el bañista estaba seguro de no ahogarse (...)” (Treutler, 1989). El mismo testimonio nos permite reconocer el uso de la playa de Barón, en el margen oriente de la ciudad. Este lugar, al parecer carente de construcciones destinadas al confort de los bañistas, se convirtió en uno de los espacios de paseo predilectos para los porteños de todas las extracciones sociales (Treutler, 1989). 2. El ferrocarril monopoliza el borde costero Hacia la década de 1860, las construcciones portuarias de uso industrial también albergaban prácticas recreativas. Ese fue el caso de los Almacenes Fiscales, el más claro ejemplo de la mixtura de usos verificada en la rada (La Unión Liberal, 3 de enero de 1863). A este lugar, donde “no había playa sino unas cabinas construidas sobre pilotes con una escalera y cordeles” (Subercaseaux, 1976), llegaban los más elegantes visitantes veraniegos. Las comodidades ofrecidas por este establecimiento no eran las mejores, pero sin duda la mayor dificultad la constituyó la suciedad de las aguas donde “se veían muchas jibias o aguas malas como las llamaban” (Subercaseaux, 1976). Valparaíso fue el antecedente inmediato de la creación de balnearios en Viña del Mar. Tras la materialización de la conexión ferroviaria entre Valparaíso y Santiago en 1863, las visitas veraniegas de los capitalinos seguían concentrándose preferentemente en la ciudad-puerto antes que en su aún exclusiva villa de descanso. Al mismo tiempo que facilitaba el acceso de veraneantes, la vía férrea constituyó, desde la década de 1870, un punto de inflexión que modificó el acercamiento de los porteños al mar. La extensión del tendido desde la estación Barón hacia el centro de la ciudad, además de generar un límite simbólico y material con el mar, provocó que una serie de instalaciones entre las que contamos bodegas, galpones, patios de maniobras, viviendas para los trabajadores de la empresa y la construcción de dos estaciones, acapararan la costa y dificultaran el mantenimiento de los antiguos balnearios (Tornero, 1872). Devenida en una externalidad negativa para los usos balnearios, la vía férrea resultó determinante en el lento proceso de expulsión de los usos recreativos del mar más allá de los márgenes de la ciudad. 3. Concesiones públicas e inversiones privadas El usufructo del negocio de los balnearios ubicados en la bahía de Valparaíso, correspondía en principio a privados que obtenían una concesión estatal para cobrar entradas que financiaran las inversiones que habían comprometido. Desde el momento de la extensión ferroviaria por el frente de mar, entre 1870 y 1876, la decisión de otorgar las concesiones también pasó por una autorización del superintendente del Ferrocarril Central, y la necesaria aprobación dependía de que los establecimientos no perjudicaran el normal funcionamiento del tren. De este modo, algunas propuestas fueron rechazadas pues se establecían muy cerca de las estaciones de la ciudad, lo que implicaría, según la empresa, numerosas molestias en los días de descanso, pues al aumentado flujo de pasajeros que llegaban a tomar el tren, habría que sumar aquellos que disfrutaban de los fríos baños de mar. Este fue el caso de la intención de construir un establecimiento de baños cerca de la nueva estación Bellavista en 1872: “Si se hiciera la concesión solicitada, la Estación de Bellavista se convertiría en una plaza pública teniendo lugar gran tráfico de gente precisamente en las horas en que ella está ocupada por los trenes que parten para Santiago y Quillota a las 10 a. m. y a las 4.45 p. m.”. Sumado a la preferencia por la gestión ferroviaria, el Estado, representado por la Intendencia de Valparaíso, no se comprometía con el desarrollo de los balnearios porteños. A pesar de conocer los beneficios higiénicos, terapéuticos y recreativos que implicaba el ocio marítimo, la autoridad provincial legó el adelanto de los baños públicos y gratuitos a capitalistas que no obtenían ganancias por estas inversiones. Booth, R. (2002). El Estado Ausente: la paradójica configuración balnearia del Gran Valparaíso (1850-1925). EURE, 28(83), 107-123. https://dx.doi.org/10.4067/S0250-71612002008300007 41",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la idea principal del primer párrafo de la lectura?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "58",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La importancia de la actividad económica en la configuración urbana en la rada de Valparaíso.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La falta de reconocimiento de los balnearios como elemento constituyente de la cultura de Valparaíso.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La escasa investigación sobre el desarrollo productivo en los balnearios de la ciudad de Valparaíso.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La relevancia del testimonio histórico para la recuperación de las actividades de ocio de la ciudad de Valparaíso. 42",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "En el segundo párrafo, ¿a qué recurso corresponde la mención a Barcelona?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "59",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A una proyección sobre el futuro crecimiento urbano de Valparaíso.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A un caso de progreso urbano paralelo al de la ciudad-puerto.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A una alabanza de un modelo exitoso de ciudad-puerto.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A un ejemplo de desarrollo de ciudad opuesto a Valparaíso. 43",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "¿Con qué fin se incluyen los testimonios de Santiago French y Paul Treutler?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "60",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para informar sobre el auge económico de los baños de mar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para describir la infraestructura utilizada para el ocio marítimo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para demostrar los usos recreativos del borde costero de la época.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Para documentar las experiencias de veraneantes en el puerto. 44",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "Según el emisor, ¿qué ejemplifican los “Almacenes Fiscales”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "61",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un espacio monopolizado por la empresa de ferrocarriles.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un espacio con prácticas industriales y recreativas en el puerto.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un espacio que conecta estación de trenes y espacios recreativos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Un espacio construido para satisfacer las exigencias de los veraneantes. 45",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "Según la lectura, ¿por qué se perdió el uso recreativo de las playas de Valparaíso?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "62",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Por el desarrollo de la actividad ferroviaria costera.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Por la incomodidad de las instalaciones balnearias.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Por el surgimiento del balneario de Viña del Mar.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Por la suciedad de las aguas costeras. 46",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la intención de la sección “Concesiones públicas e inversiones privadas”?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "63",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Explicar los daños que causó la extensión de la línea férrea en la zona costera.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Criticar la acción de las empresas que intervinieron los balnearios de la ciudad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Evidenciar el desinterés del Estado en el desarrollo de actividades recreativas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Describir la infraestructura del borde costero de Valparaíso durante el año 1870. 47",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "¿A qué se refiere la tensión declarada en el título de la lectura?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "64",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Al desinterés por el cuidado de los espacios públicos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Al conflicto social originado por el desarrollo urbano.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A la priorización de lo privado por sobre lo estatal.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A la oposición entre dos modelos de ciudad. 48",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "¿Para qué se utilizan los subtítulos en la lectura?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "printedNumber": "65",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para agrupar los argumentos del artículo académico.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para clasificar los testimonios recogidos para el estudio.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para ordenar la investigación de acuerdo a su relevancia.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para organizar la información en torno a hitos cronológicos.",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 7,
+   "name": "LECTURA 7: pregunta 49 a 55",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "“TODAS LAS ALMAS” – JAVIER MARÍAS (EXTRACTO) “Cuando uno está solo, cuando uno vive solo y además en el extranjero, se fija enormemente en el cubo de la basura, porque puede llegar a ser lo único con lo que se mantiene una relación constante o, aún más, una relación de continuidad. Cada bolsa negra de plástico, nueva, brillante, lisa, por estrenar, produce el efecto de la absoluta limpieza y la infinita posibilidad. Cuando se la coloca, a la noche, es ya la inauguración o promesa del nuevo día: está todo por suceder. Esa bolsa, ese cubo, son a veces los únicos testigos de lo que ocurre durante la jornada de un hombre solo, y es allí donde se van depositando los rastros de ese hombre a lo largo del día, su mitad descartada, lo que ha decidido no ser ni tomar para sí, el negativo de lo que ha comido, de lo que ha bebido, de lo que ha fumado, de lo que ha utilizado, de lo que ha comprado, de lo que ha producido y de lo que le ha llegado. Al término de ese día la bolsa, el cubo, están llenos y son confusos, pero se los ha visto crecer, transformarse, formarse en una mezcla indiscriminada de la cual, sin embargo, ese hombre no solo conoce la explicación y el orden, sino que la propia e indiscriminada mezcla es el orden y la explicación del hombre. La bolsa y el hombre son la prueba de que ese día ha existido y se ha acumulado y ha sido levemente distinto del anterior y del que seguirá, aunque es asimismo uniforme y el nexo visible con ambos. Es el único registro, la única constancia o fe del transcurrir de ese hombre, la única “obra” que ese hombre ha llevado a cabo verdaderamente. Son el hilo de la vida, también su reloj. Cada vez que uno se acerca al cubo y echa en él algo, vuelve a tener contacto con las cosas que tiró en las horas previas, y eso es lo que le da un sentido de la continuidad: su día está jalonado por sus visitas al cubo de la basura, y allí ve el envase del yogurt de fruta que desayunó, y aquel paquete de tabaco del que al comenzar la mañana quedaban solo dos cigarrillos, y los sobres ahora vacíos y rotos que le trajo el correo, los botes de coca-cola y la viruta de un lápiz al que sacó punta antes de empezar el trabajo, las hojas arrugadas que juzgó imperfectas o equivocadas, el envoltorio de celofán que contuvo tres sándwiches, las colillas vertidas numerosas veces desde los ceniceros, los algodones empapados en colonia con los que se refrescó la frente, la grasa de los fiambres que comió distraído para no interrumpirse, los informes inútiles recogidos en la facultad, una hoja de perejil, una de albahaca, papel de plata, las briznas, las uñas que se cortó, la oscurecida piel de una pera, el cartón de la leche, el frasco de la medicina acabada, las bolsas inglesas de papel crudo y áspero en las que envuelven sus libros los libreros de viejo. Todo se va apretando y se va concentrando, se va tapando y se va fundiendo, y así se convierte en el trazo perceptible —material y sólido— del dibujo de los días de la vida de un hombre. Cerrar y anudar la bolsa y sacarla fuera significa comprimir y clausurar la jornada, que tal vez habrá estado punteada tan solo por esos actos, por el acto de arrojar desechos y mondaduras, el acto de prescindir, el acto de seleccionar, el acto de discernir lo inútil. El resultado del discernimiento es esa “obra” que impone su propio término: cuando el cubo rebosa está concluida, y entonces, pero solo entonces, su contenido son desperdicios.” Todas las almas, Javier Marías.",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "¿A qué se refiere el narrador cuando habla de la “relación de continuidad” en el texto leído?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A la relación entre los desperdicios y el hombre.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Al contacto constante del hombre con los desperdicios, a lo largo del día.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Al depósito de los rastros del hombre en el tarro de la basura.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A la bolsa de basura que pone término al día.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "Según el narrador, ¿en qué circunstancias de la vida uno se fija en el cubo de basura?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cuando uno tiene muchos desperdicios que botar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Cuando la jornada del día se prevé solitaria.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Cuando uno está solo todo el tiempo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cuando uno vive solo y en el extranjero.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "¿Qué se van depositando, finalmente, en el tarro de la basura?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El yogurt, el tabaco, los envases vacíos, entre otras cosas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Los desperdicios de la humanidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los elementos inservibles.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los rastros diarios de un hombre.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "¿A qué hace referencia la expresión esa “obra” al final del relato?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Al resultado de separar lo servible de lo inservible.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Al cubo de basura.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A los desechos humanos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Al cambio de bolsa todas las mañanas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "¿Qué se puede inferir de la lectura?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que los desperdicios son la evidencia de un trabajo arduo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que la gente sola, siempre establece una relación especial con la basura.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que la basura, en la vida de un hombre, encierra mucho más que simples desperdicios.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que los desechos que producimos poseen un componente mágico.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "¿Por qué el narrador le da importancia al cubo de basura?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque concentra los aspectos más relevantes del día.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque el ser humano establece siempre una relación con la basura.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque al final del día clausuran una jornada de trabajo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque representan una relación de continuidad entre la jornada diaria y los desperdicios.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "Se infiere del relato que para el narrador la basura:",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "representa una metáfora del transcurrir diario en la vida de un hombre.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "plasma la soledad de un hombre extranjero.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "constituye un acto cotidiano de la vida.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "simula concentrar los aspectos más significativos de la vida de un hombre.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 8,
+   "name": "LECTURA 8: Pregunta 56 a 65",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": {
+    "title": null,
+    "text": "Texto extraído del diario El Mercurio, 19 de Marzo de 2023 “Prohibir ChatGPT no tiene mayor sentido; los estudiantes lo usarán de todos modos” “Vetarlo se equipara con haber querido eliminar las calculadoras cuando estas aparecieron”, plantea. Su llamado es a que profesores y estudiantes exploren juntos la herramienta, analizando su potencial y sus límites, recordando que a pesar de sus respuestas casi humanas, es una interfaz que no logra “determinar qué es falso o verdadero” ni “interpretar o evaluar”. Margherita Cordano A mediados de semana, la más reciente versión de ChatGPT hizo noticia por aprobar un examen para convertirse en abogado en Estados Unidos. “Lo hizo con una puntuación tan buena como el 10% superior” anunció OpenAI, el laboratorio de inteligencia detrás de este bot de charla. Se trata de una interfaz que se dio a conocer en noviembre de 2022, y que en menos de seis meses de existencia ha sorprendido por su capacidad de generar todo tipo de textos bajo demanda: al alimentarse de datos que encuentra en internet —provenientes de blogs, portales o revistas científicas— esta herramienta de inteligencia artificial logra generar diálogos con los usuarios y es capaz de escribir artículos, poemas y hasta ensayos académicos por su cuenta. “El robot está entrenado para hacer coincidir patrones y devolver las oraciones más probables. Sus rápidas respuestas son impresionantes y pueden parecer notablemente humanas en varios aspectos. Esta cualidad humana es lo que tiene a la gente hablando”, comenta Stuart Selber, académico de la Universidad Penn State de Estados Unidos, director de Educación Digital de esa institución y autor de múltiples libros enfocados en multiliteratura y comunicación en la era virtual. Invitado a exponer en el seminario “ChatGPT: Amenazas, desafíos y su impacto en la educación”, organizado por la U. del Desarrollo, en entrevista con “El Mercurio”, Selber da cuenta de la dicotomía que la herramienta genera: por un lado, están los profesores entusiasmados con sus capacidades; por el otro, aquellos que sienten desconfianza. “En las escuelas, lo que estamos empezando a ver son al menos cuatro posturas: ignorar ChatGPT, prohibirlo, vigilarlo o investigarlo. Los educadores que ignoran ChatGPT no lo entienden, se sienten intimidados por él o no imaginan que este sea relevante para su trabajo”. Reflexión conjunta Bajo la mirada de Selber, prohibir este tipo de chatbots no tiene mayor sentido y se equipara con haber querido, por ejemplo, vetar las calculadoras en las salas de clases. “Cuando estas entraron en escena, las personas querían eliminarlas porque destruirían la capacidad de los jóvenes de calcular por su cuenta”, explica. “Creo que deberíamos pedirles a los estudiantes que escriban con ChatGPT. Deberíamos hacer de ChatGPT tanto una plataforma de escritura como un tema educativo en sí. Y no solo en los campos de ciencia, tecnología, ingeniería o matemáticas, no solo en los relacionados con la informática o los técnicos, también en las artes, en las humanidades. Necesitamos hablar con los estudiantes sobre qué es esto, qué puede hacer y qué no puede hacer. Es necesario identificar qué puede ser productivo y dónde están sus problemas”, dice el docente. Inútil o valioso ¿Un ejercicio que recomienda para abrir la discusión? “Pedirle a ChatGPT que escriba una biografía profesional sobre uno mismo. Es probable que terminen alarmados”, responde riendo. “La mitad de lo que dijo sobre mí es absolutamente incorrecta. Algo de ello estaba bien, mucho de ello estaba mal”. “ChatGPT no puede determinar qué es falso o verdadero, ineficaz o efectivo, inútil o valioso. No puede interpretar ni evaluar. Y aunque aprende en el sentido de que puede dar cuenta de una cierta cantidad de indicaciones y respuestas anteriores, no aprende como nosotros. Los profesores deben utilizar un lenguaje preciso al hablar de sus capacidades y evitar el antropomorfismo, el impulso de atribuir cualidades humanas a cosas no humanas”. Algo que Selber sí sugiere hacer a los docentes, es recordar que estas nuevas herramientas son también una futura alternativa de trabajo para sus alumnos: estas seguirán creciendo —el académico dice que pronto estarán incorporadas en Word o Google Docs, por ejemplo— y para ello se requerirá de gente que las comprenda. Solo hace unos días, Anthropic (la última inversión en inteligencia artificial de Google) anunció que estaba en busca de personas que pudieran hacer “control de calidad” a sus servicios. Otras compañías tecnológicas ya crearon cargos como el de ingenieros de peticiones, un puesto que supone especializarse en redactar buenas instrucciones, para que las inteligencias artificiales logren “comunicarse” con respuestas más precisas. https://digital.elmercurio.com/2023/03/19/A/N148MNI2/light?gt=040001",
+    "format": "plain",
+    "attachments": []
+   },
+   "items": [
+    {
+     "position": 56,
+     "type": "multiple_choice",
+     "stem": "Según lo leído, ¿qué es ChatGPT?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es un intérprete o traductor entre dos dispositivos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Es una interfaz de inteligencia artificial que genera comunicación con los usuarios.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Es una herramienta surgida en noviembre del 2022.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es un robot de inteligencia artificial con características humanas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 57,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es la dicotomía a la cual hace referencia Stuart Selber?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La prohibición del ChatGPT en las escuelas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La división antagónica de los profesores frente a ChatGPT.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La actitud ambigua que genera ChatGPT en los profesores.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El desconocimiento del ChatGPT por parte de los docentes.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es una de las falencias de ChatGPT según Stuart Selber?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que genera desconfianza entre los docentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que es capaz de engañar premeditadamente a los usuarios.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que siempre desvirtuará la información.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que está imposibilitado de emitir un juicio de valor.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 59,
+     "type": "multiple_choice",
+     "stem": "¿Qué recurso le entrega credibilidad al texto leído?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La invitación a Stuart Selber a un seminario.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Los ejemplos citados por Stuart Selber.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La reflexión que realiza Stuart Selber.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La mención de Anthropic.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 60,
+     "type": "multiple_choice",
+     "stem": "¿Qué se desprende de las palabras de Stuart Selber?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que ChatGPT tiene una finalidad pedagógica.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que los estudiantes son los principales usuarios.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que existe convergencia de opiniones sobre su utilidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que más que prohibir ChatGPT, hay que educar en su uso.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 61,
+     "type": "multiple_choice",
+     "stem": "¿Qué se desprende del párrafo final?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que la inteligencia artificial plantea problemas éticos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que las herramientas tecnológicas posibilitan una vida mejor.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que ChatGPT es usada mayoritariamente por profesores.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que la inteligencia artificial llegó para quedarse.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 62,
+     "type": "multiple_choice",
+     "stem": "¿Con qué propósito se nombran las calculadoras en el texto?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para compararlas con la inteligencia artificial.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Para cuestionar a los críticos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Para predecir consecuencias del uso de ChatGPT.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para equiparar reacciones del pasado con ChatGPT.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 63,
+     "type": "multiple_choice",
+     "stem": "¿Por qué se utiliza el recurso de las comillas en “comunicarse”?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque algún día las máquinas lograrán comunicarse.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque está en sentido figurado.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Porque tiene un sentido especial.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque es sentido denotativo.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 64,
+     "type": "multiple_choice",
+     "stem": "¿Cuál sería un probable efecto del uso de ChatGPT en la educación?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El plagio por parte de los alumnos.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La unificación del lenguaje.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La redacción incorrecta.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las respuestas falsas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 65,
+     "type": "multiple_choice",
+     "stem": "Según Stuart Selve ¿Por qué algunos educadores ignoran Chat GPT?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque lo consideran irrelevante para su trabajo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque destruye la capacidad cognitive de los alumnus.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque no lo comprenden o se sienten amenazados por él.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque aniquila el entusiasmo por la educación.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "CL-E1-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 65,
+  "warnings": [
+   "cuadernillo con renumeración estampada: 32/65 ítems",
+   "el ensayo concatena 2 cuadernillos (el nº impreso reinicia)"
+  ],
+  "needsHumanReview": true,
+  "itemsConClave": 65
+ }
+}

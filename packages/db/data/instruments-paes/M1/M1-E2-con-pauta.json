@@ -1,0 +1,2074 @@
+{
+ "instrument": {
+  "name": "PAES M1 — Ensayo 2 (Tanda 2) · IV° Medio 2026",
+  "subject": "Competencia Matemática 1",
+  "subjectCode": "MATH",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "M1",
+   "tanda": "Tanda 2",
+   "mencion": null,
+   "appliedOn": "2026-04-30",
+   "basadoEn": "DEMRE REG 2026 (Completado por CMK)"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba completa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "En un juego hay dos tipos de cartas, unas tienen una estrella y las otras tienen un corazón, todas con un número. El puntaje de cada jugador se calcula de la siguiente forma: • Primero se extrae una carta al azar (carta inicial) y su valor se considera como puntaje inicial. • Luego, se extrae otra carta: o si esta tiene una estrella, le debe restar el valor de la carta a su puntaje; o si esta tiene un corazón, le debe sumar el valor de la carta a su puntaje. • El puntaje final se obtiene al repetir el procedimiento anterior, hasta tener diez cartas. Un jugador extrae las siguientes cartas, en este orden: Carta inicial ¿Cuál es el puntaje final del jugador?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "-14",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "-4",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "11",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "Para preparar una receta, una persona necesita 700 g de carne picada, 1 kg de champiñones y 2 cebollas. Para comprar los ingredientes la persona considera los siguientes precios: ¿Cuánto dinero necesita la persona para comprar los ingredientes para esta receta?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$4 600",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "$8 100",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "$10 000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "$13 700 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "Un auto recorre 5 km para ir de la ciudad A a la ciudad B y recorre 25 km para ir de la ciudad B a la ciudad C. Si este auto rinde 10 kilómetros por litro, es decir, recorre 10 km con 1 litro de bencina, ¿cuál es la cantidad de litros de bencina que se necesitan para hacer el recorrido de la ciudad A hasta la ciudad C de ida y vuelta, pasando ambas veces por la ciudad B?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el numero cuya tercera parte es 0,09?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2,7",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0,27",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "0,03 4 8 2 2 4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "Para resolver la expresión − ( ∙ − ) + ( + − ), una persona realiza el 6 12 30 60 10 siguiente procedimiento, cometiendo un error. Paso 1: simplifica una vez por 2 cada fracción de la expresión, obteniendo 2 4 1 1 2 −( ∙ − ) + ( + − ) 3 6 15 30 5 2 4 Paso 2: desarrolla el primer paréntesis − ( ∙ − ), obteniendo 1 3 6 1 1 2 3 Paso 3: desarrolla el segundo paréntesis ( + − ), obteniendo − 15 30 5 10 3 7 Paso 4: desarrolla 1 − , obteniendo 10 10 ¿En cuál de los pasos la persona cometió el error?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el Paso 1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el Paso 2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "En el Paso 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el Paso 4 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "En la figura se muestran tres ruedas de engranaje, la rueda B da dos vueltas por cada vuelta que da la rueda A. Por su parte, la rueda C da dos vueltas por cada vuelta que da la rueda B. ¿Cuántas vueltas da la rueda A cuando la rueda C ha dado 240 vueltas?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "20",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "36 C",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "52",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "60 B A",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "Una persona llega a las 8:48 am a la estación Macul de la línea 4 del metro y mira el letrero de la estación. ESTACIÓN MACUL Hora : 8:48 Tiempo de espera al próximo carro: 6:00 minutos Esta persona sabe que el tren demora 2 minutos entre cada estación y que se detiene un minuto en cada estación para que bajen y suban pasajeros. Si se considera que la estación 1 del mapa es la estación Macul y esta persona tiene que llegar a la estación 11 “Las Mercedes”, ¿a qué hora va a llegar?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8:24",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "9:18",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "9:24",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "9:32 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "√4 + √8 + √9 + √27 =",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "√48 4",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "√6",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5 + 4√3 + 9√3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "5 + 2√2 + 3√3",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el resultado de: −5 ∙ 5 ∙ 5 ∙ 5 ∙ 5 ∙ 5 = ?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "30",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "56",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "–56",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "(–5)6",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "La presión arterial de una persona se divide en presión sistólica y en diastólica, el siguiente cuadro muestra los valores de distintos estados de presión arterial: Se sabe que, si una persona de presión elevada sube 10 kg de peso, su presión sistólica sube de 2 a 3 mmHg. ¿Cuál es la máxima presión sistólica a la que llega una persona de presión elevada que sube 20 kg?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "126 mmHg",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "131 mmHg",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "135 mmHg",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "145 mmHg CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "La escalera de un edificio tiene 20 peldaños entre piso y piso. La altura de cada uno de estos peldaños es de 15 cm. Una persona empieza a subir por la escalera de este edificio, desde el primer peldaño del primer piso. Si n es la cantidad de peldaños que la persona ha subido, ¿cuál de las siguientes condiciones garantiza que la persona llego a un nuevo piso?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que 15·n es divisible por 20",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que 15 + n es divisible por 20",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que 15·n es divisible por 300",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que 15 + n es divisible por 300",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "Joaquín le sacó una foto a su gato, la cual salió muy bien, por lo que quiso imprimirla en grande para colgarla en su casa. La foto ocupa toda la superficie del celular, la cual mide 15 x 6 cm como lo muestra la figura Si Joaquín quiere que la foto que va a imprimir tenga 60 cm de alto, ¿cuánto debe ser el ancho de la impresión?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "24 cm",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "18 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "36 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "12 cm CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "Algunas calculadoras tienen botones que permiten marcar dos ceros o tres ceros a la vez, tal como la que se representa en la imagen adjunta. De esta manera, para marcar el número 1000, basta con presionar los siguientes botones una vez cada uno: ¿Cuál de las siguientes acciones permite marcar el numero 1010 ?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Presionar una vez y siete veces",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Presionar una ves y ocho veces",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Presionar una vez , dos veces y dos veces",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Presionar una vez , tres veces y una vez",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "Una persona realiza el siguiente procedimiento para factorizar 12 + 20, cometiendo un error. Paso 1: escribe cada sumando como el producto de dos números, obteniendo 4∙3+4∙5 Paso 2: descompone cada factor en números primos, obteniendo 2 ∙ 2 ∙ 3 + 2 ∙ 2 ∙ 5 Paso 3: escribe las potencias correspondientes, obteniendo 22 ∙ 3 + 22 ∙ 5 Paso 4: factoriza la suma, obteniendo 24 (3 + 5) ¿En cuál de los pasos la persona cometió el error?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el Paso 1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el Paso 2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En el Paso 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el Paso 4 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "Leonardo juega el siguiente juego: Se elige un número y luego se extraen dos tarjetas con operaciones: la primera de un mazo de color blanco y la segunda de un mazo de color gris. La operación de la tarjeta blanca se aplica sobre el numero elegido y la operación de la tarjeta gris sobre el resultado obtenido. Leonardo extrae las siguientes tarjetas: Si eligió el número 2, ¿cuál de las siguientes expresiones corresponde a la correcta aplicación de las instrucciones de las tarjetas en el orden en que las saco?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(2 − 5)3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "3 ∙ (2 − 5)",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "3 ∙ (5 − 2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "(5 − 2)3",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Se tienen 2 bidones, P y Q como se muestran en la figura P Q ¿Cuál de los siguientes argumentos es valido para asegurar que la capacidad del bidón Q es el doble de la capacidad del bidón P?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que el área de la base del bidón Q sea el doble de la base del bidón P.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que el bidón Q tenga 100% más de la capacidad que el bidón P.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Que la altura del bidón Q es a la altura del bidón P como 1 es a 2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que el bidón Q tenga 2 veces más de capacidad que el bidón P. CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "Eloísa tiene un terreno, en cuyo 40% va a construir una casa, en el 25% del resto del terreno va a plantar manzanos y el resto del terreno lo plantara con ciruelos. ¿En cuál de los siguientes diagramas la parte gris representa el terreno plantado con ciruelos?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas en fila; las figuras no están en la capa de texto",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "Tenedor libre se llama en un restaurante cuando pagas un precio fijo y comes todo lo que quieras. Dos amigos van a un restaurante de tenedor libre en el cual las bebidas no están incluidas. Uno de ellos pidió 3 bebidas y pagó 20.800 y el otro pidió una bebida y pagó 17.200. Entonces ¿Cuánto es el cargo fijo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1.800",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "3.600",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "12.600",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "15.400",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "¿Cuánto es el 75% del 75% de 100?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5625",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "150",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "56,25",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "1,5",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "En un café sirven dos tipos de café: Arábico (A) y de Brasil (B), los cuales se diferencian por su aroma y cuerpo, por lo que, al elaborar las tazas, se hace así: • Café tipo A tiene 3 gr de café por taza. • Café tipo B 10 gr de café para 4 tazas. Si se tienen 450 gr tipo A y 500gr tipo B, ¿para cuantas tazas alcanza?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "420",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "350",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "230",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "140 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "Ana está haciendo un pan con masa madre. La masa que preparo pesaba 132 gr, y al otro día había aumentado su peso en un 65%, entonces la nueva masa pesa: 197",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "100",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "193 65",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "132(1 + 100)",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "132 + 0,65",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "Se estimó que en el 2022 la cantidad de personas que les gustaba jugar videojuegos era de 3000 millones. Si en el 2023 la cantidad de personas que les gustaba jugar videojuegos aumento en 120 millones respecto al año anterior, ¿cuál es el porcentaje de aumento de ese año, respecto del año anterior?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2,5%",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "4%",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "25%",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "40% CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "En el siguiente grafico se presenta la electricidad total generada por diferentes tecnologías en Chile durante 2021. Generadoras de Chile (2022). Cifras destacadas del sector generación en 2021. ¿Cuál de las siguientes expresiones corresponde a la electricidad total generada durante 2020? 80 155",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "GWh 104,5 80 155∙100",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "GWh 104,5 80 155∙104,5",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "GWh 100 80 155",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "GWh 104,5∙100",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "Una tienda vendía un producto a $25 000. Como no se vendía lo suficiente, la tienda rebajo su precio un 20%. Sin embargo, el precio rebajado no aumento lo suficiente las ventas, por lo que rebajaron un 25% el precio ya rebajado. ¿Cuál de las siguientes expresiones representa el precio del producto luego de los dos descuentos, en pesos?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,2 ∙ 0,25 ∙ 25 000",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(0,2 + 0,25) ∙ 25 000",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0,8 ∙ 0,75 ∙ 25 000",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "(0,8 + 0,75) ∙ 25 000 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "El sueldo liquido mensual de una persona es de $M. Todos los meses, gasta las tres quintas partes y el resto lo ahorra. Si el sueldo liquido de la persona se mantiene fijo durante doce meses, ¿cuál de las siguientes expresiones representa el ahorro, en pesos, de la persona en ese periodo de tiempo? 2",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "M 5 24",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "M 5 36",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "M 5 57",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "M 5",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "El ingreso y la ganancia de una empresa, ambos en pesos, se modelan con respecto a la cantidad de artículos producidos (x) de la siguiente manera: • Ingreso: I(x) = 1000x + 600 000 • Ganancia: G(x) = 750x + 450 000 Considera que la ganancia al producir x artículos se puede calcular como G(x) = I(x) − C(x), tal que C es la función de costo. ¿Cuál es la función costo de la empresa?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "C(x) = 250x + 150 000",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "C(x) = 250x − 150 000",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "C(x) = 1750x − 1 050 000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "C(x) = 1750x + 1 050 000",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "Una pista de baile de forma rectangular tiene dimensiones de (3x + 4) metros de largo y (2x − 9) metros de ancho. Se cuenta con (20x + 20) metros de una cinta luminosa para demarcar el borde de la pista de baile. ¿Cuántos metros de cinta luminosa sobran luego de demarcar el borde de la pista?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(10x + 30) metros",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "(10x + 10) metros",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "(15x + 15) metros",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "(15x + 25) metros CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "Una persona descubrió que para lograr el color que le gusta para el glaseado de galletas, debe mezclar gotas del colorante rojo con gotas del colorante amarillo en la razón 3 : 5, respectivamente. Si la persona usa 30 gotas de colorante amarillo para preparar el glaseado que le gusta, ¿cuántas gotas de color rojo deberá agregar para obtener el color que le gusta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "18",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "28",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "30",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "32",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Una fábrica produce un cierto repuesto para un modelo determinado de una máquina lavadora, para la venta de dicho repuesto usa la siguiente función v(x) = 2x + 1000, donde x es el costo del repuesto. Entonces con respecto a esta función de venta en pesos, ¿cuál de las siguientes afirmaciones es siempre verdadera?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Si vende un repuesto lo vende en $1000",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El precio es siempre mayor que $1000",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El precio es siempre mayor que $2000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El precio de venta es el doble del costo",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "Para cierta marca de alimentos, la cantidad p de kilogramos de comida que debe comer un perro adulto, durante el día, se modela mediante la expresión p = m·0,025, tal que m es la masa del perro, en kilogramos. ¿Cómo se puede interpretar 0,025 en el modelo anterior?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que el perro adulto debe consumir 25 gramos de alimento por cada kilogramo de su masa.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Que el perro adulto debe consumir 250 gramos de alimento por cada kilogramo de su masa.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que la masa de un perro adulto es 25 veces la cantidad de alimento que debe consumir.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que la masa de un perro adulto es 250 veces la cantidad de alimento que debe consumir. CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "En la información nutricional de un paquete de galletas se indica que una porción de 4 galletas contiene 180 kilocalorías. Para calcular cuantas kilocalorías K se ingieren al consumir este tipo de galletas se puede utilizar la formula 180𝑥 𝐾= 4 tal que x es la cantidad de galletas consumidas. Una persona consumió una cantidad de galletas de este tipo junto a un vaso de jugo que contiene 90 kilocalorías, ingiriendo en total 405 kilocalorías. ¿Cuántas galletas consumió esta persona?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "7",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "9",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "11",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "Daniela, con el dinero que tiene, compra en un bazar 7 lápices pasta del mismo tipo y le sobran $900. En el mismo bazar, Marcos, con el dinero que tiene, compra 6 lápices pasta del mismo tipo que Daniela y le sobran $2330. Si Daniela y Marcos tienen la misma cantidad de dinero, ¿cuál es el precio de un lápiz pasta del mismo tipo?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$110",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "$248",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "$1430",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "$3230 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "En una ciudad se registró la cantidad de nacimientos desde el año 2019 al año 2021. Al relacionar estas cantidades con la cantidad x (en miles) de nacimientos del año 2018, se encontraron las siguientes relaciones: Si en esta ciudad, durante el año 2019 hubo una cantidad menor de nacimientos que la suma de los años 2020 y 2021, ¿cuál de las siguientes relaciones representa la información entregada?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5x + 4 < 2x + 7",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "5x + 4 < 4x + 7",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "5x + 4 > 2x + 7",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "5x + 4 > 4x + 7",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "Dos jóvenes quieren iniciar un emprendimiento de fabricación y venta de helados. Las proyecciones de los gastos y de los ingresos, ambos acumulados, que deberían tener en los primeros 12 meses, se presentan en el siguiente grafico: ¿Qué representa el punto donde las rectas se intersecan?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es el mes donde se obtiene la mayor cantidad de ingresos acumulados.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Es el mes donde los ingresos acumulados igualan a los gastos acumulados.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Es el mes desde cuando el emprendimiento no tendrá más gastos acumulados.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es el mes donde los ingresos acumulados son iguales a los gastos iniciales del emprendimiento. CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "Una persona gasta $13 500 en la compra de 8 kg de fruta entre manzanas y peras, pagando $1500 por el kilogramo de manzanas y $1800 por el kilogramo de peras. El siguiente sistema de ecuaciones modela la situación anterior: 1500x + 1800y = 13 500 x+y=8 ¿Que representa la variable x en este sistema?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La cantidad de peras compradas",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La cantidad de manzanas compradas",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La cantidad de kilogramos de peras compradas",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La cantidad de kilogramos de manzanas compradas CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "Se tiene la siguiente infografía en donde se muestra la cantidad de alumnos por profesor en distintos países: ¿Cuántos países tienen 12 o más alumnos por profesor tanto en primaria como en secundaria?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "11",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "10",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "9",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "8 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "El siguiente infograma muestra un mapa de campamentos en Chile por región en el año 2011 junto con la evolución de familias viviendo en campamentos y cantidad de campamentos totales desde el 1985 al 2011 ¿Cuál de las siguientes informaciones se puede desprender de la imagen?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Aumentaron 175 campamentos entre el año 1985 y el 2011",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Desde el año 1996 al 2007 disminuyeron los campamentos por mayor cobertura de alcantarillado",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La mayor cantidad de campamentos por región en el 2011 es de 145",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el año 1985 había aproximadamente 42 familias por campamento CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "En una ferretería se venden tubos de PVC de distinto largo, pero todos de igual ancho, como se muestran en la imagen a continuación El vendedor ha decidido que cobrará un precio equivalente a la superficie externa del tubo más un cargo fijo equivalente a la superficie de una de las caras redondas del tubo. Si los tubos tienen un diámetro de 10 cm, ¿cuál es la función que mejor representa el precio que cobrará el vendedor en donde x representa el largo del tubo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑓(𝑥) = 100𝜋 + 20𝜋𝑥",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "𝑓(𝑥) = 50𝜋 + 20𝜋𝑥",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "𝑓(𝑥) = 45𝜋 + 15𝜋𝑥",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "𝑓(𝑥) = 25𝜋 + 10𝜋𝑥",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "En la figura se muestra un aro de alambre y un adorno. Un artesano abre el aro y con el alambre hace el adorno. Este adorno está formado por una circunferencia y dos semicircunferencias más pequeñas como se muestra en la figura Adorno Aro ¿Con cuál de las siguientes opciones se puede asegurar el artesano que le va a alcanzar el alambre del aro para fabricar el adorno?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El radio del aro es mayor que el radio de la circunferencia del adorno.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El radio del aro es igual a la suma del radio de la circunferencia y de dos veces el radio de la semicircunferencia",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El perímetro de las dos semicircunferencias es igual a la mitad del perímetro de la circunferencia",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El perímetro del aro sea mayor que el perímetro de la circunferencia y las dos semicircunferencias juntas. CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "Un estanque contiene 720 litros de agua y, cada vez que se abre la llave, este se vacía a razón de 3 litros por minuto. ¿Cuál de las siguientes funciones modela la cantidad de agua que queda en el estanque por cada minuto que la llave se encuentra abierta, tal que x son los minutos transcurridos desde que se abre la llave?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑓(𝑥) = −3𝑥 + 720",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "𝑔(𝑥) = 3𝑥 − 720 𝑥−720",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "𝑝(𝑥) = 3 −𝑥+720",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "ℎ(𝑥) = 3",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "Una persona dispone de un terreno de forma rectangular. Se sabe que el terreno tiene un área de 192 m2 y que su ancho mide 4m menos que su largo. ¿Cuánto mide el largo del terreno?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "12m",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "16m",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "20m",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "24m",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "Considera la función cuadrática f con dominio el conjunto de los números reales. En la siguiente figura se representa la gráfica de f con su eje de simetría. ¿Para cuál de los siguientes valores de x se tiene que f(x) = 7?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "−3",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "−4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "−5 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "La distancia d, en metros, que recorre un móvil que parte del reposo está dada por 𝑡2 𝑑(𝑡) = 𝑎 ∙ 2 tal que t es el tiempo que demora en recorrer esa distancia, en segundos, y a es la aceleración del móvil, en m/s2 Si el móvil acelera a 10 m/s2, ¿cuántos segundos tardará en recorrer una distancia de 45 metros?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "4,5",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "√45",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "9",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "Se tiene unas lechugas hidropónicas plantadas sobre un rectángulo de plumavit, de modo que todas ellas están separadas entre si por 20 cm y además a 10 cm del borde, como se muestra en la figura. 10 10 ¿Cuál es el largo y el ancho del plumavit?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "100 y 60",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "100 y 20√3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "100 y 20√3 + 20",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "100 y 40√3 + 20 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "En la figura adjunta se representa un trapecio rectángulo de área 0,76m2. ¿Cuál es la medida de su altura?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1,444m",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,80m",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "0,722m",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "0,40m",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "El deporte lanzamiento de bala es una disciplina en donde el atleta debe lanzar una bala lo más lejos posible, para lo cual debe tener una densidad precisa para que no sea ni muy pesada ni muy liviana. La densidad D de la bala depende de su diámetro según la formula 3 D= , donde d es el diámetro. d 3 π( ) 2 Si una bala tiene diámetro 10 cm ¿Cuál será la densidad de la bala? 1",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5𝜋 3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "75𝜋 1",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "50𝜋 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "125𝜋 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "En la siguiente imagen se presenta una red de un cubo. Se construye el siguiente cuerpo usando algunos cubos como el anterior ¿Cuántos cubos se utilizaron en total para construir el cuerpo anterior?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "7",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "8",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "9",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "Una empresa fabrica y vende cajas cubicas de madera fina para almacenar joyas. El precio de venta de las cajas se determina como $800 ∙ 𝑘, tal que se cobra $800 por cada cm2 del área exterior de las cajas. Considera que el área de una cara exterior de estas cajas es de 25 cm2. ¿Cuál de las siguientes expresiones representa k?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6 ∙ 52",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "6 ∙ 54",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6 ∙ 56",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6 ∙ 512 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "Considera el siguiente procedimiento: ¿Cuál de las siguientes figuras se obtendrá al desdoblarse y estirarse el recorte?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "En el plano cartesiano de la figura adjunta se representan los puntos cardinales. ¿En cuál de las siguientes opciones las transformaciones isométricas aplicadas a la flecha negra permite que la imagen obtenida sea una flecha que apunta al oeste?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Una reflexión con respecto al eje X y luego, una reflexión con respecto a la recta y = x.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Una reflexión con respecto al origen del plano cartesiano y luego, una rotación en 45◦ en sentido horario con centro el origen del plano cartesiano.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Una reflexión con respecto al eje Y.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una traslación según el vector (−3, −3).",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "Considera los vectores representados en el plano cartesiano. ¿Cuál de las siguientes afirmaciones es verdadera, respecto a los vectores del grafico?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tienen distinta dirección.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Tienen distinto sentido.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Tienen distinta magnitud.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Están en el semieje positivo del eje X. CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "En la cuadricula de la figura se representa el plano de un videojuego. En ella se ubica un tesoro y los pies de una persona, ambos al centro de las casillas. ¿Cuál de los siguientes vectores lleva a la persona sobre la casilla del tesoro?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(8,−4)",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "(−4, 2)",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "(10,−6)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "(2,−2) CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "Un tipo de migración exterior corresponde al cambio de residencia hacia un país diferente, por ejemplo, la migración desde Chile hacia España. A aquellas personas migrantes que llegan a habitar un país son considerados inmigrantes, mientras que a aquellas personas que abandonan un país, se les considera emigrantes. En el siguiente grafico se presenta información de las migraciones exteriores en España desde el 2011 hasta el 2021. ¿En qué año hubo mayor cantidad de migrantes exteriores en España?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2013",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2015",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2018",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2019 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "El encargado del personal de una empresa extrae de la ficha de contratación las edades de las personas que trabajan en esta empresa. Luego, resume la distribución de las edades en la siguiente tabla: La empresa dará un beneficio educacional según la información de la tabla a los trabajadores cuya edad no supere los 34 años. ¿Cuál es la mayor cantidad de trabajadores que podría acceder a ese beneficio?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "7",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "9",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "12 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "Una persona está jugando un nuevo juego en línea en el cual se pueden escoger distintos personajes. Cada personaje tiene cinco habilidades, con un puntaje de 0 a 100 en cada habilidad. En el siguiente diagrama se representan las habilidades de uno de los personajes. ¿Cuál es la habilidad más débil de este personaje?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Fuerza mágica",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Defensa mágica",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Defensa física",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Fuerza física CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 56,
+     "type": "multiple_choice",
+     "stem": "Se realizo una encuesta a los estudiantes de IV◦ medio de un establecimiento educacional, sobre la cantidad de años que llevan en dicho establecimiento. En la siguiente tabla se presentan los datos de dicha encuesta. ¿Cuántos estudiantes encuestados llevan 5 años o más en el establecimiento educacional?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "12",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "35",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "68",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "80 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M 57. Según la Encuesta Nacional de Empleos se considera como “ocupado” a aquellas personas, en edad de trabajar, que durante la semana de referencia dedicaron al menos una hora para producir bienes o servicios a cambio de una remuneración o beneficio. Considera la siguiente información: ¿Cuál de las siguientes representaciones graficas corresponde a la información entregada? CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 57,
+     "type": "multiple_choice",
+     "stem": "Según la Encuesta Nacional de Empleos se considera como “ocupado” a aquellas personas, en edad de trabajar, que durante la semana de referencia dedicaron al menos una hora para producir bienes o servicios a cambio de una remuneración o beneficio. Considera la siguiente información: ¿Cuál de las siguientes representaciones graficas corresponde a la información entregada?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "El siguiente gráfico muestra los tiempos de espera en un consultorio por la misma cantidad de pacientes al día. Tiempo [min] 30 12 Consultorio 1 Consultorio 2 Consultorio 3 Consultorio 4 Una persona que dispone de 20 minutos para esperar, ¿A cuál de ellos le conviene asistir?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Consultorio 2",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Consultorio 4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Consultorio 1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Consultorio 3",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 59,
+     "type": "multiple_choice",
+     "stem": "Considera la siguiente tabla: ¿Cuál de las siguientes expresiones permite determinar el promedio de los valores? 𝑃+𝑄+2∙𝑅",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑃+𝑄+𝑅 𝑅",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "𝑃+𝑄+𝑅 0∙𝑃+1∙𝑄+2∙𝑅",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "𝑃+𝑄+𝑅 2∙𝑅",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "𝑃+𝑄+𝑅 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 60,
+     "type": "multiple_choice",
+     "stem": "Una persona planto un brote de dos centímetros y lo fotografió durante cinco semanas para dejar registro de su crecimiento, tal como se representa a continuación: ¿Cuántos centímetros, en promedio, creció el brote por semana?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,4 cm",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "3 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "7,5 cm CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 61,
+     "type": "multiple_choice",
+     "stem": "En el siguiente grafico se representa la distribución de la cantidad de horas extras realizadas por 140 trabajadores durante el mes de mayor demanda productiva de una empresa. Por cada hora extra se paga $15 000. ¿Cuál fue el pago más frecuente que realizó la empresa por concepto de horas extras en ese mes?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$15 000",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "$30 000",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "$45 000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "$60 000 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 62,
+     "type": "multiple_choice",
+     "stem": "Considera el experimento descrito en la siguiente infografía para calcular el tiempo de reacción, en segundos, de una persona. Una persona efectuó el experimento y en el paso cuatro anoto los siguientes números: ¿Cuál es el tiempo de reacción de la persona?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,10 s",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,14 s",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0,16 s",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "0,17 s CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 63,
+     "type": "multiple_choice",
+     "stem": "Una persona tiene un locker con 2 candados con claves como el de la figura, uno de 6 ruedas con 5 dígitos cada uno. Y el otro con 3 ruedas con 10 dígitos cada uno. ¿Cuál es la probabilidad que una persona que no conoce las claves acierte a las combinaciones correctas en el primer intento? 1",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "56 + 310 1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "56 ∙ 310 1",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "1516 1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6 ∙5 ∙3 ∙10 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 64,
+     "type": "multiple_choice",
+     "stem": "El memorice es un juego que está compuesto por varias tarjetas. Cada una de estas tiene una figura que esta repetida una sola vez en otra tarjeta, de tal manera que se forman pares de cada una de estas figuras. Para jugar, las tarjetas se deben disponer sobre una superficie de manera que ninguna de las figuras de las tarjetas sea visible. Luego, la persona que juega debe voltear una tarjeta y, después, debe dar vuelta una segunda tarjeta con la finalidad de encontrar el par de la primera. Una persona dispone sobre la mesa 20 tarjetas de este juego y voltea por primera vez una de las tarjetas, en la cual aparece un rayo, tal como se presenta en la siguiente imagen. Si esta persona no conoce la figura de ninguna de las otras tarjetas dispuestas, ¿cuál es la probabilidad de que esta persona encuentre el segundo rayo al dar vuelta al azar la segunda tarjeta? 1",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "20 1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "19 2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "20 2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "19 CMV +56993537083 CMV +56993537083 CMV Constanza Mönckeberg V. CKM Constanza Kutscher M",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 65,
+     "type": "multiple_choice",
+     "stem": "Cecilia va a visitar una exposición de arte y como trabajo para el colegio le piden que dibuje su obra favorita. Entre las que más le gustaron están 3 cuadros de pintura clásica, 4 de arte moderno, 5 esculturas clásicas y 2 de arte moderno. Si Cecilia va a escoger una de las anteriores para dibujar, ¿cuál es la probabilidad que escoja una obra de arte moderno?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3/7",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "1/2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1/7",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "5/9 CMV +56993537083 CMV +56993537083",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "M1-E2-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 65,
+  "warnings": [
+   "#21: notación matemática partida en líneas",
+   "#49: notación matemática partida en líneas",
+   "#63: notación matemática partida en líneas",
+   "#64: notación matemática partida en líneas"
+  ],
+  "needsHumanReview": true,
+  "itemsConClave": 65
+ }
+}

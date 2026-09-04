@@ -17,3 +17,5 @@ export * from './response-display';
 export * from './answer-key';
 export * from './raw-answer-distribution';
 export * from './trajectory-selection';
+export * from './layout-hash';
+export * from './omr-qr';

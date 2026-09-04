@@ -134,6 +134,52 @@ export async function apiPostFormData<T>(path: string, formData: FormData): Prom
   return res.json() as Promise<T>;
 }
 
+export type BinaryResponse = {
+  bytes: Uint8Array;
+  contentType: string;
+  filename?: string;
+};
+
+function parseContentDispositionFilename(header: string | null): string | undefined {
+  if (!header) return undefined;
+  const utf8Match = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1]);
+  const plainMatch = /filename="?([^";]+)"?/i.exec(header);
+  return plainMatch?.[1];
+}
+
+/**
+ * GET autenticado de una respuesta BINARIA (PDF, imágenes). Existe porque
+ * `request()` sólo maneja JSON y el proxy genérico `/api/proxy/[...path]`
+ * corrompe binarios (decodifica el stream como UTF-8). Mismo Bearer de la
+ * cookie de sesión y misma taxonomía de errores que el resto de `lib/api.ts`.
+ */
+export async function apiGetBinary(path: string): Promise<BinaryResponse> {
+  const token = await getBearerToken();
+  let res: Response;
+  try {
+    res = await fetch(`${apiUrl()}${path}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    throw new ApiConnectionError();
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const message = (body as { message?: string }).message ?? `API error ${res.status}`;
+    if (res.status >= 500) reportServerError(new Error(message), { path, status: res.status });
+    throw new ApiRequestError(res.status, message, body);
+  }
+
+  return {
+    bytes: new Uint8Array(await res.arrayBuffer()),
+    contentType: res.headers.get('content-type') ?? 'application/octet-stream',
+    filename: parseContentDispositionFilename(res.headers.get('content-disposition')),
+  };
+}
+
 // ── Llamadas internas sin Bearer (auth callbacks de NextAuth) ─────────────────
 
 export function internalGet<T>(path: string): Promise<T> {

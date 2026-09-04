@@ -307,6 +307,58 @@ CREATE POLICY "mcp_access_logs_tenant_isolation" ON "mcp_access_logs"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
 
+-- ── Lector de marcas (E22) — 6 tablas con org_id directo (D16) ────────────────
+-- Las hojas escaneadas contienen el nombre del alumno (Ley 19.628). Toda query
+-- corre dentro de withOrgContext(orgId). Diseño: docs/diseno-lector-de-marcas/.
+ALTER TABLE "sheet_layouts"      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_layouts"      FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_print_runs"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_print_runs"   FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "printed_sheets"     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "printed_sheets"     FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_batches" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_batches" FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scans"        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scans"        FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_marks"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sheet_scan_marks"   FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "sheet_layouts_tenant_isolation" ON "sheet_layouts";
+CREATE POLICY "sheet_layouts_tenant_isolation" ON "sheet_layouts"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_print_runs_tenant_isolation" ON "sheet_print_runs";
+CREATE POLICY "sheet_print_runs_tenant_isolation" ON "sheet_print_runs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "printed_sheets_tenant_isolation" ON "printed_sheets";
+CREATE POLICY "printed_sheets_tenant_isolation" ON "printed_sheets"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_scan_batches_tenant_isolation" ON "sheet_scan_batches";
+CREATE POLICY "sheet_scan_batches_tenant_isolation" ON "sheet_scan_batches"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_scans_tenant_isolation" ON "sheet_scans";
+CREATE POLICY "sheet_scans_tenant_isolation" ON "sheet_scans"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "sheet_scan_marks_tenant_isolation" ON "sheet_scan_marks";
+CREATE POLICY "sheet_scan_marks_tenant_isolation" ON "sheet_scan_marks"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
 -- ── Telemetría de uso de la plataforma — telemetry_events (org_id directo) ────
 -- Analítica de producto (qué features usa cada colegio). org_id NOT NULL: cada
 -- org ve sólo sus propios eventos. El TelemetryWriterService escribe siempre
@@ -330,3 +382,22 @@ CREATE POLICY "feedback_tenant_isolation" ON "feedback"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true))
   WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+-- ── Captura remota (E22-R, CD-16) — sesiones de emparejamiento QR ─────────────
+-- El canje del secreto ocurre ANTES de conocer la org (ruta pública, sin
+-- withOrgContext): la segunda política permite leer EXACTAMENTE la fila cuyo id
+-- ya se conoce, fijando `app.capture_session_id` en la transacción (CD-18).
+-- Nunca es un escape genérico: sólo SELECT, sólo por id propio. Todo lo demás
+-- (updates, appends, joins) corre dentro de withOrgContext como siempre.
+ALTER TABLE "capture_sessions" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "capture_sessions" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "capture_sessions_tenant_isolation" ON "capture_sessions";
+CREATE POLICY "capture_sessions_tenant_isolation" ON "capture_sessions"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "capture_sessions_redeem_by_id" ON "capture_sessions";
+CREATE POLICY "capture_sessions_redeem_by_id" ON "capture_sessions"
+  AS PERMISSIVE FOR SELECT
+  USING (id::text = current_setting('app.capture_session_id', true));

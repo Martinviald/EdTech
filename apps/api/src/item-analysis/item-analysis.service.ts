@@ -15,14 +15,11 @@ import {
   sectionAttachments,
   studentEnrollments,
   students,
-  subjectClasses,
   subjects,
   taxonomyNodes,
-  teacherAssignments,
   withOrgContext,
 } from '@soe/db';
 import {
-  RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   TRUE_FALSE_KEYS,
   TRUE_FALSE_LABELS,
@@ -35,7 +32,6 @@ import {
   parseSelectedKeys,
   mergeAnswerCounts,
   trueFalseKeyOf,
-  userHasAnyRole,
   type AlternativeDistribution,
   type ScoreCategoryDistribution,
   type RawAnswerCount,
@@ -55,7 +51,6 @@ import {
   type QuestionAnalysisResponse,
   type QuestionSection,
   type QuestionTaxonomyTag,
-  type UserRole,
   type ItemType,
   extractItemStem,
 } from '@soe/types';

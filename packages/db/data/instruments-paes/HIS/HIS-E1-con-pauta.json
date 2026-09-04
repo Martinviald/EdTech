@@ -1,0 +1,2096 @@
+{
+ "instrument": {
+  "name": "PAES HIS — Ensayo 1 (Tanda 1) · IV° Medio 2026",
+  "subject": "Historia y Ciencias Sociales",
+  "subjectCode": "HIST",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "HIS",
+   "tanda": "Tanda 1",
+   "mencion": null,
+   "appliedOn": "2026-03-25",
+   "basadoEn": "Selección DEMRE ADM REG 2025 + Complemento DEPTO HIS"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba completa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "En la actualidad, a pesar de los esfuerzos que se han realizado para contar con garantías de igualdad y justicia, siguen existiendo problemas para que las sociedades alcancen una democracia plena. En este sentido, ¿cuál de las siguientes situaciones es un obstáculo para la consolidación de una democracia?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La ocurrencia de desacuerdos políticos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La diversidad de fuentes de información.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La existencia de un sistema unipartidista.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La diferencia de opinión entre generaciones.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "En Chile cuando se evade el pago de impuestos se infringe la normativa tributaria y, al mismo tiempo, implica el incumplimiento de un deber ciudadano. ¿Qué impacto sociopolítico tiene esta situación?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Debilita la injerencia del Poder Legislativo en materia fiscal.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Disminuye la capacidad del Estado para realizar inversiones.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Aumenta los casos de corrupción en la administración pública.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Afecta la transparencia en la difusión de la información pública.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "El sistema democrático chileno contempla la realización de consultas ciudadanas, que es un mecanismo que permite a la ciudadanía opinar en distintas etapas del desarrollo de una política pública. Respecto de este mecanismo y considerando la normativa vigente en Chile, ¿de qué forma contribuye a fortalecer la democracia?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Permitiendo a la ciudadanía orientar la toma de decisiones que realiza el Estado.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Permitiendo que la ciudadanía fiscalice el desempeño de los funcionarios estatales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Permitiendo que la ciudadanía defina las diversas atribuciones de las autoridades.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Permitiendo que la ciudadanía apruebe leyes que aseguren la satisfacción de sus demandas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "La Asamblea General de las Naciones Unidas reconoce la soberanía como el derecho inalienable de los Estados a disponer de sus recursos naturales y a definir su modelo de desarrollo. No obstante, en un mundo globalizado, este derecho suele colisionar con el ordenamiento jurídico internacional que regula los intercambios comerciales y la inversión extranjera. ¿En cuál de las siguientes situaciones se ejemplifica una tensión entre la soberanía económica de un Estado y el derecho internacional actual?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En la decisión de un Gobierno de aumentar el salario mínimo por sobre el promedio regional.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En la implementación de una reforma tributaria que grave el consumo de bienes de lujo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En la nacionalización de una industria estratégica que afecta contratos de inversión con empresas extranjeras.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En la creación de planes estatales de asistencia social para la población en situación de pobreza.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "Durante las últimas décadas, en Chile se han puesto en evidencia diversas formas de corrupción en las instituciones de la administración del Estado. Al respecto, ¿cuál ha sido una iniciativa orientada a combatir la corrupción política en Chile?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El aumento de las atribuciones del Poder Ejecutivo para sancionar este tipo de situaciones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El establecimiento de leyes para garantizar el acceso ciudadano a la información pública.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La rotación permanente de las funciones de los empleados públicos para asegurar la probidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La destitución de las autoridades del gobierno mediante plebiscito para erradicar el tráfico de influencias.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente fragmento del capítulo III de la Constitución Política de la República de Chile: «Son inconstitucionales los partidos, movimientos u otras formas de organización cuyos objetivos, actos o conductas no respeten los principios básicos del régimen democrático y constitucional […] como asimismo aquellos que hagan uso de la violencia, la propugnen o inciten a ella como método de acción política». Ley 18.825 de 1989. Modifica la Constitución Política de la República de Chile. 15 de junio de 1989. ¿Por qué es importante esta disposición constitucional para la protección de la democracia?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/06.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque restringe la aparición de agrupaciones totalitarias.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Porque impide el desarrollo de alteraciones del orden público.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque resguarda la seguridad al interior de las colectividades.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque evita la influencia de corrientes ideológicas extranjeras.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "En un régimen democrático, resulta fundamental la separación de los poderes del Estado para garantizar un adecuado equilibrio del poder político. Al respecto, ¿en cuál de las siguientes situaciones se evidencia esta separación de los poderes del Estado?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El Presidente de la República anuló la aplicación de un fallo ratificado por la Corte Suprema.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El Congreso Nacional aprobó una ley que impide la reforma tributaria planteada en el programa de gobierno.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El Presidente de la República impidió a la Fiscalía Nacional realizar una investigación sobre corrupción política.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Los jueces de la Corte Suprema aprobaron la derogación de una ley que modifica el mecanismo de nombramiento de los funcionarios judiciales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "Lee el artículo 7° de la Constitución Política de Chile: «Los órganos del Estado actúan válidamente previa investidura regular de sus integrantes, dentro de su competencia y en la forma que prescriba la ley. Ninguna magistratura, ninguna persona ni grupo de personas pueden atribuirse, ni aun a pretexto de circunstancias extraordinarias, otra autoridad o derechos que los que expresamente se les hayan conferido en virtud de la Constitución o las leyes. Todo acto en contravención a este artículo es nulo y originará las responsabilidades y sanciones que la ley señale». Decreto 100 de 2005. Fija el texto refundido, coordinado y sistematizado de la Constitución Política de la República de Chile. 22 de septiembre de 2005. Considerando el artículo citado, ¿de qué forma se protege la institucionalidad democrática del país?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/08.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Centralizando la fiscalización pública en un poder estatal.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Ordenando la imparcialidad en los funcionarios de gobierno.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Reduciendo la cantidad de funcionarios del aparato burocrático.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Limitando las atribuciones de quienes trabajan en el servicio público.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "A partir de la segunda mitad del siglo XX, el modelo de desarrollo basado en el crecimiento industrial ilimitado comenzó a ser cuestionado debido al agotamiento de recursos y el impacto del cambio climático. Bajo la actual perspectiva del desarrollo sustentable, ¿cuál de las siguientes premisas redefine la relación entre el progreso económico y la naturaleza?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La subordinación de la preservación biológica a las urgencias de la demanda energética global.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La consideración de los recursos naturales como bienes inagotables gracias a la innovación técnica.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La incorporación de la responsabilidad hacia las generaciones futuras en la planificación productiva.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La prohibición total de cualquier actividad extractiva en territorios con presencia de comunidades indígenas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "En el marco del Estado de derecho, se reconoce la libertad de asociación como el derecho que tiene la ciudadanía de participar en organizaciones que expresen la diversidad de intereses sociales e identidades culturales, tales como los partidos políticos o las asociaciones gremiales. Considerando la institucionalidad democrática chilena, ¿qué acción ejercida por la ciudadanía respecto de la libertad de asociación contraviene el Estado de derecho?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La participación activa en Organizaciones No Gubernamentales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La organización de asambleas vinculantes por grupos intermedios.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La adhesión a grupos políticos opositores a la ideología del gobierno.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La creación de grupos civiles armados dedicados a cuidar el orden público.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto que se refiere a la fragmentación de la sociedad: «El concepto de fragmentación, por su parte, es utilizado en nuestro idioma cuando se quiere indicar que, en cierto grupo social, o en la sociedad misma, existe, por una determinada situación, una división, un fraccionamiento en diversas partes. Un ejemplo de este tipo de fraccionamiento lo podemos apreciar cuando, a nivel político, existe una polarización extrema entre dos sectores o propuestas políticas. De un lado estarán los que defienden una postura si se quiere oficial, de aquella que gobierna, y por el otro, aquellos que la combaten o critican sin existir voluntad alguna de buscar puntos de acuerdo para beneficio de la comunidad». Puig, M. (2021). La fragmentación social, ¿una amenaza para la seguridad del Estado? Considerando esta definición, ¿por qué la fragmentación social constituye un problema para el funcionamiento de una sociedad democrática?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/11.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque impide la diversidad de ideas en el debate público.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque concentra la discusión en asuntos de orden partidista.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque atenta contra la capacidad de diálogo de la ciudadanía.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque restringe el acceso a la información de carácter neutral.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "Uno de los rasgos fundamentales de las sociedades democráticas es la realización de elecciones periódicas. ¿Por qué la participación de la ciudadanía en estas instancias fortalece la democracia?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque asegura la eficiencia en el aparato burocrático.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque garantiza la diversidad ideológica en la población.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque otorga representatividad a las autoridades electas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque extiende las atribuciones de los poderes del Estado.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "El sistema democrático chileno contempla, entre otros mecanismos, el control del ejercicio de la función pública por parte de la ciudadanía. Al respecto, ¿qué situación evidencia un mecanismo de control de las autoridades por parte de la ciudadanía?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El Concejo Municipal aprobó de manera unánime el congelamiento de la dieta de los concejales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El Juzgado de Policía Local solicitó el desafuero de un senador acusado de apropiación indebida de dinero.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La Cámara de Diputadas y Diputados votó una acusación constitucional contra el Presidente de la República.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La Organización No Gubernamental solicitó datos sobre la gestión del Ministerio de Salud al Consejo para la Transparencia.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "El reconocimiento del acceso a internet como un derecho humano plantea el desafío de reducir la \"brecha digital\" en territorios de difícil acceso geográfico. Considerando que en Chile el servicio es provisto mayoritariamente por empresas particulares, ¿qué estrategia técnica y administrativa debe adoptar el Estado para garantizar que este derecho sea efectivo en las zonas más aisladas del país?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Fomentar la instalación de infraestructura mediante incentivos o subsidios para la operatividad del servicio en zonas rurales.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Nacionalizar las empresas de telecomunicaciones para convertirlas en servicios públicos de administración directa.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Priorizar el gasto fiscal en la creación de contenidos educativos digitales antes que en la cobertura de red.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Restringir la oferta de conectividad a los grandes centros urbanos para asegurar la calidad del servicio.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "En un trabajo de clases, un grupo de estudiantes debe elaborar varios afiches relativos a los atributos de la democracia. Para el caso de la libertad de asociación, ¿cuál es un título adecuado para la elaboración de su afiche?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "“La sindicalización nos hace más fuertes”.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "“Si todos votamos fortalecemos la nación”.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "“Tendrás un juicio justo sin importar tu origen”.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "“La censura no podrá callar la voz del pueblo”. HISTORIA: MUNDO, AMÉRICA Y CHILE",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Examina el siguiente texto que corresponde a un discurso de Simón Bolívar, a principios del siglo XIX: «México, Venezuela, Nueva Granada, Quito, Chile, Buenos Aires y el Perú presentan heroicos espectáculos de triunfos […]. Persuadamos a los pueblos que el cielo nos ha dado la libertad para la conservación de la virtud y la obtención de la Patria de los justos. Que esta mitad del globo pertenece a quien Dios hizo nacer en su suelo, y no a los tránsfugas trasatlánticos». Bolívar, S. (1815). Discurso pronunciado el 23 de enero de 1815, en Bogotá, con motivo de la incorporación de Cundinamarca a las Provincias Unidas. Como se citó en Pereira, G. (2015). Simón Bolivar, escritos anticolonialistas. Considerando el contexto histórico, ¿qué idea republicana es defendida en el fragmento de este discurso?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/16.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La defensa de un orden constitucional.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El respeto del derecho al autogobierno.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La igualdad de la ciudadanía ante la ley.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El bien común como finalidad del Estado.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "Durante el siglo XIX en América Latina comenzaron a aplicarse los principios liberales, tales como la igualdad. Sin embargo, muchos grupos quedaron al margen de la aplicación de este principio en cuanto al ejercicio de sus derechos. Considerando el contexto sociopolítico de América Latina en la primera mitad del siglo XIX, ¿en cuál de las siguientes opciones se evidencia esta contradicción?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En la abolición de la esclavitud.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En la creación de escuelas públicas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En la formación de agrupaciones políticas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el establecimiento del sufragio censitario.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "A comienzos del siglo XIX, el surgimiento de los Estados nacionales en América Latina fue un proceso complejo, que implicó el desarrollo de diversos conflictos entre los nuevos países. En este contexto histórico, ¿cuál fue uno de los factores que explica la ocurrencia de estos conflictos?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La expansión del proyecto americanista a través del continente.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La lucha por la imposición de proyectos ideológicos excluyentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La disconformidad de algunos Estados con la delimitación territorial.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La inexistencia de acuerdos sobre la organización militar de los Estados.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "Durante el siglo XIX, el Estado de Chile necesitaba asegurar que su dominio sobre el territorio fuera real y no solo en el papel. Para lograr que el país se mantuviera unido y bajo una sola autoridad desde el norte hasta el extremo sur, ¿qué estrategia principal se utilizó?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La entrega de total libertad a las provincias para que se gobernaran solas sin ayuda de Santiago.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La toma de posesión y el poblamiento de zonas estratégicas para asegurar la soberanía.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La firma de tratados de paz permanentes que prohibían el uso de la fuerza en todo el país.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La prohibición de que ciudadanos extranjeros se instalaran en las zonas del sur del territorio.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "El traslado de la capital desde Santiago hacia la ciudad de Punta Arenas para controlar el estrecho.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "Tras la Independencia, Chile organizó su economía bajo los principios del liberalismo, buscando productos que tuvieran alta demanda en los mercados mundiales. Además de la agricultura, ¿qué actividad fue fundamental para el crecimiento económico y la obtención de recursos para el Estado en la primera mitad del siglo XIX?",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La creación de grandes fábricas textiles estatales en la zona central.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El abandono definitivo de la minería para proteger los suelos agrícolas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La prohibición de importar herramientas mineras desde el extranjero.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La estatización de todas las fundiciones de minerales en el norte chico.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "El descubrimiento y explotación de nuevos yacimientos de plata y cobre.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "Hacia 1836, el Estado chileno vio con desconfianza la creación de la Confederación Perú-Boliviana, considerándola una amenaza para su estabilidad y su economía. Tras la victoria definitiva de Chile en este conflicto, ¿cuál fue uno de los principales beneficios estratégicos que obtuvo el país en el ámbito internacional?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La firma de una alianza militar permanente con todas las naciones sudamericanas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La eliminación de la competencia comercial de Lima frente al puerto de Valparaíso.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La cesión gratuita de territorios mineros por parte de Bolivia en la zona de Antofagasta.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El fin de la influencia económica de Inglaterra en las costas del Océano Pacífico.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "La rendición incondicional y la anexión de las provincias del sur del Perú a Chile.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "A mediados del siglo XIX, el Estado chileno realizó grandes esfuerzos por mejorar la educación, creando escuelas y la Universidad de Chile. ¿Qué cambio social importante se produjo gracias a que más personas pudieron estudiar y titularse en estas nuevas instituciones?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El crecimiento de un grupo de profesionales que comenzó a trabajar en los organismos del Estado.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La llegada masiva de obreros industriales a los cargos de ministros y directores de escuelas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El fin de la pobreza en el campo debido a que todos los campesinos fueron a la universidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La decisión de la élite de cerrar todas las escuelas para que nadie más pudiera aprender a leer.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "Durante la segunda mitad del siglo XIX, el Estado chileno avanzó militarmente sobre el territorio de la Araucanía para incorporarlo al país. Para lograr que esta zona se integrara definitivamente y comenzara a producir riqueza (especialmente trigo), ¿qué estrategia de ocupación utilizó el Estado en esas tierras?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La prohibición de que cualquier civil chileno o extranjero viviera en la zona.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La entrega de parcelas y facilidades a colonos para que fundaran granjas y pueblos.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El abandono de los fuertes militares para que la selva volviera a crecer.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La creación de un país independiente dirigido exclusivamente por los jefes mapuches.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "La idea de progreso indefinido fue uno de los conceptos culturales del siglo XIX que estuvo presente en la construcción del ideario político de la elite chilena. Durante la primera mitad del siglo XIX, ¿cuál fue una de las manifestaciones de este concepto en el desarrollo político de la república en Chile?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La relevancia dada a la incorporación del país a los organismos internacionales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El protagonismo asignado a los sectores medios en la dirección de los asuntos públicos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El impulso otorgado a las actividades productivas mediante distintos cuerpos legislativos.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La promoción de una estrategia de expansión de los límites territoriales hacia países vecinos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "Durante la primera mitad del siglo XIX, la economía chilena se insertó en los mercados internacionales a partir de la exportación de materias primas, actividad que se transformó en uno de los principales motores del crecimiento económico nacional. En este escenario, ¿cuál fue una de las consecuencias del crecimiento económico derivado del aumento de las exportaciones?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El afianzamiento de la industria mecanizada.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La internacionalización de la actividad forestal.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El aumento de la inversión pública en la minería.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La instalación de sociedades comerciales inglesas.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto que alude a las exportaciones de Chile a comienzos del siglo XIX: «Los minerales –plata y cobre– constituyeron los principales productos de exportación de la joven república, en la década de 1820, el cobre constituía más del 50 % de los totales exportados. La demanda de los nuevos mercados –Inglaterra, Estados Unidos y las Indias Inglesas (Calcuta)– habían provocado un alza en los precios del cobre en barra y un aumento en la producción». Nazer, R. (1994). José Tomás Urmeneta. Un empresario del siglo XIX. Considerando lo señalado en la cita y el contexto de la época aludida, ¿cuál fue uno de los factores que explica la demanda del mercado internacional por estos productos?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/26.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La exportación de materias primas a las colonias por parte de los imperios europeos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La gran acumulación de metales preciosos por parte de las potencias mundiales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los procesos industriales provocados por el desarrollo científico- tecnológico.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El monopolio comercial de las potencias mundiales con los países latinoamericanos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "A mediados del siglo XIX la agricultura chilena vivió una importante revitalización económica. ¿Cuál fue una de las situaciones del contexto histórico del periodo que favoreció dicha revitalización?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La demanda de productos alimenticios en los mercados de California y Australia.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La mayor conectividad entre las regiones exportadoras y los mercados asiáticos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La aplicación de un plan de reforma agraria basado en el modelo latinoamericano.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La llegada masiva de trabajadores extranjeros que colonizaron las provincias de la Zona Central.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto, referido a una ceremonia pública realizada a fines del siglo XIX en Chile: “La inauguración de la estatua a O’Higgins, en mayo de 1872, fue ocasión para que se organizara un acto público masivo, que contó con la presencia de estudiantes. La ceremonia partió desde la Plaza de Armas, donde se reunieron todas las escuelas primarias públicas y privadas, los colegios particulares, los alumnos del seminario, el Instituto Nacional, las escuelas de artesanos, los establecimientos de educación superior, además de delegaciones de los gremios, incluyendo a los médicos. El desfile [fue] encabezado por el presidente de la República”. (Rojas J. (2004). Moral y prácticas cívicas en los niños chilenos, 1880-1950). A partir del texto, ¿cuál era uno de los objetivos principales de incluir a estudiantes de todos los niveles en este tipo de ceremonias públicas?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/28.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Demostrar que en el siglo XIX ya no existían diferencias de dinero entre los estudiantes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Obligar a los colegios privados a seguir las mismas órdenes religiosas que el seminario.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Reemplazar las clases de matemáticas y ciencias por entrenamientos militares diarios.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Fomentar en los niños y jóvenes un sentimiento de pertenencia y respeto hacia la patria.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Hacia la segunda mitad del siglo XIX, las potencias del Atlántico experimentaron un proceso de expansión económica gracias a un importante desarrollo industrial. Por su parte, Chile fue incapaz de alcanzar ese nivel de desarrollo. Al respecto, ¿cuál es un elemento de continuidad histórica que permite explicar este retraso de la economía chilena?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La predominancia de la propiedad minera estatal.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La mantención del monopolio comercial con Europa.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La permanencia de una estructura financiera pública.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La persistencia de una matriz productiva extractivista.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "A lo largo del siglo XIX, Chile experimentó un importante crecimiento económico como consecuencia de su progresiva inserción en la economía internacional y un conjunto de medidas que operaron como factores internos que favorecieron este crecimiento. En este sentido, ¿cuál fue una de las medidas que favoreció la inserción de la economía chilena en los mercados internacionales durante el siglo XIX?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La implementación de una política de industrialización.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La puesta en marcha de un proceso de reforma agraria.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La inversión en distintas infraestructuras de transportes.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La estatización de las instituciones del sector financiero.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "La gran cantidad de recursos que recibió el Estado chileno a través de los impuestos a la exportación de salitre, entre fines del siglo XIX y comienzos del XX, permitió financiar importantes transformaciones en el país. ¿Cuál fue una de las principales consecuencias de esta riqueza en la infraestructura nacional?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La construcción de una red de caminos pavimentados que conectó todo el territorio austral.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El cierre de los puertos del norte para proteger la agricultura de la zona central.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La expansión de la red ferroviaria y la construcción de grandes obras públicas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El abandono total de la educación pública para invertir solo en armamento militar.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "A continuación se presenta un texto sobre los cultivos agrícolas en la provincia de Santiago durante el siglo XIX: «Pertenecientes estos en su mayor parte a propietarios acaudalados y entusiastas por el progreso de la agricultura, han comenzado ya a ser labrados con la multitud de máquinas agrícolas inventadas en Europa y Estados Unidos para reemplazar la fuerza animal por la mecánica, multiplicando los productos en gran escala y disminuyendo en la misma proporción los costos del laboreo». Aracena, F. (1884). La industria del cobre en la provincia de Atacama y Coquimbo y los grandes depósitos carboníferos de Lota y Coronel en la provincia de Concepción. Considerando el contexto histórico del siglo XIX, ¿cuál era una característica de la economía chilena que es correcto inferir a partir del texto?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/32.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La especialización en la producción de alimentos procesados.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La decadencia de la actividad ganadera en el sistema productivo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La capacidad interna para realizar innovaciones tecnológicas productivas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La influencia del mundo industrializado en la organización de la producción.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "Desde finales del siglo XIX y comienzos del XX la sociedad chilena experimentó diversas transformaciones provocadas por la incipiente industrialización, lo que trajo como consecuencia una profundización de las desigualdades sociales. En este contexto, ¿cuál fue una de las respuestas dadas para enfrentar esta situación?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La oligarquía financió un sistema de seguridad social.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La Iglesia Católica diseñó un conjunto de leyes sociales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El Estado garantizó el acceso universal a la vivienda social.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El proletariado fortaleció su capacidad de organización social.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "Lee la siguiente caracterización de la sociedad chilena de principios del siglo XX: «La migración y la urbanización vinculada con la particular forma de desarrollo económico de Chile, combinada con la continua desigualdad en la distribución de la riqueza, incrementaron los niveles de pobreza urbana y dislocación social que contrastaron dramáticamente con las nuevas mansiones citadinas de las ricas élites del salitre». Hutchison, E. (2006). Labores propias de su sexo. Género, políticas y trabajo en Chile urbano 1900-1930. Considerando el contexto histórico de las dos primeras décadas del siglo XX, ¿cuál fue una consecuencia generada por la situación descrita en el texto?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/34.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El comienzo de un proceso de sindicalización del campesinado.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La intensificación de las protestas lideradas por los grupos obreros.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La incorporación de miembros de la clase trabajadora en el gobierno.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El declive de los partidos políticos vinculados con los sectores populares.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto acerca de las condiciones de vida en el norte salitrero: «La gran masa de mineros del salitre tenía que satisfacer sus apetitos en las pulperías, almacenes pertenecientes a las compañías salitreras que solían vender productos de mala calidad a precios excesivos. Aislados en los campamentos y pagados con fichas, los mineros se veían obligados a tratar con ellos. Sin embargo, a pesar del trabajo peligroso y las condiciones de vida por lo general miserables, los hombres seguían llegando por miles al norte. Por muy sórdida que fuera la vida en las salitreras, era menos letal que vivir en los conventillos». Collier, S. y Sater, W. (1998). Historia de Chile 1808-1994. A finales del siglo XIX y principios del siglo XX se manifestó en Chile el fenómeno de la Cuestión Social. En este sentido, y considerando lo expresado en la cita, ¿cuál fue uno de los rasgos de la Cuestión Social?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/35.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tuvo un impacto que perjudicó a la economía nacional.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Correspondía a un fenómeno de carácter multidimensional.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Generó una rápida respuesta de las autoridades por su magnitud.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Fue una problemática cuya manifestación era acotada localmente.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto: “Mirando la llanura desde las cumbres, está expuesto a engañarse el ojo más experto: desaparecen los detalles, los contornos se suavizan, los objetos se confunden; el arroyo puro y transparente y la charca cenagosa [pantanosa] y putrefacta brillan con la misma nitidez de plata bruñida […]. Algo muy parecido acontece en la política”. (Valdés, J. (1910). Sinceridad, Chile íntimo en 1910. Imprenta Universitaria). Hacia 1910, mientras el Estado celebraba los 100 años de la República, surgieron escritos como el de Joaquín Edwards Bello o Tancredo Pinochet que, al igual que la cita anterior, criticaban la realidad nacional. De acuerdo con el texto y el contexto de la época, ¿qué fenómeno histórico se intenta visibilizar con esta crítica?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La necesidad de aumentar los impuestos a las exportaciones de salitre para modernizar el ejército.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El fuerte contraste entre el optimismo de las celebraciones oficiales y las precarias condiciones de vida del pueblo.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La superioridad moral de la clase política para resolver los problemas de vivienda en las zonas rurales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El éxito del sistema parlamentario para integrar a los trabajadores a los beneficios del progreso económico.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "“Algunos cités y pasajes tenían casas de una sola habitación, por lo que eran muy parecidos, si no inferiores, a los departamentos en los conventillos de dos habitaciones. En varias ocasiones se demolieron los cités ‘insalubres’. Sin embargo, por lo general un cité o un pasaje eran considerados como ‘un paso adelante’, en relación al conventillo”. (DeShazo, P. (2007). Trabajadores urbanos y sindicatos en Chile). A partir de la lectura del texto y considerando el contexto de la época, ¿por qué el cité era valorado positivamente en comparación con el conventillo tradicional?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque representaba una mejora en las condiciones de higiene y privacidad para las familias obreras.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Porque los cités eran construidos por el Estado para ser entregados gratuitamente a los trabajadores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque permitía a los pobladores ser dueños definitivos del terreno sin pagar un arriendo mensual.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque los cités contaban con tecnología industrial avanzada que no existía en el resto de la ciudad.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Porque estaban ubicados exclusivamente en los barrios de la élite para integrar a las distintas clases.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "La crisis de las democracias liberales durante el primer tercio del siglo XX, permitió el ascenso de totalitarismos como el fascismo en Italia y el nazismo en Alemania. Estos dos regímenes comparten semejanzas, pero también particularidades que los diferencian. A partir de esto, ¿cuál es uno de los elementos en los que difieren estos dos regímenes totalitarios?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el adoctrinamiento social de las masas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el desarrollo de una política expansionista.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En la aplicación del exterminio masivo de personas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En el establecimiento de un sistema de partido único.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "La crisis económica de 1929 afectó a las diversas economías del mundo. ¿Cuál fue uno de los mecanismos que se promovió en diversos países occidentales para superar la crisis económica?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Se establecieron bloques comerciales para liberalizar los mercados.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Se establecieron límites a la producción interna de bienes de consumo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Se fortaleció la intervención del Estado en diversas áreas de la economía.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Se promovieron privatizaciones de empresas estratégicas para generar empleos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "La crisis económica de 1930 provocó el colapso de la industria salitrera en el norte de Chile, dejando a miles de personas sin su fuente de sustento en las oficinas del desierto. ¿Cuál fue una consecuencia social inmediata de este proceso de desmantelamiento de las salitreras?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El aumento de los salarios para los pocos trabajadores que se quedaron en el norte",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La migración masiva de obreros y sus familias hacia las ciudades de la zona central.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La prohibición por parte del Estado de que los mineros abandonaran las oficinas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La creación de nuevas ciudades modernas en pleno desierto de Atacama.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "Tras la Primera Guerra Mundial, Europa vivió una profunda inestabilidad. ¿Qué factor de tipo ideológico y social permitió que sectores de la burguesía y las clases medias apoyaran el ascenso de regímenes totalitarios como el fascismo o el nazismo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La confianza absoluta de los ciudadanos en que la Sociedad de las Naciones evitaría toda guerra.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La intención de las monarquías europeas de ceder todo su poder a los sindicatos de obreros.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El deseo de las poblaciones de volver al sistema de trueque para eliminar el uso del dinero.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El temor a la expansión de las revoluciones comunistas tras el triunfo de la Unión Soviética.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto referido al fenómeno político del fascismo: Para algunos especialistas, el fenómeno político acaecido en la primera mitad del siglo XX puede ser considerado como una cultura, «dado que su proyecto se inscribía en las prácticas sociales que aspiraban a transformar el imaginario colectivo, modificar los estilos de vida, suprimir toda división entre vida privada y vida pública». Traverso, E. (2005). Interpretar el fascismo. Notas sobre George L. Mosse, Zeev Sternhell y Emilio Gentile. Considerando lo expresado en la cita anterior, ¿cuál sería uno de los objetivos centrales del fascismo?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/42.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Construir un nuevo tipo de sociedad.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Establecer una democracia protegida.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Eliminar todo tipo de propiedad privada.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Promover la igualdad de los grupos sociales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto: “Finalizada la Segunda Guerra Mundial, el mundo comenzó a transitar hacia una nueva etapa. En un discurso que luego sería histórico, Winston Churchill caracterizó ese nuevo periodo de la historia humana señalando que ‘desde Stettin, en el Báltico, a Trieste, en el Adriático, ha caído sobre el continente un telón de hierro’”. (Churchill, W. (1946). Discurso. https://n9.cl/1rnfv) De acuerdo con el texto y el contexto de la posguerra, ¿cuál fue la principal consecuencia geopolítica de la existencia de este “telón de hierro” en Europa?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La división del continente en dos áreas de influencia: una capitalista y otra comunista.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "El desmantelamiento de todas las fronteras nacionales para crear una sola nación europea.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La prohibición de que Estados Unidos y la Unión Soviética tuvieran embajadas en Europa.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La entrega de todo el control militar de la región a los países que perdieron la guerra.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "Finalizada la Segunda Guerra Mundial, la mayoría de los países participantes del conflicto comprendieron la necesidad de establecer principios que resguardaran la dignidad humana, lo que les llevó a suscribir en 1948 la Declaración Universal de los Derechos Humanos. En este contexto, ¿cuál de las siguientes situaciones representó un ejemplo de vulneración de la dignidad humana?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La manipulación ideológica de la población.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La existencia de los campos de concentración.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La implementación del servicio militar obligatorio.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La crisis derivada del proceso de descolonización.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "A partir de 1945 se inició un proceso de reconfiguración del orden mundial, que marcó el devenir de las relaciones internacionales durante la segunda mitad del siglo XX. En este contexto, ¿cuál fue una de las transformaciones geopolíticas que dieron origen a este nuevo orden internacional?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El surgimiento de los imperios europeos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El aislamiento de los países subdesarrollados.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La culminación del proceso de descolonización.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La división en bloques ideológicos antagónicos.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "A partir de 1945, finalizada la Segunda Guerra Mundial, se generaron profundos cambios en las relaciones internacionales, expresados en el establecimiento de instancias destinadas a evitar la repetición de este tipo de conflictos. Un factor que manifiesta explícita e intencionadamente ese propósito fue",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "el aumento de la influencia global de la Unión Soviética, con lo cual se buscó compensar a dicho Estado por las numerosas bajas sufridas en la guerra.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "la desaparición de Alemania como Estado independiente y su transformación en zonas de ocupación administradas por los aliados triunfantes.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "el logro de la paridad nuclear entre las principales potencias, con lo cual se eliminó la superioridad manifiesta de una parte sobre otra.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "la creación de la OTAN, concebida como una alianza militar entre Estados europeos socialistas y capitalistas.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "la conformación de la Organización de las Naciones Unidas, creada con el propósito de ser un espacio de diálogo y colaboración entre los Estados.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "En abril de 1955 se realizó en Indonesia la Conferencia de Bandung, donde participó casi una treintena de Estados de África y Asia, recientemente independizados. Allí se reunieron para discutir sobre el neocolonialismo, la cooperación económica y el intervencionismo de las grandes potencias en los asuntos internacionales. ¿Con qué proceso histórico se vincula esta conferencia?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Con el término del orden internacional bipolar impuesto por Estados Unidos junto a la Unión Soviética.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Con la reestructuración del sistema geopolítico internacional establecido desde mediados de ese siglo.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Con el establecimiento de una nueva organización supranacional que dominó el comercio internacional.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Con la clausura de las instancias de diálogo político promovidas por la Organización de las Naciones Unidas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente relato del escritor Pedro Lemebel en el que describe su infancia en una población callampa a mediados del siglo XX: «Y tal vez alguien nos dijo que existía el Zanjón y para no quedarnos a la intemperie llegamos a esas playas inmundas donde los niños corrían junto a los perros persiguiendo guarenes. Y la cosa fue tan simple, tan rápida que por unos pocos pesos nos vendieron una muralla, ni siquiera un metro de terreno, solo era un muro de adobes que mi abuela compró en ese lugar». Lemebel, P. (2015). Zanjón de la Aguada. Considerando este contexto histórico, ¿cuál fue uno de los factores que originó este tipo de asentamientos?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/48.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La implementación de un subsidio para acceder a viviendas baratas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El ocaso del mercado irregular que impidió habitar entornos adecuados.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La demanda de vivienda superaba la oferta de habitaciones disponibles.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El exceso de población produjo el abandono de diversos centros urbanos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "La aparición de las poblaciones callampas a mediados del siglo XX en Chile generó un conjunto de repercusiones políticas, sociales y territoriales. ¿De qué manera enfrentó el Estado esta situación?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Fortaleciendo la empleabilidad en las áreas rurales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Favoreciendo la inversión privada en seguridad social.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Creando programas para la construcción de viviendas.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Estableciendo normas para la migración campo-ciudad.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "Los treinta años posteriores al fin de la Segunda Guerra Mundial se caracterizaron por un notorio y sostenido auge económico en el mundo occidental, particularmente en Europa. Al decir del historiador británico Tony Judt, “La extraordinaria aceleración del crecimiento económico fue acompañada por los inicios de una era de prosperidad sin precedentes”. (Judt, T. (2006). Postguerra. Taurus). Considerando el contexto de bonanza económica descrito por el autor, ¿cuál fue una de las principales transformaciones sociales que experimentó la población de los países desarrollados durante este periodo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El retorno a una economía de subsistencia basada en el intercambio de productos agrícolas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La disminución drástica de la esperanza de vida debido a la falta de inversión en salud pública.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La prohibición del acceso a bienes de consumo tecnológico para las familias de clase media.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El surgimiento de una sociedad de consumo de masas facilitado por el aumento de los salarios reales.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "Durante la segunda mitad del siglo XX, hasta el quiebre democrático de 1973, la sociedad chilena vivió un proceso de intensas reformas y proyectos excluyentes que buscaban transformar las estructuras del país. En este contexto, ¿qué característica marcó la relación entre los distintos sectores políticos hacia finales de la década de 1960 y principios de la de 1970?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La creación de una alianza única y permanente entre todos los partidos para eliminar las elecciones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El aumento de la polarización ideológica y la dificultad para lograr acuerdos transversales.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La decisión de la sociedad civil de abandonar la vida pública para dedicarse solo a actividades privadas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La prohibición total de formar sindicatos o federaciones estudiantiles en las grandes ciudades.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "A partir del Golpe de Estado de 1973, los jerarcas del régimen controlaron el Ejecutivo, a la vez que asumieron las funciones del Legislativo, suspendiendo el funcionamiento del Congreso Nacional. También establecieron conexiones y presionaron a los tribunales de justicia para evitar el desarrollo de juicios en contra de sus acciones. Respecto de esta situación, ¿cuál es una evidencia de la supresión del Estado de derecho durante la Dictadura Militar?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La pérdida de independencia entre los poderes públicos.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La suspensión de las actividades de la administración pública.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La participación de civiles en la gestión de los asuntos públicos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La inexistencia de un marco legal de protección de las personas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto sobre la administración del Estado durante los primeros años de la Dictadura Militar: «La reducción del empleo público en 1974 y 1975 reforzó el efecto salarial, ya que más de la tercera parte de los empleados públicos perdió su empleo en 1974. Solo una parte de esta declinación era imputable a la privatización de las empresas estatales. La declinación se debió en su mayor parte a las medidas tomadas para mejorar la eficiencia de las empresas públicas restantes y para eliminar lo que se consideraba empleo redundante en el gobierno general». Bardon, A. et. al. (1985). Una década de cambios económicos. La experiencia chilena 1973-1983. Considerando que la medida descrita se enmarca en la aplicación de las reformas implementadas en Chile durante la década de 1970, ¿cuál fue un objetivo económico de la medida descrita en el texto?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/53.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La inversión en capital humano.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La disminución del déficit fiscal.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La estabilización de la productividad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La desregulación del mercado laboral.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "Desde la década de 1980, Chile consolidó un modelo económico de libre mercado orientado hacia el exterior. A pesar del crecimiento sostenido del Producto Interno Bruto (PIB) durante las décadas siguientes, ¿qué característica estructural de la economía chilena se ha mantenido como un desafío hasta el presente?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La prohibición constitucional de exportar materias primas a mercados asiáticos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La estatización de la totalidad de las empresas de servicios básicos y telecomunicaciones.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La fuerte dependencia de la exportación de recursos naturales con escaso valor agregado.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La desconexión total del país con los tratados de libre comercio a nivel internacional.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "Durante la Dictadura Militar (1973-1990) se implementó el modelo neoliberal mediante un conjunto de acciones administrativas y legales, que determinaron desde entonces la realidad económica y social de Chile. Al respecto, ¿cuál fue una de las implicancias que tuvo la implementación de este modelo en el periodo mencionado?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La reestructuración de las relaciones laborales.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La transformación del rol del Estado con mayor gasto social.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El deterioro de la infraestructura ligada al comercio internacional.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El incremento del control social respecto de las empresas productivas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 56,
+     "type": "multiple_choice",
+     "stem": "Existen diversas interpretaciones historiográficas sobre el Golpe de Estado de 1973 en Chile. Una de ellas señala lo siguiente: «Pero el 11 de septiembre de 1973, se hallaba claro (estimo), que la crisis había alcanzado su clímax; que los civiles eran incapaces de imponer o consensuar una salida pacífica para aquella; que, de contrario, ambos bandos estaban dispuestos a zanjar por la fuerza el diferendo; que, alcanzado este punto, aplicarían su criterio y solución los verdaderos poseedores de la fuerza, siempre que actuaran unidos; y que si se dividieran, la crisis sería resuelta mediante la guerra civil… larga o corta más o menos sangrienta, pero guerra civil. O ésta, pues, o el golpe». Vial, G. (2009). Chile: Cinco Siglos de Historia. De acuerdo con esta interpretación, ¿cuál fue una de las razones que gatilló un Golpe de Estado en el periodo aludido?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/56.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La dificultad para mantener la gobernabilidad del país.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La ayuda financiera internacional a los grupos opositores.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La ausencia de los partidos políticos en el debate público.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La discrepancia política al interior de las Fuerzas Armadas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 57,
+     "type": "multiple_choice",
+     "stem": "Durante la Dictadura Militar en Chile, el Estado implementó una política de represión que ha sido calificada por diversos organismos internacionales como sistemática. ¿Qué elemento de la época permite confirmar que estas violaciones a los Derechos Humanos no fueron hechos aislados, sino parte de una estructura organizada?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La creación de centros clandestinos de detención y tortura distribuidos en todo el territorio nacional.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La entrega voluntaria de las funciones del Poder Ejecutivo a las juntas de vecinos de las zonas rurales.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El financiamiento de los partidos políticos de oposición por parte del Ministerio del Interior.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La total libertad de prensa que permitió a los medios de comunicación denunciar los crímenes en tiempo real. SISTEMA ECONÓMICO",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "La fijación de precios a través de la interacción entre oferta y demanda es el principal mecanismo de regulación del funcionamiento en una economía de libre mercado, generando el denominado mercado perfecto. Considerando lo anterior, ¿cuál es una situación que altera el perfecto funcionamiento del mercado?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La disminución de las inversiones privadas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El desarrollo sostenido de un proceso inflacionario.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El aumento de la producción de bienes y servicios suntuarios.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La concentración de la demanda en bienes de primera necesidad.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 59,
+     "type": "multiple_choice",
+     "stem": "En una reunión de la junta directiva, el gerente comercial de una tienda, comunica que la empresa ha decidido expandir su negocio a dos ciudades ubicadas en diferentes regiones del país. En esta situación, ¿cuál de las siguientes proposiciones del gerente vulnera las condiciones de libre mercado?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "“Iniciaremos una fuerte campaña publicitaria para captar a los consumidores que prefieren otros productos”.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "“Estudiaremos las preferencias de los consumidores para ser la empresa más competitiva con nuestros productos”.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "“Nos aseguraremos de controlar la oferta para ser los únicos distribuidores de los productos que vendemos en estas zonas”.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "“Realizaremos un estudio de las ventajas comparativas para ofrecer los productos más adecuados a los nuevos mercados”.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 60,
+     "type": "multiple_choice",
+     "stem": "El precio de los combustibles ha experimentado un progresivo aumento durante el primer semestre del año 2022 en el mercado internacional. En el ámbito nacional, este fenómeno ha despertado la preocupación de todos los agentes económicos. ¿Por qué este fenómeno preocupa a los agentes económicos locales?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque cambia el destino de los flujos de distribución de bienes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque aumenta el volumen de la oferta de productos importados.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque disminuye la demanda de productos nacionales en el exterior.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Porque impulsa un aumento generalizado de los costos de producción.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 61,
+     "type": "multiple_choice",
+     "stem": "En Chile durante la primera década del siglo XXI el 90 % del mercado farmacéutico se concentraba en tres cadenas de farmacias. ¿Por qué esta situación se considera un ejemplo de mercado imperfecto?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Porque restringe la venta de bienes sustitutos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Porque afecta la diversidad de bienes disponibles.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Porque permite a los oferentes manipular el precio.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Porque limita la demanda de bienes complementarios.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 62,
+     "type": "multiple_choice",
+     "stem": "Durante el periodo 2020-2022 se produjo un significativo deterioro de los flujos comerciales a escala internacional. Esta situación afectó la disponibilidad de automóviles nuevos en Chile, lo que produjo un aumento en el precio de los vehículos motorizados antiguos y nuevos. Considerando las formas en que funciona una economía de libre mercado, ¿qué factor puede generar que los precios de los automóviles bajen en Chile?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La reducción de la oferta de automóviles.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La contracción de la demanda de automóviles.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El recorte en la oferta disponible de bienes sustitutos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El descenso de la producción de bienes complementarios.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 63,
+     "type": "multiple_choice",
+     "stem": "En una economía de libre mercado, el consumo de bienes y servicios no depende únicamente de los deseos de las personas, sino también de factores objetivos que limitan o facilitan el acceso a los productos. De acuerdo con la teoría económica, ¿cuál de los siguientes factores representa una limitante real para la capacidad de consumo de una familia?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La cantidad de publicidad que las empresas emiten a través de las redes sociales.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La opinión subjetiva de los amigos y familiares sobre la utilidad de un servicio.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La ubicación geográfica de las fábricas de materias primas en otros continentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La relación existente entre el nivel de ingresos del consumidor y el precio de los bienes.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 64,
+     "type": "multiple_choice",
+     "stem": "Lee el siguiente texto de difusión educativa del Ministerio de Energía de Chile: «Tenemos la radiación solar más alta del mundo, fuertes vientos de norte a sur para desarrollar energía eólica, un tremendo potencial de energía marina en nuestras costas, gran capacidad para desarrollar biogás y un recurso geotérmico a lo largo de nuestra cordillera». Ministerio de Energía (s.f.). ¿Qué son las energías renovables? Considerando la información proporcionada, ¿cómo beneficia a la sociedad chilena el uso de las energías propuestas en el texto?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-his-e1-2026/item_figure/64.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Permite mejorar la utilización de los combustibles fósiles.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Favorece el acceso masivo de la población a los bienes tecnológicos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Promueve una mayor responsabilidad en el cuidado medioambiental.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Transfiere a las empresas el impacto ecológico de la producción de bienes.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 65,
+     "type": "multiple_choice",
+     "stem": "La conformación de un monopolio es una forma de alterar el funcionamiento del libre mercado. Al respecto, ¿qué perjuicio genera la existencia de un monopolio en este tipo de economía?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Contrae el crecimiento del consumo en el largo plazo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Disminuye la cantidad de bienes disponibles en el mercado.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Desalienta la participación de nuevas empresas competidoras.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Aumenta la inseguridad de contar con el bien o servicio prestado.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "HIS-E1-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 65,
+  "warnings": [],
+  "needsHumanReview": false,
+  "itemsConClave": 65
+ }
+}

@@ -18,16 +18,12 @@ import {
   skillResults,
   studentEnrollments,
   students,
-  subjectClasses,
   taxonomyNodes,
-  teacherAssignments,
   withOrgContext,
 } from '@soe/db';
 import {
   CAPABILITY_UNAVAILABLE_CODE,
-  RESULTS_VIEWER_ROLES,
   capabilityUnavailableMessage,
-  userHasAnyRole,
   type AssessmentResultModel,
   type AssessmentResultsListResponse,
   type CalculateAssessmentResultsRequestDto,
@@ -40,7 +36,6 @@ import {
   type SkillResultModel,
   type SkillResultsListResponse,
   type StudentResultDetail,
-  type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';

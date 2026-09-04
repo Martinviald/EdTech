@@ -1,0 +1,220 @@
+{
+  "$ref": "#/definitions/layout-spec",
+  "definitions": {
+    "layout-spec": {
+      "type": "object",
+      "properties": {
+        "specVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "instrumentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "pageCount": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "paper": {
+          "type": "string",
+          "enum": [
+            "letter",
+            "a4",
+            "legal"
+          ]
+        },
+        "fiducials": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "corner_squares"
+            },
+            "sizeRatio": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "marginRatio": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "sizeRatio",
+            "marginRatio"
+          ],
+          "additionalProperties": false
+        },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "qr",
+                "rut_bubbles",
+                "none"
+              ]
+            },
+            "region": {
+              "type": "object",
+              "properties": {
+                "topLeft": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                },
+                "bottomRight": {
+                  "$ref": "#/definitions/layout-spec/properties/identity/properties/region/properties/topLeft"
+                }
+              },
+              "required": [
+                "topLeft",
+                "bottomRight"
+              ],
+              "additionalProperties": false
+            },
+            "bubbles": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "center": {
+                        "$ref": "#/definitions/layout-spec/properties/identity/properties/region/properties/topLeft"
+                      },
+                      "radius": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "group": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "center",
+                      "radius"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "mode",
+            "region"
+          ],
+          "additionalProperties": false
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fieldId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "bubble_group",
+                  "digit_grid",
+                  "crop_region"
+                ]
+              },
+              "printedNumber": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pageIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "selectMode": {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "multiple"
+                ]
+              },
+              "bubbles": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/layout-spec/properties/identity/properties/bubbles/anyOf/0/items"
+                }
+              },
+              "region": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/layout-spec/properties/identity/properties/region"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "fieldId",
+              "kind",
+              "printedNumber",
+              "pageIndex",
+              "selectMode",
+              "bubbles",
+              "region"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "specVersion",
+        "instrumentId",
+        "pageCount",
+        "paper",
+        "fiducials",
+        "identity",
+        "fields"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

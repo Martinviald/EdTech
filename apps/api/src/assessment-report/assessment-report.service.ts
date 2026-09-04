@@ -15,21 +15,17 @@ import {
   skillResults,
   studentEnrollments,
   students,
-  subjectClasses,
   subjects,
   taxonomyNodes,
-  teacherAssignments,
   withOrgContext,
 } from '@soe/db';
 import {
-  RESULTS_VIEWER_ROLES,
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
   capabilitiesFor,
   classifyByBands,
   mergeAnswerCounts,
   percentageToPerformanceLevel,
-  userHasAnyRole,
   type AnswerCount,
   type AssessmentReportCourseRow,
   type AssessmentReportItemRow,
@@ -46,7 +42,6 @@ import {
   type PerformanceBandView,
   type PerformanceDistributionBucket,
   type PerformanceLevel,
-  type UserRole,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {

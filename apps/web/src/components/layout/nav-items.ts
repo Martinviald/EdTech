@@ -11,6 +11,7 @@ import {
   Lightbulb,
   MessageSquarePlus,
   PenSquare,
+  ScanLine,
   School,
   Settings,
   ShieldCheck,
@@ -27,6 +28,7 @@ import {
   REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
   ESTABLISHMENT_REPORT_ROLES,
+  SHEET_MANAGEMENT_ROLES,
   TELEMETRY_VIEWER_ROLES,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
@@ -199,6 +201,15 @@ export const NAV_GROUPS: readonly NavGroup[] = [
           'homeroom_teacher',
         ],
         children: toNavChildren(BANCO_TABS),
+      },
+      {
+        // E22 · Lector de marcas: diseñar/imprimir hojas de respuesta propias,
+        // escanear las pruebas rendidas y revisar las lecturas.
+        href: ROUTES.hojas,
+        label: 'Hojas de respuesta',
+        icon: ScanLine,
+        status: 'live',
+        roles: SHEET_MANAGEMENT_ROLES,
       },
       {
         // Editor de Materiales: biblioteca de documentos por bloques (guías,

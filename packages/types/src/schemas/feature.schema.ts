@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { orgBrandingSchema } from './organization.schema';
+import { omrCalibrationSchema } from './omr-layout.schema';
 
 // ── F2 S5 — H18.1 Gating de tier pago ────────────────────────────────────────
 // Las features pagas de F2 se gobiernan por `organizations.config.allowedFeatures`.
@@ -39,6 +40,10 @@ export const orgConfigSchema = z
     aiBudgetUsd: z.number().nonnegative().nullable().optional(),
     /** Branding del colegio (Editor de Materiales). Ver orgBrandingSchema. */
     branding: orgBrandingSchema.optional(),
+    /** Calibración OMR por organización (CD-12). Ver omrCalibrationSchema. */
+    omrCalibration: omrCalibrationSchema.optional(),
+    /** Retención de imágenes escaneadas en días (CD-14). undefined = default 180. */
+    omrRetentionDays: z.number().int().positive().optional(),
   })
   .passthrough();
 export type OrgConfig = z.infer<typeof orgConfigSchema>;

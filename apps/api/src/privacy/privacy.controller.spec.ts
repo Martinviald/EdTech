@@ -19,13 +19,15 @@ import { PrivacyModule } from './privacy.module';
 // test-setup.ts ya cargó el .env del root → process.env está disponible
 const hkdfAsync = promisify(hkdf);
 
+const COOKIE_SALT = 'authjs.session-token';
+
 async function signToken(payload: Record<string, unknown>): Promise<string> {
   const secret = process.env.AUTH_SECRET ?? 'local-development-secret-replace-in-production';
   const derived = await hkdfAsync(
     'sha256',
     secret,
-    '',
-    'Auth.js Generated Encryption Key ()',
+    COOKIE_SALT,
+    `Auth.js Generated Encryption Key (${COOKIE_SALT})`,
     64,
   );
   const key = new Uint8Array(derived);
@@ -66,6 +68,10 @@ describe('PrivacyController (e2e)', () => {
     await app.init();
 
     db = app.get<Database>(DATABASE_CONNECTION);
+
+    await db
+      .delete(students)
+      .where(and(eq(students.orgId, DEMO_ORG_ID), eq(students.rut, '99999999-9')));
 
     // Alumno exclusivo para este suite — no afecta los del seed
     const [student] = await db

@@ -297,6 +297,39 @@ export const documentVisibilityEnum = pgEnum('document_visibility', [
   'platform',
 ]);
 
+// ── Lector de marcas (E22) — ver docs/diseno-lector-de-marcas/03-contratos.md §3.5 ──
+export const sheetScanBatchStatusEnum = pgEnum('sheet_scan_batch_status', [
+  'pending',
+  'processing',
+  'needs_review',
+  'confirmed',
+  'failed',
+  'rejected',
+]);
+
+export const sheetScanStateEnum = pgEnum('sheet_scan_state', [
+  'read',
+  'quality_rejected',
+  'identity_unresolved',
+  'superseded',
+]);
+
+export const markStateEnum = pgEnum('mark_state', [
+  'marked',
+  'blank',
+  'multiple',
+  'ambiguous',
+]);
+
+// Tipo de decisión del revisor sobre una marca dudosa. `annulled` = el alumno
+// respondió pero la respuesta se anula por regla de la prueba (doble marca);
+// NO es lo mismo que `blank`, aunque ambas puntúen 0.
+export const markReviewDecisionEnum = pgEnum('mark_review_decision', [
+  'option',
+  'blank',
+  'annulled',
+]);
+
 // ── Feedback in-app (widget de comentarios) ──
 export const feedbackTypeEnum = pgEnum('feedback_type', [
   'bug', // "Algo no funciona"
@@ -310,4 +343,13 @@ export const feedbackStatusEnum = pgEnum('feedback_status', [
   'planned',
   'done',
   'discarded',
+]);
+
+// ── Captura remota con teléfono (E22-R) — ver docs/e22-lector-contracts.md ──
+export const captureSessionStatusEnum = pgEnum('capture_session_status', [
+  'pending',
+  'active',
+  'closed',
+  'revoked',
+  'expired',
 ]);

@@ -17,8 +17,6 @@ import {
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  RESULTS_VIEWER_ROLES,
-  userHasAnyRole,
   type DataGranularity,
   type OfficialReportVariant,
   type UserRole,

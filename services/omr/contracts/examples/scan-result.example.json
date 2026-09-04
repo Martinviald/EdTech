@@ -1,0 +1,51 @@
+{
+  "pages": [
+    {
+      "pageIndex": 0,
+      "imageSha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+      "quality": {
+        "ok": true,
+        "sharpness": 0.71,
+        "glare": 0.04,
+        "fiducialsFound": 4,
+        "rejectReason": null
+      },
+      "identity": {
+        "mode": "qr",
+        "raw": "academos:v1:9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33:a3f9c1e70b4d2856:0:2",
+        "confidence": 1.0
+      },
+      "marks": [
+        {
+          "fieldId": "f_001",
+          "printedNumber": "1",
+          "state": "marked",
+          "value": "C",
+          "fill": 0.82,
+          "threshold": 0.46,
+          "margin": 0.78,
+          "cropJpegBase64": null
+        }
+      ],
+      "pageThumbJpegBase64": null
+    },
+    {
+      "pageIndex": 1,
+      "imageSha256": "5ffe533b830f08a0326348a9160afafc8ada44db88fc999905d34c1b64f7af0e",
+      "quality": {
+        "ok": false,
+        "sharpness": 0.12,
+        "glare": 0.02,
+        "fiducialsFound": 4,
+        "rejectReason": "blurry"
+      },
+      "identity": {
+        "mode": "qr",
+        "raw": null,
+        "confidence": 0.0
+      },
+      "marks": [],
+      "pageThumbJpegBase64": "/9j/4AAQSkZJRgABAQAAAQ=="
+    }
+  ]
+}

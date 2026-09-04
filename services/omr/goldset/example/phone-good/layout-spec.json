@@ -1,0 +1,362 @@
+{
+  "specVersion": 1,
+  "instrumentId": "9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33",
+  "pageCount": 1,
+  "paper": "letter",
+  "fiducials": {
+    "kind": "corner_squares",
+    "sizeRatio": 0.02,
+    "marginRatio": 0.03
+  },
+  "identity": {
+    "mode": "qr",
+    "region": {
+      "topLeft": {
+        "x": 0.74,
+        "y": 0.01
+      },
+      "bottomRight": {
+        "x": 0.99,
+        "y": 0.15
+      }
+    }
+  },
+  "fields": [
+    {
+      "fieldId": "f_001",
+      "kind": "bubble_group",
+      "printedNumber": "1",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.22
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.22
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.22
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.22
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_002",
+      "kind": "bubble_group",
+      "printedNumber": "2",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.29000000000000004
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.29000000000000004
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.29000000000000004
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.29000000000000004
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_003",
+      "kind": "bubble_group",
+      "printedNumber": "3",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.36
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.36
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.36
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.36
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_004",
+      "kind": "bubble_group",
+      "printedNumber": "4",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.43000000000000005
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.43000000000000005
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.43000000000000005
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.43000000000000005
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_005",
+      "kind": "bubble_group",
+      "printedNumber": "5",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.5
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.5
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.5
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.5
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_006",
+      "kind": "bubble_group",
+      "printedNumber": "6",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.5700000000000001
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.5700000000000001
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.5700000000000001
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.5700000000000001
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_007",
+      "kind": "bubble_group",
+      "printedNumber": "7",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.64
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.64
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.64
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.64
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    },
+    {
+      "fieldId": "f_008",
+      "kind": "bubble_group",
+      "printedNumber": "8",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.14,
+            "y": 0.7100000000000001
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.2,
+            "y": 0.7100000000000001
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.26,
+            "y": 0.7100000000000001
+          },
+          "radius": 0.013
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.32,
+            "y": 0.7100000000000001
+          },
+          "radius": 0.013
+        }
+      ],
+      "region": null
+    }
+  ]
+}

@@ -49,6 +49,12 @@ const STATIC_TITLES: Record<string, PageTitle> = {
     parent: { href: ROUTES.bancoItems, label: 'Banco de contenido' },
   },
 
+  [ROUTES.hojas]: { title: 'Hojas de respuesta' },
+  [ROUTES.hojasEscanear]: {
+    title: 'Escanear pruebas',
+    parent: { href: ROUTES.hojas, label: 'Hojas de respuesta' },
+  },
+
   [ROUTES.importar]: { title: 'Importar' },
   [ROUTES.importarAlumnos]: { title: 'Importar alumnos', parent: importarParent() },
   [ROUTES.importarInstrumento]: { title: 'Importar pauta DIA', parent: importarParent() },
@@ -116,6 +122,27 @@ function adminHubParent() {
  */
 const DYNAMIC_TITLES: readonly { pattern: RegExp; resolve: (m: RegExpMatchArray) => PageTitle }[] =
   [
+    {
+      pattern: /^\/hojas\/[^/]+\/disenar$/,
+      resolve: () => ({
+        title: 'Diseñar hoja',
+        parent: { href: ROUTES.hojas, label: 'Hojas de respuesta' },
+      }),
+    },
+    {
+      pattern: /^\/hojas\/[^/]+\/imprimir$/,
+      resolve: () => ({
+        title: 'Tirada de impresión',
+        parent: { href: ROUTES.hojas, label: 'Hojas de respuesta' },
+      }),
+    },
+    {
+      pattern: /^\/hojas\/lotes\/[^/]+\/revisar$/,
+      resolve: () => ({
+        title: 'Revisar lote',
+        parent: { href: ROUTES.hojasEscanear, label: 'Escanear pruebas' },
+      }),
+    },
     {
       pattern: /^\/dashboard\/my-classes\/[^/]+$/,
       resolve: () => ({ title: 'Curso', parent: { href: ROUTES.myClasses, label: 'Mis cursos' } }),

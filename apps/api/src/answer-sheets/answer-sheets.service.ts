@@ -54,8 +54,10 @@ import { getTemplate, listTemplates } from './lib/templates';
 import type { ParserResult } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
 import {
+  annulmentEvidence,
   buildPrintedLabelIndex,
   resolveRowAnswers,
+  resolveAnnulledAnswers,
   toScoringAnswer,
 } from './lib/composite-answers';
 
@@ -183,12 +185,14 @@ export class AnswerSheetsService {
     let matchedRows = 0;
     let unmatchedRows = 0;
     let errorRows = 0;
+    let bodyMatchedRows = 0;
 
     const rows: AnswerSheetRowPreview[] = entry.rows.map((row) => {
       const m = matches.get(row.rowNumber);
       const matched = !!m?.matched;
       if (matched) matchedRows++;
       else unmatchedRows++;
+      if (matched && m?.matchMethod === 'body') bodyMatchedRows++;
 
       // Cuenta POSICIONES respondidas, no columnas del archivo: un ítem
       // compuesto que el escaneo sub-numera es una sola pregunta del instrumento.
@@ -244,6 +248,12 @@ export class AnswerSheetsService {
       },
       warnings: [
         ...entry.warnings,
+        ...(bodyMatchedRows > 0
+          ? [
+              `${bodyMatchedRows} alumno(s) se identificaron por el cuerpo del RUT porque el ` +
+                'dígito verificador no coincidía (típico de un DV = K capturado como 0 por el escáner). Revísalos antes de confirmar.',
+            ]
+          : []),
         ...(missingItemPositions.length > 0
           ? [`Faltan respuestas para ${missingItemPositions.length} pregunta(s) del instrumento`]
           : []),
@@ -347,9 +357,13 @@ export class AnswerSheetsService {
       // varias sub-columnas para una sola pregunta (`7B1`…`7B4`). Se resuelve
       // contra los ítems del instrumento antes de corregir.
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
+      const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
 
       for (const item of instrumentItems) {
         const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
+        const evidence = annulmentEvidence(annulled, item.position);
+        const answerValue =
+          evidence === null ? { answer: rawAnswer } : { answer: rawAnswer, ...evidence };
         const result = getScoringStrategy(item.type).score({
           item: {
             id: item.id,
@@ -369,7 +383,7 @@ export class AnswerSheetsService {
             assessmentId: '', // se completa una vez creado el assessment
             studentId,
             itemId: item.id,
-            value: { answer: rawAnswer },
+            value: answerValue,
             isCorrect: null,
             rawScore: null,
             maxScore: item.maxScore.toFixed(2),
@@ -387,7 +401,7 @@ export class AnswerSheetsService {
           assessmentId: '', // se completa una vez creado el assessment
           studentId,
           itemId: item.id,
-          value: { answer: rawAnswer },
+          value: answerValue,
           isCorrect: result.isCorrect,
           rawScore: rawScore.toFixed(2),
           maxScore: item.maxScore.toFixed(2),
@@ -469,6 +483,7 @@ export class AnswerSheetsService {
       }));
 
       // Batch insert con upsert (assessmentId, studentId, itemId).
+      const keepsExistingScore = sql`excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL`;
       await tx
         .insert(responses)
         .values(responsesWithAssessment)
@@ -479,9 +494,9 @@ export class AnswerSheetsService {
             isCorrect: sql`excluded.is_correct`,
             rawScore: sql`excluded.raw_score`,
             maxScore: sql`excluded.max_score`,
-            finalScore: sql`excluded.final_score`,
-            scoredBy: sql`excluded.scored_by`,
-            scoredAt: sql`excluded.scored_at`,
+            finalScore: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.finalScore} ELSE excluded.final_score END`,
+            scoredBy: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredBy} ELSE excluded.scored_by END`,
+            scoredAt: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredAt} ELSE excluded.scored_at END`,
             updatedAt: now,
           },
         });

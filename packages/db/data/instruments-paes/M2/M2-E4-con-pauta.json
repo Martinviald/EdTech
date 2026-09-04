@@ -1,0 +1,1887 @@
+{
+ "instrument": {
+  "name": "PAES M2 — Ensayo 4 (Tanda 4) · IV° Medio 2026",
+  "subject": "Competencia Matemática 2",
+  "subjectCode": "MATH",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "M2",
+   "tanda": "Tanda 4",
+   "mencion": null,
+   "appliedOn": "2026-08-05",
+   "basadoEn": "DEMRE FORMA 191 ADM 2025"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba completa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "Considera la siguiente recta numérica: ¿Cuál de las siguientes desigualdades es verdadera? B",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/01.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,75 0,25 A B",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0 0,25 A B",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0,25 0, 6 A B",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "0, 6 1, 6 A",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "Jaime tiene una colección de 2500 estampillas. Al inicio de cada mes le regala 1 de la cantidad de estampillas que tiene, en partes iguales, a sus 5 hermanos 5 de manera que no tenga que cortar en trozos ninguna estampilla. ¿Con cuántas estampillas se quedará Jaime cuando ya no pueda continuar con esta repartición?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "256",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1280",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "320",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "4 1010 1 101 8600",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "Si a , b 4 5 y c , ¿cuál de las siguientes relaciones es 2 2 300 verdadera?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "a b c",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "a b c",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "c a b",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "a c b",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "c a b",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "Considera los números enteros p y q distintos de cero. 1 1 ¿Cuál de las siguientes condiciones asegura que sea un número p q racional?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que p q sea múltiplo de p q .",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que p q sea un cuadrado perfecto.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Que p sea igual a q.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Que p y q sean cuadrados perfectos. 2 p",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "Si p 2 3, q 3 2 y s , ¿cuál de las siguientes relaciones es q verdadera?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "p q s",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "p s s q",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "q p s p q",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "s 2 3 1 1 1",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "p q s 1 1",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "Considera las ecuaciones x 8 2 , 2r y log5 w . 4 2 ¿En cuál de las siguientes rectas se representa mejor la suma x r w?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: notación no transcrita del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "Considera que la esperanza de vida (EV) en los países, en años, se puede relacionar con su producto interno bruto (PIB), en dólares, con la siguiente relación: EV a log PIB b , en la que a y b son constantes positivas. Si la esperanza de vida del país A es x años y su PIB es 10 veces el del país B, ¿cuál de las siguientes expresiones representa la esperanza de vida , en años, en el país B según el modelo?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/07.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "10 x",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "x a",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "x a",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "x 1a",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "Si p q y p q , ¿cuál de las siguientes expresiones es igual a p2 q2 p q ? p q p3 q3",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/08.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "p q p3 q3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "p q p q",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "p q p q",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "p2 q2",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "q p 18 6 5",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de los siguientes valores es igual a ? 15 3",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "15 3 12 5",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "12",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "15",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "12",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "2 15 log 5",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "Si p log 2 , ¿cuál de las siguientes expresiones es igual a ? log 20",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2p 1 p",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "p 1 1",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "0 1",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "p2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "¿Cuál es el valor de log 25 log 2 ?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "log 50",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "log 25 2 1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "log 27 2",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "log 7",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "En un laboratorio se estudia el crecimiento de una colonia de 1024 bacterias que duplica su cantidad cada una hora. En el gráfico, el eje X representa el tiempo transcurrido en horas, mientras el eje Y corresponde al logaritmo en base b de la cantidad de bacterias en ese instante. Y 25 5 40 X ¿Cuál es el valor de b que se utilizó para construir el gráfico?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/12.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "4",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "10",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "Una persona hizo un depósito a plazo renovable a 30 días, con una tasa de interés del 0,3 % . Esta persona renovó el depósito por otros 30 días y la tasa de interés aumentó en un 100 % en este periodo, comparado con el periodo anterior. Si su depósito inicial era de $k , ¿cuál de las siguientes expresiones representa la ganancia, en pesos, generada en estos dos periodos?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/13.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "k 1,009",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "k 1,009 k",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "k 1,003 1,006",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "k 1,003 1,006 k",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "Si un estanque tiene agua hasta el 25 % de su capacidad, ¿en qué porcentaje se debe aumentar la cantidad de agua que hay en el estanque para completar su capacidad?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En un 66, 6 %",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En un 75 %",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En un 300 %",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En un 400 %",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes expresiones es igual a 25 x 2 y2 ?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5x y2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "25x y x y",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "25 x y x y",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "5x y 5x y",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Si a y b son constantes, ¿cuál debe ser el valor de b para que se cumpla la igualdad x 2 5x 6 x a2 b? 1",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4 13",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6 13",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "Considera que el peso corregido depende del peso ideal y y del peso real x de una persona, de la siguiente forma: Peso corregido y x y 0,25 ¿Cuál de las siguientes expresiones permite calcular el peso corregido de cualquier persona cuyo peso real excede en un 40 % su peso ideal?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/17.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,70 x",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,90 y",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1,10 y",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "1,30 x",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "Una persona recorre en su vehículo una distancia de 700 km en 10 horas y media. El recorrido está dividido en tres tramos. El primero y el último son de asfalto y tienen una longitud de 250 km y 245 km , respectivamente, y km cada uno de estos los recorre con una rapidez media de 90 . h ¿Cuál de las siguientes expresiones representa la rapidez media del vehículo en km el segundo tramo, en ? h 90 495 205",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "250 245 205",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "495 10 ,5 90 700 495 90",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "205 10,5 700 495 90",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "205",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "Un laboratorio farmacéutico testea un medicamento sobre dos grupos de bacterias. El rango de temperatura de proliferación, en grados Celsius, de un tipo de bacterias es 1, 10 , mientras que el otro tipo de bacterias prolifera en el rango 3, 9 , también en grados Celsius. El laboratorista debe establecer la temperatura del horno de cultivo bacteriológico de manera tal que ambos tipos de bacterias proliferen. No obstante, debe evitar que un tercer tipo de bacterias prolifere, cuyo rango de temperatura de proliferación es 8, 8 , en grados Celsius. ¿Cuál de las siguientes expresiones representa el rango de temperaturas, en grados Celsius, a la que el laboratorista debe fijar el horno bacteriológico de cultivo, para cumplir con las condiciones deseadas?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/19.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8, 10",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1, 8",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "8, 9",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "8, 10",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "Considera los números reales p y b , tal que p es mayor o igual que 4 y 1 3 menor que 3 , y b es mayor que y menor que . 2 2 ¿Cuál de los siguientes conjuntos representa únicamente a todos los valores posibles de p b ? 9",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/20.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2, 2 9",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2, 2 9",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6, 2 9",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "6, 2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "Si x debe ser un número real positivo, ¿cuál es el conjunto solución de la inecuación x 3 7?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": ",4",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0, 4",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "0, 10",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1, 2, 3",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "4,",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "En el siguiente gráfico se representa una función f de la forma f x 2x c, cuyo dominio es el conjunto de los números reales. ¿Cuál de las siguientes expresiones representa a q en términos de a ?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/22.png",
+     "points": 0,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2a 2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2a 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2a 5",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2a 6",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "Considera dos mezclas de agua y endulzante. La primera mezcla está formada por un 90 % de agua y el resto endulzante, mientras que otra está formada por un 2 % de endulzante y el resto agua. Una persona quiere generar una tercera mezcla combinando las dos anteriores, tal que se generen 10 litros y que tenga un 7 % de endulzante y el resto agua. ¿Cuál de los siguientes sistemas de ecuaciones permite determinar la cantidad de litros A de la primera mezcla y la cantidad de litros B de la segunda mezcla que tendría la tercera mezcla?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/23.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A B 10 0,9A 0,02 B 0,07 10",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,1A 0,02B 0,07 (A B) A B 0,07 10",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0,1A 0,02 B 0,07 10 A B 10",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "0,9A 0,02 B 10 A B 0,07 (A B)",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "Considera el sistema de ecuaciones, en x e y , 2mx + 3ny = 5mn que tiene kx + 2ky = 10mn infinitas soluciones, tal que m , n y k son distintos de cero. ¿Cuántas soluciones tiene el sistema 3nx + ky = 1 ? kx + 4my = 1",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/24.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Ninguna solución",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Una solución",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Infinitas soluciones",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Dependen del valor de m y n",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "Considera las funciones f y g definidas por f x 2x 7 y gx x 4, ambas con dominio el conjunto de los números reales. En la figura adjunta se representan las gráficas de f y g . ¿Cuál es el área del triángulo que se forma entre las gráficas de f , g y el eje X , en unidades cuadradas? 15",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/25.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4 15",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2 75",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2 75",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "El nivel n , en centímetros, que alcanza el agua en un depósito, durante un tiempo t , en horas, se modela según la función n t at b. Inicialmente, el depósito contiene agua y al cabo de tres horas, el nivel que alcanza el agua es de 273 cm . Si el nivel inicial del agua es el cuádruple de lo que aumenta el nivel cada hora, ¿cuál es el nivel del agua al cabo de cinco horas?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/26.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "275 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "351 cm",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "441 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "455 cm",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "La densidad es una magnitud que mide la cantidad de masa que tiene un material por unidad de volumen. M Esta magnitud se define como , tal que es la densidad, M es la masa y V V es el volumen del material. Considera un material que tiene forma cilíndrica con altura H , radio r y masa M . 4 M Para determinar la densidad del material se utiliza el modelo . Hx 2 ¿Cuál de las siguientes medidas representa la variable x en el modelo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/27.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El área de la base del cilindro",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El radio de la base del cilindro",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El diámetro de la base del cilindro",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El perímetro de la base del cilindro",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "La presión dinámica q de un fluido está relacionada con su densidad A y su 1 rapidez V a través de la expresión q AV2 . 2 ¿Cuál de las siguientes expresiones permite calcular la rapidez de un fluido a partir de su densidad y presión dinámica? q",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A q",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2A 2q",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A 2q",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "A",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "En la figura adjunta se representa la gráfica de la función cuadrática f , cuyo dominio es el conjunto de los números reales. Y X ¿Cuál de las siguientes expresiones corresponde a f x ?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/29.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "x 52 50",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2x 2 20 x 50",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2x 2 20 x 50",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "x 52 50",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "Considera la ecuación x 2 bx 2b 0 , con b un número real. ¿Cuál de los siguientes intervalos contiene únicamente a todos los posibles valores de b que garantizan que la ecuación no tiene solución en el conjunto de los números reales?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8, 0",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": ", 8 0,",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "8, 0",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": ", 8 0,",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "El volumen de agua de un pozo, en m3 , después de t horas es V t y se modela a 2 por la función V t t v0 , con a 0. 2 ¿Cuál de las siguientes afirmaciones es siempre verdadera?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/31.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El volumen inicial es 0 m 3 .",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El volumen del agua aumenta a medida que aumenta el tiempo.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El máximo volumen de agua del pozo es v 0 m 3 . 2v 0",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El pozo queda sin agua en t . a",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "El volumen de agua del pozo es 2a v0 m3 , cuando t 2.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "La teoría del consumidor es una rama de la microeconomía que estudia la conducta de los consumidores y cómo estos se deciden por bienes y servicios en el supuesto de que compran el máximo de bienes que pueden, gastando el total de su sueldo. Considera un consumidor con un sueldo de $ I . En el gráfico adjunto se representa la recta presupuestaria del consumidor con respecto a los bienes P y Q , cuyos precios son $p y $q , respectivamente. Si el sueldo del consumidor disminuye a $M y el precio de P aumenta a $s , ¿cuál de los siguientes gráficos representa las rectas presupuestarias del consumidor con respecto a los bienes P y Q , antes y después de los cambios de precios?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo) · alternativas reconstruidas como figuras sin transcribir",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/32.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "Un aparato tiene un lente que magnifica el objeto, pero lo reproduce invertido, siendo la imagen una homotecia del objeto. El objeto en A tiene una longitud de 12 mm y su imagen homotética está en B , cuyo centro de homotecia es M . La distancia entre M y Q es 78 mm . La siguiente figura es un esquema del aparato. ¿Cuál es la razón de homotecia?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/33.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6 1",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "6 1",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "A la circunferencia de radio OA de la figura adjunta se le aplica una homotecia con centro O y razón positiva, obteniéndose una circunferencia de radio OB . Este radio mide 6 cm menos que el radio de la circunferencia anterior. ¿Cuál de las siguientes expresiones representa la razón de homotecia? OB",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/34.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "OB 6 OA",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "OA 6 OB 6",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "OB OB 6",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "AB",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "El área A , en centímetros cuadrados, de un hexágono regular de perímetro P cm se puede calcular como A P2 k . ¿Cuál es el valor de k ? 3",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/35.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "24 1",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "12 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "12 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "Al rotar el vector v x, y en un ángulo de 60 en sentido antihorario, con centro en el origen, se obtiene un nuevo vector w cuyas coordenadas están x 3 y 3 dadas por y, x . 2 2 2 2 Al rotar en 60 en sentido antihorario, con centro en el origen, el vector a 1, 0 , se obtiene el vector b . Al rotar en 60 en sentido antihorario, con centro en el origen, el vector b , se obtiene el vector c . ¿Cuáles son las coordenadas del vector c ? 1 3",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/36.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": ", 4 4",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1, 3 1 5 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": ", 2 4 1 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": ", 2 2",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "Considera un perfil de aluminio de largo L milímetros, hecho con aluminio de grosor constante T milímetros, tal que al realizarle un corte transversal se obtienen las siguientes medidas: Si se requiere conocer la cantidad de aluminio necesaria para confeccionar uno de estos perfiles, ¿cuál de las siguientes expresiones representa esta cantidad, en mm 3 ?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/37.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2T A B 4T 2 L",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "2T A B 4T 2 L",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "T L 2A B T",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2T L A B",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "En la figura adjunta se representa una escalera de 5 metros de largo que está afirmada en una pared perpendicular al suelo. 3 metros Si la base de la escalera se mueve n metros en el sentido de la flecha, ¿cuál de las siguientes expresiones representa la altura hasta donde queda apoyada la escalera en la pared?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/38.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "25 3 n 2 metros",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "25 3 n 2 metros",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "25 32 n 2 metros",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "25 32 n 2 metros",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "Considera un cuadrilátero en el que uno de los vértices es A 3, 8 . A esta figura se le aplica una traslación según el vector v 4, 3 y luego, se le aplica una rotación en 180 con centro el origen del plano cartesiano. ¿Cuáles son las coordenadas de la imagen de A , luego de las transformaciones?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "7, 5",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "5, 7",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "7, 11",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "7, 5",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "A una figura se le aplica una reflexión con respecto a la recta que contiene al punto 3, 3 y es paralela al eje Y . ¿Cuál es la imagen para cada punto x, y de esta figura?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/40.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "x 6, y",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "x 3, y",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "6 2x , y",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "x, y 6",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "x, y 3",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "Una escalera de 3 m de largo está apoyada en un muro vertical, formando con él un ángulo de 37 . Si la distancia entre el pie de la escalera y el muro es de x m , ¿cuál de las siguientes igualdades es verdadera? 3",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "cos 37 x x",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "sen 37 3 x",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "tan 37 3 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "tan 37 x",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "En un conjunto de datos, se dice que un dato es atípico cuando es menor que 3 3 Q1 R o mayor que Q 3 R , tal que Q1 es el primer cuartil de la 2 2 distribución, Q 3 es el tercer cuartil y R es el rango intercuartílico. Considera un conjunto de datos con primer cuartil 20 y tercer cuartil 40 . Si los mayores datos de la distribución son 60 , 65 , 72 y 78 , ¿cuántos de ellos son datos atípicos?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/42.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "Los siguientes diagramas de cajón representan la distribución de las edades de dos grupos de personas, cada uno compuesto por 100 personas. Grupo 1 Grupo 2 Edad en años Si se forma un nuevo grupo juntando ambos grupos, ¿cuál es la mediana, en años, de las edades del nuevo grupo?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/43.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "10",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "18",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "28",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "36",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "A un grupo de personas se les tomó una muestra de sangre para medir sus niveles de glucemia. Estos se clasificaron y registraron tal como se presenta en la siguiente tabla: Valores referenciales de mg Frecuencia porcentual glucemia acumulada dl Hipoglucemia 65 5% Normal 65 100 23 % Glucemia en 101 125 50 % ayunas alterada Hiperglucemia 125 100 % ¿Qué porcentaje de personas de este grupo no presenta hipoglucemia y no presenta hiperglucemia?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/44.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "45 %",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "55 %",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "68 %",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "73 %",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "Se define el coeficiente de variación C V de un grupo de datos como x , tal que es la desviación estándar y x es el promedio del grupo de datos. ¿Cuál es el coeficiente de variación del grupo de datos formado por los números 2, 3 y 7? 14",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4 14",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "4 14",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "4 3 14",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "12",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "Se quiere formar un comité de tres personas: un representante, un secretario y un tesorero, desde un grupo de seis mujeres y ocho hombres. ¿Cuántos grupos distintos se pueden formar si el representante debe ser mujer y el secretario debe ser un hombre?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "6 8 12",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "14 13 12",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2 6 8 12",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2 14 13 12",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "En un torneo de tenis cada jugador juega con cada uno de los otros jugadores solo una vez. Si se realizan 28 partidos en total, ¿cuántos jugadores participaron en este torneo?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "27",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "15",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "14",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "8",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "El sindicato de una empresa quiere escoger una directiva compuesta por tres cargos. Existen 8 postulantes para estos cargos, de los cuales 5 son mujeres y 3 son hombres. Si se escogiera al azar a tres personas para estos cargos, ¿cuál es la probabilidad de que la directiva elegida esté conformada solo por mujeres? 5",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/48.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "28 5",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "8 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "8 1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "60 3",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "5",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "Una persona debe programar un robot de manera que decida entre girar a la izquierda o a la derecha, de forma aleatoria. La probabilidad de que el robot gire a 1 la izquierda es . 4 Si el robot se enfrenta a n decisiones, con n 3 , ¿cuál de las siguientes expresiones permite determinar la probabilidad de que el robot gire siempre a la derecha a excepción de la última decisión en la cual gire a la izquierda? n 1 1 3",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4 4 3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "n 1 16 n 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "16 n 1 3 1",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4 4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "En una caja hay en total M bolitas azules y N bolitas blancas y en otra caja hay en total 3 bolitas azules y 5 bolitas blancas. Todas las bolitas de las cajas son del mismo tipo. Si se extrae al azar una bolita de cada caja, ¿cuál de las siguientes expresiones representa la probabilidad de que ambas sean azules? M 3 M 2",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "M N 8 M N 7 M 3 M 2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "M N 8 M N 7 M 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "M N 8 M 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "M N 8",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "El presupuesto de cierto país creció un 10 % cada año durante los últimos n años. Se puede determinar el valor de n , si: (1) se conoce el presupuesto actual. (2) se sabe que en ese periodo el presupuesto creció un 33,1 % .",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/51.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "Considera la función f , definida por f x ax 2 bx c , cuyo dominio es el conjunto de los números reales. Se pueden determinar los valores de a , b y c , si: (1) se conocen las coordenadas del vértice de la gráfica de f . (2) se sabe que f 7 f 14 15 .",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/52.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "Considera el trapecio rectángulo ABCD de la figura adjunta. D C 8 cm A B Se puede determinar el perímetro del trapecio, si se conocen las medidas de: (1) sus bases. (2) sus diagonales.",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/53.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "A un recipiente cilíndrico con agua en su interior se le hace un agujero cerca de la base. El tiempo, en segundos, que demora el agua en llegar al nivel en que está el agujero se puede determinar con la siguiente ecuación: A 2h t , b g tal que A es el área basal del recipiente, b es el área del agujero, ambos en metros cuadrados, h es la altura en metros del nivel que alcanza el agua antes de realizarse el agujero y g es la aceleración de gravedad que es equivalente a m 9,8 . s2 Considera un recipiente cilíndrico con 5 L de agua en su interior, al que se le hace un agujero circular cerca de la base. Se puede determinar el tiempo t para este recipiente, si se conoce: (1) el valor de h . (2) el diámetro del agujero, en metros.",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/54.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional 4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "En una localidad, se sabe que los de las personas que realizan 7 frecuentemente actividad física tienen una alimentación saludable. Al seleccionar a una persona al azar de esta localidad, se puede conocer la probabilidad de que realice frecuentemente actividad física y que tenga una alimentación saludable, si se conoce: (1) la probabilidad de que realice actividad física frecuentemente. (2) la probabilidad de que tenga una alimentación saludable.",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-m2-e4-2026/item_figure/55.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "M2-E4-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 55,
+  "warnings": [
+   "#6: notación matemática partida en líneas",
+   "#10: notación matemática partida en líneas",
+   "#16: notación matemática partida en líneas",
+   "#19: notación matemática partida en líneas",
+   "#20: notación matemática partida en líneas",
+   "#21: notación matemática partida en líneas",
+   "#25: notación matemática partida en líneas",
+   "#30: notación matemática partida en líneas",
+   "#32: 1 alternativas",
+   "#33: notación matemática partida en líneas",
+   "#35: notación matemática partida en líneas",
+   "#39: notación matemática partida en líneas",
+   "#45: notación matemática partida en líneas",
+   "#48: notación matemática partida en líneas",
+   "#49: notación matemática partida en líneas",
+   "#32: clave B fuera de ['A']",
+   "#32: clave B asignada sobre alternativas gráficas (1 de 4 extraídas)"
+  ],
+  "needsHumanReview": true,
+  "itemsConClave": 54
+ }
+}

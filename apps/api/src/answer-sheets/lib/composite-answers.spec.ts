@@ -1,6 +1,8 @@
 import type { ItemContent } from '@soe/types';
 import {
+  annulmentEvidence,
   buildPrintedLabelIndex,
+  resolveAnnulledAnswers,
   resolveRowAnswers,
   resolveScanLabel,
   toScoringAnswer,
@@ -31,6 +33,10 @@ const matchingContent = {
 
 function mcq(position: number, printedNumber?: string): ResolvableItem {
   return { position, printedNumber, type: 'multiple_choice', content: {} as ItemContent };
+}
+
+function matchingItemAt(position: number, printedNumber?: string): ResolvableItem {
+  return { position, printedNumber, type: 'matching', content: matchingContent };
 }
 
 describe('questionColumnToLabel', () => {
@@ -185,5 +191,68 @@ describe('toScoringAnswer', () => {
   it('en un ítem no compuesto se queda con la primera sub-respuesta útil', () => {
     const item = { type: 'multiple_choice' as const, content: {} as ItemContent };
     expect(toScoringAnswer(item, { '1': '', '2': 'C' })).toBe('C');
+  });
+});
+
+describe('resolveAnnulledAnswers + annulmentEvidence', () => {
+  it('anula la pregunta completa cuando la etiqueta es un ítem simple', () => {
+    const index = buildPrintedLabelIndex([mcq(5)]);
+
+    const annulled = resolveAnnulledAnswers(index, ['5']);
+
+    expect(annulled.wholePositions).toEqual(new Set([5]));
+    expect(annulled.subKeysByPosition.size).toBe(0);
+    expect(annulmentEvidence(annulled, 5)).toEqual({ annulled: true });
+  });
+
+  it('una sub-marca anulada NO anula el ítem compuesto entero', () => {
+    const index = buildPrintedLabelIndex([matchingItemAt(7)]);
+
+    const annulled = resolveAnnulledAnswers(index, ['7B1']);
+
+    expect(annulled.wholePositions.size).toBe(0);
+    expect(annulled.subKeysByPosition.get(7)).toEqual(new Set(['B1']));
+    expect(annulmentEvidence(annulled, 7)).toEqual({ annulledParts: ['B1'] });
+  });
+
+  it('acumula y ordena las sub-marcas anuladas de una misma pregunta', () => {
+    const index = buildPrintedLabelIndex([matchingItemAt(7)]);
+
+    const annulled = resolveAnnulledAnswers(index, ['7B3', '7B1']);
+
+    expect(annulmentEvidence(annulled, 7)).toEqual({ annulledParts: ['B1', 'B3'] });
+  });
+
+  it('un ítem sub-numerado propio (14.2) se anula como pregunta completa', () => {
+    const index = buildPrintedLabelIndex([mcq(20, '14.2')]);
+
+    const annulled = resolveAnnulledAnswers(index, ['14.2']);
+
+    expect(annulmentEvidence(annulled, 20)).toEqual({ annulled: true });
+  });
+
+  it('no inventa evidencia para posiciones sin anulación ni para etiquetas desconocidas', () => {
+    const index = buildPrintedLabelIndex([mcq(5), matchingItemAt(7)]);
+
+    const annulled = resolveAnnulledAnswers(index, ['99', '5']);
+
+    expect(annulmentEvidence(annulled, 7)).toBeNull();
+    expect(annulmentEvidence(resolveAnnulledAnswers(index, undefined), 5)).toBeNull();
+  });
+
+  it('la sub-marca anulada conserva las demás sub-respuestas del pareado', () => {
+    const index = buildPrintedLabelIndex([matchingItemAt(7)]);
+    const answers = { '7B1': null, '7B2': 'A.1', '7B3': 'A.2', '7B4': 'A.6' };
+
+    const resolved = resolveRowAnswers(index, answers);
+    const scoringAnswer = toScoringAnswer(
+      { type: 'matching', content: matchingContent },
+      resolved.byPosition.get(7),
+    );
+
+    expect(scoringAnswer).toEqual({ 'B.2': 'A.1', 'B.3': 'A.2', 'B.4': 'A.6' });
+    expect(annulmentEvidence(resolveAnnulledAnswers(index, ['7B1']), 7)).toEqual({
+      annulledParts: ['B1'],
+    });
   });
 });

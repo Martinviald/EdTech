@@ -51,6 +51,9 @@ export const ROUTES = {
   resultadosInforme: route('/resultados/informe'),
   resultadosMapaCalor: route('/resultados/mapa-calor'),
 
+  hojas: route('/hojas'),
+  hojasEscanear: route('/hojas/escanear'),
+
   importar: route('/importar'),
   importarAlumnos: route('/importar/alumnos'),
   importarInstrumento: route('/importar/instrumento'),
