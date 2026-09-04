@@ -258,6 +258,17 @@ export type BatchCountersModel = {
   sheetsScanned: number;
 };
 
+/**
+ * Avance de la SUBIDA de los archivos del lote, distinto del avance de la
+ * lectura. `expected` son los archivos que el lote declaró al crearse y `ready`
+ * los que efectivamente llegaron al storage: un lote `pending` con
+ * `ready < expected` está esperando a quien captura, no al lector.
+ */
+export type BatchSourcesModel = {
+  expected: number;
+  ready: number;
+};
+
 export type BatchStatusModel = {
   id: string;
   printRunId: string;
@@ -268,6 +279,7 @@ export type BatchStatusModel = {
   reviewPending: number;
   failureReason: string | null;
   counters: BatchCountersModel;
+  sources: BatchSourcesModel;
   createdAt: string | Date;
   updatedAt: string | Date;
 };

@@ -167,3 +167,15 @@ export function useRetryBatch(batchId: string) {
     },
   });
 }
+
+/** Dispara la lectura de un lote `pending` cuyos archivos ya están todos subidos. */
+export function useStartBatchProcessing(batchId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => apiClientPost<BatchStatusModel>(`/sheet-scan-batches/${batchId}/start`, {}),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<BatchStatusModel>(batchStatusKeys.detail(batchId), updated);
+    },
+  });
+}

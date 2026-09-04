@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq, inArray, isNull, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
 import {
   files,
   printedSheets,
@@ -22,6 +22,7 @@ import {
   type AssessCaptureIdentityModel,
   type AssessCaptureResponse,
   type BatchCountersModel,
+  type BatchSourcesModel,
   type BatchStatusModel,
   type CaptureProfile,
   type CreateScanBatchDto,
@@ -67,6 +68,11 @@ const RETRYABLE_FAILURE_MESSAGE =
 const SOURCE_UNREADABLE_FAILURE_MESSAGE =
   'El servicio de lectura de hojas respondió correctamente, pero no pudo descargar ni abrir los archivos subidos. El servicio NO está caído: revisa que los archivos del lote sigan disponibles y sean PDF o imágenes válidas. Reintentar sin corregir el archivo dará el mismo resultado.';
 
+const ORPHANED_PROCESSING_TIMEOUT_MS = 15 * 60 * 1000;
+
+const ORPHANED_PROCESSING_FAILURE_MESSAGE =
+  'El procesamiento del lote se interrumpió antes de terminar: el servicio se reinició mientras leía las hojas. Los archivos subidos se conservan, así que puedes reintentar el procesamiento sin volver a subirlos.';
+
 const UNEXPECTED_FAILURE_MESSAGE =
   'Ocurrió un error inesperado al procesar el lote. Reintenta el procesamiento; si el problema persiste, contacta a soporte.';
 
@@ -89,6 +95,7 @@ type BatchRow = {
   id: string;
   printRunId: string;
   status: SheetScanBatchStatus;
+  sourceFileIds: string[];
   captureProfile: CaptureProfile;
   pagesTotal: number | null;
   pagesRead: number;
@@ -224,13 +231,20 @@ export class SheetScanService {
     return withOrgContext(this.db, orgId, async (tx) => {
       const [row] = await this.selectBatchRows(tx, orgId, eq(sheetScanBatches.id, batchId));
       if (!row) throw new NotFoundException('Lote de escaneo no encontrado');
+      const orphanedIds = await this.failOrphanedProcessingBatches(tx, orgId, [row]);
       const counters = await this.loadCounters(
         tx,
         orgId,
         [row.id],
         new Map([[row.id, row.sheetCount]]),
       );
-      return this.toBatchModel(row, counters.get(row.id) ?? this.emptyCounters(row.sheetCount));
+      const sources = await this.loadSourceProgress(tx, [row]);
+      return this.toBatchModel(
+        row,
+        counters.get(row.id) ?? this.emptyCounters(row.sheetCount),
+        sources.get(row.id) ?? this.emptySources(row),
+        orphanedIds.has(row.id),
+      );
     });
   }
 
@@ -255,6 +269,8 @@ export class SheetScanService {
         limit: query.limit,
       });
 
+      const orphanedIds = await this.failOrphanedProcessingBatches(tx, orgId, rows);
+
       const counters =
         rows.length > 0
           ? await this.loadCounters(
@@ -264,10 +280,16 @@ export class SheetScanService {
               new Map(rows.map((r) => [r.id, r.sheetCount])),
             )
           : new Map<string, BatchCountersModel>();
+      const sources = await this.loadSourceProgress(tx, rows);
 
       return {
         data: rows.map((row) =>
-          this.toBatchModel(row, counters.get(row.id) ?? this.emptyCounters(row.sheetCount)),
+          this.toBatchModel(
+            row,
+            counters.get(row.id) ?? this.emptyCounters(row.sheetCount),
+            sources.get(row.id) ?? this.emptySources(row),
+            orphanedIds.has(row.id),
+          ),
         ),
         total: Number(countRow?.total ?? 0),
         page: query.page,
@@ -540,7 +562,8 @@ export class SheetScanService {
   ): Promise<{ rejectionReason: string | null; pagesTotal: number }> {
     let pagesTotal = 0;
     const resolver = this.identityResolvers.forMode(identityModeOf(context.spec));
-    for (const sourceFile of context.sourceFiles) {
+    for (const [sourceIndex, sourceFile] of context.sourceFiles.entries()) {
+      if (sourceIndex > 0) await this.markProcessingAlive(orgId, batchId);
       const result = await this.omrClient.read(this.buildReadRequest(context, sourceFile));
       pagesTotal += result.pages.length;
       for (const page of result.pages) {
@@ -844,6 +867,7 @@ export class SheetScanService {
         id: sheetScanBatches.id,
         printRunId: sheetScanBatches.printRunId,
         status: sheetScanBatches.status,
+        sourceFileIds: sheetScanBatches.sourceFileIds,
         captureProfile: sheetScanBatches.captureProfile,
         pagesTotal: sheetScanBatches.pagesTotal,
         pagesRead: sheetScanBatches.pagesRead,
@@ -929,6 +953,81 @@ export class SheetScanService {
     return counters;
   }
 
+  private async markProcessingAlive(orgId: string, batchId: string): Promise<void> {
+    await withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .update(sheetScanBatches)
+        .set({ updatedAt: new Date() })
+        .where(
+          and(
+            eq(sheetScanBatches.id, batchId),
+            eq(sheetScanBatches.orgId, orgId),
+            eq(sheetScanBatches.status, 'processing'),
+          ),
+        ),
+    );
+  }
+
+  private async failOrphanedProcessingBatches(
+    tx: Database,
+    orgId: string,
+    rows: BatchRow[],
+  ): Promise<Set<string>> {
+    const cutoff = new Date(Date.now() - ORPHANED_PROCESSING_TIMEOUT_MS);
+    const orphaned = rows.filter(
+      (row) => row.status === 'processing' && row.updatedAt.getTime() < cutoff.getTime(),
+    );
+    if (orphaned.length === 0) return new Set();
+
+    await tx
+      .update(sheetScanBatches)
+      .set({
+        status: 'failed',
+        failureReason: ORPHANED_PROCESSING_FAILURE_MESSAGE,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(sheetScanBatches.orgId, orgId),
+          eq(sheetScanBatches.status, 'processing'),
+          inArray(
+            sheetScanBatches.id,
+            orphaned.map((row) => row.id),
+          ),
+          lt(sheetScanBatches.updatedAt, cutoff),
+        ),
+      );
+
+    return new Set(orphaned.map((row) => row.id));
+  }
+
+  private async loadSourceProgress(
+    tx: Database,
+    rows: BatchRow[],
+  ): Promise<Map<string, BatchSourcesModel>> {
+    const progress = new Map(rows.map((row) => [row.id, this.emptySources(row)]));
+    const sourceFileIds = rows.flatMap((row) => row.sourceFileIds);
+    if (sourceFileIds.length === 0) return progress;
+
+    const readyRows = await tx
+      .select({ id: files.id })
+      .from(files)
+      .where(
+        and(inArray(files.id, sourceFileIds), eq(files.status, 'ready'), isNull(files.deletedAt)),
+      );
+    const readyIds = new Set(readyRows.map((file) => file.id));
+
+    for (const row of rows) {
+      const entry = progress.get(row.id);
+      if (entry) entry.ready = row.sourceFileIds.filter((id) => readyIds.has(id)).length;
+    }
+    return progress;
+  }
+
+  private emptySources(row: BatchRow): BatchSourcesModel {
+    return { expected: row.sourceFileIds.length, ready: 0 };
+  }
+
   private emptyCounters(sheetsExpected: number): BatchCountersModel {
     const marks = {} as Record<MarkState, number>;
     for (const state of MARK_STATES) marks[state] = 0;
@@ -937,17 +1036,23 @@ export class SheetScanService {
     return { marks, scans, sheetsExpected, sheetsScanned: 0 };
   }
 
-  private toBatchModel(row: BatchRow, counters: BatchCountersModel): BatchStatusModel {
+  private toBatchModel(
+    row: BatchRow,
+    counters: BatchCountersModel,
+    sources: BatchSourcesModel,
+    orphaned: boolean,
+  ): BatchStatusModel {
     return {
       id: row.id,
       printRunId: row.printRunId,
-      status: row.status,
+      status: orphaned ? 'failed' : row.status,
       captureProfile: row.captureProfile,
       pagesTotal: row.pagesTotal,
       pagesRead: row.pagesRead,
       reviewPending: row.reviewPending,
-      failureReason: row.failureReason,
+      failureReason: orphaned ? ORPHANED_PROCESSING_FAILURE_MESSAGE : row.failureReason,
       counters,
+      sources,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };

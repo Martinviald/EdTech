@@ -3,14 +3,20 @@
 import { useRef, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, PlayCircle, Upload } from 'lucide-react';
 import type { BatchStatusModel, ConfirmBatchResponse } from '@soe/types';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCallout, CardSkeleton, Stepper, TopProgressBar } from '@/components/shared';
-import { isMarkResolved, useReviewQueue } from '../../../hooks/use-review-queue';
+import {
+  isMarkResolved,
+  useReviewQueue,
+  useStartBatchProcessing,
+} from '../../../hooks/use-review-queue';
 import { ConfirmBatchDialog, isLikelyBlankScan, PagesReviewStep } from './ReviewQueue';
 import { MarkReviewPanel } from './MarkReviewPanel';
+import { SCAN_ROUTES } from '../../../escanear/batch-meta';
 import type { StudentOption } from './ReviewShell';
 import {
   parseReviewStep,
@@ -44,8 +50,9 @@ export function ReviewWizard({
   const searchParams = useSearchParams();
   const [isNavigating, startTransition] = useTransition();
 
-  const processing = batch.status === 'pending' || batch.status === 'processing';
-  const { data: queue, isPending: queueLoading } = useReviewQueue(batchId, !processing);
+  const stage = describeBatchStage(batch);
+  const blocked = stage !== 'listo';
+  const { data: queue, isPending: queueLoading } = useReviewQueue(batchId, !blocked);
 
   const pagesBaselineRef = useRef<number | null>(null);
   const pagesPending = queue ? queue.qualityRejected.length + queue.identityUnresolved.length : 0;
@@ -60,7 +67,7 @@ export function ReviewWizard({
   const blankSheets = queue?.qualityRejected.filter(isLikelyBlankScan).length ?? 0;
   const unreadablePages = (queue?.qualityRejected.length ?? 0) - blankSheets;
 
-  const suggestedStep: ReviewStepId = processing
+  const suggestedStep: ReviewStepId = blocked
     ? 'procesar'
     : pagesPending > 0
       ? 'paginas'
@@ -68,7 +75,7 @@ export function ReviewWizard({
         ? 'marcas'
         : 'finalizar';
   const requestedStep = parseReviewStep(searchParams.get(REVIEW_STEP_PARAM));
-  const step: ReviewStepId = processing ? 'procesar' : (requestedStep ?? suggestedStep);
+  const step: ReviewStepId = blocked ? 'procesar' : (requestedStep ?? suggestedStep);
   const stepIndex = REVIEW_STEP_INDEX[step];
 
   function goToStep(next: ReviewStepId) {
@@ -92,6 +99,7 @@ export function ReviewWizard({
           <StepProgress
             step={step}
             batch={batch}
+            stage={stage}
             pagesDone={pagesDone}
             pagesTotal={pagesTotal}
             marksDone={marksDone}
@@ -100,11 +108,11 @@ export function ReviewWizard({
         </CardContent>
       </Card>
 
-      {queueLoading && !processing ? (
+      {queueLoading && !blocked ? (
         <CardSkeleton />
       ) : (
         <>
-          {step === 'procesar' && <ProcessingStep batch={batch} />}
+          {step === 'procesar' && <BatchStageStep batchId={batchId} batch={batch} stage={stage} />}
 
           {step === 'paginas' && queue && (
             <PagesReviewStep
@@ -143,14 +151,14 @@ export function ReviewWizard({
         <Button
           variant="outline"
           onClick={() => previousStep && goToStep(previousStep)}
-          disabled={!previousStep || processing}
+          disabled={!previousStep || blocked}
         >
           <ArrowLeft className="mr-2 size-4" aria-hidden />
           Volver
         </Button>
 
         {nextStep ? (
-          <Button onClick={() => goToStep(nextStep)} disabled={processing}>
+          <Button onClick={() => goToStep(nextStep)} disabled={blocked}>
             Continuar
             <ArrowRight className="ml-2 size-4" aria-hidden />
           </Button>
@@ -173,6 +181,7 @@ export function ReviewWizard({
 function StepProgress({
   step,
   batch,
+  stage,
   pagesDone,
   pagesTotal,
   marksDone,
@@ -180,6 +189,7 @@ function StepProgress({
 }: {
   step: ReviewStepId;
   batch: BatchStatusModel;
+  stage: BatchStage;
   pagesDone: number;
   pagesTotal: number;
   marksDone: number;
@@ -188,6 +198,7 @@ function StepProgress({
   const { label, done, total } = describeStepProgress(
     step,
     batch,
+    stage,
     pagesDone,
     pagesTotal,
     marksDone,
@@ -223,12 +234,31 @@ function StepProgress({
 function describeStepProgress(
   step: ReviewStepId,
   batch: BatchStatusModel,
+  stage: BatchStage,
   pagesDone: number,
   pagesTotal: number,
   marksDone: number,
   marksTotal: number,
 ): { label: string; done: number; total: number } {
   if (step === 'procesar') {
+    if (stage === 'subiendo') {
+      const { ready, expected } = batch.sources;
+      return {
+        label:
+          expected === 0
+            ? 'Todavía no se subió ninguna hoja a este lote'
+            : `${ready} de ${expected} ${expected === 1 ? 'archivo subido' : 'archivos subidos'}`,
+        done: ready,
+        total: expected,
+      };
+    }
+    if (stage === 'por_iniciar') {
+      return {
+        label: 'Los archivos ya están subidos: falta iniciar la lectura',
+        done: 0,
+        total: 1,
+      };
+    }
     const total = batch.pagesTotal ?? 0;
     return {
       label:
@@ -260,6 +290,90 @@ function describeStepProgress(
     };
   }
   return { label: 'Revisa el resumen y finaliza la corrección', done: 1, total: 1 };
+}
+
+/**
+ * En qué está realmente el lote antes de poder revisarlo. `pending` cubre dos
+ * situaciones muy distintas — faltan archivos por subir, o ya están todos y
+ * nadie inició la lectura — y confundirlas deja al usuario esperando a algo que
+ * nunca va a pasar.
+ */
+type BatchStage = 'subiendo' | 'por_iniciar' | 'procesando' | 'listo';
+
+function describeBatchStage(batch: BatchStatusModel): BatchStage {
+  if (batch.status === 'processing') return 'procesando';
+  if (batch.status !== 'pending') return 'listo';
+  const { ready, expected } = batch.sources;
+  return expected > 0 && ready >= expected ? 'por_iniciar' : 'subiendo';
+}
+
+function BatchStageStep({
+  batchId,
+  batch,
+  stage,
+}: {
+  batchId: string;
+  batch: BatchStatusModel;
+  stage: BatchStage;
+}) {
+  if (stage === 'subiendo') return <AwaitingUploadStep batch={batch} />;
+  if (stage === 'por_iniciar') return <ReadyToProcessStep batchId={batchId} batch={batch} />;
+  return <ProcessingStep batch={batch} />;
+}
+
+function AwaitingUploadStep({ batch }: { batch: BatchStatusModel }) {
+  const { ready, expected } = batch.sources;
+  const missing = Math.max(0, expected - ready);
+
+  return (
+    <AlertCallout tone="warning" icon={Upload} title="Todavía falta subir las hojas de este lote">
+      {expected === 0 ? (
+        <p>
+          Este lote se creó sin archivos: no llegó ninguna hoja al servidor, así que no hay nada que
+          leer. Vuelve a la captura y sube las hojas escaneadas o fotografiadas.
+        </p>
+      ) : (
+        <p>
+          Faltan {missing} de {expected} {expected === 1 ? 'archivo' : 'archivos'} por subir. El
+          lector no se inicia hasta que estén todos: si la captura se interrumpió, repítela o
+          reintenta las subidas que quedaron a medias.
+        </p>
+      )}
+      <p className="mt-2">
+        Nadie está procesando este lote todavía. Esta vista se actualiza sola cuando las subidas
+        terminen.
+      </p>
+      <div className="mt-3">
+        <Button asChild variant="outline" size="sm">
+          <Link href={SCAN_ROUTES.escanear}>Volver a la captura</Link>
+        </Button>
+      </div>
+    </AlertCallout>
+  );
+}
+
+function ReadyToProcessStep({ batchId, batch }: { batchId: string; batch: BatchStatusModel }) {
+  const start = useStartBatchProcessing(batchId);
+  const { expected } = batch.sources;
+
+  return (
+    <AlertCallout tone="info" icon={PlayCircle} title="Las hojas están subidas: inicia la lectura">
+      <p>
+        Los {expected} {expected === 1 ? 'archivo está subido' : 'archivos están subidos'}, pero el
+        procesamiento no ha comenzado. Inícialo para que el lector corrija las hojas.
+      </p>
+      <div className="mt-3">
+        <Button size="sm" disabled={start.isPending} onClick={() => start.mutate()}>
+          {start.isPending ? (
+            <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+          ) : (
+            <PlayCircle className="mr-2 size-4" aria-hidden />
+          )}
+          Iniciar procesamiento
+        </Button>
+      </div>
+    </AlertCallout>
+  );
 }
 
 function ProcessingStep({ batch }: { batch: BatchStatusModel }) {
