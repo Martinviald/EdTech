@@ -41,6 +41,10 @@
  */
 const PROTECTED_STAGES = ['production', 'demo'];
 
+const DOMAIN_BY_STAGE: Record<string, string | undefined> = {
+  demo: 'evaluaciones.app',
+};
+
 export default $config({
   app(input) {
     return {
@@ -388,6 +392,14 @@ export default $config({
     const web = new sst.aws.Nextjs('Web', {
       path: 'apps/web',
       link: [uploads],
+      // Dominio propio: el nombre de CloudFront (dXXXX.cloudfront.net) es propiedad de la
+      // distribucion y se pierde si esta se recrea — paso en demo y dejo muerto el link de
+      // todos los usuarios. Con dominio propio la distribucion puede destruirse y recrearse
+      // sin que la direccion cambie. La zona de Route53 se administra FUERA de este stack a
+      // proposito, para que un deploy no pueda borrar el DNS.
+      domain: DOMAIN_BY_STAGE[$app.stage]
+        ? { name: DOMAIN_BY_STAGE[$app.stage]!, dns: sst.aws.dns() }
+        : undefined,
       server: { architecture: 'arm64' },
       environment: {
         API_URL: apiUrl, // fetch server-side desde Next -> App Runner
