@@ -64,6 +64,8 @@ import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item
 import {
   ADMIN_LIKE_ROLES,
   buildAssessmentInScopeExists,
+  buildSubjectCatalogCondition,
+  isTeacherScope as isTeacherScopeFor,
   resolveClassGroupScope,
   type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
@@ -328,7 +330,22 @@ export class DashboardsService {
       const gradeMap = new Map<string, string>();
       for (const r of classGroupRows) gradeMap.set(r.gradeId, r.gradeName);
 
-      // Asignaturas visibles vía subject_classes de los cursos visibles.
+      // Asignaturas visibles vía subject_classes de los cursos visibles, ACOTADAS
+      // al alcance del caller.
+      //
+      // Filtrar sólo por curso deja en el desplegable las asignaturas que otros
+      // dictan en el mismo curso: el profesor de Matemática de 2°A veía
+      // "Lenguaje y Comunicación" y, al elegirla, un dashboard vacío. No es fuga
+      // de datos (el recorte real ya la excluye), pero delata qué más se dicta
+      // en su curso y ofrece un filtro que no devuelve nada.
+      const subjectConditions = [inArray(subjectClasses.classGroupId, visibleClassGroupIds)];
+      if (!scope.scopeAll) {
+        const subjectScope = buildSubjectCatalogCondition(scope, {
+          classGroupId: subjectClasses.classGroupId,
+          subjectId: subjectClasses.subjectId,
+        });
+        if (subjectScope) subjectConditions.push(subjectScope);
+      }
       const subjectRows =
         visibleClassGroupIds.length === 0
           ? []
@@ -336,7 +353,7 @@ export class DashboardsService {
               .selectDistinct({ id: subjects.id, name: subjects.name })
               .from(subjectClasses)
               .innerJoin(subjects, eq(subjects.id, subjectClasses.subjectId))
-              .where(inArray(subjectClasses.classGroupId, visibleClassGroupIds))
+              .where(and(...subjectConditions))
               .orderBy(subjects.name);
 
       // Instrumentos: oficiales (org_id null) + propios de la org, no borrados.
@@ -1402,10 +1419,17 @@ export class DashboardsService {
     return user.orgId;
   }
 
-  /** True si el caller es profesor puro (no admin-like ni platform_admin). */
+  /**
+   * True si el caller mira la plataforma como profesor.
+   *
+   * Delega en el helper de alcance: usaba la UNIÓN de roles mientras
+   * `resolveClassGroupScope` ya decidía por `activeRole`, así que un usuario
+   * teacher + dept_head con rol activo `teacher` recibía `scope: 'org'` junto a
+   * datos ya recortados a sus cursos — una respuesta contradictoria consigo
+   * misma, y sin el bloque "Mis cursos" que la UI monta sobre este campo.
+   */
   private isTeacherScope(user: JwtPayload): boolean {
-    if (user.isPlatformAdmin) return false;
-    return !userHasAnyRole(user.roles, ADMIN_LIKE_ROLES);
+    return isTeacherScopeFor(user);
   }
 
   /**
