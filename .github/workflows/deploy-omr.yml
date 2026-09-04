@@ -1,0 +1,97 @@
+name: Deploy OMR (services/omr → ECR → App Runner)
+
+# Push a main que toca el servicio de visión OMR (E22) → rebuildea la imagen y la
+# pushea a ECR. El servicio de App Runner tiene autoDeploymentsEnabled, así que
+# redeploya solo al detectar un :latest nuevo. No hay `sst deploy` acá.
+#
+# ── Por qué un workflow aparte y no un job dentro de deploy-backend.yml ──
+# deploy-backend.yml gatea el build con el job `migrate`, que abre un túnel SSM contra
+# el RDS privado, corre las migraciones de Drizzle y puebla el read-model de cohorte.
+# El OMR no tiene base de datos ni migraciones: es una función pura sobre (imagen,
+# LayoutSpec). Colgarlo de ese job significaría (a) que una migración rota bloquee el
+# despliegue de un arreglo de visión que no toca la BDD, y (b) pagar el túnel y el
+# backfill para publicar una imagen que no los necesita. Son dominios de falla
+# distintos y se despliegan por separado.
+#
+# Sí comparten el grupo de `concurrency`: el `sst deploy` del frontend reconcilia TODOS
+# los recursos, el servicio Omr incluido, y si se pisa con el auto-deploy que dispara
+# este push de imagen App Runner responde OPERATION_IN_PROGRESS.
+#
+# ── Primer deploy (huevo y gallina) ──
+# SST crea el servicio de App Runner apuntando a `<repo>:latest`, y App Runner exige que
+# esa etiqueta YA exista para poder crear el servicio. Por eso este workflow tiene
+# `workflow_dispatch`: después del bootstrap (que crea el ECR) se corre a mano una vez,
+# y recién entonces el `sst deploy` completo puede crear el servicio Omr.
+# Orden completo en docs/deploy/aws-sst-nivel1.md.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/omr/**"
+      - ".github/workflows/deploy-omr.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sst-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  STAGE: demo
+  ECR_REPOSITORY: edtech-omr-demo # = aws.ecr.Repository name en sst.config.ts (stage demo)
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Falla temprano y con un mensaje claro si todavía no se corrió el bootstrap:
+      # sin el repo de ECR el push falla más adelante con un error de registry opaco.
+      - name: Verificar que el repo de ECR exista
+        run: |
+          set -euo pipefail
+          aws ecr describe-repositories --repository-names "${ECR_REPOSITORY}" >/dev/null 2>&1 || {
+            echo "::error::No existe el repo de ECR ${ECR_REPOSITORY}. Corre primero el bootstrap: SST_BOOTSTRAP=1 npx sst deploy --stage ${STAGE}"
+            exit 1
+          }
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          # Contexto = services/omr (no la raíz): la imagen sólo necesita app/,
+          # contracts/ y los requirements, nada del monorepo de Node.
+          context: services/omr
+          file: services/omr/Dockerfile
+          # Arquitectura por defecto de App Runner, y la misma para la que está
+          # resuelto services/omr/requirements.lock.txt (x86_64-unknown-linux-gnu).
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Resumen
+        run: |
+          echo "✓ Imagen OMR publicada en ${ECR_REPOSITORY}:latest y :${{ github.sha }}"
+          echo "App Runner (autoDeploymentsEnabled) redeploya solo el servicio edtech-omr-${STAGE}."
