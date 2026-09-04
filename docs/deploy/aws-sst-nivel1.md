@@ -3,15 +3,44 @@
 Despliegue por código (un solo `sst.config.ts`, SST corre sobre Pulumi así que App Runner
 se define con el provider crudo `aws.*`). Stage: `production`. Región: `us-east-1`.
 
-| Capa | Corre en (AWS) | Definido con |
-|---|---|---|
-| Frontend (Next.js) | CloudFront + Lambda (OpenNext) | `sst.aws.Nextjs` |
-| Backend (NestJS) | **App Runner** desde imagen en **ECR** | `aws.apprunner.*` (crudo) |
-| BDD (Postgres) | RDS `t4g.micro` Single-AZ | `sst.aws.Postgres` |
-| Archivos | S3 | `sst.aws.Bucket` |
-| Red | VPC **sin NAT** + bastion (para `sst tunnel`) | `sst.aws.Vpc` |
+| Capa               | Corre en (AWS)                                | Definido con              |
+| ------------------ | --------------------------------------------- | ------------------------- |
+| Frontend (Next.js) | CloudFront + Lambda (OpenNext)                | `sst.aws.Nextjs`          |
+| Backend (NestJS)   | **App Runner** desde imagen en **ECR**        | `aws.apprunner.*` (crudo) |
+| BDD (Postgres)     | RDS `t4g.micro` Single-AZ                     | `sst.aws.Postgres`        |
+| Archivos           | S3                                            | `sst.aws.Bucket`          |
+| Red                | VPC **sin NAT** + bastion (para `sst tunnel`) | `sst.aws.Vpc`             |
 
 **Costo idle ~$22-26/mes** (sin ALB, sin NAT, sin Fargate). Ver §7.
+
+> 🚨 **NUNCA corras `SST_BOOTSTRAP=1` sobre un stage que ya está desplegado.**
+>
+> El flag hace un `return` temprano en `sst.config.ts`: la configuración **omite** App Runner y
+> el frontend. SST ve que esos recursos desaparecieron del estado deseado y **los borra**. Sobre
+> un stage nuevo y vacío no hay nada que borrar y el flag es inofensivo; sobre un stage vivo es
+> un comando de destrucción.
+>
+> Ya pasó **dos veces** en `demo`. La segunda se llevó la distribución de CloudFront, las Lambdas
+> de OpenNext, el bucket de assets y la tabla de revalidación. Los datos (RDS y el bucket de
+> subidas) no se tocaron, pero **el dominio de CloudFront no se puede recuperar**: al recrear la
+> distribución se asigna uno nuevo y el link de cada usuario queda muerto.
+>
+> Desde entonces `demo` está en `PROTECTED_STAGES` (`protect: true` + `removal: "retain"`), así
+> que SST **aborta con error** en vez de borrar. Esa es una red, no un permiso para correr el
+> flag: si lo usas sobre un stage protegido, el deploy falla a la mitad y hay que reparar el
+> estado a mano.
+>
+> 🚨 **Y en general: no corras `sst deploy` a mano.** No es un comando incremental — reconcilia
+> la infraestructura **completa** contra la configuración que tenga delante. Si esa configuración
+> es de otra rama, o está detrás de lo desplegado, la diferencia se aplica **borrando**. El árbol
+> principal del repo suele estar en la rama de trabajo de alguien más; ejecutar el comando desde
+> ahí despliega esa rama.
+>
+> **Usa el CD:** `deploy-frontend.yml`, `deploy-backend.yml` y `deploy-omr.yml` despliegan desde
+> `main` con la configuración correcta, y se pueden lanzar a mano con **Run workflow**
+> (`gh workflow run <archivo> --ref main`). Si necesitas correr SST localmente para inspeccionar
+> —`sst state export`, `sst diff`—, hazlo desde un árbol que sea **exactamente** la rama
+> desplegada, y nunca con un subcomando que mute.
 
 > ⚠️ **Bootstrap en 2 pasos (solo la 1ª vez de un stage):** App Runner exige que la imagen
 > exista en ECR antes de crearse. El bootstrap (`SST_BOOTSTRAP=1`) deja solo la infra base
@@ -159,11 +188,11 @@ Abrí la URL `web`. Con `AuthMode=mock` entrás con el dropdown del seed.
 
 Tres workflows en `.github/workflows/`:
 
-| Workflow | Dispara con | Hace |
-|---|---|---|
-| `deploy-backend.yml` | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | **(1) migra el RDS** (port-forward SSM por el bastión — gatea el deploy) → **(2)** build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
-| `deploy-omr.yml` | cambios en `services/omr` (o **Run workflow** a mano) | build de la imagen del OMR → push a ECR `:latest` → App Runner **auto-deploya** |
-| `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts` | `sst deploy` (deploy completo idempotente) |
+| Workflow              | Dispara con                                                      | Hace                                                                                                                                                       |
+| --------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `deploy-backend.yml`  | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | **(1) migra el RDS** (port-forward SSM por el bastión — gatea el deploy) → **(2)** build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
+| `deploy-omr.yml`      | cambios en `services/omr` (o **Run workflow** a mano)            | build de la imagen del OMR → push a ECR `:latest` → App Runner **auto-deploya**                                                                            |
+| `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts`               | `sst deploy` (deploy completo idempotente)                                                                                                                 |
 
 Los tres comparten el grupo de `concurrency`: nunca corren a la vez, porque el `sst deploy`
 del front reconcilia también los servicios de App Runner y chocaría con un auto-deploy.
@@ -204,17 +233,18 @@ DB_MASTER_PASSWORD      # = SST secret DbMasterPassword (stage demo). Lo usa el 
 
 ## 7. Costo aproximado (idle)
 
-| Recurso | ~USD/mes |
-|---|---|
-| RDS `t4g.micro` Single-AZ | ~13 |
-| App Runner 0.25 vCPU / 0.5 GB (min 1 instancia) | ~5-8 |
-| Bastion `t4g.nano` | ~3 |
-| CloudFront + Lambda (web) | ~0-1 |
-| ECR (storage de imágenes) | ~0-1 |
-| S3 | ~0 |
-| **Total** | **~$22-26/mes** |
+| Recurso                                         | ~USD/mes        |
+| ----------------------------------------------- | --------------- |
+| RDS `t4g.micro` Single-AZ                       | ~13             |
+| App Runner 0.25 vCPU / 0.5 GB (min 1 instancia) | ~5-8            |
+| Bastion `t4g.nano`                              | ~3              |
+| CloudFront + Lambda (web)                       | ~0-1            |
+| ECR (storage de imágenes)                       | ~0-1            |
+| S3                                              | ~0              |
+| **Total**                                       | **~$22-26/mes** |
 
 **Ahorros adicionales:**
+
 - Quitar `bastion: true` del `sst.config.ts` tras provisionar la BDD (re-agregar para migrar).
 - App Runner no escala a 0 (mínimo 1 instancia). Para idle ≈ $0 habría que ir a Lambda.
 
