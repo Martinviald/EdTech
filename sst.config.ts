@@ -31,14 +31,24 @@
  * (App Runner auto-deploya) y el frontend corre `sst deploy`.
  * Runbook completo: docs/deploy/aws-sst-nivel1.md
  */
+const PROTECTED_STAGES = ['production', 'demo'];
+
 export default $config({
   app(input) {
     return {
-      name: "edtech",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      protect: input?.stage === "production",
-      home: "aws",
-      providers: { aws: { region: "us-east-1" } },
+      name: 'edtech',
+      // Stages con usuarios reales detras. `demo` NO es efimero: es el ambiente que
+      // usan los colegios y el que despliega `main`. Sin esto, un `sst deploy` desde
+      // una rama equivocada reconcilia contra una configuracion vieja y BORRA el
+      // frontend — paso dos veces, y la segunda se llevo CloudFront, las Lambdas de
+      // OpenNext, el bucket de assets y la tabla de revalidacion. `protect` hace que
+      // SST se NIEGUE a borrar en vez de hacerlo; `retain` deja el recurso vivo si
+      // igual sale del stack. El dominio de CloudFront no se puede recuperar: al
+      // recrear la distribucion cambia, y con el se rompe el link de cada usuario.
+      removal: PROTECTED_STAGES.includes(input?.stage ?? '') ? 'retain' : 'remove',
+      protect: PROTECTED_STAGES.includes(input?.stage ?? ''),
+      home: 'aws',
+      providers: { aws: { region: 'us-east-1' } },
     };
   },
 
@@ -46,44 +56,44 @@ export default $config({
     // Gate de bootstrap: por default `sst deploy` crea TODO (App Runner + front). Solo el
     // arranque de un stage nuevo usa SST_BOOTSTRAP=1 para crear la infra base primero,
     // porque App Runner exige la imagen ya en ECR para poder crearse.
-    const bootstrapOnly = process.env.SST_BOOTSTRAP === "1";
+    const bootstrapOnly = process.env.SST_BOOTSTRAP === '1';
 
     // ── Secretos (set con: npx sst secret set <Nombre> <valor> --stage <stage>) ──
-    const authSecret = new sst.Secret("AuthSecret"); // == NEXTAUTH_SECRET, idéntico en web y api
-    const internalApiSecret = new sst.Secret("InternalApiSecret");
-    const soeAppPassword = new sst.Secret("SoeAppPassword"); // rol RLS soe_app (runtime API)
-    const dbMasterPassword = new sst.Secret("DbMasterPassword"); // master RDS (admin: migrate/seed)
-    const llmProvider = new sst.Secret("LlmProvider", "gemini");
-    const geminiApiKey = new sst.Secret("GeminiApiKey", "");
-    const anthropicApiKey = new sst.Secret("AnthropicApiKey", "");
-    const authMode = new sst.Secret("AuthMode", "mock"); // 'mock' (demo) | 'sso'
-    const googleClientId = new sst.Secret("GoogleClientId", "");
-    const googleClientSecret = new sst.Secret("GoogleClientSecret", "");
+    const authSecret = new sst.Secret('AuthSecret'); // == NEXTAUTH_SECRET, idéntico en web y api
+    const internalApiSecret = new sst.Secret('InternalApiSecret');
+    const soeAppPassword = new sst.Secret('SoeAppPassword'); // rol RLS soe_app (runtime API)
+    const dbMasterPassword = new sst.Secret('DbMasterPassword'); // master RDS (admin: migrate/seed)
+    const llmProvider = new sst.Secret('LlmProvider', 'gemini');
+    const geminiApiKey = new sst.Secret('GeminiApiKey', '');
+    const anthropicApiKey = new sst.Secret('AnthropicApiKey', '');
+    const authMode = new sst.Secret('AuthMode', 'mock'); // 'mock' (demo) | 'sso'
+    const googleClientId = new sst.Secret('GoogleClientId', '');
+    const googleClientSecret = new sst.Secret('GoogleClientSecret', '');
 
     // ── Servidor MCP analítico (docs/propuesta-mcp-analitico.md) ──
     // Defaults seguros: con McpEnabled="false" el endpoint /mcp responde 404 (apagado).
     // Encender = setear los 4 secrets (WorkOS + URI canónica) y McpEnabled="true", luego redeploy.
-    const mcpEnabled = new sst.Secret("McpEnabled", "false");
-    const mcpCanonicalUri = new sst.Secret("McpCanonicalUri", ""); // https://<api>/mcp (== resource indicator en WorkOS)
-    const workosIssuer = new sst.Secret("WorkosIssuer", ""); // AuthKit issuer
-    const workosJwksUrl = new sst.Secret("WorkosJwksUrl", ""); // jwks_uri del issuer
+    const mcpEnabled = new sst.Secret('McpEnabled', 'false');
+    const mcpCanonicalUri = new sst.Secret('McpCanonicalUri', ''); // https://<api>/mcp (== resource indicator en WorkOS)
+    const workosIssuer = new sst.Secret('WorkosIssuer', ''); // AuthKit issuer
+    const workosJwksUrl = new sst.Secret('WorkosJwksUrl', ''); // jwks_uri del issuer
 
     // ── Red: VPC con bastion (para `sst tunnel`) + NAT ec2 (fck-nat, ~$3-4/mes). ──
     // El NAT da salida a internet a las subredes privadas. App Runner enruta TODO su
     // egress por la VPC (lo necesita para el RDS privado); el asistente E21 llama a la
     // API de Gemini en runtime → sin NAT esas llamadas mueren con `fetch failed`.
-    const vpc = new sst.aws.Vpc("Vpc", { bastion: true, nat: "ec2" });
+    const vpc = new sst.aws.Vpc('Vpc', { bastion: true, nat: 'ec2' });
 
     // ── BDD: RDS Postgres t4g.micro Single-AZ ──
     // master user (soe_admin) = rol ADMIN -> DATABASE_ADMIN_URL (migrate/seed, desde laptop/CI).
-    const db = new sst.aws.Postgres("Db", {
+    const db = new sst.aws.Postgres('Db', {
       vpc,
-      instance: "t4g.micro",
-      version: "17",
-      storage: "20 GB",
+      instance: 't4g.micro',
+      version: '17',
+      storage: '20 GB',
       multiAz: false,
-      database: "soe",
-      username: "soe_admin",
+      database: 'soe',
+      username: 'soe_admin',
       password: dbMasterPassword.value,
     });
     // APP: rol soe_app (sin BYPASSRLS) -> runtime de la API, sujeto a RLS (§5.2).
@@ -91,48 +101,47 @@ export default $config({
     const databaseAppUrl = $interpolate`postgresql://soe_app:${soeAppPassword.value}@${db.host}:${db.port}/${db.database}`;
 
     // ── S3 para hojas de respuesta (presigned URLs) ──
-    const uploads = new sst.aws.Bucket("Uploads");
+    const uploads = new sst.aws.Bucket('Uploads');
 
     // ── ECR: repo de la imagen del backend (nombre explícito, lo usa el CI) ──
-    const apiRepo = new aws.ecr.Repository("ApiRepo", {
+    const apiRepo = new aws.ecr.Repository('ApiRepo', {
       name: `edtech-api-${$app.stage}`,
       forceDelete: true, // permite `sst remove` aunque haya imágenes
       imageScanningConfiguration: { scanOnPush: true },
     });
 
     // ── IAM: rol de acceso a ECR (pull) ──
-    const accessRole = new aws.iam.Role("ApiEcrAccessRole", {
+    const accessRole = new aws.iam.Role('ApiEcrAccessRole', {
       assumeRolePolicy: JSON.stringify({
-        Version: "2012-10-17",
+        Version: '2012-10-17',
         Statement: [
           {
-            Effect: "Allow",
-            Principal: { Service: "build.apprunner.amazonaws.com" },
-            Action: "sts:AssumeRole",
+            Effect: 'Allow',
+            Principal: { Service: 'build.apprunner.amazonaws.com' },
+            Action: 'sts:AssumeRole',
           },
         ],
       }),
     });
-    new aws.iam.RolePolicyAttachment("ApiEcrAccessAttach", {
+    new aws.iam.RolePolicyAttachment('ApiEcrAccessAttach', {
       role: accessRole.name,
-      policyArn:
-        "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess",
+      policyArn: 'arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess',
     });
 
     // ── IAM: rol de instancia (la API firma presigned URLs de S3) ──
-    const instanceRole = new aws.iam.Role("ApiInstanceRole", {
+    const instanceRole = new aws.iam.Role('ApiInstanceRole', {
       assumeRolePolicy: JSON.stringify({
-        Version: "2012-10-17",
+        Version: '2012-10-17',
         Statement: [
           {
-            Effect: "Allow",
-            Principal: { Service: "tasks.apprunner.amazonaws.com" },
-            Action: "sts:AssumeRole",
+            Effect: 'Allow',
+            Principal: { Service: 'tasks.apprunner.amazonaws.com' },
+            Action: 'sts:AssumeRole',
           },
         ],
       }),
     });
-    new aws.iam.RolePolicy("ApiInstanceS3Policy", {
+    new aws.iam.RolePolicy('ApiInstanceS3Policy', {
       role: instanceRole.id,
       policy: $interpolate`{
         "Version": "2012-10-17",
@@ -147,7 +156,7 @@ export default $config({
     // ── VPC connector: App Runner -> RDS (subredes privadas + SG de la VPC) ──
     // NOTA: usa el SG por defecto de la VPC, que el RDS de SST acepta como inbound.
     // Si la API no logra conectar al RDS, agregar un ingress 5432 desde este SG.
-    const vpcConnector = new aws.apprunner.VpcConnector("ApiVpcConnector", {
+    const vpcConnector = new aws.apprunner.VpcConnector('ApiVpcConnector', {
       vpcConnectorName: `edtech-api-${$app.stage}`,
       subnets: vpc.privateSubnets,
       securityGroups: vpc.securityGroups,
@@ -156,28 +165,28 @@ export default $config({
     // ── Bootstrap (SST_BOOTSTRAP=1): solo infra base. Sin el flag se crea TODO. ──
     if (bootstrapOnly) {
       return {
-        phase: "bootstrap — infra base lista",
+        phase: 'bootstrap — infra base lista',
         ecrRepo: apiRepo.repositoryUrl,
         dbHost: db.host,
         bucket: uploads.name,
-        next: "Push imagen a ECR + provisionar BDD, luego (sin flag): npx sst deploy",
+        next: 'Push imagen a ECR + provisionar BDD, luego (sin flag): npx sst deploy',
       };
     }
 
     // ── Backend: App Runner desde la imagen :latest en ECR ──
-    const api = new aws.apprunner.Service("Api", {
+    const api = new aws.apprunner.Service('Api', {
       serviceName: `edtech-api-${$app.stage}-v2`,
       sourceConfiguration: {
         autoDeploymentsEnabled: true, // el CI pushea :latest -> redeploy automático
         authenticationConfiguration: { accessRoleArn: accessRole.arn },
         imageRepository: {
-          imageRepositoryType: "ECR",
+          imageRepositoryType: 'ECR',
           imageIdentifier: $interpolate`${apiRepo.repositoryUrl}:latest`,
           imageConfiguration: {
-            port: "4000",
+            port: '4000',
             runtimeEnvironmentVariables: {
-              NODE_ENV: "production",
-              API_PORT: "4000",
+              NODE_ENV: 'production',
+              API_PORT: '4000',
               // soe_app -> RLS activo (§11). El admin NO va al runtime (least privilege).
               DATABASE_URL: databaseAppUrl,
               AUTH_SECRET: authSecret.value,
@@ -187,7 +196,7 @@ export default $config({
               ANTHROPIC_API_KEY: anthropicApiKey.value,
               AWS_S3_BUCKET: uploads.name,
               // web->api es server-side (Lambda OpenNext -> App Runner), CORS no aplica.
-              CORS_ORIGIN: "*",
+              CORS_ORIGIN: '*',
               // MCP analítico: apagado por default; se enciende seteando los secrets.
               MCP_ENABLED: mcpEnabled.value,
               MCP_CANONICAL_URI: mcpCanonicalUri.value,
@@ -200,16 +209,16 @@ export default $config({
       instanceConfiguration: {
         // 1 vCPU / 2 GB: la API NestJS carga ~40 módulos + SDKs de IA al arrancar;
         // con 0.25 vCPU el boot excedía la ventana del health check → CREATE_FAILED.
-        cpu: "1 vCPU",
-        memory: "2 GB",
+        cpu: '1 vCPU',
+        memory: '2 GB',
         instanceRoleArn: instanceRole.arn,
       },
       networkConfiguration: {
-        egressConfiguration: { egressType: "VPC", vpcConnectorArn: vpcConnector.arn },
+        egressConfiguration: { egressType: 'VPC', vpcConnectorArn: vpcConnector.arn },
       },
       // Health check tolerante: da tiempo a que el boot bindee el puerto 4000.
       healthCheckConfiguration: {
-        protocol: "TCP",
+        protocol: 'TCP',
         interval: 10,
         timeout: 5,
         healthyThreshold: 1,
@@ -220,14 +229,14 @@ export default $config({
     const apiUrl = $interpolate`https://${api.serviceUrl}`;
 
     // ── Frontend: Next.js en CloudFront + Lambda (OpenNext) ──
-    const web = new sst.aws.Nextjs("Web", {
-      path: "apps/web",
+    const web = new sst.aws.Nextjs('Web', {
+      path: 'apps/web',
       link: [uploads],
-      server: { architecture: "arm64" },
+      server: { architecture: 'arm64' },
       environment: {
         API_URL: apiUrl, // fetch server-side desde Next -> App Runner
         AUTH_SECRET: authSecret.value, // DEBE == AUTH_SECRET del API
-        AUTH_TRUST_HOST: "true", // next-auth v5 infiere host -> evita NEXTAUTH_URL
+        AUTH_TRUST_HOST: 'true', // next-auth v5 infiere host -> evita NEXTAUTH_URL
         INTERNAL_API_SECRET: internalApiSecret.value,
         AUTH_MODE: authMode.value,
         GOOGLE_CLIENT_ID: googleClientId.value,
@@ -236,7 +245,7 @@ export default $config({
     });
 
     return {
-      phase: "completa",
+      phase: 'completa',
       web: web.url,
       api: apiUrl,
       ecrRepo: apiRepo.repositoryUrl,
