@@ -39,6 +39,8 @@
  * (App Runner auto-deploya) y el frontend corre `sst deploy`.
  * Runbook completo: docs/deploy/aws-sst-nivel1.md
  */
+const PROTECTED_STAGES = ['production', 'demo'];
+
 const DOMAIN_BY_STAGE: Record<string, string | undefined> = {
   demo: 'evaluaciones.app',
 };
@@ -47,8 +49,16 @@ export default $config({
   app(input) {
     return {
       name: 'edtech',
-      removal: input?.stage === 'production' ? 'retain' : 'remove',
-      protect: input?.stage === 'production',
+      // Stages con usuarios reales detras. `demo` NO es efimero: es el ambiente que
+      // usan los colegios y el que despliega `main`. Sin esto, un `sst deploy` desde
+      // una rama equivocada reconcilia contra una configuracion vieja y BORRA el
+      // frontend — paso dos veces, y la segunda se llevo CloudFront, las Lambdas de
+      // OpenNext, el bucket de assets y la tabla de revalidacion. `protect` hace que
+      // SST se NIEGUE a borrar en vez de hacerlo; `retain` deja el recurso vivo si
+      // igual sale del stack. El dominio de CloudFront no se puede recuperar: al
+      // recrear la distribucion cambia, y con el se rompe el link de cada usuario.
+      removal: PROTECTED_STAGES.includes(input?.stage ?? '') ? 'retain' : 'remove',
+      protect: PROTECTED_STAGES.includes(input?.stage ?? ''),
       home: 'aws',
       providers: { aws: { region: 'us-east-1' } },
     };
