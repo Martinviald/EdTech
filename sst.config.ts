@@ -39,14 +39,24 @@
  * (App Runner auto-deploya) y el frontend corre `sst deploy`.
  * Runbook completo: docs/deploy/aws-sst-nivel1.md
  */
+const PROTECTED_STAGES = ['production', 'demo'];
+
 export default $config({
   app(input) {
     return {
-      name: "edtech",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      protect: input?.stage === "production",
-      home: "aws",
-      providers: { aws: { region: "us-east-1" } },
+      name: 'edtech',
+      // Stages con usuarios reales detras. `demo` NO es efimero: es el ambiente que
+      // usan los colegios y el que despliega `main`. Sin esto, un `sst deploy` desde
+      // una rama equivocada reconcilia contra una configuracion vieja y BORRA el
+      // frontend — paso dos veces, y la segunda se llevo CloudFront, las Lambdas de
+      // OpenNext, el bucket de assets y la tabla de revalidacion. `protect` hace que
+      // SST se NIEGUE a borrar en vez de hacerlo; `retain` deja el recurso vivo si
+      // igual sale del stack. El dominio de CloudFront no se puede recuperar: al
+      // recrear la distribucion cambia, y con el se rompe el link de cada usuario.
+      removal: PROTECTED_STAGES.includes(input?.stage ?? '') ? 'retain' : 'remove',
+      protect: PROTECTED_STAGES.includes(input?.stage ?? ''),
+      home: 'aws',
+      providers: { aws: { region: 'us-east-1' } },
     };
   },
 
@@ -54,45 +64,45 @@ export default $config({
     // Gate de bootstrap: por default `sst deploy` crea TODO (App Runner + front). Solo el
     // arranque de un stage nuevo usa SST_BOOTSTRAP=1 para crear la infra base primero,
     // porque App Runner exige la imagen ya en ECR para poder crearse.
-    const bootstrapOnly = process.env.SST_BOOTSTRAP === "1";
+    const bootstrapOnly = process.env.SST_BOOTSTRAP === '1';
 
     // ── Secretos (set con: npx sst secret set <Nombre> <valor> --stage <stage>) ──
-    const authSecret = new sst.Secret("AuthSecret"); // == NEXTAUTH_SECRET, idéntico en web y api
-    const internalApiSecret = new sst.Secret("InternalApiSecret");
-    const omrServiceToken = new sst.Secret("OmrServiceToken"); // header X-OMR-Token backend→servicio OMR
-    const soeAppPassword = new sst.Secret("SoeAppPassword"); // rol RLS soe_app (runtime API)
-    const dbMasterPassword = new sst.Secret("DbMasterPassword"); // master RDS (admin: migrate/seed)
-    const llmProvider = new sst.Secret("LlmProvider", "gemini");
-    const geminiApiKey = new sst.Secret("GeminiApiKey", "");
-    const anthropicApiKey = new sst.Secret("AnthropicApiKey", "");
-    const authMode = new sst.Secret("AuthMode", "mock"); // 'mock' (demo) | 'sso'
-    const googleClientId = new sst.Secret("GoogleClientId", "");
-    const googleClientSecret = new sst.Secret("GoogleClientSecret", "");
+    const authSecret = new sst.Secret('AuthSecret'); // == NEXTAUTH_SECRET, idéntico en web y api
+    const internalApiSecret = new sst.Secret('InternalApiSecret');
+    const omrServiceToken = new sst.Secret('OmrServiceToken'); // header X-OMR-Token backend→servicio OMR
+    const soeAppPassword = new sst.Secret('SoeAppPassword'); // rol RLS soe_app (runtime API)
+    const dbMasterPassword = new sst.Secret('DbMasterPassword'); // master RDS (admin: migrate/seed)
+    const llmProvider = new sst.Secret('LlmProvider', 'gemini');
+    const geminiApiKey = new sst.Secret('GeminiApiKey', '');
+    const anthropicApiKey = new sst.Secret('AnthropicApiKey', '');
+    const authMode = new sst.Secret('AuthMode', 'mock'); // 'mock' (demo) | 'sso'
+    const googleClientId = new sst.Secret('GoogleClientId', '');
+    const googleClientSecret = new sst.Secret('GoogleClientSecret', '');
 
     // ── Servidor MCP analítico (docs/propuesta-mcp-analitico.md) ──
     // Defaults seguros: con McpEnabled="false" el endpoint /mcp responde 404 (apagado).
     // Encender = setear los 4 secrets (WorkOS + URI canónica) y McpEnabled="true", luego redeploy.
-    const mcpEnabled = new sst.Secret("McpEnabled", "false");
-    const mcpCanonicalUri = new sst.Secret("McpCanonicalUri", ""); // https://<api>/mcp (== resource indicator en WorkOS)
-    const workosIssuer = new sst.Secret("WorkosIssuer", ""); // AuthKit issuer
-    const workosJwksUrl = new sst.Secret("WorkosJwksUrl", ""); // jwks_uri del issuer
+    const mcpEnabled = new sst.Secret('McpEnabled', 'false');
+    const mcpCanonicalUri = new sst.Secret('McpCanonicalUri', ''); // https://<api>/mcp (== resource indicator en WorkOS)
+    const workosIssuer = new sst.Secret('WorkosIssuer', ''); // AuthKit issuer
+    const workosJwksUrl = new sst.Secret('WorkosJwksUrl', ''); // jwks_uri del issuer
 
     // ── Red: VPC con bastion (para `sst tunnel`) + NAT ec2 (fck-nat, ~$3-4/mes). ──
     // El NAT da salida a internet a las subredes privadas. App Runner enruta TODO su
     // egress por la VPC (lo necesita para el RDS privado); el asistente E21 llama a la
     // API de Gemini en runtime → sin NAT esas llamadas mueren con `fetch failed`.
-    const vpc = new sst.aws.Vpc("Vpc", { bastion: true, nat: "ec2" });
+    const vpc = new sst.aws.Vpc('Vpc', { bastion: true, nat: 'ec2' });
 
     // ── BDD: RDS Postgres t4g.micro Single-AZ ──
     // master user (soe_admin) = rol ADMIN -> DATABASE_ADMIN_URL (migrate/seed, desde laptop/CI).
-    const db = new sst.aws.Postgres("Db", {
+    const db = new sst.aws.Postgres('Db', {
       vpc,
-      instance: "t4g.micro",
-      version: "17",
-      storage: "20 GB",
+      instance: 't4g.micro',
+      version: '17',
+      storage: '20 GB',
       multiAz: false,
-      database: "soe",
-      username: "soe_admin",
+      database: 'soe',
+      username: 'soe_admin',
       password: dbMasterPassword.value,
     });
     // APP: rol soe_app (sin BYPASSRLS) -> runtime de la API, sujeto a RLS (§5.2).
@@ -103,10 +113,10 @@ export default $config({
     // `cors: false` desactiva la regla que gestiona el componente (su default es
     // `allowOrigins: ["*"]`). El CORS real se declara más abajo, después de `web`, para
     // poder acotarlo al origen del frontend: ver el bloque "CORS del bucket".
-    const uploads = new sst.aws.Bucket("Uploads", { cors: false });
+    const uploads = new sst.aws.Bucket('Uploads', { cors: false });
 
     // ── ECR: repo de la imagen del backend (nombre explícito, lo usa el CI) ──
-    const apiRepo = new aws.ecr.Repository("ApiRepo", {
+    const apiRepo = new aws.ecr.Repository('ApiRepo', {
       name: `edtech-api-${$app.stage}`,
       forceDelete: true, // permite `sst remove` aunque haya imágenes
       imageScanningConfiguration: { scanOnPush: true },
@@ -115,45 +125,44 @@ export default $config({
     // ── ECR: repo de la imagen del servicio de visión OMR (services/omr) ──
     // Dockerfile listo en services/omr/ (uvicorn, puerto 8090). Igual que el
     // backend: la imagen se buildea/pushea fuera de SST antes de la fase 2.
-    const omrRepo = new aws.ecr.Repository("OmrRepo", {
+    const omrRepo = new aws.ecr.Repository('OmrRepo', {
       name: `edtech-omr-${$app.stage}`,
       forceDelete: true,
       imageScanningConfiguration: { scanOnPush: true },
     });
 
     // ── IAM: rol de acceso a ECR (pull) ──
-    const accessRole = new aws.iam.Role("ApiEcrAccessRole", {
+    const accessRole = new aws.iam.Role('ApiEcrAccessRole', {
       assumeRolePolicy: JSON.stringify({
-        Version: "2012-10-17",
+        Version: '2012-10-17',
         Statement: [
           {
-            Effect: "Allow",
-            Principal: { Service: "build.apprunner.amazonaws.com" },
-            Action: "sts:AssumeRole",
+            Effect: 'Allow',
+            Principal: { Service: 'build.apprunner.amazonaws.com' },
+            Action: 'sts:AssumeRole',
           },
         ],
       }),
     });
-    new aws.iam.RolePolicyAttachment("ApiEcrAccessAttach", {
+    new aws.iam.RolePolicyAttachment('ApiEcrAccessAttach', {
       role: accessRole.name,
-      policyArn:
-        "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess",
+      policyArn: 'arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess',
     });
 
     // ── IAM: rol de instancia (la API firma presigned URLs de S3) ──
-    const instanceRole = new aws.iam.Role("ApiInstanceRole", {
+    const instanceRole = new aws.iam.Role('ApiInstanceRole', {
       assumeRolePolicy: JSON.stringify({
-        Version: "2012-10-17",
+        Version: '2012-10-17',
         Statement: [
           {
-            Effect: "Allow",
-            Principal: { Service: "tasks.apprunner.amazonaws.com" },
-            Action: "sts:AssumeRole",
+            Effect: 'Allow',
+            Principal: { Service: 'tasks.apprunner.amazonaws.com' },
+            Action: 'sts:AssumeRole',
           },
         ],
       }),
     });
-    new aws.iam.RolePolicy("ApiInstanceS3Policy", {
+    new aws.iam.RolePolicy('ApiInstanceS3Policy', {
       role: instanceRole.id,
       policy: $interpolate`{
         "Version": "2012-10-17",
@@ -168,7 +177,7 @@ export default $config({
     // ── VPC connector: App Runner -> RDS (subredes privadas + SG de la VPC) ──
     // NOTA: usa el SG por defecto de la VPC, que el RDS de SST acepta como inbound.
     // Si la API no logra conectar al RDS, agregar un ingress 5432 desde este SG.
-    const vpcConnector = new aws.apprunner.VpcConnector("ApiVpcConnector", {
+    const vpcConnector = new aws.apprunner.VpcConnector('ApiVpcConnector', {
       vpcConnectorName: `edtech-api-${$app.stage}`,
       subnets: vpc.privateSubnets,
       securityGroups: vpc.securityGroups,
@@ -177,12 +186,12 @@ export default $config({
     // ── Bootstrap (SST_BOOTSTRAP=1): solo infra base. Sin el flag se crea TODO. ──
     if (bootstrapOnly) {
       return {
-        phase: "bootstrap — infra base lista",
+        phase: 'bootstrap — infra base lista',
         ecrRepo: apiRepo.repositoryUrl,
         ecrOmrRepo: omrRepo.repositoryUrl,
         dbHost: db.host,
         bucket: uploads.name,
-        next: "Push imágenes (api + omr) a ECR + provisionar BDD, luego (sin flag): npx sst deploy",
+        next: 'Push imágenes (api + omr) a ECR + provisionar BDD, luego (sin flag): npx sst deploy',
       };
     }
 
@@ -218,32 +227,32 @@ export default $config({
     // arreglo estructural es que el backend parta el PDF en tandas de ~10 páginas y
     // persista por tanda; hoy si el cliente corta se pierde TODO el lote, porque
     // persistPage recién corre cuando read() resuelve. Fuera del alcance de esta PR.
-    const omrPageTimeoutS = "8";
-    const omrReadTimeoutS = "110";
+    const omrPageTimeoutS = '8';
+    const omrReadTimeoutS = '110';
 
     // Escalado: por default App Runner manda hasta 100 requests concurrentes a la MISMA
     // instancia. Acá cada request es CPU-bound sobre 1 vCPU y procesa las páginas en
     // serie, así que apilar requests en una instancia sólo las encola hasta que todas
     // se pasan de tiempo. maxConcurrency: 1 hace que App Runner escale a lo ANCHO
     // (instancia nueva) en vez de encolar.
-    const omrScaling = new aws.apprunner.AutoScalingConfigurationVersion("OmrScaling", {
+    const omrScaling = new aws.apprunner.AutoScalingConfigurationVersion('OmrScaling', {
       autoScalingConfigurationName: `edtech-omr-${$app.stage}`,
       maxConcurrency: 1,
       minSize: 1, // 1 instancia caliente: el arranque carga OpenCV, no conviene pagarlo por lote
       maxSize: 4, // techo de costo; 4 lotes de curso en paralelo
     });
 
-    const omr = new aws.apprunner.Service("Omr", {
+    const omr = new aws.apprunner.Service('Omr', {
       serviceName: `edtech-omr-${$app.stage}`,
       autoScalingConfigurationArn: omrScaling.arn,
       sourceConfiguration: {
         autoDeploymentsEnabled: true,
         authenticationConfiguration: { accessRoleArn: accessRole.arn },
         imageRepository: {
-          imageRepositoryType: "ECR",
+          imageRepositoryType: 'ECR',
           imageIdentifier: $interpolate`${omrRepo.repositoryUrl}:latest`,
           imageConfiguration: {
-            port: "8090",
+            port: '8090',
             runtimeEnvironmentVariables: {
               OMR_SERVICE_TOKEN: omrServiceToken.value,
               OMR_PAGE_TIMEOUT_S: omrPageTimeoutS,
@@ -253,8 +262,8 @@ export default $config({
       },
       instanceConfiguration: {
         // Rectifica y clasifica imágenes página a página: CPU-bound.
-        cpu: "1 vCPU",
-        memory: "2 GB",
+        cpu: '1 vCPU',
+        memory: '2 GB',
       },
       networkConfiguration: {
         // Sin URL pública: sólo se llega por el VPC endpoint de más abajo.
@@ -264,8 +273,8 @@ export default $config({
         // HTTP contra /health, no TCP: con TCP un proceso vivo pero con la app rota
         // (OpenCV que no carga, contrato inválido) pasa el check igual y recibe
         // tráfico. /health sólo responde si la app importó y montó las rutas.
-        protocol: "HTTP",
-        path: "/health",
+        protocol: 'HTTP',
+        path: '/health',
         interval: 10,
         // 10 s (no 5): el chequeo compite con una página en proceso sobre 1 vCPU.
         timeout: 10,
@@ -285,11 +294,11 @@ export default $config({
     // El SG por defecto de la VPC (vpc.securityGroups, el que ya usa el VPC connector
     // del API) admite todo el tráfico originado dentro del CIDR de la VPC, así que el
     // API llega al endpoint por 443 sin reglas extra.
-    const omrEndpoint = new aws.ec2.VpcEndpoint("OmrVpcEndpoint", {
+    const omrEndpoint = new aws.ec2.VpcEndpoint('OmrVpcEndpoint', {
       vpcId: vpc.id,
       // Región fijada en `providers` arriba.
-      serviceName: "com.amazonaws.us-east-1.apprunner.requests",
-      vpcEndpointType: "Interface",
+      serviceName: 'com.amazonaws.us-east-1.apprunner.requests',
+      vpcEndpointType: 'Interface',
       subnetIds: vpc.privateSubnets, // >= 2 AZs, como recomienda App Runner
       securityGroupIds: vpc.securityGroups,
       // privateDnsEnabled queda en false (default): el dominio que devuelve el ingress
@@ -299,7 +308,7 @@ export default $config({
       tags: { Name: `edtech-omr-${$app.stage}` },
     });
 
-    const omrIngress = new aws.apprunner.VpcIngressConnection("OmrVpcIngress", {
+    const omrIngress = new aws.apprunner.VpcIngressConnection('OmrVpcIngress', {
       name: `edtech-omr-${$app.stage}`,
       serviceArn: omr.arn,
       ingressVpcConfiguration: {
@@ -314,19 +323,19 @@ export default $config({
     const omrUrl = $interpolate`https://${omrIngress.domainName}`;
 
     // ── Backend: App Runner desde la imagen :latest en ECR ──
-    const api = new aws.apprunner.Service("Api", {
+    const api = new aws.apprunner.Service('Api', {
       serviceName: `edtech-api-${$app.stage}-v2`,
       sourceConfiguration: {
         autoDeploymentsEnabled: true, // el CI pushea :latest -> redeploy automático
         authenticationConfiguration: { accessRoleArn: accessRole.arn },
         imageRepository: {
-          imageRepositoryType: "ECR",
+          imageRepositoryType: 'ECR',
           imageIdentifier: $interpolate`${apiRepo.repositoryUrl}:latest`,
           imageConfiguration: {
-            port: "4000",
+            port: '4000',
             runtimeEnvironmentVariables: {
-              NODE_ENV: "production",
-              API_PORT: "4000",
+              NODE_ENV: 'production',
+              API_PORT: '4000',
               // soe_app -> RLS activo (§11). El admin NO va al runtime (least privilege).
               DATABASE_URL: databaseAppUrl,
               AUTH_SECRET: authSecret.value,
@@ -343,7 +352,7 @@ export default $config({
               // Ver "Presupuestos de tiempo" en el bloque del OMR.
               OMR_READ_TIMEOUT_S: omrReadTimeoutS,
               // web->api es server-side (Lambda OpenNext -> App Runner), CORS no aplica.
-              CORS_ORIGIN: "*",
+              CORS_ORIGIN: '*',
               // MCP analítico: apagado por default; se enciende seteando los secrets.
               MCP_ENABLED: mcpEnabled.value,
               MCP_CANONICAL_URI: mcpCanonicalUri.value,
@@ -356,16 +365,16 @@ export default $config({
       instanceConfiguration: {
         // 1 vCPU / 2 GB: la API NestJS carga ~40 módulos + SDKs de IA al arrancar;
         // con 0.25 vCPU el boot excedía la ventana del health check → CREATE_FAILED.
-        cpu: "1 vCPU",
-        memory: "2 GB",
+        cpu: '1 vCPU',
+        memory: '2 GB',
         instanceRoleArn: instanceRole.arn,
       },
       networkConfiguration: {
-        egressConfiguration: { egressType: "VPC", vpcConnectorArn: vpcConnector.arn },
+        egressConfiguration: { egressType: 'VPC', vpcConnectorArn: vpcConnector.arn },
       },
       // Health check tolerante: da tiempo a que el boot bindee el puerto 4000.
       healthCheckConfiguration: {
-        protocol: "TCP",
+        protocol: 'TCP',
         interval: 10,
         timeout: 5,
         healthyThreshold: 1,
@@ -376,14 +385,14 @@ export default $config({
     const apiUrl = $interpolate`https://${api.serviceUrl}`;
 
     // ── Frontend: Next.js en CloudFront + Lambda (OpenNext) ──
-    const web = new sst.aws.Nextjs("Web", {
-      path: "apps/web",
+    const web = new sst.aws.Nextjs('Web', {
+      path: 'apps/web',
       link: [uploads],
-      server: { architecture: "arm64" },
+      server: { architecture: 'arm64' },
       environment: {
         API_URL: apiUrl, // fetch server-side desde Next -> App Runner
         AUTH_SECRET: authSecret.value, // DEBE == AUTH_SECRET del API
-        AUTH_TRUST_HOST: "true", // next-auth v5 infiere host -> evita NEXTAUTH_URL
+        AUTH_TRUST_HOST: 'true', // next-auth v5 infiere host -> evita NEXTAUTH_URL
         INTERNAL_API_SECRET: internalApiSecret.value,
         AUTH_MODE: authMode.value,
         GOOGLE_CLIENT_ID: googleClientId.value,
@@ -407,18 +416,18 @@ export default $config({
     // (`link: [uploads]`). Declararlo dentro del `new sst.aws.Bucket` cerraría el ciclo
     // bucket → web → bucket; como recurso separado la cadena queda uploads → web →
     // cors, sin ciclo.
-    new aws.s3.BucketCorsConfiguration("UploadsCors", {
+    new aws.s3.BucketCorsConfiguration('UploadsCors', {
       bucket: uploads.name,
       corsRules: [
         {
           // web.url viene con "/" final; Origin nunca lo lleva y S3 compara literal.
-          allowedOrigins: [web.url.apply((url) => url.replace(/\/+$/, ""))],
+          allowedOrigins: [web.url.apply((url) => url.replace(/\/+$/, ''))],
           // El presign firma sólo `host` (lo demás va en query params X-Amz-*), así
           // que el navegador manda un único header propio: Content-Type.
-          allowedHeaders: ["content-type"],
+          allowedHeaders: ['content-type'],
           // PUT sube la foto; GET/HEAD leen desde el navegador lo ya subido.
-          allowedMethods: ["PUT", "GET", "HEAD"],
-          exposeHeaders: ["ETag"],
+          allowedMethods: ['PUT', 'GET', 'HEAD'],
+          exposeHeaders: ['ETag'],
           // Cachea el preflight. Con el default (0 s) cada archivo paga un OPTIONS
           // extra, que en el 4G de un teléfono es un round-trip por foto.
           maxAgeSeconds: 3600,
@@ -427,7 +436,7 @@ export default $config({
     });
 
     return {
-      phase: "completa",
+      phase: 'completa',
       web: web.url,
       api: apiUrl,
       omr: omrUrl,
