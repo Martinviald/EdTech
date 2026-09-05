@@ -139,17 +139,30 @@ def locate_ring(
 ) -> tuple[int, int, float]:
     """Desplazamiento (dx, dy) del anillo respecto de `center_px` y score de la correlacion.
 
-    Fuera de la imagen (burbuja pegada al borde) devuelve (0, 0, 0.0): sin evidencia,
-    sin ajuste.
+    Si la ventana se sale de la imagen (burbuja cerca del borde del marco fiducial),
+    lo que falta se rellena con papel: el anillo que si esta adentro se correlaciona
+    igual, con un score algo menor. Una burbuja con el centro fuera de la imagen no
+    tiene evidencia y devuelve (0, 0, 0.0).
     """
     template, mask, half = ring_template(radius_px)
     reach = half + window_px
+    height, width = gray.shape
+    if not (0 <= center_px[0] < width and 0 <= center_px[1] < height):
+        return 0, 0, 0.0
     x0, y0 = center_px[0] - reach, center_px[1] - reach
     x1, y1 = center_px[0] + reach + 1, center_px[1] + reach + 1
-    if x0 < 0 or y0 < 0 or x1 > gray.shape[1] or y1 > gray.shape[0]:
-        return 0, 0, 0.0
-    patch = (255 - gray[y0:y1, x0:x1]).astype(np.float32)
-    response = cv2.matchTemplate(patch, template, cv2.TM_CCORR_NORMED, mask=mask)
+    inside = gray[max(0, y0) : min(height, y1), max(0, x0) : min(width, x1)]
+    patch = cv2.copyMakeBorder(
+        inside,
+        max(0, -y0),
+        max(0, y1 - height),
+        max(0, -x0),
+        max(0, x1 - width),
+        cv2.BORDER_CONSTANT,
+        value=int(np.median(inside)),
+    )
+    inverted = (255 - patch).astype(np.float32)
+    response = cv2.matchTemplate(inverted, template, cv2.TM_CCORR_NORMED, mask=mask)
     _, best, _, location = cv2.minMaxLoc(response)
     return int(location[0] + half - reach), int(location[1] + half - reach), float(best)
 

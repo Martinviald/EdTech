@@ -789,3 +789,88 @@ def png_bytes(gray: np.ndarray) -> bytes:
     ok, encoded = cv2.imencode(".png", to_bgr(gray))
     assert ok
     return encoded.tobytes()
+
+
+def radial_distortion(gray: np.ndarray, k1: float) -> np.ndarray:
+    """Distorsion de barril de una lente de telefono: las esquinas se acercan al centro
+    mas que el interior, y una homografia de 4 fiduciales deja cada burbuja corrida.
+
+    r' = r (1 + k1 r^2) con r normalizado a la media diagonal. Con k1 = 0.02 en una hoja
+    de 1655 px el desajuste interior queda en ~8-10 px, el rango medido en fotos reales
+    (goldset/README-registro.md).
+    """
+    height, width = gray.shape
+    center_x, center_y = width / 2.0, height / 2.0
+    radius = float(np.hypot(center_x, center_y))
+    xs, ys = np.meshgrid(
+        np.arange(width, dtype=np.float32), np.arange(height, dtype=np.float32)
+    )
+    xn = (xs - center_x) / radius
+    yn = (ys - center_y) / radius
+    factor = 1.0 + k1 * (xn * xn + yn * yn)
+    map_x = (center_x + (xs - center_x) * factor).astype(np.float32)
+    map_y = (center_y + (ys - center_y) * factor).astype(np.float32)
+    return cv2.remap(
+        gray,
+        map_x,
+        map_y,
+        interpolation=cv2.INTER_LINEAR,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=245,
+    )
+
+
+def cylinder_curl(gray: np.ndarray, amplitude_px: float) -> np.ndarray:
+    """Hoja abombada sobre la mesa: las filas del medio se corren en x, las esquinas no.
+
+    x' = x + a sin(pi y / H). Los fiduciales (arriba y abajo) casi no se mueven, asi que
+    la homografia sale "bien" y aun asi las burbujas del centro quedan a `a` pixeles.
+    """
+    height, width = gray.shape
+    xs, ys = np.meshgrid(
+        np.arange(width, dtype=np.float32), np.arange(height, dtype=np.float32)
+    )
+    map_x = xs - amplitude_px * np.sin(np.pi * ys / height)
+    return cv2.remap(
+        gray,
+        map_x.astype(np.float32),
+        ys,
+        interpolation=cv2.INTER_LINEAR,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=245,
+    )
+
+
+def shift_fiducials(
+    gray: np.ndarray,
+    size_ratio: float,
+    margin_ratio: float,
+    shifts: tuple[tuple[int, int], ...],
+) -> np.ndarray:
+    """Corre cada cuadrado fiducial (dx, dy) pixeles: un centroide sesgado por esquina.
+
+    La tinta de la hoja no se mueve, solo los 4 cuadrados; la homografia que sale de
+    ellos deja el interior corrido con un campo que varia suave por la pagina, como el
+    sesgo consistente medido en las fotos reales. Orden de esquinas como en
+    `_draw_fiducials`: TL, TR, BR, BL.
+    """
+    height, width = gray.shape
+    side = size_ratio * width
+    inset = margin_ratio * width + side / 2
+    corners = [(inset, inset), (width - inset, inset), (width - inset, height - inset),
+               (inset, height - inset)]
+    out = gray.copy()
+    reach = round(side * 0.9)
+    paper = int(np.median(gray))
+    for (center_x, center_y), (dx, dy) in zip(corners, shifts, strict=True):
+        cx, cy = round(center_x), round(center_y)
+        y0, y1 = max(0, cy - reach), min(height, cy + reach + 1)
+        x0, x1 = max(0, cx - reach), min(width, cx + reach + 1)
+        patch = gray[y0:y1, x0:x1].copy()
+        out[y0:y1, x0:x1] = paper
+        ty0, tx0 = y0 + dy, x0 + dx
+        ty1, tx1 = ty0 + patch.shape[0], tx0 + patch.shape[1]
+        if ty0 < 0 or tx0 < 0 or ty1 > height or tx1 > width:
+            continue
+        out[ty0:ty1, tx0:tx1] = patch
+    return out

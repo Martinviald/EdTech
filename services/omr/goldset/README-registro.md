@@ -174,3 +174,35 @@ cambio de criterio ni de contrato. El campo de evidencia en `marks[]` (fill de l
 oscura) queda como deuda para la próxima versión del esquema.
 
 Decisión: **avanza** a fase 5.
+
+### 2026-09-04 · fase 5 · el barrido sintético aprende a ver el registro
+
+Cambio: `tests/synthetic.py` gana `radial_distortion`, `cylinder_curl` y `shift_fiducials`;
+`goldset/make_synthetic.py` gana `pencil_gray` por receta y cuatro recetas nuevas
+(`distorsion-radial`, `curvatura`, `fiducial-sesgo` en `phone-good`; `lapiz-claro` en `dirty`).
+`locate_ring` rellena con papel la parte de la ventana que se sale del marco (la fila 12 del
+spec sintético queda a 20 px del borde y caía al fallback).
+
+**Ciclo 5a** (radial 0.02, curvatura 10 px, sesgo ±3–6 px → desplazamientos de 7–8 px): el
+código viejo las leía 100 % bien. Las marcas sintéticas son grandes y nítidas; 8 px no alcanzan.
+Decisión: **ajusta** las magnitudes al rango de la peor foto real (IMG_1621: 15 px).
+
+**Ciclo 5b** (radial 0.035, curvatura 16 px, sesgo ±6–11 px → desplazamientos 11–13 px, p90
+14–15):
+
+| receta | sin registro (ok/rev/ERR) | con registro | hueco spec → motor |
+|---|---|---|---|
+| distorsion-radial (2 hojas) | 21 / 3 / 0 | **24 / 0 / 0** | 0.29 → 0.75 |
+| curvatura (2 hojas) | 23 / 1 / 0 | **24 / 0 / 0** | 0.32 → 0.80 |
+| fiducial-sesgo (1 hoja) | 11 / 1 / 0 | **12 / 0 / 0** | 0.35 → 0.75 |
+| lapiz-claro (1 hoja) | 12 / 0 / 0 | 12 / 0 / 0 | — |
+| sombra-lateral (ya existía) | 6 / 6 / 0 | **12 / 0 / 0** | — |
+
+Las tres recetas geométricas degradan sin registro (revisión 4–25 % de sus marcas; en sintético
+el error se manifiesta como duda porque las marcas son grandes) y pasan con él. Barrido completo
+(48 hojas): sin registro 95.66 % / **4.17 %** / 1 → **NO APRUEBA también por revisión**; con
+registro 97.57 % / 2.26 % / 1 (la incorrecta es la marca lavada de siempre, ahora en
+`marcas-sucias-con-sombra-047` q7, fill 0.17 ≈ vacía). `residuo` contra el localizador
+independiente 0.5–0.9 px, fallback 0 %.
+
+Decisión: **avanza** a fase 6.

@@ -25,10 +25,14 @@ import cv2
 import numpy as np
 import pytest
 
+from app import registration
+from app.pipeline import process_page
 from goldset import make_synthetic as gen
+from goldset import run as goldset_run
 from goldset.dataset import consensus_answers, discover_sheets, load_truth
 from goldset.fiducial_metrics import measure_image
 from goldset.validate import main as validate_main
+from tests import synthetic as syn
 
 REAL_SOLIDITY = (0.85, 0.93)
 REAL_COMPACTNESS = (16.5, 18.5)
@@ -72,6 +76,66 @@ def test_la_verdad_coincide_con_las_marcas_dibujadas() -> None:
             drawn = plan.marks[field_id]
             chosen = [drawn] if isinstance(drawn, str) else list(drawn)
             assert expected in chosen, f"{recipe.name}/{field_id}: verdad != dibujo"
+
+
+REGISTRATION_RECIPES = ("distorsion-radial", "curvatura", "fiducial-sesgo")
+
+
+def _sweep_sheet(recipe_name: str) -> tuple[dict, gen.SheetPlan, np.ndarray]:
+    """La primera hoja de esa receta en el barrido por defecto, byte a byte."""
+    spec = syn.make_layout_spec(fields_per_page=gen.FIELDS_PER_PAGE)
+    for index, recipe in enumerate(gen.allocate(gen.DEFAULT_SHEETS)):
+        if recipe.name != recipe_name:
+            continue
+        rng = np.random.default_rng([gen.DEFAULT_SEED, index])
+        plan = gen.plan_sheet(recipe, index, rng)
+        return spec, plan, gen.render_sheet(spec, plan, rng)
+    raise AssertionError(f"la receta {recipe_name} no entra en el barrido por defecto")
+
+
+def _read_outcomes(spec: dict, plan: gen.SheetPlan, gray: np.ndarray) -> list[str]:
+    page = process_page(syn.to_bgr(gray), 0, spec, dict(goldset_run.PHONE_PROFILE))
+    assert page["quality"]["ok"], page["quality"]
+    outcomes = []
+    for mark in page["marks"]:
+        expected = plan.answers[mark["printedNumber"]]
+        if mark["state"] in ("ambiguous", "multiple"):
+            outcomes.append("review")
+        elif mark["state"] == "marked":
+            outcomes.append("ok" if mark["value"] == expected else "wrong")
+        else:
+            outcomes.append("ok" if expected is None else "wrong")
+    return outcomes
+
+
+def test_las_recetas_de_registro_degradan_sin_registro_y_pasan_con_el(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Requisito de admision de cada receta de registro (goldset/README-registro.md, fase 5):
+    si el codigo viejo la lee igual de bien, no ejercita el problema y no sirve de
+    guardarrail. Con el registro puesto tiene que leerse entera y bien."""
+    degraded_without = 0
+    for recipe_name in REGISTRATION_RECIPES:
+        spec, plan, gray = _sweep_sheet(recipe_name)
+        monkeypatch.setenv(registration.ENV_FLAG, "0")
+        without = _read_outcomes(spec, plan, gray)
+        monkeypatch.setenv(registration.ENV_FLAG, "1")
+        with_registration = _read_outcomes(spec, plan, gray)
+
+        assert "wrong" not in without, f"{recipe_name}: incorrecta confiada sin registro"
+        assert with_registration == ["ok"] * len(with_registration), (
+            recipe_name,
+            with_registration,
+        )
+        degraded_without += without.count("review")
+    assert degraded_without >= 3, "las recetas de registro ya no ejercitan el problema"
+
+
+def test_el_lapiz_claro_nunca_sale_blank_confiado(monkeypatch: pytest.MonkeyPatch) -> None:
+    spec, plan, gray = _sweep_sheet("lapiz-claro")
+    for flag in ("0", "1"):
+        monkeypatch.setenv(registration.ENV_FLAG, flag)
+        assert "wrong" not in _read_outcomes(spec, plan, gray)
 
 
 def test_la_doble_marca_conserva_la_alternativa_elegida() -> None:
@@ -132,9 +196,7 @@ def test_los_fiduciales_caen_en_la_envolvente_del_papel_real(sweep: Path) -> Non
     median_solidity = float(np.median(solidities))
     median_compactness = float(np.median(compactnesses))
     assert REAL_SOLIDITY[0] <= median_solidity <= REAL_SOLIDITY[1], median_solidity
-    assert (
-        REAL_COMPACTNESS[0] <= median_compactness <= REAL_COMPACTNESS[1]
-    ), median_compactness
+    assert REAL_COMPACTNESS[0] <= median_compactness <= REAL_COMPACTNESS[1], median_compactness
 
 
 def test_la_composicion_respeta_las_proporciones_del_conjunto_de_oro() -> None:

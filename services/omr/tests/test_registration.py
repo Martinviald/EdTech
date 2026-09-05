@@ -210,9 +210,37 @@ def test_a_bubble_whose_ring_is_hidden_inherits_the_group_shift(
 
 
 def test_a_bubble_at_the_image_border_does_not_crash(rectified: RectifiedPage) -> None:
+    from app.geometry import radius_to_px
+
     edge = [{"value": "A", "center": {"x": 0.0, "y": 0.0}, "radius": 0.013}]
     [fix] = reg.register_group(rectified, edge)
+    assert fix.offset_px <= 0.9 * radius_to_px(0.013, rectified.size)
+
+    outside = [{"value": "A", "center": {"x": 1.2, "y": 0.5}, "radius": 0.013}]
+    [fix] = reg.register_group(rectified, outside)
     assert fix.fallback
+
+
+def test_a_ring_next_to_the_frame_edge_is_still_registered(rectified: RectifiedPage) -> None:
+    """La ultima fila de un spec puede quedar a menos de una ventana del borde del marco
+    (el barrido sintetico la pone a 0.99). La ventana se rellena con papel y el anillo,
+    que si esta adentro, se encuentra igual."""
+    from app.geometry import radius_to_px
+
+    width, height = rectified.size
+    radius_px = radius_to_px(0.013, rectified.size)
+    gray = rectified.gray.copy()
+    cy = height - radius_px - 6
+    cx = width // 2
+    cv2.circle(gray, (cx + 5, cy - 3), radius_px, 40, thickness=3)
+    page = RectifiedPage(gray, rectified.size, rectified.fiducials_found, False)
+    center = {"x": cx / (width - 1), "y": cy / (height - 1)}
+    bubble = [{"value": "A", "center": center, "radius": 0.013}]
+
+    [fix] = reg.register_group(page, bubble)
+
+    assert not fix.fallback
+    assert abs(fix.dx - 5) <= 1 and abs(fix.dy + 3) <= 1
 
 
 def test_grid_signature_keeps_sampling_at_the_spec_position(
