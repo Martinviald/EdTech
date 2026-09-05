@@ -126,6 +126,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/04.png",
      "alternatives": [
       {
        "key": "A",
@@ -188,6 +189,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/06.png",
      "alternatives": [
       {
        "key": "A",
@@ -250,6 +252,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/08.png",
      "alternatives": [
       {
        "key": "A",
@@ -281,6 +284,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/09.png",
      "alternatives": [
       {
        "key": "A",
@@ -436,6 +440,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/14.png",
      "alternatives": [
       {
        "key": "A",
@@ -467,6 +472,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/15.png",
      "alternatives": [
       {
        "key": "A",
@@ -498,6 +504,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/16.png",
      "alternatives": [
       {
        "key": "A",
@@ -529,6 +536,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/17.png",
      "alternatives": [
       {
        "key": "A",
@@ -565,6 +573,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/18.png",
      "alternatives": [
       {
        "key": "A",
@@ -596,6 +605,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/19.png",
      "alternatives": [
       {
        "key": "A",
@@ -725,6 +735,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/23.png",
      "alternatives": [
       {
        "key": "A",
@@ -761,6 +772,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/24.png",
      "alternatives": [
       {
        "key": "A",
@@ -792,6 +804,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/25.png",
      "alternatives": [
       {
        "key": "A",
@@ -885,6 +898,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/28.png",
      "alternatives": [
       {
        "key": "A",
@@ -951,6 +965,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/30.png",
      "alternatives": [
       {
        "key": "A",
@@ -1013,6 +1028,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/32.png",
      "alternatives": [
       {
        "key": "A",
@@ -1106,6 +1122,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/35.png",
      "alternatives": [
       {
        "key": "A",
@@ -1230,6 +1247,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/39.png",
      "alternatives": [
       {
        "key": "A",
@@ -1292,6 +1310,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/41.png",
      "alternatives": [
       {
        "key": "A",
@@ -1323,6 +1342,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/42.png",
      "alternatives": [
       {
        "key": "A",
@@ -1359,6 +1379,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/43.png",
      "alternatives": [
       {
        "key": "A",
@@ -1390,6 +1411,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/44.png",
      "alternatives": [
       {
        "key": "A",
@@ -1421,6 +1443,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/45.png",
      "alternatives": [
       {
        "key": "A",
@@ -1452,6 +1475,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/46.png",
      "alternatives": [
       {
        "key": "A",
@@ -1524,6 +1548,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/48.png",
      "alternatives": [
       {
        "key": "A",
@@ -1555,6 +1580,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/49.png",
      "alternatives": [
       {
        "key": "A",
@@ -1586,6 +1612,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/50.png",
      "alternatives": [
       {
        "key": "A",
@@ -1741,6 +1768,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/55.png",
      "alternatives": [
       {
        "key": "A",
@@ -1838,6 +1866,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/58.png",
      "alternatives": [
       {
        "key": "A",
@@ -1962,6 +1991,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/62.png",
      "alternatives": [
       {
        "key": "A",
@@ -2028,6 +2058,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/64.png",
      "alternatives": [
       {
        "key": "A",
@@ -2090,6 +2121,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/66.png",
      "alternatives": [
       {
        "key": "A",
@@ -2121,6 +2153,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/67.png",
      "alternatives": [
       {
        "key": "A",
@@ -2156,6 +2189,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/68.png",
      "alternatives": [
       {
        "key": "A",
@@ -2187,6 +2221,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/69.png",
      "alternatives": [
       {
        "key": "A",
@@ -2311,6 +2346,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/73.png",
      "alternatives": [
       {
        "key": "A",
@@ -2342,6 +2378,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/74.png",
      "alternatives": [
       {
        "key": "A",
@@ -2373,6 +2410,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/75.png",
      "alternatives": [
       {
        "key": "A",
