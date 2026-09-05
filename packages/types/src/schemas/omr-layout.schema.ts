@@ -88,6 +88,27 @@ export const SHEET_QR_IDENTITY_REGION = {
 export const layoutSpecSchema = z.object({
   specVersion: z.literal(1),
   instrumentId: z.string().uuid(),
+  /**
+   * Forma (subconjunto de secciones) que cubre esta hoja, cuando el instrumento
+   * tiene secciones electivas. Ausente = la hoja cubre el instrumento completo.
+   *
+   * ⚠️ DECISIÓN sobre el `layoutHash` (etapa 8 de secciones electivas):
+   * el campo SÍ entra al hash, pero **sólo cuando existe**. `layoutHash` omite
+   * las claves con valor `undefined` al canonicalizar, así que un layout sin
+   * forma no lleva la clave y su hash es BIT A BIT el de hoy: los layouts ya
+   * congelados (3 en demo) siguen validando y ninguna hoja impresa se invalida.
+   * Cuando hay forma, dos hojas del mismo instrumento con formas distintas
+   * tienen hashes distintos — que es justo lo que el lector necesita para
+   * rechazar una hoja aplicada con el layout de la otra forma (G1).
+   *
+   * Por eso el campo se normaliza a `undefined` (nunca `null`): un `null`
+   * explícito sí cambiaría el hash de un layout sin forma.
+   */
+  formId: z
+    .string()
+    .uuid()
+    .nullish()
+    .transform((value) => value ?? undefined),
   pageCount: z.number().int().positive(),
   paper: z.enum(['letter', 'a4', 'legal']),
   fiducials: z.object({
