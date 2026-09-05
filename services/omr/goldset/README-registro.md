@@ -132,3 +132,20 @@ ninguna constante.** Pendiente: re-medir esas 10 capturas con el registro (no es
 repo) y actualizar la tabla del docstring de `readability_verdict`.
 
 Decisión: **avanza** a fase 3.
+
+### 2026-09-04 · fase 3 · identidad RUT y gate del teléfono
+
+Cambio: `identity._read_rut_bubbles` muestrea con `readers.sample_digit_grid_fills`
+(registro por columna; ventana 8 px en el layout RUT real, donde los dígitos están a 22 px).
+`assess_page` ya compartía `_marks_readability`, así que hereda el registro sin cambios.
+Test nuevo: RUT en página desplazada 7 px se lee entero con registro y nunca sale un dígito
+inventado sin él.
+
+| comprobación | resultado |
+|---|---|
+| tests identidad / grilla / gate / catálogo sucio (95) | en verde con el interruptor apagado y encendido |
+| gate (`assess_page`) = lote (`read`) en el corte real, registro encendido | **10/10** (9 legibles, `carla-1620` cropped en ambos) |
+| RUT sucio confiado y mal (`test_dirty_grid_catalog.py`) | ninguno, con y sin registro |
+| capturas RUT reales | no hay en el repo; pendiente cuando existan |
+
+Decisión: **avanza** a fase 4.

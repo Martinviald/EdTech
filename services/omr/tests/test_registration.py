@@ -146,6 +146,38 @@ def test_robust_line_ignores_one_outlier_and_caps_wild_slopes() -> None:
     assert slope == 0.0
 
 
+def test_rut_grid_is_read_on_a_shifted_page_only_with_registration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """La grilla RUT se registra por columna: con la pagina corrida 7 px (mas de un
+    tercio de la distancia entre digitos) el RUT sale entero con registro y no sale
+    —o sale distinto— sin el. Nunca un RUT con un digito inventado."""
+    from app.identity import read_identity
+
+    rut = "12345678K"
+    rut_spec = syn.make_layout_spec(fields_per_page=4)
+    rut_spec["identity"] = syn.make_rut_identity()
+    gray = syn.render_page(
+        rut_spec,
+        0,
+        marks={"f_001": "A", "f_002": "C", "f_003": "B", "f_004": "D"},
+        identity_marks=syn.rut_marks(rut),
+        rng=np.random.default_rng(15),
+    )
+    page = rectify(syn.to_bgr(gray), rut_spec)
+    assert isinstance(page, RectifiedPage)
+    moved = shifted(page, 7, -7)
+
+    monkeypatch.setenv(reg.ENV_FLAG, "1")
+    with_registration = read_identity(moved, moved.gray, rut_spec)
+    monkeypatch.setenv(reg.ENV_FLAG, "0")
+    without_registration = read_identity(moved, moved.gray, rut_spec)
+
+    assert with_registration["raw"] == rut
+    assert with_registration["confidence"] > 0.0
+    assert without_registration["raw"] in (None, rut)
+
+
 def test_plain_paper_yields_a_fallback_to_the_spec_position(rectified: RectifiedPage) -> None:
     width, height = rectified.size
     paper = [
