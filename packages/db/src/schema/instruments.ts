@@ -17,6 +17,7 @@ import {
   instrumentStatusEnum,
   instrumentTypeEnum,
   passageFormatEnum,
+  sectionRoleEnum,
   sectionTypeEnum,
   stimulusKindEnum,
   stimulusSourceEnum,
@@ -79,6 +80,14 @@ export const instrumentSections = pgTable(
     name: text('name').notNull(),
     type: sectionTypeEnum('type').notNull(),
     order: integer('order').default(0).notNull(),
+    // ── Rol de la sección (tronco común + ramas electivas) ──
+    // `core` la responde todo el mundo; `elective` sólo quien la eligió. `electiveGroup`
+    // agrupa las alternativas entre las que se elige una ("mencion-ciencias") y
+    // `electiveKey` identifica cuál es ("BIO"). Default `core` ⇒ la migración es INERTE
+    // para todo lo existente: un instrumento sin electivas se comporta igual que antes.
+    role: sectionRoleEnum('role').default('core').notNull(),
+    electiveGroup: text('elective_group'),
+    electiveKey: text('elective_key'),
     maxPoints: decimal('max_points', { precision: 7, scale: 2 }),
     timeLimitMin: integer('time_limit_min'),
     instructions: text('instructions'),

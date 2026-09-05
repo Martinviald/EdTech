@@ -181,9 +181,9 @@ describe('aggregateItemStats', () => {
     expect(out.find((o) => o.classGroupId === CURSO_B)!.studentCount).toBe(1);
   });
 
-  it('el N de la cohorte es constante entre ítems del mismo curso', () => {
-    // s3 solo respondió i1. El N del curso sigue siendo 3 en ambos ítems, pero el
-    // responseCount de i2 baja a 2. Esa distinción es la razón de tener dos campos.
+  it('el N es por (curso, ítem): sólo los alumnos con fila para ese ítem', () => {
+    // s3 no tiene fila para i2 (no le tocaba, o no se le administró). El N de i2 es 2,
+    // no 3: contarlo como 3 infla el denominador de un ítem que respondieron 2.
     const out = aggregateItemStats(
       [
         resp({ studentId: 's1', itemId: 'i1' }),
@@ -195,9 +195,54 @@ describe('aggregateItemStats', () => {
       enrollment,
     );
 
+    const i1 = out.find((o) => o.itemId === 'i1')!;
+    expect(i1.studentCount).toBe(3);
+    // El N del curso sigue siendo el `max` entre sus ítems, que es lo que hacen los
+    // consumidores (`cohort-item-stats.helper`, `item-analysis.service`).
+    expect(Math.max(...out.map((o) => o.studentCount))).toBe(3);
+
     const i2 = out.find((o) => o.itemId === 'i2')!;
-    expect(i2.studentCount).toBe(3);
+    expect(i2.studentCount).toBe(2);
     expect(i2.responseCount).toBe(2);
+  });
+
+  it('regresión: sin secciones electivas el N es idéntico en todos los ítems del curso', () => {
+    // Gate de la etapa 7: para un instrumento que todos rinden entero —todos los de
+    // hoy— el N por ítem coincide con el N del curso, así que ningún número cambia.
+    const alumnos = ['s1', 's2', 's3'];
+    const items = ['i1', 'i2', 'i3', 'i4'];
+    const out = aggregateItemStats(
+      alumnos.flatMap((studentId) => items.map((itemId) => resp({ studentId, itemId }))),
+      enrollment,
+    );
+
+    expect(out).toHaveLength(items.length);
+    for (const st of out) {
+      expect(st.studentCount).toBe(3);
+      expect(st.responseCount).toBe(3);
+    }
+  });
+
+  it('secciones electivas: el ítem común lleva el N del curso y el de mención el suyo', () => {
+    // 3 alumnos del curso rinden el común (c1); sólo s1 y s2 rinden la mención A (m1)
+    // y sólo s3 la mención B (m2). El N de cada ítem es el de su población real.
+    const out = aggregateItemStats(
+      [
+        resp({ studentId: 's1', itemId: 'c1' }),
+        resp({ studentId: 's2', itemId: 'c1' }),
+        resp({ studentId: 's3', itemId: 'c1' }),
+        resp({ studentId: 's1', itemId: 'm1' }),
+        resp({ studentId: 's2', itemId: 'm1' }),
+        resp({ studentId: 's3', itemId: 'm2' }),
+      ],
+      enrollment,
+    );
+
+    expect(out.find((o) => o.itemId === 'c1')!.studentCount).toBe(3);
+    expect(out.find((o) => o.itemId === 'm1')!.studentCount).toBe(2);
+    expect(out.find((o) => o.itemId === 'm2')!.studentCount).toBe(1);
+    // El N del curso —el `max`— sigue siendo 3 y no lo arrastran hacia abajo las menciones.
+    expect(Math.max(...out.map((o) => o.studentCount))).toBe(3);
   });
 
   it('descarta respuestas de alumnos sin matrícula (no se les puede asignar cohorte)', () => {
@@ -494,5 +539,26 @@ describe('deriveSkillStatsFromItemStats', () => {
       new Map([['p1', ['n1']]]),
     );
     expect(out[0]!.percentage).toBeNull();
+  });
+
+  it('con N distinto por ítem toma el mayor como N del nodo', () => {
+    // Un nodo etiquetado en un ítem común (N=43) y en uno de mención (N=14): el N
+    // reportado es el de la población mayor. La tasa sigue saliendo de scoreSum/maxSum,
+    // que son conteos y por lo tanto sumables aunque las poblaciones difieran.
+    const out = deriveSkillStatsFromItemStats(
+      [
+        stat({ itemId: 'comun', studentCount: 43, responseCount: 43, correctCount: 30, scoreSum: 30, maxSum: 43 }),
+        stat({ itemId: 'mencion', studentCount: 14, responseCount: 14, correctCount: 7, scoreSum: 7, maxSum: 14 }),
+      ],
+      new Map([
+        ['comun', ['n1']],
+        ['mencion', ['n1']],
+      ]),
+    );
+
+    expect(out).toHaveLength(1);
+    expect(out[0]!.studentCount).toBe(43);
+    expect(out[0]!.totalCount).toBe(57);
+    expect(out[0]!.percentage).toBeCloseTo(37 / 57, 6);
   });
 });

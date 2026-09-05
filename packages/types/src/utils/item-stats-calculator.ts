@@ -176,13 +176,23 @@ export function mergeAnswerCounts(buckets: readonly AnswerCount[][]): AnswerCoun
  * de bucket. Las respuestas de alumnos ausentes del mapa se descartan (no se les
  * puede asignar cohorte).
  *
- * `studentCount` es el N de la cohorte: alumnos distintos del curso presentes en el
- * set de respuestas. Es constante entre los ítems de un mismo curso, igual que el
- * "Cantidad de estudiantes que considera este informe" del PDF oficial.
+ * `studentCount` es el N de la cohorte **de ese ítem**: alumnos distintos del curso
+ * con una fila de respuesta para el ítem. Grano `(curso, ítem)`, no `(curso)`.
  *
- * `responseCount` es el número de filas de respuesta del ítem, que es el denominador
- * del `correctRate` actual e incluye los blancos. Puede ser menor que `studentCount`
- * si un alumno no tiene fila para ese ítem.
+ * ⚠️ Antes era el N del curso entero, "constante entre los ítems de un mismo curso".
+ * Con secciones electivas eso es falso: un ítem de una mención lo responden 26 de los
+ * 80 alumnos del curso, y reportar 80 infla el denominador de toda la analítica. La
+ * fila de respuesta es el proxy correcto de "a este alumno le tocaba este ítem":
+ * la ingesta crea una fila por cada ítem de la forma del alumno, blancos incluidos.
+ *
+ * Para un instrumento que todos rinden entero —todos los de hoy— cada ítem tiene una
+ * fila por alumno del curso, así que `studentCount` sigue siendo el N del curso y
+ * ningún número cambia. El N del curso, cuando se necesita, es el `max` de los
+ * `studentCount` de sus ítems (lo que ya hacían todos los consumidores).
+ *
+ * `responseCount` es el número de FILAS de respuesta del ítem, que es el denominador
+ * del `correctRate` actual e incluye los blancos. Coincide con `studentCount` salvo
+ * que un alumno tenga más de una fila para el mismo ítem.
  */
 export function aggregateItemStats(
   responses: readonly ResponseForItemStats[],
@@ -205,19 +215,9 @@ export function aggregateItemStats(
       maxSum: number;
     }
   >();
-  // classGroupId → alumnos distintos del curso en todo el set (el N de la cohorte).
-  const cohort = new Map<string, Set<string>>();
-
   for (const r of responses) {
     const classGroupId = enrollment.get(r.studentId);
     if (classGroupId == null) continue;
-
-    let students = cohort.get(classGroupId);
-    if (!students) {
-      students = new Set();
-      cohort.set(classGroupId, students);
-    }
-    students.add(r.studentId);
 
     const cellKey = `${classGroupId}__${r.itemId}`;
     let cell = acc.get(cellKey);
@@ -263,7 +263,8 @@ export function aggregateItemStats(
   return [...acc.values()].map((cell) => ({
     classGroupId: cell.classGroupId,
     itemId: cell.itemId,
-    studentCount: cohort.get(cell.classGroupId)?.size ?? cell.students.size,
+    // Grano (curso, ítem): los alumnos que efectivamente tienen respuesta a ESTE ítem.
+    studentCount: cell.students.size,
     responseCount: cell.responseCount,
     correctCount: cell.correctCount,
     answerCounts: sortAnswerCounts([...cell.buckets.values()]),
@@ -381,6 +382,10 @@ export function deriveSkillStatsFromItemStats(
         };
         acc.set(key, cell);
       }
+      // El N del nodo es el del ítem más respondido que lo etiqueta. Con secciones
+      // electivas un mismo nodo puede venir de un ítem común (N del curso) y de uno
+      // de mención (N de la mención): el `max` toma la población mayor, que es la
+      // única lectura defendible sin partir la fila por sección (§3.4 del diseño).
       cell.studentCount = Math.max(cell.studentCount, st.studentCount);
       cell.correctCount += st.correctCount;
       cell.totalCount += st.responseCount;
