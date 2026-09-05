@@ -97,9 +97,24 @@ equivocada.
 `result` es el ScanResult del contrato sin cambios; `debug` agrega por página
 histograma de fills (10 bins), `threshold`/`gap`/`stdLow`/`stdHigh`,
 `separable`/`allMarked`, conteo por estado, `sharpness`/`glare` crudos,
-`orientationDegrees` y ms por etapa. Sin `?debug=1` la respuesta es el
-ScanResult puro. El harness del conjunto de oro (F4) puede importar
-`app.pipeline.classify_page_debug` / `read_scan_debug` directamente.
+`orientationDegrees`, ms por etapa y `registration` (resumen del registro local
+de burbujas: desplazamiento mediano/p90/máximo respecto del spec, score p10,
+cuántas burbujas cayeron al spec y cuántas heredaron el ajuste del grupo). Sin
+`?debug=1` la respuesta es el ScanResult puro. El harness del conjunto de oro
+(F4) puede importar `app.pipeline.classify_page_debug` / `read_scan_debug`
+directamente.
+
+## Registro local de burbujas
+
+La homografía de los 4 fiduciales deja cada burbuja a varios píxeles de donde el
+spec la pone (6–8 px típicos en fotos de teléfono, 15 en la peor medida; el anillo
+tiene 17.6 px de radio y el disco de muestreo 14). `app/registration.py` localiza
+el anillo impreso de cada burbuja en una ventana acotada alrededor del spec antes
+de medir el fill, con consistencia lineal por grupo y fallback a la posición del
+spec. La firma de grilla y la identidad RUT siguen muestreando en el spec (la
+firma es la prueba de la homografía; no debe ayudarse). Método, compuertas y
+bitácora de validación en `goldset/README-registro.md`; medición con
+`python -m tools.measure_registration goldset/real`.
 
 ## Conjunto de oro (O4)
 
@@ -130,6 +145,7 @@ prueba el harness de punta a punta).
 |---|---|---|
 | `OMR_PAGE_TIMEOUT_S` | `20` | Tiempo límite por página; una página que lo excede se omite del resultado (si TODAS lo exceden → 504) |
 | `OMR_DOWNLOAD_TIMEOUT_S` | `10` | Timeout de descarga de cada URL firmada |
+| `OMR_LOCAL_REGISTRATION` | ver `app/registration.py` | Registro local de burbujas antes de muestrear (`1`/`0`). Interruptor de emergencia mientras dure la observación en producción |
 
 ## Desarrollo local
 

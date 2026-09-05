@@ -98,8 +98,11 @@ class PageThreshold:
 
 
 def bubble_fill(page: RectifiedPage, center: dict[str, float], radius: float) -> float:
-    center_px = point_to_px(center, page.size)
-    radius_px = radius_to_px(radius, page.size)
+    return bubble_fill_px(page, point_to_px(center, page.size), radius_to_px(radius, page.size))
+
+
+def bubble_fill_px(page: RectifiedPage, center_px: tuple[int, int], radius_px: int) -> float:
+    """El mismo fill con el centro ya en pixeles (lo usa el registro local, app/registration)."""
     patch, local_center = _patch_around(page.gray, center_px, radius_px)
     background = _local_background(patch, local_center, radius_px)
     inner = _circle_pixels(patch, local_center, max(1, round(radius_px * INNER_RADIUS_RATIO)))

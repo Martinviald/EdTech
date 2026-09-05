@@ -78,3 +78,36 @@ ilegible que fijaron `BLANK_SHEET_MAX_FILL`; las 16 páginas locales. Sin ellas 
 recalibra ese corte (ver entrada de la fase 2).
 
 Decisión: **avanza** a fase 1.
+
+### 2026-09-04 · fase 1 · registro local del anillo, detrás de `OMR_LOCAL_REGISTRATION`
+
+Cambio: `app/registration.py` (plantilla de anillo, ventana `W = min(0.9 R, 0.4·distancia)`,
+consistencia por grupo, fallback al spec); `readers.sample_bubble_fills` lo usa con el
+interruptor encendido; firma de grilla, `_refine_accepted` e identidad siguen en
+`sample_bubble_fills_at_spec`; `registration` en el debug de página; 22 tests nuevos.
+
+**Ciclo 1a — consistencia por mediana del grupo (±3 px):** real 186 / 34 / 0, pero piso p95
+de vacías 0.28–0.33 en 4 hojas (compuerta ≤ 0.25) con residuo 4–6 px justo en la columna A.
+Diagnóstico con `register_group` a mano: dentro de una fila el desplazamiento es un
+**gradiente** (diego-1624 q5: A −13, B −10, C −7, D −5 px) y los ajustes crudos coinciden con
+el localizador independiente a < 1 px; la mediana constante era lo que metía el error.
+Decisión: **ajusta** — no se tocó ningún umbral, se cambió el modelo de consistencia.
+
+**Ciclo 1b — consistencia lineal (Theil-Sen por grupo, tolerancia 3 px respecto de la
+recta, pendiente acotada 0.10):**
+
+| conjunto | resultado | compuerta |
+|---|---|---|
+| real, 220 marcas | **194 / 26 / 0** (22 = `carla-1620` cropped; 4 revisiones reales: las 2 dobles de Bruno q12 como `multiple` + 2) | 0 incorrectas ✓ |
+| 154 con verdad | **150 / 4 / 0** | ≥ 145 ✓ |
+| demo, 44 | **44 / 0 / 0**, todas coinciden con humano/motor | ✓ |
+| `res_med` vs localizador independiente | 0.4–0.6 px | ≤ 1.5 ✓ |
+| `fallback` | 0 % en las 9 hojas | ≤ 5 % ✓ |
+| `motor_floor_p95` | 0.20–0.27 en 8 hojas; **0.330 en demo-1** | ≤ 0.25: **no en demo-1** — pero el localizador independiente da 0.334 en esa misma foto: es el piso de la captura (anillo más grueso/desenfocado), no del registro. Se reformula la compuerta como "piso del motor a ≤ 0.03 del piso independiente", que se cumple en las 9. |
+| `motor_gap` mínimo | **0.486** (alcanzable 0.498) | ≥ 0.30 ✓ |
+| contraste por pregunta min/max | 0.52–0.73 / 0.02–0.08 | — |
+| xcap Diego (marcadas) | **0.002** | ≤ 0.03 ✓ |
+| sintético 48 | 97.92 % / 1.91 % / 1 (idéntico a la línea base con registro; misma incorrecta ajena) | sin regresión ✓ |
+| `classify` por página | 27–32 ms (antes ~20) | ≤ +50 ✓ |
+
+Decisión: **avanza** a fase 2.

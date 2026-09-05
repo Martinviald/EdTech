@@ -31,7 +31,7 @@ import zxingcpp
 
 from .classify import AMBIGUITY_MARGIN, page_threshold
 from .geometry import point_to_px
-from .readers import read_digit_groups, sample_bubble_fills
+from .readers import read_digit_groups, sample_bubble_fills_at_spec
 from .rectify import RectifiedPage
 
 QR_PAYLOAD_PREFIX = "academos"
@@ -68,7 +68,7 @@ def _read_rut_bubbles(
     bubbles = spec["identity"].get("bubbles")
     if not bubbles:
         return undetected
-    fills = sample_bubble_fills(rectified, bubbles)
+    fills = sample_bubble_fills_at_spec(rectified, bubbles)
     threshold = page_threshold(fills)
     if not threshold.is_readable():
         return undetected

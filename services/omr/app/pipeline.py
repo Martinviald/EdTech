@@ -85,7 +85,7 @@ from .identity import (
 )
 from .illumination import flatten_illumination
 from .quality import assess
-from .readers import READERS, sample_bubble_fills
+from .readers import READERS, sample_bubble_fills_at_spec
 from .rectify import (
     FiducialFailure,
     RectifiedPage,
@@ -94,6 +94,7 @@ from .rectify import (
     refine_reconstruction,
     search_rectification,
 )
+from .registration import RingFix, local_registration_enabled, summarize
 from .sources import Fetch, build_page_source, fetch_url
 
 logger = logging.getLogger("omr.pipeline")
@@ -485,7 +486,7 @@ def _refine_accepted(
         return rectified
 
     def separation_gap(page: RectifiedPage) -> float:
-        return page_threshold(sample_bubble_fills(page, bubbles)).gap
+        return page_threshold(sample_bubble_fills_at_spec(page, bubbles)).gap
 
     refined = refine_reconstruction(
         bgr, spec, rectified.reconstructed_corner, separation_gap
@@ -594,7 +595,7 @@ def _grid_signature_fraction(
     bubbles = _spec_bubbles(spec, logical_page)
     if not bubbles:
         return 0.0
-    fills = sample_bubble_fills(rectified, bubbles)
+    fills = sample_bubble_fills_at_spec(rectified, bubbles)
     over = sum(1 for fill in fills if fill > GRID_SIGNATURE_FILL_FLOOR)
     return over / len(fills)
 
@@ -641,6 +642,7 @@ def _empty_classify_debug() -> dict[str, Any]:
         "gap": None,
         "stdLow": None,
         "stdHigh": None,
+        "registration": None,
     }
 
 
@@ -655,7 +657,12 @@ def _marks_readability(
     identity: dict[str, Any],
     file_page_index: int,
 ) -> tuple[
-    list[dict[str, Any]], list[list[float]], list[float], PageThreshold | None, str
+    list[dict[str, Any]],
+    list[list[float]],
+    list[float],
+    PageThreshold | None,
+    str,
+    list[RingFix],
 ]:
     """Muestrea los fills de la pagina y dictamina si sus marcas se pueden leer.
 
@@ -664,6 +671,10 @@ def _marks_readability(
     rectificada y con el mismo muestreo por lector. Extraerlo en vez de
     duplicarlo es el requisito duro: un gate que acepte con un criterio lo que
     el lote despues rechaza con otro es peor que no tener gate.
+
+    El ultimo elemento es el registro local de cada burbuja muestreada
+    (app/registration.py), para el payload de debug; vacio con el interruptor
+    apagado.
     """
     logical_page = peek_logical_page_index(identity["raw"], file_page_index, spec["pageCount"])
     readable = [
@@ -671,18 +682,19 @@ def _marks_readability(
         for field in spec["fields"]
         if field["pageIndex"] == logical_page and field["kind"] in READERS
     ]
+    registration_log: list[RingFix] = []
     if not readable:
-        return [], [], [], None, MARKS_UNREADABLE
+        return [], [], [], None, MARKS_UNREADABLE, registration_log
     fills_by_field = [
-        READERS[field["kind"]].sample_fills(rectified, field) for field in readable
+        READERS[field["kind"]].sample_fills(rectified, field, registration_log)
+        for field in readable
     ]
     all_fills = [fill for fills in fills_by_field for fill in fills]
     if not all_fills:
-        return readable, fills_by_field, [], None, MARKS_READABLE
+        return readable, fills_by_field, [], None, MARKS_READABLE, registration_log
     threshold = page_threshold(all_fills)
-    return readable, fills_by_field, all_fills, threshold, readability_verdict(
-        threshold, all_fills
-    )
+    verdict = readability_verdict(threshold, all_fills)
+    return readable, fills_by_field, all_fills, threshold, verdict, registration_log
 
 
 def _read_marks(
@@ -693,8 +705,8 @@ def _read_marks(
     quality: dict[str, Any],
     ambiguity_margin: float,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    readable, fills_by_field, all_fills, threshold, verdict = _marks_readability(
-        rectified, spec, identity, file_page_index
+    readable, fills_by_field, all_fills, threshold, verdict, registration_log = (
+        _marks_readability(rectified, spec, identity, file_page_index)
     )
     quality["marksReadability"] = verdict
     if not readable:
@@ -722,6 +734,7 @@ def _read_marks(
         "gap": round(threshold.gap, 4),
         "stdLow": round(threshold.std_low, 4),
         "stdHigh": round(threshold.std_high, 4),
+        "registration": summarize(registration_log, local_registration_enabled()),
     }
     if not threshold.is_readable():
         _reject_page(quality, "no_separable_marks")
