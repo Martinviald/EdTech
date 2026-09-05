@@ -51,13 +51,14 @@ const BATCH_ROW = {
   id: BATCH_ID,
   printRunId: RUN_ID,
   status: 'processing',
+  sourceFileIds: [FILE_ID],
   captureProfile: PROFILE,
   pagesTotal: null,
   pagesRead: 0,
   reviewPending: 0,
   failureReason: null,
   createdAt: new Date('2026-08-20T12:00:00Z'),
-  updatedAt: new Date('2026-08-20T12:00:00Z'),
+  updatedAt: new Date(),
   sheetCount: 30,
 };
 
@@ -899,6 +900,141 @@ describe('SheetScanService.getBatch', () => {
     const { service } = makeService([[]]);
 
     await expect(service.getBatch(ORG_ID, BATCH_ID)).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('SheetScanService — avance de subida de los archivos del lote', () => {
+  const SECOND_FILE_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+  it('un lote pending sin ninguna subida confirmada reporta ready 0 de los esperados', async () => {
+    const { service } = makeService([
+      [
+        {
+          ...BATCH_ROW,
+          status: 'pending',
+          sourceFileIds: [FILE_ID, SECOND_FILE_ID],
+          updatedAt: new Date(),
+        },
+      ],
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    const model = await service.getBatch(ORG_ID, BATCH_ID);
+
+    expect(model.status).toBe('pending');
+    expect(model.sources).toEqual({ expected: 2, ready: 0 });
+  });
+
+  it('un lote pending con parte de los archivos subidos reporta cuántos faltan', async () => {
+    const { service } = makeService([
+      [
+        {
+          ...BATCH_ROW,
+          status: 'pending',
+          sourceFileIds: [FILE_ID, SECOND_FILE_ID],
+          updatedAt: new Date(),
+        },
+      ],
+      [],
+      [],
+      [],
+      [{ id: FILE_ID }],
+    ]);
+
+    const model = await service.getBatch(ORG_ID, BATCH_ID);
+
+    expect(model.sources).toEqual({ expected: 2, ready: 1 });
+  });
+
+  it('un lote sin archivos declarados no consulta la tabla de archivos', async () => {
+    const { service } = makeService([
+      [{ ...BATCH_ROW, status: 'pending', sourceFileIds: [], updatedAt: new Date() }],
+      [],
+      [],
+      [],
+    ]);
+
+    const model = await service.getBatch(ORG_ID, BATCH_ID);
+
+    expect(model.sources).toEqual({ expected: 0, ready: 0 });
+  });
+});
+
+describe('SheetScanService — watchdog de lotes huérfanos en processing', () => {
+  const STALE_UPDATED_AT = new Date(Date.now() - 60 * 60 * 1000);
+
+  it('un lote processing sin señales de vida por más del umbral queda failed y reintentable', async () => {
+    const { service, updates } = makeService([
+      [{ ...BATCH_ROW, status: 'processing', updatedAt: STALE_UPDATED_AT }],
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    const model = await service.getBatch(ORG_ID, BATCH_ID);
+
+    expect(model.status).toBe('failed');
+    expect(model.failureReason).toContain('se interrumpió');
+    expect(model.failureReason).toContain('reintentar');
+    expect(updates).toHaveLength(1);
+    expect(updates[0].table).toBe(sheetScanBatches);
+    expect(updates[0].set).toMatchObject({ status: 'failed' });
+  });
+
+  it('un lote processing que acaba de dar señales de vida no se toca', async () => {
+    const { service, updates } = makeService([
+      [{ ...BATCH_ROW, status: 'processing', updatedAt: new Date() }],
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    const model = await service.getBatch(ORG_ID, BATCH_ID);
+
+    expect(model.status).toBe('processing');
+    expect(model.failureReason).toBeNull();
+    expect(updates).toHaveLength(0);
+  });
+
+  it('un lote en un estado terminal antiguo no se reconcilia', async () => {
+    const { service, updates } = makeService([
+      [{ ...BATCH_ROW, status: 'needs_review', updatedAt: STALE_UPDATED_AT }],
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    const model = await service.getBatch(ORG_ID, BATCH_ID);
+
+    expect(model.status).toBe('needs_review');
+    expect(updates).toHaveLength(0);
+  });
+
+  it('el listado reconcilia los huérfanos de la página en una sola escritura', async () => {
+    const OTHER_BATCH_ID = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+    const { service, updates } = makeService([
+      [{ total: 2 }],
+      [
+        { ...BATCH_ROW, status: 'processing', updatedAt: STALE_UPDATED_AT },
+        { ...BATCH_ROW, id: OTHER_BATCH_ID, status: 'processing', updatedAt: STALE_UPDATED_AT },
+      ],
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    const result = await service.list(ORG_ID, { page: 1, limit: 20 });
+
+    expect(result.data.map((batch) => batch.status)).toEqual(['failed', 'failed']);
+    expect(updates).toHaveLength(1);
+    expect(updates[0].set).toMatchObject({ status: 'failed' });
   });
 });
 
