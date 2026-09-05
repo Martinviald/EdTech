@@ -1,0 +1,37 @@
+{
+  "sheetId": "carla-1625",
+  "layoutSpecFile": "../layout-spec.json",
+  "truthSource": "construction",
+  "physicalSheet": "carla",
+  "sourceFile": "IMG_1625.JPG",
+  "transcriptions": [
+    {
+      "by": "autor-de-la-hoja",
+      "answers": {
+        "1": "A",
+        "2": "B",
+        "3": "C",
+        "4": "D",
+        "5": "B",
+        "6": "C",
+        "7": "B",
+        "8": "B",
+        "9": "B",
+        "10": "B",
+        "11": "C",
+        "12": "C",
+        "13": null,
+        "14": "C",
+        "15": "C",
+        "16": "C",
+        "18": "B",
+        "19": "B",
+        "20": "B",
+        "22": "B",
+        "23": "B",
+        "24": "A"
+      }
+    }
+  ],
+  "notes": "Verdad por construccion: la persona que rellena reporto sus marcas con la hoja fisica a la vista, antes de fotografiar. Fotos con verdad del 2026-09-04 (analisis-omr-marcas/datos/fotos-con-verdad). "
+}

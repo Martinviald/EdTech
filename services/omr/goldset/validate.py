@@ -33,6 +33,7 @@ from .dataset import (
     load_truth,
     page_files,
     printed_number_sort_key,
+    required_transcriptions,
     transcription_answers,
 )
 
@@ -54,11 +55,15 @@ def validate_sheet(sheet: GoldSheet) -> list[str]:
     except DatasetError as error:
         return errors + [f"{sheet.label}: {error}"]
 
-    errors.extend(_validate_transcription_shape(sheet, transcriptions))
+    try:
+        required = required_transcriptions(truth)
+    except DatasetError as error:
+        return errors + [f"{sheet.label}: {error}"]
+    errors.extend(_validate_transcription_shape(sheet, transcriptions, required))
     fields = fields_by_printed_number(spec)
     for transcription in transcriptions:
         errors.extend(_validate_answers(sheet, transcription, fields))
-    if len(transcriptions) == REQUIRED_TRANSCRIPTIONS:
+    if required == REQUIRED_TRANSCRIPTIONS and len(transcriptions) == REQUIRED_TRANSCRIPTIONS:
         errors.extend(_transcription_discrepancies(sheet, transcriptions))
     return errors
 
@@ -81,13 +86,14 @@ def _validate_pages(sheet: GoldSheet, spec: dict[str, Any]) -> list[str]:
 
 
 def _validate_transcription_shape(
-    sheet: GoldSheet, transcriptions: list[dict[str, Any]]
+    sheet: GoldSheet, transcriptions: list[dict[str, Any]], required: int
 ) -> list[str]:
     errors: list[str] = []
-    if len(transcriptions) != REQUIRED_TRANSCRIPTIONS:
+    if len(transcriptions) != required:
+        why = "doble verificacion" if required == REQUIRED_TRANSCRIPTIONS else "truthSource"
         errors.append(
-            f"{sheet.label}: se requieren exactamente {REQUIRED_TRANSCRIPTIONS} "
-            f"transcripciones (doble verificacion) y hay {len(transcriptions)}"
+            f"{sheet.label}: se requieren exactamente {required} "
+            f"transcripciones ({why}) y hay {len(transcriptions)}"
         )
     names = [t.get("by") for t in transcriptions]
     if any(not isinstance(name, str) or not name for name in names):
@@ -174,7 +180,7 @@ def main(argv: list[str] | None = None) -> int:
         for error in all_errors:
             print(f"  - {error}")
         return 1
-    print(f"Conjunto valido: {len(sheets)} hoja(s), 2 transcripciones coincidentes por hoja.")
+    print(f"Conjunto valido: {len(sheets)} hoja(s), transcripciones completas y coincidentes.")
     return 0
 
 

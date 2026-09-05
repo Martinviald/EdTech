@@ -50,9 +50,54 @@ def test_validate_reporta_discrepancias_entre_transcripciones(
     assert "persona2=D" in output
 
 
-def test_run_sobre_el_ejemplo_aprueba(
+def _example_copy_with_truth(tmp_path: Path, mutate) -> Path:
+    data_dir = tmp_path / "data"
+    shutil.copytree(EXAMPLE_DIR, data_dir)
+    truth_path = data_dir / "phone-good" / "hoja-ejemplo-001" / "truth.json"
+    truth = json.loads(truth_path.read_text(encoding="utf-8"))
+    mutate(truth)
+    truth_path.write_text(json.dumps(truth), encoding="utf-8")
+    return data_dir
+
+
+def test_validate_acepta_verdad_por_construccion_con_una_transcripcion(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    def mutate(truth: dict) -> None:
+        truth["truthSource"] = "construction"
+        truth["transcriptions"] = truth["transcriptions"][:1]
+        truth["transcriptions"][0]["by"] = "autor-de-la-hoja"
+
+    data_dir = _example_copy_with_truth(tmp_path, mutate)
+
+    assert goldset_validate.main([str(data_dir)]) == 0
+    assert "Conjunto valido" in capsys.readouterr().out
+    assert goldset_run.main([str(data_dir), "--reports-dir", str(tmp_path / "rep")]) == 0
+
+
+def test_validate_exige_una_sola_transcripcion_si_la_verdad_es_por_construccion(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    data_dir = _example_copy_with_truth(
+        tmp_path, lambda truth: truth.__setitem__("truthSource", "construction")
+    )
+
+    assert goldset_validate.main([str(data_dir)]) == 1
+    assert "se requieren exactamente 1 transcripciones (truthSource)" in capsys.readouterr().out
+
+
+def test_validate_rechaza_un_truth_source_desconocido(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    data_dir = _example_copy_with_truth(
+        tmp_path, lambda truth: truth.__setitem__("truthSource", "de-oido")
+    )
+
+    assert goldset_validate.main([str(data_dir)]) == 1
+    assert "truthSource desconocido 'de-oido'" in capsys.readouterr().out
+
+
+def test_run_sobre_el_ejemplo_aprueba(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     exit_code = goldset_run.main([str(EXAMPLE_DIR), "--reports-dir", str(tmp_path)])
     assert exit_code == 0
 
@@ -83,8 +128,7 @@ def _mini_spec() -> dict:
             "pageIndex": page,
             "selectMode": "single",
             "bubbles": [
-                {"value": value, "center": {"x": 0.1, "y": 0.1}, "radius": 0.01}
-                for value in "AB"
+                {"value": value, "center": {"x": 0.1, "y": 0.1}, "radius": 0.01} for value in "AB"
             ],
             "region": None,
         }
