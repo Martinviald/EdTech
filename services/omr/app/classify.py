@@ -39,6 +39,24 @@ margin < AMBIGUITY_MARGIN => ambiguous. Ademas, un fill en tierra de nadie
 — lejos de AMBOS grupos (banda `ambiguity_band`) — tambien es ambiguous
 aunque su margin sea alto: un tick al 40% en una hoja de rellenos completos
 quedaba como blank CONFIADO, el unico defecto que la cola no compensa.
+
+Lo que NO cambia, y por que (goldset/README-registro.md):
+
+- El margen normalizado por el hueco entre grupos ("propuesta A", rama
+  exp/omr-margen-por-hueco) queda archivado. Atacaba el sintoma: con el disco
+  de muestreo corrido respecto del anillo (app/registration.py) el margen se
+  comprimia, y normalizarlo dejaba de dudar sobre fills que estaban mal
+  medidos — 13 errores confiados sobre 154 preguntas con verdad, contra 4 del
+  criterio actual y 0 con el registro puesto. Ademas la evaluacion que lo
+  apoyaba comparaba el `fill` REPRESENTATIVO del campo (en un campo ambiguous es
+  la burbuja mas dudosa, casi siempre una vacia) como si fuera la marcada.
+  Cualquier evaluacion de criterios se hace por burbuja, con los 4 fills.
+- El contraste por pregunta (fill mayor menos segundo mayor) se midio como
+  segunda opinion para dudar: con el registro puesto, ningun campo de las 9
+  fotos reales ni de las 48 sinteticas cambiaria de decision con un corte de
+  0.15, 0.25 o 0.35 — margen + banda + `multiple` ya cubren esos casos. Se
+  expone en el debug de pagina (`fieldContrast`) como senal de monitoreo, no
+  como regla.
 """
 
 from __future__ import annotations
@@ -209,6 +227,14 @@ def margin_of(fill: float, threshold: float) -> float:
     if threshold <= 0:
         return 0.0
     return abs(fill - threshold) / threshold
+
+
+def field_contrast(fills: list[float]) -> float:
+    """Fill mayor menos segundo mayor del campo: cuanto se despega la respuesta del resto."""
+    if len(fills) < 2:
+        return 0.0
+    ordered = sorted(fills, reverse=True)
+    return float(ordered[0] - ordered[1])
 
 
 def _otsu_split(values: np.ndarray) -> tuple[np.ndarray, np.ndarray] | None:

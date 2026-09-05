@@ -76,6 +76,7 @@ from .classify import (
     MARKS_READABLE,
     MARKS_UNREADABLE,
     PageThreshold,
+    field_contrast,
     page_threshold,
     readability_verdict,
 )
@@ -643,6 +644,7 @@ def _empty_classify_debug() -> dict[str, Any]:
         "stdLow": None,
         "stdHigh": None,
         "registration": None,
+        "fieldContrast": None,
     }
 
 
@@ -744,7 +746,36 @@ def _read_marks(
         READERS[field["kind"]].read(rectified, field, fills, threshold, ambiguity_margin)
         for field, fills in zip(readable, fills_by_field, strict=True)
     ]
+    classify_debug["fieldContrast"] = _field_contrast_summary(readable, fills_by_field, marks)
     return marks, classify_debug
+
+
+def _field_contrast_summary(
+    fields: list[dict[str, Any]], fills_by_field: list[list[float]], marks: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Contraste por pregunta (fill mayor menos segundo) segun lo que se decidio.
+
+    Senal de monitoreo, no de decision (ver app/classify.py): en una captura sana
+    las preguntas leidas `marked` se despegan del resto por >= 0.5 y las `blank`
+    por < 0.1; si esas dos cifras se acercan en un lote, algo cambio en la
+    impresion, la camara o el registro antes de que aparezca un error.
+    """
+    marked: list[float] = []
+    blank: list[float] = []
+    for field, fills, mark in zip(fields, fills_by_field, marks, strict=True):
+        if field["kind"] != "bubble_group" or len(fills) < 2:
+            continue
+        contrast = field_contrast(fills)
+        if mark["state"] == "marked":
+            marked.append(contrast)
+        elif mark["state"] == "blank":
+            blank.append(contrast)
+    return {
+        "markedMin": round(min(marked), 4) if marked else None,
+        "markedCount": len(marked),
+        "blankMax": round(max(blank), 4) if blank else None,
+        "blankCount": len(blank),
+    }
 
 
 def _reject_page(quality: dict[str, Any], reason: str) -> None:

@@ -149,3 +149,28 @@ inventado sin él.
 | capturas RUT reales | no hay en el repo; pendiente cuando existan |
 
 Decisión: **avanza** a fase 4.
+
+### 2026-09-04 · fase 4 · criterio de decisión: medido, no se cambia
+
+Contraste por pregunta (fill mayor − segundo mayor), fills con registro:
+
+| conjunto | contestadas: mín / p5 | en blanco: máx | dobles |
+|---|---|---|---|
+| real (140 / 56) | 0.517 / 0.604 | 0.082 | 0.199, 0.201 |
+| sintético phone-good / scanner / phone-bad | 0.755 / 0.739 / 0.634 | ≤ 0.035 | — |
+| sintético dirty | 0.016 (marca lavada, la incorrecta confiada de siempre) / 0.429 | 0.034 | — |
+
+Recuento de lo que una regla "una burbuja sobre el umbral y contraste < C ⇒ dudar"
+agregaría sobre margen + tierra de nadie + `multiple`, para C ∈ {0.15, 0.25, 0.35}: **0 campos**
+en real y **0** en sintético. Tampoco hay ningún `marked` incorrecto con una sola burbuja sobre
+el umbral que la regla pudiera atrapar. Con el registro puesto, el criterio actual ya duda donde
+corresponde: las 4 revisiones reales son las 2 dobles marcas de Bruno (`multiple`) y 2 rellenos
+al 0.68 que caen en la tierra de nadie (verdad: sí son marcas; un tick suelto también caería
+ahí, y no hay datos para distinguirlos — se mantiene la duda).
+
+Cambios: `fieldContrast` (mín entre `marked`, máx entre `blank`) en el debug de página como
+señal de monitoreo; docstring de `classify.py` con el archivo de la propuesta A y su razón. Sin
+cambio de criterio ni de contrato. El campo de evidencia en `marks[]` (fill de la burbuja más
+oscura) queda como deuda para la próxima versión del esquema.
+
+Decisión: **avanza** a fase 5.
