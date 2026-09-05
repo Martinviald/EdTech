@@ -1,0 +1,37 @@
+{
+  "sheetId": "bruno-1619",
+  "layoutSpecFile": "../layout-spec.json",
+  "truthSource": "construction",
+  "physicalSheet": "bruno",
+  "sourceFile": "IMG_1619.JPG",
+  "transcriptions": [
+    {
+      "by": "autor-de-la-hoja",
+      "answers": {
+        "1": "B",
+        "2": "C",
+        "3": "C",
+        "4": "B",
+        "5": "C",
+        "6": "D",
+        "7": null,
+        "8": "C",
+        "9": "B",
+        "10": "C",
+        "11": null,
+        "12": "BC",
+        "13": "B",
+        "14": "C",
+        "15": "C",
+        "16": "B",
+        "18": "B",
+        "19": "C",
+        "20": "C",
+        "22": "B",
+        "23": "B",
+        "24": "C"
+      }
+    }
+  ],
+  "notes": "Verdad por construccion: la persona que rellena reporto sus marcas con la hoja fisica a la vista, antes de fotografiar. Fotos con verdad del 2026-09-04 (analisis-omr-marcas/datos/fotos-con-verdad). Pregunta 12 con doble marca real (B y C): la lectura correcta es `multiple`."
+}

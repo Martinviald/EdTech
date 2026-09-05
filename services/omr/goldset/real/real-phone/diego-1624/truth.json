@@ -1,0 +1,37 @@
+{
+  "sheetId": "diego-1624",
+  "layoutSpecFile": "../layout-spec.json",
+  "truthSource": "construction",
+  "physicalSheet": "diego",
+  "sourceFile": "IMG_1624.JPG",
+  "transcriptions": [
+    {
+      "by": "autor-de-la-hoja",
+      "answers": {
+        "1": "D",
+        "2": "D",
+        "3": "D",
+        "4": "D",
+        "5": null,
+        "6": "C",
+        "7": "C",
+        "8": "C",
+        "9": "C",
+        "10": null,
+        "11": "B",
+        "12": "B",
+        "13": "B",
+        "14": "B",
+        "15": null,
+        "16": "A",
+        "18": "A",
+        "19": "A",
+        "20": "A",
+        "22": "B",
+        "23": "C",
+        "24": "D"
+      }
+    }
+  ],
+  "notes": "Verdad por construccion: la persona que rellena reporto sus marcas con la hoja fisica a la vista, antes de fotografiar. Fotos con verdad del 2026-09-04 (analisis-omr-marcas/datos/fotos-con-verdad). "
+}

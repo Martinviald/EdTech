@@ -12,7 +12,11 @@ misma regla de oro de CD-8 — cualquier grupo dudoso, doble o vacio => raw None
 (identidad no detectada), jamas un RUT con un digito inventado. raw = digitos
 concatenados ("12345678K"); confidence = minimo margin de los grupos ganadores,
 recortado a [0,1]. El umbral se calcula sobre los fills de la grilla misma:
-autocontenida, funciona igual en /v1/read y /v1/assess.
+autocontenida, funciona igual en /v1/read y /v1/assess. Los fills se muestrean con
+el registro local por COLUMNA (readers.sample_digit_grid_fills): en la grilla las
+burbujas estan a menos de dos radios y una columna entera comparte el mismo
+desplazamiento; la ventana de busqueda sale de esa distancia (8 px en el layout RUT
+real), asi que un digito nunca puede tomarse el anillo del vecino.
 
 CD-15: la hoja generica ADEMAS imprime el QR de esquina (superior derecha) con
 printedSheetId + layoutHash + pageIndex. En modo rut_bubbles se decodifica desde
@@ -31,7 +35,7 @@ import zxingcpp
 
 from .classify import AMBIGUITY_MARGIN, page_threshold
 from .geometry import point_to_px
-from .readers import read_digit_groups, sample_bubble_fills
+from .readers import read_digit_groups, sample_digit_grid_fills
 from .rectify import RectifiedPage
 
 QR_PAYLOAD_PREFIX = "academos"
@@ -68,7 +72,7 @@ def _read_rut_bubbles(
     bubbles = spec["identity"].get("bubbles")
     if not bubbles:
         return undetected
-    fills = sample_bubble_fills(rectified, bubbles)
+    fills = sample_digit_grid_fills(rectified, bubbles)
     threshold = page_threshold(fills)
     if not threshold.is_readable():
         return undetected

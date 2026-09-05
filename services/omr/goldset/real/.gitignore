@@ -1,0 +1,9 @@
+# Fotos de hojas reales: no se comitean. Se traen con `python -m goldset.import_real <origen>`.
+*.jpg
+*.JPG
+*.jpeg
+*.JPEG
+*.png
+*.PNG
+*.pdf
+*.PDF

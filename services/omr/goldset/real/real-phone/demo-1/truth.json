@@ -1,0 +1,37 @@
+{
+  "sheetId": "demo-1",
+  "layoutSpecFile": "../layout-spec.json",
+  "truthSource": "adjudication",
+  "physicalSheet": "demo-1",
+  "sourceFile": "captura-1.jpg",
+  "transcriptions": [
+    {
+      "by": "revisor-y-motor",
+      "answers": {
+        "1": "D",
+        "2": "D",
+        "3": "D",
+        "4": "D",
+        "5": null,
+        "6": "C",
+        "7": "C",
+        "8": "C",
+        "9": "C",
+        "10": null,
+        "11": "B",
+        "12": "B",
+        "13": "B",
+        "14": "B",
+        "15": null,
+        "16": "A",
+        "18": "A",
+        "19": "A",
+        "20": "A",
+        "22": "B",
+        "23": "C",
+        "24": "D"
+      }
+    }
+  ],
+  "notes": "Verdad PROVISIONAL del lote demo 5a6d5cd9: 30 marcas adjudicadas por una persona mirando el recorte + 14 lecturas confiadas del motor (98912ae) que nadie reviso."
+}

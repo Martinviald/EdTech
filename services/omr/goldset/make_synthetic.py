@@ -89,6 +89,7 @@ class Recipe:
     cut: str
     page_width: int = PHONE_WIDTH
     paper_gray: int = syn.PAPER_GRAY
+    pencil_gray: int = syn.PENCIL_GRAY
     washed_corner: int | None = None
     dropped_corner: int | None = None
     clipped_corner: int | None = None
@@ -154,6 +155,28 @@ def _reflow() -> Callable[[Page, np.random.Generator], Page]:
 
 def _alias_resample(scale: float) -> Callable[[Page, np.random.Generator], Page]:
     return lambda gray, rng: syn.alias_resample(gray, scale, int(rng.integers(0, 3)))
+
+
+def _radial(k1: float) -> Callable[[Page, np.random.Generator], Page]:
+    return lambda gray, _rng: syn.radial_distortion(gray, k1)
+
+
+def _curl(amplitude_px: float) -> Callable[[Page, np.random.Generator], Page]:
+    return lambda gray, _rng: syn.cylinder_curl(gray, amplitude_px)
+
+
+def _fiducial_bias(
+    *shifts: tuple[int, int],
+) -> Callable[[Page, np.random.Generator], Page]:
+    """Cada cuadrado fiducial corrido unos pixeles: el sesgo de centroide medido en fotos.
+
+    Usa los ratios del spec que genera este barrido (`syn.make_layout_spec`), porque
+    el post-proceso solo ve la imagen.
+    """
+    spec = syn.make_layout_spec()
+    size_ratio = spec["fiducials"]["sizeRatio"]
+    margin_ratio = spec["fiducials"]["marginRatio"]
+    return lambda gray, _rng: syn.shift_fiducials(gray, size_ratio, margin_ratio, shifts)
 
 
 def _distractors(
@@ -233,6 +256,18 @@ RECIPES: tuple[Recipe, ...] = (
         post=(_canvas(0.05),),
     ),
     Recipe("sombra-diagonal", "phone-good", post=(_diagonal_shadow(0.18),)),
+    # Las tres recetas del REGISTRO (goldset/README-registro.md): lo que queda tras la
+    # homografia de 4 fiduciales en una foto real no es cero sino 6-8 px (15 en la
+    # peor), y el barrido no lo reproducia — sus fiduciales son exactos y sus
+    # deformaciones, proyectivas. Sin registro local estas tres hojas dan lecturas
+    # confiadas y mal; con registro, pasan. Es el requisito de admision de cada una.
+    Recipe("distorsion-radial", "phone-good", post=(_radial(0.035),)),
+    Recipe("curvatura", "phone-good", post=(_curl(16.0),)),
+    Recipe(
+        "fiducial-sesgo",
+        "phone-good",
+        post=(_fiducial_bias((9, 6), (-8, 10), (10, -7), (-6, -11)),),
+    ),
     Recipe(
         "perspectiva-fuerte",
         "phone-bad",
@@ -253,6 +288,12 @@ RECIPES: tuple[Recipe, ...] = (
     ),
     Recipe("fiducial-cortado", "dirty", clipped_corner=1, post=(_clip(1),)),
     Recipe("fiducial-ausente", "dirty", dropped_corner=2),
+    # Lapiz claro real (HB flojo, grafito con brillo): la marca queda a ~20 % del papel
+    # en vez de ~70 %. El corte de oscuridad del fill (12 % bajo el fondo) todavia la
+    # ve, pero con menos margen: lo que se exige es que NUNCA salga un blank confiado
+    # sobre una marca real. Una marca lavada por debajo del corte es invisible por
+    # diseno (tests/test_washed_band.py, limitacion conocida) y no entra aca.
+    Recipe("lapiz-claro", "dirty", pencil_gray=185, post=(_blur(0.8),)),
     # Las tres recetas del distractor: el fiducial verdadero esta y el detector
     # lo encuentra, pero un cuadrado oscuro del fondo queda mas cerca de la
     # esquina de la IMAGEN y se la gana. Es el modo de falla medido sobre fotos
@@ -413,6 +454,7 @@ def render_sheet(spec: dict[str, Any], plan: SheetPlan, rng: np.random.Generator
         styles=plan.styles,
         page_width=recipe.page_width,
         paper_gray=recipe.paper_gray,
+        pencil_gray=recipe.pencil_gray,
         fiducial_roughness=float(rng.uniform(*ROUGHNESS_RANGE)),
         fiducial_inks=inks,
         drop_fiducials=(
