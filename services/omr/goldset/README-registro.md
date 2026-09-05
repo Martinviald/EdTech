@@ -111,3 +111,24 @@ recta, pendiente acotada 0.10):**
 | `classify` por página | 27–32 ms (antes ~20) | ≤ +50 ✓ |
 
 Decisión: **avanza** a fase 2.
+
+### 2026-09-04 · fase 2 · constantes derivadas del piso, con el registro encendido
+
+Distribuciones por página (real, 9 leídas) con `OMR_LOCAL_REGISTRATION=1`:
+
+| | medido | constante | holgura |
+|---|---|---|---|
+| gap Otsu (media alta − media baja) | 0.708–0.814 (antes 0.457–0.601) | `MIN_FILL_GAP` 0.25 | ≥ 2.8× |
+| gap / 2·(σ_baja + σ_alta) | 3.2–8.8 (mínimo en Bruno: la C parcial de la doble marca ensancha el grupo alto) | `MIN_GAP_SPREAD_RATIO` 2.0 | ≥ 1.6× |
+| hueco real entre grupos | 0.486–0.701 | — | — |
+| fill mínimo de página | 0.121–0.192 | `ALL_MARKED_MIN_FILL` 0.5 | una hoja toda marcada sigue distinguible |
+| hoja impresa sin marcar (PDF rasterizado) | `no_separable_marks` + `likely_blank`, máximo < 0.30 | `BLANK_SHEET_MAX_FILL` 0.47 | ✓ |
+| firma de grilla en el spec | 1.000 en las 9 | `GRID_SIGNATURE_FILL_FLOOR` 0.08 | sin cambio (la firma no registra) |
+
+`BLANK_SHEET_MAX_FILL`: las 7 fotos en blanco (máx 0.297–0.440) y las 3 con tinta ilegible
+(0.501–0.791) se midieron sin registro. Centrado, el máximo de una blanca solo baja y el de
+una con tinta solo sube, así que el corte conserva su sentido con más holgura. **No se cambia
+ninguna constante.** Pendiente: re-medir esas 10 capturas con el registro (no están en el
+repo) y actualizar la tabla del docstring de `readability_verdict`.
+
+Decisión: **avanza** a fase 3.

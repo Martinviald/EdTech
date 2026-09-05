@@ -189,6 +189,14 @@ def readability_verdict(threshold: PageThreshold, fills: list[float]) -> str:
     Pendiente: el corpus son 7 fotos de UNA hoja, un papel y una impresora. Si
     aparece papel mas gris o una camara con mas ruido, el rango de las blancas
     sube y hay que volver a medir este numero.
+
+    Con el registro local (app/registration.py) las 7 blancas se midieron ANTES
+    del registro, con el disco corrido y el anillo dentro: centrado, el maximo de
+    una hoja en blanco solo puede bajar (la hoja impresa sin marcar, rasterizada
+    del PDF, da 0.207 de maximo con o sin registro), y el de una hoja con tinta
+    solo puede subir (el disco cae sobre la marca). El corte sigue valiendo con
+    mas holgura del lado blanco; falta re-medir las 10 capturas con el registro
+    encendido para actualizar la tabla (goldset/README-registro.md, fase 2).
     """
     if threshold.is_readable():
         return MARKS_READABLE
