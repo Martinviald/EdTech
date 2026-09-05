@@ -53,8 +53,10 @@ este modulo: la firma es la prueba de que la homografia es la correcta, y una bu
 local que la "ayudara" dejaria de probarlo. El registro corrige el residuo de una
 homografia ya confirmada, nunca la elige.
 
-Interruptor: `OMR_LOCAL_REGISTRATION` (fases 1-5 del plan: apagado por defecto, se
-enciende en el arnes y en los tests; fase 6: encendido por defecto).
+Interruptor: `OMR_LOCAL_REGISTRATION`. Encendido por defecto desde la fase 6 del plan
+(validado en las fases 1-5 con el interruptor explicito: corte real con verdad 121/29/4
+-> 150/4/0, demo 44/44, sintetico sin regresion). `OMR_LOCAL_REGISTRATION=0` es el
+apagado de emergencia mientras dure la observacion en produccion; despues se retira.
 """
 
 from __future__ import annotations
@@ -70,7 +72,7 @@ from .geometry import point_to_px, radius_to_px
 from .rectify import RectifiedPage
 
 ENV_FLAG = "OMR_LOCAL_REGISTRATION"
-DEFAULT_ENABLED = False
+DEFAULT_ENABLED = True
 
 SCORE_MIN = 0.70
 GROUP_TOLERANCE_PX = 3

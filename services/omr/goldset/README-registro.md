@@ -206,3 +206,34 @@ registro 97.57 % / 2.26 % / 1 (la incorrecta es la marca lavada de siempre, ahor
 independiente 0.5–0.9 px, fallback 0 %.
 
 Decisión: **avanza** a fase 6.
+
+### 2026-09-04 · fase 6 · encendido por defecto, apagado de emergencia, observación
+
+Cambio: `DEFAULT_ENABLED = True` en `app/registration.py`; `OMR_LOCAL_REGISTRATION=0` queda como
+apagado de emergencia documentado en el README del servicio; `tools/read_sheet.py` imprime el
+resumen de registro por página.
+
+Validación final **sin variable de entorno** (lo que corre en producción):
+
+| instrumento | resultado |
+|---|---|
+| suite | 253 en verde (y 253 con `OMR_LOCAL_REGISTRATION=0`) |
+| sintético 48 | 97.57 % / 2.26 % / 1 (`marcas-sucias-con-sombra-047` q7, marca lavada; ajena al registro) |
+| real 220 | **194 / 26 / 0**; en páginas legibles (198) 194 / 4 / 0; 154 con verdad 150 / 4 / 0; demo 44 / 0 / 0 |
+| arnés real | hueco mínimo 0.486 (alcanzable 0.498); Diego 0.002 entre capturas; fallback 0 % |
+| canario `captura-1` | 19 `marked` / 3 `blank` / 0 `ambiguous`, umbral 0.626, brecha 0.743, registro med 8.5 px (antes: 5 / 1 / 16, brecha 0.460). El canario del briefing (`f_001` fill 0.8369) cambia por diseño: ahora se mide sobre el anillo. |
+
+**Lo que queda para el equipo (no se puede hacer desde el repo):**
+
+1. Desplegar a demo (`deploy-omr.yml`, disparo manual) y reprocesar el lote `5a6d5cd9`:
+   esperado 44 marcas confiadas coincidentes con la adjudicación, ≤ 2 a revisión.
+2. Monitoreo por lote con el debug de página: `registration.offMedianPx` (alerta > 10 px),
+   `registration.fallbackCount` (alerta > 10 % de las burbujas), `fieldContrast.markedMin` vs
+   `blankMax` (alerta si se acercan), tasa de revisión y `no_separable_marks` (no debe subir).
+3. Dos semanas sin alertas → retirar `OMR_LOCAL_REGISTRATION` y el camino
+   `sample_bubble_fills_at_spec` del lector de marcas (la firma de grilla lo conserva).
+4. Material pendiente: las 7 fotos de hoja en blanco y las 3 con tinta ilegible (re-medir
+   `BLANK_SHEET_MAX_FILL`), capturas RUT reales, y el crecimiento del corte `real-phone`
+   (protocolo en `goldset/real/README.md`).
+
+Decisión: **listo para PR contra `dev`.**

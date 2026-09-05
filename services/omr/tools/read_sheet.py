@@ -144,6 +144,15 @@ def render(result: dict[str, Any], debug: list[dict[str, Any]], show_marks: bool
                 f"   separables={page_debug.get('separable')}"
                 f"   brecha={page_debug.get('gap')}"
             )
+        registration = page_debug.get("registration") or {}
+        if registration.get("bubbles"):
+            print(
+                f"   registro: desplazamiento med {registration['offMedianPx']} px"
+                f"   p90 {registration['offP90Px']}   max {registration['offMaxPx']}"
+                f"   score p10 {registration['scoreP10']}"
+                f"   al spec {registration['fallbackCount']}"
+                f"   heredados {registration['inheritedCount']}"
+            )
         if not show_marks:
             continue
         print(f"\n   {'n':>4}  {'estado':<10} {'valor':<6} {'relleno':>8} {'margen':>7}")
