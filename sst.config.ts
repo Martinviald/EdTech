@@ -397,8 +397,16 @@ export default $config({
       // todos los usuarios. Con dominio propio la distribucion puede destruirse y recrearse
       // sin que la direccion cambie. La zona de Route53 se administra FUERA de este stack a
       // proposito, para que un deploy no pueda borrar el DNS.
+      // `redirects` manda www.<dominio> al apex con un 301. No basta con apuntar el
+      // DNS: el certificado y los alias de CloudFront cubren solo el apex, asi que un
+      // registro www a secas daria error de SSL. SST emite el certificado con el SAN,
+      // crea la distribucion de redireccion y el registro en Route53.
       domain: DOMAIN_BY_STAGE[$app.stage]
-        ? { name: DOMAIN_BY_STAGE[$app.stage]!, dns: sst.aws.dns() }
+        ? {
+            name: DOMAIN_BY_STAGE[$app.stage]!,
+            dns: sst.aws.dns(),
+            redirects: [`www.${DOMAIN_BY_STAGE[$app.stage]!}`],
+          }
         : undefined,
       server: { architecture: 'arm64' },
       environment: {
