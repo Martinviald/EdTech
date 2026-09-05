@@ -59,6 +59,7 @@ export class SheetPrintService {
           id: sheetLayouts.id,
           version: sheetLayouts.version,
           instrumentId: sheetLayouts.instrumentId,
+          assessmentFormId: sheetLayouts.assessmentFormId,
           spec: sheetLayouts.spec,
         })
         .from(sheetLayouts)
@@ -66,14 +67,11 @@ export class SheetPrintService {
         .limit(1);
       if (!layout) throw new NotFoundException('Layout de hoja no encontrado');
 
-      const form = dto.assessmentFormId
-        ? await this.requireRunForm(
-            tx,
-            orgId,
-            dto.assessmentFormId,
-            layout.instrumentId,
-            dto.assessmentId ?? null,
-          )
+      // Un layout congelado para una forma electiva sólo sirve para esa forma:
+      // si la tirada no la declara, se hereda del layout.
+      const runFormId = dto.assessmentFormId ?? layout.assessmentFormId ?? null;
+      const form = runFormId
+        ? await this.requireRunForm(tx, orgId, runFormId, layout, dto.assessmentId ?? null)
         : null;
 
       const [classGroup] = await tx
@@ -197,9 +195,7 @@ export class SheetPrintService {
         })
         .from(assessmentForms)
         .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
-        .where(
-          and(eq(assessments.orgId, orgId), eq(assessments.instrumentId, layout.instrumentId)),
-        )
+        .where(and(eq(assessments.orgId, orgId), eq(assessments.instrumentId, layout.instrumentId)))
         .orderBy(asc(assessmentForms.name), asc(assessmentForms.createdAt));
 
       return { data: rows };
@@ -443,10 +439,7 @@ export class SheetPrintService {
         .select({ shortCode: printedSheets.shortCode })
         .from(printedSheets)
         .where(
-          and(
-            eq(printedSheets.orgId, orgId),
-            inArray(printedSheets.shortCode, [...candidates]),
-          ),
+          and(eq(printedSheets.orgId, orgId), inArray(printedSheets.shortCode, [...candidates])),
         );
       const takenSet = new Set(taken.map((row) => row.shortCode));
       for (const candidate of candidates) {
@@ -461,13 +454,27 @@ export class SheetPrintService {
     return [...picked];
   }
 
+  /**
+   * La forma de la tirada tiene que ser compatible con el layout:
+   * - layout de forma (`assessmentFormId` no nulo): tiene que ser ESA forma, porque
+   *   los campos de la hoja son los ítems de sus secciones y no los de otra;
+   * - layout del instrumento completo: basta con que la forma cuelgue de una
+   *   evaluación del mismo instrumento (la regla histórica, intacta).
+   */
   private async requireRunForm(
     tx: Database,
     orgId: string,
     assessmentFormId: string,
-    instrumentId: string,
+    layout: { instrumentId: string; assessmentFormId: string | null },
     requestedAssessmentId: string | null,
   ): Promise<{ id: string; assessmentId: string }> {
+    const layoutFormId = layout.assessmentFormId ?? null;
+    if (layoutFormId !== null && layoutFormId !== assessmentFormId) {
+      throw new BadRequestException(
+        'El layout de esta tirada está congelado para otra forma: usa la forma del layout o congela un layout para la forma elegida.',
+      );
+    }
+    const instrumentId = layout.instrumentId;
     const [form] = await tx
       .select({
         id: assessmentForms.id,

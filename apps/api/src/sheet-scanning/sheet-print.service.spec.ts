@@ -585,6 +585,29 @@ describe('SheetPrintService — hoja genérica y formas (v1)', () => {
     expect(run.assessmentId).toBe(ASSESSMENT_ID);
   });
 
+  it('un layout congelado para una forma hereda esa forma en la tirada (etapa 8)', async () => {
+    const { db, inserts } = makeDb(
+      [[{ ...LAYOUT_ROW, assessmentFormId: FORM_ID }], [FORM_ROW], [CLASS_GROUP_ROW], ROSTER_ROWS],
+      [[{ ...RUN_RETURNING[0], assessmentId: ASSESSMENT_ID, assessmentFormId: FORM_ID }]],
+    );
+    const service = new SheetPrintService(db);
+
+    const run = await service.createRun(ORG_ID, USER_ID, { ...CREATE_DTO, assessmentId: null });
+
+    expect(inserts[0]).toMatchObject({ assessmentFormId: FORM_ID });
+    expect(run.assessmentFormId).toBe(FORM_ID);
+  });
+
+  it('rechaza una tirada cuya forma no es la del layout congelado (etapa 8)', async () => {
+    const otherFormId = '88888888-8888-4888-8888-888888888888';
+    const { db } = makeDb([[{ ...LAYOUT_ROW, assessmentFormId: otherFormId }]]);
+    const service = new SheetPrintService(db);
+
+    await expect(
+      service.createRun(ORG_ID, USER_ID, { ...CREATE_DTO, assessmentFormId: FORM_ID }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
   it('rechaza con NotFound una forma inexistente o de otra org', async () => {
     const { db } = makeDb([[LAYOUT_ROW], []]);
     const service = new SheetPrintService(db);

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   SHEET_MANAGEMENT_ROLES,
   deriveLayoutSchema,
@@ -35,6 +44,7 @@ export class SheetLayoutsController {
       getEffectiveOrgId(user, orgId),
       dto.instrumentId,
       dto.identityMode ?? 'qr',
+      dto.assessmentFormId ?? null,
     );
   }
 

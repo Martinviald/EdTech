@@ -11,7 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import type { CaptureProfile, CaptureSessionCapture, LayoutSpec, PageQuality } from '@soe/types';
 import {
   captureSessionStatusEnum,
@@ -48,6 +48,15 @@ export const sheetLayouts = pgTable(
     instrumentId: uuid('instrument_id')
       .notNull()
       .references(() => instruments.id),
+    /**
+     * Forma que cubre el layout, cuando el instrumento tiene secciones electivas
+     * (etapa 8). NULL = la hoja cubre el instrumento completo (comportamiento
+     * histórico, intacto). `instrument_id` sigue siendo NOT NULL: la forma
+     * cuelga de una evaluación que ya apunta a un instrumento, así que el
+     * instrumento del layout siempre se conoce y los filtros por instrumento
+     * (listado, tiradas) siguen funcionando sin cambios.
+     */
+    assessmentFormId: uuid('assessment_form_id').references(() => assessmentForms.id),
     version: integer('version').notNull(),
     spec: jsonb('spec').$type<LayoutSpec>().notNull(),
     // Hash canónico (layoutHash de @soe/types). Viaja dentro del QR; un hash
@@ -57,11 +66,17 @@ export const sheetLayouts = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => ({
-    orgInstrumentVersionUq: unique('sheet_layouts_org_instrument_version_uq').on(
-      t.orgId,
-      t.instrumentId,
-      t.version,
-    ),
+    // El versionado es por ÁMBITO: un instrumento puede tener el layout del
+    // instrumento completo y, además, uno por cada forma electiva, cada uno con
+    // su propia serie de versiones. Como un UNIQUE de Postgres considera
+    // distintos los NULL, hacen falta dos índices parciales complementarios.
+    orgInstrumentVersionUq: uniqueIndex('sheet_layouts_org_instrument_version_uq')
+      .on(t.orgId, t.instrumentId, t.version)
+      .where(sql`${t.assessmentFormId} is null`),
+    orgFormVersionUq: uniqueIndex('sheet_layouts_org_form_version_uq')
+      .on(t.orgId, t.assessmentFormId, t.version)
+      .where(sql`${t.assessmentFormId} is not null`),
+    formIdx: index('sheet_layouts_form_idx').on(t.assessmentFormId),
     hashIdx: index('sheet_layouts_hash_idx').on(t.specHash),
   }),
 );
@@ -263,7 +278,14 @@ export const captureSessions = pgTable(
 
 export const sheetLayoutsRelations = relations(sheetLayouts, ({ one, many }) => ({
   org: one(organizations, { fields: [sheetLayouts.orgId], references: [organizations.id] }),
-  instrument: one(instruments, { fields: [sheetLayouts.instrumentId], references: [instruments.id] }),
+  instrument: one(instruments, {
+    fields: [sheetLayouts.instrumentId],
+    references: [instruments.id],
+  }),
+  assessmentForm: one(assessmentForms, {
+    fields: [sheetLayouts.assessmentFormId],
+    references: [assessmentForms.id],
+  }),
   createdBy: one(users, { fields: [sheetLayouts.createdById], references: [users.id] }),
   printRuns: many(sheetPrintRuns),
 }));
@@ -271,8 +293,14 @@ export const sheetLayoutsRelations = relations(sheetLayouts, ({ one, many }) => 
 export const sheetPrintRunsRelations = relations(sheetPrintRuns, ({ one, many }) => ({
   org: one(organizations, { fields: [sheetPrintRuns.orgId], references: [organizations.id] }),
   layout: one(sheetLayouts, { fields: [sheetPrintRuns.layoutId], references: [sheetLayouts.id] }),
-  classGroup: one(classGroups, { fields: [sheetPrintRuns.classGroupId], references: [classGroups.id] }),
-  assessment: one(assessments, { fields: [sheetPrintRuns.assessmentId], references: [assessments.id] }),
+  classGroup: one(classGroups, {
+    fields: [sheetPrintRuns.classGroupId],
+    references: [classGroups.id],
+  }),
+  assessment: one(assessments, {
+    fields: [sheetPrintRuns.assessmentId],
+    references: [assessments.id],
+  }),
   assessmentForm: one(assessmentForms, {
     fields: [sheetPrintRuns.assessmentFormId],
     references: [assessmentForms.id],
@@ -284,23 +312,38 @@ export const sheetPrintRunsRelations = relations(sheetPrintRuns, ({ one, many })
 
 export const printedSheetsRelations = relations(printedSheets, ({ one, many }) => ({
   org: one(organizations, { fields: [printedSheets.orgId], references: [organizations.id] }),
-  printRun: one(sheetPrintRuns, { fields: [printedSheets.printRunId], references: [sheetPrintRuns.id] }),
+  printRun: one(sheetPrintRuns, {
+    fields: [printedSheets.printRunId],
+    references: [sheetPrintRuns.id],
+  }),
   student: one(students, { fields: [printedSheets.studentId], references: [students.id] }),
   scans: many(sheetScans),
 }));
 
 export const sheetScanBatchesRelations = relations(sheetScanBatches, ({ one, many }) => ({
   org: one(organizations, { fields: [sheetScanBatches.orgId], references: [organizations.id] }),
-  printRun: one(sheetPrintRuns, { fields: [sheetScanBatches.printRunId], references: [sheetPrintRuns.id] }),
-  importJob: one(importJobs, { fields: [sheetScanBatches.importJobId], references: [importJobs.id] }),
+  printRun: one(sheetPrintRuns, {
+    fields: [sheetScanBatches.printRunId],
+    references: [sheetPrintRuns.id],
+  }),
+  importJob: one(importJobs, {
+    fields: [sheetScanBatches.importJobId],
+    references: [importJobs.id],
+  }),
   scans: many(sheetScans),
 }));
 
 export const sheetScansRelations = relations(sheetScans, ({ one, many }) => ({
   org: one(organizations, { fields: [sheetScans.orgId], references: [organizations.id] }),
   batch: one(sheetScanBatches, { fields: [sheetScans.batchId], references: [sheetScanBatches.id] }),
-  printedSheet: one(printedSheets, { fields: [sheetScans.printedSheetId], references: [printedSheets.id] }),
-  resolvedStudent: one(students, { fields: [sheetScans.resolvedStudentId], references: [students.id] }),
+  printedSheet: one(printedSheets, {
+    fields: [sheetScans.printedSheetId],
+    references: [printedSheets.id],
+  }),
+  resolvedStudent: one(students, {
+    fields: [sheetScans.resolvedStudentId],
+    references: [students.id],
+  }),
   marks: many(sheetScanMarks),
 }));
 

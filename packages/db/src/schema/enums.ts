@@ -97,6 +97,17 @@ export const sectionTypeEnum = pgEnum('section_type', [
   'mixed',
 ]);
 
+/**
+ * Rol de una sección dentro del instrumento.
+ *
+ * `core` la responden TODOS los alumnos; `elective` sólo quienes la eligieron. Es ortogonal
+ * a `section_type` (que describe la naturaleza: multiple_choice, listening…): una sección
+ * electiva puede ser de cualquier tipo. Va en columna y no en `config` JSONB porque se
+ * FILTRA en SQL —"las secciones core de este instrumento" es la query base de la ingesta,
+ * del layout y del scoring— y porque permite un CHECK de integridad (CLAUDE.md §5.4).
+ */
+export const sectionRoleEnum = pgEnum('section_role', ['core', 'elective']);
+
 export const itemTypeEnum = pgEnum('item_type', [
   'multiple_choice',
   'multi_select',

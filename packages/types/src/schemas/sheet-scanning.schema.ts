@@ -38,6 +38,12 @@ export type SheetScanState = (typeof SHEET_SCAN_STATES)[number];
 export const deriveLayoutSchema = z.object({
   instrumentId: z.string().uuid(),
   identityMode: z.enum(['qr', 'rut_bubbles']).optional(),
+  /**
+   * Forma electiva a cubrir. Ausente o null = el instrumento completo
+   * (comportamiento histórico). Con forma, el borrador sólo trae los ítems de
+   * las secciones de esa forma.
+   */
+  assessmentFormId: z.string().uuid().nullable().optional(),
 });
 
 export const freezeLayoutSchema = z.object({
@@ -130,6 +136,7 @@ export const updateOmrCalibrationSchema = omrCalibrationSchema;
 
 export const sheetLayoutQuerySchema = z.object({
   instrumentId: z.string().uuid().optional(),
+  assessmentFormId: z.string().uuid().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
@@ -188,6 +195,8 @@ export type FreezeLayoutResponse = {
 export type SheetLayoutSummaryModel = {
   id: string;
   instrumentId: string;
+  /** Forma que cubre el layout; null = el instrumento completo. */
+  assessmentFormId: string | null;
   version: number;
   specHash: string;
   pageCount: number;

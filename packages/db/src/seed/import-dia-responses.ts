@@ -20,6 +20,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { readFileSync } from 'fs';
 import { and, eq, inArray, sql as dsql } from 'drizzle-orm';
 import * as schema from '../schema';
+import { assertNoElectiveSections } from '../queries/elective-guard';
 import { withOrgContext } from '../with-org-context';
 import { instruments } from '../schema/instruments';
 import { items, itemTaxonomyTags } from '../schema/items';
@@ -162,6 +163,12 @@ async function main() {
       .select({ id: items.id, instrumentId: items.instrumentId, position: items.position, type: items.type, content: items.content, scoringConfig: items.scoringConfig })
       .from(items)
       .where(inArray(items.instrumentId, instIds));
+
+    // Guarda de secciones electivas: este cargador escribe una respuesta por CADA ítem del
+    // instrumento, así que con ramas a elección inventaría respuestas incorrectas.
+    for (const instId of instIds) {
+      await assertNoElectiveSections(db, instId, 'import-dia-responses');
+    }
     const allTags = await tx
       .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
       .from(itemTaxonomyTags)

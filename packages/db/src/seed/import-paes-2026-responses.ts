@@ -57,6 +57,7 @@ import { resolve } from 'path';
 import { and, eq, inArray, sql as dsql } from 'drizzle-orm';
 import * as schema from '../schema';
 import { withOrgContext } from '../with-org-context';
+import { assertNoElectiveSections } from '../queries/elective-guard';
 import { instruments } from '../schema/instruments';
 import { items, itemTaxonomyTags } from '../schema/items';
 import { classGroups, grades, subjects } from '../schema/academic';
@@ -508,6 +509,13 @@ async function main() {
       tagsByItem.set(t.itemId, list);
     }
     const itemsByInstrument = new Map<string, typeof allItems>();
+
+  // Guarda de secciones electivas (ver assertNoElectiveSections): con ramas a elección este
+  // cargador le fabricaría a cada alumno respuestas por las que no rindió.
+  for (const instId of new Set(artifact.courses.map((c) => c.instrumentId))) {
+    await assertNoElectiveSections(db, instId, 'import-paes-2026-responses');
+  }
+
     for (const item of allItems) {
       if (item.instrumentId == null) continue;
       const list = itemsByInstrument.get(item.instrumentId) ?? [];
