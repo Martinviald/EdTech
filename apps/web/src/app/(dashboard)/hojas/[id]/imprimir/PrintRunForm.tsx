@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Loader2, Printer } from 'lucide-react';
 import {
   createPrintRunSchema,
+  todaySheetDate,
   type PrintRunAssessmentOption,
   type PrintRunModel,
 } from '@soe/types';
@@ -49,6 +50,7 @@ export function PrintRunForm({
   const [classGroupId, setClassGroupId] = useState('');
   const [assessmentId, setAssessmentId] = useState<string>(NEW_ASSESSMENT);
   const [assessmentFormId, setAssessmentFormId] = useState('');
+  const [administeredAt, setAdministeredAt] = useState(todaySheetDate());
   const [spareCount, setSpareCount] = useState('2');
   const [createdRun, setCreatedRun] = useState<PrintRunModel | null>(null);
   const [pending, startTransition] = useTransition();
@@ -67,6 +69,7 @@ export function PrintRunForm({
       classGroupId,
       assessmentId: assessmentId === NEW_ASSESSMENT ? null : assessmentId,
       assessmentFormId: hasForms && assessmentFormId ? assessmentFormId : null,
+      administeredAt: administeredAt === '' ? null : administeredAt,
       spareCount: Number(spareCount),
     });
     if (!parsed.success) {
@@ -91,8 +94,8 @@ export function PrintRunForm({
       <CardHeader>
         <CardTitle>Nueva tirada</CardTitle>
         <CardDescription>
-          Se genera una hoja por alumno activo del curso, con su nombre y QR propios, más las
-          reservas sin nombre que indiques.
+          Se genera una hoja por alumno activo del curso, con su curso, número de lista, nombre,
+          evaluación y fecha impresos en la cabecera, más las reservas sin nombre que indiques.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -161,6 +164,20 @@ export function PrintRunForm({
             </Field>
 
             <Field
+              label="Fecha de aplicación"
+              htmlFor="print-run-date"
+              hint="Se imprime en la cabecera de cada hoja y queda guardada en la evaluación. Puedes dejarla fijada desde antes."
+            >
+              <Input
+                id="print-run-date"
+                type="date"
+                value={administeredAt}
+                onChange={(e) => setAdministeredAt(e.target.value)}
+                disabled={pending}
+              />
+            </Field>
+
+            <Field
               label="Hojas de reserva"
               htmlFor="print-run-spare"
               hint="Hojas extra sin alumno asignado, para incorporaciones o reemplazos (0–20)."
@@ -178,7 +195,10 @@ export function PrintRunForm({
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={pending || !classGroupId || (hasForms && !assessmentFormId)}>
+            <Button
+              type="submit"
+              disabled={pending || !classGroupId || (hasForms && !assessmentFormId)}
+            >
               {pending ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />

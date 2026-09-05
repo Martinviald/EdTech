@@ -11,6 +11,9 @@ import {
   assessmentForms,
   assessments,
   classGroups,
+  grades,
+  instruments,
+  subjects,
   printedSheets,
   sheetLayouts,
   sheetPrintRuns,
@@ -19,6 +22,7 @@ import {
   students,
   withOrgContext,
 } from '@soe/db';
+import { parseSheetDate, todaySheetDate } from '@soe/types';
 import type {
   AssessmentFormListResponse,
   CreatePrintRunDto,
@@ -30,7 +34,11 @@ import type {
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { identityModeOf } from './sheet-layout.helpers';
-import { renderSheetsPdf, type PrintableSheetInfo } from './sheet-print.helpers';
+import {
+  buildInstrumentLabel,
+  renderSheetsPdf,
+  type PrintableSheetInfo,
+} from './sheet-print.helpers';
 
 type RunRow = {
   id: string;
@@ -41,6 +49,7 @@ type RunRow = {
   classGroupName: string | null;
   assessmentId: string | null;
   assessmentFormId: string | null;
+  administeredAt: Date | null;
   spareCount: number;
   sheetCount: number;
   pdfFileId: string | null;
@@ -104,7 +113,18 @@ export class SheetPrintService {
       const assessmentId = dto.assessmentId
         ? await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, layout.instrumentId)
         : (form?.assessmentId ??
-          (await this.createAssessmentForRun(tx, orgId, userId, layout.instrumentId, classGroup)));
+          (await this.createAssessmentForRun(
+            tx,
+            orgId,
+            userId,
+            layout.instrumentId,
+            classGroup,
+            dto.administeredAt ?? null,
+          )));
+
+      if (dto.assessmentId || form) {
+        await this.applyAdministeredAt(tx, orgId, assessmentId, dto.administeredAt);
+      }
 
       const sheetCount = roster.length + dto.spareCount;
       const genericSheets = identityModeOf(layout.spec) === 'rut_bubbles';
@@ -169,6 +189,7 @@ export class SheetPrintService {
         classGroupName: classGroup.name,
         assessmentId: run.assessmentId,
         assessmentFormId: run.assessmentFormId,
+        administeredAt: dto.administeredAt ? parseSheetDate(dto.administeredAt) : null,
         spareCount: run.spareCount,
         sheetCount: run.sheetCount,
         pdfFileId: run.pdfFileId,
@@ -197,9 +218,7 @@ export class SheetPrintService {
         })
         .from(assessmentForms)
         .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
-        .where(
-          and(eq(assessments.orgId, orgId), eq(assessments.instrumentId, layout.instrumentId)),
-        )
+        .where(and(eq(assessments.orgId, orgId), eq(assessments.instrumentId, layout.instrumentId)))
         .orderBy(asc(assessmentForms.name), asc(assessmentForms.createdAt));
 
       return { data: rows };
@@ -236,7 +255,14 @@ export class SheetPrintService {
         .limit(1);
       if (!run) throw new NotFoundException('Tirada de impresión no encontrada');
 
-      if (!('assessmentId' in dto) || run.assessmentId !== dto.assessmentId) {
+      const requestedAssessmentId = 'assessmentId' in dto ? dto.assessmentId : null;
+      const wantsNewAssessment = 'createAssessment' in dto;
+      const changesAssessment =
+        requestedAssessmentId !== null
+          ? run.assessmentId !== requestedAssessmentId
+          : wantsNewAssessment;
+
+      if (changesAssessment) {
         const [confirmed] = await tx
           .select({ id: sheetScanBatches.id })
           .from(sheetScanBatches)
@@ -256,21 +282,39 @@ export class SheetPrintService {
         }
       }
 
-      const assessmentId =
-        'assessmentId' in dto
-          ? await this.assertAssessmentUsable(tx, orgId, dto.assessmentId, run.instrumentId)
-          : await this.createAssessmentForRun(
-              tx,
-              orgId,
-              userId,
-              run.instrumentId,
-              this.requireClassGroup(run),
-            );
+      const administeredAt = 'administeredAt' in dto ? dto.administeredAt : undefined;
 
-      await tx
-        .update(sheetPrintRuns)
-        .set({ assessmentId })
-        .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)));
+      if (requestedAssessmentId !== null) {
+        const assessmentId = await this.assertAssessmentUsable(
+          tx,
+          orgId,
+          requestedAssessmentId,
+          run.instrumentId,
+        );
+        await this.applyAdministeredAt(tx, orgId, assessmentId, administeredAt);
+        await this.setRunAssessment(tx, orgId, runId, assessmentId);
+        return;
+      }
+
+      if (wantsNewAssessment) {
+        const assessmentId = await this.createAssessmentForRun(
+          tx,
+          orgId,
+          userId,
+          run.instrumentId,
+          this.requireClassGroup(run),
+          administeredAt ?? null,
+        );
+        await this.setRunAssessment(tx, orgId, runId, assessmentId);
+        return;
+      }
+
+      if (!run.assessmentId) {
+        throw new BadRequestException(
+          'La tirada aún no tiene una evaluación asociada: asócia una antes de fijar la fecha de aplicación.',
+        );
+      }
+      await this.applyAdministeredAt(tx, orgId, run.assessmentId, administeredAt);
     });
 
     return this.getRun(orgId, runId);
@@ -328,21 +372,48 @@ export class SheetPrintService {
     return { id: run.classGroupId, name: run.classGroupName };
   }
 
+  private async setRunAssessment(
+    tx: Database,
+    orgId: string,
+    runId: string,
+    assessmentId: string,
+  ): Promise<void> {
+    await tx
+      .update(sheetPrintRuns)
+      .set({ assessmentId })
+      .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)));
+  }
+
+  private async applyAdministeredAt(
+    tx: Database,
+    orgId: string,
+    assessmentId: string,
+    administeredAt: string | null | undefined,
+  ): Promise<void> {
+    if (administeredAt === undefined) return;
+    await tx
+      .update(assessments)
+      .set({ administeredAt: administeredAt === null ? null : parseSheetDate(administeredAt) })
+      .where(and(eq(assessments.orgId, orgId), eq(assessments.id, assessmentId)));
+  }
+
   private async createAssessmentForRun(
     tx: Database,
     orgId: string,
     userId: string,
     instrumentId: string,
     classGroup: { id: string; name: string },
+    administeredAt: string | null,
   ): Promise<string> {
     const [created] = await tx
       .insert(assessments)
       .values({
         orgId,
         instrumentId,
-        name: `${classGroup.name} · hojas propias ${new Date().toISOString().slice(0, 10)}`,
+        name: `${classGroup.name} · hojas propias ${administeredAt ?? todaySheetDate()}`,
         mode: 'paper',
         status: 'scheduled',
+        administeredAt: administeredAt === null ? null : parseSheetDate(administeredAt),
         administeredById: userId,
         config: { source: 'sheet_print_run' },
       })
@@ -382,6 +453,7 @@ export class SheetPrintService {
   }
 
   async renderPdf(orgId: string, runId: string): Promise<Buffer> {
+    const printedOn = parseSheetDate(todaySheetDate());
     const { spec, specHash, sheets } = await withOrgContext(this.db, orgId, async (tx) => {
       const [run] = await tx
         .select({
@@ -389,13 +461,34 @@ export class SheetPrintService {
           spec: sheetLayouts.spec,
           specHash: sheetLayouts.specHash,
           classGroupName: classGroups.name,
+          administeredAt: assessments.administeredAt,
+          instrumentName: instruments.name,
+          instrumentYear: instruments.year,
+          instrumentApplicationPeriod: instruments.applicationPeriod,
+          subjectName: subjects.name,
+          gradeName: grades.name,
         })
         .from(sheetPrintRuns)
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
         .leftJoin(classGroups, eq(classGroups.id, sheetPrintRuns.classGroupId))
+        .leftJoin(assessments, eq(assessments.id, sheetPrintRuns.assessmentId))
+        .leftJoin(instruments, eq(instruments.id, sheetLayouts.instrumentId))
+        .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+        .leftJoin(grades, eq(grades.id, instruments.gradeId))
         .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)))
         .limit(1);
       if (!run) throw new NotFoundException('Tirada de impresión no encontrada');
+
+      const instrumentLabel = run.instrumentName
+        ? buildInstrumentLabel({
+            name: run.instrumentName,
+            subjectName: run.subjectName ?? null,
+            gradeName: run.gradeName ?? null,
+            year: run.instrumentYear ?? null,
+            applicationPeriod: run.instrumentApplicationPeriod ?? null,
+          })
+        : null;
+      const administeredAt = run.administeredAt ?? printedOn;
 
       const sheetRows = await tx
         .select({
@@ -410,16 +503,22 @@ export class SheetPrintService {
         .where(and(eq(printedSheets.orgId, orgId), eq(printedSheets.printRunId, runId)))
         .orderBy(asc(printedSheets.sequence));
 
-      const printable: PrintableSheetInfo[] = sheetRows.map((sheet) => ({
-        printedSheetId: sheet.id,
-        sequence: sheet.sequence,
-        shortCode: sheet.shortCode,
-        studentName:
+      const printable: PrintableSheetInfo[] = sheetRows.map((sheet) => {
+        const studentName =
           sheet.lastName !== null && sheet.firstName !== null
             ? `${sheet.lastName}, ${sheet.firstName}`
-            : null,
-        classGroupName: run.classGroupName,
-      }));
+            : null;
+        return {
+          printedSheetId: sheet.id,
+          sequence: sheet.sequence,
+          shortCode: sheet.shortCode,
+          studentName,
+          classGroupName: run.classGroupName,
+          listNumber: studentName === null ? null : sheet.sequence,
+          instrumentLabel,
+          administeredAt,
+        };
+      });
 
       return { spec: run.spec, specHash: run.specHash, sheets: printable };
     });
@@ -443,10 +542,7 @@ export class SheetPrintService {
         .select({ shortCode: printedSheets.shortCode })
         .from(printedSheets)
         .where(
-          and(
-            eq(printedSheets.orgId, orgId),
-            inArray(printedSheets.shortCode, [...candidates]),
-          ),
+          and(eq(printedSheets.orgId, orgId), inArray(printedSheets.shortCode, [...candidates])),
         );
       const takenSet = new Set(taken.map((row) => row.shortCode));
       for (const candidate of candidates) {
@@ -508,6 +604,7 @@ export class SheetPrintService {
         classGroupName: classGroups.name,
         assessmentId: sheetPrintRuns.assessmentId,
         assessmentFormId: sheetPrintRuns.assessmentFormId,
+        administeredAt: assessments.administeredAt,
         spareCount: sheetPrintRuns.spareCount,
         sheetCount: sheetPrintRuns.sheetCount,
         pdfFileId: sheetPrintRuns.pdfFileId,
@@ -517,6 +614,7 @@ export class SheetPrintService {
       .from(sheetPrintRuns)
       .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
       .leftJoin(classGroups, eq(classGroups.id, sheetPrintRuns.classGroupId))
+      .leftJoin(assessments, eq(assessments.id, sheetPrintRuns.assessmentId))
       .where(and(eq(sheetPrintRuns.orgId, orgId), where))
       .orderBy(desc(sheetPrintRuns.createdAt));
 
@@ -534,6 +632,7 @@ export class SheetPrintService {
       classGroupName: row.classGroupName,
       assessmentId: row.assessmentId,
       assessmentFormId: row.assessmentFormId,
+      administeredAt: row.administeredAt ?? null,
       spareCount: row.spareCount,
       sheetCount: row.sheetCount,
       pdfFileId: row.pdfFileId,

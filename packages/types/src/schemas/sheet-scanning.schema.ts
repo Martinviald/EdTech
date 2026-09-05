@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { AssessmentStatus } from '../enums';
+import { SHEET_DATE_PATTERN, isSheetDate } from '../utils/sheet-date';
 import {
   captureProfileSchema,
   layoutSpecSchema,
@@ -44,11 +45,23 @@ export const freezeLayoutSchema = z.object({
   spec: layoutSpecSchema,
 });
 
+/**
+ * Día de aplicación de la evaluación (`AAAA-MM-DD`). Es la fecha que se imprime
+ * en la cabecera de la hoja de respuestas y la que se guarda en
+ * `assessments.administered_at`; se fija antes de imprimir para que el profesor
+ * reciba la hoja con el día que corresponde.
+ */
+export const printRunAdministeredAtSchema = z
+  .string()
+  .regex(SHEET_DATE_PATTERN, 'La fecha de aplicación debe tener el formato AAAA-MM-DD')
+  .refine(isSheetDate, 'La fecha de aplicación no es una fecha válida');
+
 export const createPrintRunSchema = z.object({
   layoutId: z.string().uuid(),
   classGroupId: z.string().uuid(),
   assessmentId: z.string().uuid().nullable().optional(),
   assessmentFormId: z.string().uuid().nullable().optional(),
+  administeredAt: printRunAdministeredAtSchema.nullable().optional(),
   spareCount: z.number().int().min(0).max(20).default(2),
 });
 
@@ -63,10 +76,22 @@ export const createPrintRunSchema = z.object({
  * (`createAssessment: true`) — la misma evaluación que se autocrea al crear una
  * tirada. Sin esa segunda forma, una tirada cuyo instrumento no tiene ninguna
  * evaluación quedaba sin salida: nada en la app podía desbloquearla.
+ *
+ * Cualquiera de las dos formas puede además fijar `administeredAt`, y una
+ * tercera lo cambia sin tocar la evaluación asociada: es la fecha que se imprime
+ * en la hoja, y se corrige desde la misma pantalla de impresión en lugar de
+ * abrir un CRUD de evaluaciones por un solo campo.
  */
 export const updatePrintRunSchema = z.union([
-  z.object({ assessmentId: z.string().uuid() }),
-  z.object({ createAssessment: z.literal(true) }),
+  z.object({
+    assessmentId: z.string().uuid(),
+    administeredAt: printRunAdministeredAtSchema.nullable().optional(),
+  }),
+  z.object({
+    createAssessment: z.literal(true),
+    administeredAt: printRunAdministeredAtSchema.nullable().optional(),
+  }),
+  z.object({ administeredAt: printRunAdministeredAtSchema.nullable() }),
 ]);
 
 /** `GET /api/sheet-print-runs/assessment-options?instrumentId=…` */
@@ -218,6 +243,7 @@ export type PrintRunModel = {
   classGroupName: string | null;
   assessmentId: string | null;
   assessmentFormId?: string | null;
+  administeredAt: string | Date | null;
   spareCount: number;
   sheetCount: number;
   pdfFileId: string | null;
