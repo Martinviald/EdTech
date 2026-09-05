@@ -32,6 +32,12 @@ del 99% se reporta aparte.)
 | `phone-good` | 100 · foto de celular, condiciones buenas | `phone` |
 | `phone-bad` | 50 · celular malo (sombra, ángulo, arruga) | `phone` |
 | `dirty` | 50 · casos sucios deliberados (doble marca, borrada, en blanco) | `phone` |
+| `real-phone` / `real-scanner` | fotos y escaneos de hojas impresas con **verdad por construcción** (`goldset/real/`, ver su README) | `phone` / `scanner` |
+
+`truth.json` puede declarar `truthSource`: `double-transcription` (default, 2 personas),
+`construction` (1 transcripción: quien rellenó dejó la clave antes de capturar) o
+`adjudication` (1 transcripción provisional desde la cola de revisión). Los cortes `real-*`
+son el juez del registro de burbujas; método y bitácora en `README-registro.md`.
 
 ## Estructura de directorios
 

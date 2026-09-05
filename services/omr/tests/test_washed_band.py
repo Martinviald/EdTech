@@ -45,7 +45,9 @@ def wash_band(gray: np.ndarray, y0_frac: float, y1_frac: float, keep: float) -> 
 
 
 @pytest.mark.xfail(
-    reason="limitacion conocida (doc 07 §6): marcas lavadas al nivel del anillo salen blank confiado",
+    reason=(
+        "limitacion conocida (doc 07 §6): marcas lavadas al nivel del anillo salen blank confiado"
+    ),
     strict=False,
 )
 def test_washed_band_marks_never_read_as_confident_blank(

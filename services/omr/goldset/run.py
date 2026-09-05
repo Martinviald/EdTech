@@ -59,6 +59,8 @@ PROFILES_BY_CUT = {
     "phone-good": PHONE_PROFILE,
     "phone-bad": PHONE_PROFILE,
     "dirty": PHONE_PROFILE,
+    "real-phone": PHONE_PROFILE,
+    "real-scanner": SCANNER_PROFILE,
 }
 
 

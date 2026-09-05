@@ -30,11 +30,14 @@ from .classify import (
     AMBIGUITY_MARGIN,
     PageThreshold,
     bubble_fill,
+    bubble_fill_px,
     crop_field_jpeg,
     crop_region_jpeg,
     margin_of,
 )
+from .geometry import point_to_px, radius_to_px
 from .rectify import RectifiedPage
+from .registration import RingFix, local_registration_enabled, register_group
 
 
 @dataclass(frozen=True)
@@ -58,7 +61,12 @@ class DigitGroupReading:
 class FieldReader(Protocol):
     kind: str
 
-    def sample_fills(self, page: RectifiedPage, field: dict[str, Any]) -> list[float]: ...
+    def sample_fills(
+        self,
+        page: RectifiedPage,
+        field: dict[str, Any],
+        registration_log: list[RingFix] | None = None,
+    ) -> list[float]: ...
 
     def read(
         self,
@@ -70,8 +78,71 @@ class FieldReader(Protocol):
     ) -> dict[str, Any]: ...
 
 
-def sample_bubble_fills(page: RectifiedPage, bubbles: list[dict[str, Any]]) -> list[float]:
+def sample_bubble_fills_at_spec(
+    page: RectifiedPage, bubbles: list[dict[str, Any]]
+) -> list[float]:
+    """Fill en la posicion que dice el spec, sin registro local.
+
+    Es lo que usan la firma de grilla y el afinado de esquinas (pipeline.py): ahi la
+    posicion del spec ES la pregunta — si el anillo esta donde el spec lo pone, la
+    homografia es la correcta — y una busqueda local la responderia por ellos.
+    """
     return [bubble_fill(page, bubble["center"], bubble["radius"]) for bubble in bubbles]
+
+
+def sample_bubble_fills(
+    page: RectifiedPage,
+    bubbles: list[dict[str, Any]],
+    registration_log: list[RingFix] | None = None,
+) -> list[float]:
+    """Fill de cada burbuja del grupo, sobre el anillo localizado si el registro esta activo.
+
+    El grupo es la unidad de consistencia del registro (app/registration.py): un campo
+    de alternativas o una columna de la grilla RUT. Con el interruptor apagado es
+    exactamente `sample_bubble_fills_at_spec`.
+    """
+    if not bubbles:
+        return []
+    if not local_registration_enabled():
+        return sample_bubble_fills_at_spec(page, bubbles)
+    fixes = register_group(page, bubbles)
+    if registration_log is not None:
+        registration_log.extend(fixes)
+    fills = []
+    for bubble, fix in zip(bubbles, fixes, strict=True):
+        center_px = point_to_px(bubble["center"], page.size)
+        radius_px = radius_to_px(bubble["radius"], page.size)
+        registered_px = (center_px[0] + fix.dx, center_px[1] + fix.dy)
+        fills.append(bubble_fill_px(page, registered_px, radius_px))
+    return fills
+
+
+def sample_digit_grid_fills(
+    page: RectifiedPage,
+    bubbles: list[dict[str, Any]],
+    registration_log: list[RingFix] | None = None,
+) -> list[float]:
+    """Una grilla de digitos se registra por columna (`group`), no como un solo grupo.
+
+    En la grilla las burbujas estan a menos de dos radios entre si y una columna entera
+    comparte el mismo desplazamiento; la mediana por columna es la consistencia
+    correcta. Sin `group` valido se registra la grilla completa como un unico grupo.
+    """
+    if not bubbles:
+        return []
+    if not local_registration_enabled():
+        return sample_bubble_fills_at_spec(page, bubbles)
+    if any(not isinstance(bubble.get("group"), int) for bubble in bubbles):
+        return sample_bubble_fills(page, bubbles, registration_log)
+    fills: dict[int, float] = {}
+    by_group: dict[int, list[int]] = {}
+    for index, bubble in enumerate(bubbles):
+        by_group.setdefault(bubble["group"], []).append(index)
+    for indexes in by_group.values():
+        group_fills = sample_bubble_fills(page, [bubbles[i] for i in indexes], registration_log)
+        for index, fill in zip(indexes, group_fills, strict=True):
+            fills[index] = fill
+    return [fills[index] for index in range(len(bubbles))]
 
 
 def bubble_samples(
@@ -145,8 +216,13 @@ def _read_group(
 class BubbleGroupReader:
     kind = "bubble_group"
 
-    def sample_fills(self, page: RectifiedPage, field: dict[str, Any]) -> list[float]:
-        return sample_bubble_fills(page, field["bubbles"])
+    def sample_fills(
+        self,
+        page: RectifiedPage,
+        field: dict[str, Any],
+        registration_log: list[RingFix] | None = None,
+    ) -> list[float]:
+        return sample_bubble_fills(page, field["bubbles"], registration_log)
 
     def read(
         self,
@@ -193,8 +269,13 @@ class BubbleGroupReader:
 class DigitGridReader:
     kind = "digit_grid"
 
-    def sample_fills(self, page: RectifiedPage, field: dict[str, Any]) -> list[float]:
-        return sample_bubble_fills(page, field["bubbles"])
+    def sample_fills(
+        self,
+        page: RectifiedPage,
+        field: dict[str, Any],
+        registration_log: list[RingFix] | None = None,
+    ) -> list[float]:
+        return sample_digit_grid_fills(page, field["bubbles"], registration_log)
 
     def read(
         self,
@@ -238,7 +319,12 @@ class DigitGridReader:
 class CropRegionReader:
     kind = "crop_region"
 
-    def sample_fills(self, page: RectifiedPage, field: dict[str, Any]) -> list[float]:
+    def sample_fills(
+        self,
+        page: RectifiedPage,
+        field: dict[str, Any],
+        registration_log: list[RingFix] | None = None,
+    ) -> list[float]:
         return []
 
     def read(

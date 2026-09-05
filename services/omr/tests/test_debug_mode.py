@@ -72,6 +72,11 @@ def test_read_with_debug_wraps_result_and_adds_per_page_metrics(
     assert debug_page["orientationDegrees"] == 0
     for stage in ("rectify", "quality", "identity", "classify", "total"):
         assert debug_page["timingsMs"][stage] >= 0.0
+    assert debug_page["registration"]["bubbles"] in (0, 32)
+    contrast = debug_page["fieldContrast"]
+    assert contrast["markedCount"] == 7 and contrast["blankCount"] == 1
+    assert contrast["markedMin"] > 0.5
+    assert contrast["blankMax"] < 0.1
 
 
 def test_classify_page_debug_is_importable_for_the_golden_set_harness(

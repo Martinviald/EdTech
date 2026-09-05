@@ -45,14 +45,25 @@ dejarían de ser comparables con el criterio que se va a medir en papel.
 
 | Corte | Recetas |
 |---|---|
-| `scanner-adf` | plano · papel-realzado · papel-gris · fotocopia · **esquina-lavada** · **alta-resolución** |
-| `phone-good` | rotación-leve · perspectiva-leve · con-fondo · alta-resolución-foto · sombra-diagonal |
-| `phone-bad` | perspectiva-fuerte · arruga · sombra-lateral · desenfoque · reflejo · **reflow-a4** · **qr-movido** |
-| `dirty` | marcas-sucias · marcas-sucias-con-sombra · **fiducial-cortado** · **fiducial-ausente** |
+| `scanner-adf` | plano · papel-realzado · papel-gris · fotocopia · **esquina-lavada** · **alta-resolución** · remuestreo-240dpi |
+| `phone-good` | rotación-leve · perspectiva-leve · con-fondo · alta-resolución-foto · sombra-diagonal · distractor-en-diagonal · ***distorsión-radial*** · ***curvatura*** · ***fiducial-sesgo*** |
+| `phone-bad` | perspectiva-fuerte · arruga · sombra-lateral · desenfoque · reflejo · **reflow-a4** · **qr-movido** · distractor-dos-esquinas-superiores |
+| `dirty` | marcas-sucias · marcas-sucias-con-sombra · **fiducial-cortado** · **fiducial-ausente** · distractor-tres-esquinas · ***lápiz-claro*** |
 
 En negrita, los seis modos de falla **reales** que el generador no simulaba y que se agregaron acá
 (`tests/synthetic.py`: `clip_corner`, `motion_blur_region`, `reflow`, y los parámetros
 `fiducial_roughness` / `fiducial_inks` / `drop_fiducials` de `render_page`).
+
+En negrita cursiva, las recetas del **registro de burbujas** (`goldset/README-registro.md`). Lo que
+queda tras la homografía de 4 fiduciales en una foto real no es cero sino 6–8 px (15 en la peor
+medida), y el barrido no lo reproducía: sus fiduciales son exactos y sus deformaciones,
+proyectivas. `distorsion-radial` (barril de lente, `radial_distortion`), `curvatura` (hoja
+abombada, `cylinder_curl`) y `fiducial-sesgo` (cada cuadrado corrido unos píxeles,
+`shift_fiducials`) dejan el interior a 11–13 px del spec. **Requisito de admisión de cada una:
+degradar la lectura sin registro local y pasar con él** (`OMR_LOCAL_REGISTRATION`); medido en
+la fase 5: sin registro 21/3, 23/1 y 11/1 (correctas/revisión), con registro 24/0, 24/0 y 12/0.
+`lápiz-claro` (`pencil_gray` 185, desenfoque 0.8) es el guardarraíl fotométrico: una marca real a
+~20 % del papel nunca sale `blank` confiado.
 
 El corte `dirty` sortea además los estilos de mano humana que el clasificador tiene que mandar a
 revisión en vez de adivinar: cruz, tilde, relleno a medias, borrón y doble marca.

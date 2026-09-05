@@ -39,6 +39,24 @@ margin < AMBIGUITY_MARGIN => ambiguous. Ademas, un fill en tierra de nadie
 — lejos de AMBOS grupos (banda `ambiguity_band`) — tambien es ambiguous
 aunque su margin sea alto: un tick al 40% en una hoja de rellenos completos
 quedaba como blank CONFIADO, el unico defecto que la cola no compensa.
+
+Lo que NO cambia, y por que (goldset/README-registro.md):
+
+- El margen normalizado por el hueco entre grupos ("propuesta A", rama
+  exp/omr-margen-por-hueco) queda archivado. Atacaba el sintoma: con el disco
+  de muestreo corrido respecto del anillo (app/registration.py) el margen se
+  comprimia, y normalizarlo dejaba de dudar sobre fills que estaban mal
+  medidos — 13 errores confiados sobre 154 preguntas con verdad, contra 4 del
+  criterio actual y 0 con el registro puesto. Ademas la evaluacion que lo
+  apoyaba comparaba el `fill` REPRESENTATIVO del campo (en un campo ambiguous es
+  la burbuja mas dudosa, casi siempre una vacia) como si fuera la marcada.
+  Cualquier evaluacion de criterios se hace por burbuja, con los 4 fills.
+- El contraste por pregunta (fill mayor menos segundo mayor) se midio como
+  segunda opinion para dudar: con el registro puesto, ningun campo de las 9
+  fotos reales ni de las 48 sinteticas cambiaria de decision con un corte de
+  0.15, 0.25 o 0.35 — margen + banda + `multiple` ya cubren esos casos. Se
+  expone en el debug de pagina (`fieldContrast`) como senal de monitoreo, no
+  como regla.
 """
 
 from __future__ import annotations
@@ -98,8 +116,11 @@ class PageThreshold:
 
 
 def bubble_fill(page: RectifiedPage, center: dict[str, float], radius: float) -> float:
-    center_px = point_to_px(center, page.size)
-    radius_px = radius_to_px(radius, page.size)
+    return bubble_fill_px(page, point_to_px(center, page.size), radius_to_px(radius, page.size))
+
+
+def bubble_fill_px(page: RectifiedPage, center_px: tuple[int, int], radius_px: int) -> float:
+    """El mismo fill con el centro ya en pixeles (lo usa el registro local, app/registration)."""
     patch, local_center = _patch_around(page.gray, center_px, radius_px)
     background = _local_background(patch, local_center, radius_px)
     inner = _circle_pixels(patch, local_center, max(1, round(radius_px * INNER_RADIUS_RATIO)))
@@ -186,6 +207,14 @@ def readability_verdict(threshold: PageThreshold, fills: list[float]) -> str:
     Pendiente: el corpus son 7 fotos de UNA hoja, un papel y una impresora. Si
     aparece papel mas gris o una camara con mas ruido, el rango de las blancas
     sube y hay que volver a medir este numero.
+
+    Con el registro local (app/registration.py) las 7 blancas se midieron ANTES
+    del registro, con el disco corrido y el anillo dentro: centrado, el maximo de
+    una hoja en blanco solo puede bajar (la hoja impresa sin marcar, rasterizada
+    del PDF, da 0.207 de maximo con o sin registro), y el de una hoja con tinta
+    solo puede subir (el disco cae sobre la marca). El corte sigue valiendo con
+    mas holgura del lado blanco; falta re-medir las 10 capturas con el registro
+    encendido para actualizar la tabla (goldset/README-registro.md, fase 2).
     """
     if threshold.is_readable():
         return MARKS_READABLE
@@ -198,6 +227,14 @@ def margin_of(fill: float, threshold: float) -> float:
     if threshold <= 0:
         return 0.0
     return abs(fill - threshold) / threshold
+
+
+def field_contrast(fills: list[float]) -> float:
+    """Fill mayor menos segundo mayor del campo: cuanto se despega la respuesta del resto."""
+    if len(fills) < 2:
+        return 0.0
+    ordered = sorted(fills, reverse=True)
+    return float(ordered[0] - ordered[1])
 
 
 def _otsu_split(values: np.ndarray) -> tuple[np.ndarray, np.ndarray] | None:

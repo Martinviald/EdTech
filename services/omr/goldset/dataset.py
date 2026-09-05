@@ -21,10 +21,27 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-CUTS = ("scanner-adf", "phone-good", "phone-bad", "dirty")
+CUTS = ("scanner-adf", "phone-good", "phone-bad", "dirty", "real-phone", "real-scanner")
 PAGE_IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg")
 PAGE_FILE_PATTERN = re.compile(r"^page-(\d+)$")
 REQUIRED_TRANSCRIPTIONS = 2
+
+# `truthSource` en truth.json dice de donde sale la verdad y cuantas transcripciones
+# hacen falta. Sin el campo, la verdad es la doble transcripcion de O4 (2 personas que
+# leen el papel). En los cortes `real-*` la verdad puede venir POR CONSTRUCCION: la
+# persona que rellena la hoja deja escrita la clave ANTES de fotografiarla, asi que no
+# hay lectura que verificar por duplicado (una transcripcion, `by` = quien rellena).
+# `adjudication` es la verdad provisional de un lote real ya adjudicado en la cola de
+# revision (una transcripcion, `by` = revisor + motor); vale para seguir el cambio de
+# lectura de ese lote, no como juez.
+TRUTH_SOURCE_DOUBLE = "double-transcription"
+TRUTH_SOURCE_CONSTRUCTION = "construction"
+TRUTH_SOURCE_ADJUDICATION = "adjudication"
+TRANSCRIPTIONS_BY_SOURCE = {
+    TRUTH_SOURCE_DOUBLE: REQUIRED_TRANSCRIPTIONS,
+    TRUTH_SOURCE_CONSTRUCTION: 1,
+    TRUTH_SOURCE_ADJUDICATION: 1,
+}
 
 
 class DatasetError(Exception):
@@ -161,13 +178,33 @@ def transcription_answers(truth: dict[str, Any]) -> list[dict[str, Any]]:
     return transcriptions
 
 
+def truth_source(truth: dict[str, Any]) -> str:
+    source = truth.get("truthSource", TRUTH_SOURCE_DOUBLE)
+    if source not in TRANSCRIPTIONS_BY_SOURCE:
+        raise DatasetError(
+            f"truthSource desconocido {source!r} "
+            f"(validos: {', '.join(TRANSCRIPTIONS_BY_SOURCE)})"
+        )
+    return source
+
+
+def required_transcriptions(truth: dict[str, Any]) -> int:
+    return TRANSCRIPTIONS_BY_SOURCE[truth_source(truth)]
+
+
 def consensus_answers(sheet: GoldSheet, truth: dict[str, Any]) -> dict[str, str | None]:
     transcriptions = transcription_answers(truth)
-    if len(transcriptions) != REQUIRED_TRANSCRIPTIONS:
+    required = required_transcriptions(truth)
+    if len(transcriptions) != required:
         raise DatasetError(
-            f"{sheet.label}: se requieren exactamente {REQUIRED_TRANSCRIPTIONS} "
+            f"{sheet.label}: se requieren exactamente {required} "
             f"transcripciones y hay {len(transcriptions)}"
         )
+    if required == 1:
+        answers = transcriptions[0].get("answers")
+        if not isinstance(answers, dict):
+            raise DatasetError(f"{sheet.label}: transcripcion sin answers")
+        return answers
     first, second = (t.get("answers") for t in transcriptions)
     if first != second:
         raise DatasetError(
