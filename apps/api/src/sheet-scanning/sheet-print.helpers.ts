@@ -3,6 +3,7 @@ import * as QRCode from 'qrcode';
 import {
   buildOmrQrPayload,
   buildOmrShortQrPayload,
+  formatSheetDayMonthYear,
   formatShortCode,
   type LayoutSpec,
 } from '@soe/types';
@@ -52,6 +53,7 @@ export interface SheetDrawPlan {
   syncTicks: DrawPlanRect[];
   qr: { x: number; y: number; size: number };
   header: { nameX: number; nameY: number; courseX: number; courseY: number };
+  headerMaxWidth: { name: number; course: number };
   rutGridBubbles: DrawPlanBubble[];
   instructions: DrawPlanLabel[];
   cropRegions: DrawPlanCropRegion[];
@@ -63,6 +65,99 @@ export interface PrintableSheetInfo {
   shortCode: number | null;
   studentName: string | null;
   classGroupName: string | null;
+  listNumber: number | null;
+  instrumentLabel: string | null;
+  administeredAt: string | Date | null;
+}
+
+export interface InstrumentLabelParts {
+  name: string;
+  subjectName: string | null;
+  gradeName: string | null;
+  year: number | null;
+  applicationPeriod: string | null;
+}
+
+const APPLICATION_PERIOD_LABELS: Record<string, string> = {
+  diagnostico: 'Diagnóstico',
+  intermedio: 'Monitoreo Intermedio',
+  cierre: 'Cierre',
+};
+
+function normalizeForComparison(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function appendIfMissing(base: string, addition: string | null): string {
+  if (addition === null) return base;
+  const trimmed = addition.trim();
+  if (trimmed.length === 0) return base;
+  const normalizedAddition = normalizeForComparison(trimmed);
+  if (normalizedAddition.length === 0) return base;
+  if (normalizeForComparison(base).includes(normalizedAddition)) return base;
+  return `${base} · ${trimmed}`;
+}
+
+export function buildInstrumentLabel(parts: InstrumentLabelParts): string {
+  const period = parts.applicationPeriod
+    ? (APPLICATION_PERIOD_LABELS[parts.applicationPeriod] ?? parts.applicationPeriod)
+    : null;
+
+  let label = parts.name.trim();
+  label = appendIfMissing(label, parts.subjectName);
+  label = appendIfMissing(label, parts.gradeName);
+  label = appendIfMissing(label, parts.year === null ? null : String(parts.year));
+
+  if (period === null) return label;
+  if (normalizeForComparison(label).includes(normalizeForComparison(period))) return label;
+  return `${label} — ${period}`;
+}
+
+function joinHeaderParts(parts: readonly (string | null)[]): string {
+  return parts
+    .map((part) => part?.trim() ?? '')
+    .filter((part) => part.length > 0)
+    .join(' · ');
+}
+
+export function buildSheetIdentityLine(sheet: PrintableSheetInfo): string {
+  if (sheet.studentName === null) {
+    return joinHeaderParts([sheet.classGroupName, 'Reserva']);
+  }
+  return joinHeaderParts([
+    sheet.classGroupName,
+    sheet.listNumber === null ? null : `N° ${sheet.listNumber}`,
+    sheet.studentName,
+  ]);
+}
+
+export function buildSheetContextLine(
+  sheet: PrintableSheetInfo,
+  options: { includeClassGroup: boolean } = { includeClassGroup: false },
+): string {
+  return joinHeaderParts([
+    options.includeClassGroup ? sheet.classGroupName : null,
+    sheet.instrumentLabel,
+    formatSheetDayMonthYear(sheet.administeredAt),
+  ]);
+}
+
+export function fitTextToWidth(
+  text: string,
+  maxWidth: number,
+  widthOf: (value: string) => number,
+): string {
+  if (text.length === 0 || widthOf(text) <= maxWidth) return text;
+  let truncated = text;
+  while (truncated.length > 1 && widthOf(`${truncated}…`) > maxWidth) {
+    truncated = truncated.slice(0, -1);
+  }
+  return `${truncated.trimEnd()}…`;
 }
 
 export function qrPayloadForSheet(
@@ -90,6 +185,7 @@ const COURSE_FONT_SIZE = 9;
 const INSTRUCTION_FONT_SIZE = 7;
 const SHORT_CODE_FONT_SIZE = 7;
 const SHORT_CODE_STRIP_PT = 11;
+const HEADER_QR_GAP = 8;
 const BLANK_NAME_LINE = '________________________________';
 const RUT_MODE_NAME_LINE = 'Nombre: ____________________________';
 const RUT_INSTRUCTION_LINES = [
@@ -116,10 +212,25 @@ export function computeDrawPlan(
   const toY = (ny: number): number => pageHeight - (frameTop + ny * frameHeight);
 
   const fiducials: DrawPlanRect[] = [
-    { x: fiducialMargin, y: pageHeight - fiducialMargin - fiducialSide, width: fiducialSide, height: fiducialSide },
-    { x: pageWidth - fiducialMargin - fiducialSide, y: pageHeight - fiducialMargin - fiducialSide, width: fiducialSide, height: fiducialSide },
+    {
+      x: fiducialMargin,
+      y: pageHeight - fiducialMargin - fiducialSide,
+      width: fiducialSide,
+      height: fiducialSide,
+    },
+    {
+      x: pageWidth - fiducialMargin - fiducialSide,
+      y: pageHeight - fiducialMargin - fiducialSide,
+      width: fiducialSide,
+      height: fiducialSide,
+    },
     { x: fiducialMargin, y: fiducialMargin, width: fiducialSide, height: fiducialSide },
-    { x: pageWidth - fiducialMargin - fiducialSide, y: fiducialMargin, width: fiducialSide, height: fiducialSide },
+    {
+      x: pageWidth - fiducialMargin - fiducialSide,
+      y: fiducialMargin,
+      width: fiducialSide,
+      height: fiducialSide,
+    },
   ];
 
   const bubbles: DrawPlanBubble[] = [];
@@ -215,10 +326,15 @@ export function computeDrawPlan(
         }))
       : [];
 
+  const headerRightEdge = Math.min(qrX, pageWidth - fiducialMargin) - HEADER_QR_GAP;
   const header =
     identityMode === 'rut_bubbles'
       ? { nameX: toX(0.05), nameY: toY(0.015), courseX: toX(0.55), courseY: toY(0.02) }
       : { nameX: toX(0.02), nameY: toY(0.05), courseX: toX(0.02), courseY: toY(0.09) };
+  const headerMaxWidth = {
+    name: Math.max(headerRightEdge - header.nameX, 0),
+    course: Math.max(headerRightEdge - header.courseX, 0),
+  };
 
   return {
     pageWidth,
@@ -230,6 +346,7 @@ export function computeDrawPlan(
     syncTicks,
     qr: { x: qrX, y: qrY, size: qrSize },
     header,
+    headerMaxWidth,
     rutGridBubbles,
     instructions,
     cropRegions,
@@ -365,28 +482,36 @@ export async function renderSheetsPdf(
       }
 
       const rutMode = identityModeOf(spec) === 'rut_bubbles';
-      const name = rutMode ? RUT_MODE_NAME_LINE : (sheet.studentName ?? BLANK_NAME_LINE);
-      page.drawText(name, {
-        x: plan.header.nameX,
-        y: plan.header.nameY,
-        size: NAME_FONT_SIZE,
-        font: boldFont,
-        color: black,
-      });
-
-      const courseLine = rutMode
-        ? (sheet.classGroupName ?? '')
-        : sheet.studentName === null
-          ? ['Hoja de reserva', sheet.classGroupName].filter(Boolean).join(' — ')
-          : (sheet.classGroupName ?? '');
-      if (courseLine.length > 0) {
-        page.drawText(courseLine, {
-          x: plan.header.courseX,
-          y: plan.header.courseY,
-          size: COURSE_FONT_SIZE,
-          font,
+      const identityLine = rutMode
+        ? RUT_MODE_NAME_LINE
+        : buildSheetIdentityLine(sheet) || BLANK_NAME_LINE;
+      page.drawText(
+        fitTextToWidth(identityLine, plan.headerMaxWidth.name, (value) =>
+          boldFont.widthOfTextAtSize(value, NAME_FONT_SIZE),
+        ),
+        {
+          x: plan.header.nameX,
+          y: plan.header.nameY,
+          size: NAME_FONT_SIZE,
+          font: boldFont,
           color: black,
-        });
+        },
+      );
+
+      const contextLine = buildSheetContextLine(sheet, { includeClassGroup: rutMode });
+      if (contextLine.length > 0) {
+        page.drawText(
+          fitTextToWidth(contextLine, plan.headerMaxWidth.course, (value) =>
+            font.widthOfTextAtSize(value, COURSE_FONT_SIZE),
+          ),
+          {
+            x: plan.header.courseX,
+            y: plan.header.courseY,
+            size: COURSE_FONT_SIZE,
+            font,
+            color: black,
+          },
+        );
       }
     }
   }
