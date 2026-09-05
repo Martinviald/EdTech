@@ -547,8 +547,22 @@ describe('deriveSkillStatsFromItemStats', () => {
     // que son conteos y por lo tanto sumables aunque las poblaciones difieran.
     const out = deriveSkillStatsFromItemStats(
       [
-        stat({ itemId: 'comun', studentCount: 43, responseCount: 43, correctCount: 30, scoreSum: 30, maxSum: 43 }),
-        stat({ itemId: 'mencion', studentCount: 14, responseCount: 14, correctCount: 7, scoreSum: 7, maxSum: 14 }),
+        stat({
+          itemId: 'comun',
+          studentCount: 43,
+          responseCount: 43,
+          correctCount: 30,
+          scoreSum: 30,
+          maxSum: 43,
+        }),
+        stat({
+          itemId: 'mencion',
+          studentCount: 14,
+          responseCount: 14,
+          correctCount: 7,
+          scoreSum: 7,
+          maxSum: 14,
+        }),
       ],
       new Map([
         ['comun', ['n1']],
