@@ -437,6 +437,8 @@ describe('SheetPrintService.getRun / list', () => {
     classGroupId: CLASS_GROUP_ID,
     classGroupName: '3° Básico A',
     assessmentId: null,
+    assessmentFormId: undefined,
+    administeredAt: null,
     spareCount: 2,
     sheetCount: 5,
     pdfFileId: null,
@@ -687,5 +689,169 @@ describe('SheetPrintService — hoja genérica y formas (v1)', () => {
     const doc = await PDFDocument.load(pdf);
 
     expect(doc.getPageCount()).toBe(rutSpec.pageCount * 2);
+  });
+});
+
+describe('SheetPrintService — fecha de aplicación', () => {
+  const LAYOUT_ROW_2 = { id: LAYOUT_ID, version: 3, instrumentId: INSTRUMENT_ID };
+  const CLASS_GROUP_ROW_2 = { id: CLASS_GROUP_ID, name: '3° Básico A' };
+  const ROSTER_ROWS_2 = [{ id: 'student-a' }, { id: 'student-b' }, { id: 'student-c' }];
+  const RUN_ROW_2 = {
+    id: RUN_ID,
+    assessmentId: ASSESSMENT_ID,
+    spareCount: 2,
+    sheetCount: 5,
+    pdfFileId: null,
+    createdById: USER_ID,
+    createdAt: new Date('2026-08-01T12:00:00Z'),
+  };
+  const RUN_LOOKUP_2 = [
+    {
+      id: RUN_ID,
+      assessmentId: ASSESSMENT_ID,
+      instrumentId: INSTRUMENT_ID,
+      classGroupId: CLASS_GROUP_ID,
+      classGroupName: '3° Básico A',
+    },
+  ];
+  const UPDATED_ROW_2 = {
+    id: RUN_ID,
+    layoutId: LAYOUT_ID,
+    layoutVersion: 3,
+    instrumentId: INSTRUMENT_ID,
+    classGroupId: CLASS_GROUP_ID,
+    classGroupName: '3° Básico A',
+    assessmentId: ASSESSMENT_ID,
+    administeredAt: new Date('2026-04-30T12:00:00Z'),
+    spareCount: 2,
+    sheetCount: 5,
+    pdfFileId: null,
+    createdById: USER_ID,
+    createdAt: new Date('2026-08-01T12:00:00Z'),
+  };
+
+  it('la evaluación que nace de la tirada ya guarda la fecha elegida', async () => {
+    const { db, inserts } = makeDb(
+      [[LAYOUT_ROW_2], [CLASS_GROUP_ROW_2], ROSTER_ROWS_2],
+      [[{ id: ASSESSMENT_ID }], [], [RUN_ROW_2]],
+    );
+    const service = new SheetPrintService(db);
+
+    await service.createRun(ORG_ID, USER_ID, { ...CREATE_DTO, administeredAt: '2026-04-30' });
+
+    expect(inserts[0]).toMatchObject({
+      administeredAt: new Date('2026-04-30T12:00:00.000Z'),
+    });
+  });
+
+  it('la evaluación existente recibe la fecha elegida al crear la tirada', async () => {
+    const { db, updates } = makeDb(
+      [
+        [LAYOUT_ROW_2],
+        [CLASS_GROUP_ROW_2],
+        ROSTER_ROWS_2,
+        [{ id: ASSESSMENT_ID, instrumentId: INSTRUMENT_ID }],
+      ],
+      [[RUN_ROW_2]],
+    );
+    const service = new SheetPrintService(db);
+
+    await service.createRun(ORG_ID, USER_ID, {
+      ...CREATE_DTO,
+      assessmentId: ASSESSMENT_ID,
+      administeredAt: '2026-04-30',
+    });
+
+    expect(updates).toEqual([{ administeredAt: new Date('2026-04-30T12:00:00.000Z') }]);
+  });
+
+  it('sin fecha en el dto NO se toca la fecha de la evaluación existente', async () => {
+    const { db, updates } = makeDb(
+      [
+        [LAYOUT_ROW_2],
+        [CLASS_GROUP_ROW_2],
+        ROSTER_ROWS_2,
+        [{ id: ASSESSMENT_ID, instrumentId: INSTRUMENT_ID }],
+      ],
+      [[RUN_ROW_2]],
+    );
+    const service = new SheetPrintService(db);
+
+    await service.createRun(ORG_ID, USER_ID, { ...CREATE_DTO, assessmentId: ASSESSMENT_ID });
+
+    expect(updates).toHaveLength(0);
+  });
+
+  it('updateRun con sólo la fecha no reasigna la evaluación ni consulta lotes confirmados', async () => {
+    const { db, updates } = makeDb([RUN_LOOKUP_2, [UPDATED_ROW_2]]);
+    const service = new SheetPrintService(db);
+
+    const run = await service.updateRun(ORG_ID, USER_ID, RUN_ID, {
+      administeredAt: '2026-04-30',
+    });
+
+    expect(updates).toEqual([{ administeredAt: new Date('2026-04-30T12:00:00.000Z') }]);
+    expect(run.administeredAt).toEqual(new Date('2026-04-30T12:00:00Z'));
+  });
+
+  it('updateRun con fecha null la limpia', async () => {
+    const { db, updates } = makeDb([RUN_LOOKUP_2, [{ ...UPDATED_ROW_2, administeredAt: null }]]);
+    const service = new SheetPrintService(db);
+
+    await service.updateRun(ORG_ID, USER_ID, RUN_ID, { administeredAt: null });
+
+    expect(updates).toEqual([{ administeredAt: null }]);
+  });
+
+  it('updateRun rechaza fijar la fecha en una tirada sin evaluación asociada', async () => {
+    const { db, updates } = makeDb([[{ ...RUN_LOOKUP_2[0], assessmentId: null }]]);
+    const service = new SheetPrintService(db);
+
+    await expect(
+      service.updateRun(ORG_ID, USER_ID, RUN_ID, { administeredAt: '2026-04-30' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('renderPdf arma la cabecera con instrumento y fecha sin perder hojas', async () => {
+    const spec = makeSpec(20);
+    const { db } = makeDb([
+      [
+        {
+          id: RUN_ID,
+          spec,
+          specHash: 'a3f9c1e70b4d2856',
+          classGroupName: '3° Básico A',
+          administeredAt: new Date('2026-04-30T12:00:00Z'),
+          instrumentName: 'DIA Lectura 3° Básico 2026',
+          instrumentYear: 2026,
+          instrumentApplicationPeriod: 'diagnostico',
+          subjectName: 'Lectura',
+          gradeName: '3° Básico',
+        },
+      ],
+      [
+        {
+          id: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
+          sequence: 1,
+          shortCode: null,
+          firstName: 'Ana',
+          lastName: 'Pérez',
+        },
+        {
+          id: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
+          sequence: 2,
+          shortCode: null,
+          firstName: null,
+          lastName: null,
+        },
+      ],
+    ]);
+    const service = new SheetPrintService(db);
+
+    const pdf = await service.renderPdf(ORG_ID, RUN_ID);
+    const doc = await PDFDocument.load(pdf);
+
+    expect(doc.getPageCount()).toBe(spec.pageCount * 2);
   });
 });

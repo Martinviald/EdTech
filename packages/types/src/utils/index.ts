@@ -19,3 +19,4 @@ export * from './raw-answer-distribution';
 export * from './trajectory-selection';
 export * from './layout-hash';
 export * from './omr-qr';
+export * from './sheet-date';

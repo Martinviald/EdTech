@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/table';
 import { DownloadPdfButton } from '../../components/DownloadPdfButton';
 import { AssignAssessmentControl } from '../../components/AssignAssessmentControl';
+import { PrintRunDateControl } from '../../components/PrintRunDateControl';
 import { HOJAS_ROUTES } from '../../lib/routes';
 import { listInstrumentsForSheets } from '../../lib/instruments';
 import { listAssessmentOptions } from '../../lib/assessment-options';
@@ -170,8 +171,9 @@ async function HistorySection({ layoutId }: { layoutId: string }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Fecha</TableHead>
+            <TableHead>Creada</TableHead>
             <TableHead>Curso</TableHead>
+            <TableHead>Fecha de aplicación</TableHead>
             <TableHead className="hidden sm:table-cell">Hojas</TableHead>
             <TableHead className="hidden sm:table-cell">Reservas</TableHead>
             <TableHead className="text-right">Acciones</TableHead>
@@ -184,6 +186,13 @@ async function HistorySection({ layoutId }: { layoutId: string }) {
                 {formatSheetDate(run.createdAt)}
               </TableCell>
               <TableCell className="font-medium">{run.classGroupName ?? '—'}</TableCell>
+              <TableCell>
+                <PrintRunDateControl
+                  runId={run.id}
+                  administeredAt={run.administeredAt}
+                  disabled={run.assessmentId === null}
+                />
+              </TableCell>
               <TableCell className="hidden sm:table-cell">{run.sheetCount}</TableCell>
               <TableCell className="hidden sm:table-cell">{run.spareCount}</TableCell>
               <TableCell>

@@ -235,9 +235,15 @@ interface VariantVerdict {
   total: number;
 }
 
-function judge(result: ScanResult, spec: LayoutSpec, answerKey: Map<string, string | null>): VariantVerdict {
+function judge(
+  result: ScanResult,
+  spec: LayoutSpec,
+  answerKey: Map<string, string | null>,
+): VariantVerdict {
   const verdict: VariantVerdict = { firmCorrect: 0, wrongConfident: [], toReview: 0, total: 0 };
-  const marksByField = new Map(result.pages.flatMap((p) => p.marks.map((m) => [m.fieldId, m] as const)));
+  const marksByField = new Map(
+    result.pages.flatMap((p) => p.marks.map((m) => [m.fieldId, m] as const)),
+  );
   for (const field of spec.fields) {
     if (!answerKey.has(field.fieldId)) continue;
     verdict.total += 1;
@@ -294,6 +300,9 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
         shortCode: SHORT_CODE,
         studentName: 'Prueba, Ronda',
         classGroupName: '4°A',
+        listNumber: 1,
+        instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+        administeredAt: '2026-04-30',
       },
     ]);
     const filled = await fillPdfAtPrinterCoordinates(printed, spec, { answerKey });
@@ -310,6 +319,9 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
         shortCode: null,
         studentName: 'Prueba, Ronda',
         classGroupName: '4°A',
+        listNumber: 1,
+        instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+        administeredAt: '2026-04-30',
       },
     ]);
     servedPdfs.set(
@@ -334,6 +346,9 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
         shortCode: SHORT_CODE,
         studentName: null,
         classGroupName: '4°A',
+        listNumber: null,
+        instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+        administeredAt: '2026-04-30',
       },
     ]);
     const digitValues = new Map([[DIGIT_FIELD_ID, DIGIT_VALUE]]);
@@ -370,9 +385,13 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
     if (typeof address === 'string' || address === null) throw new Error('sin puerto');
     fileServerPort = address.port;
 
-    omr = spawn(resolve(OMR_DIR, '.venv/bin/uvicorn'), ['app.main:app', '--port', String(OMR_PORT)], {
-      cwd: OMR_DIR,
-    });
+    omr = spawn(
+      resolve(OMR_DIR, '.venv/bin/uvicorn'),
+      ['app.main:app', '--port', String(OMR_PORT)],
+      {
+        cwd: OMR_DIR,
+      },
+    );
     await waitForHealth(OMR_BASE, 40);
   });
 
