@@ -192,16 +192,20 @@ export class SheetLayoutService {
   ): Promise<string[] | null> {
     if (assessmentFormId === null) return null;
 
-    const [form] = await this.db
-      .select({
-        id: assessmentForms.id,
-        sectionIds: assessmentForms.sectionIds,
-        instrumentId: assessments.instrumentId,
-      })
-      .from(assessmentForms)
-      .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
-      .where(and(eq(assessmentForms.id, assessmentFormId), eq(assessmentForms.orgId, orgId)))
-      .limit(1);
+    // `assessment_forms` tiene RLS forzado: sin contexto de organización la consulta
+    // devuelve 0 filas y esto lanzaría "Forma de evaluación no encontrada" siempre.
+    const [form] = await withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .select({
+          id: assessmentForms.id,
+          sectionIds: assessmentForms.sectionIds,
+          instrumentId: assessments.instrumentId,
+        })
+        .from(assessmentForms)
+        .innerJoin(assessments, eq(assessments.id, assessmentForms.assessmentId))
+        .where(and(eq(assessmentForms.id, assessmentFormId), eq(assessmentForms.orgId, orgId)))
+        .limit(1),
+    );
 
     if (!form) throw new NotFoundException('Forma de evaluación no encontrada');
     if (form.instrumentId !== instrumentId) {
