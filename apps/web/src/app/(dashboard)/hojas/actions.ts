@@ -69,6 +69,27 @@ export async function createPrintRunAssessment(runId: string): Promise<CreatePri
   }
 }
 
+/**
+ * Fija (o limpia) la fecha de aplicación de la evaluación asociada a la tirada
+ * (`PATCH /sheet-print-runs/:id` con `administeredAt`). Es la fecha que se
+ * imprime en la cabecera de la hoja: se expone donde ya se arma la tirada para
+ * no abrir un CRUD de evaluaciones por un solo campo.
+ */
+export async function updatePrintRunAdministeredAt(
+  runId: string,
+  administeredAt: string | null,
+): Promise<CreatePrintRunResult> {
+  try {
+    const data = await apiPatch<PrintRunModel>(`/sheet-print-runs/${runId}`, { administeredAt });
+    return { ok: true, data };
+  } catch (e) {
+    return {
+      ok: false,
+      message: getDisplayMessage(e, 'No se pudo guardar la fecha de aplicación'),
+    };
+  }
+}
+
 export type DownloadPdfResult =
   | { ok: true; base64: string; fileName: string }
   | { ok: false; message: string };

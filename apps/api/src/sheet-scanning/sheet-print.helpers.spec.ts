@@ -1,9 +1,14 @@
 import { PDFDocument } from 'pdf-lib';
-import type { ItemContent, LayoutField, LayoutSpec } from '@soe/types';
+import { layoutHash, type ItemContent, type LayoutField, type LayoutSpec } from '@soe/types';
 import { deriveLayoutDraft, type DerivableItem } from './sheet-layout.helpers';
 import {
   PAPER_SIZES_PT,
+  qrPayloadForSheet,
+  buildInstrumentLabel,
+  buildSheetContextLine,
+  buildSheetIdentityLine,
   computeDrawPlan,
+  fitTextToWidth,
   renderSheetsPdf,
   type PrintableSheetInfo,
 } from './sheet-print.helpers';
@@ -91,9 +96,10 @@ describe('computeDrawPlan', () => {
           (b) => b.fieldId === field.fieldId && b.value === bubble.value,
         )!;
         expect((drawn.cx - plan.frame.x) / plan.frame.width).toBeCloseTo(bubble.center.x, 6);
-        expect(
-          (plan.pageHeight - drawn.cy - plan.frame.y) / plan.frame.height,
-        ).toBeCloseTo(bubble.center.y, 6);
+        expect((plan.pageHeight - drawn.cy - plan.frame.y) / plan.frame.height).toBeCloseTo(
+          bubble.center.y,
+          6,
+        );
       }
     }
   });
@@ -147,6 +153,9 @@ describe('renderSheetsPdf', () => {
       shortCode: 0x0a1b2c3d,
       studentName: 'Pérez, Ana',
       classGroupName: '3° Básico A',
+      listNumber: 1,
+      instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+      administeredAt: '2026-04-30',
     },
     {
       printedSheetId: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
@@ -154,6 +163,9 @@ describe('renderSheetsPdf', () => {
       shortCode: 0x0a1b2c3e,
       studentName: null,
       classGroupName: '3° Básico A',
+      listNumber: null,
+      instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+      administeredAt: '2026-04-30',
     },
   ];
 
@@ -274,6 +286,9 @@ describe('computeDrawPlan — campos digit_grid y crop_region (CD-8/CD-9)', () =
         shortCode: 0x0a1b2c3d,
         studentName: 'Pérez, Ana',
         classGroupName: '3° Básico A',
+        listNumber: 1,
+        instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+        administeredAt: '2026-04-30',
       },
     ]);
     const doc = await PDFDocument.load(bytes);
@@ -330,6 +345,9 @@ describe('computeDrawPlan — hoja genérica con RUT (CD-10)', () => {
         shortCode: 0x0a1b2c3d,
         studentName: null,
         classGroupName: '3° Básico A',
+        listNumber: null,
+        instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+        administeredAt: '2026-04-30',
       },
       {
         printedSheetId: '8e1b0933-2a6d-4b00-8c9c-4d7e6a1b0c22',
@@ -337,6 +355,9 @@ describe('computeDrawPlan — hoja genérica con RUT (CD-10)', () => {
         shortCode: 0x0a1b2c3e,
         studentName: null,
         classGroupName: '3° Básico A',
+        listNumber: null,
+        instrumentLabel: 'DIA Lectura 3° Básico 2026 — Diagnóstico',
+        administeredAt: '2026-04-30',
       },
     ];
 
@@ -344,5 +365,171 @@ describe('computeDrawPlan — hoja genérica con RUT (CD-10)', () => {
     const doc = await PDFDocument.load(bytes);
 
     expect(doc.getPageCount()).toBe(spec.pageCount * genericSheets.length);
+  });
+});
+
+describe('buildInstrumentLabel', () => {
+  it('no repite asignatura, grado ni año que el nombre del instrumento ya trae', () => {
+    expect(
+      buildInstrumentLabel({
+        name: 'DIA Lectura 5° Básico 2026',
+        subjectName: 'Lectura',
+        gradeName: '5° Básico',
+        year: 2026,
+        applicationPeriod: 'diagnostico',
+      }),
+    ).toBe('DIA Lectura 5° Básico 2026 — Diagnóstico');
+  });
+
+  it('completa lo que falta en el nombre', () => {
+    expect(
+      buildInstrumentLabel({
+        name: 'Ensayo interno',
+        subjectName: 'Matemática',
+        gradeName: '7° Básico',
+        year: 2026,
+        applicationPeriod: null,
+      }),
+    ).toBe('Ensayo interno · Matemática · 7° Básico · 2026');
+  });
+
+  it('ignora tildes y mayúsculas al detectar repetición', () => {
+    expect(
+      buildInstrumentLabel({
+        name: 'DIA MATEMATICA 3° basico',
+        subjectName: 'Matemática',
+        gradeName: '3° Básico',
+        year: null,
+        applicationPeriod: 'cierre',
+      }),
+    ).toBe('DIA MATEMATICA 3° basico — Cierre');
+  });
+});
+
+describe('cabecera de la hoja', () => {
+  const base: PrintableSheetInfo = {
+    printedSheetId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
+    sequence: 12,
+    shortCode: null,
+    studentName: 'Contreras Callejón, Lucía Alessandra',
+    classGroupName: '5° Básico A',
+    listNumber: 12,
+    instrumentLabel: 'DIA Lectura 5° Básico 2026 — Diagnóstico',
+    administeredAt: '2026-04-30',
+  };
+
+  it('primera línea: curso, número de lista y nombre', () => {
+    expect(buildSheetIdentityLine(base)).toBe(
+      '5° Básico A · N° 12 · Contreras Callejón, Lucía Alessandra',
+    );
+  });
+
+  it('segunda línea: instrumento y fecha de aplicación', () => {
+    expect(buildSheetContextLine(base)).toBe(
+      'DIA Lectura 5° Básico 2026 — Diagnóstico · 30/04/2026',
+    );
+  });
+
+  it('una hoja de reserva dice Reserva y NUNCA un número de lista', () => {
+    const spare: PrintableSheetInfo = {
+      ...base,
+      sequence: 31,
+      studentName: null,
+      listNumber: null,
+    };
+
+    const line = buildSheetIdentityLine(spare);
+    expect(line).toBe('5° Básico A · Reserva');
+    expect(line).not.toContain('N°');
+    expect(line).not.toContain('31');
+  });
+
+  it('la fecha nula deja la línea sin fecha en vez de imprimir un vacío', () => {
+    expect(buildSheetContextLine({ ...base, administeredAt: null })).toBe(
+      'DIA Lectura 5° Básico 2026 — Diagnóstico',
+    );
+  });
+
+  it('incluye el curso en la segunda línea sólo en el modo genérico por RUT', () => {
+    expect(buildSheetContextLine(base, { includeClassGroup: true })).toBe(
+      '5° Básico A · DIA Lectura 5° Básico 2026 — Diagnóstico · 30/04/2026',
+    );
+  });
+});
+
+describe('fitTextToWidth', () => {
+  const widthOf = (value: string): number => value.length;
+
+  it('deja intacto el texto que cabe', () => {
+    expect(fitTextToWidth('hola', 10, widthOf)).toBe('hola');
+  });
+
+  it('recorta con elipsis lo que no cabe', () => {
+    const fitted = fitTextToWidth('abcdefghij', 5, widthOf);
+    expect(widthOf(fitted)).toBeLessThanOrEqual(5);
+    expect(fitted.endsWith('…')).toBe(true);
+  });
+});
+
+describe('la cabecera no invade los fiduciales ni el QR', () => {
+  it('deja aire vertical entre el fiducial superior y la primera línea de texto', () => {
+    const plan = computeDrawPlan(makeSpec(30), 0);
+    const topFiducial = plan.fiducials[0]!;
+    const fiducialBottomFromTop = plan.pageHeight - topFiducial.y;
+    const nameTopFromTop = plan.pageHeight - plan.header.nameY - 11;
+
+    expect(nameTopFromTop - fiducialBottomFromTop).toBeGreaterThan(6);
+  });
+
+  it('acota el ancho de la cabecera para que no llegue al QR', () => {
+    const plan = computeDrawPlan(makeSpec(30), 0);
+
+    expect(plan.header.nameX + plan.headerMaxWidth.name).toBeLessThanOrEqual(plan.qr.x);
+    expect(plan.header.courseX + plan.headerMaxWidth.course).toBeLessThanOrEqual(plan.qr.x);
+  });
+});
+
+describe('la cabecera NO entra al LayoutSpec (candado del layoutHash)', () => {
+  const spec = makeSpec(30);
+  const hash = layoutHash(spec);
+
+  const conCabecera: PrintableSheetInfo = {
+    printedSheetId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
+    sequence: 12,
+    shortCode: null,
+    studentName: 'Contreras Callejón, Lucía Alessandra',
+    classGroupName: '5° Básico A',
+    listNumber: 12,
+    instrumentLabel: 'DIA Lectura 5° Básico 2026 — Diagnóstico',
+    administeredAt: '2026-04-30',
+  };
+  const sinCabecera: PrintableSheetInfo = {
+    ...conCabecera,
+    studentName: null,
+    classGroupName: null,
+    listNumber: null,
+    instrumentLabel: null,
+    administeredAt: null,
+  };
+
+  it('el hash del spec no depende de los datos de cabecera', async () => {
+    await renderSheetsPdf(spec, hash, [conCabecera]);
+    await renderSheetsPdf(spec, hash, [sinCabecera]);
+
+    expect(layoutHash(spec)).toBe(hash);
+  });
+
+  it('el payload del QR es idéntico con y sin cabecera', () => {
+    expect(qrPayloadForSheet(conCabecera, hash, 0, spec.pageCount)).toBe(
+      qrPayloadForSheet(sinCabecera, hash, 0, spec.pageCount),
+    );
+  });
+
+  it('el plano de dibujo (fiduciales, burbujas, QR) no cambia con la cabecera', () => {
+    const plan = computeDrawPlan(spec, 0);
+
+    expect(plan.fiducials).toEqual(computeDrawPlan(spec, 0).fiducials);
+    expect(plan.bubbles).toEqual(computeDrawPlan(spec, 0).bubbles);
+    expect(plan.qr).toEqual(computeDrawPlan(spec, 0).qr);
   });
 });
