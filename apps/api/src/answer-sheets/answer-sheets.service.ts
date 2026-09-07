@@ -16,6 +16,7 @@ import {
   withOrgContext,
   loadSectionRoles,
   resolveElectiveScope,
+  type ElectiveScope,
 } from '@soe/db';
 import {
   CAPABILITY_UNAVAILABLE_CODE,
@@ -317,8 +318,32 @@ export class AnswerSheetsService {
     //       su porcentaje (correctas/132 en vez de correctas/80). Para los instrumentos sin
     //       electivas —hoy, todos— `hasElectives` es false y el camino es idéntico al de
     //       siempre, ítem por ítem del instrumento.
+    //       `assessment_forms` y `assessment_form_students` tienen RLS FORZADO: la
+    //       resolución corre dentro de `withOrgContext` y se hace UNA vez por alumno,
+    //       antes del bucle, no una consulta por fila.
     const sectionRoles = await this.loadSectionRolesFor(entry.instrumentId);
     const hasElectives = sectionRoles.some((s) => s.role === 'elective');
+
+    const scopeByStudent = new Map<string, ElectiveScope>();
+    if (hasElectives) {
+      const studentIds = [
+        ...new Set(
+          [...matches.values()].filter((m) => m.studentId).map((m) => m.studentId as string),
+        ),
+      ];
+      await withOrgContext(this.db, orgId, async (tx) => {
+        for (const sid of studentIds) {
+          scopeByStudent.set(
+            sid,
+            await resolveElectiveScope(tx, {
+              instrumentId: entry.instrumentId,
+              studentId: sid,
+              assessmentId: body.assessmentId ?? null,
+            }),
+          );
+        }
+      });
+    }
 
     // 4. Construir responses + errores.
     const errors: AnswerSheetRowError[] = [];
@@ -360,12 +385,8 @@ export class AnswerSheetsService {
       // por defecto serían las dos formas de meter un dato falso sin que nadie se entere.
       let scopedItems = instrumentItems;
       if (hasElectives) {
-        const scope = await resolveElectiveScope(this.db, {
-          instrumentId: entry.instrumentId,
-          studentId,
-          assessmentId: body.assessmentId ?? null,
-        });
-        if (scope.missingForm) {
+        const scope = scopeByStudent.get(studentId);
+        if (!scope || scope.missingForm) {
           errors.push({
             rowNumber: row.rowNumber,
             field: 'studentRut',
