@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import {
   assessmentCourseAssignments,
   assessmentForms,
@@ -35,10 +36,13 @@ import type {
 import { InjectDb, type Database } from '../database/database.types';
 import { identityModeOf } from './sheet-layout.helpers';
 import {
+  buildClassGroupLabel,
   buildInstrumentLabel,
   renderSheetsPdf,
   type PrintableSheetInfo,
 } from './sheet-print.helpers';
+
+const classGroupGrades = alias(grades, 'class_group_grades');
 
 type RunRow = {
   id: string;
@@ -47,6 +51,7 @@ type RunRow = {
   instrumentId: string;
   classGroupId: string | null;
   classGroupName: string | null;
+  classGroupGradeName: string | null;
   assessmentId: string | null;
   assessmentFormId: string | null;
   administeredAt: Date | null;
@@ -83,12 +88,22 @@ export class SheetPrintService {
         ? await this.requireRunForm(tx, orgId, runFormId, layout, dto.assessmentId ?? null)
         : null;
 
-      const [classGroup] = await tx
-        .select({ id: classGroups.id, name: classGroups.name })
+      const [classGroupRow] = await tx
+        .select({
+          id: classGroups.id,
+          name: classGroups.name,
+          gradeName: classGroupGrades.name,
+        })
         .from(classGroups)
+        .innerJoin(classGroupGrades, eq(classGroupGrades.id, classGroups.gradeId))
         .where(and(eq(classGroups.orgId, orgId), eq(classGroups.id, dto.classGroupId)))
         .limit(1);
-      if (!classGroup) throw new NotFoundException('Curso no encontrado');
+      if (!classGroupRow) throw new NotFoundException('Curso no encontrado');
+      const classGroup = {
+        id: classGroupRow.id,
+        name:
+          buildClassGroupLabel(classGroupRow.gradeName, classGroupRow.name) ?? classGroupRow.name,
+      };
 
       const roster = await tx
         .select({ id: students.id })
@@ -245,10 +260,12 @@ export class SheetPrintService {
           instrumentId: sheetLayouts.instrumentId,
           classGroupId: sheetPrintRuns.classGroupId,
           classGroupName: classGroups.name,
+          classGroupGradeName: classGroupGrades.name,
         })
         .from(sheetPrintRuns)
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
         .leftJoin(classGroups, eq(classGroups.id, sheetPrintRuns.classGroupId))
+        .leftJoin(classGroupGrades, eq(classGroupGrades.id, classGroups.gradeId))
         .where(and(eq(sheetPrintRuns.orgId, orgId), eq(sheetPrintRuns.id, runId)))
         .limit(1);
       if (!run) throw new NotFoundException('Tirada de impresión no encontrada');
@@ -358,7 +375,11 @@ export class SheetPrintService {
     return assessment.id;
   }
 
-  private requireClassGroup(run: { classGroupId: string | null; classGroupName: string | null }): {
+  private requireClassGroup(run: {
+    classGroupId: string | null;
+    classGroupName: string | null;
+    classGroupGradeName: string | null;
+  }): {
     id: string;
     name: string;
   } {
@@ -367,7 +388,10 @@ export class SheetPrintService {
         'La tirada no tiene un curso asociado: no se puede crear su evaluación automáticamente.',
       );
     }
-    return { id: run.classGroupId, name: run.classGroupName };
+    return {
+      id: run.classGroupId,
+      name: buildClassGroupLabel(run.classGroupGradeName, run.classGroupName) ?? run.classGroupName,
+    };
   }
 
   private async setRunAssessment(
@@ -459,16 +483,19 @@ export class SheetPrintService {
           spec: sheetLayouts.spec,
           specHash: sheetLayouts.specHash,
           classGroupName: classGroups.name,
+          classGroupGradeName: classGroupGrades.name,
           administeredAt: assessments.administeredAt,
           instrumentName: instruments.name,
           instrumentYear: instruments.year,
           instrumentApplicationPeriod: instruments.applicationPeriod,
           subjectName: subjects.name,
           gradeName: grades.name,
+          gradeCode: grades.code,
         })
         .from(sheetPrintRuns)
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
         .leftJoin(classGroups, eq(classGroups.id, sheetPrintRuns.classGroupId))
+        .leftJoin(classGroupGrades, eq(classGroupGrades.id, classGroups.gradeId))
         .leftJoin(assessments, eq(assessments.id, sheetPrintRuns.assessmentId))
         .leftJoin(instruments, eq(instruments.id, sheetLayouts.instrumentId))
         .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
@@ -482,11 +509,13 @@ export class SheetPrintService {
             name: run.instrumentName,
             subjectName: run.subjectName ?? null,
             gradeName: run.gradeName ?? null,
+            gradeCode: run.gradeCode ?? null,
             year: run.instrumentYear ?? null,
             applicationPeriod: run.instrumentApplicationPeriod ?? null,
           })
         : null;
       const administeredAt = run.administeredAt ?? printedOn;
+      const classGroupLabel = buildClassGroupLabel(run.classGroupGradeName, run.classGroupName);
 
       const sheetRows = await tx
         .select({
@@ -511,7 +540,7 @@ export class SheetPrintService {
           sequence: sheet.sequence,
           shortCode: sheet.shortCode,
           studentName,
-          classGroupName: run.classGroupName,
+          classGroupName: classGroupLabel,
           listNumber: studentName === null ? null : sheet.sequence,
           instrumentLabel,
           administeredAt,
@@ -614,6 +643,7 @@ export class SheetPrintService {
         instrumentId: sheetLayouts.instrumentId,
         classGroupId: sheetPrintRuns.classGroupId,
         classGroupName: classGroups.name,
+        classGroupGradeName: classGroupGrades.name,
         assessmentId: sheetPrintRuns.assessmentId,
         assessmentFormId: sheetPrintRuns.assessmentFormId,
         administeredAt: assessments.administeredAt,
@@ -626,6 +656,7 @@ export class SheetPrintService {
       .from(sheetPrintRuns)
       .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
       .leftJoin(classGroups, eq(classGroups.id, sheetPrintRuns.classGroupId))
+      .leftJoin(classGroupGrades, eq(classGroupGrades.id, classGroups.gradeId))
       .leftJoin(assessments, eq(assessments.id, sheetPrintRuns.assessmentId))
       .where(and(eq(sheetPrintRuns.orgId, orgId), where))
       .orderBy(desc(sheetPrintRuns.createdAt));
@@ -641,7 +672,7 @@ export class SheetPrintService {
       layoutVersion: row.layoutVersion,
       instrumentId: row.instrumentId,
       classGroupId: row.classGroupId,
-      classGroupName: row.classGroupName,
+      classGroupName: buildClassGroupLabel(row.classGroupGradeName, row.classGroupName),
       assessmentId: row.assessmentId,
       assessmentFormId: row.assessmentFormId,
       administeredAt: row.administeredAt ?? null,

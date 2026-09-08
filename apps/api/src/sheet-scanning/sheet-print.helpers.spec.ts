@@ -1,14 +1,16 @@
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { layoutHash, type ItemContent, type LayoutField, type LayoutSpec } from '@soe/types';
 import { deriveLayoutDraft, type DerivableItem } from './sheet-layout.helpers';
 import {
   PAPER_SIZES_PT,
   qrPayloadForSheet,
+  buildClassGroupLabel,
   buildInstrumentLabel,
   buildSheetContextLine,
   buildSheetIdentityLine,
   computeDrawPlan,
   fitTextToWidth,
+  gradeAliasesFromCode,
   renderSheetsPdf,
   type PrintableSheetInfo,
 } from './sheet-print.helpers';
@@ -375,6 +377,7 @@ describe('buildInstrumentLabel', () => {
         name: 'DIA Lectura 5° Básico 2026',
         subjectName: 'Lectura',
         gradeName: '5° Básico',
+        gradeCode: '5TH_BASIC',
         year: 2026,
         applicationPeriod: 'diagnostico',
       }),
@@ -387,10 +390,63 @@ describe('buildInstrumentLabel', () => {
         name: 'Ensayo interno',
         subjectName: 'Matemática',
         gradeName: '7° Básico',
+        gradeCode: '7TH_BASIC',
         year: 2026,
         applicationPeriod: null,
       }),
     ).toBe('Ensayo interno · Matemática · 7° Básico · 2026');
+  });
+
+  it('reconoce el grado en numeración romana y no lo duplica en arábigo', () => {
+    expect(
+      buildInstrumentLabel({
+        name: 'PAES M1 — Ensayo 5 (Tanda 5) · IV° Medio 2026',
+        subjectName: 'Matemáticas',
+        gradeName: '4° Medio',
+        gradeCode: '4TH_MEDIO',
+        year: 2026,
+        applicationPeriod: null,
+      }),
+    ).toBe('PAES M1 — Ensayo 5 (Tanda 5) · IV° Medio 2026 · Matemáticas');
+  });
+
+  it('reconoce el grado romano también en Básico', () => {
+    expect(
+      buildInstrumentLabel({
+        name: 'Ensayo II° Basico',
+        subjectName: null,
+        gradeName: '2° Básico',
+        gradeCode: '2ND_BASIC',
+        year: null,
+        applicationPeriod: null,
+      }),
+    ).toBe('Ensayo II° Basico');
+  });
+
+  it('agrega el grado cuando el nombre no lo menciona en ninguna notación', () => {
+    expect(
+      buildInstrumentLabel({
+        name: 'Ensayo PAES M1',
+        subjectName: null,
+        gradeName: '4° Medio',
+        gradeCode: '4TH_MEDIO',
+        year: null,
+        applicationPeriod: null,
+      }),
+    ).toBe('Ensayo PAES M1 · 4° Medio');
+  });
+
+  it('sin código de grado cae al cotejo textual de siempre', () => {
+    expect(
+      buildInstrumentLabel({
+        name: 'Ensayo IV° Medio',
+        subjectName: null,
+        gradeName: '4° Medio',
+        gradeCode: null,
+        year: null,
+        applicationPeriod: null,
+      }),
+    ).toBe('Ensayo IV° Medio · 4° Medio');
   });
 
   it('ignora tildes y mayúsculas al detectar repetición', () => {
@@ -399,10 +455,39 @@ describe('buildInstrumentLabel', () => {
         name: 'DIA MATEMATICA 3° basico',
         subjectName: 'Matemática',
         gradeName: '3° Básico',
+        gradeCode: '3RD_BASIC',
         year: null,
         applicationPeriod: 'cierre',
       }),
     ).toBe('DIA MATEMATICA 3° basico — Cierre');
+  });
+});
+
+describe('gradeAliasesFromCode', () => {
+  it('deriva las dos notaciones del código del grado', () => {
+    expect(gradeAliasesFromCode('4TH_MEDIO')).toEqual(['4 medio', 'iv medio']);
+    expect(gradeAliasesFromCode('7TH_BASIC')).toEqual(['7 basico', 'vii basico']);
+  });
+
+  it('no inventa alias con un código desconocido', () => {
+    expect(gradeAliasesFromCode(null)).toEqual([]);
+    expect(gradeAliasesFromCode('PK')).toEqual([]);
+  });
+});
+
+describe('buildClassGroupLabel', () => {
+  it('antepone el nivel al nombre de la letra', () => {
+    expect(buildClassGroupLabel('4° Medio', 'A')).toBe('4° Medio A');
+  });
+
+  it('no duplica el nivel si el nombre del curso ya lo trae', () => {
+    expect(buildClassGroupLabel('3° Básico', '3° Básico A')).toBe('3° Básico A');
+  });
+
+  it('tolera que falte una de las dos partes', () => {
+    expect(buildClassGroupLabel(null, 'A')).toBe('A');
+    expect(buildClassGroupLabel('4° Medio', null)).toBe('4° Medio');
+    expect(buildClassGroupLabel(null, null)).toBeNull();
   });
 });
 
@@ -454,6 +539,47 @@ describe('cabecera de la hoja', () => {
     expect(buildSheetContextLine(base, { includeClassGroup: true })).toBe(
       '5° Básico A · DIA Lectura 5° Básico 2026 — Diagnóstico · 30/04/2026',
     );
+  });
+});
+
+describe('la cabecera con el nivel del curso no pisa el QR ni el fiducial', () => {
+  const LONGEST_NAME = 'Vásquez-Montenegro Etcheverría, María Fernanda Alejandra';
+  const identityLine = buildSheetIdentityLine({
+    printedSheetId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
+    sequence: 37,
+    shortCode: null,
+    studentName: LONGEST_NAME,
+    classGroupName: '4° Medio A',
+    listNumber: 37,
+    instrumentLabel: 'PAES M1 — Ensayo 5 (Tanda 5) · IV° Medio 2026 · Matemáticas',
+    administeredAt: '2026-09-08',
+  });
+
+  it('la primera línea antepone el nivel al curso', () => {
+    expect(identityLine).toBe(`4° Medio A · N° 37 · ${LONGEST_NAME}`);
+  });
+
+  it('el texto impreso deja al menos la holgura de 8 pt contra el QR', async () => {
+    const spec = makeSpec(80);
+    const doc = await PDFDocument.create();
+    const boldFont = await doc.embedFont(StandardFonts.HelveticaBold);
+    const plan = computeDrawPlan(spec, 0);
+
+    const fitted = fitTextToWidth(identityLine, plan.headerMaxWidth.name, (value) =>
+      boldFont.widthOfTextAtSize(value, 11),
+    );
+    const printedRight = plan.header.nameX + boldFont.widthOfTextAtSize(fitted, 11);
+
+    expect(printedRight).toBeLessThanOrEqual(plan.headerMaxWidth.name + plan.header.nameX);
+    expect(plan.qr.x - printedRight).toBeGreaterThanOrEqual(8);
+  });
+
+  it('la holgura contra el fiducial superior izquierdo no cambia', () => {
+    const plan = computeDrawPlan(makeSpec(80), 0);
+    const topFiducial = plan.fiducials[0]!;
+    const gap = plan.pageHeight - plan.header.nameY - 11 - (plan.pageHeight - topFiducial.y);
+
+    expect(gap).toBeCloseTo(18.35, 2);
   });
 });
 

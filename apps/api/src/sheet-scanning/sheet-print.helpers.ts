@@ -74,6 +74,7 @@ export interface InstrumentLabelParts {
   name: string;
   subjectName: string | null;
   gradeName: string | null;
+  gradeCode: string | null;
   year: number | null;
   applicationPeriod: string | null;
 }
@@ -103,6 +104,39 @@ function appendIfMissing(base: string, addition: string | null): string {
   return `${base} · ${trimmed}`;
 }
 
+const GRADE_CYCLE_WORDS: Record<string, string> = { basic: 'basico', medio: 'medio' };
+const ROMAN_BY_LEVEL = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii'] as const;
+
+export function gradeAliasesFromCode(code: string | null): string[] {
+  if (code === null) return [];
+  const match = /^(\d{1,2})[a-z]{2}_(basic|medio)$/i.exec(code.trim());
+  if (match === null) return [];
+  const level = Number(match[1]);
+  const cycle = GRADE_CYCLE_WORDS[match[2]!.toLowerCase()];
+  if (cycle === undefined || level < 1) return [];
+  const aliases = [`${level} ${cycle}`];
+  const roman = ROMAN_BY_LEVEL[level - 1];
+  if (roman !== undefined) aliases.push(`${roman} ${cycle}`);
+  return aliases;
+}
+
+function mentionsGrade(label: string, gradeCode: string | null): boolean {
+  const normalized = normalizeForComparison(label);
+  return gradeAliasesFromCode(gradeCode).some((alias) => normalized.includes(alias));
+}
+
+export function buildClassGroupLabel(
+  gradeName: string | null,
+  className: string | null,
+): string | null {
+  const grade = gradeName?.trim() ?? '';
+  const group = className?.trim() ?? '';
+  if (group.length === 0) return grade.length === 0 ? null : grade;
+  if (grade.length === 0) return group;
+  if (normalizeForComparison(group).includes(normalizeForComparison(grade))) return group;
+  return `${grade} ${group}`;
+}
+
 export function buildInstrumentLabel(parts: InstrumentLabelParts): string {
   const period = parts.applicationPeriod
     ? (APPLICATION_PERIOD_LABELS[parts.applicationPeriod] ?? parts.applicationPeriod)
@@ -110,7 +144,9 @@ export function buildInstrumentLabel(parts: InstrumentLabelParts): string {
 
   let label = parts.name.trim();
   label = appendIfMissing(label, parts.subjectName);
-  label = appendIfMissing(label, parts.gradeName);
+  if (!mentionsGrade(label, parts.gradeCode)) {
+    label = appendIfMissing(label, parts.gradeName);
+  }
   label = appendIfMissing(label, parts.year === null ? null : String(parts.year));
 
   if (period === null) return label;
