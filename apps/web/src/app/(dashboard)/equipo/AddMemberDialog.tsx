@@ -4,11 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2, UserPlus } from 'lucide-react';
-import {
-  ASSIGNABLE_SCHOOL_ROLES,
-  inviteMemberSchema,
-  type AssignableSchoolRole,
-} from '@soe/types';
+import { ASSIGNABLE_SCHOOL_ROLES, inviteMemberSchema, type AssignableSchoolRole } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -43,19 +39,24 @@ const ROLE_LABELS: Record<AssignableSchoolRole, string> = {
 
 export function AddMemberDialog() {
   const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<AssignableSchoolRole>('teacher');
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
   function reset() {
+    setName('');
     setEmail('');
     setRole('teacher');
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = inviteMemberSchema.safeParse({ email, role });
+    // El nombre es opcional en el schema (el import por CSV sólo trae email,role) pero
+    // acá se exige: con nombre se crea la fila en `users` de una vez, y eso es lo que
+    // hace que la persona pueda recibir carga académica sin esperar a su primer login.
+    const parsed = inviteMemberSchema.safeParse({ name, email, role });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? 'Datos inválidos');
       return;
@@ -87,12 +88,24 @@ export function AddMemberDialog() {
           <DialogHeader>
             <DialogTitle>Invitar miembro al equipo</DialogTitle>
             <DialogDescription>
-              Registra el correo institucional y el rol. La persona podrá iniciar sesión con Google
-              de inmediato — no enviamos correo de invitación.
+              Registra el nombre, el correo institucional y el rol. La persona podrá iniciar sesión
+              con Google de inmediato — no enviamos correo de invitación.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
+            <Field label="Nombre y apellido" htmlFor="member-name" required>
+              <Input
+                id="member-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Javiera González"
+                disabled={pending}
+                required
+                autoComplete="off"
+              />
+            </Field>
+
             <Field label="Correo institucional" htmlFor="member-email" required>
               <Input
                 id="member-email"

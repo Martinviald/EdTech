@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import type { OrgSubjectClass, OrgTeacher } from '@/lib/teacherAssignmentsApi';
 import { createAssignmentAction } from './actions';
+import { TeacherPicker } from './TeacherPicker';
 
 type Role = 'primary' | 'assistant';
 
@@ -52,10 +53,7 @@ export function CreateAssignmentDialog({
   }
 
   const classGroups = useMemo(() => {
-    const seen = new Map<
-      string,
-      { id: string; label: string; gradeOrder: number }
-    >();
+    const seen = new Map<string, { id: string; label: string; gradeOrder: number }>();
     subjectClasses.forEach((sc) => {
       seen.set(sc.classGroup.id, {
         id: sc.classGroup.id,
@@ -106,7 +104,9 @@ export function CreateAssignmentDialog({
     handleSubmit('assistant');
   }
 
-  if (teachers.length === 0) {
+  // Ojo: `teachers` ahora incluye invitaciones sin usuario, que se listan pero NO se
+  // pueden asignar. El botón se habilita sólo si hay alguien realmente asignable.
+  if (!teachers.some((t) => t.assignable)) {
     return (
       <Button disabled variant="outline">
         No hay profesores con membership activa
@@ -145,21 +145,15 @@ export function CreateAssignmentDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="teacher">Profesor</Label>
-            <Select value={teacherId} onValueChange={setTeacherId}>
-              <SelectTrigger id="teacher">
-                <SelectValue placeholder="Selecciona un profesor" />
-              </SelectTrigger>
-              <SelectContent>
-                {teachers.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name} ({t.email})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <TeacherPicker
+            teachers={teachers}
+            value={teacherId}
+            onChange={(id) => {
+              setTeacherId(id);
+              setPrimaryConflictMsg(null);
+            }}
+            disabled={pending}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="class-group">Curso</Label>
@@ -228,9 +222,7 @@ export function CreateAssignmentDialog({
 
           {primaryConflictMsg ? (
             <div className="rounded-md border border-warning/30 bg-warning/15 p-3 text-sm">
-              <p className="font-medium text-warning">
-                Conflicto de profesor titular
-              </p>
+              <p className="font-medium text-warning">Conflicto de profesor titular</p>
               <p className="mt-1 text-warning">{primaryConflictMsg}</p>
               <p className="mt-2 text-warning">
                 Puedes asignar a este profesor como <strong>asistente / co-docente</strong> en su
