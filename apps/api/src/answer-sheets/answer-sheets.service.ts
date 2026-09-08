@@ -14,6 +14,9 @@ import {
   items,
   responses,
   withOrgContext,
+  loadSectionRoles,
+  resolveElectiveScope,
+  type ElectiveScope,
 } from '@soe/db';
 import {
   CAPABILITY_UNAVAILABLE_CODE,
@@ -309,6 +312,39 @@ export class AnswerSheetsService {
       matchStudents(tx, orgId, entry.rows),
     );
 
+    // 3bis. Alcance electivo. Un instrumento con secciones `elective` NO se corrige entero:
+    //       a cada alumno le tocan las secciones `core` más la rama que eligió. Sin esto la
+    //       ingesta fabricaría respuestas incorrectas por las ramas que no rindió y hundiría
+    //       su porcentaje (correctas/132 en vez de correctas/80). Para los instrumentos sin
+    //       electivas —hoy, todos— `hasElectives` es false y el camino es idéntico al de
+    //       siempre, ítem por ítem del instrumento.
+    //       `assessment_forms` y `assessment_form_students` tienen RLS FORZADO: la
+    //       resolución corre dentro de `withOrgContext` y se hace UNA vez por alumno,
+    //       antes del bucle, no una consulta por fila.
+    const sectionRoles = await this.loadSectionRolesFor(entry.instrumentId);
+    const hasElectives = sectionRoles.some((s) => s.role === 'elective');
+
+    const scopeByStudent = new Map<string, ElectiveScope>();
+    if (hasElectives) {
+      const studentIds = [
+        ...new Set(
+          [...matches.values()].filter((m) => m.studentId).map((m) => m.studentId as string),
+        ),
+      ];
+      await withOrgContext(this.db, orgId, async (tx) => {
+        for (const sid of studentIds) {
+          scopeByStudent.set(
+            sid,
+            await resolveElectiveScope(tx, {
+              instrumentId: entry.instrumentId,
+              studentId: sid,
+              assessmentId: body.assessmentId ?? null,
+            }),
+          );
+        }
+      });
+    }
+
     // 4. Construir responses + errores.
     const errors: AnswerSheetRowError[] = [];
     const responseRows: Array<typeof responses.$inferInsert> = [];
@@ -343,6 +379,30 @@ export class AnswerSheetsService {
       }
 
       const studentId = match!.studentId!;
+
+      // Con electivas, el alumno sin forma asignada NO se corrige: se reporta como error de
+      // fila, igual que un RUT sin match. Corregirle la prueba entera o inventarle una rama
+      // por defecto serían las dos formas de meter un dato falso sin que nadie se entere.
+      let scopedItems = instrumentItems;
+      if (hasElectives) {
+        const scope = scopeByStudent.get(studentId);
+        if (!scope || scope.missingForm) {
+          errors.push({
+            rowNumber: row.rowNumber,
+            field: 'studentRut',
+            message:
+              'El alumno no tiene asignada una forma (rama electiva) en esta evaluación: ' +
+              'no se puede corregir su hoja hasta resolverlo',
+          });
+          rowsSkipped++;
+          continue;
+        }
+        if (scope.itemIds) {
+          const permitidos = new Set(scope.itemIds);
+          scopedItems = instrumentItems.filter((i) => permitidos.has(i.id));
+        }
+      }
+
       processedStudentIds.add(studentId);
 
       // Crear una response por ítem del instrumento (incluye los items que
@@ -359,7 +419,7 @@ export class AnswerSheetsService {
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
       const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
 
-      for (const item of instrumentItems) {
+      for (const item of scopedItems) {
         const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
         const evidence = annulmentEvidence(annulled, item.position);
         const answerValue =
@@ -672,6 +732,11 @@ export class AnswerSheetsService {
       .from(instruments)
       .where(eq(instruments.id, instrumentId));
     return row?.name ?? '';
+  }
+
+  /** Secciones del instrumento con su rol (ver `resolveElectiveScope`). */
+  private async loadSectionRolesFor(instrumentId: string) {
+    return loadSectionRoles(this.db, instrumentId);
   }
 
   private async loadInstrumentItems(instrumentId: string): Promise<ItemForAssessment[]> {

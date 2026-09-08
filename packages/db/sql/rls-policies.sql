@@ -29,6 +29,10 @@ ALTER TABLE "assessments"         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "assessments"         FORCE  ROW LEVEL SECURITY;
 ALTER TABLE "import_jobs"         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "import_jobs"         FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "assessment_forms"          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assessment_forms"          FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "assessment_form_students"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "assessment_form_students"  FORCE  ROW LEVEL SECURITY;
 ALTER TABLE "responses"           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "responses"           FORCE  ROW LEVEL SECURITY;
 ALTER TABLE "assessment_results"  ENABLE ROW LEVEL SECURITY;
@@ -401,3 +405,22 @@ DROP POLICY IF EXISTS "capture_sessions_redeem_by_id" ON "capture_sessions";
 CREATE POLICY "capture_sessions_redeem_by_id" ON "capture_sessions"
   AS PERMISSIVE FOR SELECT
   USING (id::text = current_setting('app.capture_session_id', true));
+
+
+-- ── Formas de evaluación y su asignación a alumnos ──────────────────────────
+-- `assessment_form_students` liga a un alumno con el electivo que cursa: es dato personal
+-- (Ley 19.628) y necesita aislamiento propio.
+--
+-- Ambas llevan `org_id` PROPIO y no heredado por EXISTS, a diferencia de responses /
+-- assessment_results. La razón es concreta: `assessment_forms` no tenía org_id, así que
+-- `assessment_form_students` no habría tenido de dónde heredarlo sin un doble join hasta
+-- `assessments`. Se agregó la columna a las dos y se usa el patrón simple.
+DROP POLICY IF EXISTS "assessment_forms_tenant_isolation" ON "assessment_forms";
+CREATE POLICY "assessment_forms_tenant_isolation" ON "assessment_forms"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "assessment_form_students_tenant_isolation" ON "assessment_form_students";
+CREATE POLICY "assessment_form_students_tenant_isolation" ON "assessment_form_students"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

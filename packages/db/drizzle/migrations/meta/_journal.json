@@ -197,6 +197,20 @@
       "when": 1788452507931,
       "tag": "0027_numerous_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1788625024861,
+      "tag": "0028_real_wong",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788625275388,
+      "tag": "0029_jittery_white_tiger",
+      "breakpoints": true
     }
   ]
 }
