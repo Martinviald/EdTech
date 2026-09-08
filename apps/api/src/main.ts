@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import compression from 'compression';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -14,17 +15,28 @@ async function bootstrap() {
   });
   app.useBodyParser('json', { limit: '8mb' });
 
+  // Las respuestas de analítica son JSON grande y repetitivo. CloudFront ya comprime
+  // lo que llega al navegador, pero no este hop: el front lo consume server-side
+  // (Lambda -> App Runner) y el servidor MCP pega directo a la API por internet.
+  app.use(compression());
+
   // HTTP request logger (dev only)
   if (process.env.NODE_ENV !== 'production') {
     const httpLogger = new Logger('HTTP');
-    app.use((req: { method: string; url: string }, res: { statusCode: number; on: (e: string, cb: () => void) => void }, next: () => void) => {
-      const { method, url } = req;
-      const start = Date.now();
-      res.on('finish', () => {
-        httpLogger.log(`${method} ${url} → ${res.statusCode} (${Date.now() - start}ms)`);
-      });
-      next();
-    });
+    app.use(
+      (
+        req: { method: string; url: string },
+        res: { statusCode: number; on: (e: string, cb: () => void) => void },
+        next: () => void,
+      ) => {
+        const { method, url } = req;
+        const start = Date.now();
+        res.on('finish', () => {
+          httpLogger.log(`${method} ${url} → ${res.statusCode} (${Date.now() - start}ms)`);
+        });
+        next();
+      },
+    );
   }
   const configService = app.get(ConfigService);
 

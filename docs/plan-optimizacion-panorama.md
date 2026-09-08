@@ -223,14 +223,12 @@ El criterio correcto es **la matrícula del año académico de la evaluación**,
 
 ### F7 — Transporte
 
-**Cambio, dos líneas independientes:**
+**Se hizo la mitad que la medición sostuvo, y se descartó la otra.**
 
-1. `compression` en `apps/api/src/main.ts` (`app.use(compression())`). Beneficia el hop Next↔API, que hoy va en claro.
-2. `prefetch={false}` en los `<Link>` de `PageTabs.tsx`. Son 6 tabs, todas apuntando a páginas `force-dynamic`; en una conexión de colegio el prefetch compite con la carga que la persona sí pidió.
+1. **`compression` en `apps/api/src/main.ts`** — hecho. Verificado contra la API compilada y corriendo: el panorama PAES pasa de **39.674 a 5.687 bytes** (−86%) y el refresco de alertas queda en **1.412 bytes**.
+2. **`prefetch={false}` en `PageTabs`** — **descartado, no aplica.** Las 6 tabs de `/resultados` tienen su `loading.tsx`, así que el prefetch por defecto de Next 15 se detiene en ese shell estático y no dispara la carga de datos. Tocarlo sólo habría empeorado la navegación entre tabs.
 
-**Validación:** medir el tamaño transferido de `/api/proxy/dashboards/comparable-overview/alerts` con y sin compresión, y contar los RSC disparados al aterrizar en `/resultados` (DevTools → Red, filtro `_rsc`).
-
-**Nota:** el prefetch es el punto **menos confirmado** del diagnóstico — Next 15 ya limita el prefetch de rutas dinámicas al shell del `loading.tsx` cuando existe. Antes de tocarlo, **medir**: si los `_rsc` al aterrizar son 0 o 1, esta mitad de la fase se descarta y se documenta que no aplica.
+**Por qué la compresión sigue valiendo aunque no sea lo que ve el colegio:** la distribución de CloudFront ya comprime hacia el navegador (`DefaultCacheBehavior.Compress: true`, verificado en la cuenta). Lo que no estaba comprimido es el hop **Lambda (OpenNext) → App Runner**, por donde pasa todo lo que el front pide server-side, y la API directa que consume el servidor MCP por internet.
 
 ---
 
