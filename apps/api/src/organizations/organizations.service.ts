@@ -305,6 +305,18 @@ export class OrganizationsService {
       )
       .orderBy(users.name);
 
+    // ⚠️ DEDUPE POR USUARIO. La query es una fila por MEMBERSHIP, y el multi-rol es
+    // normal en un colegio (CLAUDE.md §6.3): un profesor jefe suele ser `teacher` +
+    // `homeroom_teacher`, y ahí salía DOS veces con el mismo `id`.
+    //
+    // No era cosmético: el selector usa `id` como React key, y con keys repetidas React
+    // reutiliza mal los nodos al filtrar y muestra filas que no corresponden a la
+    // búsqueda. El `Select` anterior tenía el mismo problema latente (`value` repetido).
+    const byUser = new Map<string, (typeof withUser)[number]>();
+    for (const row of withUser) {
+      if (!byUser.has(row.id)) byUser.set(row.id, row);
+    }
+
     const pendingWithoutUser = await this.db
       .select({
         id: orgMemberships.id,
@@ -323,8 +335,13 @@ export class OrganizationsService {
       )
       .orderBy(orgMemberships.email);
 
+    // La misma persona puede tener un membership real con un rol y otro PENDIENTE con
+    // otro rol. Sin este filtro aparecería dos veces en el selector: una asignable y otra
+    // no, con el mismo correo. Gana el que sí se puede asignar.
+    const emailsWithUser = new Set([...byUser.values()].map((t) => t.email.toLowerCase()));
+
     return [
-      ...withUser.map((t) => ({
+      ...[...byUser.values()].map((t) => ({
         id: t.id,
         name: t.name,
         email: t.email,
@@ -332,14 +349,16 @@ export class OrganizationsService {
         status: t.lastLoginAt ? ('active' as const) : ('pending' as const),
         assignable: true,
       })),
-      ...pendingWithoutUser.map((t) => ({
-        id: `pending:${t.id}`,
-        name: t.email ?? '',
-        email: t.email ?? '',
-        role: t.role,
-        status: 'pending' as const,
-        assignable: false,
-      })),
+      ...pendingWithoutUser
+        .filter((t) => t.email !== null && !emailsWithUser.has(t.email.toLowerCase()))
+        .map((t) => ({
+          id: `pending:${t.id}`,
+          name: t.email ?? '',
+          email: t.email ?? '',
+          role: t.role,
+          status: 'pending' as const,
+          assignable: false,
+        })),
     ];
   }
 

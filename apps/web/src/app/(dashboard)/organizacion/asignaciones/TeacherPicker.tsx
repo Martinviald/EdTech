@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Check, Search } from 'lucide-react';
+import { MIN_TEACHER_QUERY_LENGTH, matchesTeacherQuery } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,14 +20,6 @@ import type { OrgTeacher } from '@/lib/teacherAssignmentsApi';
  * no necesita popover ni portal, y evitamos sumar una dependencia de UI (CLAUDE.md §2).
  */
 
-/** Sin tildes y en minúsculas: buscar "gonzalez" tiene que encontrar a "González". */
-function normalize(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
-
 export function TeacherPicker({
   teachers,
   value,
@@ -40,17 +33,18 @@ export function TeacherPicker({
 }) {
   const [query, setQuery] = useState('');
 
+  const trimmed = query.trim();
+  const hasQuery = trimmed.length >= MIN_TEACHER_QUERY_LENGTH;
+
   const results = useMemo(() => {
-    const q = normalize(query.trim());
-    const matches = q
-      ? teachers.filter((t) => normalize(t.name).includes(q) || normalize(t.email).includes(q))
-      : teachers;
+    // Sin búsqueda no se despliega nada: la lista completa no es un resultado.
+    if (!hasQuery) return [];
     // Los que no se pueden asignar van al final: se listan para explicar por qué no
     // están disponibles, no para competir con los que sí sirven.
-    return [...matches].sort(
-      (a, b) => Number(b.assignable) - Number(a.assignable) || a.name.localeCompare(b.name),
-    );
-  }, [teachers, query]);
+    return teachers
+      .filter((t) => matchesTeacherQuery(t, trimmed))
+      .sort((a, b) => Number(b.assignable) - Number(a.assignable) || a.name.localeCompare(b.name));
+  }, [teachers, trimmed, hasQuery]);
 
   const selected = teachers.find((t) => t.id === value) ?? null;
 
@@ -71,59 +65,71 @@ export function TeacherPicker({
         />
       </div>
 
-      <div
-        role="listbox"
-        aria-label="Profesores"
-        className="max-h-56 overflow-y-auto rounded-md border"
-      >
-        {results.length === 0 ? (
-          <p className="text-muted-foreground p-3 text-sm">
-            Ningún docente coincide con “{query}”.
-          </p>
-        ) : (
-          results.map((t) => {
-            const isSelected = t.id === value;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                disabled={disabled || !t.assignable}
-                onClick={() => onChange(t.id)}
-                className={cn(
-                  'flex w-full items-start gap-2 border-b p-2 text-left text-sm last:border-b-0',
-                  t.assignable
-                    ? 'hover:bg-muted/60 cursor-pointer'
-                    : 'cursor-not-allowed opacity-60',
-                  isSelected && 'bg-muted',
-                )}
-              >
-                <Check
-                  className={cn('mt-0.5 size-4 shrink-0', isSelected ? 'opacity-100' : 'opacity-0')}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-medium">{t.name}</span>
-                    {t.status === 'pending' ? (
-                      <Badge variant="warning" className="text-[10px]">
-                        Sin ingresar aún
-                      </Badge>
+      {/* La lista sólo existe cuando hay una búsqueda: sin ella no se despliega nada. */}
+      {!hasQuery ? (
+        <p className="text-muted-foreground text-xs">
+          {selected
+            ? 'Escribe para cambiar de profesor.'
+            : `Escribe al menos ${MIN_TEACHER_QUERY_LENGTH} caracteres para buscar entre ${teachers.length} docentes.`}
+        </p>
+      ) : (
+        <div
+          role="listbox"
+          aria-label="Profesores"
+          className="max-h-56 overflow-y-auto rounded-md border"
+        >
+          {results.length === 0 ? (
+            <p className="text-muted-foreground p-3 text-sm">
+              Ningún docente coincide con “{trimmed}”.
+            </p>
+          ) : (
+            results.map((t) => {
+              const isSelected = t.id === value;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  disabled={disabled || !t.assignable}
+                  onClick={() => onChange(t.id)}
+                  className={cn(
+                    'flex w-full items-start gap-2 border-b p-2 text-left text-sm last:border-b-0',
+                    t.assignable
+                      ? 'hover:bg-muted/60 cursor-pointer'
+                      : 'cursor-not-allowed opacity-60',
+                    isSelected && 'bg-muted',
+                  )}
+                >
+                  <Check
+                    className={cn(
+                      'mt-0.5 size-4 shrink-0',
+                      isSelected ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <span className="font-medium">{t.name}</span>
+                      {t.status === 'pending' ? (
+                        <Badge variant="warning" className="text-[10px]">
+                          Sin ingresar aún
+                        </Badge>
+                      ) : null}
+                    </span>
+                    <span className="text-muted-foreground block truncate text-xs">{t.email}</span>
+                    {!t.assignable ? (
+                      <span className="text-muted-foreground mt-0.5 block text-xs">
+                        Invitación sin nombre registrado. Vuelve a invitarlo desde Equipo agregando
+                        su nombre para poder asignarle carga.
+                      </span>
                     ) : null}
                   </span>
-                  <span className="text-muted-foreground block truncate text-xs">{t.email}</span>
-                  {!t.assignable ? (
-                    <span className="text-muted-foreground mt-0.5 block text-xs">
-                      Invitación sin nombre registrado. Vuelve a invitarlo desde Equipo agregando su
-                      nombre para poder asignarle carga.
-                    </span>
-                  ) : null}
-                </span>
-              </button>
-            );
-          })
-        )}
-      </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {selected ? (
         <p className="text-muted-foreground text-xs">
