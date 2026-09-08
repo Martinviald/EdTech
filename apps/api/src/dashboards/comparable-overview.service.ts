@@ -26,7 +26,7 @@ import {
   type AchievementByAssessment,
   type BandClassificationRow,
   type BaselineCandidate,
-  type ClassGroupResultRow,
+  type ClassGroupBreakdownData,
 } from './comparable/comparable-unit.assembler';
 import { DashboardsService } from './dashboards.service';
 
@@ -34,7 +34,7 @@ type ScopeData = {
   achievementByAssessment: AchievementByAssessment;
   bandsByInstrument: Map<string, PerformanceBandInput[]>;
   levelCountsByAssessment: Map<string, CohortLevelCount[]>;
-  classGroupRowsByAssessment: Map<string, ClassGroupResultRow[]>;
+  classGroupBreakdownByInstrument: Map<string, ClassGroupBreakdownData>;
   classificationRowsByAssessment: Map<string, BandClassificationRow[]>;
 };
 
@@ -204,22 +204,35 @@ export class ComparableOverviewService {
     assessmentIds: string[],
     classGroupIds: string[] | null,
   ): Promise<ScopeData> {
-    const [achievementByAssessment, bandsByInstrument, levelCountsByAssessment, classGroupRows] =
-      await Promise.all([
-        this.assembler.loadAchievementByAssessment(tx, assessmentIds, classGroupIds),
-        loadBandsForInstruments(
-          tx,
-          units.map((unit) => unit.ref.instrumentId),
-        ),
-        this.assembler.loadLevelCountsByAssessment(tx, assessmentIds, classGroupIds),
-        this.assembler.loadClassGroupRows(tx, orgId, assessmentIds, classGroupIds),
-      ]);
+    const [
+      achievementByAssessment,
+      bandsByInstrument,
+      levelCountsByAssessment,
+      classGroupBreakdown,
+    ] = await Promise.all([
+      this.assembler.loadAchievementByAssessment(tx, assessmentIds, classGroupIds),
+      loadBandsForInstruments(
+        tx,
+        units.map((unit) => unit.ref.instrumentId),
+      ),
+      this.assembler.loadLevelCountsByAssessment(tx, assessmentIds, classGroupIds),
+      this.assembler.loadClassGroupBreakdown(tx, orgId, assessmentIds, classGroupIds),
+    ]);
 
-    const classGroupRowsByAssessment = new Map<string, ClassGroupResultRow[]>();
-    for (const row of classGroupRows) {
-      const bucket = classGroupRowsByAssessment.get(row.assessmentId);
-      if (bucket) bucket.push(row);
-      else classGroupRowsByAssessment.set(row.assessmentId, [row]);
+    const classGroupBreakdownByInstrument = new Map<string, ClassGroupBreakdownData>();
+    const breakdownFor = (instrumentId: string): ClassGroupBreakdownData => {
+      const existing = classGroupBreakdownByInstrument.get(instrumentId);
+      if (existing) return existing;
+      const created: ClassGroupBreakdownData = { totals: [], bandCounts: [], unbanded: [] };
+      classGroupBreakdownByInstrument.set(instrumentId, created);
+      return created;
+    };
+    for (const row of classGroupBreakdown.totals) breakdownFor(row.instrumentId).totals.push(row);
+    for (const row of classGroupBreakdown.bandCounts) {
+      breakdownFor(row.instrumentId).bandCounts.push(row);
+    }
+    for (const row of classGroupBreakdown.unbanded) {
+      breakdownFor(row.instrumentId).unbanded.push(row);
     }
 
     const needsClassificationRows = units.some((unit) => {
@@ -237,7 +250,7 @@ export class ComparableOverviewService {
       achievementByAssessment,
       bandsByInstrument,
       levelCountsByAssessment,
-      classGroupRowsByAssessment,
+      classGroupBreakdownByInstrument,
       classificationRowsByAssessment,
     };
   }
@@ -262,9 +275,11 @@ export class ComparableOverviewService {
     const lowestBandShare = this.assembler.lowestBandShare(bandDistribution);
 
     const byClassGroup = this.assembler.foldByClassGroup(
-      unit.assessmentIds.flatMap(
-        (assessmentId) => scope.classGroupRowsByAssessment.get(assessmentId) ?? [],
-      ),
+      scope.classGroupBreakdownByInstrument.get(unit.ref.instrumentId) ?? {
+        totals: [],
+        bandCounts: [],
+        unbanded: [],
+      },
       bands,
     );
 

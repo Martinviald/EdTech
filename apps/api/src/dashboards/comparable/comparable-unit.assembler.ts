@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import {
   assessmentResults,
   assessments,
@@ -31,14 +31,33 @@ import type { Database } from '../../database/database.types';
 
 export type AchievementByAssessment = Map<string, { achievement: number | null; students: number }>;
 
-export type ClassGroupResultRow = {
-  assessmentId: string;
+export type ClassGroupTotalsRow = {
+  instrumentId: string;
   classGroupId: string;
   classGroupName: string;
   gradeName: string | null;
+  studentsAssessed: number;
+  percentageSum: string | null;
+  percentageCount: number;
+};
+
+export type ClassGroupBandCountRow = {
+  instrumentId: string;
+  classGroupId: string;
+  performanceBandId: string;
+  count: number;
+};
+
+export type ClassGroupUnbandedRow = {
+  instrumentId: string;
+  classGroupId: string;
   percentage: string | null;
-  performanceBandId: string | null;
-  studentId: string;
+};
+
+export type ClassGroupBreakdownData = {
+  totals: ClassGroupTotalsRow[];
+  bandCounts: ClassGroupBandCountRow[];
+  unbanded: ClassGroupUnbandedRow[];
 };
 
 export type BandClassificationRow = {
@@ -293,64 +312,104 @@ export class ComparableUnitAssembler {
     classGroupIds: string[] | null,
     bands: PerformanceBandInput[],
   ): Promise<ComparableUnitClassGroup[]> {
-    const rows = await this.loadClassGroupRows(tx, orgId, assessmentIds, classGroupIds);
-    return this.foldByClassGroup(rows, bands);
+    const data = await this.loadClassGroupBreakdown(tx, orgId, assessmentIds, classGroupIds);
+    return this.foldByClassGroup(data, bands);
   }
 
   /**
-   * Las filas de resultado con su curso, para varias evaluaciones en una query.
+   * El desglose por curso, agregado por Postgres.
    *
-   * El panorama la pide UNA vez para todo el alcance y reparte por evaluación; el
-   * método por unidad de arriba la envuelve para los otros dos consumidores del
-   * assembler (trayectoria y comparación de un alumno).
+   * Son tres consultas y no una porque la clasificación en bandas NO se puede empujar
+   * a SQL sin duplicar la regla, que vive en `classifyByBands` (`@soe/types`): los
+   * totales por curso y los conteos de las filas que YA traen banda se agregan en la
+   * base, y sólo las filas sin banda viajan —su porcentaje, nada más— para que la
+   * regla las clasifique donde está escrita una sola vez.
    */
-  async loadClassGroupRows(
+  async loadClassGroupBreakdown(
     tx: Database,
     orgId: string,
     assessmentIds: string[],
     classGroupIds: string[] | null,
-  ): Promise<ClassGroupResultRow[]> {
-    if (assessmentIds.length === 0) return [];
+  ): Promise<ClassGroupBreakdownData> {
+    const empty: ClassGroupBreakdownData = { totals: [], bandCounts: [], unbanded: [] };
+    if (assessmentIds.length === 0) return empty;
+    if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
     const conditions = [
       inArray(assessmentResults.assessmentId, assessmentIds),
       eq(classGroups.orgId, orgId),
       isNull(students.deletedAt),
     ];
-    if (classGroupIds !== null) {
-      if (classGroupIds.length === 0) return [];
-      conditions.push(inArray(classGroups.id, classGroupIds));
-    }
+    if (classGroupIds !== null) conditions.push(inArray(classGroups.id, classGroupIds));
 
     const assessmentYear = assessmentAcademicYears(tx);
-    return tx
+    const enrollmentOfAssessmentYear = and(
+      eq(studentEnrollments.studentId, assessmentResults.studentId),
+      eq(studentEnrollments.academicYearId, assessmentYear.academicYearId),
+    );
+
+    const totalsQuery = tx
       .select({
-        assessmentId: assessmentResults.assessmentId,
+        instrumentId: assessments.instrumentId,
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
         gradeName: grades.name,
-        percentage: assessmentResults.percentage,
-        performanceBandId: assessmentResults.performanceBandId,
-        studentId: assessmentResults.studentId,
+        studentsAssessed: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
+        percentageSum: sql<string | null>`sum(${assessmentResults.percentage}::numeric)`,
+        percentageCount: sql<number>`count(${assessmentResults.percentage})::int`,
       })
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
+      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
       .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
-      .innerJoin(
-        studentEnrollments,
-        and(
-          eq(studentEnrollments.studentId, assessmentResults.studentId),
-          eq(studentEnrollments.academicYearId, assessmentYear.academicYearId),
-        ),
-      )
+      .innerJoin(studentEnrollments, enrollmentOfAssessmentYear)
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .leftJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(and(...conditions));
+      .where(and(...conditions))
+      .groupBy(assessments.instrumentId, classGroups.id, classGroups.name, grades.name);
+
+    const bandCountsQuery = tx
+      .select({
+        instrumentId: assessments.instrumentId,
+        classGroupId: classGroups.id,
+        performanceBandId: sql<string>`${assessmentResults.performanceBandId}`,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(assessmentResults)
+      .innerJoin(students, eq(students.id, assessmentResults.studentId))
+      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
+      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
+      .innerJoin(studentEnrollments, enrollmentOfAssessmentYear)
+      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
+      .where(and(...conditions, isNotNull(assessmentResults.performanceBandId)))
+      .groupBy(assessments.instrumentId, classGroups.id, assessmentResults.performanceBandId);
+
+    const unbandedQuery = tx
+      .select({
+        instrumentId: assessments.instrumentId,
+        classGroupId: classGroups.id,
+        percentage: assessmentResults.percentage,
+      })
+      .from(assessmentResults)
+      .innerJoin(students, eq(students.id, assessmentResults.studentId))
+      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
+      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
+      .innerJoin(studentEnrollments, enrollmentOfAssessmentYear)
+      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
+      .where(and(...conditions, isNull(assessmentResults.performanceBandId)));
+
+    const [totals, bandCounts, unbanded] = await Promise.all([
+      totalsQuery,
+      bandCountsQuery,
+      unbandedQuery,
+    ]);
+
+    return { totals, bandCounts, unbanded };
   }
 
-  /** Agrupa por curso las filas ya traídas. Sin consultar. */
+  /** Arma los cursos con lo que Postgres ya agregó. Sin consultar. */
   foldByClassGroup(
-    rows: readonly ClassGroupResultRow[],
+    data: ClassGroupBreakdownData,
     bands: PerformanceBandInput[],
   ): ComparableUnitClassGroup[] {
     const lowestBandId = bands.length > 0 ? lowestBand(bands)?.id : undefined;
@@ -359,39 +418,45 @@ export class ComparableUnitAssembler {
       classGroupId: string;
       classGroupName: string;
       gradeName: string | null;
-      pctSum: number;
-      pctCount: number;
-      studentIds: Set<string>;
+      studentsAssessed: number;
+      percentageSum: number;
+      percentageCount: number;
       inLowestBand: number;
       classified: number;
     };
     const byCourse = new Map<string, Acc>();
-    for (const row of rows) {
-      let acc = byCourse.get(row.classGroupId);
-      if (!acc) {
-        acc = {
-          classGroupId: row.classGroupId,
-          classGroupName: row.classGroupName,
-          gradeName: row.gradeName,
-          pctSum: 0,
-          pctCount: 0,
-          studentIds: new Set(),
-          inLowestBand: 0,
-          classified: 0,
-        };
-        byCourse.set(row.classGroupId, acc);
+    for (const row of data.totals) {
+      const existing = byCourse.get(row.classGroupId);
+      const acc = existing ?? {
+        classGroupId: row.classGroupId,
+        classGroupName: row.classGroupName,
+        gradeName: row.gradeName,
+        studentsAssessed: 0,
+        percentageSum: 0,
+        percentageCount: 0,
+        inLowestBand: 0,
+        classified: 0,
+      };
+      acc.studentsAssessed += row.studentsAssessed;
+      acc.percentageSum += row.percentageSum === null ? 0 : Number(row.percentageSum);
+      acc.percentageCount += row.percentageCount;
+      if (!existing) byCourse.set(row.classGroupId, acc);
+    }
+
+    if (lowestBandId) {
+      for (const row of data.bandCounts) {
+        const acc = byCourse.get(row.classGroupId);
+        if (!acc) continue;
+        acc.classified += row.count;
+        if (row.performanceBandId === lowestBandId) acc.inLowestBand += row.count;
       }
-      acc.studentIds.add(row.studentId);
-      if (row.percentage != null) {
-        acc.pctSum += Number(row.percentage);
-        acc.pctCount += 1;
-      }
-      if (lowestBandId) {
-        const bandId = row.performanceBandId ?? this.classifyPercentage(row.percentage, bands);
-        if (bandId) {
-          acc.classified += 1;
-          if (bandId === lowestBandId) acc.inLowestBand += 1;
-        }
+      for (const row of data.unbanded) {
+        const acc = byCourse.get(row.classGroupId);
+        if (!acc) continue;
+        const bandId = this.classifyPercentage(row.percentage, bands);
+        if (!bandId) continue;
+        acc.classified += 1;
+        if (bandId === lowestBandId) acc.inLowestBand += 1;
       }
     }
 
@@ -400,8 +465,9 @@ export class ComparableUnitAssembler {
         classGroupId: acc.classGroupId,
         classGroupName: acc.classGroupName,
         gradeName: acc.gradeName,
-        studentsAssessed: acc.studentIds.size,
-        averageAchievement: acc.pctCount > 0 ? acc.pctSum / acc.pctCount : null,
+        studentsAssessed: acc.studentsAssessed,
+        averageAchievement:
+          acc.percentageCount > 0 ? acc.percentageSum / acc.percentageCount : null,
         lowestBandShare: acc.classified > 0 ? (acc.inLowestBand / acc.classified) * 100 : null,
       }))
       .sort((a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101));
