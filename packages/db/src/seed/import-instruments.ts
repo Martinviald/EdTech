@@ -91,6 +91,12 @@ type Section = {
   order: number;
   name: string;
   type: string;
+  /** `core` (default) o `elective`. Ver `instrument_sections.role`. */
+  role?: 'core' | 'elective';
+  /** Grupo de alternativas entre las que se elige una (ej. "mencion-ciencias"). */
+  electiveGroup?: string | null;
+  /** Cuál de las alternativas es esta sección (ej. "BIO"). */
+  electiveKey?: string | null;
   instructions?: string;
   passage?: Passage | null;
   /**
@@ -517,6 +523,11 @@ export async function importInstruments(db: Database): Promise<void> {
             type: s.type as typeof instrumentSections.$inferInsert.type,
             order: s.order ?? 0,
             instructions: s.instructions ?? null,
+            // Rol de la sección (tronco común / rama electiva). Ausente ⇒ `core`, que es el
+            // default de la columna: los JSON existentes se importan igual que siempre.
+            role: (s.role ?? 'core') as typeof instrumentSections.$inferInsert.role,
+            electiveGroup: s.role === 'elective' ? (s.electiveGroup ?? null) : null,
+            electiveKey: s.role === 'elective' ? (s.electiveKey ?? null) : null,
             passageTitle: p?.title ?? null,
             passageText: p?.text ?? null,
             passageFormat: p

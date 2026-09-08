@@ -874,9 +874,12 @@ export class ItemAnalysisService {
    * "cuántos respondieron" y "cuántos lo lograron entero"—, pero la TASA se pondera
    * por puntaje para no dar 0% en los ítems de crédito parcial.
    *
-   * `studentCount` viene por (assessment, curso, ítem) y se repite en cada ítem del
-   * mismo curso → se toma el `max` por curso y recién ahí se suma; si no, se
-   * contaría cada alumno tantas veces como preguntas tiene la prueba.
+   * `studentCount` viene por (assessment, curso, ítem): son los alumnos que
+   * respondieron ESE ítem → se toma el `max` por curso y recién ahí se suma; si no,
+   * se contaría cada alumno tantas veces como preguntas tiene la prueba. El `max`
+   * sigue dando el N del curso cuando hay secciones electivas, porque los ítems
+   * comunes los responde el curso entero; y para un instrumento que todos rinden
+   * entero todas las filas traen el mismo número, igual que antes.
    */
   private aggregateReference(
     rows: Array<{

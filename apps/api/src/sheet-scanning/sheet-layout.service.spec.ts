@@ -14,6 +14,9 @@ const layoutHashMock = layoutHash as jest.MockedFunction<typeof layoutHash>;
 const ORG_ID = '22222222-2222-4222-8222-222222222222';
 const USER_ID = '33333333-3333-4333-8333-333333333333';
 const INSTRUMENT_ID = '11111111-1111-4111-8111-111111111111';
+const FORM_ID = '44444444-4444-4444-8444-444444444444';
+const SECTION_CORE = '55555555-5555-4555-8555-555555555555';
+const SECTION_ELECTIVE = '66666666-6666-4666-8666-666666666666';
 
 type QueryChain = {
   from: (..._: unknown[]) => QueryChain;
@@ -106,6 +109,10 @@ function validItems(): DerivableItem[] {
 function validSpec(items: DerivableItem[] = validItems()): LayoutSpec {
   return deriveLayoutDraft(INSTRUMENT_ID, items).spec;
 }
+
+const FORM_ROW = [
+  { id: FORM_ID, sectionIds: [SECTION_CORE, SECTION_ELECTIVE], instrumentId: INSTRUMENT_ID },
+];
 
 function serviceForFreeze(
   items: DerivableItem[],
@@ -225,9 +232,7 @@ describe('SheetLayoutService.freeze — invariantes §3.1', () => {
     spec.fields[0] = { ...spec.fields[0]!, printedNumber: '99' };
     const { service } = serviceForFreeze(items);
 
-    await expect(service.freeze(ORG_ID, USER_ID, spec)).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
+    await expect(service.freeze(ORG_ID, USER_ID, spec)).rejects.toBeInstanceOf(BadRequestException);
   });
 });
 
@@ -235,9 +240,11 @@ describe('SheetLayoutService.freeze — versionado', () => {
   it('congela con version = max(version) + 1 y devuelve el hash canónico', async () => {
     const items = validItems();
     const spec = validSpec(items);
-    const { service, inserts } = serviceForFreeze(items, [[{ id: 'layout-9' }]], [
-      { maxVersion: 4 },
-    ]);
+    const { service, inserts } = serviceForFreeze(
+      items,
+      [[{ id: 'layout-9' }]],
+      [{ maxVersion: 4 }],
+    );
 
     const result = await service.freeze(ORG_ID, USER_ID, spec);
 
@@ -313,5 +320,111 @@ describe('SheetLayoutService.getFrozen / list', () => {
     expect(result.data).toHaveLength(1);
     expect(result.data[0]).toMatchObject({ id: 'layout-1', fieldCount: 3, pageCount: 1 });
     expect(result.data[0]).not.toHaveProperty('spec');
+  });
+});
+
+// ── Secciones electivas (etapa 8): el layout puede ser de una FORMA ──────────
+
+describe('SheetLayoutService — layout por forma', () => {
+  const formItems = [mcItem(1), mcItem(2)];
+
+  it('deriva el borrador sólo con los ítems de las secciones de la forma', async () => {
+    const { db } = makeDb([INSTRUMENT_ROW, FORM_ROW, formItems.map(itemRow)]);
+    const service = new SheetLayoutService(db);
+
+    const draft = await service.deriveDraft(ORG_ID, INSTRUMENT_ID, 'qr', FORM_ID);
+
+    expect(draft.spec.formId).toBe(FORM_ID);
+    expect(draft.spec.fields.map((f) => f.printedNumber)).toEqual(['1', '2']);
+  });
+
+  it('congela el layout de la forma y lo guarda con assessment_form_id', async () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, formItems, 'qr', FORM_ID).spec;
+    const { db, inserts } = makeDb(
+      [INSTRUMENT_ROW, FORM_ROW, formItems.map(itemRow), [{ maxVersion: 2 }]],
+      [[{ id: 'layout-form' }]],
+    );
+    const service = new SheetLayoutService(db);
+
+    const result = await service.freeze(ORG_ID, USER_ID, spec);
+
+    expect(result).toMatchObject({ layoutId: 'layout-form', version: 3 });
+    expect(inserts[0]).toMatchObject({
+      instrumentId: INSTRUMENT_ID,
+      assessmentFormId: FORM_ID,
+      version: 3,
+    });
+  });
+
+  it('rechaza el invariante 4 cuando falta un ítem de la forma en el layout', async () => {
+    // La biyección se evalúa contra los ítems de la FORMA (2), no contra los
+    // del instrumento completo: un layout de 1 campo la viola.
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, [mcItem(1)], 'qr', FORM_ID).spec;
+    const { db } = makeDb(
+      [INSTRUMENT_ROW, FORM_ROW, formItems.map(itemRow), [{ maxVersion: 0 }]],
+      [[{ id: 'layout-form' }]],
+    );
+    const service = new SheetLayoutService(db);
+
+    await expect(service.freeze(ORG_ID, USER_ID, spec)).rejects.toThrow(/Invariante 4 violado/);
+  });
+
+  it('rechaza una forma de otro instrumento', async () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, formItems, 'qr', FORM_ID).spec;
+    const otherForm = [{ id: FORM_ID, sectionIds: [SECTION_CORE], instrumentId: 'otro' }];
+    const { db } = makeDb([INSTRUMENT_ROW, otherForm, formItems.map(itemRow)]);
+    const service = new SheetLayoutService(db);
+
+    await expect(service.freeze(ORG_ID, USER_ID, spec)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rechaza una forma sin secciones declaradas', async () => {
+    const emptyForm = [{ id: FORM_ID, sectionIds: [], instrumentId: INSTRUMENT_ID }];
+    const { db } = makeDb([INSTRUMENT_ROW, emptyForm]);
+    const service = new SheetLayoutService(db);
+
+    await expect(service.deriveDraft(ORG_ID, INSTRUMENT_ID, 'qr', FORM_ID)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+  });
+
+  it('rechaza una forma inexistente en la org', async () => {
+    const { db } = makeDb([INSTRUMENT_ROW, []]);
+    const service = new SheetLayoutService(db);
+
+    await expect(service.deriveDraft(ORG_ID, INSTRUMENT_ID, 'qr', FORM_ID)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+  });
+});
+
+describe('SheetLayoutService — regresión sin forma', () => {
+  const actualTypes = jest.requireActual<typeof import('@soe/types')>('@soe/types');
+
+  it('un spec sin forma no lleva la clave formId y conserva su hash histórico', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, validItems()).spec;
+
+    expect('formId' in spec).toBe(false);
+    // El hash es el de un spec construido sin el campo: los layouts congelados
+    // antes de las secciones electivas siguen validando.
+    const legacy = { ...spec } as Record<string, unknown>;
+    delete legacy.formId;
+    expect(actualTypes.layoutHash(spec)).toBe(actualTypes.layoutHash(legacy as LayoutSpec));
+  });
+
+  it('la forma cambia el hash: dos formas del mismo instrumento no comparten layout', () => {
+    const base = deriveLayoutDraft(INSTRUMENT_ID, validItems()).spec;
+    const withForm = deriveLayoutDraft(INSTRUMENT_ID, validItems(), 'qr', FORM_ID).spec;
+
+    expect(actualTypes.layoutHash(withForm)).not.toBe(actualTypes.layoutHash(base));
+  });
+
+  it('el layout sin forma se guarda con assessmentFormId null', async () => {
+    const items = validItems();
+    const { service, inserts } = serviceForFreeze(items);
+
+    await service.freeze(ORG_ID, USER_ID, validSpec(items));
+
+    expect(inserts[0]).toMatchObject({ assessmentFormId: null });
   });
 });

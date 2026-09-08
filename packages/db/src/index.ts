@@ -5,5 +5,7 @@ export * from './queries/memberships';
 export * from './queries/platform-admins';
 export * from './queries/auth-context';
 export * from './queries/cohort-stats';
+export * from './queries/elective-sections';
+export * from './queries/elective-guard';
 export { withOrgContext } from './with-org-context';
 export { withCaptureSessionContext } from './with-capture-session-context';

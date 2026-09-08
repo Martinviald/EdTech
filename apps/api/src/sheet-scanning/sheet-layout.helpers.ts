@@ -78,7 +78,9 @@ function fieldIdOf(label: string): string {
   const segments = label
     .split(/[^a-zA-Z0-9]+/)
     .filter((s) => s.length > 0)
-    .map((segment, index) => (index === 0 && /^\d+$/.test(segment) ? segment.padStart(3, '0') : segment));
+    .map((segment, index) =>
+      index === 0 && /^\d+$/.test(segment) ? segment.padStart(3, '0') : segment,
+    );
   return `f_${segments.join('_')}`;
 }
 
@@ -152,7 +154,9 @@ export function buildRutIdentityBubbles(): OmrBubble[] {
   const bubbles: OmrBubble[] = [];
   for (let group = 0; group <= RUT_DV_GROUP_INDEX; group++) {
     const values: string[] =
-      group === RUT_DV_GROUP_INDEX ? [...RUT_DIGIT_VALUES, RUT_DV_EXTRA_VALUE] : [...RUT_DIGIT_VALUES];
+      group === RUT_DV_GROUP_INDEX
+        ? [...RUT_DIGIT_VALUES, RUT_DV_EXTRA_VALUE]
+        : [...RUT_DIGIT_VALUES];
     const centerX = RUT_COLUMN_START_X + group * RUT_COLUMN_SPACING_X;
     for (const [row, value] of values.entries()) {
       bubbles.push({
@@ -217,10 +221,16 @@ function buildField(entry: CorrectableItem, slot: number, gridTop: number): Layo
   };
 }
 
+/**
+ * `formId` sólo se escribe en el spec cuando existe: un layout sin forma no
+ * lleva la clave y su `layoutHash` es bit a bit el de antes de las secciones
+ * electivas (ver la nota del campo en omr-layout.schema.ts).
+ */
 export function deriveLayoutDraft(
   instrumentId: string,
   items: readonly DerivableItem[],
   identityMode: SheetIdentityMode = 'qr',
+  formId: string | null = null,
 ): LayoutDraftModel {
   const { correctable, excluded } = partitionDerivableItems(items);
   const gridTop = gridTopOf(identityMode);
@@ -230,6 +240,7 @@ export function deriveLayoutDraft(
   const spec: LayoutSpec = {
     specVersion: 1,
     instrumentId,
+    ...(formId === null ? {} : { formId }),
     pageCount,
     paper: 'letter',
     fiducials: {
@@ -317,7 +328,11 @@ function collectDigitGroupViolations(
     if (groups.size !== max + 1 || !groups.has(0)) {
       violations.push({
         invariant: 6,
-        message: `los grupos de ${fieldLabel} deben ser contiguos desde 0 (encontrados: ${Array.from(groups).sort((a, b) => a - b).join(', ')})`,
+        message: `los grupos de ${fieldLabel} deben ser contiguos desde 0 (encontrados: ${Array.from(
+          groups,
+        )
+          .sort((a, b) => a - b)
+          .join(', ')})`,
       });
     }
   }

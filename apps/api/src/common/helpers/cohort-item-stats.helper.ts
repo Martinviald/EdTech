@@ -17,10 +17,16 @@
  * `assessment_item_stats` tiene grano `(assessment_id, class_group_id, item_id)`. El
  * scope de lectura puede abarcar varios cursos. `score_sum`/`max_sum` son sumables sin
  * más (el ratio de las sumas es el logro global correcto), pero `studentsAssessed` NO:
- * dentro de un curso `student_count` es constante entre ítems, así que el N del curso es
- * su `max(student_count)`, y el N del scope es la SUMA de esos max por curso (mismo
- * argumento que `COHORT_STUDENTS_ASSESSED` del helper de habilidades). Por eso se agrupa
- * por curso en SQL y se recombina en JS.
+ * `student_count` tiene grano `(curso, ítem)` —los alumnos que respondieron ESE ítem—,
+ * así que el N del curso es su `max(student_count)`, y el N del scope es la SUMA de esos
+ * max por curso (mismo argumento que `COHORT_STUDENTS_ASSESSED` del helper de
+ * habilidades). Por eso se agrupa por curso en SQL y se recombina en JS.
+ *
+ * ⚠️ El `max` es deliberado y no cambia con secciones electivas: los ítems comunes los
+ * responde el curso entero, así que el máximo sigue siendo el N del curso. Un `sum`
+ * contaría a cada alumno una vez por pregunta y un `avg` subestimaría el N al promediar
+ * el ítem común con el de la mención. Para un instrumento que todos rinden entero,
+ * `student_count` es igual en todos los ítems y el `max` da exactamente lo de antes.
  */
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { assessmentItemStats } from '@soe/db';
