@@ -1,0 +1,81 @@
+name: Backfill cohort-stats (semanal, completo)
+
+# RED DE SEGURIDAD del gate del deploy (docs/plan-optimizar-backfill-cohort-stats.md §2.3, R2).
+#
+# Desde que el deploy dejó de repoblar el read-model en cada push, la señal que decide es
+# la huella del código. Esa huella cubre CÓDIGO, no semántica río arriba: si cambia la
+# forma del JSONB `responses.value` o el significado de `is_correct` sin tocar el
+# calculador, la huella no se mueve y la analítica queda vieja EN SILENCIO.
+#
+# Ningún gate basado en código cierra ese hueco. Este workflow sí lo acota: corre el
+# backfill COMPLETO una vez por semana, sin gate, y auto-cura cualquier deriva en ≤7 días.
+# Cuesta ~10 minutos de runner por semana — el seguro barato que hace aceptable el resto
+# del diseño.
+#
+# También es el lugar para repoblar a mano tras un restore o un incidente
+# (workflow_dispatch).
+
+on:
+  schedule:
+    # Domingos 07:00 UTC (~03:00-04:00 en Chile): fuera de horario de colegios.
+    - cron: "0 7 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# MISMO grupo que los deploys: ambos escriben el read-model del stage. Nunca a la vez.
+concurrency:
+  group: sst-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  STAGE: demo
+  BACKFILL_CONCURRENCY: "6"
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # El backfill importa el calculador puro de `@soe/types`, que se consume como
+      # paquete compilado (`dist/`). Sin este build falla con "Cannot find module".
+      - name: Build @soe/types (lo consume el backfill)
+        run: pnpm --filter @soe/types build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Open RDS tunnel (SSM port-forward via bastion)
+        uses: ./.github/actions/rds-tunnel
+        with:
+          stage: ${{ env.STAGE }}
+          db-password: ${{ secrets.DB_MASTER_PASSWORD }}
+
+      # Sin gate y a propósito: el punto de este workflow es correr aunque el gate diga
+      # que no hace falta. Si el backfill falla, el `&&` evita estampar: la huella vieja
+      # queda en su lugar y el próximo deploy vuelve a intentar.
+      - name: Backfill completo + estampado
+        run: |
+          set -euo pipefail
+          pnpm --filter @soe/db db:backfill:cohort-stats \
+            && pnpm --filter @soe/db db:cohort-stamp write
+
+      - name: Verify cohort read-model (smoke check)
+        run: pnpm --filter @soe/db db:cohort-stamp verify

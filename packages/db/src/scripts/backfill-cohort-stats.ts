@@ -6,6 +6,7 @@
  *   ... --org <orgId>            # sólo una organización
  *   ... --assessment <id>        # sólo un assessment (implica su org)
  *   ... --dry-run                # calcula y reporta, no escribe
+ *   ... --concurrency <n>        # evaluaciones en paralelo (default 6, o BACKFILL_CONCURRENCY)
  *
  * Idempotente: cada assessment se recalcula con delete + reinsert, igual que el
  * recálculo en caliente. Correrlo dos veces deja exactamente el mismo estado.
@@ -18,6 +19,18 @@
  * transacción corta (no una gigante por org) y cada operación se reintenta con
  * reconexión ante cortes transitorios. Como es idempotente, reintentar o re-ejecutar
  * es seguro; un assessment ya recalculado simplemente se vuelve a dejar igual.
+ *
+ * Concurrencia: el trabajo está dominado por la LATENCIA (runner en Azure, RDS en
+ * us-east-1, por un túnel SSM: ~10 round-trips por evaluación), no por CPU ni por el
+ * RDS. Las evaluaciones se procesan con un pool de workers sobre una cola plana; cada
+ * tarea sigue siendo la misma transacción corta e idempotente de siempre, así que el
+ * paralelismo no cambia ningún número (lo verifica el diff de snapshot documentado en
+ * docs/plan-optimizar-backfill-cohort-stats.md, Etapa A).
+ *
+ * ⚠️ `withOrgContext` fija `app.current_org_id` con `set_config(..., true)`, que es
+ * TRANSACTION-scoped. Eso es lo que hace seguro correr varias orgs a la vez sobre el
+ * mismo pool: cada transacción tiene su propio contexto y ninguna ve el de otra. Si
+ * alguna vez pasara a ser de sesión, este paralelismo mezclaría tenants.
  *
  * ⚠️ NO es opcional después de una migración. Desde la Fase 2 los lectores
  * (item-analysis, official-reports, dashboards, heatmap, assessment-report) ya no
@@ -39,6 +52,8 @@ config({ path: resolve(__dirname, '../../../../.env') });
 import { and, eq, ne } from 'drizzle-orm';
 import type { SkillResultForCohort } from '@soe/types';
 import { createDbClient, type Database } from '../client';
+import { runPooled, resolveConcurrency } from '../lib/concurrency';
+import { createConnectionHolder, type ConnectionHolder } from '../lib/connection-holder';
 import { withOrgContext } from '../with-org-context';
 import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
 import { assessments } from '../schema/assessments';
@@ -51,16 +66,26 @@ type Args = {
   orgId?: string;
   assessmentId?: string;
   dryRun: boolean;
+  concurrency: number;
 };
 
+/**
+ * 6 y no 8: deja margen cómodo en el pool y en los sockets del túnel. Se puede subir
+ * con `--concurrency` o `BACKFILL_CONCURRENCY` sin tocar código (el workflow lo usa).
+ */
+const DEFAULT_CONCURRENCY = 6;
+
 function parseArgs(argv: readonly string[]): Args {
-  const args: Args = { dryRun: false };
+  let concurrencyRaw: string | undefined = process.env.BACKFILL_CONCURRENCY;
+  const args: Args = { dryRun: false, concurrency: DEFAULT_CONCURRENCY };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     if (flag === '--dry-run') args.dryRun = true;
     else if (flag === '--org') args.orgId = argv[++i];
     else if (flag === '--assessment') args.assessmentId = argv[++i];
+    else if (flag === '--concurrency') concurrencyRaw = argv[++i];
   }
+  args.concurrency = resolveConcurrency(concurrencyRaw, DEFAULT_CONCURRENCY);
   return args;
 }
 
@@ -88,19 +113,23 @@ function isTransient(err: unknown): boolean {
 const MAX_ATTEMPTS = 4;
 
 /**
- * Ejecuta `op` reintentando con RECONEXIÓN ante cortes transitorios. Cada intento
- * usa el cliente actual de `holder`; si la conexión se cayó, se abre uno fresco.
+ * Ejecuta `op` reintentando con RECONEXIÓN ante cortes transitorios. Cada intento usa
+ * el cliente vigente del holder; si la conexión se cayó, se pide una reconexión CONTRA
+ * LA GENERACIÓN QUE SE VIO. Si otro worker ya reconectó, el pedido es un no-op y este
+ * reintenta contra el cliente nuevo: una sola reconexión por corte, aunque haya N
+ * workers en vuelo (ver `lib/connection-holder.ts`).
+ *
  * Los errores no-transitorios (SQL inválido, constraint, etc.) se propagan de una.
  */
 async function withDbRetry<T>(
-  holder: { db: Database },
-  makeDb: () => Database,
+  holder: ConnectionHolder<Database>,
   op: (db: Database) => Promise<T>,
   label: string,
 ): Promise<T> {
   for (let attempt = 1; ; attempt++) {
+    const seenGeneration = holder.generation;
     try {
-      return await op(holder.db);
+      return await op(holder.current);
     } catch (err) {
       if (attempt >= MAX_ATTEMPTS || !isTransient(err)) throw err;
       const waitMs = 1000 * attempt;
@@ -109,7 +138,7 @@ async function withDbRetry<T>(
           `reconectando en ${waitMs}ms…`,
       );
       await sleep(waitMs);
-      holder.db = makeDb();
+      await holder.reconnect(seenGeneration);
     }
   }
 }
@@ -175,6 +204,8 @@ async function backfillAssessment(
   });
 }
 
+type Task = { orgId: string; assessmentId: string; name: string | null };
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
@@ -182,33 +213,31 @@ async function main(): Promise<void> {
     throw new Error('Falta DATABASE_ADMIN_URL (o DATABASE_URL) en el entorno');
   }
 
-  const makeDb = (): Database => createDbClient(databaseUrl);
-  const holder = { db: makeDb() };
+  // El pool necesita una conexión por tarea en vuelo (cada una abre su transacción) más
+  // margen para el listado y para la que quede cerrándose tras una reconexión.
+  const maxConnections = args.concurrency + 2;
+  const holder = createConnectionHolder<Database>({
+    connect: () => createDbClient(databaseUrl, { maxConnections }),
+    close: (db) => db.$client.end({ timeout: 5 }),
+  });
 
   const orgRows = args.orgId
     ? [{ id: args.orgId }]
     : await withDbRetry(
         holder,
-        makeDb,
         (db) => db.select({ id: organizations.id }).from(organizations),
         'listar organizaciones',
       );
 
-  let orgsTouched = 0;
-  let assessmentsDone = 0;
-  let itemRowsTotal = 0;
-  let skillRowsTotal = 0;
-  let orphanTotal = 0;
-
-  console.log(
-    `[backfill-cohort-stats] ${orgRows.length} organización(es)${args.dryRun ? ' — DRY RUN' : ''}`,
-  );
+  // ── Fase 1: listado (secuencial, una consulta por org). Arma la cola plana. ──
+  // Barato comparado con el recálculo, y deja el total conocido ANTES de empezar, que
+  // es lo que permite numerar el progreso `[n/total]` con los logs intercalados.
+  const queue: Task[] = [];
+  const orgsWithWork = new Set<string>();
 
   for (const org of orgRows) {
-    // Listar los assessments de la org (transacción corta con contexto de org).
     const rows = await withDbRetry(
       holder,
-      makeDb,
       (db) =>
         withOrgContext(db, org.id, async (tx) => {
           const conditions = [
@@ -225,41 +254,80 @@ async function main(): Promise<void> {
     );
 
     if (rows.length === 0) continue;
-    orgsTouched += 1;
-
-    for (const a of rows) {
-      if (args.dryRun) {
-        assessmentsDone += 1;
-        console.log(`  · ${org.id} / ${a.id} (${a.name ?? 'sin nombre'}) — dry run, sin escribir`);
-        continue;
-      }
-
-      // Cada assessment en su PROPIA transacción corta, reintentable: si el túnel
-      // corta la conexión, se reconecta y se recalcula sólo este assessment (idempotente).
-      const res = await withDbRetry(
-        holder,
-        makeDb,
-        (db) => withOrgContext(db, org.id, (tx) => backfillAssessment(tx, a.id)),
-        `evaluación ${a.id}`,
-      );
-
-      assessmentsDone += 1;
-      itemRowsTotal += res.itemRows;
-      skillRowsTotal += res.skillRows;
-      orphanTotal += res.orphanResponses;
-      console.log(
-        `  · ${a.id} (${a.name ?? 'sin nombre'}) → ${res.itemRows} item stats, ${res.skillRows} skill stats` +
-          (res.orphanResponses > 0
-            ? ` — ⚠️ ${res.orphanResponses} respuesta(s) de alumnos sin curso, fuera del read-model`
-            : ''),
-      );
-    }
-
-    console.log(`[backfill-cohort-stats] org ${org.id}: ${rows.length} evaluación(es)`);
+    orgsWithWork.add(org.id);
+    for (const a of rows) queue.push({ orgId: org.id, assessmentId: a.id, name: a.name });
   }
 
   console.log(
-    `[backfill-cohort-stats] listo — ${assessmentsDone} evaluación(es) en ${orgsTouched} org(s); ` +
+    `[backfill-cohort-stats] ${orgRows.length} organización(es), ${queue.length} evaluación(es)` +
+      `${args.dryRun ? ' — DRY RUN' : `, concurrencia ${args.concurrency}`}`,
+  );
+
+  if (args.dryRun) {
+    for (const t of queue) {
+      console.log(
+        `  · ${t.orgId} / ${t.assessmentId} (${t.name ?? 'sin nombre'}) — dry run, sin escribir`,
+      );
+    }
+    console.log(
+      `[backfill-cohort-stats] dry run — ${queue.length} evaluación(es) en ${orgsWithWork.size} org(s)`,
+    );
+    await holder.close();
+    process.exit(0);
+  }
+
+  // ── Fase 2: recálculo con pool de workers. ──
+  // Cada tarea es idéntica a la del loop en serie: una transacción corta, idempotente,
+  // reintentable, dentro del contexto de org de SU evaluación.
+  let completed = 0;
+  const outcome = await runPooled(queue, args.concurrency, async (task) => {
+    const res = await withDbRetry(
+      holder,
+      (db) => withOrgContext(db, task.orgId, (tx) => backfillAssessment(tx, task.assessmentId)),
+      `evaluación ${task.assessmentId}`,
+    );
+
+    completed += 1;
+    console.log(
+      `  [${completed}/${queue.length}] ${task.assessmentId} (${task.name ?? 'sin nombre'}) → ` +
+        `${res.itemRows} item stats, ${res.skillRows} skill stats` +
+        (res.orphanResponses > 0
+          ? ` — ⚠️ ${res.orphanResponses} respuesta(s) de alumnos sin curso, fuera del read-model`
+          : ''),
+    );
+    return res;
+  });
+
+  const itemRowsTotal = outcome.results.reduce((n, r) => n + r.itemRows, 0);
+  const skillRowsTotal = outcome.results.reduce((n, r) => n + r.skillRows, 0);
+  const orphanTotal = outcome.results.reduce((n, r) => n + r.orphanResponses, 0);
+
+  // ── Fallo: reportar TODO lo que quedó sin procesar y salir != 0. ──
+  // Un backfill parcial que sale 0 haría que el deploy estampe como bueno un read-model
+  // incompleto. Es exactamente el modo de falla silencioso que este script existe para
+  // no tener.
+  if (outcome.failures.length > 0) {
+    for (const f of outcome.failures) {
+      console.error(
+        `[backfill-cohort-stats] ✗ evaluación ${f.task.assessmentId} (org ${f.task.orgId}):`,
+        f.error,
+      );
+    }
+    console.error(
+      `[backfill-cohort-stats] FALLÓ — ${outcome.results.length}/${queue.length} evaluación(es) ` +
+        `procesadas, ${outcome.failures.length} con error, ${outcome.skipped.length} sin procesar.`,
+    );
+    if (outcome.skipped.length > 0) {
+      console.error(
+        `[backfill-cohort-stats] sin procesar: ${outcome.skipped.map((t) => t.assessmentId).join(', ')}`,
+      );
+    }
+    await holder.close();
+    process.exit(1);
+  }
+
+  console.log(
+    `[backfill-cohort-stats] listo — ${outcome.results.length} evaluación(es) en ${orgsWithWork.size} org(s); ` +
       `${itemRowsTotal} filas en assessment_item_stats, ${skillRowsTotal} en assessment_skill_stats`,
   );
   // Toda respuesta huérfana es una diferencia org-wide contra el `GROUP BY` actual
@@ -274,6 +342,7 @@ async function main(): Promise<void> {
   } else {
     console.log('[backfill-cohort-stats] 0 respuestas huérfanas — paridad org-wide exacta.');
   }
+  await holder.close();
   process.exit(0);
 }
 

@@ -55,10 +55,10 @@ return withOrgContext(this.db, orgId, async (tx) => {
 RLS solo filtra si la conexión **no** bypassa RLS. Superusers y roles `BYPASSRLS`
 siempre bypassan. Modelo de dos roles (ver `sql/roles.sql`):
 
-| Conexión | Variable de entorno | Rol | RLS |
-|---|---|---|---|
-| API runtime | `DATABASE_URL` | `soe_app` (NOBYPASSRLS) | **aplica** |
-| migrate / seed / reset | `DATABASE_ADMIN_URL` (cae a `DATABASE_URL`) | owner/superuser | bypassa |
+| Conexión               | Variable de entorno                         | Rol                     | RLS        |
+| ---------------------- | ------------------------------------------- | ----------------------- | ---------- |
+| API runtime            | `DATABASE_URL`                              | `soe_app` (NOBYPASSRLS) | **aplica** |
+| migrate / seed / reset | `DATABASE_ADMIN_URL` (cae a `DATABASE_URL`) | owner/superuser         | bypassa    |
 
 `FORCE ROW LEVEL SECURITY` asegura que el RLS aplique incluso al dueño de la tabla.
 La API emite un warning de arranque si detecta que conecta con un rol que bypassa RLS.
@@ -99,7 +99,40 @@ pnpm db:seed       # carga datos demo base (usa DATABASE_ADMIN_URL → bypassa R
 pnpm db:seed:dev   # ⭐ SEED MAESTRO dev/testing: las 6 seeds en orden (ver abajo)
 pnpm db:migrate:dev # migra y luego corre db:seed:dev — el flujo post-migración
 pnpm db:reset      # reset-schema + migrate:dev (destructivo, solo local)
+
+pnpm db:backfill:cohort-stats            # repuebla el read-model de cohorte
+pnpm db:backfill:cohort-stats --concurrency 6   # (default 6; también BACKFILL_CONCURRENCY)
+pnpm db:cohort-stamp check|write|verify  # gate del backfill en el deploy (ver abajo)
 ```
+
+### Read-model de cohorte: cuándo hay que repoblarlo
+
+`assessment_item_stats` / `assessment_skill_stats` son un read-model: los dashboards, el
+heatmap y los informes leen de ahí y **ya no derivan de `responses`**. Si queda sin
+poblar, la analítica sale en blanco sin ningún error visible.
+
+El deploy ya **no** corre el backfill completo en cada push (costaba ~10 de los ~11
+minutos del job). Lo decide `db:cohort-stamp check`, comparando contra la fila de
+`read_model_stamps`:
+
+- **la huella del código** del recálculo — SHA-256 del cierre transitivo de imports de
+  `queries/cohort-stats.ts`, `scripts/backfill-cohort-stats.ts` y el calculador puro de
+  `@soe/types` (`lib/cohort-stats-fingerprint.ts`), y
+- **la última migración aplicada** (`drizzle.__drizzle_migrations`).
+
+⚠️ **Si tocas la semántica del recálculo, no tienes que acordarte de nada**: la huella se
+mueve sola y el próximo deploy repuebla. Lo que **sí** tienes que saber es que la huella
+cubre CÓDIGO, no semántica río arriba: si cambias la forma de `responses.value` o el
+significado de `is_correct` sin tocar esos archivos, la huella no se mueve. Ese hueco lo
+cubren el backfill completo semanal
+(`.github/workflows/backfill-cohort-stats.yml`, auto-cura en ≤7 días) y el
+`db:cohort-stamp verify` que corre en TODO deploy y lo falla si el read-model quedó vacío.
+
+Si agregas un import externo nuevo al recálculo, el test de cierre
+(`src/lib/cohort-stats-fingerprint.spec.ts`, job `db` del CI) se pone en rojo hasta que
+decidas si ese paquete influye en los números. Es a propósito.
+
+Detalle completo en `docs/plan-optimizar-backfill-cohort-stats.md`.
 
 ### Seed maestro de dev/testing (`db:seed:dev`)
 
@@ -107,14 +140,14 @@ Reseedea un entorno local completo para testear cambios. Corre las 6 seeds en el
 **orden de dependencias correcto** (todas idempotentes: borran-y-recrean por
 namespace de UUID, así que se puede re-ejecutar sin duplicar):
 
-| # | Seed | Aporta | Depende de |
-|---|---|---|---|
-| 1 | `index.ts` | Orgs demo + usuarios mock (admin/director/teacher) | — |
-| 2 | `taxonomy-real.ts` | Taxonomía real (marcos Currículum Nacional + DIA) | — |
-| 3 | `import-instruments.ts` | 24 instrumentos · 77 secciones · 612 ítems | (2) taxonomía |
-| 4 | `import-item-tags.ts` | ~2131 `item_taxonomy_tags` | (2)(3) |
-| 5 | `e2e-testing.ts` | 5 cursos · 74 alumnos · 10 evals · respuestas + resultados | (1)(2) |
-| 6 | `benchmark-demo.ts` | Cohorte de benchmarking (modo global + red) | — |
+| #   | Seed                    | Aporta                                                     | Depende de    |
+| --- | ----------------------- | ---------------------------------------------------------- | ------------- |
+| 1   | `index.ts`              | Orgs demo + usuarios mock (admin/director/teacher)         | —             |
+| 2   | `taxonomy-real.ts`      | Taxonomía real (marcos Currículum Nacional + DIA)          | —             |
+| 3   | `import-instruments.ts` | 24 instrumentos · 77 secciones · 612 ítems                 | (2) taxonomía |
+| 4   | `import-item-tags.ts`   | ~2131 `item_taxonomy_tags`                                 | (2)(3)        |
+| 5   | `e2e-testing.ts`        | 5 cursos · 74 alumnos · 10 evals · respuestas + resultados | (1)(2)        |
+| 6   | `benchmark-demo.ts`     | Cohorte de benchmarking (modo global + red)                | —             |
 
 **Uso típico tras una migración** (para validar los cambios en local):
 
