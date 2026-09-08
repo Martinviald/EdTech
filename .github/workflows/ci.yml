@@ -83,3 +83,30 @@ jobs:
       # cierre de imports). Corren en cualquier runner sin Postgres.
       - name: Tests
         run: pnpm --filter @soe/db test
+
+  types:
+    name: Types (typecheck · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @soe/types typecheck
+
+      # Los schemas Zod y las utilidades puras (calculadores, parsers) se validan acá.
+      # No tocan la BDD ni la red: corren en cualquier runner.
+      #
+      # No se agrega un job para `@soe/api`: su suite necesita un Postgres con seed y los
+      # secretos de sesión, que el runner no tiene. Correrla sin eso da rojo por entorno,
+      # no por el código — ruido que termina enseñando a ignorar el CI.
+      - name: Tests
+        run: pnpm --filter @soe/types test

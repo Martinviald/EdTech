@@ -7,10 +7,19 @@ import type {
 } from '@soe/types';
 
 export type OrgTeacher = {
+  /** userId, salvo en los pendientes sin usuario: ahí viene como `pending:<membershipId>`. */
   id: string;
   name: string;
   email: string;
   role: string;
+  /** 'pending' = invitado que todavía no inició sesión. */
+  status: 'active' | 'pending';
+  /**
+   * Si es `false`, es una invitación vieja sin fila en `users` y NO puede recibir carga
+   * (`teacher_assignments.user_id` es NOT NULL). Se lista igual para que no desaparezca
+   * del selector sin explicación; se completa volviéndolo a invitar con su nombre.
+   */
+  assignable: boolean;
 };
 
 export type OrgSubjectClass = {
@@ -67,7 +76,5 @@ export function listClassGroupsForUser(orgId: string) {
 }
 
 export function getClassGroupDetail(orgId: string, classGroupId: string) {
-  return apiGet<ClassGroupDetailResponse>(
-    `/organizations/${orgId}/class-groups/${classGroupId}`,
-  );
+  return apiGet<ClassGroupDetailResponse>(`/organizations/${orgId}/class-groups/${classGroupId}`);
 }
