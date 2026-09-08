@@ -22,6 +22,7 @@ import {
   type ComparableUnitSummary,
   type DashboardAlert,
 } from '@soe/types';
+import { assessmentAcademicYears } from '../common/helpers/assessment-academic-year.helper';
 import type { Database } from '../database/database.types';
 
 type AlertDraft = Omit<DashboardAlert, 'dedupKey'> & { dedupKey?: string };
@@ -308,6 +309,7 @@ export class ComparableAlertsService {
 
     const currentBand = alias(performanceBands, 'current_band');
     const priorBand = alias(performanceBands, 'prior_band');
+    const assessmentYear = assessmentAcademicYears(tx);
 
     const rows = await tx
       .select({
@@ -320,7 +322,14 @@ export class ComparableAlertsService {
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
       .innerJoin(currentBand, eq(currentBand.id, assessmentResults.performanceBandId))
       .innerJoin(priorBand, eq(priorBand.id, assessmentResults.priorPerformanceBandId))
-      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
+      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
+      .innerJoin(
+        studentEnrollments,
+        and(
+          eq(studentEnrollments.studentId, assessmentResults.studentId),
+          eq(studentEnrollments.academicYearId, assessmentYear.academicYearId),
+        ),
+      )
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .where(
         and(
@@ -386,13 +395,24 @@ export class ComparableAlertsService {
       .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
       .where(and(...assignedConditions));
 
+    const coverageAssessmentYear = assessmentAcademicYears(tx);
     const withResults = await tx
       .selectDistinct({
         assessmentId: assessmentResults.assessmentId,
         classGroupId: studentEnrollments.classGroupId,
       })
       .from(assessmentResults)
-      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
+      .innerJoin(
+        coverageAssessmentYear,
+        eq(coverageAssessmentYear.assessmentId, assessmentResults.assessmentId),
+      )
+      .innerJoin(
+        studentEnrollments,
+        and(
+          eq(studentEnrollments.studentId, assessmentResults.studentId),
+          eq(studentEnrollments.academicYearId, coverageAssessmentYear.academicYearId),
+        ),
+      )
       .where(inArray(assessmentResults.assessmentId, assessmentIds));
 
     const covered = new Set(withResults.map((r) => `${r.assessmentId}:${r.classGroupId}`));

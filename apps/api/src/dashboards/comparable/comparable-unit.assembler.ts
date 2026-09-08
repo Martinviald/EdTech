@@ -19,6 +19,7 @@ import {
   type PerformanceBandDistributionBucket,
   type PerformanceBandInput,
 } from '@soe/types';
+import { assessmentAcademicYears } from '../../common/helpers/assessment-academic-year.helper';
 import { loadCohortAchievementByAssessment } from '../../common/helpers/cohort-item-stats.helper';
 import {
   levelCountsToBandDistribution,
@@ -190,7 +191,14 @@ export class ComparableUnitAssembler {
     }));
   }
 
-  /** Desglose por curso de una unidad, ordenado por logro ascendente. */
+  /**
+   * Desglose por curso de una unidad, ordenado por logro ascendente.
+   *
+   * La matrícula se une por el AÑO de la evaluación: `student_enrollments` es única
+   * por (alumno, año), así que unir sólo por alumno traía una fila por cada año
+   * cursado —el mismo alumno contado en 3° y en 4° Medio, y su porcentaje promediado
+   * dos veces—. Medido en la demo: 2.164 filas para 1.082 resultados.
+   */
   async loadByClassGroup(
     tx: Database,
     orgId: string,
@@ -210,6 +218,7 @@ export class ComparableUnitAssembler {
       conditions.push(inArray(classGroups.id, classGroupIds));
     }
 
+    const assessmentYear = assessmentAcademicYears(tx);
     const rows = await tx
       .select({
         classGroupId: classGroups.id,
@@ -221,7 +230,14 @@ export class ComparableUnitAssembler {
       })
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
+      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
+      .innerJoin(
+        studentEnrollments,
+        and(
+          eq(studentEnrollments.studentId, assessmentResults.studentId),
+          eq(studentEnrollments.academicYearId, assessmentYear.academicYearId),
+        ),
+      )
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .leftJoin(grades, eq(grades.id, classGroups.gradeId))
       .where(and(...conditions));
