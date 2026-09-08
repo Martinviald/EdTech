@@ -124,7 +124,11 @@ function normalizeSortingOnlyNonDeterministicArrays(value: unknown, key?: string
 
 type Metrics = { scope: string; queries: number; ms: number; bytes: number };
 
-async function captureSnapshots(outDir: string, only: string | null): Promise<void> {
+async function captureSnapshots(
+  outDir: string,
+  only: string | null,
+  verifyAlertsEndpoint: boolean,
+): Promise<void> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error('DATABASE_URL is required');
 
@@ -156,6 +160,19 @@ async function captureSnapshots(outDir: string, only: string | null): Promise<vo
     const response = await overview.getComparableOverview(scope.user, dto);
     const ms = Date.now() - startedAt;
     const queries = queryCount;
+
+    if (verifyAlertsEndpoint) {
+      const alertsOnly = await overview.getComparableAlerts(scope.user, dto);
+      const fromFullEndpoint = JSON.stringify({
+        alerts: response.alerts,
+        alertsTotal: response.alertsTotal,
+      });
+      if (JSON.stringify(alertsOnly) !== fromFullEndpoint) {
+        throw new Error(
+          `${scope.key}: el endpoint de alertas no devuelve lo mismo que el panorama completo`,
+        );
+      }
+    }
 
     const payload = JSON.stringify(normalizeSortingOnlyNonDeterministicArrays(response), null, 2);
     writeFileSync(join(outDir, `${scope.key}.json`), `${payload}\n`);
@@ -280,7 +297,7 @@ async function main(): Promise<void> {
   if (!out) throw new Error('Falta --out <dir> (o --diff <a> <b>)');
   const outDir = resolve(out);
   mkdirSync(dirname(outDir), { recursive: true });
-  await captureSnapshots(outDir, flagValue('--only'));
+  await captureSnapshots(outDir, flagValue('--only'), argv.includes('--verify-alerts-endpoint'));
 }
 
 main().catch((error) => {

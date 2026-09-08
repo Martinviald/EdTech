@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import type { ComparableOverviewResponse, DashboardAlert } from '@soe/types';
+import type { ComparableAlertsResponse, DashboardAlert } from '@soe/types';
 import { apiClientGet } from '@/lib/api-client';
 
 /**
@@ -42,8 +42,8 @@ export function useComparableAlerts(
   const { data } = useQuery({
     queryKey: comparableAlertsKeys.detail(query),
     queryFn: async () => {
-      const response = await apiClientGet<ComparableOverviewResponse>(
-        `/dashboards/comparable-overview${query}`,
+      const response = await apiClientGet<ComparableAlertsResponse>(
+        `/dashboards/comparable-overview/alerts${query}`,
       );
       return { alerts: response.alerts, total: response.alertsTotal };
     },

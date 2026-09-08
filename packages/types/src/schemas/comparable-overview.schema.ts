@@ -98,6 +98,15 @@ export type GenerationalHighlight = {
   instrumentIds: string[];
 };
 
+/**
+ * GET /api/dashboards/comparable-overview/alerts
+ *
+ * Lo único que el panorama refresca solo. Existe para que ese refresco no arrastre
+ * las unidades, su desglose por curso y el corte generacional, que no cambian entre
+ * dos poleos y son casi todo el peso de la respuesta completa.
+ */
+export type ComparableAlertsResponse = Pick<ComparableOverviewResponse, 'alerts' | 'alertsTotal'>;
+
 export type ComparableOverviewResponse = {
   scope: 'org' | 'teacher';
   /**

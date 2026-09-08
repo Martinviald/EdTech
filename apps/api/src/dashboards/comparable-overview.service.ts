@@ -10,6 +10,7 @@ import {
   MAX_DASHBOARD_ALERTS,
   type BaselineRef,
   type ComparabilityInstrumentRef,
+  type ComparableAlertsResponse,
   type ComparableOverviewQueryDto,
   type ComparableOverviewResponse,
   type ComparableUnitSummary,
@@ -110,6 +111,23 @@ export class ComparableOverviewService {
         comparability: buildComparabilityMeta(refs, assessmentIds.length),
       };
     });
+  }
+
+  /**
+   * Las alertas solas, para el refresco en segundo plano de la banda.
+   *
+   * Reusa el armado completo en vez de derivarlas por su cuenta: toda alerta se
+   * calcula SOBRE las unidades ya resueltas (su banda, su baseline, su desglose por
+   * curso), así que un atajo que se saltara ese armado devolvería otras alertas. Lo
+   * que se ahorra acá es red, que es lo que sufre una conexión de colegio; el costo
+   * de cómputo lo bajan las fases siguientes, y las baja para los dos endpoints.
+   */
+  async getComparableAlerts(
+    user: JwtPayload,
+    query: ComparableOverviewQueryDto,
+  ): Promise<ComparableAlertsResponse> {
+    const { alerts, alertsTotal } = await this.getComparableOverview(user, query);
+    return { alerts, alertsTotal };
   }
 
   private recencyRank(value: Date | string | null): number {
