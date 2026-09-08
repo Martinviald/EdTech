@@ -6,6 +6,12 @@ name: CI
 # `next build` es el ÚNICO paso que detecta violaciones de frontera cliente/servidor
 # (RSC): un módulo que usa hooks (useState/useRef) sin `'use client'` pasa typecheck y
 # lint pero rompe la build de producción. Sin este paso esos errores llegaban al deploy.
+#
+# El job `db` corre los tests de `packages/db`. Entre ellos está el test de CIERRE del
+# read-model de cohorte (R1), que es la mitad auditable del gate del backfill: si el
+# grafo de imports del recálculo se ensancha y la huella deja de cubrirlo, esto se pone
+# en rojo acá en vez de dejar la analítica vieja en silencio en el próximo deploy.
+# Ver docs/plan-optimizar-backfill-cohort-stats.md §2.3.
 on:
   pull_request:
     branches: [dev, main]
@@ -50,3 +56,30 @@ jobs:
       # `.env`, igual que el `next build` del deploy (que compila sin esas variables).
       - name: Production build (next build)
         run: pnpm --filter @soe/web build
+
+  db:
+    name: DB (typecheck · tests · gate del read-model)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # packages/db importa tipos de @soe/types (schemas con .$type<T>()).
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/db typecheck
+
+      # No tocan la BDD: son puros (pool de workers, holder de conexión, huella del
+      # cierre de imports). Corren en cualquier runner sin Postgres.
+      - name: Tests
+        run: pnpm --filter @soe/db test

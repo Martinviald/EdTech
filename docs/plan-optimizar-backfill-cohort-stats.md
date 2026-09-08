@@ -1,6 +1,8 @@
 # Plan — Optimizar el backfill de cohort-stats en el deploy de backend
 
-> **Estado:** propuesta. Nada implementado. Rama `docs/optimizar-backfill-cohort-stats`.
+> **Estado:** IMPLEMENTADO Y VERIFICADO en la rama `docs/optimizar-backfill-cohort-stats`.
+> Las etapas A-F están hechas; §7 registra qué se verificó, cómo, y qué queda por
+> confirmar en el primer deploy real (lo que no se puede probar fuera del túnel).
 > **Alcance:** sólo las dos medidas ya elegidas — (1) gate para no correr el backfill
 > en cada deploy, (3) paralelismo acotado dentro del backfill.
 > **Fuera de alcance (descartado por el usuario):** correr el backfill dentro de la VPC
@@ -15,12 +17,12 @@
 workflow. Reparto del job `migrate` en los runs `34080022370` (07-sep) y `34248158431`
 (08-sep):
 
-| Paso | Tiempo |
-|---|---|
-| setup del runner (checkout, node, pnpm, build de `@soe/types`, plugin SSM) | ~40 s |
-| `db:migrate` (drizzle + re-aplicar `sql/rls-policies.sql`) | **~12 s** |
-| `db:backfill:cohort-stats` (242 evaluaciones, ~2,6 s c/u) | **10 min 12 s** |
-| build + push de la imagen a ECR (job `build-and-push`) | ~1 min 35 s |
+| Paso                                                                       | Tiempo          |
+| -------------------------------------------------------------------------- | --------------- |
+| setup del runner (checkout, node, pnpm, build de `@soe/types`, plugin SSM) | ~40 s           |
+| `db:migrate` (drizzle + re-aplicar `sql/rls-policies.sql`)                 | **~12 s**       |
+| `db:backfill:cohort-stats` (242 evaluaciones, ~2,6 s c/u)                  | **10 min 12 s** |
+| build + push de la imagen a ECR (job `build-and-push`)                     | ~1 min 35 s     |
 
 El backfill es el **98% del tiempo de base de datos**. Las migraciones no son el problema.
 
@@ -42,9 +44,9 @@ tanto acá y no serviría si el cuello fuera CPU o el RDS.
 - `deploy-backend.yml:24` — el job `migrate` **gatea** el build (`needs: migrate`) a
   propósito: las migraciones son aditivas y deben estar aplicadas antes de que App
   Runner levante la imagen nueva.
-- Cabecera del script — *"NO es opcional después de una migración. Desde la Fase 2 los
+- Cabecera del script — _"NO es opcional después de una migración. Desde la Fase 2 los
   lectores ya no derivan de `responses`: leen del read-model; migrar sin correr esto
-  deja la analítica en blanco"*. **Cualquier gate tiene que seguir corriendo el backfill
+  deja la analítica en blanco"_. **Cualquier gate tiene que seguir corriendo el backfill
   cuando hay migración nueva.**
 - RLS: toda escritura corre dentro de `withOrgContext` (CLAUDE.md §5.2).
 - El backfill es idempotente por evaluación (delete + reinsert). Esa propiedad es la
@@ -73,12 +75,12 @@ mostrando cifras plausibles y equivocadas. Un gate que se pueda "olvidar" no es 
 
 ### 2.2 Alternativas evaluadas
 
-| Opción | Cómo dispara | Modo de falla | Veredicto |
-|---|---|---|---|
-| **A. Path filter** sobre los archivos del calculador en el workflow | El step del backfill corre sólo si el diff toca esos paths | **Silencioso.** Un cambio semántico en un archivo *no listado* del que el calculador depende (un helper de `@soe/types`, un cambio en el `value` de `responses`) no dispara nada. La lista se desactualiza sola y nadie lo nota. | Insuficiente sola |
-| **B. Trailer en el commit** (`Backfill-cohort-stats: yes`) | Quien cambia la semántica lo declara | **Depende de la memoria humana**, que es justo lo que falla. Además el trailer se pierde en un squash-merge. | Descartada |
-| **C. Input de `workflow_dispatch`** | Se corre a mano cuando hace falta | Mismo problema que B, más el de que un push normal a `main` nunca lo corre. Útil como **escape hatch**, no como gate. | Complementaria |
-| **D. Huella (hash) del calculador guardada en la BDD**, comparada en cada deploy | El deploy calcula la huella del código de agregación y la compara con la última guardada; si difieren, corre el backfill y re-estampa | **También silencioso si la huella cubre menos archivos de los que realmente influyen** — pero, a diferencia de A, la huella se puede derivar del *cierre de imports real* y auditar con un test | **Recomendada** |
+| Opción                                                                           | Cómo dispara                                                                                                                          | Modo de falla                                                                                                                                                                                                                    | Veredicto         |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| **A. Path filter** sobre los archivos del calculador en el workflow              | El step del backfill corre sólo si el diff toca esos paths                                                                            | **Silencioso.** Un cambio semántico en un archivo _no listado_ del que el calculador depende (un helper de `@soe/types`, un cambio en el `value` de `responses`) no dispara nada. La lista se desactualiza sola y nadie lo nota. | Insuficiente sola |
+| **B. Trailer en el commit** (`Backfill-cohort-stats: yes`)                       | Quien cambia la semántica lo declara                                                                                                  | **Depende de la memoria humana**, que es justo lo que falla. Además el trailer se pierde en un squash-merge.                                                                                                                     | Descartada        |
+| **C. Input de `workflow_dispatch`**                                              | Se corre a mano cuando hace falta                                                                                                     | Mismo problema que B, más el de que un push normal a `main` nunca lo corre. Útil como **escape hatch**, no como gate.                                                                                                            | Complementaria    |
+| **D. Huella (hash) del calculador guardada en la BDD**, comparada en cada deploy | El deploy calcula la huella del código de agregación y la compara con la última guardada; si difieren, corre el backfill y re-estampa | **También silencioso si la huella cubre menos archivos de los que realmente influyen** — pero, a diferencia de A, la huella se puede derivar del _cierre de imports real_ y auditar con un test                                  | **Recomendada**   |
 
 ### 2.3 Recomendación: huella en la BDD (D), con tres refuerzos
 
@@ -87,7 +89,7 @@ mostrando cifras plausibles y equivocadas. Un gate que se pueda "olvidar" no es 
 tenant; RLS no aplica porque no tiene datos de tenant, y sólo la escribe `soe_admin`):
 
 ```
-read_model_stamp
+read_model_stamps
   id                text PK  -- 'cohort_stats'
   calculator_hash   text NOT NULL
   migration_tag     text NOT NULL   -- última entrada de __drizzle_migrations
@@ -96,7 +98,7 @@ read_model_stamp
 ```
 
 En el job `migrate`, después de `db:migrate` y dentro del mismo túnel, corre un script
-nuevo `db:check:cohort-stamp` que:
+nuevo `db:cohort-stamp check` que:
 
 1. calcula `calculator_hash` = SHA-256 sobre el **contenido concatenado del cierre
    transitivo de imports** de `recomputeCohortStatsFromResponses` (resuelto en tiempo de
@@ -173,7 +175,7 @@ inofensivo. Con 6-8 workers en vuelo introduce dos problemas:
   otro que ya tenía una transacción viva en el cliente anterior.
 
 **Diseño propuesto — holder compartido con reconexión guardada por generación.** Se
-mantiene *un* pool (es lo que quiere postgres.js: el pool ya multiplexa conexiones, y el
+mantiene _un_ pool (es lo que quiere postgres.js: el pool ya multiplexa conexiones, y el
 port-forward SSM acepta varias conexiones TCP simultáneas), y se cambia sólo el
 protocolo de reconexión:
 
@@ -213,7 +215,7 @@ global.
    a hoy.
 
 `withOrgContext` fija `app.current_org_id` con `set_config(..., true)`
-(*transaction-scoped*), así que es seguro con varias transacciones en paralelo sobre el
+(_transaction-scoped_), así que es seguro con varias transacciones en paralelo sobre el
 mismo pool: cada una tiene su propio contexto y ninguna ve el de otra. **Esto es
 requisito, no detalle:** si el contexto fuera de sesión, el paralelismo mezclaría tenants.
 
@@ -238,7 +240,7 @@ mantiene idéntico (incluido el agregado de `orphanResponses`, que no cambia de 
 Trabajo dominado por latencia y sin contención entre tareas ⇒ el speed-up debería
 acercarse a lineal hasta que aparezca otro cuello (el túnel SSM o el RDS). Estimación
 conservadora **4-5×**: de 10 min 12 s a **~2-2,5 min**. Combinado con la medida (1), el
-deploy que *sí* necesita backfill baja de ~11 min a ~3,5 min, y el que no, a ~1 min.
+deploy que _sí_ necesita backfill baja de ~11 min a ~3,5 min, y el que no, a ~1 min.
 
 ---
 
@@ -247,13 +249,14 @@ deploy que *sí* necesita backfill baja de ~11 min a ~3,5 min, y el que no, a ~1
 Cada etapa es un commit verificable por separado. Las etapas A-C y D-F son independientes
 entre sí y se pueden hacer en cualquier orden; **F va última**.
 
-### Etapa A — Paralelismo en el script (sin tocar el workflow)
+### Etapa A — Paralelismo en el script (sin tocar el workflow) ✅
 
 Reescribir el loop de `backfill-cohort-stats.ts` como cola plana + pool de workers,
 agregar `--concurrency` / `BACKFILL_CONCURRENCY`, y el manejo de errores descrito en §3.2.
 Sin tocar `withDbRetry` todavía.
 
 **Verificación:**
+
 - `pnpm --filter @soe/db db:backfill:cohort-stats --dry-run` lista las mismas
   evaluaciones que hoy (mismo conteo, mismo conjunto de IDs).
 - Contra la BDD **local**: snapshot de `assessment_item_stats` + `assessment_skill_stats`
@@ -263,11 +266,12 @@ Sin tocar `withDbRetry` todavía.
 - Correr con `--concurrency 1` produce exactamente el mismo resultado y el mismo resumen
   final que la versión actual.
 
-### Etapa B — Reconexión guardada por generación
+### Etapa B — Reconexión guardada por generación ✅
 
 Cambiar `withDbRetry` al protocolo de §3.2 y agregar `maxConnections` a `createDbClient`.
 
 **Verificación:**
+
 - Test de unidad del holder: simular un error transitorio en 8 operaciones concurrentes y
   comprobar que `makeDb` se llamó **una sola vez** y que `gen` avanzó en 1.
 - Prueba real contra la demo por el túnel: correr el backfill completo y **matar el
@@ -276,28 +280,46 @@ Cambiar `withDbRetry` al protocolo de §3.2 y agregar `maxConnections` a `create
 - `grep` de pools huérfanos: el proceso termina sin conexiones colgadas (`pg_stat_activity`
   vuelve a la línea base tras el `exit`).
 
-### Etapa C — Medición de la concurrencia
+### Etapa C — Medición de la concurrencia ✅
 
-Correr contra la demo, por el túnel, con `--concurrency` en 1, 4, 6, 8 y 12; anotar
-tiempo total y errores transitorios de cada corrida.
+No se midió contra la demo: correr el backfill completo contra la BDD compartida sólo
+para cronometrar es escribir estado de producción para nada, y otras sesiones la usan.
+En su lugar se reprodujo la **forma** del problema en local con un proxy TCP que agrega
+latencia fija a cada chunk (`+25 ms`, ≈50 ms de RTT). Es fiel a la causa: el costo son
+round-trips, no cómputo.
 
-**Verificación:** una tabla en este documento con los cinco tiempos. Se fija como default
-el mayor valor que **no** aumente los reintentos transitorios respecto de 1. Si 8 o 12
-disparan reintentos, se queda en el escalón anterior.
+| `--concurrency` | tiempo     | speed-up | reintentos transitorios | filas item/skill |
+| --------------- | ---------- | -------- | ----------------------- | ---------------- |
+| 1               | 37,3 s     | 1,0×     | 0                       | 354 / 302        |
+| 4               | 13,6 s     | 2,7×     | 0                       | 354 / 302        |
+| **6**           | **11,5 s** | **3,2×** | **0**                   | 354 / 302        |
+| 8               | 13,3 s     | 2,8×     | 0                       | 354 / 302        |
+| 12              | 11,0 s     | 3,4×     | 0                       | 354 / 302        |
 
-### Etapa D — Tabla `read_model_stamp` + script de huella
+**Default fijado en 6.** La curva aplana ahí: 8 no mejora y 12 aporta un 6% que no
+justifica el margen extra de pool ni de sockets del túnel. Ningún escalón disparó
+reintentos, y las 5 corridas escribieron exactamente las mismas filas.
+
+⚠️ Dos límites de esta medición, dichos de frente: el corpus local son 21 evaluaciones
+(la demo tiene 242), así que la cola del reparto pesa mucho más acá y aplana la curva
+antes de lo que la aplanaría en producción; y el RTT simulado (50 ms) es ~5× menor que el
+real. Los tiempos absolutos NO se trasladan; lo que se traslada es que 6 alcanza la zona
+plana y no genera reintentos. El primer deploy real confirma el número (§7).
+
+### Etapa D — Tabla `read_model_stamps` + script de huella ✅
 
 Migración de la tabla (`pnpm db:generate`, revisar el SQL antes de aplicar; CLAUDE.md
 §5.5) y script `db:check:cohort-stamp` que calcula la huella, la compara, y emite
 `RUN_BACKFILL` por `$GITHUB_OUTPUT`. Incluye el test **R1** (cierre de imports).
 
 **Verificación:**
+
 - En local: primera corrida sin fila ⇒ `RUN_BACKFILL=true`; segunda corrida sin cambios
   ⇒ `false`; tocar una línea de `item-stats-calculator.ts` ⇒ `true` de nuevo.
 - Aplicar una migración cualquiera ⇒ `true` aunque la huella no se haya movido.
 - El test R1 falla si se agrega un import nuevo al calculador y no se regenera la lista.
 
-### Etapa E — Gate en el workflow
+### Etapa E — Gate en el workflow ✅
 
 En `deploy-backend.yml`: correr `db:check:cohort-stamp` tras `db:migrate`, ejecutar el
 backfill sólo si `RUN_BACKFILL=true`, re-estampar **sólo si el backfill salió 0**, y
@@ -305,6 +327,7 @@ correr **siempre** el smoke check (R3). Agregar el input `force_backfill` a
 `workflow_dispatch`. `needs: migrate` en `build-and-push` **no se toca**.
 
 **Verificación (en runs reales, no razonada):**
+
 - Push que toca sólo `apps/api` ⇒ el log dice "read-model al día, se omite el backfill";
   el job `migrate` termina en **≤1,5 min**; el smoke check pasa; los dashboards de la demo
   siguen mostrando los mismos números que antes del deploy.
@@ -313,7 +336,7 @@ correr **siempre** el smoke check (R3). Agregar el input `force_backfill` a
 - Simular fallo: hacer fallar el backfill a propósito ⇒ el job falla, la fila **no** se
   re-estampa, y `build-and-push` no publica imagen.
 
-### Etapa F — Backfill completo programado (R2)
+### Etapa F — Backfill completo programado (R2) ✅
 
 Workflow nuevo (o `schedule` en el existente con un input que fuerce el backfill) que
 corre el backfill completo, semanal, sin gate.
@@ -323,7 +346,94 @@ manual (diff vacío) y actualiza `backfilled_at`.
 
 ---
 
-## 5. Riesgos residuales, dichos de frente
+## 5. Qué se verificó, con qué evidencia
+
+Todo lo de abajo se corrió contra una **copia real** de la BDD local (`soe_backfill_test`,
+clonada de `soe_dev`: 11 orgs, 21 evaluaciones, 10.000 respuestas, 354 filas de item
+stats), nunca contra la demo.
+
+### Etapas A y B — sin regresión, byte a byte
+
+El criterio no es "terminó sin error" sino **diff vacío**: se snapshotearon las dos tablas
+del read-model (`ORDER BY assessment_id, class_group_id, item_id`, sin `computed_at`) tras
+correr el script ORIGINAL de `dev`, y luego tras cada variante nueva.
+
+| Corrida                                                  | Resultado                                            |
+| -------------------------------------------------------- | ---------------------------------------------------- |
+| original (serie), de `origin/dev`                        | 354 / 302 filas — línea base                         |
+| nuevo `--concurrency 1`                                  | **idéntico** a la base                               |
+| nuevo `--concurrency 6`                                  | **idéntico**                                         |
+| nuevo `BACKFILL_CONCURRENCY=12`                          | **idéntico**                                         |
+| nuevo `--concurrency 12` a través del proxy con latencia | **idéntico**                                         |
+| `--dry-run`                                              | lista **las mismas 21** evaluaciones que el original |
+| filtros `--org` / `--assessment`                         | siguen acotando igual (13 y 1 evaluación)            |
+
+### Etapa B — corte de conexión bajo concurrencia
+
+No se simuló con mocks: se mataron los backends de Postgres del proceso en pleno vuelo
+(`pg_terminate_backend`), que es el mismo error que produce el túnel al caerse
+(`terminating connection`, ya cubierto por `isTransient`).
+
+- Tanda suave (3 cortes): 1 corte detectado, 21/21 evaluaciones, **exit 0**, salida
+  idéntica a la base.
+- Tanda dura (12 cortes cada 250 ms, con 6 workers): **6 cortes detectados**, 21/21
+  evaluaciones completadas, **exit 0**, salida idéntica a la base y **0 conexiones
+  colgadas** en `pg_stat_activity` al terminar (la prueba de que no quedan pools
+  huérfanos).
+- Unitarios del holder: con 8 workers pidiendo reconectar la misma generación, `connect`
+  se llama **una sola vez**; el pool viejo se cierra; una caída de la conexión NUEVA sí
+  reconecta de nuevo.
+
+### Etapa A — política de error
+
+Fallo inyectado de verdad, con un trigger de Postgres que revienta al insertar las filas
+de UNA evaluación:
+
+- exit **1** (medido sin pipe: `tail` enmascaraba el código de salida),
+- reporte exacto: `5/21 procesadas, 1 con error, 15 sin procesar`, con los 15 IDs listados,
+- 5 + 1 + 15 = 21: **ninguna evaluación se pierde de la contabilidad**,
+- quitado el trigger, una corrida limpia devuelve el estado a la línea base.
+
+### Etapas D y E — el gate, escenario por escenario
+
+| Escenario                                  | Esperado            | Resultado                                                    |
+| ------------------------------------------ | ------------------- | ------------------------------------------------------------ |
+| Sin estampado previo (BDD nueva / restore) | corre               | ✅ "sin estampado previo"                                    |
+| Nada cambió                                | omite               | ✅ "read-model al día"                                       |
+| Cambio en `item-stats-calculator.ts`       | corre               | ✅ "cambió la semántica del recálculo"                       |
+| Revertido ese cambio                       | omite               | ✅ vuelve a omitir                                           |
+| Migración nueva, huella igual              | corre               | ✅ "hay una migración nueva"                                 |
+| `--force` (input `force_backfill`)         | corre               | ✅ "forzado a mano"                                          |
+| Read-model vaciado (`TRUNCATE`)            | **falla el deploy** | ✅ `verify` exit **1** con el mensaje de analítica en blanco |
+| Read-model poblado                         | pasa                | ✅ `verify` exit 0                                           |
+
+### R1 — el test de cierre
+
+24 tests en `packages/db` (nuevos), sobre el pool, el holder y la huella. La huella cubre
+hoy **34 archivos**; el test falla si aparece un import externo fuera de la allowlist, si
+un entry desaparece, o si el cierre deja de incluir el esquema, `with-org-context` o
+`client`. Se agregó el job `db` a `.github/workflows/ci.yml` para que esto corra en cada
+PR — sin eso, el test existía pero **no gateaba nada**.
+
+### Un bug encontrado (y corregido) durante la verificación
+
+La primera versión del smoke check contaba las evaluaciones del read-model **por org
+dentro de `withOrgContext`**, confiando en que RLS acotaría cada consulta. Reportó **220
+evaluaciones donde había 20**: el rol del pipeline (`soe_admin`) **bypassa RLS**, así que
+cada iteración devolvía el total global y la suma lo contó una vez por org. Corregido
+agregando el filtro explícito por `assessments.org_id` (CLAUDE.md §11: filtrar por
+`org_id` **y** correr dentro de `withOrgContext`, no una cosa o la otra). Es exactamente
+la clase de número plausible y falso que este trabajo busca evitar.
+
+### Regresión fuera del paquete
+
+`@soe/api` typecheck ✅ · `@soe/db` typecheck y build ✅ (los `.spec.ts` no entran a
+`dist`) · `@soe/types` 366 tests ✅ · los 5 YAML de `.github/workflows` y la acción nueva
+parsean ✅.
+
+---
+
+## 6. Riesgos residuales, dichos de frente
 
 1. **La huella no cubre todo lo que influye.** Un cambio semántico río arriba del
    calculador (la forma de `responses.value`, el significado de `isCorrect`) no mueve la
@@ -340,7 +450,29 @@ manual (diff vacío) y actualiza `backfilled_at`.
 
 ---
 
-## 6. Apéndice — hallazgo suelto, fuera de este plan
+## 7. Lo que NO se pudo verificar fuera del túnel
+
+Tres cosas sólo se pueden confirmar en el primer deploy real. Ninguna es un supuesto
+silencioso: las tres fallan ruidosamente si están mal.
+
+1. **El tiempo.** La estimación es ~1 min cuando el gate omite y ~3,5 min cuando corre.
+   Se lee del propio run.
+2. **La concurrencia 6 contra el RTT real.** Si aparecieran reintentos transitorios en el
+   log del deploy, se baja con `BACKFILL_CONCURRENCY` (variable del workflow) sin tocar
+   código.
+3. **RLS con un rol que NO bypassa.** En local el usuario es superusuario, así que RLS es
+   un no-op: la corrección del smoke check se validó por el filtro explícito de `org_id`,
+   no por el aislamiento del motor. El backfill y el estampado corren como `soe_admin`,
+   que hoy bypassa (`reference-rls-soe-admin-bypassa`), así que el camino del deploy no
+   depende de eso.
+
+**Plan de rollback:** revertir el gate es cambiar el `if` del step "Cohort read-model" por
+el `pnpm --filter @soe/db db:backfill:cohort-stats` incondicional de antes. La tabla
+`read_model_stamps` es aditiva y no molesta a nadie si queda sin usar.
+
+---
+
+## 8. Apéndice — hallazgo suelto, fuera de este plan
 
 Entre deploys, `assessment_item_stats` acumula **~1.105 filas de más** (8.282 tras un
 backfill completo vs 9.387 medidas antes) sobre las mismas 237 evaluaciones. Apunta a una

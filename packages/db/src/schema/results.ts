@@ -331,6 +331,36 @@ export const skillResultsRelations = relations(skillResults, ({ one }) => ({
   }),
 }));
 
+/**
+ * Estampado del read-model de cohorte — estado del DESPLIEGUE, no de un tenant.
+ *
+ * Una fila por read-model (`id = 'cohort_stats'`). El deploy la compara antes de decidir
+ * si corre el backfill completo, que cuesta 10 de los 11 minutos del job y sólo hace
+ * falta cuando cambió la semántica del recálculo o hubo migración nueva.
+ *
+ * NO lleva `org_id` ni RLS a propósito: no contiene datos de ningún colegio, sólo la
+ * huella del código con el que se pobló el read-model y cuándo. La escribe únicamente el
+ * rol admin desde el pipeline (`db:cohort-stamp`); la API nunca la lee.
+ *
+ * ⚠️ Sólo se estampa DESPUÉS de un backfill exitoso. Si el backfill falla, la fila queda
+ * con la huella vieja y el próximo deploy lo vuelve a intentar: nunca queda marcado como
+ * hecho algo que no se hizo.
+ *
+ * Ver docs/plan-optimizar-backfill-cohort-stats.md §2.3.
+ */
+export const readModelStamps = pgTable('read_model_stamps', {
+  id: text('id').primaryKey(),
+  /** SHA-256 del cierre de imports del recálculo (lib/cohort-stats-fingerprint.ts). */
+  calculatorHash: text('calculator_hash').notNull(),
+  /** Última migración aplicada al momento del backfill (`drizzle.__drizzle_migrations`). */
+  migrationTag: text('migration_tag').notNull(),
+  /** Evaluaciones distintas presentes en el read-model tras el backfill. Base del smoke check. */
+  assessmentsCount: integer('assessments_count').notNull(),
+  backfilledAt: timestamp('backfilled_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export type PerformanceBand = typeof performanceBands.$inferSelect;
 export type NewPerformanceBand = typeof performanceBands.$inferInsert;
 export type AssessmentResult = typeof assessmentResults.$inferSelect;
@@ -343,3 +373,5 @@ export type AssessmentSkillStat = typeof assessmentSkillStats.$inferSelect;
 export type NewAssessmentSkillStat = typeof assessmentSkillStats.$inferInsert;
 export type AssessmentLevelStat = typeof assessmentLevelStats.$inferSelect;
 export type NewAssessmentLevelStat = typeof assessmentLevelStats.$inferInsert;
+export type ReadModelStamp = typeof readModelStamps.$inferSelect;
+export type NewReadModelStamp = typeof readModelStamps.$inferInsert;

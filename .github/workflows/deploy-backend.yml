@@ -1,8 +1,17 @@
 name: Deploy Backend (migrate + backfill → ECR → App Runner)
 
-# Push a main que toca el backend → (1) migra el RDS y puebla el read-model de cohorte,
-# (2) rebuildea la imagen y la pushea a ECR. App Runner (autoDeploymentsEnabled)
-# redeploya al detectar :latest nuevo.
+# Push a main que toca el backend → (1) migra el RDS y, SI HACE FALTA, repuebla el
+# read-model de cohorte, (2) rebuildea la imagen y la pushea a ECR. App Runner
+# (autoDeploymentsEnabled) redeploya al detectar :latest nuevo.
+#
+# GATE DEL BACKFILL. El backfill completo costaba ~10 de los ~11 minutos del job y sólo
+# hace falta cuando cambió la semántica del recálculo o hubo una migración nueva.
+# `db:cohort-stamp check` decide comparando la huella del código (cierre de imports) y la
+# última migración aplicada contra lo estampado en `read_model_stamps`; ante cualquier
+# duda responde que sí. El `verify` corre SIEMPRE, corra o no el backfill, y falla el
+# deploy si el read-model quedó en blanco — es lo que reemplaza la garantía que antes
+# daba correr el backfill en cada push.
+# Ver docs/plan-optimizar-backfill-cohort-stats.md.
 #
 # La migración corre ANTES del build/push y lo GATEA (needs: migrate): las migraciones
 # son ADITIVAS, así que el código viejo que sigue corriendo no se rompe, y cuando App
@@ -19,7 +28,14 @@ on:
       - "packages/types/**"
       - "pnpm-lock.yaml"
       - ".github/workflows/deploy-backend.yml"
+      - ".github/actions/rds-tunnel/**"
   workflow_dispatch:
+    inputs:
+      force_backfill:
+        description: "Correr el backfill de cohort-stats aunque el gate diga que no hace falta"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -36,6 +52,11 @@ env:
   AWS_REGION: us-east-1
   STAGE: demo
   ECR_REPOSITORY: edtech-api-demo # = aws.ecr.Repository name en sst.config.ts (stage demo)
+  # Evaluaciones en paralelo dentro del backfill. El trabajo está dominado por la
+  # latencia (runner en Azure, RDS en us-east-1, por el túnel SSM), no por CPU ni por el
+  # RDS. Medido: la curva aplana en 6 y no aparecen reintentos transitorios.
+  # Ver docs/plan-optimizar-backfill-cohort-stats.md §3 (Etapa C).
+  BACKFILL_CONCURRENCY: "6"
 
 jobs:
   # ── Migra el RDS privado ANTES de publicar la imagen nueva. ──
@@ -72,70 +93,57 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install session-manager-plugin + psql client
-        run: |
-          curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o /tmp/smp.deb
-          sudo dpkg -i /tmp/smp.deb
-          sudo apt-get update -y && sudo apt-get install -y postgresql-client
+      # El túnel vive en una acción compuesta para que el backfill programado semanal
+      # (.github/workflows/backfill-cohort-stats.yml) use exactamente el mismo camino.
+      # Deja DATABASE_ADMIN_URL en el entorno del job.
+      - name: Open RDS tunnel (SSM port-forward via bastion)
+        uses: ./.github/actions/rds-tunnel
+        with:
+          stage: ${{ env.STAGE }}
+          db-password: ${{ secrets.DB_MASTER_PASSWORD }}
 
-      - name: Migrate RDS (SSM port-forward via bastion)
+      - name: Migrate RDS
+        run: pnpm --filter @soe/db db:migrate
+
+      # ── Read-model de cohorte ──
+      # Los lectores de la imagen nueva (item-analysis, dashboards, heatmap,
+      # official-reports) ya no derivan de `responses`: leen de acá. Si el read-model
+      # quedara sin poblar, la analítica saldría en blanco (correctRate null, skills [],
+      # heatmap []) sin ningún error visible.
+      #
+      # `check` decide; el backfill sólo corre si hace falta. El orden importa:
+      #  · `set -euo pipefail` + `&&` ⇒ si el backfill falla, NO se estampa. La fila
+      #    queda con la huella vieja y el próximo deploy lo reintenta: nunca queda
+      #    marcado como hecho algo que no se hizo.
+      #  · Todo va dentro del mismo túnel y ANTES de `build-and-push` (que depende de
+      #    este job), así que cuando App Runner levanta la imagen nueva el read-model ya
+      #    está al día.
+      #  · El backfill es idempotente (delete+reinsert por assessment); correrlo de más
+      #    es seguro. No recalcula assessment_results/skill_results, sólo los agrega.
+      - name: Cohort read-model (gate + backfill si hace falta)
         env:
-          DB_MASTER_PASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
+          FORCE_BACKFILL: ${{ inputs.force_backfill }}
         run: |
           set -euo pipefail
 
-          [ -n "${DB_MASTER_PASSWORD:-}" ] || { echo "::error::Falta el secret DB_MASTER_PASSWORD (= SST DbMasterPassword del stage ${STAGE})"; exit 1; }
+          FORCE_FLAG=""
+          [ "${FORCE_BACKFILL:-false}" = "true" ] && FORCE_FLAG="--force"
 
-          # RDS privado del stage (endpoint).
-          RDS_HOST=$(aws rds describe-db-instances \
-            --query "DBInstances[?starts_with(DBInstanceIdentifier,'edtech-${STAGE}-dbinstance')].Endpoint.Address | [0]" \
-            --output text)
-          { [ -n "$RDS_HOST" ] && [ "$RDS_HOST" != "None" ]; } || { echo "::error::No encontré el RDS del stage ${STAGE}"; exit 1; }
-          echo "RDS host: $RDS_HOST"
+          pnpm --filter @soe/db db:cohort-stamp check --out /tmp/run_backfill ${FORCE_FLAG}
 
-          # Bastión = NAT instance de SST (combina NAT + bastión SSM).
-          BASTION=$(aws ec2 describe-instances \
-            --filters "Name=instance-state-name,Values=running" "Name=tag:sst:is-nat,Values=true" "Name=tag:sst:stage,Values=${STAGE}" \
-            --query "Reservations[0].Instances[0].InstanceId" --output text)
-          { [ -n "$BASTION" ] && [ "$BASTION" != "None" ]; } || { echo "::error::No encontré el bastión (NAT SSM) del stage ${STAGE}"; exit 1; }
-          echo "bastion: $BASTION"
+          if [ "$(cat /tmp/run_backfill)" = "true" ]; then
+            echo "::group::backfill de cohort-stats"
+            pnpm --filter @soe/db db:backfill:cohort-stats \
+              && pnpm --filter @soe/db db:cohort-stamp write
+            echo "::endgroup::"
+          else
+            echo "read-model al día — se omite el backfill (≈10 min ahorrados)"
+          fi
 
-          # Port-forward SSM: 127.0.0.1:5432 -> RDS:5432 por el bastión (background).
-          aws ssm start-session --target "$BASTION" \
-            --document-name AWS-StartPortForwardingSessionToRemoteHost \
-            --parameters "{\"host\":[\"${RDS_HOST}\"],\"portNumber\":[\"5432\"],\"localPortNumber\":[\"5432\"]}" \
-            > /tmp/ssm.log 2>&1 &
-          SSM_PID=$!
-
-          # Esperar a que el forward acepte conexiones (máx ~80s).
-          ready=0
-          for i in $(seq 1 40); do
-            if pg_isready -h 127.0.0.1 -p 5432 >/dev/null 2>&1; then ready=1; echo "port-forward listo (intento $i)"; break; fi
-            sleep 2
-          done
-          if [ "$ready" != 1 ]; then echo "::error::El port-forward SSM no quedó listo"; cat /tmp/ssm.log 2>/dev/null || true; kill "$SSM_PID" 2>/dev/null || true; exit 1; fi
-
-          # Migrar como admin (soe_admin). En CI migrate.ts no lee .env → usa DATABASE_ADMIN_URL.
-          PW_ENC=$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$DB_MASTER_PASSWORD")
-          echo "::add-mask::$PW_ENC"
-          export DATABASE_ADMIN_URL="postgresql://soe_admin:${PW_ENC}@127.0.0.1:5432/soe?sslmode=require"
-          pnpm --filter @soe/db db:migrate
-
-          # Read-model de cohorte: la migración crea las tablas VACÍAS, y los lectores
-          # de la imagen nueva (item-analysis, dashboards, heatmap, official-reports)
-          # ya no derivan de `responses` — leen de acá. Sin este paso, el deploy dejaría
-          # la analítica en blanco: correctRate null, skills [] y heatmap [].
-          #
-          # Va dentro del mismo túnel y ANTES de `build-and-push` (que depende de este
-          # job), así que cuando App Runner levanta la imagen nueva el read-model ya está
-          # poblado. Es idempotente (delete+reinsert por assessment), así que correrlo en
-          # cada deploy es seguro; no recalcula assessment_results/skill_results, sólo
-          # los agrega por curso.
-          # Ver docs/plan-analitica-agregada-informes-oficiales.md §7 (Fase 1).
-          pnpm --filter @soe/db db:backfill:cohort-stats
-
-          kill "$SSM_PID" 2>/dev/null || true
-          echo "✓ RDS migrado + read-model de cohorte poblado (stage ${STAGE})"
+      # Corre SIEMPRE, haya backfill o no: si el read-model quedó en blanco, el deploy
+      # falla acá en vez de publicar una imagen que muestra una analítica muda.
+      - name: Verify cohort read-model (smoke check)
+        run: pnpm --filter @soe/db db:cohort-stamp verify
 
   build-and-push:
     needs: migrate # el deploy no publica imagen nueva si la migración falló

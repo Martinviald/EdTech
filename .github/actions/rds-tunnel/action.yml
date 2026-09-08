@@ -1,0 +1,79 @@
+name: RDS tunnel (SSM port-forward)
+description: >-
+  Abre un port-forward SSM al RDS privado del stage a través del bastión (la NAT
+  instance de SST) y deja DATABASE_ADMIN_URL listo en el entorno del job.
+
+# Extraído de deploy-backend.yml para que el backfill programado semanal use EXACTAMENTE
+# el mismo camino que el deploy, sin copiar 60 líneas de descubrimiento y espera.
+#
+# No usa `sst tunnel` (evita sudo/TUN en el runner). El proceso del port-forward queda en
+# background y vive lo que dure el job; GitHub lo limpia al terminar.
+#
+# El caller debe haber configurado antes las credenciales AWS
+# (aws-actions/configure-aws-credentials).
+
+inputs:
+  stage:
+    description: Stage de SST (p. ej. demo)
+    required: true
+  db-password:
+    description: Password del master del RDS (= SST secret DbMasterPassword del stage)
+    required: true
+  local-port:
+    description: Puerto local donde escucha el forward
+    required: false
+    default: "5432"
+
+runs:
+  using: composite
+  steps:
+    - name: Install session-manager-plugin + psql client
+      shell: bash
+      run: |
+        curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o /tmp/smp.deb
+        sudo dpkg -i /tmp/smp.deb
+        sudo apt-get update -y && sudo apt-get install -y postgresql-client
+
+    - name: Open SSM port-forward to RDS
+      shell: bash
+      env:
+        STAGE: ${{ inputs.stage }}
+        DB_MASTER_PASSWORD: ${{ inputs.db-password }}
+        LOCAL_PORT: ${{ inputs.local-port }}
+      run: |
+        set -euo pipefail
+
+        [ -n "${DB_MASTER_PASSWORD:-}" ] || { echo "::error::Falta el secret DB_MASTER_PASSWORD (= SST DbMasterPassword del stage ${STAGE})"; exit 1; }
+
+        # RDS privado del stage (endpoint).
+        RDS_HOST=$(aws rds describe-db-instances \
+          --query "DBInstances[?starts_with(DBInstanceIdentifier,'edtech-${STAGE}-dbinstance')].Endpoint.Address | [0]" \
+          --output text)
+        { [ -n "$RDS_HOST" ] && [ "$RDS_HOST" != "None" ]; } || { echo "::error::No encontré el RDS del stage ${STAGE}"; exit 1; }
+        echo "RDS host: $RDS_HOST"
+
+        # Bastión = NAT instance de SST (combina NAT + bastión SSM).
+        BASTION=$(aws ec2 describe-instances \
+          --filters "Name=instance-state-name,Values=running" "Name=tag:sst:is-nat,Values=true" "Name=tag:sst:stage,Values=${STAGE}" \
+          --query "Reservations[0].Instances[0].InstanceId" --output text)
+        { [ -n "$BASTION" ] && [ "$BASTION" != "None" ]; } || { echo "::error::No encontré el bastión (NAT SSM) del stage ${STAGE}"; exit 1; }
+        echo "bastion: $BASTION"
+
+        # Port-forward SSM: 127.0.0.1:$LOCAL_PORT -> RDS:5432 por el bastión (background).
+        aws ssm start-session --target "$BASTION" \
+          --document-name AWS-StartPortForwardingSessionToRemoteHost \
+          --parameters "{\"host\":[\"${RDS_HOST}\"],\"portNumber\":[\"5432\"],\"localPortNumber\":[\"${LOCAL_PORT}\"]}" \
+          > /tmp/ssm.log 2>&1 &
+
+        # Esperar a que el forward acepte conexiones (máx ~80s).
+        ready=0
+        for i in $(seq 1 40); do
+          if pg_isready -h 127.0.0.1 -p "$LOCAL_PORT" >/dev/null 2>&1; then ready=1; echo "port-forward listo (intento $i)"; break; fi
+          sleep 2
+        done
+        if [ "$ready" != 1 ]; then echo "::error::El port-forward SSM no quedó listo"; cat /tmp/ssm.log 2>/dev/null || true; exit 1; fi
+
+        # Conectar como admin (soe_admin): DDL de migraciones y escritura sin contexto de org.
+        PW_ENC=$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$DB_MASTER_PASSWORD")
+        echo "::add-mask::$PW_ENC"
+        echo "DATABASE_ADMIN_URL=postgresql://soe_admin:${PW_ENC}@127.0.0.1:${LOCAL_PORT}/soe?sslmode=require" >> "$GITHUB_ENV"
