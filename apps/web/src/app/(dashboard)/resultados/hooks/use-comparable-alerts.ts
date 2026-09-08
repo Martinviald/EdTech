@@ -30,18 +30,26 @@ export const comparableAlertsKeys = {
   detail: (query: string) => ['comparable-overview', query, 'alerts'] as const,
 };
 
-export function useComparableAlerts(query: string, initialAlerts: DashboardAlert[]) {
+export type ComparableAlertsView = {
+  alerts: DashboardAlert[];
+  total: number;
+};
+
+export function useComparableAlerts(
+  query: string,
+  initial: ComparableAlertsView,
+): ComparableAlertsView {
   const { data } = useQuery({
     queryKey: comparableAlertsKeys.detail(query),
     queryFn: async () => {
       const response = await apiClientGet<ComparableOverviewResponse>(
         `/dashboards/comparable-overview${query}`,
       );
-      return response.alerts;
+      return { alerts: response.alerts, total: response.alertsTotal };
     },
     refetchInterval: REFRESH_INTERVAL_MS,
     staleTime: REFRESH_INTERVAL_MS,
-    initialData: initialAlerts,
+    initialData: initial,
     initialDataUpdatedAt: Date.now(),
   });
 

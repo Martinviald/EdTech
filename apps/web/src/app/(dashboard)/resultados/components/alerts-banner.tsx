@@ -49,12 +49,12 @@ function alertHref(alert: DashboardAlert): Route | null {
   }
 }
 
-export function AlertsBanner({ alerts }: { alerts: DashboardAlert[] }) {
+export function AlertsBanner({ alerts, total }: { alerts: DashboardAlert[]; total: number }) {
   const bySeverity = [...alerts].sort(
     (a, b) => severityRank(a.severity) - severityRank(b.severity),
   );
   const visible = bySeverity.slice(0, VISIBLE_LIMIT);
-  const hidden = bySeverity.length - visible.length;
+  const hidden = total - visible.length;
 
   return (
     <Card>
@@ -62,8 +62,8 @@ export function AlertsBanner({ alerts }: { alerts: DashboardAlert[] }) {
         <CardTitle className="flex items-center gap-2 text-base">
           <TriangleAlert className="size-4 text-warning" />
           Requiere atención
-          {alerts.length > 0 ? (
-            <span className="text-sm font-normal text-muted-foreground">({alerts.length})</span>
+          {total > 0 ? (
+            <span className="text-sm font-normal text-muted-foreground">({total})</span>
           ) : null}
         </CardTitle>
       </CardHeader>

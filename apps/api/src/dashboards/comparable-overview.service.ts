@@ -7,6 +7,7 @@ import {
   deltaInPoints,
   deriveGenerationalHighlights,
   severityFromLowestBandShare,
+  MAX_DASHBOARD_ALERTS,
   type BaselineRef,
   type ComparabilityInstrumentRef,
   type ComparableOverviewQueryDto,
@@ -51,6 +52,7 @@ export class ComparableOverviewService {
       return {
         scope: 'org',
         alerts: [],
+        alertsTotal: 0,
         units: [],
         generational: [],
         totals: { assessments: 0, studentsEvaluated: 0 },
@@ -62,6 +64,7 @@ export class ComparableOverviewService {
     const emptyResponse: ComparableOverviewResponse = {
       scope: isTeacherScope ? 'teacher' : 'org',
       alerts: [],
+      alertsTotal: 0,
       units: [],
       generational: [],
       totals: { assessments: 0, studentsEvaluated: 0 },
@@ -99,7 +102,8 @@ export class ComparableOverviewService {
 
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
-        alerts,
+        alerts: alerts.slice(0, MAX_DASHBOARD_ALERTS),
+        alertsTotal: alerts.length,
         units: summaries,
         generational: deriveGenerationalHighlights(summaries),
         totals: { assessments: assessmentIds.length, studentsEvaluated },

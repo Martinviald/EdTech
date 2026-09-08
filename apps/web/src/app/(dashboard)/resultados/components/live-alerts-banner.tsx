@@ -1,7 +1,6 @@
 'use client';
 
-import type { DashboardAlert } from '@soe/types';
-import { useComparableAlerts } from '../hooks/use-comparable-alerts';
+import { useComparableAlerts, type ComparableAlertsView } from '../hooks/use-comparable-alerts';
 import { AlertsBanner } from './alerts-banner';
 
 /**
@@ -12,11 +11,11 @@ import { AlertsBanner } from './alerts-banner';
  */
 export function LiveAlertsBanner({
   query,
-  initialAlerts,
+  initial,
 }: {
   query: string;
-  initialAlerts: DashboardAlert[];
+  initial: ComparableAlertsView;
 }) {
-  const alerts = useComparableAlerts(query, initialAlerts);
-  return <AlertsBanner alerts={alerts} />;
+  const { alerts, total } = useComparableAlerts(query, initial);
+  return <AlertsBanner alerts={alerts} total={total} />;
 }

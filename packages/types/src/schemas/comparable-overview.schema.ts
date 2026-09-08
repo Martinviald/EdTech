@@ -106,6 +106,13 @@ export type ComparableOverviewResponse = {
    * decidir si algo está mal (era el defecto de los umbrales 60/50 hardcodeados).
    */
   alerts: DashboardAlert[];
+  /**
+   * Cuántas alertas cumplen umbral en el alcance completo. `alerts` trae sólo las
+   * `MAX_DASHBOARD_ALERTS` mejor rankeadas: un alcance sin filtrar produce >1.500
+   * alertas de ítem y la banda muestra 4, así que mandarlas todas era el grueso del
+   * payload de la vista. El total sigue siendo dato: es el contador del encabezado.
+   */
+  alertsTotal: number;
   /** Ordenadas por severidad y, dentro de ella, por recencia. */
   units: ComparableUnitSummary[];
   /**
