@@ -65,3 +65,6 @@ packages/db/data/test-spec-table.csv
 scripts/cscj/**/*.xlsx
 scripts/cscj/**/*.csv
 scripts/cscj/**/*.json
+
+# Snapshots de no-regresión del panorama (apps/api/scripts/snapshot-panorama.ts)
+apps/api/tmp/

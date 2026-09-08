@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "test": "jest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "retention:sheet-scans": "tsx scripts/retention-sheet-scans.ts",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },

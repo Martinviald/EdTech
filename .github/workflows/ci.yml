@@ -1,6 +1,7 @@
 name: CI
 
-# Gate de calidad en PRs: typecheck + lint + guard del Design System + `next build`.
+# Gate de calidad en PRs: web (typecheck + lint + guard del Design System + `next build`)
+# y api (typecheck + lint + tests).
 # (El repo antes solo tenía workflows de deploy; nada bloqueaba un PR roto.)
 #
 # `next build` es el ÚNICO paso que detecta violaciones de frontera cliente/servidor
@@ -83,3 +84,34 @@ jobs:
       # cierre de imports). Corren en cualquier runner sin Postgres.
       - name: Tests
         run: pnpm --filter @soe/db test
+
+  api:
+    name: API (typecheck · lint · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # apps/api importa @soe/types y @soe/db por su `dist`; sin estos builds
+      # el typecheck no resuelve los paquetes del workspace.
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/api typecheck
+
+      - name: Lint
+        run: pnpm --filter @soe/api lint
+
+      # Los tests de la API viven acá y no en local: la suite levanta un worker de
+      # jest por core y no entra en una máquina de 8 GB.
+      - name: Tests
+        run: pnpm --filter @soe/api exec jest --ci --runInBand

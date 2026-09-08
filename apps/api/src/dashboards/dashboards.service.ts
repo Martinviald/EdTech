@@ -27,7 +27,6 @@ import {
   buildComparabilityMeta,
   classifyByBands,
   percentageToPerformanceLevel,
-  userHasAnyRole,
   type AssessmentStatus,
   type ComparabilityInstrumentRef,
   type DashboardAssessmentSummary,
@@ -62,7 +61,6 @@ import {
 } from '../common/helpers/cohort-skill-stats.helper';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import {
-  ADMIN_LIKE_ROLES,
   buildAssessmentInScopeExists,
   buildSubjectCatalogCondition,
   isTeacherScope as isTeacherScopeFor,
