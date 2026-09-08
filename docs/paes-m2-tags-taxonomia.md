@@ -30,6 +30,10 @@ Cada fila trae: número impreso, clave, habilidad y eje temático.
 
 ## Pipeline
 
+Los scripts viven en el workspace `ensayos-paes/`, fuera del monorepo, junto al
+resto de la herramienta de extracción PAES (`parse_paes.py`, `plan_tags.py`,
+`taxonomia_paes.py`). Acá solo se versionan sus salidas.
+
 ```sh
 cd ensayos-paes
 python3 tabla_espec_m2.py <xlsx tanda 3> <xlsx tanda 4>   # → extraccion/M2/m2-tabla-especificaciones.json
