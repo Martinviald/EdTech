@@ -99,7 +99,7 @@ function makeSpec(itemCount: number): LayoutSpec {
 }
 
 const LAYOUT_ROW = { id: LAYOUT_ID, version: 3, instrumentId: INSTRUMENT_ID };
-const CLASS_GROUP_ROW = { id: CLASS_GROUP_ID, name: '3° Básico A' };
+const CLASS_GROUP_ROW = { id: CLASS_GROUP_ID, name: 'A', gradeName: '3° Básico' };
 const ROSTER_ROWS = [{ id: 'student-a' }, { id: 'student-b' }, { id: 'student-c' }];
 const AUTO_ASSESSMENT_RETURNING: unknown[][] = [[{ id: ASSESSMENT_ID }], []];
 const RUN_RETURNING = [
@@ -268,7 +268,8 @@ describe('SheetPrintService.updateRun', () => {
       assessmentId: null,
       instrumentId: INSTRUMENT_ID,
       classGroupId: CLASS_GROUP_ID,
-      classGroupName: '3° Básico A',
+      classGroupName: 'A',
+      classGroupGradeName: '3° Básico',
     },
   ];
   const UPDATED_RUN_ROW = {
@@ -277,7 +278,8 @@ describe('SheetPrintService.updateRun', () => {
     layoutVersion: 3,
     instrumentId: INSTRUMENT_ID,
     classGroupId: CLASS_GROUP_ID,
-    classGroupName: '3° Básico A',
+    classGroupName: 'A',
+    classGroupGradeName: '3° Básico',
     assessmentId: ASSESSMENT_ID,
     spareCount: 2,
     sheetCount: 5,
@@ -398,7 +400,7 @@ describe('SheetPrintService.updateRun', () => {
 
   it('rechaza createAssessment en una tirada sin curso asociado', async () => {
     const { db, inserts } = makeDb([
-      [{ ...RUN_LOOKUP[0], classGroupId: null, classGroupName: null }],
+      [{ ...RUN_LOOKUP[0], classGroupId: null, classGroupName: null, classGroupGradeName: null }],
       [],
     ]);
     const service = new SheetPrintService(db);
@@ -429,13 +431,12 @@ describe('SheetPrintService.listAssessmentOptions', () => {
 });
 
 describe('SheetPrintService.getRun / list', () => {
-  const RUN_ROW = {
+  const MODEL_FIELDS = {
     id: RUN_ID,
     layoutId: LAYOUT_ID,
     layoutVersion: 3,
     instrumentId: INSTRUMENT_ID,
     classGroupId: CLASS_GROUP_ID,
-    classGroupName: '3° Básico A',
     assessmentId: null,
     assessmentFormId: undefined,
     administeredAt: null,
@@ -445,14 +446,16 @@ describe('SheetPrintService.getRun / list', () => {
     createdById: USER_ID,
     createdAt: new Date('2026-08-01T12:00:00Z'),
   };
+  const RUN_ROW = { ...MODEL_FIELDS, classGroupName: 'A', classGroupGradeName: '3° Básico' };
+  const EXPECTED_MODEL = { ...MODEL_FIELDS, classGroupName: '3° Básico A' };
 
-  it('getRun devuelve el PrintRunModel', async () => {
+  it('getRun devuelve el PrintRunModel con el nivel antepuesto al curso', async () => {
     const { db } = makeDb([[RUN_ROW]]);
     const service = new SheetPrintService(db);
 
     const model = await service.getRun(ORG_ID, RUN_ID);
 
-    expect(model).toEqual(RUN_ROW);
+    expect(model).toEqual(EXPECTED_MODEL);
   });
 
   it('getRun lanza NotFound cuando la tirada no existe', async () => {
@@ -471,7 +474,7 @@ describe('SheetPrintService.getRun / list', () => {
     expect(result.total).toBe(11);
     expect(result.page).toBe(3);
     expect(result.limit).toBe(4);
-    expect(result.data).toEqual([RUN_ROW]);
+    expect(result.data).toEqual([EXPECTED_MODEL]);
   });
 });
 
@@ -482,7 +485,8 @@ describe('SheetPrintService.renderPdf', () => {
     id: RUN_ID,
     spec,
     specHash: 'a3f9c1e70b4d2856',
-    classGroupName: '3° Básico A',
+    classGroupName: 'A',
+    classGroupGradeName: '3° Básico',
   };
 
   const SHEET_ROWS = [
@@ -688,7 +692,15 @@ describe('SheetPrintService — hoja genérica y formas (v1)', () => {
 
   it('renderPdf de una tirada genérica dibuja la grilla RUT sin alumnos y conserva el pageCount', async () => {
     const { db } = makeDb([
-      [{ id: RUN_ID, spec: rutSpec, specHash: 'a3f9c1e70b4d2856', classGroupName: '3° Básico A' }],
+      [
+        {
+          id: RUN_ID,
+          spec: rutSpec,
+          specHash: 'a3f9c1e70b4d2856',
+          classGroupName: 'A',
+          classGroupGradeName: '3° Básico',
+        },
+      ],
       [
         {
           id: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d33',
@@ -717,7 +729,7 @@ describe('SheetPrintService — hoja genérica y formas (v1)', () => {
 
 describe('SheetPrintService — fecha de aplicación', () => {
   const LAYOUT_ROW_2 = { id: LAYOUT_ID, version: 3, instrumentId: INSTRUMENT_ID };
-  const CLASS_GROUP_ROW_2 = { id: CLASS_GROUP_ID, name: '3° Básico A' };
+  const CLASS_GROUP_ROW_2 = { id: CLASS_GROUP_ID, name: 'A', gradeName: '3° Básico' };
   const ROSTER_ROWS_2 = [{ id: 'student-a' }, { id: 'student-b' }, { id: 'student-c' }];
   const RUN_ROW_2 = {
     id: RUN_ID,
@@ -734,7 +746,8 @@ describe('SheetPrintService — fecha de aplicación', () => {
       assessmentId: ASSESSMENT_ID,
       instrumentId: INSTRUMENT_ID,
       classGroupId: CLASS_GROUP_ID,
-      classGroupName: '3° Básico A',
+      classGroupName: 'A',
+      classGroupGradeName: '3° Básico',
     },
   ];
   const UPDATED_ROW_2 = {
@@ -743,7 +756,8 @@ describe('SheetPrintService — fecha de aplicación', () => {
     layoutVersion: 3,
     instrumentId: INSTRUMENT_ID,
     classGroupId: CLASS_GROUP_ID,
-    classGroupName: '3° Básico A',
+    classGroupName: 'A',
+    classGroupGradeName: '3° Básico',
     assessmentId: ASSESSMENT_ID,
     administeredAt: new Date('2026-04-30T12:00:00Z'),
     spareCount: 2,
@@ -844,7 +858,8 @@ describe('SheetPrintService — fecha de aplicación', () => {
           id: RUN_ID,
           spec,
           specHash: 'a3f9c1e70b4d2856',
-          classGroupName: '3° Básico A',
+          classGroupName: 'A',
+          classGroupGradeName: '3° Básico',
           administeredAt: new Date('2026-04-30T12:00:00Z'),
           instrumentName: 'DIA Lectura 3° Básico 2026',
           instrumentYear: 2026,
