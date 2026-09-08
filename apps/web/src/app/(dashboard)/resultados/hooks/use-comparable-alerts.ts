@@ -15,6 +15,13 @@ import { apiClientGet } from '@/lib/api-client';
  *
  * TanStack Query pausa el intervalo cuando la pestaña no está en foco, así que un
  * tablero abierto y olvidado no golpea la API indefinidamente.
+ *
+ * `initialAlerts` entra como `initialData`, no como valor de respaldo: sin eso el
+ * hook dispara un fetch al montar y cada carga del panorama pedía DOS veces el
+ * endpoint más caro de la app (una en el RSC, otra en el cliente, con ~200 ms de
+ * diferencia). Con `staleTime` igual al intervalo, lo que el servidor acaba de
+ * renderizar se considera fresco y el primer refetch recién ocurre al minuto — eso
+ * también evita que un cambio de foco de pestaña vuelva a pedirlo entero.
  */
 
 const REFRESH_INTERVAL_MS = 60_000;
@@ -26,11 +33,17 @@ export const comparableAlertsKeys = {
 export function useComparableAlerts(query: string, initialAlerts: DashboardAlert[]) {
   const { data } = useQuery({
     queryKey: comparableAlertsKeys.detail(query),
-    queryFn: () =>
-      apiClientGet<ComparableOverviewResponse>(`/dashboards/comparable-overview${query}`),
+    queryFn: async () => {
+      const response = await apiClientGet<ComparableOverviewResponse>(
+        `/dashboards/comparable-overview${query}`,
+      );
+      return response.alerts;
+    },
     refetchInterval: REFRESH_INTERVAL_MS,
-    initialData: undefined,
+    staleTime: REFRESH_INTERVAL_MS,
+    initialData: initialAlerts,
+    initialDataUpdatedAt: Date.now(),
   });
 
-  return data?.alerts ?? initialAlerts;
+  return data;
 }
