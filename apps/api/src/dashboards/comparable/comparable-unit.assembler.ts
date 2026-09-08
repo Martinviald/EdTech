@@ -24,10 +24,28 @@ import { loadCohortAchievementByAssessment } from '../../common/helpers/cohort-i
 import {
   levelCountsToBandDistribution,
   loadCohortLevelCounts,
+  loadCohortLevelCountsByAssessment,
+  type CohortLevelCount,
 } from '../../common/helpers/cohort-level-stats.helper';
 import type { Database } from '../../database/database.types';
 
 export type AchievementByAssessment = Map<string, { achievement: number | null; students: number }>;
+
+export type ClassGroupResultRow = {
+  assessmentId: string;
+  classGroupId: string;
+  classGroupName: string;
+  gradeName: string | null;
+  percentage: string | null;
+  performanceBandId: string | null;
+  studentId: string;
+};
+
+export type BandClassificationRow = {
+  assessmentId: string;
+  performanceBandId: string | null;
+  percentage: string | null;
+};
 
 export type BaselineCandidate = {
   instrumentId: string;
@@ -131,6 +149,7 @@ export class ComparableUnitAssembler {
 
     const rows = await tx
       .select({
+        assessmentId: assessmentResults.assessmentId,
         performanceBandId: assessmentResults.performanceBandId,
         percentage: assessmentResults.percentage,
       })
@@ -140,8 +159,50 @@ export class ComparableUnitAssembler {
         and(inArray(assessmentResults.assessmentId, assessmentIds), isNull(students.deletedAt)),
       );
 
-    const counts = new Map<string, number>();
+    return this.foldBandDistribution(cohortCounts, rows, bands);
+  }
+
+  /**
+   * Las filas por alumno de VARIAS evaluaciones en una query, para el camino de
+   * respaldo de la distribución por banda.
+   */
+  async loadBandClassificationRows(
+    tx: Database,
+    assessmentIds: string[],
+  ): Promise<Map<string, BandClassificationRow[]>> {
+    const byAssessment = new Map<string, BandClassificationRow[]>();
+    if (assessmentIds.length === 0) return byAssessment;
+
+    const rows = await tx
+      .select({
+        assessmentId: assessmentResults.assessmentId,
+        performanceBandId: assessmentResults.performanceBandId,
+        percentage: assessmentResults.percentage,
+      })
+      .from(assessmentResults)
+      .innerJoin(students, eq(students.id, assessmentResults.studentId))
+      .where(
+        and(inArray(assessmentResults.assessmentId, assessmentIds), isNull(students.deletedAt)),
+      );
+
     for (const row of rows) {
+      const bucket = byAssessment.get(row.assessmentId);
+      if (bucket) bucket.push(row);
+      else byAssessment.set(row.assessmentId, [row]);
+    }
+    return byAssessment;
+  }
+
+  /** El cómputo de la distribución, ya sin consultar: primero cohorte, después alumnos. */
+  foldBandDistribution(
+    cohortCounts: readonly CohortLevelCount[],
+    classificationRows: readonly BandClassificationRow[],
+    bands: PerformanceBandInput[],
+  ): PerformanceBandDistributionBucket[] | null {
+    if (cohortCounts.length > 0) return levelCountsToBandDistribution(cohortCounts, bands);
+
+    const counts = new Map<string, number>();
+    for (const row of classificationRows) {
       const bandId = row.performanceBandId ?? this.classifyPercentage(row.percentage, bands);
       if (!bandId) continue;
       counts.set(bandId, (counts.get(bandId) ?? 0) + 1);
@@ -155,6 +216,32 @@ export class ComparableUnitAssembler {
       })),
       bands,
     );
+  }
+
+  /** Conteos por banda de todas las evaluaciones del alcance, en una query. */
+  loadLevelCountsByAssessment(
+    tx: Database,
+    assessmentIds: string[],
+    classGroupIds: string[] | null,
+  ): Promise<Map<string, CohortLevelCount[]>> {
+    return loadCohortLevelCountsByAssessment(tx, assessmentIds, classGroupIds);
+  }
+
+  /** Suma los conteos de cohorte de las evaluaciones de una unidad. */
+  foldLevelCounts(
+    assessmentIds: string[],
+    byAssessment: Map<string, CohortLevelCount[]>,
+  ): CohortLevelCount[] {
+    const counts = new Map<string, number>();
+    for (const assessmentId of assessmentIds) {
+      for (const row of byAssessment.get(assessmentId) ?? []) {
+        counts.set(row.performanceBandId, (counts.get(row.performanceBandId) ?? 0) + row.count);
+      }
+    }
+    return Array.from(counts.entries()).map(([performanceBandId, count]) => ({
+      performanceBandId,
+      count,
+    }));
   }
 
   /** % de alumnos en la banda inferior de una distribución ya resuelta. */
@@ -206,6 +293,23 @@ export class ComparableUnitAssembler {
     classGroupIds: string[] | null,
     bands: PerformanceBandInput[],
   ): Promise<ComparableUnitClassGroup[]> {
+    const rows = await this.loadClassGroupRows(tx, orgId, assessmentIds, classGroupIds);
+    return this.foldByClassGroup(rows, bands);
+  }
+
+  /**
+   * Las filas de resultado con su curso, para varias evaluaciones en una query.
+   *
+   * El panorama la pide UNA vez para todo el alcance y reparte por evaluación; el
+   * método por unidad de arriba la envuelve para los otros dos consumidores del
+   * assembler (trayectoria y comparación de un alumno).
+   */
+  async loadClassGroupRows(
+    tx: Database,
+    orgId: string,
+    assessmentIds: string[],
+    classGroupIds: string[] | null,
+  ): Promise<ClassGroupResultRow[]> {
     if (assessmentIds.length === 0) return [];
 
     const conditions = [
@@ -219,8 +323,9 @@ export class ComparableUnitAssembler {
     }
 
     const assessmentYear = assessmentAcademicYears(tx);
-    const rows = await tx
+    return tx
       .select({
+        assessmentId: assessmentResults.assessmentId,
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
         gradeName: grades.name,
@@ -241,7 +346,13 @@ export class ComparableUnitAssembler {
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .leftJoin(grades, eq(grades.id, classGroups.gradeId))
       .where(and(...conditions));
+  }
 
+  /** Agrupa por curso las filas ya traídas. Sin consultar. */
+  foldByClassGroup(
+    rows: readonly ClassGroupResultRow[],
+    bands: PerformanceBandInput[],
+  ): ComparableUnitClassGroup[] {
     const lowestBandId = bands.length > 0 ? lowestBand(bands)?.id : undefined;
 
     type Acc = {

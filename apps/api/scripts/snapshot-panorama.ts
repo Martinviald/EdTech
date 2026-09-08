@@ -187,7 +187,41 @@ async function captureSnapshots(
   console.log(`\nSnapshots en ${outDir}`);
 }
 
-type DiffOptions = { expectTruncatedAlerts: number | null };
+type DiffOptions = { expectTruncatedAlerts: number | null; floatTolerance: number };
+
+type Difference = { path: string; baseline: unknown; current: unknown };
+
+function collectDifferences(
+  baseline: unknown,
+  current: unknown,
+  tolerance: number,
+  path = '',
+): Difference[] {
+  if (typeof baseline === 'number' && typeof current === 'number') {
+    if (baseline === current) return [];
+    const relative = Math.abs(baseline - current) / Math.max(Math.abs(baseline), 1e-12);
+    return relative <= tolerance ? [] : [{ path, baseline, current }];
+  }
+  if (Array.isArray(baseline) && Array.isArray(current)) {
+    if (baseline.length !== current.length) {
+      return [{ path: `${path}.length`, baseline: baseline.length, current: current.length }];
+    }
+    return baseline.flatMap((item, index) =>
+      collectDifferences(item, current[index], tolerance, `${path}[${index}]`),
+    );
+  }
+  if (isPlainObject(baseline) && isPlainObject(current)) {
+    const keys = new Set([...Object.keys(baseline), ...Object.keys(current)]);
+    return [...keys].flatMap((key) =>
+      collectDifferences(baseline[key], current[key], tolerance, `${path}.${key}`),
+    );
+  }
+  return JSON.stringify(baseline) === JSON.stringify(current) ? [] : [{ path, baseline, current }];
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 function diffSnapshotDirs(dirA: string, dirB: string, options: DiffOptions): string[] {
   const files = readdirSync(dirA).filter(
@@ -211,16 +245,22 @@ function diffSnapshotDirs(dirA: string, dirB: string, options: DiffOptions): str
 
     if (options.expectTruncatedAlerts !== null) {
       problems.push(
-        ...diffAgainstTruncatedAlerts(file, baseline, current, options.expectTruncatedAlerts),
+        ...checkTruncatedAlerts(file, baseline, current, options.expectTruncatedAlerts),
+      );
+      const { alerts: _baselineAlerts, ...restBaseline } = baseline;
+      const { alerts: _currentAlerts, alertsTotal: _total, ...restCurrent } = current;
+      problems.push(
+        ...describe(file, collectDifferences(restBaseline, restCurrent, options.floatTolerance)),
       );
       continue;
     }
-    problems.push(...describeTopLevelDiff(file, baseline, current, []));
+
+    problems.push(...describe(file, collectDifferences(baseline, current, options.floatTolerance)));
   }
   return problems;
 }
 
-function diffAgainstTruncatedAlerts(
+function checkTruncatedAlerts(
   file: string,
   baseline: Record<string, unknown>,
   current: Record<string, unknown>,
@@ -238,28 +278,19 @@ function diffAgainstTruncatedAlerts(
       `${file} › alertsTotal: ${String(current.alertsTotal)} pero el baseline traía ${baselineAlerts.length} alertas`,
     );
   }
-  problems.push(...describeTopLevelDiff(file, baseline, current, ['alerts', 'alertsTotal']));
   return problems;
 }
 
-function describeTopLevelDiff(
-  file: string,
-  baseline: Record<string, unknown>,
-  current: Record<string, unknown>,
-  ignoredKeys: string[],
-): string[] {
-  const problems: string[] = [];
-  const keys = new Set([...Object.keys(baseline), ...Object.keys(current)]);
-  for (const key of keys) {
-    if (ignoredKeys.includes(key)) continue;
-    const left = JSON.stringify(baseline[key]);
-    const right = JSON.stringify(current[key]);
-    if (left === right) continue;
-    problems.push(
-      `${file} › ${key}: difiere\n    baseline: ${truncateForDisplay(left)}\n    actual:   ${truncateForDisplay(right)}`,
+function describe(file: string, differences: Difference[]): string[] {
+  return differences
+    .slice(0, 10)
+    .map(
+      (difference) =>
+        `${file} › ${difference.path}\n    baseline: ${truncateForDisplay(JSON.stringify(difference.baseline))}\n    actual:   ${truncateForDisplay(JSON.stringify(difference.current))}`,
+    )
+    .concat(
+      differences.length > 10 ? [`${file}: y ${differences.length - 10} diferencia(s) más`] : [],
     );
-  }
-  return problems;
 }
 
 function truncateForDisplay(value: string | undefined, max = 220): string {
@@ -280,8 +311,10 @@ async function main(): Promise<void> {
     const dirB = argv[diffIndex + 2];
     if (!dirA || !dirB) throw new Error('--diff necesita dos directorios');
     const truncated = flagValue('--expect-truncated-alerts');
+    const tolerance = flagValue('--float-tolerance');
     const problems = diffSnapshotDirs(resolve(dirA), resolve(dirB), {
       expectTruncatedAlerts: truncated === null ? null : Number(truncated),
+      floatTolerance: tolerance === null ? 0 : Number(tolerance),
     });
     if (problems.length === 0) {
       console.log('✓ Sin diff: el resultado es exactamente el mismo.');

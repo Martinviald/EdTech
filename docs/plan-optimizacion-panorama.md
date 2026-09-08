@@ -94,6 +94,8 @@ pnpm --filter @soe/api exec tsx scripts/snapshot-panorama.ts --out tmp/actual
 pnpm --filter @soe/api exec tsx scripts/snapshot-panorama.ts --diff tmp/golden tmp/actual
 ```
 
+**Tolerancia de punto flotante (`--float-tolerance`).** El diff es estructural: reporta la ruta exacta de cada diferencia (`units[0].byClassGroup[1].averageAchievement`). Para los números acepta una tolerancia relativa, porque un refactor que agrupa sumas de otra manera cambia el último dígito representable de un `double` sin cambiar el resultado: F5 movió 213 valores, todos con diferencia relativa ≤ 6.4e-16 (un ULP). Se corre **sin** tolerancia por defecto; cuando una fase declara reordenar sumas, se corre con `--float-tolerance 1e-12` y se deja constancia de la magnitud observada. Cualquier diferencia que no sea numérica se reporta siempre, tolerancia o no.
+
 El script también imprime, por alcance: **cantidad de queries** (contador en el cliente `postgres`), **tiempo total del endpoint** y **tamaño del JSON en bytes**. Esas tres cifras son la métrica de la épica.
 
 **Contra qué BDD:** la demo por el túnel SST (ver skill `demo-db-access`). El baseline se toma **una sola vez, al inicio de la épica**, y se versiona en `tmp/` fuera de git — pero las **tres métricas** de cada corrida sí se anotan en la tabla de §5 de este doc.
@@ -180,6 +182,8 @@ El criterio correcto es **la matrícula del año académico de la evaluación**,
 1. **Fuente independiente**, no el golden: para 3 evaluaciones PAES y 3 DIA, contrastar `studentsAssessed` y `averageAchievement` por curso contra una consulta SQL escrita a mano que cuente `distinct student_id` sin pasar por `student_enrollments`. Los números nuevos tienen que coincidir con esa cuenta; los viejos no van a coincidir.
 2. **Regresión dirigida:** un alumno que sólo tiene matrícula en un año no puede cambiar de valor. Aislar uno y verificar que su curso reporta exactamente lo mismo antes y después.
 3. Spec nuevo del assembler (el primero de ese archivo) con un caso de doble matrícula.
+
+**Hallazgo que F4 destapa y NO corrige** (queda para un ticket aparte): validando el resultado apareció que `studentsAssessed` de una unidad **suma los alumnos de cada aplicación**, así que un instrumento con dos aplicaciones a los mismos 81 alumnos reporta 162. Es la cifra que alimenta la tarjeta "Alumnos evaluados". Corregirlo cambia un número visible de la portada y merece su propia decisión de producto — no se cuela dentro de una fase de performance.
 
 **Diff esperado en el golden:** cambian `byClassGroup`, `studentsAssessed` de las unidades y las alertas derivadas de cursos. **Se re-baseliza el golden después de F4**, y se deja registro en §5 de qué cambió y por qué. Ninguna fase posterior puede volver a mover estos números.
 

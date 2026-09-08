@@ -17,14 +17,26 @@ import {
   type PerformanceBandInput,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import type { CohortLevelCount } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { loadInstrumentBands } from '../performance-bands/lib/load-instrument-bands';
+import { loadBandsForInstruments } from '../performance-bands/lib/load-instrument-bands';
 import { ComparableAlertsService } from './comparable-alerts.service';
 import {
   ComparableUnitAssembler,
   type AchievementByAssessment,
+  type BandClassificationRow,
+  type BaselineCandidate,
+  type ClassGroupResultRow,
 } from './comparable/comparable-unit.assembler';
 import { DashboardsService } from './dashboards.service';
+
+type ScopeData = {
+  achievementByAssessment: AchievementByAssessment;
+  bandsByInstrument: Map<string, PerformanceBandInput[]>;
+  levelCountsByAssessment: Map<string, CohortLevelCount[]>;
+  classGroupRowsByAssessment: Map<string, ClassGroupResultRow[]>;
+  classificationRowsByAssessment: Map<string, BandClassificationRow[]>;
+};
 
 type UnitAccumulator = {
   ref: ComparabilityInstrumentRef;
@@ -77,18 +89,8 @@ export class ComparableOverviewService {
       const units = await this.loadUnits(tx, orgId, assessmentIds, refs);
       if (units.length === 0) return emptyResponse;
 
-      const achievementByAssessment = await this.assembler.loadAchievementByAssessment(
-        tx,
-        assessmentIds,
-        classGroupIds,
-      );
-
-      const summaries: ComparableUnitSummary[] = [];
-      for (const unit of units) {
-        summaries.push(
-          await this.buildSummary(tx, orgId, unit, achievementByAssessment, classGroupIds),
-        );
-      }
+      const scopeData = await this.loadScopeData(tx, orgId, units, assessmentIds, classGroupIds);
+      const summaries = units.map((unit) => this.buildSummary(unit, scopeData));
 
       await this.attachBaselines(tx, orgId, summaries, classGroupIds);
 
@@ -185,30 +187,84 @@ export class ComparableOverviewService {
     return Array.from(byInstrument.values());
   }
 
-  private async buildSummary(
+  /**
+   * Todo lo que las unidades necesitan, en una query por tipo de dato en vez de una
+   * por unidad.
+   *
+   * Antes cada unidad disparaba sus bandas, sus conteos de cohorte (una query POR
+   * evaluación), su distribución y su desglose por curso, encadenadas con `await`
+   * dentro de un `for`: 593 idas y vueltas para el alcance completo de un colegio,
+   * todas dentro de la misma transacción. Los datos son los mismos; lo que cambia es
+   * que se piden juntos.
+   */
+  private async loadScopeData(
     tx: Database,
     orgId: string,
-    unit: UnitAccumulator,
-    achievementByAssessment: AchievementByAssessment,
+    units: UnitAccumulator[],
+    assessmentIds: string[],
     classGroupIds: string[] | null,
-  ): Promise<ComparableUnitSummary> {
-    const bands = await loadInstrumentBands(tx, unit.ref.instrumentId);
+  ): Promise<ScopeData> {
+    const [achievementByAssessment, bandsByInstrument, levelCountsByAssessment, classGroupRows] =
+      await Promise.all([
+        this.assembler.loadAchievementByAssessment(tx, assessmentIds, classGroupIds),
+        loadBandsForInstruments(
+          tx,
+          units.map((unit) => unit.ref.instrumentId),
+        ),
+        this.assembler.loadLevelCountsByAssessment(tx, assessmentIds, classGroupIds),
+        this.assembler.loadClassGroupRows(tx, orgId, assessmentIds, classGroupIds),
+      ]);
+
+    const classGroupRowsByAssessment = new Map<string, ClassGroupResultRow[]>();
+    for (const row of classGroupRows) {
+      const bucket = classGroupRowsByAssessment.get(row.assessmentId);
+      if (bucket) bucket.push(row);
+      else classGroupRowsByAssessment.set(row.assessmentId, [row]);
+    }
+
+    const needsClassificationRows = units.some((unit) => {
+      const bands = bandsByInstrument.get(unit.ref.instrumentId) ?? [];
+      if (bands.length === 0) return false;
+      return (
+        this.assembler.foldLevelCounts(unit.assessmentIds, levelCountsByAssessment).length === 0
+      );
+    });
+    const classificationRowsByAssessment = needsClassificationRows
+      ? await this.assembler.loadBandClassificationRows(tx, assessmentIds)
+      : new Map<string, BandClassificationRow[]>();
+
+    return {
+      achievementByAssessment,
+      bandsByInstrument,
+      levelCountsByAssessment,
+      classGroupRowsByAssessment,
+      classificationRowsByAssessment,
+    };
+  }
+
+  private buildSummary(unit: UnitAccumulator, scope: ScopeData): ComparableUnitSummary {
+    const bands = scope.bandsByInstrument.get(unit.ref.instrumentId) ?? [];
     const { achievement, students } = this.assembler.foldAchievement(
       unit.assessmentIds,
-      achievementByAssessment,
+      scope.achievementByAssessment,
     );
 
     const bandDistribution =
       bands.length > 0
-        ? await this.assembler.resolveBandDistribution(tx, unit.assessmentIds, classGroupIds, bands)
+        ? this.assembler.foldBandDistribution(
+            this.assembler.foldLevelCounts(unit.assessmentIds, scope.levelCountsByAssessment),
+            unit.assessmentIds.flatMap(
+              (assessmentId) => scope.classificationRowsByAssessment.get(assessmentId) ?? [],
+            ),
+            bands,
+          )
         : null;
     const lowestBandShare = this.assembler.lowestBandShare(bandDistribution);
 
-    const byClassGroup = await this.assembler.loadByClassGroup(
-      tx,
-      orgId,
-      unit.assessmentIds,
-      classGroupIds,
+    const byClassGroup = this.assembler.foldByClassGroup(
+      unit.assessmentIds.flatMap(
+        (assessmentId) => scope.classGroupRowsByAssessment.get(assessmentId) ?? [],
+      ),
       bands,
     );
 
@@ -250,30 +306,48 @@ export class ComparableOverviewService {
     );
     if (candidates.size === 0) return;
 
+    const chosenByUnit = new Map<
+      ComparableUnitSummary,
+      { candidate: BaselineCandidate; kind: BaselineRef['kind'] }
+    >();
     for (const unit of summaries) {
-      const ref = this.refOf(unit);
       const { previousPeriod, previousYear } = this.assembler.resolveBaselineChoices(
-        ref,
+        this.refOf(unit),
         candidates,
       );
-
-      const chosen = previousPeriod ?? previousYear;
-      if (!chosen || chosen.instrumentId === unit.instrumentId) continue;
-
-      const achievement = await this.assembler.baselineAchievement(
-        tx,
-        chosen.assessmentIds,
-        classGroupIds,
-      );
-      const baseline: BaselineRef = {
+      const candidate = previousPeriod ?? previousYear;
+      if (!candidate || candidate.instrumentId === unit.instrumentId) continue;
+      chosenByUnit.set(unit, {
+        candidate,
         kind: previousPeriod ? 'previous_period' : 'previous_year',
-        label: chosen.label,
-        instrumentId: chosen.instrumentId,
-        assessmentIds: chosen.assessmentIds,
+      });
+    }
+    if (chosenByUnit.size === 0) return;
+
+    const baselineAssessmentIds = Array.from(
+      new Set(
+        Array.from(chosenByUnit.values()).flatMap(({ candidate }) => candidate.assessmentIds),
+      ),
+    );
+    const achievementByAssessment = await this.assembler.loadAchievementByAssessment(
+      tx,
+      baselineAssessmentIds,
+      classGroupIds,
+    );
+
+    for (const [unit, { candidate, kind }] of chosenByUnit) {
+      const { achievement } = this.assembler.foldAchievement(
+        candidate.assessmentIds,
+        achievementByAssessment,
+      );
+      unit.baseline = {
+        kind,
+        label: candidate.label,
+        instrumentId: candidate.instrumentId,
+        assessmentIds: candidate.assessmentIds,
         achievement,
         deltaPp: deltaInPoints(unit.averageAchievement, achievement),
       };
-      unit.baseline = baseline;
     }
   }
 
