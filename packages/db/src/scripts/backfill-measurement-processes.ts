@@ -263,6 +263,7 @@ async function main(): Promise<void> {
           expectedScope,
         })
         .returning({ id: measurementProcesses.id });
+      if (!inserted) throw new Error(`No se pudo crear el proceso "${name}".`);
       processId = inserted.id;
       existingBySlug.set(`${group.orgId}|${slug}`, processId);
       createdCount += 1;

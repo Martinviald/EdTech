@@ -165,7 +165,7 @@ export class MeasurementProcessesService {
           startsOn: dto.startsOn ?? null,
           endsOn: dto.endsOn ?? null,
           expectedScope: dto.expectedScope ?? {},
-          ownerId: user.sub ?? null,
+          ownerId: user.userId,
           notes: dto.notes ?? null,
         })
         .returning({ id: measurementProcesses.id });
