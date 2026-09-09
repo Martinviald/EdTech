@@ -731,6 +731,9 @@ export class SheetScanService {
             threshold: mark.threshold.toFixed(3),
             margin: Math.min(mark.margin, 999.999).toFixed(3),
             cropFileId: cropFileIdByField.get(mark.fieldId) ?? null,
+            suggestedValue: mark.suggestedValue ?? null,
+            doubtReason: mark.doubtReason ?? null,
+            nullConfidence: mark.nullConfidence == null ? null : mark.nullConfidence.toFixed(3),
           })),
         );
       }

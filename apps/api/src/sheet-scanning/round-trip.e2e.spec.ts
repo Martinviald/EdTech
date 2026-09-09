@@ -439,6 +439,22 @@ describeRoundTrip('ida y vuelta impresión ↔ lectura (gates F3 y V1)', () => {
       expect(verdict.firmCorrect / verdict.total).toBeGreaterThanOrEqual(0.95);
     });
 
+    it('contrato v2: el motor real emite suggestedValue/doubtReason/nullConfidence y el cliente los conserva', async () => {
+      const result = await readVariant('/normal.pdf', spec);
+      const marks = result.pages.flatMap((page) => page.marks);
+      expect(marks.length).toBeGreaterThan(0);
+      for (const mark of marks) {
+        expect(mark).toHaveProperty('suggestedValue');
+        expect(mark).toHaveProperty('doubtReason');
+        expect(mark).toHaveProperty('nullConfidence');
+        if (mark.state === 'marked' || mark.state === 'blank') {
+          expect(mark.suggestedValue).toBeNull();
+          expect(mark.doubtReason).toBeNull();
+          expect(mark.nullConfidence).toBeNull();
+        }
+      }
+    });
+
     it('hoja legada (payload completo): se sigue leyendo idéntica', async () => {
       const result = await readVariant('/legacy.pdf', spec);
       expect(result.pages).toHaveLength(1);

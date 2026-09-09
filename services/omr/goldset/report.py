@@ -118,13 +118,32 @@ def build_report(
         "verdict": "APRUEBA" if metrics.approves else "NO APRUEBA",
         "metrics": {
             "global": metrics.to_json(),
-            "byCut": {cut: compute_metrics(cut_outcomes).to_json()
-                      for cut, cut_outcomes in sorted(by_cut.items())},
+            "byCut": {
+                cut: compute_metrics(cut_outcomes).to_json()
+                for cut, cut_outcomes in sorted(by_cut.items())
+            },
         },
         "reviewByRejectReason": dict(sorted(reject_reasons.items())),
         "confidentWrong": [o.to_json() for o in wrong],
         "confidentWrongMarginHistogram": _margin_histogram(wrong),
+        "contractV2": _contract_v2_stats(outcomes),
         "marks": [o.to_json() for o in outcomes],
+    }
+
+
+def _contract_v2_stats(outcomes: list[MarkOutcome]) -> dict[str, Any]:
+    ambiguous = [o for o in outcomes if o.state == "ambiguous"]
+    suggested = [o for o in ambiguous if o.suggested_value is not None]
+    multiples = sorted(
+        (o for o in outcomes if o.state == "multiple"),
+        key=lambda o: o.null_confidence if o.null_confidence is not None else -1.0,
+    )
+    return {
+        "ambiguous": len(ambiguous),
+        "withSuggestion": len(suggested),
+        "suggestionCorrect": sum(1 for o in suggested if o.suggested_value == o.expected),
+        "suggestionWrong": [o.to_json() for o in suggested if o.suggested_value != o.expected],
+        "multiples": [o.to_json() for o in multiples],
     }
 
 
@@ -198,6 +217,7 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines.extend(_reject_reason_section(report))
     lines.extend(_wrong_section(report))
     lines.extend(_margin_section(report))
+    lines.extend(_contract_v2_section(report))
     return "\n".join(lines) + "\n"
 
 
@@ -253,13 +273,55 @@ def _margin_section(report: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _contract_v2_section(report: dict[str, Any]) -> list[str]:
+    stats = report.get("contractV2")
+    lines = ["", "## Contrato v2: sugerencias y confianza de nula", ""]
+    if not stats:
+        return lines + ["Sin datos del contrato v2."]
+    lines.append(
+        f"Ambiguas: {stats['ambiguous']}; con `suggestedValue`: {stats['withSuggestion']}; "
+        f"sugerencia correcta: {stats['suggestionCorrect']}."
+    )
+    if stats["suggestionWrong"]:
+        lines.extend(
+            [
+                "",
+                "| Hoja | Pregunta | Esperado | Sugerido | Motivo | margin |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for o in stats["suggestionWrong"]:
+            expected = o["expected"] if o["expected"] is not None else "blanco"
+            lines.append(
+                f"| {o['sheet']} | {o['printedNumber']} | {expected} | {o['suggestedValue']} "
+                f"| {o['doubtReason']} | {o['margin']} |"
+            )
+    if stats["multiples"]:
+        lines.extend(
+            [
+                "",
+                "Dobles (`multiple`) ordenadas por `nullConfidence` ascendente; nula legitima = "
+                "la verdad tiene mas de una alternativa.",
+                "",
+                "| Hoja | Pregunta | Esperado | Nula legitima | nullConfidence | fill | margin |",
+                "|---|---|---|---|---|---|---|",
+            ]
+        )
+        for o in stats["multiples"]:
+            expected = o["expected"] if o["expected"] is not None else "blanco"
+            legit = "si" if o["expected"] is not None and len(o["expected"]) > 1 else "no"
+            lines.append(
+                f"| {o['sheet']} | {o['printedNumber']} | {expected} | {legit} "
+                f"| {o['nullConfidence']} | {o['fill']} | {o['margin']} |"
+            )
+    return lines
+
+
 def write_reports(report: dict[str, Any], reports_dir: Path) -> tuple[Path, Path]:
     reports_dir.mkdir(parents=True, exist_ok=True)
     stem = f"report-{report['generatedOn']}"
     md_path = reports_dir / f"{stem}.md"
     json_path = reports_dir / f"{stem}.json"
     md_path.write_text(render_markdown(report), encoding="utf-8")
-    json_path.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return md_path, json_path

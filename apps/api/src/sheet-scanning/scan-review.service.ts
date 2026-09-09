@@ -24,6 +24,7 @@ import type {
   ConfirmBatchResponse,
   DiscardScanDto,
   LayoutSpec,
+  DoubtReason,
   MarkReviewDecision,
   MarkState,
   PageQuality,
@@ -127,6 +128,9 @@ type MarkQueueRow = {
   threshold: string;
   margin: string;
   cropFileId: string | null;
+  suggestedValue: string | null;
+  doubtReason: DoubtReason | null;
+  nullConfidence: string | null;
   reviewedValue: string | null;
   reviewDecision: MarkReviewDecision | null;
   reviewedById: string | null;
@@ -233,6 +237,9 @@ export class ScanReviewService {
           threshold: sheetScanMarks.threshold,
           margin: sheetScanMarks.margin,
           cropFileId: sheetScanMarks.cropFileId,
+          suggestedValue: sheetScanMarks.suggestedValue,
+          doubtReason: sheetScanMarks.doubtReason,
+          nullConfidence: sheetScanMarks.nullConfidence,
           batchId: sheetScans.batchId,
           batchStatus: sheetScanBatches.status,
           scanState: sheetScans.state,
@@ -299,6 +306,9 @@ export class ScanReviewService {
         margin: Number(row.margin),
         cropUrl,
         options,
+        suggestedValue: row.suggestedValue,
+        doubtReason: row.doubtReason,
+        nullConfidence: this.decimalOrNull(row.nullConfidence),
         reviewedValue,
         reviewedDecision: dto.decision,
         reviewedById: userId,
@@ -712,6 +722,9 @@ export class ScanReviewService {
         threshold: sheetScanMarks.threshold,
         margin: sheetScanMarks.margin,
         cropFileId: sheetScanMarks.cropFileId,
+        suggestedValue: sheetScanMarks.suggestedValue,
+        doubtReason: sheetScanMarks.doubtReason,
+        nullConfidence: sheetScanMarks.nullConfidence,
         reviewedValue: sheetScanMarks.reviewedValue,
         reviewDecision: sheetScanMarks.reviewDecision,
         reviewedById: sheetScanMarks.reviewedById,
@@ -879,10 +892,17 @@ export class ScanReviewService {
       margin: Number(mark.margin),
       cropUrl,
       options,
+      suggestedValue: mark.suggestedValue ?? null,
+      doubtReason: mark.doubtReason ?? null,
+      nullConfidence: this.decimalOrNull(mark.nullConfidence),
       reviewedValue: mark.reviewedValue,
       reviewedDecision: mark.reviewDecision,
       reviewedById: mark.reviewedById,
     };
+  }
+
+  private decimalOrNull(value: string | null | undefined): number | null {
+    return value == null ? null : Number(value);
   }
 
   private studentNameOf(scan: ScanQueueRow): string | null {

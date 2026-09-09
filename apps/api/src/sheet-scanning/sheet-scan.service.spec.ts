@@ -425,7 +425,14 @@ describe('SheetScanService job', () => {
           identity: { mode: 'qr', raw: qrRaw(SHEET_1, 1), confidence: 1 },
           marks: [
             makeMark(),
-            makeMark({ fieldId: 'item-2', printedNumber: '2', state: 'ambiguous', value: null }),
+            makeMark({
+              fieldId: 'item-2',
+              printedNumber: '2',
+              state: 'ambiguous',
+              value: null,
+              suggestedValue: 'B',
+              doubtReason: 'margin',
+            }),
           ],
         }),
         makePage({
@@ -470,8 +477,17 @@ describe('SheetScanService job', () => {
       threshold: '0.410',
       margin: '1.000',
       cropFileId: null,
+      suggestedValue: null,
+      doubtReason: null,
+      nullConfidence: null,
     });
-    expect(marks[1]).toMatchObject({ state: 'ambiguous', value: null });
+    expect(marks[1]).toMatchObject({
+      state: 'ambiguous',
+      value: null,
+      suggestedValue: 'B',
+      doubtReason: 'margin',
+      nullConfidence: null,
+    });
     expect(inserts[2].values).toMatchObject({
       printedSheetId: SHEET_2,
       pageIndex: 0,

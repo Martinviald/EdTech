@@ -15,17 +15,24 @@
               "type": "string",
               "format": "uuid"
             },
+            "formId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "pageCount": {
               "type": "integer",
               "exclusiveMinimum": 0
             },
             "paper": {
               "type": "string",
-              "enum": [
-                "letter",
-                "a4",
-                "legal"
-              ]
+              "enum": ["letter", "a4", "legal"]
             },
             "fiducials": {
               "type": "object",
@@ -43,11 +50,7 @@
                   "exclusiveMinimum": 0
                 }
               },
-              "required": [
-                "kind",
-                "sizeRatio",
-                "marginRatio"
-              ],
+              "required": ["kind", "sizeRatio", "marginRatio"],
               "additionalProperties": false
             },
             "identity": {
@@ -55,11 +58,7 @@
               "properties": {
                 "mode": {
                   "type": "string",
-                  "enum": [
-                    "qr",
-                    "rut_bubbles",
-                    "none"
-                  ]
+                  "enum": ["qr", "rut_bubbles", "none"]
                 },
                 "region": {
                   "type": "object",
@@ -78,20 +77,14 @@
                           "maximum": 1
                         }
                       },
-                      "required": [
-                        "x",
-                        "y"
-                      ],
+                      "required": ["x", "y"],
                       "additionalProperties": false
                     },
                     "bottomRight": {
                       "$ref": "#/definitions/assess-request/properties/layoutSpec/properties/identity/properties/region/properties/topLeft"
                     }
                   },
-                  "required": [
-                    "topLeft",
-                    "bottomRight"
-                  ],
+                  "required": ["topLeft", "bottomRight"],
                   "additionalProperties": false
                 },
                 "bubbles": {
@@ -124,11 +117,7 @@
                             ]
                           }
                         },
-                        "required": [
-                          "value",
-                          "center",
-                          "radius"
-                        ],
+                        "required": ["value", "center", "radius"],
                         "additionalProperties": false
                       }
                     },
@@ -138,10 +127,7 @@
                   ]
                 }
               },
-              "required": [
-                "mode",
-                "region"
-              ],
+              "required": ["mode", "region"],
               "additionalProperties": false
             },
             "fields": {
@@ -155,11 +141,7 @@
                   },
                   "kind": {
                     "type": "string",
-                    "enum": [
-                      "bubble_group",
-                      "digit_grid",
-                      "crop_region"
-                    ]
+                    "enum": ["bubble_group", "digit_grid", "crop_region"]
                   },
                   "printedNumber": {
                     "type": "string",
@@ -171,10 +153,7 @@
                   },
                   "selectMode": {
                     "type": "string",
-                    "enum": [
-                      "single",
-                      "multiple"
-                    ]
+                    "enum": ["single", "multiple"]
                   },
                   "bubbles": {
                     "type": "array",
@@ -223,10 +202,7 @@
           "properties": {
             "source": {
               "type": "string",
-              "enum": [
-                "scanner",
-                "phone"
-              ]
+              "enum": ["scanner", "phone"]
             },
             "normalizeIllumination": {
               "type": "boolean"
@@ -280,11 +256,7 @@
           "minLength": 1
         }
       },
-      "required": [
-        "layoutSpec",
-        "captureProfile",
-        "imageBase64"
-      ],
+      "required": ["layoutSpec", "captureProfile", "imageBase64"],
       "additionalProperties": false
     }
   },

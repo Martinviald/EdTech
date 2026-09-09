@@ -225,6 +225,13 @@
       "when": 1788922348958,
       "tag": "0031_gifted_frightful_four",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788956293680,
+      "tag": "0032_flowery_rogue",
+      "breakpoints": true
     }
   ]
 }

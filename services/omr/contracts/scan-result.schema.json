@@ -122,6 +122,32 @@
                     },
                     "cropJpegBase64": {
                       "type": ["string", "null"]
+                    },
+                    "suggestedValue": {
+                      "type": ["string", "null"]
+                    },
+                    "doubtReason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": ["margin", "band", "multiple"]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "nullConfidence": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
