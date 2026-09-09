@@ -14,10 +14,8 @@ import {
   teacherAssignments,
   users,
 } from '@soe/db';
-import type {
-  CreateTeacherAssignmentDto,
-  ListTeacherAssignmentsQuery,
-} from '@soe/types';
+import { canReceiveTeachingLoad } from '@soe/types';
+import type { CreateTeacherAssignmentDto, ListTeacherAssignmentsQuery } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 
 @Injectable()
@@ -87,8 +85,14 @@ export class TeacherAssignmentsService {
   }
 
   async create(orgId: string, dto: CreateTeacherAssignmentDto) {
-    // 1. El usuario debe tener membership activa en la org.
-    const [membership] = await this.db
+    // 1. El usuario debe tener membership activa en la org, con ALGÚN rol docente.
+    //
+    // ⚠️ Se leen TODOS sus memberships, no uno. Antes esto hacía `LIMIT 1` sin
+    // `ORDER BY` y validaba ese rol arbitrario: a los 6 directores académicos que
+    // además hacen clases (`academic_director` + `teacher`) les tocaba
+    // `academic_director` y el endpoint los rechazaba diciendo que no eran profesores.
+    // Es la regla de guards por unión de CLAUDE.md §6.3.
+    const memberships = await this.db
       .select({ role: orgMemberships.role })
       .from(orgMemberships)
       .where(
@@ -97,13 +101,12 @@ export class TeacherAssignmentsService {
           eq(orgMemberships.orgId, orgId),
           eq(orgMemberships.isActive, true),
         ),
-      )
-      .limit(1);
+      );
 
-    if (!membership) {
+    if (memberships.length === 0) {
       throw new BadRequestException('El usuario no pertenece a esta organización');
     }
-    if (!['teacher', 'homeroom_teacher', 'eval_coordinator'].includes(membership.role)) {
+    if (!canReceiveTeachingLoad(memberships.map((m) => m.role))) {
       throw new BadRequestException(
         'Solo profesores, profesores jefes o coordinadores de evaluación pueden ser asignados',
       );
