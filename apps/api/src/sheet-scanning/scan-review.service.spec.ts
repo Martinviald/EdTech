@@ -197,6 +197,9 @@ function markQueueRow(overrides: Record<string, unknown>) {
     threshold: '0.500',
     margin: '0.200',
     cropFileId: null,
+    suggestedValue: null,
+    doubtReason: null,
+    nullConfidence: null,
     reviewedValue: null,
     reviewDecision: null,
     reviewedById: null,
@@ -273,6 +276,9 @@ describe('ScanReviewService.getQueue', () => {
         fieldId: 'f3',
         printedNumber: '3',
         cropFileId: 'file-crop',
+        suggestedValue: 'V',
+        doubtReason: 'band',
+        nullConfidence: '0.880',
       }),
     ];
     const { service } = makeService([
@@ -287,6 +293,28 @@ describe('ScanReviewService.getQueue', () => {
     expect(queue.ambiguousMarks[0].options).toEqual(['V', 'F']);
     expect(queue.ambiguousMarks[0].cropUrl).toBe('https://signed/file-crop');
     expect(queue.ambiguousMarks[0].studentName).toBe('Ana Pérez');
+    expect(queue.ambiguousMarks[0]).toMatchObject({
+      suggestedValue: 'V',
+      doubtReason: 'band',
+      nullConfidence: 0.88,
+    });
+  });
+
+  it('una marca persistida por un motor v1 expone los campos del contrato v2 en null', async () => {
+    const { service } = makeService([
+      [{ id: BATCH_ID, spec: SPEC }],
+      [scanQueueRow({ scanId: 'scan-read' })],
+      [markQueueRow({ markId: 'mark-v1', scanId: 'scan-read' })],
+      [],
+    ]);
+
+    const queue = await service.getQueue(ORG_ID, BATCH_ID);
+
+    expect(queue.ambiguousMarks[0]).toMatchObject({
+      suggestedValue: null,
+      doubtReason: null,
+      nullConfidence: null,
+    });
   });
 
   it('lanza NotFound cuando el lote no existe en la org', async () => {

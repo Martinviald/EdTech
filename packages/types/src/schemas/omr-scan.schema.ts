@@ -13,6 +13,15 @@ export const MARK_STATES = ['marked', 'blank', 'multiple', 'ambiguous'] as const
 export type MarkState = (typeof MARK_STATES)[number];
 
 /**
+ * Contrato v2: por qué el motor dudó. `margin` = alguna burbuja del campo
+ * quedó a menos de `ambiguityMargin` del umbral; `band` = ninguna por margen,
+ * pero alguna cayó en la tierra de nadie entre los dos grupos de la página;
+ * `multiple` = más de una burbuja sobre el umbral en un campo de selección única.
+ */
+export const DOUBT_REASONS = ['margin', 'band', 'multiple'] as const;
+export type DoubtReason = (typeof DOUBT_REASONS)[number];
+
+/**
  * `blank` = el alumno NO marcó, con separación clara. Una página que no llegó a
  * escanearse no produce `blank`: no produce nada y el escaneo queda incompleto (G3).
  * `margin = |fill − threshold| / threshold` ordena la cola: lo más dudoso primero.
@@ -28,6 +37,20 @@ export const markReadingSchema = z.object({
   threshold: z.number().min(0).max(1),
   margin: z.number(),
   cropJpegBase64: z.string().nullable(),
+  /**
+   * Contrato v2 (aditivo, `OMR_CONTRACT_V2` en el servicio). Los tres son
+   * opcionales: un motor v1 no los trae y la lectura vale igual. Nunca cambian
+   * `state`/`value`: son la sugerencia y la explicación que la cola de revisión
+   * puede usar (B1: confirmar con sí/no; B2: anular sin revisar).
+   * `suggestedValue`: en `ambiguous`, la única burbuja sobre el umbral (todas
+   * las que lo superan si el campo es de selección múltiple); `null` si no hay
+   * una sola. `nullConfidence`: sólo en `multiple`, 0–1, qué tan seguro es que
+   * la doble marca sea una nula real (dos igual de rellenas → alto; una clara
+   * y una tenue → bajo).
+   */
+  suggestedValue: z.string().nullable().optional(),
+  doubtReason: z.enum(DOUBT_REASONS).nullable().optional(),
+  nullConfidence: z.number().min(0).max(1).nullable().optional(),
 });
 
 export const PAGE_REJECT_REASONS = [

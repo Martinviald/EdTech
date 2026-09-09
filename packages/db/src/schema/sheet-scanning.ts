@@ -16,6 +16,7 @@ import type {
   CaptureProfile,
   CaptureSessionCapture,
   LayoutSpec,
+  DoubtReason,
   PageDiagnostics,
   PageQuality,
 } from '@soe/types';
@@ -238,6 +239,9 @@ export const sheetScanMarks = pgTable(
     threshold: decimal('threshold', { precision: 4, scale: 3 }).notNull(),
     margin: decimal('margin', { precision: 6, scale: 3 }).notNull(),
     cropFileId: uuid('crop_file_id').references(() => files.id),
+    suggestedValue: text('suggested_value'),
+    doubtReason: text('doubt_reason').$type<DoubtReason>(),
+    nullConfidence: decimal('null_confidence', { precision: 4, scale: 3 }),
     reviewedValue: text('reviewed_value'),
     reviewDecision: markReviewDecisionEnum('review_decision'),
     reviewedById: uuid('reviewed_by_id').references(() => users.id),

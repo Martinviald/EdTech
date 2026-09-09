@@ -49,6 +49,9 @@ class MarkOutcome:
     threshold: float | None
     margin: float | None
     reject_reason: str | None
+    suggested_value: str | None = None
+    doubt_reason: str | None = None
+    null_confidence: float | None = None
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -63,6 +66,9 @@ class MarkOutcome:
             "threshold": self.threshold,
             "margin": self.margin,
             "rejectReason": self.reject_reason,
+            "suggestedValue": self.suggested_value,
+            "doubtReason": self.doubt_reason,
+            "nullConfidence": self.null_confidence,
         }
 
 
@@ -146,6 +152,9 @@ def _score_mark(
         threshold=mark["threshold"],
         margin=mark["margin"],
         reject_reason=None,
+        suggested_value=mark.get("suggestedValue"),
+        doubt_reason=mark.get("doubtReason"),
+        null_confidence=mark.get("nullConfidence"),
     )
 
 

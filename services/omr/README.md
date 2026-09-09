@@ -145,6 +145,7 @@ prueba el harness de punta a punta).
 |---|---|---|
 | `OMR_PAGE_TIMEOUT_S` | `20` | Tiempo límite por página; una página que lo excede se omite del resultado (si TODAS lo exceden → 504) |
 | `OMR_DOWNLOAD_TIMEOUT_S` | `10` | Timeout de descarga de cada URL firmada |
+| `OMR_CONTRACT_V2` | `1` | Campos aditivos del contrato v2 en cada marca (`suggestedValue`, `doubtReason`, `nullConfidence`; `app/readers.py`). `0` = el ScanResult vuelve a la forma v1 (las claves no se emiten); nada aguas abajo depende de ellas hasta que la cola de revisión las use |
 | `OMR_LOCAL_REGISTRATION` | `1` | Registro local de burbujas antes de muestrear (`app/registration.py`). `0` = apagado de emergencia (vuelve al muestreo en la posición del spec) mientras dure la observación en producción; después se retira |
 
 ## Desarrollo local

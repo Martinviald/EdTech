@@ -9,7 +9,13 @@ import {
   type LayoutSpec,
   type OmrCalibration,
 } from './omr-layout.schema';
-import type { MarksReadability, MarkState, PageQuality, PageRejectReason } from './omr-scan.schema';
+import type {
+  DoubtReason,
+  MarksReadability,
+  MarkState,
+  PageQuality,
+  PageRejectReason,
+} from './omr-scan.schema';
 
 // ── Lector de marcas (E22) — contrato API ⇄ web del módulo sheet-scanning ────
 // Response Models EXACTOS (lección S2: frontend y backend compilan contra el
@@ -365,6 +371,10 @@ export type ReviewMarkModel = {
   cropUrl: string | null;
   /** Alternativas del campo según el spec, para resolver con una tecla (C16). */
   options: string[];
+  /** Contrato v2 del motor (ver `markReadingSchema`); `null` con un motor v1 o cuando no aplica. */
+  suggestedValue: string | null;
+  doubtReason: DoubtReason | null;
+  nullConfidence: number | null;
   reviewedValue: string | null;
   /** `null` = nadie la revisó todavía. */
   reviewedDecision: MarkReviewDecision | null;

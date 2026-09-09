@@ -56,3 +56,50 @@ despliegue.
 **Retroceso:** dejar de pedir `?debug=1` (una línea en `omr-http.client.ts`); la columna queda vacía.
 
 Decisión: **avanza** a fase 2 (A1, motor).
+
+---
+
+### 2026-09-09 · fase 4 · contrato v2 — `suggestedValue`, `doubtReason`, `nullConfidence`
+
+**Cambio (aditivo en todas las capas, ninguna decisión cambia):**
+- `packages/types` (`omr-scan.schema.ts`): `DOUBT_REASONS = ['margin', 'band', 'multiple']` y
+  los tres campos **opcionales y nullables** en `markReadingSchema`; `ReviewMarkModel` los expone
+  (`null` con un motor v1 o cuando no aplican). JSON Schema regenerados con
+  `pnpm --filter @soe/types gen:omr-contracts` (el generador también incorporó `formId` en
+  `layout-spec` / `read-request` / `assess-request`, que ya estaba en Zod y faltaba en los JSON).
+  `scan-result.example.json` trae una `ambiguous` con sugerencia y una `multiple` con confianza;
+  `omr-contract-examples.spec` valida el ejemplo con y sin los campos, y rechaza un
+  `doubtReason` desconocido o una `nullConfidence` fuera de 0–1.
+- `packages/db`: `sheet_scan_marks.suggested_value text`, `doubt_reason text`,
+  `null_confidence numeric(4,3)` — migración `0032_flowery_rogue.sql` (tres `ADD COLUMN`
+  nullables), aplicada en la BD local con `db:migrate`.
+- `apps/api`: `persistPage` guarda los tres campos (`?? null`: un motor v1 no los trae);
+  `GET :id/review` y `PATCH :id` los devuelven en cada `ReviewMarkModel`. Ninguna query nueva,
+  solo columnas en los `select` existentes (los fakes por posición no cambian).
+- Motor: `app/readers.py` los calcula (`OMR_CONTRACT_V2`, default encendido) — detalle y
+  calibración en `services/omr/goldset/README-registro.md` (pendientes fase 4).
+- Web: sin cambios (fase 5).
+
+**Pruebas nuevas:** motor 17 (`tests/test_contract_v2.py`, más la forma v1 en `test_contract.py`);
+tipos 2; backend 2 (persistencia con y sin campos; cola con campos y con un motor v1); e2e 1
+(el motor real emite los campos y el cliente HTTP los conserva).
+
+**No regresión:**
+
+| instrumento | resultado |
+|---|---|
+| `@soe/types` | 396 / 396 |
+| `jest src/sheet-scanning` | 382 / 382 (25 suites) |
+| typecheck API · eslint `sheet-scanning` · prettier | sin errores |
+| e2e `round-trip` contra el OMR real (`RUN_OMR_ROUNDTRIP=1`) | 13 / 13 |
+| motor | 277 · sintético sin cambio de decisión · real 275 / 33 / 0; sugerencias 4 / 4 correctas |
+
+**Compuerta 4:** la cola de revisión es idéntica (mismos estados, mismo orden por `margin`); los
+campos nuevos viajan en `ReviewMarkModel` sin que la web los use todavía. El orden de despliegue
+§1.4 se cumple por construcción: motor viejo + backend nuevo → `null`; motor nuevo + backend viejo
+→ Zod descarta las claves desconocidas. Verificar en demo con el humo real que `suggested_value`
+queda poblado en las revisiones por margen.
+
+**Retroceso:** `OMR_CONTRACT_V2=0` en el motor; las columnas quedan en `null`.
+
+Decisión: **avanza** a fase 5 (B1, backend y web).

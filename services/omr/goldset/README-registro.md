@@ -309,3 +309,41 @@ anclada queda para el caso parcial. `RingFix.saturated` y `saturatedCount` en el
 | costo `register_group` por página (88 burbujas, 14 fotos, 3 repeticiones) | 30.4 ms con segunda pasada vs 29.5 ms sin ella: **+0.9 ms** |
 
 Decisión: **avanza** a pendientes fase 4 (contrato v2).
+
+### 2026-09-09 · pendientes fase 4 · contrato v2 — `suggestedValue`, `doubtReason`, `nullConfidence`
+
+Tres campos aditivos por marca (`app/readers.py`, `OMR_CONTRACT_V2`, default encendido; con `0`
+las claves no se emiten y el ScanResult vuelve a la forma v1). `state` y `value` no cambian: el
+motor dice además **qué sugiere y por qué duda**, para que la cola de revisión pueda confirmar con
+sí/no (B1) o anular sin revisar (B2) en las fases siguientes.
+
+- `suggestedValue` (solo `ambiguous`): la única burbuja sobre el umbral; en `selectMode: multiple`,
+  todas las que lo superan. `null` si ninguna o más de una.
+- `doubtReason`: `margin` (alguna burbuja con `margin < ambiguityMargin`), `band` (ninguna por
+  margen, alguna en tierra de nadie), `multiple`.
+- `nullConfidence` (solo `multiple`): fuerza de la burbuja más tenue sobre el umbral,
+  `(fill − umbral) / (1 − umbral)`, penalizada linealmente por el contraste entre la más oscura y la
+  más clara (`NULL_CONFIDENCE_CONTRAST_SCALE = 0.25` de fill lo anula).
+
+**Ciclo 4a — primera definición, descartada:** la fuerza como `margin` mínimo recortado a 1. En la
+hoja de Diego (rellenos plenos, umbral 0.62) el `margin` máximo alcanzable es 0.62, así que sus
+cuatro dobles evidentes (fills 0.99–1.00 en ambas burbujas) quedaban en 0.59–0.62: la confianza
+dependía del umbral de la página y no de las marcas. **Ciclo 4b:** fuerza normalizada por la
+distancia al relleno pleno; la misma doble llega a 0.96–1.00.
+
+| medición (corte real, 14 hojas, 308 marcas) | resultado |
+|---|---|
+| `ambiguous` con verdad (4: 2 marcas claras en tierra de nadie + 2 por margen) | **4 / 4** sugerencias coinciden con la verdad |
+| dobles/triples de Diego (q11 BC, q14 BC, q16 ABC, q20 AC; fills 0.99–1.00) | `nullConfidence` **0.957 · 1.000 · 0.979 · 1.000** |
+| Bruno q12 en 3 capturas (B 1.00 / C 0.77–0.81; la verdad transcribe BC) | **0.102 · 0.103 · 0.137** |
+| suite · sintético 48 · real | 277 (+17 de contrato v2) · 97.57 % / 2.26 % / 1, idéntico · 275 / 33 / 0 |
+| sintético, única `multiple` (`dirty-marcas-sucias-040` q11, verdad B: un borrón junto a la marca) | `nullConfidence` **0.0** — un borrón no es una nula |
+
+Bruno q12 es una doble legítima según la transcripción, pero con una burbuja 0.2 de fill más clara
+que la otra: la definición la deja en revisión, que es el comportamiento de hoy. Lo que B2 podrá
+anular sin revisar son las dobles con ambas burbujas plenas; el umbral se fija en la fase 6b con
+esta tabla, no antes. Los JSON Schema se regeneraron desde Zod (`pnpm --filter @soe/types
+gen:omr-contracts`): además de los tres campos, el generador incorporó `formId` en `layout-spec` /
+`read-request` / `assess-request`, que ya estaba en Zod y faltaba en los JSON.
+
+Decisión: **avanza** a pendientes fase 5 (B1, backend y web).
