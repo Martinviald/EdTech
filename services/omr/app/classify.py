@@ -40,6 +40,32 @@ margin < AMBIGUITY_MARGIN => ambiguous. Ademas, un fill en tierra de nadie
 aunque su margin sea alto: un tick al 40% en una hoja de rellenos completos
 quedaba como blank CONFIADO, el unico defecto que la cola no compensa.
 
+La banda va desde `low_mean + max(CLUSTER_BAND_STD_FACTOR·σ_low, MIN_WIDTH)`
+hasta `high_mean - max(CLUSTER_BAND_STD_FACTOR·σ_high, MIN_WIDTH)`. Medida
+con `tools/measure_band.py` (pendientes fase 6a, 2026-09-09; 14 fotos reales
+con verdad y 48 hojas sinteticas cruzadas con el estilo del trazo), y NO se
+cambia:
+
+    banda            | reales solo-por-banda      | sinteticas | digito RUT al 50 %
+    max(2σ, 0.12)    | 4 marcas reales de Bruno   | 0          | ambiguous (bien)
+      (vigente)      |   (q22/q23, fills 0.69-    |            |
+                     |   0.77, umbral 0.53-0.59,  |            |
+                     |   verdad B)                |            |
+    max(3σ, 0.12)    | 0                          | 0          | MARKED: identidad
+                     |                            |            |   con digito inventado
+    max(2.5σ, 0.10)  | 0                          | 0          | falla 1 de 2 tests
+    max(3σ, 0.08)    | 4 vacias a 0.27-0.33       | 0          | falla
+    max(2σ, 0.08)    | 17                         | 0          | pasa
+
+Ningun trazo-no-respuesta del sintetico (cruz, tilde, relleno a medias,
+borron, doble) depende de la banda: van a revision por margin o `multiple`.
+Pero un digito relleno a medias en la grilla RUT (CD-10) SI depende de ella,
+y con 3σ se escapa: el propio digito a medias infla σ_high de un grupo de
+digitos plenos, el borde alto de la banda se derrumba hasta el umbral y el
+RUT sale leido con un digito inventado — el error que la regla de oro de
+identidad prohibe. Las 4 marcas claras de Bruno que la banda manda a revision
+cuestan una tecla con la sugerencia (B1) y 0 errores; se aceptan.
+
 Lo que NO cambia, y por que (goldset/README-registro.md):
 
 - El margen normalizado por el hueco entre grupos ("propuesta A", rama
