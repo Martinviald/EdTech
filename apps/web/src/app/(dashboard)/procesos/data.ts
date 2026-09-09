@@ -1,7 +1,9 @@
 import { apiGet } from '@/lib/api';
 import type {
+  DashboardFilterOptionsResponse,
   MeasurementProcessListResponse,
   MeasurementProcessModel,
+  ProcessCandidatesResponse,
   ProcessCoverageResponse,
 } from '@soe/types';
 
@@ -15,4 +17,15 @@ export function getProcess(processId: string): Promise<MeasurementProcessModel> 
 
 export function getProcessCoverage(processId: string): Promise<ProcessCoverageResponse> {
   return apiGet<ProcessCoverageResponse>(`/measurement-processes/${processId}/coverage`);
+}
+
+export function getProcessCandidates(processId: string): Promise<ProcessCandidatesResponse> {
+  return apiGet<ProcessCandidatesResponse>(`/measurement-processes/${processId}/candidates`);
+}
+
+export function getScopeCatalog(
+  academicYearId?: string | null,
+): Promise<DashboardFilterOptionsResponse> {
+  const query = academicYearId ? `?academicYearId=${academicYearId}` : '';
+  return apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${query}`);
 }

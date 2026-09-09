@@ -1,12 +1,19 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { CalendarRange } from 'lucide-react';
+import { CalendarRange, Plus } from 'lucide-react';
 import { auth } from '@/auth';
-import { canAccess, PROCESS_VIEWER_ROLES, type MeasurementProcessModel } from '@soe/types';
+import {
+  canAccess,
+  PROCESS_MANAGEMENT_ROLES,
+  PROCESS_VIEWER_ROLES,
+  type MeasurementProcessModel,
+} from '@soe/types';
 import { CardSkeleton, EmptyState, PageContainer, PageHeader } from '@/components/shared';
 import { ROUTES } from '@/lib/routes';
-import { getProcesses } from './data';
+import { Button } from '@/components/ui/button';
+import { getProcesses, getScopeCatalog } from './data';
 import { ProcessCard } from './components/process-card';
+import { ProcessFormDialog } from './components/process-form-dialog';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +26,7 @@ export default async function ProcesosPage({
   if (!session?.user) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, PROCESS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
+  const canManage = canAccess(session.user.roles, PROCESS_MANAGEMENT_ROLES);
   const params = await searchParams;
   const academicYearId = typeof params.academicYearId === 'string' ? params.academicYearId : null;
   const query = academicYearId ? `?academicYearId=${academicYearId}` : '';
@@ -29,11 +37,35 @@ export default async function ProcesosPage({
         title="Procesos de medición"
         description="Cada ventana de aplicación —un momento DIA, una toma de ensayo, una evaluación semestral— con su rendición, sus resultados y sus accesos directos."
         icon={CalendarRange}
+        actions={
+          canManage ? (
+            <Suspense fallback={null}>
+              <NewProcessAction />
+            </Suspense>
+          ) : null
+        }
       />
       <Suspense key={query} fallback={<ProcessListSkeleton />}>
         <ProcessList query={query} />
       </Suspense>
     </PageContainer>
+  );
+}
+
+async function NewProcessAction() {
+  const catalog = await getScopeCatalog();
+  if (catalog.periods.length === 0) return null;
+
+  return (
+    <ProcessFormDialog
+      academicYears={catalog.periods}
+      trigger={
+        <Button>
+          <Plus className="mr-2 size-4" aria-hidden />
+          Nuevo proceso
+        </Button>
+      }
+    />
   );
 }
 

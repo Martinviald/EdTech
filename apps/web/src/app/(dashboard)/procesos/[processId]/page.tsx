@@ -1,11 +1,17 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { ClipboardList, LayoutGrid, TriangleAlert, Users } from 'lucide-react';
+import { ClipboardList, LayoutGrid, Pencil, TriangleAlert, Users } from 'lucide-react';
+import { auth } from '@/auth';
+import { canAccess, PROCESS_MANAGEMENT_ROLES } from '@soe/types';
 import { AlertCallout, CardSkeleton, KpiGridSkeleton, StatCard } from '@/components/shared';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ROUTES } from '@/lib/routes';
-import { getProcess, getProcessCoverage } from '../data';
+import { getProcess, getProcessCandidates, getProcessCoverage, getScopeCatalog } from '../data';
 import { CoverageBar } from '../components/coverage-bar';
+import { ProcessFormDialog } from '../components/process-form-dialog';
+import { ScopeDialog } from './components/scope-dialog';
+import { LinkAssessmentsDialog } from './components/link-assessments-dialog';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,15 +21,51 @@ export default async function ProcesoResumenPage({
   params: Promise<{ processId: string }>;
 }) {
   const { processId } = await params;
+  const session = await auth();
+  const canManage = canAccess(session?.user?.roles ?? [], PROCESS_MANAGEMENT_ROLES);
 
   return (
     <div className="space-y-6">
+      {canManage && (
+        <Suspense fallback={null}>
+          <ManagementToolbar processId={processId} />
+        </Suspense>
+      )}
       <Suspense fallback={<KpiGridSkeleton count={3} />}>
         <ResumenSection processId={processId} />
       </Suspense>
       <Suspense fallback={<CardSkeleton rows={4} />}>
         <AccesosDirectosSection processId={processId} />
       </Suspense>
+    </div>
+  );
+}
+
+async function ManagementToolbar({ processId }: { processId: string }) {
+  const process = await getProcess(processId);
+  const [catalog, candidates] = await Promise.all([
+    getScopeCatalog(process.academicYearId),
+    getProcessCandidates(processId),
+  ]);
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <ProcessFormDialog
+        process={process}
+        academicYears={catalog.periods}
+        trigger={
+          <Button variant="outline" size="sm">
+            <Pencil className="mr-2 size-4" aria-hidden />
+            Editar
+          </Button>
+        }
+      />
+      <ScopeDialog
+        process={process}
+        classGroups={catalog.classGroups}
+        subjects={catalog.subjects}
+      />
+      <LinkAssessmentsDialog processId={processId} candidates={candidates.data} />
     </div>
   );
 }

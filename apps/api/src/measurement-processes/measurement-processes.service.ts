@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, countDistinct, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, countDistinct, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentCourseAssignments,
@@ -308,7 +308,7 @@ export class MeasurementProcessesService {
         .where(
           and(
             eq(assessments.orgId, orgId),
-            isNull(assessments.processId),
+            or(isNull(assessments.processId), ne(assessments.processId, processId)),
             isNull(instruments.deletedAt),
             eq(classGroups.academicYearId, process.academicYearId),
           ),
@@ -479,7 +479,10 @@ export class MeasurementProcessesService {
             studentEnrollments,
             eq(studentEnrollments.studentId, assessmentResults.studentId),
           )
-          .where(inArray(assessmentResults.assessmentId, assessmentIds))
+          .innerJoin(students, eq(students.id, assessmentResults.studentId))
+          .where(
+            and(inArray(assessmentResults.assessmentId, assessmentIds), isNull(students.deletedAt)),
+          )
           .groupBy(assessmentResults.assessmentId, studentEnrollments.classGroupId)
       : [];
 
