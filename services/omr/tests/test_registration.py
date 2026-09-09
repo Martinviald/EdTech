@@ -296,6 +296,67 @@ def test_registering_a_whole_page_is_cheap(spec: dict, rectified: RectifiedPage)
     assert per_page_ms / bubbles * 88 < 60
 
 
+def _cover_field_bubbles(gray: np.ndarray, spec: dict, field_ids: set[str]) -> np.ndarray:
+    """Tapa las 4 burbujas de esos campos con un cuadrado negro: hay tinta (la firma de
+    grilla pasa) pero no hay anillo que registrar (el grupo entero cae al spec)."""
+    covered = gray.copy()
+    radius_px = syn.bubble_radius_px(spec)
+    for field in spec["fields"]:
+        if field["fieldId"] not in field_ids:
+            continue
+        for bubble in field["bubbles"]:
+            cx, cy = syn.bubble_center_px(spec, field["fieldId"], bubble["value"])
+            side = round(radius_px * 1.5)
+            cv2.rectangle(covered, (cx - side, cy - side), (cx + side, cy + side), 25, -1)
+    return covered
+
+
+def test_a_page_with_too_many_unregistrable_groups_is_rejected_not_read(
+    spec: dict, clean_gray: np.ndarray, profile: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.pipeline import assess_page
+
+    half = {field["fieldId"] for field in spec["fields"][: len(spec["fields"]) // 2]}
+    covered = _cover_field_bubbles(clean_gray, spec, half)
+
+    monkeypatch.setenv(reg.ENV_FLAG, "1")
+    page = process_page(syn.to_bgr(covered), 0, spec, profile)
+    gate = assess_page(syn.to_bgr(covered), spec, profile)
+
+    assert page["quality"]["ok"] is False
+    assert page["quality"]["rejectReason"] == "no_separable_marks"
+    assert page["quality"]["marksReadability"] == "unreadable"
+    assert page["marks"] == []
+    assert gate["quality"]["rejectReason"] == page["quality"]["rejectReason"]
+    assert gate["quality"]["marksReadability"] == page["quality"]["marksReadability"]
+
+    monkeypatch.setenv(reg.ENV_FLAG, "0")
+    legacy = process_page(syn.to_bgr(covered), 0, spec, profile)
+    assert legacy["quality"]["ok"] is True
+
+
+def test_a_single_unregistrable_group_is_tolerated(
+    spec: dict, clean_gray: np.ndarray, profile: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    covered = _cover_field_bubbles(clean_gray, spec, {spec["fields"][0]["fieldId"]})
+
+    monkeypatch.setenv(reg.ENV_FLAG, "1")
+    page = process_page(syn.to_bgr(covered), 0, spec, profile)
+
+    assert page["quality"]["ok"] is True
+    states = {mark["fieldId"]: mark["state"] for mark in page["marks"]}
+    assert states[spec["fields"][0]["fieldId"]] == "multiple"
+    assert all(
+        state in ("marked", "blank")
+        for field, state in states.items()
+        if field != spec["fields"][0]["fieldId"]
+    )
+
+
+def test_score_min_sits_between_real_paper_and_the_worst_real_ring() -> None:
+    assert 0.586 < reg.SCORE_MIN < 0.677
+
+
 def test_env_flag_parsing(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv(reg.ENV_FLAG, raising=False)
     assert reg.local_registration_enabled() is reg.DEFAULT_ENABLED

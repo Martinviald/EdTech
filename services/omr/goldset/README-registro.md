@@ -237,3 +237,47 @@ Validación final **sin variable de entorno** (lo que corre en producción):
    (protocolo en `goldset/real/README.md`).
 
 Decisión: **listo para PR contra `dev`.**
+
+---
+
+## Pendientes (plan `analisis-omr-marcas/plan-pendientes-omr.md`)
+
+### 2026-09-08 · pendientes fase 2 · A1 — fallback masivo y `SCORE_MIN`
+
+**Ciclo 2a — medir.** El arnés puntúa ahora la plantilla de anillo también sobre **papel sin
+anillo** (4 posiciones a la derecha de cada fila, `_paper_scores`), además de sobre cada burbuja:
+
+| | mín | p1 |
+|---|---|---|
+| anillo real, vacías (648, 9 fotos) | **0.677** | 0.737 |
+| anillo real, marcadas (144) | **0.695** | 0.713 |
+| anillo real, 4 hojas del 2026-09-05 (352) | 0.709 | — |
+| anillo sintético limpio (`phone-*`, `scanner`) | 0.69 marcadas · 0.79 vacías | — |
+| anillo sintético `dirty` (marca sucia sobre el anillo) | 0.57 — esa burbuja **debe** heredar del grupo | 0.59 |
+
+| papel | máx | p99 |
+|---|---|---|
+| real (792 posiciones) | **0.586** | 0.584 |
+| sintético | 0.544 | 0.544 |
+
+Con `SCORE_MIN = 0.70` el corte tocaba los anillos reales (3 vacías y 1 marcada por debajo, en
+`diego-1621`) y dejaba 0 de margen. Fallback medido: 0 % en 13 fotos reales y 48 sintéticas.
+
+**Ciclo 2b — `SCORE_MIN` 0.70 → 0.63:** medio del hueco real (0.586 – 0.677), ±0.045 a cada lado.
+Tabla en el docstring de `app/registration.py`; test `test_score_min_sits_between_real_paper_and_the_worst_real_ring`.
+
+**Ciclo 2c — política:** `unregistrable(fixes)` = más de `FALLBACK_MAX_RATIO` (0.25) de las burbujas
+de la página muestreadas en la posición del spec → `_marks_readability` declara la página
+`unreadable` y el lote la rechaza con `no_separable_marks` (mismo veredicto en `assess_page`; sin
+motivo nuevo, sin cambio de contrato). Con `OMR_LOCAL_REGISTRATION=0` la política no actúa.
+Tests: página con la mitad de los campos sin anillo → rechazada (gate = lote), leída con el
+interruptor apagado; un solo campo sin anillo → tolerado.
+
+| instrumento | resultado |
+|---|---|
+| suite | 256 (27 de registro) |
+| sintético 48 | 97.57 % / 2.26 % / 1 — idéntico |
+| real 9 · real 4 (2026-09-05) | 194 / 26 / 0 · 81 / 7 / 0 — idénticos; ninguna hoja legible rechazada |
+| hueco mínimo motor | 0.486 · 0.439 — sin cambio |
+
+Decisión: **avanza** a pendientes fase 3 (A2).
