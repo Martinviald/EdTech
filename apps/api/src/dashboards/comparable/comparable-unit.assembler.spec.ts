@@ -24,7 +24,7 @@ const BANDS: PerformanceBandInput[] = [
 ];
 
 function breakdown(overrides: Partial<ClassGroupBreakdownData> = {}): ClassGroupBreakdownData {
-  return { totals: [], bandCounts: [], unbanded: [], ...overrides };
+  return { totals: [], classification: [], ...overrides };
 }
 
 function totalsRow(
@@ -71,9 +71,21 @@ describe('ComparableUnitAssembler.foldByClassGroup', () => {
     const [course] = assembler.foldByClassGroup(
       breakdown({
         totals: [totalsRow({ studentsAssessed: 4, percentageSum: '200', percentageCount: 4 })],
-        bandCounts: [
-          { instrumentId: 'i-1', classGroupId: 'cg-1', performanceBandId: 'band-low', count: 2 },
-          { instrumentId: 'i-1', classGroupId: 'cg-1', performanceBandId: 'band-high', count: 2 },
+        classification: [
+          {
+            instrumentId: 'i-1',
+            classGroupId: 'cg-1',
+            performanceBandId: 'band-low',
+            percentage: null,
+            count: 2,
+          },
+          {
+            instrumentId: 'i-1',
+            classGroupId: 'cg-1',
+            performanceBandId: 'band-high',
+            percentage: null,
+            count: 2,
+          },
         ],
       }),
       BANDS,
@@ -86,9 +98,21 @@ describe('ComparableUnitAssembler.foldByClassGroup', () => {
     const [course] = assembler.foldByClassGroup(
       breakdown({
         totals: [totalsRow({ studentsAssessed: 2, percentageSum: '110', percentageCount: 2 })],
-        unbanded: [
-          { instrumentId: 'i-1', classGroupId: 'cg-1', percentage: '30' },
-          { instrumentId: 'i-1', classGroupId: 'cg-1', percentage: '80' },
+        classification: [
+          {
+            instrumentId: 'i-1',
+            classGroupId: 'cg-1',
+            performanceBandId: null,
+            percentage: '30',
+            count: 1,
+          },
+          {
+            instrumentId: 'i-1',
+            classGroupId: 'cg-1',
+            performanceBandId: null,
+            percentage: '80',
+            count: 1,
+          },
         ],
       }),
       BANDS,
@@ -101,12 +125,21 @@ describe('ComparableUnitAssembler.foldByClassGroup', () => {
     const [course] = assembler.foldByClassGroup(
       breakdown({
         totals: [totalsRow({ studentsAssessed: 3, percentageSum: '150', percentageCount: 3 })],
-        bandCounts: [
-          { instrumentId: 'i-1', classGroupId: 'cg-1', performanceBandId: 'band-high', count: 1 },
-        ],
-        unbanded: [
-          { instrumentId: 'i-1', classGroupId: 'cg-1', percentage: '30' },
-          { instrumentId: 'i-1', classGroupId: 'cg-1', percentage: '20' },
+        classification: [
+          {
+            instrumentId: 'i-1',
+            classGroupId: 'cg-1',
+            performanceBandId: 'band-high',
+            percentage: null,
+            count: 1,
+          },
+          {
+            instrumentId: 'i-1',
+            classGroupId: 'cg-1',
+            performanceBandId: null,
+            percentage: '30',
+            count: 2,
+          },
         ],
       }),
       BANDS,

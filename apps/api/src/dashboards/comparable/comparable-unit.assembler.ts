@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   assessmentResults,
   assessments,
@@ -41,23 +41,17 @@ export type ClassGroupTotalsRow = {
   percentageCount: number;
 };
 
-export type ClassGroupBandCountRow = {
+export type ClassGroupClassificationRow = {
   instrumentId: string;
   classGroupId: string;
-  performanceBandId: string;
-  count: number;
-};
-
-export type ClassGroupUnbandedRow = {
-  instrumentId: string;
-  classGroupId: string;
+  performanceBandId: string | null;
   percentage: string | null;
+  count: number;
 };
 
 export type ClassGroupBreakdownData = {
   totals: ClassGroupTotalsRow[];
-  bandCounts: ClassGroupBandCountRow[];
-  unbanded: ClassGroupUnbandedRow[];
+  classification: ClassGroupClassificationRow[];
 };
 
 export type BandClassificationRow = {
@@ -312,7 +306,9 @@ export class ComparableUnitAssembler {
     classGroupIds: string[] | null,
     bands: PerformanceBandInput[],
   ): Promise<ComparableUnitClassGroup[]> {
-    const data = await this.loadClassGroupBreakdown(tx, orgId, assessmentIds, classGroupIds);
+    const data = await this.loadClassGroupBreakdown(tx, orgId, assessmentIds, classGroupIds, {
+      needsClassification: bands.length > 0,
+    });
     return this.foldByClassGroup(data, bands);
   }
 
@@ -330,8 +326,9 @@ export class ComparableUnitAssembler {
     orgId: string,
     assessmentIds: string[],
     classGroupIds: string[] | null,
+    options: { needsClassification: boolean } = { needsClassification: true },
   ): Promise<ClassGroupBreakdownData> {
-    const empty: ClassGroupBreakdownData = { totals: [], bandCounts: [], unbanded: [] };
+    const empty: ClassGroupBreakdownData = { totals: [], classification: [] };
     if (assessmentIds.length === 0) return empty;
     if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
@@ -368,11 +365,12 @@ export class ComparableUnitAssembler {
       .where(and(...conditions))
       .groupBy(assessments.instrumentId, classGroups.id, classGroups.name, grades.name);
 
-    const bandCountsQuery = tx
+    const classificationQuery = tx
       .select({
         instrumentId: assessments.instrumentId,
         classGroupId: classGroups.id,
-        performanceBandId: sql<string>`${assessmentResults.performanceBandId}`,
+        performanceBandId: assessmentResults.performanceBandId,
+        percentage: assessmentResults.percentage,
         count: sql<number>`count(*)::int`,
       })
       .from(assessmentResults)
@@ -381,30 +379,20 @@ export class ComparableUnitAssembler {
       .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
       .innerJoin(studentEnrollments, enrollmentOfAssessmentYear)
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-      .where(and(...conditions, isNotNull(assessmentResults.performanceBandId)))
-      .groupBy(assessments.instrumentId, classGroups.id, assessmentResults.performanceBandId);
+      .where(and(...conditions))
+      .groupBy(
+        assessments.instrumentId,
+        classGroups.id,
+        assessmentResults.performanceBandId,
+        assessmentResults.percentage,
+      );
 
-    const unbandedQuery = tx
-      .select({
-        instrumentId: assessments.instrumentId,
-        classGroupId: classGroups.id,
-        percentage: assessmentResults.percentage,
-      })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
-      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
-      .innerJoin(studentEnrollments, enrollmentOfAssessmentYear)
-      .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-      .where(and(...conditions, isNull(assessmentResults.performanceBandId)));
-
-    const [totals, bandCounts, unbanded] = await Promise.all([
+    const [totals, classification] = await Promise.all([
       totalsQuery,
-      bandCountsQuery,
-      unbandedQuery,
+      options.needsClassification ? classificationQuery : Promise.resolve([]),
     ]);
 
-    return { totals, bandCounts, unbanded };
+    return { totals, classification };
   }
 
   /** Arma los cursos con lo que Postgres ya agregó. Sin consultar. */
@@ -444,19 +432,13 @@ export class ComparableUnitAssembler {
     }
 
     if (lowestBandId) {
-      for (const row of data.bandCounts) {
+      for (const row of data.classification) {
         const acc = byCourse.get(row.classGroupId);
         if (!acc) continue;
-        acc.classified += row.count;
-        if (row.performanceBandId === lowestBandId) acc.inLowestBand += row.count;
-      }
-      for (const row of data.unbanded) {
-        const acc = byCourse.get(row.classGroupId);
-        if (!acc) continue;
-        const bandId = this.classifyPercentage(row.percentage, bands);
+        const bandId = row.performanceBandId ?? this.classifyPercentage(row.percentage, bands);
         if (!bandId) continue;
-        acc.classified += 1;
-        if (bandId === lowestBandId) acc.inLowestBand += 1;
+        acc.classified += row.count;
+        if (bandId === lowestBandId) acc.inLowestBand += row.count;
       }
     }
 

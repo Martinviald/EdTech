@@ -223,16 +223,13 @@ export class ComparableOverviewService {
     const breakdownFor = (instrumentId: string): ClassGroupBreakdownData => {
       const existing = classGroupBreakdownByInstrument.get(instrumentId);
       if (existing) return existing;
-      const created: ClassGroupBreakdownData = { totals: [], bandCounts: [], unbanded: [] };
+      const created: ClassGroupBreakdownData = { totals: [], classification: [] };
       classGroupBreakdownByInstrument.set(instrumentId, created);
       return created;
     };
     for (const row of classGroupBreakdown.totals) breakdownFor(row.instrumentId).totals.push(row);
-    for (const row of classGroupBreakdown.bandCounts) {
-      breakdownFor(row.instrumentId).bandCounts.push(row);
-    }
-    for (const row of classGroupBreakdown.unbanded) {
-      breakdownFor(row.instrumentId).unbanded.push(row);
+    for (const row of classGroupBreakdown.classification) {
+      breakdownFor(row.instrumentId).classification.push(row);
     }
 
     const needsClassificationRows = units.some((unit) => {
@@ -277,8 +274,7 @@ export class ComparableOverviewService {
     const byClassGroup = this.assembler.foldByClassGroup(
       scope.classGroupBreakdownByInstrument.get(unit.ref.instrumentId) ?? {
         totals: [],
-        bandCounts: [],
-        unbanded: [],
+        classification: [],
       },
       bands,
     );
