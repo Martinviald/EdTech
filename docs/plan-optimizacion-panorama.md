@@ -249,6 +249,45 @@ Tres cifras por fase y por alcance: queries por request · ms del endpoint · KB
 
 ---
 
+## 5 bis. Comparación medida contra la versión anterior (F8)
+
+Las métricas de arriba comparan cada fase con la anterior. Esta sección compara **la épica completa contra el código previo**, con los dos corriendo contra la misma BDD y desde la misma máquina, y extiende la verificación a los **otros dos consumidores** del assembler, que el snapshot del panorama no cubría: la trayectoria comparable y la comparación de un alumno.
+
+La herramienta es `apps/api/scripts/bench-panorama.ts` (11 casos, mide queries, ms y bytes); se corre desde un worktree en el commit base y desde el de la épica.
+
+| Caso                            | Queries antes → después | Bytes antes → después |
+| ------------------------------- | ----------------------- | --------------------- |
+| Panorama, alcance completo      | **610 → 24**            | 1.008 KB → 297 KB     |
+| Panorama, PAES                  | 61 → 21                 | 288 KB → 51 KB        |
+| Panorama, DIA                   | 566 → 24                | 720 KB → 259 KB       |
+| Panorama, profesor              | 42 → 24                 | 174 KB → 31 KB        |
+| Trayectoria (2 casos)           | 42 → 43 · 40 → 41       | igual                 |
+| Comparación de alumno (2 casos) | 29 → 33                 | igual                 |
+
+**Los dos últimos empeoran y hay que decirlo:** el desglose por curso pasó de 1 query a 2 (totales + clasificación), y la comparación de alumno lo llama cuatro veces. Son +1 query por llamada; en producción, ~1-2 ms cada una. Se descartó mantener el camino viejo para esos consumidores: sería la misma lógica escrita dos veces.
+
+**Los tiempos absolutos de esas corridas no sirven como referencia de producción:** por el túnel SST cada query cuesta ~150 ms de ida y vuelta (medido: mediana 150 ms, p90 165 ms), así que el reloj mide sobre todo el túnel. Sirven para comparar entre sí, no para prometer una cifra.
+
+**El "antes" de producción, ese sí medido** contra la API desplegada en el demo (App Runner, código previo a la épica):
+
+| Alcance     | Primer byte   | Bytes   |
+| ----------- | ------------- | ------- |
+| PAES        | 1,85 – 1,91 s | 240.646 |
+| Sin filtros | 5,73 – 7,86 s | 810.789 |
+
+Sin `content-encoding` en la respuesta: la API desplegada **no comprime** (lo que arregla F7). El "después" de producción sólo se puede medir tras el deploy, contra esta misma línea base.
+
+### Lo que cambió en los otros dos consumidores
+
+El fan-out de F4 los afectaba a ellos también, así que su salida cambió — a mejor:
+
+- **Trayectoria:** el desglose por curso deja de repetir cada curso una vez por año cursado.
+- **Comparación de un alumno:** la cohorte de nivel contra la que se compara al alumno pasa de 149 a 76 alumnos en Matemáticas, y su etiqueta de **"6° Básico" a "7° Básico"** — que es el nivel del instrumento ancla (`DIA Matemática 7° Básico 2026 — Intermedio`). Antes comparaba al alumno contra una cohorte mal rotulada y con el doble de gente.
+
+Fuera de eso, la comparación campo a campo de los 11 casos no muestra ninguna otra diferencia estructural: sólo el truncado de alertas (F2), `alertsTotal` (F2) y ruido de punto flotante.
+
+---
+
 ## 6. Fuera del alcance de esta épica
 
 - **La caída de sesión** que menciona el mismo comentario ("se me cayó varias veces"). Puede ser el timeout de App Runner o la conexión del colegio; se investiga con los logs de la API de la ventana 2026-09-08 ~15:29 hora Chile. Es un ticket aparte, no una fase.
