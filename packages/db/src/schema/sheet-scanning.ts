@@ -12,7 +12,13 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
-import type { CaptureProfile, CaptureSessionCapture, LayoutSpec, PageQuality } from '@soe/types';
+import type {
+  CaptureProfile,
+  CaptureSessionCapture,
+  LayoutSpec,
+  PageDiagnostics,
+  PageQuality,
+} from '@soe/types';
 import {
   captureSessionStatusEnum,
   markReviewDecisionEnum,
@@ -184,6 +190,10 @@ export const sheetScans = pgTable(
     imageHash: text('image_hash').notNull(),
     state: sheetScanStateEnum('state').notNull(),
     quality: jsonb('quality').$type<PageQuality>().notNull(),
+    // Payload `debug` del lector (registro local de burbujas, contraste por
+    // pregunta, umbral/hueco de Otsu, tiempos). Es monitoreo, no contrato: NULL
+    // si el servicio no lo emitió; nunca condiciona la lectura ni la revisión.
+    diagnostics: jsonb('diagnostics').$type<PageDiagnostics>(),
     resolvedStudentId: uuid('resolved_student_id').references(() => students.id),
     identityConfidence: decimal('identity_confidence', { precision: 4, scale: 3 }),
     identityEvidence: jsonb('identity_evidence').$type<Record<string, unknown>>(),

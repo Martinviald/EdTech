@@ -218,6 +218,13 @@
       "when": 1788893445545,
       "tag": "0030_nebulous_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1788922348958,
+      "tag": "0031_gifted_frightful_four",
+      "breakpoints": true
     }
   ]
 }

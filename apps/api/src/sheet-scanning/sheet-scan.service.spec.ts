@@ -452,6 +452,7 @@ describe('SheetScanService job', () => {
       sourcePageIndex: 0,
       imageHash: 'a'.repeat(64),
       state: 'read',
+      diagnostics: null,
       resolvedStudentId: STUDENT_1,
       identityConfidence: '1.000',
       supersedesId: null,

@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
 import {
   files,
   printedSheets,
@@ -35,7 +35,9 @@ import {
   type PaginatedResponse,
   type ScanBatchQueryDto,
   type ScanUploadIntent,
+  type BatchDiagnosticsModel,
   type ScannedPage,
+  type ScannedPageWithDiagnostics,
   type SheetScanBatchStatus,
   type SheetScanState,
 } from '@soe/types';
@@ -75,6 +77,8 @@ const ORPHANED_PROCESSING_FAILURE_MESSAGE =
 
 const UNEXPECTED_FAILURE_MESSAGE =
   'Ocurrió un error inesperado al procesar el lote. Reintenta el procesamiento; si el problema persiste, contacta a soporte.';
+
+const round1 = (value: number): number => Math.round(value * 10) / 10;
 
 type JobContext = {
   printRunId: string;
@@ -239,13 +243,45 @@ export class SheetScanService {
         new Map([[row.id, row.sheetCount]]),
       );
       const sources = await this.loadSourceProgress(tx, [row]);
-      return this.toBatchModel(
+      const model = this.toBatchModel(
         row,
         counters.get(row.id) ?? this.emptyCounters(row.sheetCount),
         sources.get(row.id) ?? this.emptySources(row),
         orphanedIds.has(row.id),
       );
+      return { ...model, diagnostics: await this.loadBatchDiagnostics(tx, orgId, row.id) };
     });
+  }
+
+  private async loadBatchDiagnostics(
+    tx: Database,
+    orgId: string,
+    batchId: string,
+  ): Promise<BatchDiagnosticsModel | null> {
+    const registration = sql`${sheetScans.diagnostics} -> 'registration'`;
+    const [row] = await tx
+      .select({
+        pages: sql<number>`count(*)::int`,
+        offMedianPxAvg: sql<number | null>`avg((${registration} ->> 'offMedianPx')::numeric)`,
+        offMaxPxMax: sql<number | null>`max((${registration} ->> 'offMaxPx')::numeric)`,
+        fallbackPages: sql<number>`count(*) filter (where coalesce((${registration} ->> 'fallbackCount')::int, 0) > 0)::int`,
+      })
+      .from(sheetScans)
+      .where(
+        and(
+          eq(sheetScans.orgId, orgId),
+          eq(sheetScans.batchId, batchId),
+          ne(sheetScans.state, 'superseded'),
+          isNotNull(sheetScans.diagnostics),
+        ),
+      );
+    if (!row || Number(row.pages) === 0) return null;
+    return {
+      pages: Number(row.pages),
+      offMedianPxAvg: row.offMedianPxAvg === null ? null : round1(Number(row.offMedianPxAvg)),
+      offMaxPxMax: row.offMaxPxMax === null ? null : round1(Number(row.offMaxPxMax)),
+      fallbackPages: Number(row.fallbackPages),
+    };
   }
 
   async list(
@@ -614,7 +650,7 @@ export class SheetScanService {
     orgId: string,
     batchId: string,
     sourceFileId: string,
-    page: ScannedPage,
+    page: ScannedPageWithDiagnostics,
     candidate: IdentityCandidate,
   ): Promise<void> {
     const qrPayload = this.qrPayloadOf(page.identity);
@@ -673,6 +709,7 @@ export class SheetScanService {
         imageHash: page.imageSha256,
         state: this.resolveScanState(page, candidate),
         quality: page.quality,
+        diagnostics: page.diagnostics ?? null,
         resolvedStudentId: candidate.studentId,
         identityConfidence: candidate.confidence.toFixed(3),
         identityEvidence: candidate.evidence,

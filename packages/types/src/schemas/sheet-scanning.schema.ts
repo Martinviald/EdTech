@@ -304,6 +304,19 @@ export type BatchSourcesModel = {
   ready: number;
 };
 
+/**
+ * Resumen del registro local de burbujas sobre las páginas leídas del lote
+ * (agregado de `sheet_scans.diagnostics`). `null` cuando ninguna página trae
+ * diagnóstico (servicio viejo o lote sin páginas leídas). Solo lo trae el
+ * detalle de un lote, no el listado.
+ */
+export type BatchDiagnosticsModel = {
+  pages: number;
+  offMedianPxAvg: number | null;
+  offMaxPxMax: number | null;
+  fallbackPages: number;
+};
+
 export type BatchStatusModel = {
   id: string;
   printRunId: string;
@@ -315,6 +328,7 @@ export type BatchStatusModel = {
   failureReason: string | null;
   counters: BatchCountersModel;
   sources: BatchSourcesModel;
+  diagnostics?: BatchDiagnosticsModel | null;
   createdAt: string | Date;
   updatedAt: string | Date;
 };
@@ -385,12 +399,30 @@ export type OmrCalibrationResponse = {
   calibration: OmrCalibration;
 };
 
+/**
+ * Monitoreo del registro local de burbujas sobre las páginas leídas de la org.
+ * `offsetAlertPages` y `fallbackAlertPages` cuentan páginas por encima de
+ * `alerts` (REGISTRATION_ALERT_* en omr-scan.schema): si suben, una impresora
+ * o una cámara se corrió y hay que mirar esos lotes antes de que aparezca un
+ * error confiado.
+ */
+export type RegistrationMetricsModel = {
+  pagesWithDiagnostics: number;
+  offMedianPxAvg: number | null;
+  offMaxPxMax: number | null;
+  fallbackPages: number;
+  offsetAlertPages: number;
+  fallbackAlertPages: number;
+  alerts: { offMedianPx: number; fallbackRatio: number };
+};
+
 export type SheetScanMetricsResponse = {
   batchesByStatus: Record<string, number>;
   rejectedPagesByReason: Record<string, number>;
   marksByState: Record<string, number>;
   reviewRatePercent: number;
   firmReadingOverrides: number;
+  registration: RegistrationMetricsModel;
 };
 
 export type ConfirmBatchResponse = {
