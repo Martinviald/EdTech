@@ -143,30 +143,33 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
   function runGate(capture: CapturedJpeg) {
     const previewUrl = URL.createObjectURL(capture.blob);
     setGate({ phase: 'assessing', previewUrl });
-    assess.mutate(capture.imageBase64, {
-      onSuccess: (result) => {
-        if (!result.accepted && looksBlank(result.quality)) {
-          setGate({
-            phase: 'blank-confirm',
-            previewUrl,
-            blob: capture.blob,
-            identity: result.identity,
-          });
-          return;
-        }
-        if (!result.accepted) {
-          setGate({
-            phase: 'rejected',
-            previewUrl,
-            reason: rejectionLabel(result.quality),
-            hint: rejectionHint(result.quality.rejectReason),
-          });
-          return;
-        }
-        upload(capture.blob, result.identity, previewUrl);
+    assess.mutate(
+      { imageBase64: capture.imageBase64 },
+      {
+        onSuccess: (result) => {
+          if (!result.accepted && looksBlank(result.quality)) {
+            setGate({
+              phase: 'blank-confirm',
+              previewUrl,
+              blob: capture.blob,
+              identity: result.identity,
+            });
+            return;
+          }
+          if (!result.accepted) {
+            setGate({
+              phase: 'rejected',
+              previewUrl,
+              reason: rejectionLabel(result.quality),
+              hint: rejectionHint(result.quality.rejectReason),
+            });
+            return;
+          }
+          upload(capture.blob, result.identity, previewUrl);
+        },
+        onError: () => backToLive(previewUrl),
       },
-      onError: () => backToLive(previewUrl),
-    });
+    );
   }
 
   async function handleCapture() {
