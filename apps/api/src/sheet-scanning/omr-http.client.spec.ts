@@ -68,9 +68,77 @@ describe('HttpOmrClient.read', () => {
 
     expect(result.pages).toHaveLength(1);
     expect(result.pages[0].imageSha256).toBe('a'.repeat(64));
+    expect(result.pages[0].diagnostics).toBeNull();
     expect(calls).toHaveLength(1);
-    expect(calls[0].url).toBe('http://omr.test:8090/v1/read');
+    expect(calls[0].url).toBe('http://omr.test:8090/v1/read?debug=1');
     expect(JSON.parse(calls[0].body)).toEqual(REQUEST);
+  });
+
+  it('con `{ result, debug }` empareja el diagnóstico de cada página por pageIndex', async () => {
+    const debugPage = {
+      pageIndex: 0,
+      threshold: 0.61,
+      gap: 0.74,
+      separable: true,
+      registration: {
+        enabled: true,
+        bubbles: 88,
+        offMedianPx: 8.5,
+        offP90Px: 13,
+        offMaxPx: 15.3,
+        scoreP10: 0.73,
+        fallbackCount: 0,
+        inheritedCount: 2,
+      },
+      fieldContrast: { markedMin: 0.62, markedCount: 19, blankMax: 0.08, blankCount: 3 },
+      timingsMs: { classify: 31.2 },
+    };
+    const { fetchFn } = makeFetch([
+      jsonResponse(200, { result: VALID_RESULT, debug: { pages: [debugPage] } }),
+    ]);
+    const client = makeClient(fetchFn);
+
+    const result = await client.read(REQUEST);
+
+    expect(result.pages[0].imageSha256).toBe('a'.repeat(64));
+    expect(result.pages[0].diagnostics).toEqual({
+      threshold: 0.61,
+      gap: 0.74,
+      separable: true,
+      registration: debugPage.registration,
+      fieldContrast: debugPage.fieldContrast,
+      timingsMs: { classify: 31.2 },
+    });
+  });
+
+  it('un debug inválido se descarta y la lectura sigue con el result', async () => {
+    const { fetchFn } = makeFetch([
+      jsonResponse(200, { result: VALID_RESULT, debug: { pages: 'no-una-lista' } }),
+    ]);
+    const client = makeClient(fetchFn);
+
+    const result = await client.read(REQUEST);
+
+    expect(result.pages).toHaveLength(1);
+    expect(result.pages[0].diagnostics).toBeNull();
+  });
+
+  it('un debug sin la página deja su diagnóstico en null sin tocar las demás', async () => {
+    const twoPages: ScanResult = {
+      pages: [VALID_RESULT.pages[0], { ...VALID_RESULT.pages[0], pageIndex: 1 }],
+    };
+    const { fetchFn } = makeFetch([
+      jsonResponse(200, {
+        result: twoPages,
+        debug: { pages: [{ pageIndex: 1, threshold: 0.5 }] },
+      }),
+    ]);
+    const client = makeClient(fetchFn);
+
+    const result = await client.read(REQUEST);
+
+    expect(result.pages[0].diagnostics).toBeNull();
+    expect(result.pages[1].diagnostics).toEqual({ threshold: 0.5 });
   });
 
   it('una respuesta 200 bien formada pero inválida lanza OmrInvalidResponseError', async () => {

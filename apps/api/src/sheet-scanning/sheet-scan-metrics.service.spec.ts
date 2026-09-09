@@ -106,6 +106,47 @@ describe('SheetScanMetricsService', () => {
 
     expect(metrics.reviewRatePercent).toBe(0);
     expect(metrics.firmReadingOverrides).toBe(0);
+    expect(metrics.registration).toEqual({
+      pagesWithDiagnostics: 0,
+      offMedianPxAvg: null,
+      offMaxPxMax: null,
+      fallbackPages: 0,
+      offsetAlertPages: 0,
+      fallbackAlertPages: 0,
+      alerts: { offMedianPx: 10, fallbackRatio: 0.1 },
+    });
+  });
+
+  it('agrega el registro local de burbujas desde sheet_scans.diagnostics', async () => {
+    const service = makeService([
+      [],
+      [],
+      [],
+      [],
+      [],
+      [
+        {
+          pages: 9,
+          offMedianPxAvg: '8.4444',
+          offMaxPxMax: '17.69',
+          fallbackPages: 1,
+          offsetAlertPages: 3,
+          fallbackAlertPages: 0,
+        },
+      ],
+    ]);
+
+    const metrics = await service.getMetrics(ORG_ID);
+
+    expect(metrics.registration).toEqual({
+      pagesWithDiagnostics: 9,
+      offMedianPxAvg: 8.4,
+      offMaxPxMax: 17.7,
+      fallbackPages: 1,
+      offsetAlertPages: 3,
+      fallbackAlertPages: 0,
+      alerts: { offMedianPx: 10, fallbackRatio: 0.1 },
+    });
   });
 
   it('expone las correcciones humanas que contradicen lecturas firmes', async () => {
@@ -144,8 +185,8 @@ describe('SheetScanMetricsService', () => {
     expect(metrics.marksByState.marked).toBe(70);
   });
 
-  it('las marcas de scans superseded quedan fuera de todas las queries de marcas', async () => {
-    const { db, selectWheres } = makeDb([[], [], [], [{ count: 0 }], [{ count: 0 }]]);
+  it('las marcas de scans superseded quedan fuera de todas las queries de marcas y de diagnóstico', async () => {
+    const { db, selectWheres } = makeDb([[], [], [], [{ count: 0 }], [{ count: 0 }], []]);
     const service = new SheetScanMetricsService(db);
 
     await service.getMetrics(ORG_ID);
@@ -154,7 +195,7 @@ describe('SheetScanMetricsService', () => {
     const markQueries = selectWheres.slice(2).map((condition) => {
       return dialect.sqlToQuery(condition as Parameters<PgDialect['sqlToQuery']>[0]);
     });
-    expect(markQueries).toHaveLength(3);
+    expect(markQueries).toHaveLength(4);
     for (const query of markQueries) {
       expect(query.sql).toContain('"sheet_scans"."state" <>');
       expect(query.params).toContain('superseded');
