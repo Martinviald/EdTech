@@ -45,8 +45,12 @@ describe('ejemplos compartidos del contrato OMR', () => {
       pages: Array<{ marks: Array<Record<string, unknown>> }>;
     };
     const marks = example.pages.flatMap((page) => page.marks);
-    expect(marks.some((mark) => mark.suggestedValue === 'B' && mark.doubtReason === 'margin')).toBe(true);
-    expect(marks.some((mark) => mark.doubtReason === 'multiple' && mark.nullConfidence === 0.88)).toBe(true);
+    expect(marks.some((mark) => mark.suggestedValue === 'B' && mark.doubtReason === 'margin')).toBe(
+      true,
+    );
+    expect(
+      marks.some((mark) => mark.doubtReason === 'multiple' && mark.nullConfidence === 0.88),
+    ).toBe(true);
     const v1 = {
       pages: example.pages.map((page) => ({
         ...page,

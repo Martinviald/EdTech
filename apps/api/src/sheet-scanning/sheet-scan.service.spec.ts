@@ -408,6 +408,93 @@ describe('SheetScanService.startProcessing / retry', () => {
 });
 
 describe('SheetScanService job', () => {
+  it('B2: con organizations.config.review.autoAnnulMinConfidence una doble evidente se anula sola y una dudosa no', async () => {
+    const { service, inserts, resolve, omr } = makeService([
+      [{ ...CTX_ROW, orgConfig: { review: { autoAnnulMinConfidence: 0.9 } } }],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 1 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [
+        makePage({
+          pageIndex: 0,
+          imageSha256: 'a'.repeat(64),
+          identity: { mode: 'qr', raw: qrRaw(SHEET_1, 1), confidence: 1 },
+          marks: [
+            makeMark({
+              fieldId: 'item-1',
+              state: 'multiple',
+              value: null,
+              doubtReason: 'multiple',
+              nullConfidence: 0.98,
+            }),
+            makeMark({
+              fieldId: 'item-2',
+              printedNumber: '2',
+              state: 'multiple',
+              value: null,
+              doubtReason: 'multiple',
+              nullConfidence: 0.12,
+            }),
+          ],
+        }),
+      ],
+    });
+    resolve.mockResolvedValueOnce(candidate({ printedSheetId: SHEET_1, studentId: STUDENT_1 }));
+
+    await runJob(service);
+
+    const marks = inserts[1].values as Array<Record<string, unknown>>;
+    expect(marks[0]).toMatchObject({
+      state: 'multiple',
+      nullConfidence: '0.980',
+      reviewDecision: 'annulled',
+      reviewedValue: null,
+      autoResolved: true,
+    });
+    expect(marks[0].reviewedAt).toBeInstanceOf(Date);
+    expect(marks[0].reviewedById).toBeUndefined();
+    expect(marks[1]).toMatchObject({ state: 'multiple', nullConfidence: '0.120' });
+    expect(marks[1].reviewDecision).toBeUndefined();
+    expect(marks[1].autoResolved).toBeUndefined();
+  });
+
+  it('B2: sin el ajuste de la org ninguna doble se anula sola', async () => {
+    const { service, inserts, resolve, omr } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 1 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [
+        makePage({
+          pageIndex: 0,
+          imageSha256: 'a'.repeat(64),
+          identity: { mode: 'qr', raw: qrRaw(SHEET_1, 1), confidence: 1 },
+          marks: [
+            makeMark({
+              state: 'multiple',
+              value: null,
+              doubtReason: 'multiple',
+              nullConfidence: 1,
+            }),
+          ],
+        }),
+      ],
+    });
+    resolve.mockResolvedValueOnce(candidate({ printedSheetId: SHEET_1, studentId: STUDENT_1 }));
+
+    await runJob(service);
+
+    const marks = inserts[1].values as Array<Record<string, unknown>>;
+    expect(marks[0].reviewDecision).toBeUndefined();
+    expect(marks[0].autoResolved).toBeUndefined();
+  });
+
   it('lote feliz multipágina: persiste scans y marks y deja el lote needs_review con contadores', async () => {
     const { service, inserts, updates, resolve, omr } = makeService([
       [CTX_ROW],

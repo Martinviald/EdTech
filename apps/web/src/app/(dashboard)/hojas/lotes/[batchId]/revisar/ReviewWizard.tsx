@@ -60,7 +60,8 @@ export function ReviewWizard({
   const pagesTotal = pagesBaselineRef.current ?? 0;
   const pagesDone = Math.max(0, pagesTotal - pagesPending);
 
-  const marks = queue?.ambiguousMarks ?? [];
+  const autoAnnulled = queue?.autoAnnulled ?? [];
+  const marks = [...(queue?.ambiguousMarks ?? []), ...autoAnnulled];
   const marksDone = marks.filter(isMarkResolved).length;
   const marksPending = marks.length - marksDone;
 
@@ -122,6 +123,16 @@ export function ReviewWizard({
               students={students}
               rosterAvailable={rosterAvailable}
             />
+          )}
+
+          {step === 'marcas' && autoAnnulled.length > 0 && (
+            <AlertCallout tone="info" title="Dobles marcas anuladas automáticamente">
+              {autoAnnulled.length === 1
+                ? 'Una doble marca evidente se anuló sola'
+                : `${autoAnnulled.length} dobles marcas evidentes se anularon solas`}{' '}
+              (ambas burbujas rellenas). No requieren revisión; quedan al final de la lista por si
+              quieres corregir alguna.
+            </AlertCallout>
           )}
 
           {step === 'marcas' &&

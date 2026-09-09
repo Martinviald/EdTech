@@ -159,7 +159,10 @@ export class CaptureSessionService {
       if (!row) throw new NotFoundException(SESSION_NOT_FOUND_MESSAGE);
 
       let status = row.status;
-      if ((status === 'pending' || status === 'active') && row.expiresAt.getTime() <= Date.now()) {
+      if (
+        (status === 'pending' || status === 'active') &&
+        row.expiresAt.getTime() <= Date.now()
+      ) {
         await tx
           .update(captureSessions)
           .set({ status: 'expired', updatedAt: new Date() })

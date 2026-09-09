@@ -35,7 +35,7 @@ import type {
   ReviewScanModel,
   SheetScanState,
 } from '@soe/types';
-import { isQuickConfirmEnabled } from '@soe/types';
+import { autoAnnulMinConfidence, isQuickConfirmEnabled } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
@@ -136,6 +136,7 @@ type MarkQueueRow = {
   reviewedValue: string | null;
   reviewDecision: MarkReviewDecision | null;
   reviewedById: string | null;
+  autoResolved: boolean;
 };
 
 type ConfirmMarkRow = {
@@ -182,7 +183,7 @@ export class ScanReviewService {
       if (!batch) throw new NotFoundException('Lote de escaneo no encontrado');
 
       const scanRows = await this.selectBatchScans(tx, orgId, batchId);
-      const markRows = await this.selectPendingMarks(tx, orgId, batchId);
+      const markRows = await this.selectPendingMarks(tx, orgId, batchId, 'pending');
 
       const fileIds: string[] = [];
       for (const scan of scanRows) {
@@ -220,12 +221,32 @@ export class ScanReviewService {
         })
         .sort((a, b) => a.margin - b.margin);
 
+      const autoRows = await this.selectPendingMarks(tx, orgId, batchId, 'auto');
+      const autoUrlByFileId = await this.buildFileUrlIndex(
+        tx,
+        orgId,
+        autoRows.flatMap((mark) => (mark.cropFileId ? [mark.cropFileId] : [])),
+      );
+      const autoAnnulled = autoRows.map((mark) => {
+        const scan = scanById.get(mark.scanId);
+        return this.toReviewMarkModel(
+          mark,
+          scan ? this.studentNameOf(scan) : null,
+          optionsByFieldId.get(mark.fieldId) ?? [],
+          mark.cropFileId ? (autoUrlByFileId.get(mark.cropFileId) ?? null) : null,
+        );
+      });
+
       return {
         batchId,
         qualityRejected,
         identityUnresolved,
         ambiguousMarks,
-        settings: { quickConfirm: isQuickConfirmEnabled(batch.orgConfig) },
+        autoAnnulled,
+        settings: {
+          quickConfirm: isQuickConfirmEnabled(batch.orgConfig),
+          autoAnnulMinConfidence: autoAnnulMinConfidence(batch.orgConfig),
+        },
       };
     });
   }
@@ -297,6 +318,7 @@ export class ScanReviewService {
           reviewDecision,
           reviewedById: userId,
           reviewedAt: new Date(),
+          autoResolved: false,
         })
         .where(eq(sheetScanMarks.id, markId));
 
@@ -327,6 +349,7 @@ export class ScanReviewService {
         reviewedValue,
         reviewedDecision: reviewDecision,
         reviewedById: userId,
+        autoResolved: false,
       };
     });
   }
@@ -739,7 +762,12 @@ export class ScanReviewService {
     tx: Database,
     orgId: string,
     batchId: string,
+    kind: 'pending' | 'auto',
   ): Promise<MarkQueueRow[]> {
+    const condition =
+      kind === 'pending'
+        ? isNull(sheetScanMarks.reviewedAt)
+        : and(eq(sheetScanMarks.autoResolved, true), isNull(sheetScanMarks.reviewedById));
     return tx
       .select({
         markId: sheetScanMarks.id,
@@ -758,6 +786,7 @@ export class ScanReviewService {
         reviewedValue: sheetScanMarks.reviewedValue,
         reviewDecision: sheetScanMarks.reviewDecision,
         reviewedById: sheetScanMarks.reviewedById,
+        autoResolved: sheetScanMarks.autoResolved,
       })
       .from(sheetScanMarks)
       .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
@@ -767,7 +796,7 @@ export class ScanReviewService {
           eq(sheetScans.batchId, batchId),
           ne(sheetScans.state, 'superseded'),
           inArray(sheetScanMarks.state, PENDING_MARK_STATES),
-          isNull(sheetScanMarks.reviewedAt),
+          condition,
         ),
       );
   }
@@ -928,6 +957,7 @@ export class ScanReviewService {
       reviewedValue: mark.reviewedValue,
       reviewedDecision: mark.reviewDecision,
       reviewedById: mark.reviewedById,
+      autoResolved: mark.autoResolved ?? false,
     };
   }
 

@@ -1,5 +1,6 @@
 import {
   bigint,
+  boolean,
   decimal,
   index,
   integer,
@@ -242,6 +243,7 @@ export const sheetScanMarks = pgTable(
     suggestedValue: text('suggested_value'),
     doubtReason: text('doubt_reason').$type<DoubtReason>(),
     nullConfidence: decimal('null_confidence', { precision: 4, scale: 3 }),
+    autoResolved: boolean('auto_resolved').notNull().default(false),
     reviewedValue: text('reviewed_value'),
     reviewDecision: markReviewDecisionEnum('review_decision'),
     reviewedById: uuid('reviewed_by_id').references(() => users.id),
