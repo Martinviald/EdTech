@@ -98,6 +98,15 @@ export type GenerationalHighlight = {
   instrumentIds: string[];
 };
 
+/**
+ * GET /api/dashboards/comparable-overview/alerts
+ *
+ * Lo único que el panorama refresca solo. Existe para que ese refresco no arrastre
+ * las unidades, su desglose por curso y el corte generacional, que no cambian entre
+ * dos poleos y son casi todo el peso de la respuesta completa.
+ */
+export type ComparableAlertsResponse = Pick<ComparableOverviewResponse, 'alerts' | 'alertsTotal'>;
+
 export type ComparableOverviewResponse = {
   scope: 'org' | 'teacher';
   /**
@@ -106,6 +115,13 @@ export type ComparableOverviewResponse = {
    * decidir si algo está mal (era el defecto de los umbrales 60/50 hardcodeados).
    */
   alerts: DashboardAlert[];
+  /**
+   * Cuántas alertas cumplen umbral en el alcance completo. `alerts` trae sólo las
+   * `MAX_DASHBOARD_ALERTS` mejor rankeadas: un alcance sin filtrar produce >1.500
+   * alertas de ítem y la banda muestra 4, así que mandarlas todas era el grueso del
+   * payload de la vista. El total sigue siendo dato: es el contador del encabezado.
+   */
+  alertsTotal: number;
   /** Ordenadas por severidad y, dentro de ella, por recencia. */
   units: ComparableUnitSummary[];
   /**

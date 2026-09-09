@@ -211,6 +211,13 @@
       "when": 1788625275388,
       "tag": "0029_jittery_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1788893445545,
+      "tag": "0030_nebulous_paibok",
+      "breakpoints": true
     }
   ]
 }

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "composite": true,
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*", "drizzle.config.ts"]
 }

@@ -108,13 +108,16 @@ async function PanoramaSections({ query }: { query: string }) {
         />
         <StatCard
           label="Requieren atención"
-          value={comparable.alerts.length.toLocaleString('es-CL')}
+          value={comparable.alertsTotal.toLocaleString('es-CL')}
           hint="Cursos y habilidades bajo umbral"
           icon={TriangleAlert}
         />
       </div>
 
-      <LiveAlertsBanner query={query} initialAlerts={comparable.alerts} />
+      <LiveAlertsBanner
+        query={query}
+        initial={{ alerts: comparable.alerts, total: comparable.alertsTotal }}
+      />
 
       <GenerationalBanner cells={comparable.generational} />
 

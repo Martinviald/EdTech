@@ -1,11 +1,18 @@
 name: CI
 
-# Gate de calidad en PRs: typecheck + lint + guard del Design System + `next build`.
+# Gate de calidad en PRs: web (typecheck + lint + guard del Design System + `next build`)
+# y api (typecheck + lint + tests).
 # (El repo antes solo tenía workflows de deploy; nada bloqueaba un PR roto.)
 #
 # `next build` es el ÚNICO paso que detecta violaciones de frontera cliente/servidor
 # (RSC): un módulo que usa hooks (useState/useRef) sin `'use client'` pasa typecheck y
 # lint pero rompe la build de producción. Sin este paso esos errores llegaban al deploy.
+#
+# El job `db` corre los tests de `packages/db`. Entre ellos está el test de CIERRE del
+# read-model de cohorte (R1), que es la mitad auditable del gate del backfill: si el
+# grafo de imports del recálculo se ensancha y la huella deja de cubrirlo, esto se pone
+# en rojo acá en vez de dejar la analítica vieja en silencio en el próximo deploy.
+# Ver docs/plan-optimizar-backfill-cohort-stats.md §2.3.
 on:
   pull_request:
     branches: [dev, main]
@@ -51,6 +58,34 @@ jobs:
       - name: Production build (next build)
         run: pnpm --filter @soe/web build
 
+  db:
+    name: DB (typecheck · tests · gate del read-model)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # packages/db importa tipos de @soe/types (schemas con .$type<T>()).
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/db typecheck
+
+      # No tocan la BDD: son puros (pool de workers, holder de conexión, huella del
+      # cierre de imports). Corren en cualquier runner sin Postgres.
+      - name: Tests
+        run: pnpm --filter @soe/db test
+
+
   types:
     name: Types (typecheck · tests)
     runs-on: ubuntu-latest
@@ -71,9 +106,41 @@ jobs:
 
       # Los schemas Zod y las utilidades puras (calculadores, parsers) se validan acá.
       # No tocan la BDD ni la red: corren en cualquier runner.
-      #
-      # No se agrega un job para `@soe/api`: su suite necesita un Postgres con seed y los
-      # secretos de sesión, que el runner no tiene. Correrla sin eso da rojo por entorno,
-      # no por el código — ruido que termina enseñando a ignorar el CI.
       - name: Tests
         run: pnpm --filter @soe/types test
+
+  api:
+    name: API (typecheck · lint · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # apps/api importa @soe/types y @soe/db por su `dist`; sin estos builds
+      # el typecheck no resuelve los paquetes del workspace.
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/api typecheck
+
+      - name: Lint
+        run: pnpm --filter @soe/api lint
+
+      # Los tests de la API viven acá y no en local: la suite levanta un worker de
+      # jest por core y no entra en una máquina de 8 GB.
+      #
+      # src/privacy/ queda fuera: sus specs escriben contra una BDD con seed
+      # (`db.update(students)`) y el runner no tiene Postgres. Ya fallaban antes de
+      # existir este job; incluirlas lo dejaría en rojo permanente y el gate no
+      # serviría para nada. Se reincorporan cuando el CI levante un Postgres.
+      - name: Tests
+        run: pnpm --filter @soe/api exec jest --ci --runInBand --testPathIgnorePatterns "src/privacy/"

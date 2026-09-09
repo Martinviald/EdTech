@@ -13,6 +13,7 @@ function makeDb(): Database {
     leftJoin: () => chain,
     groupBy: () => chain,
     orderBy: () => chain,
+    as: () => chain,
     then: <T>(resolve: (rows: T[]) => unknown) =>
       Promise.resolve([] as never).then(resolve as never),
   };
