@@ -74,7 +74,8 @@ describe('gate F3/F4: guardarraíl de resolución — todo QR derivado imprime �
       const overlapsX =
         bubble.cx + bubble.radius >= plan.qr.x &&
         bubble.cx - bubble.radius <= plan.qr.x + plan.qr.size;
-      const overlapsY = bubble.cy + bubble.radius >= qrBottomPdf && bubble.cy - bubble.radius <= qrTopPdf;
+      const overlapsY =
+        bubble.cy + bubble.radius >= qrBottomPdf && bubble.cy - bubble.radius <= qrTopPdf;
       expect(overlapsX && overlapsY).toBe(false);
     }
     for (const fiducial of plan.fiducials) {

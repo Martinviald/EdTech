@@ -103,3 +103,56 @@ queda poblado en las revisiones por margen.
 **Retroceso:** `OMR_CONTRACT_V2=0` en el motor; las columnas quedan en `null`.
 
 Decisión: **avanza** a fase 5 (B1, backend y web).
+
+---
+
+### 2026-09-09 · fase 5 · B1 — revisión sí/no con la alternativa sugerida
+
+**Cambio (detrás de un interruptor por org, apagado por defecto):**
+- `packages/types`: `orgConfigSchema.review.quickConfirm` (`orgReviewSettingsSchema`) e
+  `isQuickConfirmEnabled(config)`; `reviewMarkSchema` acepta `{ decision: 'confirm' }`;
+  `ReviewQueueModel.settings.quickConfirm`; `SheetScanMetricsResponse.suggestions`
+  (`marksWithSuggestion`, `reviewed`, `confirmed`, `rejected`).
+- `apps/api`: `PATCH /sheet-scan-marks/:id` con `confirm` persiste **`option` con
+  `reviewedValue = suggestedValue`** (misma fila, misma semántica; `POST :id/confirm` del lote no
+  cambia); una marca sin sugerencia responde 400 sin escribir. `getQueue` toma
+  `organizations.config` en la misma query del lote (un `innerJoin`, ninguna query nueva) y expone
+  `settings`. Métricas: una query más **al final** que mide cuántas sugerencias ya revisadas
+  coincidieron con la decisión humana (por Sí o eligiendo la misma letra) y cuántas no; la tasa de
+  "no" sostenida cerca de 0 es la señal para la fase 6a.
+- `apps/web`: `MarkReviewPanel` recibe `quickConfirm`; con el flag y una marca `ambiguous` con
+  `suggestedValue`, muestra el recorte y "¿Es la **B**?" con **Sí** (`S`) / **No** (`N` o `Esc`);
+  al No se abre el panel de siempre (alternativas, en blanco, anulada). Las letras de alternativa
+  siguen resolviendo directo también en modo rápido; la tecla `N` de "anulada" queda para después
+  del No (el pie de teclas lo dice). Dobles y blancos dudosos (sin sugerencia) → panel actual sin
+  cambios. `useResolveMark` refleja `confirm` de forma optimista como `option` con la sugerencia.
+  Etiquetas del motivo de duda en `review-labels.ts`.
+
+**Pruebas nuevas:** backend 5 (`confirm` con y sin sugerencia; `settings` encendido/apagado;
+métricas de sugerencias con datos y en cero) y el spec del controller de métricas con el campo
+nuevo. Web: no hay corredor de tests de componentes en `apps/web` (sin `test` script ni RTL); la
+verificación es la CI de PR (typecheck, lint, guard del Design System, `next build`).
+
+**No regresión:**
+
+| instrumento | resultado |
+|---|---|
+| `@soe/types` | 396 / 396 |
+| `jest src/sheet-scanning` | 387 / 387 (25 suites) |
+| typecheck API · eslint `sheet-scanning` · prettier | sin errores |
+| web `typecheck` · `lint` (`ESLINT_USE_FLAT_CONFIG=false`: el ESLint 9 local no lee `.eslintrc.json`; única advertencia preexistente en `getCurrentOrg.ts`) · `lint:ds` · `next build` (`AUTH_MODE=sso`) | sin errores; `/hojas/lotes/[batchId]/revisar` compila |
+
+**Compuerta 5 (pendiente de demo):** con el flag encendido y apagado, la cola del humo real trae
+las mismas marcas y `sheet_scan_marks` termina con las mismas decisiones; sólo cambia cuántas
+teclas costó. Encender para la org demo:
+
+```sql
+update organizations
+set config = coalesce(config, '{}'::jsonb) || '{"review": {"quickConfirm": true}}'::jsonb
+where id = '<orgId>';
+```
+
+**Retroceso:** flag de org apagado (o ausente); el backend sigue aceptando `confirm` sin efecto
+sobre nada más.
+
+Decisión: **avanza** a fase 6a (A3, medición sobre `dirty`).

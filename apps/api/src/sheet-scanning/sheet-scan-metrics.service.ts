@@ -14,6 +14,7 @@ import {
   REGISTRATION_ALERT_OFF_MEDIAN_PX,
   type RegistrationMetricsModel,
   type SheetScanMetricsResponse,
+  type SuggestionMetricsModel,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 
@@ -24,6 +25,12 @@ const UNKNOWN_REJECT_REASON = 'unknown';
 const CROP_FIXED_MARK_CONDITION = sql`${sheetScanMarks.state} = 'marked' AND ${sheetScanMarks.fill} = 0 AND ${sheetScanMarks.threshold} = 0.5 AND ${sheetScanMarks.margin} = 1`;
 
 type CountByKey = { key: string | null; count: number };
+type SuggestionRow = {
+  marksWithSuggestion: number;
+  reviewed: number;
+  confirmed: number;
+};
+
 type RegistrationRow = {
   pages: number;
   offMedianPxAvg: number | string | null;
@@ -109,6 +116,17 @@ export class SheetScanMetricsService {
           ),
         );
 
+      const suggestionMatches = sql`${sheetScanMarks.reviewedValue} = ${sheetScanMarks.suggestedValue}`;
+      const [suggestionRow] = await tx
+        .select({
+          marksWithSuggestion: sql<number>`count(*)::int`,
+          reviewed: sql<number>`count(*) filter (where ${sheetScanMarks.reviewedAt} is not null)::int`,
+          confirmed: sql<number>`count(*) filter (where ${suggestionMatches})::int`,
+        })
+        .from(sheetScanMarks)
+        .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
+        .where(and(activeScanMarks, isNotNull(sheetScanMarks.suggestedValue)));
+
       return this.assembleResponse(
         batchRows,
         rejectRows,
@@ -116,8 +134,20 @@ export class SheetScanMetricsService {
         overrideRow?.count ?? 0,
         cropFixedRow?.count ?? 0,
         this.registrationMetrics(registrationRow),
+        this.suggestionMetrics(suggestionRow),
       );
     });
+  }
+
+  private suggestionMetrics(row: SuggestionRow | undefined): SuggestionMetricsModel {
+    const reviewed = Number(row?.reviewed ?? 0);
+    const confirmed = Number(row?.confirmed ?? 0);
+    return {
+      marksWithSuggestion: Number(row?.marksWithSuggestion ?? 0),
+      reviewed,
+      confirmed,
+      rejected: reviewed - confirmed,
+    };
   }
 
   private registrationMetrics(row: RegistrationRow | undefined): RegistrationMetricsModel {
@@ -143,6 +173,7 @@ export class SheetScanMetricsService {
     firmReadingOverrides: number,
     cropFixedMarks: number,
     registration: RegistrationMetricsModel,
+    suggestions: SuggestionMetricsModel,
   ): SheetScanMetricsResponse {
     const marksByState = this.countsToRecord(markRows, markStateEnum.enumValues);
     return {
@@ -152,6 +183,7 @@ export class SheetScanMetricsService {
       reviewRatePercent: this.reviewRatePercent(marksByState, cropFixedMarks),
       firmReadingOverrides,
       registration,
+      suggestions,
     };
   }
 

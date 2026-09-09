@@ -92,12 +92,7 @@ describe('deriveLayoutDraft', () => {
   });
 
   it('respeta los printedNumber compuestos 19.1..19.5 (D17)', () => {
-    const items = [
-      mcItem(1),
-      ...[1, 2, 3, 4, 5].map((sub, i) =>
-        tfItem(2 + i, `19.${sub}`),
-      ),
-    ];
+    const items = [mcItem(1), ...[1, 2, 3, 4, 5].map((sub, i) => tfItem(2 + i, `19.${sub}`))];
     const draft = deriveLayoutDraft(INSTRUMENT_ID, items);
 
     expect(draft.spec.fields.map((f) => f.printedNumber)).toEqual([
@@ -131,7 +126,10 @@ describe('deriveLayoutDraft', () => {
   });
 
   it('excluye un número impreso duplicado en vez de dibujarlo dos veces', () => {
-    const items = [mcItem(1, { printedNumber: '5', id: 'a' }), mcItem(2, { printedNumber: '5', id: 'b' })];
+    const items = [
+      mcItem(1, { printedNumber: '5', id: 'a' }),
+      mcItem(2, { printedNumber: '5', id: 'b' }),
+    ];
     const draft = deriveLayoutDraft(INSTRUMENT_ID, items);
 
     expect(draft.spec.fields).toHaveLength(1);
@@ -171,10 +169,29 @@ describe('deriveLayoutDraft — identidad rut_bubbles (CD-10)', () => {
     expect(draft.spec.identity.mode).toBe('rut_bubbles');
     expect(new Set(bubbles.map((b) => b.group)).size).toBe(RUT_DV_GROUP_INDEX + 1);
     expect(bubbles.filter((b) => b.group === 0).map((b) => b.value)).toEqual([
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
     ]);
     expect(bubbles.filter((b) => b.group === RUT_DV_GROUP_INDEX).map((b) => b.value)).toEqual([
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'K',
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'K',
     ]);
     expect(() => layoutSpecSchema.parse(draft.spec)).not.toThrow();
     expect(collectInvariantViolations(draft.spec, items)).toEqual([]);
@@ -294,11 +311,15 @@ describe('deriveLayoutDraft — identidad rut_bubbles (CD-10)', () => {
     const rutSinGrilla = { ...rut, identity: { ...rut.identity, bubbles: null } };
     const qrConGrilla = { ...qr, identity: { ...qr.identity, bubbles: rut.identity.bubbles } };
 
-    expect(collectInvariantViolations(rutSinGrilla, items).map((v) => v.message).join(' ')).toContain(
-      'grilla RUT',
-    );
-    expect(collectInvariantViolations(qrConGrilla, items).map((v) => v.message).join(' ')).toContain(
-      'no lleva grilla',
-    );
+    expect(
+      collectInvariantViolations(rutSinGrilla, items)
+        .map((v) => v.message)
+        .join(' '),
+    ).toContain('grilla RUT');
+    expect(
+      collectInvariantViolations(qrConGrilla, items)
+        .map((v) => v.message)
+        .join(' '),
+    ).toContain('no lleva grilla');
   });
 });

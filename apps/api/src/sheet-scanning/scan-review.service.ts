@@ -12,6 +12,7 @@ import {
   printedSheets,
   sheetLayouts,
   sheetPrintRuns,
+  organizations,
   sheetScanBatches,
   sheetScanMarks,
   sheetScans,
@@ -34,6 +35,7 @@ import type {
   ReviewScanModel,
   SheetScanState,
 } from '@soe/types';
+import { isQuickConfirmEnabled } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
@@ -166,10 +168,15 @@ export class ScanReviewService {
   async getQueue(orgId: string, batchId: string): Promise<ReviewQueueModel> {
     return withOrgContext(this.db, orgId, async (tx) => {
       const [batch] = await tx
-        .select({ id: sheetScanBatches.id, spec: sheetLayouts.spec })
+        .select({
+          id: sheetScanBatches.id,
+          spec: sheetLayouts.spec,
+          orgConfig: organizations.config,
+        })
         .from(sheetScanBatches)
         .innerJoin(sheetPrintRuns, eq(sheetPrintRuns.id, sheetScanBatches.printRunId))
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .innerJoin(organizations, eq(organizations.id, sheetScanBatches.orgId))
         .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)))
         .limit(1);
       if (!batch) throw new NotFoundException('Lote de escaneo no encontrado');
@@ -213,7 +220,13 @@ export class ScanReviewService {
         })
         .sort((a, b) => a.margin - b.margin);
 
-      return { batchId, qualityRejected, identityUnresolved, ambiguousMarks };
+      return {
+        batchId,
+        qualityRejected,
+        identityUnresolved,
+        ambiguousMarks,
+        settings: { quickConfirm: isQuickConfirmEnabled(batch.orgConfig) },
+      };
     });
   }
 
@@ -268,10 +281,12 @@ export class ScanReviewService {
       }
 
       const options = this.buildOptionsIndex(row.spec).get(row.fieldId) ?? [];
-      const reviewedValue = dto.decision === 'option' ? dto.reviewedValue : null;
-      if (dto.decision === 'option' && !options.includes(dto.reviewedValue)) {
+      const reviewedValue = this.reviewedValueFor(dto, row.suggestedValue, row.printedNumber);
+      const reviewDecision: MarkReviewDecision =
+        dto.decision === 'confirm' ? 'option' : dto.decision;
+      if (reviewedValue !== null && !options.includes(reviewedValue)) {
         throw new BadRequestException(
-          `"${dto.reviewedValue}" no es una alternativa válida para la pregunta ${row.printedNumber}. Alternativas: ${options.join(', ')}`,
+          `"${reviewedValue}" no es una alternativa válida para la pregunta ${row.printedNumber}. Alternativas: ${options.join(', ')}`,
         );
       }
 
@@ -279,7 +294,7 @@ export class ScanReviewService {
         .update(sheetScanMarks)
         .set({
           reviewedValue,
-          reviewDecision: dto.decision,
+          reviewDecision,
           reviewedById: userId,
           reviewedAt: new Date(),
         })
@@ -310,10 +325,25 @@ export class ScanReviewService {
         doubtReason: row.doubtReason,
         nullConfidence: this.decimalOrNull(row.nullConfidence),
         reviewedValue,
-        reviewedDecision: dto.decision,
+        reviewedDecision: reviewDecision,
         reviewedById: userId,
       };
     });
+  }
+
+  private reviewedValueFor(
+    dto: ReviewMarkDto,
+    suggestedValue: string | null,
+    printedNumber: string,
+  ): string | null {
+    if (dto.decision === 'option') return dto.reviewedValue;
+    if (dto.decision !== 'confirm') return null;
+    if (suggestedValue === null) {
+      throw new BadRequestException(
+        `La pregunta ${printedNumber} no tiene una alternativa sugerida para confirmar: elige una alternativa, en blanco o anulada.`,
+      );
+    }
+    return suggestedValue;
   }
 
   async assignIdentity(

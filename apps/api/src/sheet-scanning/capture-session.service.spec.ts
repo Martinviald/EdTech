@@ -163,10 +163,16 @@ function makeService(
   });
   const confirm = jest.fn().mockResolvedValue({ id: FILE_ID });
   const filesService = { createUploadIntent, confirm } as unknown as FilesService;
-  const assessCapture = jest.fn().mockResolvedValue({ accepted: true, quality: {}, identity: null });
+  const assessCapture = jest
+    .fn()
+    .mockResolvedValue({ accepted: true, quality: {}, identity: null });
   const startProcessing = jest.fn().mockResolvedValue({ id: BATCH_ID, status: 'processing' });
   const getBatch = jest.fn().mockResolvedValue({ id: BATCH_ID, status: 'pending' });
-  const sheetScanService = { assessCapture, startProcessing, getBatch } as unknown as SheetScanService;
+  const sheetScanService = {
+    assessCapture,
+    startProcessing,
+    getBatch,
+  } as unknown as SheetScanService;
   const service = new CaptureSessionService(db, config, filesService, sheetScanService);
   return {
     service,
@@ -351,9 +357,7 @@ describe('CaptureSessionService.createUploadIntent', () => {
   };
 
   it('rechaza con 401 una sesión que ya no está activa (el móvil lo trata como terminal)', async () => {
-    const { service, createUploadIntent } = makeService([
-      [makeSessionRow({ status: 'closed' })],
-    ]);
+    const { service, createUploadIntent } = makeService([[makeSessionRow({ status: 'closed' })]]);
 
     await expect(service.createUploadIntent(SESSION_CTX, DTO)).rejects.toBeInstanceOf(
       UnauthorizedException,
@@ -525,10 +529,7 @@ describe('CaptureSessionService.finish', () => {
 
   it('cierra sin disparar procesamiento cuando no hay capturas', async () => {
     const { service, startProcessing, getBatch } = makeService(
-      [
-        [makeSessionRow({ status: 'active', captures: [] })],
-        [{ sourceFileIds: [] }],
-      ],
+      [[makeSessionRow({ status: 'active', captures: [] })], [{ sourceFileIds: [] }]],
       [],
       [[{ id: SESSION_ID }]],
     );

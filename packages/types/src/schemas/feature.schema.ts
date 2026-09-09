@@ -32,6 +32,17 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
  * este schema valida/extrae sólo las claves que F2 conoce y deja pasar el resto
  * (`.passthrough()`) para no perder configuración de otros dominios.
  */
+/**
+ * Ajustes de la cola de revisión de hojas (B1). `quickConfirm`: cuando el motor
+ * sugiere una alternativa en una marca dudosa, el revisor la confirma con
+ * Sí/No en vez de elegir entre todas las opciones. Apagado por defecto en el
+ * primer ciclo; se enciende por org.
+ */
+export const orgReviewSettingsSchema = z.object({
+  quickConfirm: z.boolean().optional(),
+});
+export type OrgReviewSettings = z.infer<typeof orgReviewSettingsSchema>;
+
 export const orgConfigSchema = z
   .object({
     /** Lista de features pagas habilitadas. `undefined` = default (ver isFeatureAllowed). */
@@ -44,9 +55,19 @@ export const orgConfigSchema = z
     omrCalibration: omrCalibrationSchema.optional(),
     /** Retención de imágenes escaneadas en días (CD-14). undefined = default 180. */
     omrRetentionDays: z.number().int().positive().optional(),
+    /** Cola de revisión de hojas (B1). Ver orgReviewSettingsSchema. */
+    review: orgReviewSettingsSchema.optional(),
   })
   .passthrough();
 export type OrgConfig = z.infer<typeof orgConfigSchema>;
+
+/** ¿La org confirma sugerencias del motor con Sí/No? Apagado salvo `config.review.quickConfirm: true`. */
+export function isQuickConfirmEnabled(
+  config: OrgConfig | Record<string, unknown> | null | undefined,
+): boolean {
+  const parsed = orgConfigSchema.safeParse(config ?? {});
+  return parsed.success && parsed.data.review?.quickConfirm === true;
+}
 
 /**
  * ¿La org tiene habilitada esta feature paga?

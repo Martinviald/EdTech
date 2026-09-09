@@ -75,7 +75,13 @@ describe('purgeExpiredSheetScanFiles', () => {
     const { db, updates } = makeDb([EXPIRED_ROWS]);
     const { storage } = makeStorage();
 
-    const report = await purgeExpiredSheetScanFiles({ db, storage, org: ORG, dryRun: true, now: NOW });
+    const report = await purgeExpiredSheetScanFiles({
+      db,
+      storage,
+      org: ORG,
+      dryRun: true,
+      now: NOW,
+    });
 
     expect(report.expiredCount).toBe(3);
     expect(report.byPurpose).toEqual({ scan_thumb: 1, mark_crop: 1, scan_source: 1 });
@@ -89,7 +95,13 @@ describe('purgeExpiredSheetScanFiles', () => {
     const { db, updates } = makeDb([EXPIRED_ROWS]);
     const { storage, deletedKeys } = makeStorage();
 
-    const report = await purgeExpiredSheetScanFiles({ db, storage, org: ORG, dryRun: false, now: NOW });
+    const report = await purgeExpiredSheetScanFiles({
+      db,
+      storage,
+      org: ORG,
+      dryRun: false,
+      now: NOW,
+    });
 
     expect(report.deletedFromS3).toBe(3);
     expect(report.softDeleted).toBe(3);
@@ -103,7 +115,13 @@ describe('purgeExpiredSheetScanFiles', () => {
     const { db, updates } = makeDb([[]]);
     const { storage } = makeStorage();
 
-    const report = await purgeExpiredSheetScanFiles({ db, storage, org: ORG, dryRun: false, now: NOW });
+    const report = await purgeExpiredSheetScanFiles({
+      db,
+      storage,
+      org: ORG,
+      dryRun: false,
+      now: NOW,
+    });
 
     expect(report.expiredCount).toBe(0);
     expect(storage.deleteObject).not.toHaveBeenCalled();

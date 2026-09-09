@@ -149,6 +149,40 @@ describe('SheetScanMetricsService', () => {
     });
   });
 
+  it('B1: mide cuántas sugerencias del motor confirmó o rechazó el revisor', async () => {
+    const service = makeService([
+      [],
+      [],
+      [],
+      [{ count: 0 }],
+      [{ count: 0 }],
+      [],
+      [{ marksWithSuggestion: 12, reviewed: 9, confirmed: 7 }],
+    ]);
+
+    const metrics = await service.getMetrics(ORG_ID);
+
+    expect(metrics.suggestions).toEqual({
+      marksWithSuggestion: 12,
+      reviewed: 9,
+      confirmed: 7,
+      rejected: 2,
+    });
+  });
+
+  it('sin marcas con sugerencia las métricas de B1 quedan en cero', async () => {
+    const service = makeService([[], [], [], [{ count: 0 }], [{ count: 0 }], []]);
+
+    const metrics = await service.getMetrics(ORG_ID);
+
+    expect(metrics.suggestions).toEqual({
+      marksWithSuggestion: 0,
+      reviewed: 0,
+      confirmed: 0,
+      rejected: 0,
+    });
+  });
+
   it('expone las correcciones humanas que contradicen lecturas firmes', async () => {
     const service = makeService([[], [], [{ key: 'marked', count: 10 }], [{ count: 3 }]]);
 
@@ -195,7 +229,7 @@ describe('SheetScanMetricsService', () => {
     const markQueries = selectWheres.slice(2).map((condition) => {
       return dialect.sqlToQuery(condition as Parameters<PgDialect['sqlToQuery']>[0]);
     });
-    expect(markQueries).toHaveLength(4);
+    expect(markQueries).toHaveLength(5);
     for (const query of markQueries) {
       expect(query.sql).toContain('"sheet_scans"."state" <>');
       expect(query.params).toContain('superseded');

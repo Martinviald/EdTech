@@ -126,7 +126,11 @@ export function ReviewWizard({
 
           {step === 'marcas' &&
             (marks.length > 0 ? (
-              <MarkReviewPanel batchId={batchId} marks={marks} />
+              <MarkReviewPanel
+                batchId={batchId}
+                marks={marks}
+                quickConfirm={queue?.settings.quickConfirm ?? false}
+              />
             ) : (
               <AlertCallout tone="success" icon={CheckCircle2} title="No hay marcas dudosas">
                 El lector leyó todas las marcas del lote sin dudar. Continúa para revisar el resumen
