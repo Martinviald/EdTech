@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import {
   academicYears,
   assessmentCourseAssignments,
@@ -34,9 +34,16 @@ import {
   type UpdateOrganizationProfileDto,
   type UpdateOrgBrandingDto,
   type UpdateOrgFeaturesDto,
+  type UserRole,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { FilesService } from '../files/files.service';
+
+/**
+ * Roles que pueden recibir carga académica en `teacher_assignments`.
+ * Sin `as const`: `inArray` de Drizzle no acepta una tupla readonly.
+ */
+const TEACHING_ROLES: UserRole[] = ['teacher', 'homeroom_teacher', 'eval_coordinator'];
 
 @Injectable()
 export class OrganizationsService {
@@ -265,17 +272,26 @@ export class OrganizationsService {
   }
 
   /**
-   * Lista los usuarios elegibles para ser asignados como profesores en una org.
-   * Incluye memberships activas con rol docente; excluye invitaciones pendientes
-   * (user_id IS NULL) porque aún no tienen un usuario al cual asignar carga.
+   * Lista las personas con rol docente de una org, para el selector de asignaciones.
+   *
+   * Devuelve DOS grupos, y la diferencia importa:
+   *  · `assignable: true` — tienen fila en `users`, así que pueden recibir carga.
+   *    `status: 'pending'` marca a quien todavía no inició sesión (invitado con nombre):
+   *    es asignable igual, sólo que su nombre real llega con el primer login.
+   *  · `assignable: false` — invitaciones viejas sin fila en `users` (`user_id NULL`).
+   *    Se listan para que no "desaparezcan" del selector sin explicación, pero no se
+   *    pueden asignar: `teacher_assignments.user_id` es NOT NULL contra `users.id`.
+   *    Su `id` va prefijado con `pending:` justamente para que NO pueda colarse como
+   *    userId — el DTO de creación valida UUID y lo rechazaría.
    */
   async listTeachers(orgId: string) {
-    return this.db
+    const withUser = await this.db
       .select({
         id: users.id,
         name: users.name,
         email: users.email,
         role: orgMemberships.role,
+        lastLoginAt: users.lastLoginAt,
       })
       .from(orgMemberships)
       .innerJoin(users, eq(users.id, orgMemberships.userId))
@@ -283,11 +299,67 @@ export class OrganizationsService {
         and(
           eq(orgMemberships.orgId, orgId),
           eq(orgMemberships.isActive, true),
-          inArray(orgMemberships.role, ['teacher', 'homeroom_teacher', 'eval_coordinator']),
+          inArray(orgMemberships.role, TEACHING_ROLES),
           isNull(users.deletedAt),
         ),
       )
       .orderBy(users.name);
+
+    // ⚠️ DEDUPE POR USUARIO. La query es una fila por MEMBERSHIP, y el multi-rol es
+    // normal en un colegio (CLAUDE.md §6.3): un profesor jefe suele ser `teacher` +
+    // `homeroom_teacher`, y ahí salía DOS veces con el mismo `id`.
+    //
+    // No era cosmético: el selector usa `id` como React key, y con keys repetidas React
+    // reutiliza mal los nodos al filtrar y muestra filas que no corresponden a la
+    // búsqueda. El `Select` anterior tenía el mismo problema latente (`value` repetido).
+    const byUser = new Map<string, (typeof withUser)[number]>();
+    for (const row of withUser) {
+      if (!byUser.has(row.id)) byUser.set(row.id, row);
+    }
+
+    const pendingWithoutUser = await this.db
+      .select({
+        id: orgMemberships.id,
+        email: orgMemberships.email,
+        role: orgMemberships.role,
+      })
+      .from(orgMemberships)
+      .where(
+        and(
+          eq(orgMemberships.orgId, orgId),
+          eq(orgMemberships.isActive, true),
+          inArray(orgMemberships.role, TEACHING_ROLES),
+          isNull(orgMemberships.userId),
+          isNotNull(orgMemberships.email),
+        ),
+      )
+      .orderBy(orgMemberships.email);
+
+    // La misma persona puede tener un membership real con un rol y otro PENDIENTE con
+    // otro rol. Sin este filtro aparecería dos veces en el selector: una asignable y otra
+    // no, con el mismo correo. Gana el que sí se puede asignar.
+    const emailsWithUser = new Set([...byUser.values()].map((t) => t.email.toLowerCase()));
+
+    return [
+      ...[...byUser.values()].map((t) => ({
+        id: t.id,
+        name: t.name,
+        email: t.email,
+        role: t.role,
+        status: t.lastLoginAt ? ('active' as const) : ('pending' as const),
+        assignable: true,
+      })),
+      ...pendingWithoutUser
+        .filter((t) => t.email !== null && !emailsWithUser.has(t.email.toLowerCase()))
+        .map((t) => ({
+          id: `pending:${t.id}`,
+          name: t.email ?? '',
+          email: t.email ?? '',
+          role: t.role,
+          status: 'pending' as const,
+          assignable: false,
+        })),
+    ];
   }
 
   /**

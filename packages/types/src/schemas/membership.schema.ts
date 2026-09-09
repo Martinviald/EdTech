@@ -23,15 +23,27 @@ export const ASSIGNABLE_SCHOOL_ROLES = [
 export const assignableSchoolRoleSchema = z.enum(ASSIGNABLE_SCHOOL_ROLES);
 export type AssignableSchoolRole = z.infer<typeof assignableSchoolRoleSchema>;
 
-const emailField = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .email('Correo inválido')
-  .max(320);
+const emailField = z.string().trim().toLowerCase().email('Correo inválido').max(320);
+
+/**
+ * Nombre de la persona invitada.
+ *
+ * OPCIONAL en el schema y REQUERIDO en el modal de /equipo, a propósito: el import
+ * masivo por CSV sólo trae `email,role` (ver `csv-parser`), así que exigirlo acá
+ * rompería esa ruta. La diferencia no es cosmética — decide cómo se materializa la
+ * invitación:
+ *
+ *  · CON nombre  → se crea la fila en `users` de una vez (`users.name` es NOT NULL),
+ *    así el invitado ya es asignable en /organizacion/asignaciones sin esperar a que
+ *    inicie sesión.
+ *  · SIN nombre  → membership pendiente con `user_id NULL`, como siempre. Sigue sin
+ *    poder recibir carga académica hasta su primer login.
+ */
+const nameField = z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(120);
 
 export const inviteMemberSchema = z.object({
   email: emailField,
+  name: nameField.optional(),
   role: assignableSchoolRoleSchema,
 });
 

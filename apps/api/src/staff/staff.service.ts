@@ -55,22 +55,30 @@ export class StaffService {
       .where(eq(orgMemberships.orgId, orgId))
       .orderBy(orgMemberships.role, orgMemberships.createdAt);
 
-    return rows
-      // Excluir users soft-deleted (membership "huérfano" después de borrar user)
-      .filter((r) => r.userId === null || r.userDeletedAt === null)
-      .map((r) => ({
-        id: r.id,
-        orgId: r.orgId,
-        userId: r.userId,
-        email: r.userEmail ?? r.pendingEmail ?? '',
-        name: r.userName,
-        role: r.role,
-        status: r.userId ? ('active' as const) : ('pending' as const),
-        isActive: r.isActive,
-        lastLoginAt: r.lastLoginAt?.toISOString() ?? null,
-        invitedAt: r.invitedAt?.toISOString() ?? null,
-        createdAt: r.createdAt.toISOString(),
-      }));
+    return (
+      rows
+        // Excluir users soft-deleted (membership "huérfano" después de borrar user)
+        .filter((r) => r.userId === null || r.userDeletedAt === null)
+        .map((r) => ({
+          id: r.id,
+          orgId: r.orgId,
+          userId: r.userId,
+          email: r.userEmail ?? r.pendingEmail ?? '',
+          name: r.userName,
+          role: r.role,
+          // "Pendiente" = todavía no inició sesión, NO "no tiene fila en users".
+          // Desde que invitar con nombre crea el `users` row de una vez, la señal vieja
+          // (`user_id`) marcaría como activo a alguien que nunca entró. `last_login_at`
+          // se escribe en el login y en la promoción (auth.service), así que es la señal
+          // correcta — y además arregla el caso viejo de los usuarios creados desde el
+          // panel de admin, que figuraban como activos sin haber entrado nunca.
+          status: r.lastLoginAt ? ('active' as const) : ('pending' as const),
+          isActive: r.isActive,
+          lastLoginAt: r.lastLoginAt?.toISOString() ?? null,
+          invitedAt: r.invitedAt?.toISOString() ?? null,
+          createdAt: r.createdAt.toISOString(),
+        }))
+    );
   }
 
   /**
@@ -88,14 +96,12 @@ export class StaffService {
   }
 
   /** Misma lógica pero no lanza; útil para bulk para acumular errores. */
-  private async inviteInternal(
-    user: JwtPayload,
-    dto: InviteMemberDto,
-  ): Promise<InviteResult> {
+  private async inviteInternal(user: JwtPayload, dto: InviteMemberDto): Promise<InviteResult> {
     // El controller garantiza user.orgId != null antes de llamar al service.
     const orgId = user.orgId!;
     const email = dto.email; // ya viene normalizado por Zod
     const role = dto.role;
+    const name = dto.name?.trim();
 
     // 1) Cross-org check: ¿este email ya pertenece a OTRA org?
     const crossOrg = await this.db
@@ -168,7 +174,80 @@ export class StaffService {
       return { ok: true, member: await this.readMember(created.id) };
     }
 
-    // Caso: user no existe → insertar pending. Partial unique resuelve "pending duplicado mismo rol".
+    // Caso: user no existe.
+    //
+    // CON NOMBRE → creamos la fila en `users` acá mismo, con `provider_id` placeholder
+    // que el primer login real reemplaza. Es el mismo patrón que ya usa
+    // `AdminService.createUser`. Sirve para algo concreto: `teacher_assignments.user_id`
+    // es NOT NULL contra `users.id`, así que sin fila en `users` el invitado NO puede
+    // recibir carga académica — era la razón por la que no aparecía en el selector de
+    // /organizacion/asignaciones.
+    //
+    // SIN NOMBRE (import masivo por CSV, que sólo trae email,role) → membership
+    // pendiente con `user_id NULL`, exactamente como antes.
+    if (name) {
+      // Reusar un pending previo del mismo email+rol en vez de chocar contra el partial
+      // unique: invitar de nuevo agregando el nombre es la forma de COMPLETAR una
+      // invitación vieja que quedó sin usuario, no un duplicado.
+      const [pendingSameRole] = await this.db
+        .select({ id: orgMemberships.id })
+        .from(orgMemberships)
+        .where(
+          and(
+            eq(orgMemberships.orgId, orgId),
+            eq(orgMemberships.role, role),
+            isNull(orgMemberships.userId),
+            sql`lower(${orgMemberships.email}) = ${email}`,
+          ),
+        )
+        .limit(1);
+
+      const [createdUser] = await this.db
+        .insert(users)
+        .values({
+          email,
+          name,
+          provider: 'google',
+          // Se completa en el primer login real (auth.service.promoteInvitation /
+          // el upsert del login). Mismo placeholder que AdminService.createUser.
+          providerId: `pending-${Date.now()}`,
+        })
+        .returning({ id: users.id });
+
+      if (!createdUser) {
+        return { ok: false, reason: 'duplicate_in_org', message: 'No se pudo crear el usuario' };
+      }
+
+      if (pendingSameRole) {
+        await this.db
+          .update(orgMemberships)
+          .set({ userId: createdUser.id, email: null })
+          .where(eq(orgMemberships.id, pendingSameRole.id));
+        await this.logAudit(user, 'invite_member', { email, role, completed: true }, 1);
+        return { ok: true, member: await this.readMember(pendingSameRole.id) };
+      }
+
+      const [created] = await this.db
+        .insert(orgMemberships)
+        .values({
+          userId: createdUser.id,
+          orgId,
+          role,
+          invitedAt: new Date(),
+          invitedByUserId: user.userId,
+          isActive: true,
+        })
+        .returning({ id: orgMemberships.id });
+
+      if (!created) {
+        return { ok: false, reason: 'duplicate_in_org', message: 'No se pudo crear el miembro' };
+      }
+
+      await this.logAudit(user, 'invite_member', { email, role }, 1);
+      return { ok: true, member: await this.readMember(created.id) };
+    }
+
+    // Partial unique resuelve "pending duplicado mismo rol".
     // Omitimos userId para que quede NULL (Drizzle insert no acepta null literal en columnas typed).
     try {
       const [created] = await this.db
@@ -262,9 +341,7 @@ export class StaffService {
           ),
         );
       if (activeAdmins <= 1) {
-        throw new ForbiddenException(
-          'No puedes eliminar al último administrador del colegio',
-        );
+        throw new ForbiddenException('No puedes eliminar al último administrador del colegio');
       }
     }
 

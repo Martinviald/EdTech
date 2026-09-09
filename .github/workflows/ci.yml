@@ -85,6 +85,30 @@ jobs:
       - name: Tests
         run: pnpm --filter @soe/db test
 
+
+  types:
+    name: Types (typecheck · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @soe/types typecheck
+
+      # Los schemas Zod y las utilidades puras (calculadores, parsers) se validan acá.
+      # No tocan la BDD ni la red: corren en cualquier runner.
+      - name: Tests
+        run: pnpm --filter @soe/types test
+
   api:
     name: API (typecheck · lint · tests)
     runs-on: ubuntu-latest
