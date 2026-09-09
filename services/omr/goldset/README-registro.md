@@ -281,3 +281,31 @@ interruptor apagado; un solo campo sin anillo → tolerado.
 | hueco mínimo motor | 0.486 · 0.439 — sin cambio |
 
 Decisión: **avanza** a pendientes fase 3 (A2).
+
+### 2026-09-09 · pendientes fase 3 · A2 — segunda pasada de la ventana
+
+Corte real ampliado con las 4 hojas del 2026-09-05 (`*-20260905`, Diego con dobles y triple):
+14 hojas, 13 legibles, 308 marcas.
+
+**Ciclo 3a — pasada anclada:** un ajuste que cae en el borde de la ventana (`|dx| ≥ W` o
+`|dy| ≥ W`) se vuelve a buscar centrado en la predicción de la recta del grupo, con la misma `W`,
+solo si `2W + máscara < distancia − R` (`second_pass_allowed`: sí en el layout de preguntas, no en
+la grilla RUT). En real funcionó de inmediato (`diego-1621`: 33 ajustes saturados recuperados,
+desplazamiento máximo 21.6 px contra `W` 16), pero en sintético los tests de corrimiento 24–30 px
+fallaban: con anillos finos y nítidos la primera pasada **ni llega al borde** — el pico cae en el
+spec con score de papel — y no había "saturado" que reintentar.
+
+**Ciclo 3b — pasada ancha:** si ningún ajuste del grupo es confiable y la geometría lo permite,
+se repite la búsqueda desde el spec con ventana `2W` (misma garantía contra el vecino). La pasada
+anclada queda para el caso parcial. `RingFix.saturated` y `saturatedCount` en el debug.
+
+| instrumento | resultado |
+|---|---|
+| suite | 260 (31 de registro; corrimientos 24/−24, −27/10, 0/30 recuperados a ≤ 1 px) |
+| real 14 | **275 / 33 / 0** (22 = `carla-1620` cropped; 11 revisiones: 5 dobles/triples reales + 6 marcas claras en tierra de nadie) |
+| Diego, 3 capturas de la misma hoja | Δfill de marcadas entre capturas **0.000–0.002** (antes 0.411 / 0.240 / 0.162 en el spec) |
+| saturados tras la segunda pasada | 0 en 12 hojas; `diego-1621` 33 recuperados |
+| sintético 48 | 97.57 % / 2.26 % / 1 — idéntico |
+| costo `register_group` por página (88 burbujas, 14 fotos, 3 repeticiones) | 30.4 ms con segunda pasada vs 29.5 ms sin ella: **+0.9 ms** |
+
+Decisión: **avanza** a pendientes fase 4 (contrato v2).

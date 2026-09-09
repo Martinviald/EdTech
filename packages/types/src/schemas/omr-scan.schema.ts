@@ -130,6 +130,7 @@ export const registrationDiagnosticsSchema = z.object({
   scoreP10: z.number().optional(),
   fallbackCount: z.number().int().min(0).optional(),
   inheritedCount: z.number().int().min(0).optional(),
+  saturatedCount: z.number().int().min(0).optional(),
 });
 
 /** Contraste por pregunta (fill mayor − segundo) según lo que se decidió. */

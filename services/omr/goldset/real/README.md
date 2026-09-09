@@ -16,9 +16,11 @@ de leer la foto: la persona que rellena deja escrita la clave antes de fotografi
 | `diego-1621`, `diego-1624` | Diego (FC95-F3FE) | `IMG_1621.JPG`, `IMG_1624.JPG` | construcción; la misma hoja con y sin el problema de registro |
 | `ana-1622`, `ana-1623` | Ana (C014-6453) | `IMG_1622.JPG`, `IMG_1623.JPG` | construcción; 13 marcas, el resto en blanco |
 | `demo-1`, `demo-2` | lote demo `5a6d5cd9` | `captura-1.jpg`, `captura-2.jpg` | **adjudicación** (revisor sobre 30 ambiguas + motor en 14 confiadas); provisional |
+| `ana-20260905`, `bruno-20260905`, `carla-20260905`, `diego-20260905` | las mismas 4 hojas, escaneadas el 2026-09-05 en demo (lote `40fb30b3`) con el registro en producción | `…-captura-N-….jpg` (nombres originales del bucket) | construcción; **Diego con dobles y una triple marca** agregadas ese día (q11 B+C, q14 B+C, q16 A+B+C, q20 A+C) |
 
-Las fotos originales están en `analisis-omr-marcas/datos/fotos-con-verdad/` y
-`analisis-omr-marcas/datos/imgs/` (fuera del repo). `physicalSheet` en `truth.json` agrupa
+Las fotos originales están en `analisis-omr-marcas/datos/fotos-con-verdad/`,
+`analisis-omr-marcas/datos/imgs/` y `analisis-omr-marcas/datos/lote-40fb30b3-2026-09-05/src/`
+(fuera del repo; las del 2026-09-05 también en el bucket demo, `sheet_scan/…/40fb30b3…/scan_source/`). `physicalSheet` en `truth.json` agrupa
 las capturas de una misma hoja física: el arnés mide con eso la estabilidad entre capturas.
 
 ## Traer las fotos

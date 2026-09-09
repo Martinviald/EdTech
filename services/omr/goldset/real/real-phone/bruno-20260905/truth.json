@@ -1,0 +1,37 @@
+{
+  "sheetId": "bruno-20260905",
+  "layoutSpecFile": "../layout-spec.json",
+  "truthSource": "construction",
+  "physicalSheet": "bruno",
+  "sourceFile": "ee10e80b-1e18-4726-babe-e314cd83ce4c-captura-4-1788620050009.jpg",
+  "transcriptions": [
+    {
+      "by": "autor-de-la-hoja",
+      "answers": {
+        "1": "B",
+        "2": "C",
+        "3": "C",
+        "4": "B",
+        "5": "C",
+        "6": "D",
+        "7": null,
+        "8": "C",
+        "9": "B",
+        "10": "C",
+        "11": null,
+        "12": "BC",
+        "13": "B",
+        "14": "C",
+        "15": "C",
+        "16": "B",
+        "18": "B",
+        "19": "C",
+        "20": "C",
+        "22": "B",
+        "23": "B",
+        "24": "C"
+      }
+    }
+  ],
+  "notes": "Escaneada en demo el 2026-09-05 (lote 40fb30b3, registro local en produccion). Diego con dobles y una triple marca agregadas ese dia: q11 B+C, q14 B+C, q16 A+B+C, q20 A+C."
+}
