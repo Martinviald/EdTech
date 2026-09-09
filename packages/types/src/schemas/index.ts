@@ -54,3 +54,4 @@ export * from './sheet-scanning.schema';
 export * from './mcp.schema';
 export * from './telemetry.schema';
 export * from './feedback.schema';
+export * from './measurement-process.schema';
