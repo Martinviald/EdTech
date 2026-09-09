@@ -47,7 +47,7 @@
 | `jest src/sheet-scanning` | 380 / 380 (25 suites) |
 | `jest` completo | 1508 / 1510; los 2 fallos son `privacy.service.spec.ts` (integración contra BD local, pasa solo) |
 | typecheck API · eslint `sheet-scanning` | sin errores |
-| e2e `round-trip` contra el OMR real | **pendiente**: el venv del servicio desapareció de todas las copias durante el ciclo; se recrea desde `requirements.lock.txt` y se corre antes de cerrar la PR |
+| e2e `round-trip` contra el OMR real (`RUN_OMR_ROUNDTRIP=1`) | 12 / 12 — el servicio real responde `{ result, debug }` y el cliente lo empareja; venv recreado desde `requirements.lock.txt` (el anterior desapareció de todas las copias durante el ciclo) |
 
 **Compuerta 1:** los endpoints existentes no cambian de forma (campos nuevos opcionales); migración
 aditiva y reversible; `diagnostics` poblado se verifica en demo con el humo real después del

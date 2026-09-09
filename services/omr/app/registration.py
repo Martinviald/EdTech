@@ -38,12 +38,21 @@ Tres reglas hacen que fallar sea seguro:
 3. Sin ajuste confiable en todo el grupo, se muestrea donde dice el spec: exactamente lo
    que hacia el motor hasta hoy (`source == "spec"`, contado como fallback en el debug).
 
-Calibracion medida:
+Calibracion medida (tools/measure_registration.py, que puntua la plantilla tanto
+sobre cada anillo como sobre papel sin anillo a la derecha de cada fila):
 
-    score de la plantilla sobre anillos reales      p10 0.73-0.85 (9 fotos)
-    score sobre hojas sinteticas del goldset        p10 0.59 (corte dirty) - 0.76
-    SCORE_MIN 0.70                                  fallback 0 % en fotos reales,
-                                                    <= 8 % de campos en sinteticas
+    anillo real, burbuja vacia (648)                min 0.677   p1 0.737
+    anillo real, burbuja marcada (144)              min 0.695   p1 0.713
+    papel real, 792 posiciones en 9 fotos           max 0.586   p99 0.584
+    anillo sintetico limpio (phone/scanner)         min 0.69 (marcadas) - 0.79 (vacias)
+    anillo sintetico con marca sucia (dirty)        min 0.57: la marca tapa el anillo y
+                                                    ESA burbuja debe heredar del grupo
+    papel sintetico                                 max 0.544
+    SCORE_MIN 0.63                                  a 0.045 del peor anillo real y a
+                                                    0.045 del papel real; el 0.70
+                                                    anterior tocaba el anillo (3 vacias
+                                                    y 1 marcada reales por debajo)
+    fallback (grupo entero sin anillo confiable)    0 % en 13 fotos reales y 48 sinteticas
     ajuste crudo vs localizador independiente       < 1 px en las 9 fotos
     pendiente del gradiente dentro de una fila      0.02-0.04 px/px (MAX_SLOPE 0.10)
     residuo contra un localizador independiente     ver tools/measure_registration.py
@@ -74,7 +83,8 @@ from .rectify import RectifiedPage
 ENV_FLAG = "OMR_LOCAL_REGISTRATION"
 DEFAULT_ENABLED = True
 
-SCORE_MIN = 0.70
+SCORE_MIN = 0.63
+FALLBACK_MAX_RATIO = 0.25
 GROUP_TOLERANCE_PX = 3
 MAX_SLOPE = 0.10
 RING_WIDTH_PX = 2.6
@@ -245,6 +255,26 @@ def robust_line(points: list[tuple[float, float]]) -> tuple[float, float]:
         slope = 0.0
     intercept = float(np.median([value - slope * position for position, value in points]))
     return intercept, slope
+
+
+def fallback_ratio(fixes: list[RingFix]) -> float:
+    if not fixes:
+        return 0.0
+    return sum(1 for fix in fixes if fix.fallback) / len(fixes)
+
+
+def unregistrable(fixes: list[RingFix]) -> bool:
+    """La captura no se puede registrar: demasiadas burbujas sin anillo confiable.
+
+    Con el registro activo, muestrear en la posicion del spec es volver al modo
+    de falla que el registro vino a cerrar (disco fuera de la burbuja, lecturas
+    confiadas y mal). Una burbuja suelta que hereda o cae al spec es normal
+    (marca gruesa, trazo); una PAGINA con mas de FALLBACK_MAX_RATIO de sus
+    burbujas al spec es una captura que no se deja registrar (desenfoque,
+    layout distinto) y pide otra foto, no una lectura silenciosa. Medido:
+    fotos reales 0 %; sinteticas con marcas sucias hasta 8 % de una hoja.
+    """
+    return fallback_ratio(fixes) > FALLBACK_MAX_RATIO
 
 
 def summarize(fixes: list[RingFix], enabled: bool) -> dict:
