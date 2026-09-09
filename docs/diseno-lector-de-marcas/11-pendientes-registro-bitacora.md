@@ -156,3 +156,82 @@ where id = '<orgId>';
 sobre nada más.
 
 Decisión: **avanza** a fase 6a (A3, medición sobre `dirty`).
+
+---
+
+### 2026-09-09 · fase 6a · A3 — tierra de nadie: medida, no se cambia
+
+Sólo motor: `tools/measure_band.py` y la tabla en `app/classify.py`. Con `max(3σ, 0.12)` las 4
+marcas claras de Bruno dejarían de ir a revisión, pero un dígito RUT relleno a medias infla
+`σ_high` y se lee como marcado (identidad con un dígito inventado). Se mantiene `max(2σ, 0.12)`;
+detalle en `services/omr/goldset/README-registro.md`. Suite 283; sintético y real idénticos.
+
+---
+
+### 2026-09-09 · fase 6b · B2 — nula automática con confianza alta
+
+**Costo medido antes de implementar** (`README-registro.md`, ciclo 6b-1): con umbral 0.9, las 4
+dobles plenas de Diego se anulan solas y **ninguna** marca con respuesta verdadera única lo
+haría, ni en real ni en sintético; Bruno q12 (0.10–0.14) y el borrón sintético (0.0) siguen en
+la cola.
+
+**Cambio (detrás de `organizations.config.review.autoAnnulMinConfidence`, ausente = apagado):**
+- `packages/types`: `autoAnnulMinConfidence(config)`, `AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE = 0.9`;
+  `ReviewMarkModel.autoResolved`; `ReviewQueueModel.autoAnnulled` y
+  `settings.autoAnnulMinConfidence`.
+- `packages/db`: `sheet_scan_marks.auto_resolved boolean not null default false` — migración
+  `0033_lowly_eternity.sql`, aplicada en local.
+- `apps/api`: el contexto del job toma `organizations.config` en la misma query del lote (un
+  `innerJoin`); al persistir, una `multiple` con `nullConfidence ≥` umbral se guarda con
+  `reviewDecision = annulled`, `reviewedAt`, `reviewedById = null` y `autoResolved = true`. El
+  motor no cambia de decisión (`state` sigue `multiple`). No entra a la cola (`reviewedAt` ya
+  filtra en `finalizeBatch`, `recountReviewPending` y la cola) y `POST :id/confirm` la cuenta como
+  anulada (`reviewedAt !== null` → `annulledLabels`), igual que si la hubiera anulado una persona.
+  `GET :id/review` la expone en `autoAnnulled` (query nueva **al final**, con su recorte firmado);
+  cualquier `PATCH :id` la vuelve decisión humana (`autoResolved = false`).
+- `apps/web`: `isMarkResolved` pasa a "tiene decisión" (humana o automática); el panel lista las
+  automáticas al final con la etiqueta "Nula automática · confianza 0.98", la opción Anulada
+  seleccionada y una nota; un callout en el paso de marcas dice cuántas se anularon solas. Las
+  optimistas y el rollback del hook cubren ambas listas.
+
+**Pruebas nuevas:** backend 4 (persistencia con umbral: evidente se anula, dudosa no; sin ajuste
+nada se anula; cola con `autoAnnulled` y recorte; corregir una automática). Web: CI de PR.
+
+**No regresión:**
+
+| instrumento | resultado |
+|---|---|
+| `@soe/types` | 396 / 396 |
+| `jest src/sheet-scanning` | 391 / 391 (25 suites) |
+| typecheck API · eslint · prettier | sin errores |
+| web `typecheck` · `lint` · `lint:ds` · `next build` | sin errores (misma advertencia preexistente) |
+
+**Compuerta 6b (pendiente de demo):** con el ajuste en 0.9, el humo real deja a Diego q11/q14/q16/q20
+como nulas automáticas y a Bruno q12 en la cola; las notas del lote no cambian respecto de
+anularlas a mano. Encender:
+
+```sql
+update organizations
+set config = coalesce(config, '{}'::jsonb) || '{"review": {"autoAnnulMinConfidence": 0.9}}'::jsonb
+where id = '<orgId>';
+```
+
+**Retroceso:** quitar el ajuste (o ponerlo en `1`); las marcas ya anuladas quedan como están y se
+pueden corregir desde el panel.
+
+Decisión: **avanza** a fase 7 (A5), que depende del material del equipo.
+
+---
+
+### 2026-09-09 · fase 7 · A5 — material y limpieza: qué queda abierto
+
+| punto del plan | estado |
+|---|---|
+| Sumar las 4 fotos del 2026-09-05 a `goldset/real` con la verdad de Diego actualizada | **hecho** en la fase 3 (`*-20260905`, 14 hojas en el corte real) |
+| Re-medir `BLANK_SHEET_MAX_FILL` con 7 fotos en blanco + 3 con tinta | **pendiente de material**: no hay fotos de hojas sin marcar en el repo ni fuera; el umbral sigue marcado como "pendiente de calibración" en `pageQualitySchema.marksReadability` |
+| Corte `real-phone` con `identity.mode = rut_bubbles` y validación de la grilla registrada por columna | **pendiente de material**: no hay capturas reales con grilla RUT |
+| Retirar `OMR_LOCAL_REGISTRATION` y `sample_bubble_fills_at_spec` del lector de marcas | **pendiente de observación**: requiere dos semanas sin alertas en `sheet_scans.diagnostics` (métricas `registration.offsetAlertPages` / `fallbackAlertPages`, fase 1) en demo |
+
+Cuando llegue el material, el ciclo es el de siempre: fotos con verdad en `goldset/real`, medir
+con `tools/measure_registration.py` (y `tools/measure_band.py` si toca la banda), tabla en el
+docstring de la constante, suite + barrido + real, entrada aquí.

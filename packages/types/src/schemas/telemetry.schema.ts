@@ -145,9 +145,7 @@ export const telemetryEventDefinitions = {
 
 export type TelemetryEventName = keyof typeof telemetryEventDefinitions;
 
-export const TELEMETRY_EVENT_NAMES = Object.keys(
-  telemetryEventDefinitions,
-) as TelemetryEventName[];
+export const TELEMETRY_EVENT_NAMES = Object.keys(telemetryEventDefinitions) as TelemetryEventName[];
 
 /** Mapa `nombre → tipo de sus properties`, derivado del registro para tipar `track()`. */
 export type TelemetryEventPropertiesMap = {
@@ -160,9 +158,7 @@ export type TrackFn = <K extends TelemetryEventName>(
   properties: TelemetryEventPropertiesMap[K],
 ) => void;
 
-export function getTelemetryEventDefinition(
-  name: string,
-): TelemetryEventDefinition | undefined {
+export function getTelemetryEventDefinition(name: string): TelemetryEventDefinition | undefined {
   return (telemetryEventDefinitions as Record<string, TelemetryEventDefinition>)[name];
 }
 

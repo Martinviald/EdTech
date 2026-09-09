@@ -232,6 +232,13 @@
       "when": 1788956293680,
       "tag": "0032_flowery_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1788957777758,
+      "tag": "0033_lowly_eternity",
+      "breakpoints": true
     }
   ]
 }

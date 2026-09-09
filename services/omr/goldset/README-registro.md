@@ -383,3 +383,23 @@ grupos anchos).
 | sintético 48 · real 14 | idénticos: 97.57 % / 2.26 % / 1 · 275 / 33 / 0 |
 
 Decisión: **cerrada sin cambio de constantes**; pasa a pendientes fase 6b (B2).
+
+### 2026-09-09 · pendientes fase 6b · B2 — costo de la nula automática (ciclo 6b-1)
+
+El motor no cambia: `nullConfidence` es la de la fase 4. Se mide qué `multiple` tendrían
+confianza alta y cuántas de esas tienen una respuesta verdadera única (las que **no** se pueden
+anular solas). Ese número tiene que ser 0 para el corte que se automatice.
+
+| corte | `multiple` | con `nullConfidence` ≥ 0.9 | de esas, con respuesta verdadera única |
+|---|---|---|---|
+| real (14 fotos) | 7 (todas dobles legítimas según la transcripción) | 4: Diego q11 0.957, q16 0.979, q14 1.000, q20 1.000 | **0** |
+| sintético (48; `dirty` con dobles de 0.35 de cobertura y borrones) | 1 (`dirty-marcas-sucias-040` q11: borrón junto a la marca, verdad B) | 0 (`nullConfidence` 0.0) | **0** |
+
+Las 11 dobles sintéticas con la segunda burbuja a 0.35 de cobertura ni siquiera llegan a
+`multiple`: van a revisión por `margin`. Bruno q12 (doble legítima con una burbuja 0.2 más clara)
+queda en 0.10–0.14 y sigue en la cola: la definición es conservadora a propósito. Umbral
+recomendado `AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE = 0.9` (`packages/types`), encendido por org
+en `organizations.config.review.autoAnnulMinConfidence`; la implementación y sus pruebas
+(backend y web) están en `docs/diseno-lector-de-marcas/11-pendientes-registro-bitacora.md`.
+
+Decisión: **costo 0 medido**; se implementa detrás del ajuste por org (ciclo 6b-2).

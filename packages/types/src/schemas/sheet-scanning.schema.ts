@@ -384,12 +384,19 @@ export type ReviewMarkModel = {
   /** `null` = nadie la revisó todavía. */
   reviewedDecision: MarkReviewDecision | null;
   reviewedById: string | null;
+  /**
+   * B2: la decisión la tomó el sistema al persistir (doble marca anulada por
+   * `nullConfidence` alta). `reviewedById` queda `null`; una decisión humana
+   * posterior la vuelve `false`.
+   */
+  autoResolved: boolean;
 };
 
 /** Orden por daño (C16): calidad primero (el profesor aún tiene las hojas), identidades después, marcas por margin ascendente. */
 /** Ajustes de la org que cambian cómo se revisa, no qué se revisa (B1). */
 export type ReviewQueueSettingsModel = {
   quickConfirm: boolean;
+  autoAnnulMinConfidence: number | null;
 };
 
 export type ReviewQueueModel = {
@@ -397,6 +404,8 @@ export type ReviewQueueModel = {
   qualityRejected: ReviewScanModel[];
   identityUnresolved: ReviewScanModel[];
   ambiguousMarks: ReviewMarkModel[];
+  /** B2: dobles anuladas por el sistema; no cuentan como pendientes, pero se ven y se pueden corregir. */
+  autoAnnulled: ReviewMarkModel[];
   settings: ReviewQueueSettingsModel;
 };
 

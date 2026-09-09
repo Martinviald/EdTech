@@ -149,9 +149,7 @@ export const remedialGuideStudentContentSchema = z.object({
     .min(1),
   materials: z.array(z.string()),
 });
-export type RemedialGuideStudentContent = z.infer<
-  typeof remedialGuideStudentContentSchema
->;
+export type RemedialGuideStudentContent = z.infer<typeof remedialGuideStudentContentSchema>;
 
 /** Ítem de práctica en la versión ESTUDIANTE: enunciado + alternativas para poder
  * responder, pero SIN marcar la correcta (`isCorrect`/`correctKey`) ni la
@@ -162,13 +160,9 @@ export const remedialPracticeStudentItemSchema = z.object({
   itemId: z.string().uuid(),
   position: z.number().int(),
   stem: z.string(),
-  alternatives: z
-    .array(z.object({ key: z.string(), text: z.string() }))
-    .nullable(),
+  alternatives: z.array(z.object({ key: z.string(), text: z.string() })).nullable(),
 });
-export type RemedialPracticeStudentItem = z.infer<
-  typeof remedialPracticeStudentItemSchema
->;
+export type RemedialPracticeStudentItem = z.infer<typeof remedialPracticeStudentItemSchema>;
 
 /** Set de práctica para el estudiante: los ítems sin las notas docentes
  * (`notes`). Cada ítem lleva sus alternativas SIN la clave correcta ni la
@@ -178,9 +172,7 @@ export const remedialPracticeStudentContentSchema = z.object({
   itemCount: z.number().int(),
   items: z.array(remedialPracticeStudentItemSchema),
 });
-export type RemedialPracticeStudentContent = z.infer<
-  typeof remedialPracticeStudentContentSchema
->;
+export type RemedialPracticeStudentContent = z.infer<typeof remedialPracticeStudentContentSchema>;
 
 /** Plan de grupo para el estudiante: la secuencia de trabajo sin la brecha
  * compartida (`sharedGap`), el conteo/etiqueta de agrupación ni las referencias
@@ -197,9 +189,7 @@ export const remedialPlanStudentContentSchema = z.object({
     )
     .min(1),
 });
-export type RemedialPlanStudentContent = z.infer<
-  typeof remedialPlanStudentContentSchema
->;
+export type RemedialPlanStudentContent = z.infer<typeof remedialPlanStudentContentSchema>;
 
 /** Unión del contenido "versión estudiante" (por `type`). */
 export const remedialStudentContentSchema = z.union([
@@ -243,17 +233,14 @@ export function toRemedialStudentContent(
       // Alternativas hidratadas por `itemId`; se stripea `isCorrect` (y no se
       // copian `correctKey`/`explanation`) → el estudiante ve las opciones para
       // responder, nunca la respuesta.
-      const previewByItemId = new Map(
-        (practiceItems ?? []).map((p) => [p.itemId, p]),
-      );
+      const previewByItemId = new Map((practiceItems ?? []).map((p) => [p.itemId, p]));
       return {
         skillFocus: c.skillFocus,
         itemCount: c.itemCount,
         items: c.items.map((ref) => {
           const preview = previewByItemId.get(ref.itemId);
           const alternatives =
-            preview?.alternatives?.map((alt) => ({ key: alt.key, text: alt.text })) ??
-            null;
+            preview?.alternatives?.map((alt) => ({ key: alt.key, text: alt.text })) ?? null;
           return {
             itemId: ref.itemId,
             position: ref.position,
@@ -383,9 +370,7 @@ export const remedialStudentMaterialModelSchema = z.object({
   title: z.string().nullable(),
   content: remedialStudentContentSchema.nullable(),
 });
-export type RemedialStudentMaterialModel = z.infer<
-  typeof remedialStudentMaterialModelSchema
->;
+export type RemedialStudentMaterialModel = z.infer<typeof remedialStudentMaterialModelSchema>;
 
 // ── DTOs de entrada ──
 

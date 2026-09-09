@@ -248,6 +248,14 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
               >
                 {MARK_STATE_LABELS[current.state]}
               </span>
+              {current.autoResolved && (
+                <span className="rounded-full bg-info/10 px-2 py-0.5 text-xs font-medium text-info">
+                  Nula automática
+                  {current.nullConfidence !== null
+                    ? ` · confianza ${current.nullConfidence.toFixed(2)}`
+                    : ''}
+                </span>
+              )}
             </div>
             <span className="text-xs text-muted-foreground">
               {safeIndex + 1} de {marks.length}
@@ -325,6 +333,12 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
                   Lectura de máquina: {current.value ?? 'sin valor'} · no se sobrescribe, tu
                   decisión queda aparte.
                 </p>
+                {current.autoResolved && (
+                  <p className="text-xs text-muted-foreground">
+                    El lector anuló esta doble marca por su cuenta: las dos burbujas están rellenas.
+                    Elige otra opción solo si el recorte dice otra cosa.
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   <strong className="font-medium text-foreground">En blanco</strong>: el alumno no
                   respondió. <strong className="font-medium text-foreground">Anulada</strong>: sí

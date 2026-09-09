@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
 import {
   files,
+  organizations,
   printedSheets,
   sheetLayouts,
   sheetPrintRuns,
@@ -17,6 +18,7 @@ import {
   DEFAULT_CAPTURE_PROFILES,
   MARK_STATES,
   SHEET_SCAN_STATES,
+  autoAnnulMinConfidence,
   parseOmrQrPayload,
   type AssessCaptureDto,
   type AssessCaptureIdentityModel,
@@ -26,6 +28,7 @@ import {
   type BatchStatusModel,
   type CaptureProfile,
   type CreateScanBatchDto,
+  type MarkReading,
   type CreateScanBatchResponse,
   type LayoutSpec,
   type MarkState,
@@ -86,6 +89,7 @@ type JobContext = {
   specHash: string;
   captureProfile: CaptureProfile;
   sourceFiles: FileRecord[];
+  autoAnnulMinConfidence: number | null;
 };
 
 type RunSheetLookup = {
@@ -567,10 +571,12 @@ export class SheetScanService {
           captureProfile: sheetScanBatches.captureProfile,
           spec: sheetLayouts.spec,
           specHash: sheetLayouts.specHash,
+          orgConfig: organizations.config,
         })
         .from(sheetScanBatches)
         .innerJoin(sheetPrintRuns, eq(sheetPrintRuns.id, sheetScanBatches.printRunId))
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .innerJoin(organizations, eq(organizations.id, sheetScanBatches.orgId))
         .where(and(eq(sheetScanBatches.id, batchId), eq(sheetScanBatches.orgId, orgId)))
         .limit(1);
       if (!row) throw new NotFoundException('Lote de escaneo no encontrado');
@@ -587,6 +593,7 @@ export class SheetScanService {
         specHash: row.specHash,
         captureProfile: row.captureProfile,
         sourceFiles,
+        autoAnnulMinConfidence: autoAnnulMinConfidence(row.orgConfig),
       };
     });
   }
@@ -614,7 +621,7 @@ export class SheetScanService {
         if (candidate.batchRejection !== null) {
           return { rejectionReason: candidate.batchRejection.reason, pagesTotal };
         }
-        await this.persistPage(orgId, batchId, sourceFile.id, page, candidate);
+        await this.persistPage(orgId, batchId, sourceFile.id, page, candidate, context);
       }
     }
     return { rejectionReason: null, pagesTotal };
@@ -652,6 +659,7 @@ export class SheetScanService {
     sourceFileId: string,
     page: ScannedPageWithDiagnostics,
     candidate: IdentityCandidate,
+    context: Pick<JobContext, 'autoAnnulMinConfidence'>,
   ): Promise<void> {
     const qrPayload = this.qrPayloadOf(page.identity);
     const pageIndex = qrPayload?.pageIndex ?? page.pageIndex;
@@ -734,10 +742,34 @@ export class SheetScanService {
             suggestedValue: mark.suggestedValue ?? null,
             doubtReason: mark.doubtReason ?? null,
             nullConfidence: mark.nullConfidence == null ? null : mark.nullConfidence.toFixed(3),
+            ...this.autoAnnulment(mark, context.autoAnnulMinConfidence),
           })),
         );
       }
     });
+  }
+
+  private autoAnnulment(
+    mark: MarkReading,
+    minConfidence: number | null,
+  ): Pick<
+    typeof sheetScanMarks.$inferInsert,
+    'reviewDecision' | 'reviewedValue' | 'reviewedAt' | 'autoResolved'
+  > {
+    if (
+      minConfidence === null ||
+      mark.state !== 'multiple' ||
+      mark.nullConfidence == null ||
+      mark.nullConfidence < minConfidence
+    ) {
+      return {};
+    }
+    return {
+      reviewDecision: 'annulled',
+      reviewedValue: null,
+      reviewedAt: new Date(),
+      autoResolved: true,
+    };
   }
 
   private async checkIdempotency(

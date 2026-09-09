@@ -132,8 +132,6 @@ export type FinishCaptureSessionResponse = {
  */
 export type CaptureTransport = {
   assess(imageBase64: string): Promise<AssessCaptureResponse>;
-  createUploadIntent(
-    meta: Omit<CaptureUploadIntentDto, 'mimeType'>,
-  ): Promise<ScanUploadIntent>;
+  createUploadIntent(meta: Omit<CaptureUploadIntentDto, 'mimeType'>): Promise<ScanUploadIntent>;
   confirmFile(fileId: string, sizeBytes: number): Promise<void>;
 };
