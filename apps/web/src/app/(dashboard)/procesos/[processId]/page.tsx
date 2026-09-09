@@ -12,6 +12,7 @@ import { CoverageBar } from '../components/coverage-bar';
 import { ProcessFormDialog } from '../components/process-form-dialog';
 import { ScopeDialog } from './components/scope-dialog';
 import { LinkAssessmentsDialog } from './components/link-assessments-dialog';
+import { DeleteProcessDialog } from './components/delete-process-dialog';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,6 +67,11 @@ async function ManagementToolbar({ processId }: { processId: string }) {
         subjects={catalog.subjects}
       />
       <LinkAssessmentsDialog processId={processId} candidates={candidates.data} />
+      <DeleteProcessDialog
+        processId={processId}
+        processName={process.name}
+        assessmentCount={process.assessmentCount}
+      />
     </div>
   );
 }

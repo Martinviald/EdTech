@@ -91,6 +91,11 @@ async function ProcessList({ query }: { query: string }) {
 
   return (
     <div className="space-y-8">
+      {data.length < total && (
+        <p className="text-muted-foreground text-sm">
+          Mostrando {data.length} de {total} procesos.
+        </p>
+      )}
       {Array.from(byYear.entries()).map(([year, processes]) => (
         <section key={year ?? 'sin-anio'} className="space-y-3">
           <h2 className="text-muted-foreground text-sm font-medium">
