@@ -77,6 +77,45 @@ export async function loadCohortLevelCounts(
 }
 
 /**
+ * Los mismos conteos para varias evaluaciones en UNA query, indexados por evaluación.
+ *
+ * El panorama arma decenas de unidades y cada una agrupa varias aplicaciones: pedir
+ * los conteos de a una evaluación convertía un dato chico en cientos de idas y vueltas.
+ */
+export async function loadCohortLevelCountsByAssessment(
+  db: Database,
+  assessmentIds: readonly string[],
+  classGroupFilter: string[] | null,
+): Promise<Map<string, CohortLevelCount[]>> {
+  const byAssessment = new Map<string, CohortLevelCount[]>();
+  if (assessmentIds.length === 0) return byAssessment;
+  if (classGroupFilter !== null && classGroupFilter.length === 0) return byAssessment;
+
+  const conditions = [inArray(assessmentLevelStats.assessmentId, [...assessmentIds])];
+  if (classGroupFilter !== null) {
+    conditions.push(inArray(assessmentLevelStats.classGroupId, classGroupFilter));
+  }
+
+  const rows = await db
+    .select({
+      assessmentId: assessmentLevelStats.assessmentId,
+      performanceBandId: assessmentLevelStats.performanceBandId,
+      count: sql<number>`sum(${assessmentLevelStats.studentCount})::int`,
+    })
+    .from(assessmentLevelStats)
+    .where(and(...conditions))
+    .groupBy(assessmentLevelStats.assessmentId, assessmentLevelStats.performanceBandId);
+
+  for (const row of rows) {
+    const bucket = byAssessment.get(row.assessmentId);
+    const entry = { performanceBandId: row.performanceBandId, count: Number(row.count) };
+    if (bucket) bucket.push(entry);
+    else byAssessment.set(row.assessmentId, [entry]);
+  }
+  return byAssessment;
+}
+
+/**
  * Distribución por banda del instrumento (N niveles data-driven, ej. DIA I/II/III).
  * Itera TODAS las bandas del instrumento —incluidas las de conteo 0— para una torta
  * estable, igual que `AssessmentReportService.buildBandDistribution`.

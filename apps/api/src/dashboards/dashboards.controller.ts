@@ -41,6 +41,19 @@ export class DashboardsController {
   }
 
   /**
+   * GET /api/dashboards/comparable-overview/alerts
+   * Sólo las alertas del mismo alcance. Es a lo que le pega el refresco periódico de
+   * la banda del panorama, que antes se traía la respuesta completa para leer un
+   * campo.
+   */
+  @Get('comparable-overview/alerts')
+  @Roles(...DASHBOARD_VIEWER_ROLES)
+  getComparableAlerts(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
+    const dto = comparableOverviewQuerySchema.parse(query ?? {});
+    return this.comparableOverview.getComparableAlerts(user, dto);
+  }
+
+  /**
    * GET /api/dashboards/overview
    * KPIs macro: % logro global, alumnos evaluados, distribución por nivel,
    * últimas evaluaciones y alertas. `scope` = 'teacher' para profesores puros.

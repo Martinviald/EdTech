@@ -299,3 +299,13 @@ export const ALERT_THRESHOLDS = {
   /** Días desde la aplicación sin resultados para considerarla estancada. */
   staleAssessmentDays: 14,
 } as const;
+
+/**
+ * Tope de alertas que viajan en la respuesta del panorama.
+ *
+ * La banda pliega en 4 y deja desplegar el resto; 20 cubre el desplegado sin mandar
+ * cientos. El corte se aplica DESPUÉS del ranking por severidad y alumnos afectados,
+ * así que lo que se pierde es siempre lo menos grave, y `alertsTotal` conserva el
+ * conteo real.
+ */
+export const MAX_DASHBOARD_ALERTS = 20;
