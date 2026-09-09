@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/sonner';
+import { MobileViewportFrame } from './MobileViewportFrame';
 
 export const metadata: Metadata = {
   title: 'Captura de hojas',
@@ -22,7 +23,7 @@ const TOAST_OFFSET = { bottom: 'calc(env(safe-area-inset-bottom) + 7.5rem)' };
  */
 export default function MovilLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[rgb(2_6_23)] text-[hsl(var(--neutral-0))]">
+    <MobileViewportFrame>
       {children}
       <Toaster
         position="bottom-center"
@@ -31,6 +32,6 @@ export default function MovilLayout({ children }: { children: React.ReactNode })
         offset={TOAST_OFFSET}
         mobileOffset={TOAST_OFFSET}
       />
-    </div>
+    </MobileViewportFrame>
   );
 }

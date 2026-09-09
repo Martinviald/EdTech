@@ -1,4 +1,9 @@
-import { SHEET_QR_IDENTITY_REGION, type LayoutField, type LayoutSpec } from '@soe/types';
+import {
+  SHEET_PAPER_DIMENSIONS,
+  SHEET_QR_IDENTITY_REGION,
+  type LayoutField,
+  type LayoutSpec,
+} from '@soe/types';
 import { cn } from '@/lib/utils';
 
 /**
@@ -15,13 +20,6 @@ import { cn } from '@/lib/utils';
  * (fracciones del ancho de página) y se escalan las coordenadas normalizadas a
  * ese rectángulo de referencia.
  */
-
-const PAPER_DIMENSIONS: Record<LayoutSpec['paper'], { width: number; height: number }> = {
-  letter: { width: 850, height: 1100 },
-  a4: { width: 827, height: 1169 },
-  legal: { width: 850, height: 1400 },
-};
-
 
 type ReferenceFrame = {
   originX: number;
@@ -52,7 +50,7 @@ function groupFieldsByPage(fields: LayoutField[]): Map<number, LayoutField[]> {
 }
 
 export function SheetPreview({ spec, className }: { spec: LayoutSpec; className?: string }) {
-  const paper = PAPER_DIMENSIONS[spec.paper];
+  const paper = SHEET_PAPER_DIMENSIONS[spec.paper];
   const fiducialSide = spec.fiducials.sizeRatio * paper.width;
   const fiducialMargin = spec.fiducials.marginRatio * paper.width;
   const fiducialCenterOffset = fiducialMargin + fiducialSide / 2;
@@ -186,12 +184,7 @@ function IdentityMarks({
 
   return (
     <g>
-      <text
-        x={identityX}
-        y={identityY - 14}
-        fontSize={16}
-        className="fill-foreground"
-      >
+      <text x={identityX} y={identityY - 14} fontSize={16} className="fill-foreground">
         Nombre: ______________________________
       </text>
       <rect

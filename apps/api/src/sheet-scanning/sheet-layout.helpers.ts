@@ -8,6 +8,8 @@ import {
   type LayoutSpec,
   type OmrBubble,
   type OmrRegion,
+  SHEET_FIDUCIAL_MARGIN_RATIO,
+  SHEET_FIDUCIAL_SIZE_RATIO,
   SHEET_QR_IDENTITY_REGION,
   type SheetIdentityMode,
 } from '@soe/types';
@@ -36,8 +38,9 @@ export interface InvariantViolation {
   message: string;
 }
 
-export const SHEET_FIDUCIAL_SIZE_RATIO = 0.025;
-export const SHEET_FIDUCIAL_MARGIN_RATIO = 0.03;
+// Fuente única en `@soe/types`: el visor de captura dibuja sus guías con estos mismos
+// valores, así que no pueden vivir sólo acá.
+export { SHEET_FIDUCIAL_SIZE_RATIO, SHEET_FIDUCIAL_MARGIN_RATIO };
 export const SHEET_BUBBLE_RADIUS = 0.011;
 export const SHEET_MAX_ROWS_PER_COLUMN = 25;
 export const SHEET_COLUMNS_PER_PAGE = 3;
