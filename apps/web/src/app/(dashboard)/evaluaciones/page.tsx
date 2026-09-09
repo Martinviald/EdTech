@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { DashboardFilterBar } from '../resultados/components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
+  withDefaultAcademicYear,
   buildDashboardQuery,
   type DashboardFilterValues,
 } from '../resultados/components/dashboard-filters';
@@ -41,7 +42,7 @@ export default async function EvaluacionesPage({
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
-        <AssessmentsSection query={filterQuery} canImport={canImport} />
+        <AssessmentsSection filters={filters} query={filterQuery} canImport={canImport} />
       </Suspense>
     </PageContainer>
   );
@@ -55,11 +56,28 @@ async function FiltersSection({
   query: string;
 }) {
   const options = await getEvaluacionesFilters(query);
-  return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
+  return (
+    <DashboardFilterBar
+      options={options}
+      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      basePath={BASE_PATH}
+    />
+  );
 }
 
-async function AssessmentsSection({ query, canImport }: { query: string; canImport: boolean }) {
-  const assessmentList = await getEvaluacionesAssessments(query);
+async function AssessmentsSection({
+  filters,
+  query,
+  canImport,
+}: {
+  filters: DashboardFilterValues;
+  query: string;
+  canImport: boolean;
+}) {
+  const options = await getEvaluacionesFilters(query);
+  const assessmentList = await getEvaluacionesAssessments(
+    buildDashboardQuery(withDefaultAcademicYear(filters, options.defaultAcademicYearId)),
+  );
   const assessments = assessmentList.data;
 
   if (assessments.length === 0) {

@@ -10,6 +10,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  withDefaultAcademicYear,
   toScalarFilters,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
@@ -60,7 +61,7 @@ export default async function DimensionesPage({
       <RegisterAssistantContext refs={dashboardFiltersToAssistantRefs(filters)} />
       <PageActions>
         <Suspense fallback={null}>
-          <DimensionesAction query={skillsQuery} />
+          <DimensionesAction query={skillsQuery} filters={filters} />
         </Suspense>
       </PageActions>
 
@@ -83,11 +84,27 @@ async function FiltersSection({
   filters: DashboardFilterValues;
 }) {
   const options = await getDashboardFilters(query);
-  return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
+  return (
+    <DashboardFilterBar
+      options={options}
+      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      basePath={BASE_PATH}
+    />
+  );
 }
 
-async function DimensionesAction({ query }: { query: string }) {
-  const skillsResponse = await getDashboardSkills(query);
+async function DimensionesAction({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  const scopedQuery = buildDashboardQuery(
+    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
+  );
+  const skillsResponse = await getDashboardSkills(scopedQuery);
   if (skillsResponse.skills.length === 0) return null;
   return <AskAiButton prompt={ASK_AI_PROMPT} />;
 }
@@ -101,7 +118,11 @@ async function SkillsSection({
   filters: DashboardFilterValues;
   assessmentId?: string;
 }) {
-  const skillsResponse = await getDashboardSkills(query);
+  const options = await getDashboardFilters(query);
+  const scopedQuery = buildDashboardQuery(
+    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
+  );
+  const skillsResponse = await getDashboardSkills(scopedQuery);
   const skills = skillsResponse.skills;
 
   if (skills.length === 0) {
