@@ -1,0 +1,882 @@
+[
+ {
+  "ensayo": "E3",
+  "printedNumber": 1,
+  "clave": "E",
+  "habilidad": "Modelar",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 2,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": true
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 3,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 4,
+  "clave": "C",
+  "habilidad": "Representar",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 5,
+  "clave": "E",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 6,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 7,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 8,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 9,
+  "clave": "D",
+  "habilidad": "Representar",
+  "eje": "Números",
+  "piloto": true
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 10,
+  "clave": "E",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 11,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": true
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 12,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 13,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 14,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 15,
+  "clave": "D",
+  "habilidad": "Argumentar",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 16,
+  "clave": "B",
+  "habilidad": "Modelar",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 17,
+  "clave": "C",
+  "habilidad": "Modelar",
+  "eje": "Números",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 18,
+  "clave": "B",
+  "habilidad": "Representar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 19,
+  "clave": "D",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 20,
+  "clave": "A",
+  "habilidad": "Representar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 21,
+  "clave": "C",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 22,
+  "clave": "C",
+  "habilidad": "Representar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 23,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y Funciones",
+  "piloto": true
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 24,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 25,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 26,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 27,
+  "clave": "B",
+  "habilidad": "Argumentar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 28,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 29,
+  "clave": "B",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 30,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 31,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 32,
+  "clave": "D",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 33,
+  "clave": "B",
+  "habilidad": "Representar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 34,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 35,
+  "clave": "D",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 36,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 37,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": true
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 38,
+  "clave": "E",
+  "habilidad": "Argumentar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 39,
+  "clave": "D",
+  "habilidad": "Representar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 40,
+  "clave": "C",
+  "habilidad": "Modelar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 41,
+  "clave": "D",
+  "habilidad": "Argumentar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 42,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 43,
+  "clave": "A",
+  "habilidad": "Argumentar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 44,
+  "clave": "A",
+  "habilidad": "Representar",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 45,
+  "clave": "D",
+  "habilidad": "Argumentar",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 46,
+  "clave": "B",
+  "habilidad": "Argumentar",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 47,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 48,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 49,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 50,
+  "clave": "E",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 51,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 52,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Álgebra y Funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 53,
+  "clave": "E",
+  "habilidad": "Argumentar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 54,
+  "clave": "B",
+  "habilidad": "Argumentar",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E3",
+  "printedNumber": 55,
+  "clave": "A",
+  "habilidad": "Argumentar",
+  "eje": "Probabilidad y Estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 1,
+  "clave": "C",
+  "habilidad": "Representar",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 2,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 3,
+  "clave": "B",
+  "habilidad": "Argumentar",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 4,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 5,
+  "clave": "D",
+  "habilidad": "Argumentar",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 6,
+  "clave": "B",
+  "habilidad": "Representar",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 7,
+  "clave": "C",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 8,
+  "clave": "E",
+  "habilidad": "Resolver problemas",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 9,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 10,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 11,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 12,
+  "clave": "B",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 13,
+  "clave": "D",
+  "habilidad": "Resolver problemas",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 14,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 15,
+  "clave": "D",
+  "habilidad": "Representar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 16,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 17,
+  "clave": "C",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 18,
+  "clave": "B",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 19,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 20,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 21,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 22,
+  "clave": "Eliminada",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y funciones",
+  "piloto": true
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 23,
+  "clave": "C",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 24,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 25,
+  "clave": "D",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 26,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 27,
+  "clave": "D",
+  "habilidad": "Modelar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 28,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 29,
+  "clave": "C",
+  "habilidad": "Representar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 30,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 31,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 32,
+  "clave": "B",
+  "habilidad": "Modelar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 33,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 34,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 35,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 36,
+  "clave": "D",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 37,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 38,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 39,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 40,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 41,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 42,
+  "clave": "B",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 43,
+  "clave": "A",
+  "habilidad": "Argumentar",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 44,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 45,
+  "clave": "C",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 46,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 47,
+  "clave": "D",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 48,
+  "clave": "A",
+  "habilidad": "Resolver problemas",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 49,
+  "clave": "A",
+  "habilidad": "Modelar",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 50,
+  "clave": "D",
+  "habilidad": "Modelar",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 51,
+  "clave": "B",
+  "habilidad": "Argumentar",
+  "eje": "número",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 52,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 53,
+  "clave": "D",
+  "habilidad": "Argumentar",
+  "eje": "Geometría",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 54,
+  "clave": "C",
+  "habilidad": "Argumentar",
+  "eje": "Álgebra y funciones",
+  "piloto": false
+ },
+ {
+  "ensayo": "E4",
+  "printedNumber": 55,
+  "clave": "A",
+  "habilidad": "Argumentar",
+  "eje": "Probabilidad y estadística",
+  "piloto": false
+ }
+]

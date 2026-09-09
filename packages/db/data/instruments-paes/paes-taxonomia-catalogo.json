@@ -186,6 +186,63 @@
    }
   },
   {
+   "code": "PAES.M2.HAB.RESOLVER",
+   "type": "skill",
+   "name": "Resolver problemas",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Resolver problemas"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M2.HAB.MODELAR",
+   "type": "skill",
+   "name": "Modelar",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Modelar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M2.HAB.REPRESENTAR",
+   "type": "skill",
+   "name": "Representar",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Representar"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M2.HAB.ARGUMENTAR",
+   "type": "skill",
+   "name": "Argumentar y comunicar",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Argumentar",
+     "Argumentar y comunicar"
+    ]
+   }
+  },
+  {
    "code": "PAES.CIE.HAB.OBSERVAR",
    "type": "skill",
    "name": "Observar y plantear preguntas",
@@ -374,6 +431,65 @@
     "variantesObservadas": [
      "Probabilidad y estadística",
      "DATOS Y AZAR"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M2.EJE.NUMEROS",
+   "type": "axis",
+   "name": "Números",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Números",
+     "Número"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M2.EJE.ALGEBRA",
+   "type": "axis",
+   "name": "Álgebra y funciones",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Álgebra y funciones",
+     "Álgebra y Funciones"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M2.EJE.GEOMETRIA",
+   "type": "axis",
+   "name": "Geometría",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Geometría"
+    ]
+   }
+  },
+  {
+   "code": "PAES.M2.EJE.PROBABILIDAD",
+   "type": "axis",
+   "name": "Probabilidad y estadística",
+   "parentCode": "PAES.M2",
+   "marco": "paes",
+   "subjectCode": null,
+   "source": "Tabla de especificaciones CSCJ 2026",
+   "metadata": {
+    "variantesObservadas": [
+     "Probabilidad y estadística",
+     "Probabilidad y Estadística"
     ]
    }
   },

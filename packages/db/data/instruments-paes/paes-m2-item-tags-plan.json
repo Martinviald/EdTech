@@ -1,0 +1,1874 @@
+{
+ "plan": [
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 1,
+   "printedNumber": "1",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 2,
+   "printedNumber": "2",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 3,
+   "printedNumber": "3",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 4,
+   "printedNumber": "4",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 5,
+   "printedNumber": "5",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 6,
+   "printedNumber": "6",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 7,
+   "printedNumber": "7",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 8,
+   "printedNumber": "8",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 9,
+   "printedNumber": "9",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 10,
+   "printedNumber": "10",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 11,
+   "printedNumber": "11",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 12,
+   "printedNumber": "12",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 13,
+   "printedNumber": "13",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 14,
+   "printedNumber": "14",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 15,
+   "printedNumber": "15",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 16,
+   "printedNumber": "16",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 17,
+   "printedNumber": "17",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 18,
+   "printedNumber": "18",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 19,
+   "printedNumber": "19",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 20,
+   "printedNumber": "20",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 21,
+   "printedNumber": "21",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 22,
+   "printedNumber": "22",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 23,
+   "printedNumber": "23",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 24,
+   "printedNumber": "24",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 25,
+   "printedNumber": "25",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 26,
+   "printedNumber": "26",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 27,
+   "printedNumber": "27",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 28,
+   "printedNumber": "28",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 29,
+   "printedNumber": "29",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 30,
+   "printedNumber": "30",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 31,
+   "printedNumber": "31",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 32,
+   "printedNumber": "32",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 33,
+   "printedNumber": "33",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 34,
+   "printedNumber": "34",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 35,
+   "printedNumber": "35",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 36,
+   "printedNumber": "36",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 37,
+   "printedNumber": "37",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 38,
+   "printedNumber": "38",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 39,
+   "printedNumber": "39",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 40,
+   "printedNumber": "40",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 41,
+   "printedNumber": "41",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 42,
+   "printedNumber": "42",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 43,
+   "printedNumber": "43",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 44,
+   "printedNumber": "44",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 45,
+   "printedNumber": "45",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 46,
+   "printedNumber": "46",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 47,
+   "printedNumber": "47",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 48,
+   "printedNumber": "48",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 49,
+   "printedNumber": "49",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 50,
+   "printedNumber": "50",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 51,
+   "printedNumber": "51",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 52,
+   "printedNumber": "52",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 53,
+   "printedNumber": "53",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 54,
+   "printedNumber": "54",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E3-con-pauta.json",
+   "position": 55,
+   "printedNumber": "55",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 1,
+   "printedNumber": "1",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 2,
+   "printedNumber": "2",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 3,
+   "printedNumber": "3",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 4,
+   "printedNumber": "4",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 5,
+   "printedNumber": "5",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 6,
+   "printedNumber": "6",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 7,
+   "printedNumber": "7",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 8,
+   "printedNumber": "8",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 9,
+   "printedNumber": "9",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 10,
+   "printedNumber": "10",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 11,
+   "printedNumber": "11",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 12,
+   "printedNumber": "12",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 13,
+   "printedNumber": "13",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 14,
+   "printedNumber": "14",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 15,
+   "printedNumber": "15",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 16,
+   "printedNumber": "16",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 17,
+   "printedNumber": "17",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 18,
+   "printedNumber": "18",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 19,
+   "printedNumber": "19",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 20,
+   "printedNumber": "20",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 21,
+   "printedNumber": "21",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 22,
+   "printedNumber": "22",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 23,
+   "printedNumber": "23",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 24,
+   "printedNumber": "24",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 25,
+   "printedNumber": "25",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 26,
+   "printedNumber": "26",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 27,
+   "printedNumber": "27",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 28,
+   "printedNumber": "28",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 29,
+   "printedNumber": "29",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.REPRESENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 30,
+   "printedNumber": "30",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 31,
+   "printedNumber": "31",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 32,
+   "printedNumber": "32",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 33,
+   "printedNumber": "33",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 34,
+   "printedNumber": "34",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 35,
+   "printedNumber": "35",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 36,
+   "printedNumber": "36",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 37,
+   "printedNumber": "37",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 38,
+   "printedNumber": "38",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 39,
+   "printedNumber": "39",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 40,
+   "printedNumber": "40",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 41,
+   "printedNumber": "41",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 42,
+   "printedNumber": "42",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 43,
+   "printedNumber": "43",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 44,
+   "printedNumber": "44",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 45,
+   "printedNumber": "45",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 46,
+   "printedNumber": "46",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 47,
+   "printedNumber": "47",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 48,
+   "printedNumber": "48",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.RESOLVER",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 49,
+   "printedNumber": "49",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 50,
+   "printedNumber": "50",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.MODELAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 51,
+   "printedNumber": "51",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.NUMEROS",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 52,
+   "printedNumber": "52",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 53,
+   "printedNumber": "53",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.GEOMETRIA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 54,
+   "printedNumber": "54",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.ALGEBRA",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  },
+  {
+   "instrument": "M2-E4-con-pauta.json",
+   "position": 55,
+   "printedNumber": "55",
+   "tags": [
+    {
+     "code": "PAES.M2.HAB.ARGUMENTAR",
+     "type": "skill",
+     "tagType": "primary"
+    },
+    {
+     "code": "PAES.M2.EJE.PROBABILIDAD",
+     "type": "axis",
+     "tagType": "secondary"
+    }
+   ]
+  }
+ ]
+}
