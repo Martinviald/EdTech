@@ -297,6 +297,18 @@ Esto es lo que hace que la migración pueda ser incremental y no un big bang.
 Dos tabs, no tres: los resultados son el panorama existente acotado por `processId`
 (botón "Ver panorama" en la cabecera), no una vista nueva que lo reimplemente.
 
+**Gestión** (sólo `PROCESS_MANAGEMENT_ROLES`), como diálogos sobre Server Actions con
+el patrón `Result` del repo:
+
+| Diálogo              | Para qué                                                                    |
+| -------------------- | --------------------------------------------------------------------------- |
+| Crear / editar       | nombre, año, tipo, momento, estado, ventana, notas                          |
+| Declarar alcance     | cursos × asignaturas, con el conteo de celdas esperadas en vivo             |
+| Asociar evaluaciones | vincula las del año, incluidas las que ya están en otro proceso (las mueve) |
+
+El diálogo de alcance es el que hace que la rendición mida algo: mientras nadie lo use,
+la cobertura de un proceso derivado es la tautología del §7 Paso 4.
+
 La tarjeta de proceso es la unidad de navegación nueva: nombre, ventana, barra de
 cobertura, estado. El home del directivo pasa a ser una lista de procesos en vez de
 tres selects vacíos.
@@ -364,8 +376,9 @@ controller contra DB real con seed (§10.2).
 
 ### Ola 4 — Frontend ✅
 
-Rutas, tarjeta de proceso, matriz de rendición, tab de resultados. Responsive
-mobile-first desde el inicio (§7.4).
+Rutas, tarjeta de proceso, matriz de rendición, y los tres diálogos de gestión.
+Responsive mobile-first desde el inicio (§7.4); la matriz scrollea en su propio
+contenedor en vez de romper el ancho de la página.
 
 ### Ola 5 — Adopción ⏳ no construida
 
