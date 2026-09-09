@@ -330,17 +330,13 @@ export type DocumentImageUploadRequestDto = z.infer<typeof documentImageUploadRe
 export const documentImageConfirmRequestSchema = z.object({
   sizeBytes: z.number().int().min(0).optional(),
 });
-export type DocumentImageConfirmRequestDto = z.infer<
-  typeof documentImageConfirmRequestSchema
->;
+export type DocumentImageConfirmRequestDto = z.infer<typeof documentImageConfirmRequestSchema>;
 
 export const documentImageConfirmResponseSchema = z.object({
   fileId: z.string().uuid(),
   url: z.string().nullable(),
 });
-export type DocumentImageConfirmResponse = z.infer<
-  typeof documentImageConfirmResponseSchema
->;
+export type DocumentImageConfirmResponse = z.infer<typeof documentImageConfirmResponseSchema>;
 
 /** GET /documents/:id/assets → mapa fileId → URL prefirmada inline. */
 export const documentAssetsResponseSchema = z.record(z.string());

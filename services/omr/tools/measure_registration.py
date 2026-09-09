@@ -82,9 +82,13 @@ from goldset.scoring import (  # noqa: E402
 )
 
 try:
-    from app.registration import register_group
+    from app.registration import locate_ring, register_group, search_window_px
 except ImportError:  # fase 0: el motor todavia no registra
     register_group = None
+    locate_ring = None
+    search_window_px = None
+
+PAPER_PROBE_SPACINGS = (3, 4, 5, 6)
 
 INDEPENDENT_DARK_MIN_DELTA = 30.0
 INDEPENDENT_DARK_RATIO = 0.25
@@ -217,7 +221,55 @@ def measure_sheet(sheet: GoldSheet) -> dict[str, Any]:
             bubbles_out.append(entry)
     record["bubbles"] = bubbles_out
     record["metrics"] = _sheet_metrics(bubbles_out)
+    paper_scores = _paper_scores(gray, size, spec)
+    record["paperScores"] = paper_scores
+    record["metrics"].update(_score_metrics(bubbles_out, paper_scores))
     return record
+
+
+def _paper_scores(gray: np.ndarray, size: tuple[int, int], spec: dict[str, Any]) -> list[float]:
+    """Score de la plantilla de anillo donde NO hay anillo: papel a la derecha de cada fila.
+
+    Es la otra mitad de la calibracion de SCORE_MIN: el score de un anillo verdadero
+    ya lo da cada burbuja; falta saber cuanto puntua el papel (o lo que haya) con la
+    misma ventana, para que el corte quede en medio y no al borde de los anillos.
+    """
+    if locate_ring is None or search_window_px is None:
+        return []
+    scores: list[float] = []
+    for field in spec["fields"]:
+        if field["pageIndex"] != 0 or field["kind"] != "bubble_group" or not field["bubbles"]:
+            continue
+        centers = [point_to_px(b["center"], size) for b in field["bubbles"]]
+        radius_px = radius_to_px(field["bubbles"][0]["radius"], size)
+        window = search_window_px(centers, radius_px)
+        xs = sorted(c[0] for c in centers)
+        spacing = (xs[-1] - xs[0]) / (len(xs) - 1) if len(xs) > 1 else 4.0 * radius_px
+        row_y = centers[0][1]
+        for k in PAPER_PROBE_SPACINGS:
+            probe_x = round(xs[-1] + k * spacing)
+            if probe_x + 2 * radius_px >= size[0]:
+                break
+            scores.append(locate_ring(gray, (probe_x, row_y), radius_px, window)[2])
+    return scores
+
+
+def _score_metrics(bubbles: list[dict[str, Any]], paper_scores: list[float]) -> dict[str, Any]:
+    metrics: dict[str, Any] = {}
+    ring = np.array([b["score"] for b in bubbles if "score" in b])
+    if ring.size:
+        metrics["ring_score_min"] = float(ring.min())
+        metrics["ring_score_p1"] = float(np.percentile(ring, 1))
+        metrics["ring_score_p10"] = float(np.percentile(ring, 10))
+        marked = np.array([b["score"] for b in bubbles if "score" in b and b["marked"]])
+        if marked.size:
+            metrics["ring_score_min_marked"] = float(marked.min())
+    if paper_scores:
+        paper = np.array(paper_scores)
+        metrics["paper_score_med"] = float(np.median(paper))
+        metrics["paper_score_p99"] = float(np.percentile(paper, 99))
+        metrics["paper_score_max"] = float(paper.max())
+    return metrics
 
 
 def _sheet_metrics(bubbles: list[dict[str, Any]]) -> dict[str, Any]:
@@ -366,6 +418,25 @@ def render(records: list[dict[str, Any]], pairs: list[dict[str, Any]]) -> str:
             "hueco minimo entre hojas: "
             + "  ".join(f"{kind}={_fmt(worst[kind])}" for kind in FILL_KINDS)
         )
+        ring_min = [
+            r["metrics"]["ring_score_min"] for r in measured if "ring_score_min" in r["metrics"]
+        ]
+        ring_p10 = [
+            r["metrics"]["ring_score_p10"] for r in measured if "ring_score_p10" in r["metrics"]
+        ]
+        paper_max = [
+            r["metrics"]["paper_score_max"] for r in measured if "paper_score_max" in r["metrics"]
+        ]
+        paper_p99 = [
+            r["metrics"]["paper_score_p99"] for r in measured if "paper_score_p99" in r["metrics"]
+        ]
+        if ring_min and paper_max:
+            lines.append(
+                f"score de plantilla: anillo min={_fmt(min(ring_min))} "
+                f"(p10 min={_fmt(min(ring_p10))})"
+                f"  |  papel max={_fmt(max(paper_max))} (p99 max={_fmt(max(paper_p99))})"
+                f"  |  hueco anillo-papel={_fmt(min(ring_min) - max(paper_max))}"
+            )
     if pairs:
         lines.append(
             "estabilidad entre capturas de la misma hoja (mediana |delta fill| marcadas / vacias):"

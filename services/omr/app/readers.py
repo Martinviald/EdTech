@@ -18,11 +18,37 @@ inventado. Todos los grupos vacios y claros => blank.
 
 crop_region (CD-9): el recorte ES la respuesta: state marked, value null,
 cropJpegBase64 siempre, fill/threshold/margin fijos 0/0.5/1.
+
+Contrato v2 (OMR_CONTRACT_V2, default encendido): cada marca lleva ademas tres
+campos que dicen QUE sugiere el motor y POR QUE duda, sin cambiar state/value:
+
+  suggestedValue  en ambiguous, la alternativa que el motor elegiria si la duda
+                  se resolviera como viene: la unica burbuja sobre el umbral
+                  (en selectMode multiple, todas las que estan sobre el umbral).
+                  null si ninguna o mas de una lo supera; null fuera de ambiguous.
+  doubtReason     `margin` (alguna burbuja con margin < ambiguity_margin),
+                  `band` (ninguna por margin pero alguna en tierra de nadie),
+                  `multiple` (state multiple); null en marked/blank.
+  nullConfidence  solo en multiple, 0-1: cuan seguro es que la doble marca es
+                  una nula real. Fuerza de la burbuja mas tenue sobre el umbral,
+                  (fill - umbral) / (1 - umbral) — cuanto del camino hasta el
+                  relleno pleno recorrio — penalizada linealmente por el
+                  contraste entre la mas oscura y la mas clara de ellas
+                  (NULL_CONFIDENCE_CONTRAST_SCALE = 0.25 de fill anula la
+                  confianza): dos igual de rellenas => alto; una clara y una
+                  tenue (borron o correccion) => bajo. No usa `margin` porque
+                  ese es relativo al umbral y en una hoja de rellenos plenos
+                  (umbral 0.62) topa en 0.62 hasta para la doble mas evidente.
+                  Medido en goldset/README-registro.md (pendientes fase 4).
+
+Con OMR_CONTRACT_V2=0 las tres claves no se emiten y el ScanResult vuelve a la
+forma v1 (los tres campos son opcionales en el contrato).
 """
 
 from __future__ import annotations
 
 import base64
+import os
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -38,6 +64,20 @@ from .classify import (
 from .geometry import point_to_px, radius_to_px
 from .rectify import RectifiedPage
 from .registration import RingFix, local_registration_enabled, register_group
+
+ENV_CONTRACT_V2 = "OMR_CONTRACT_V2"
+CONTRACT_V2_DEFAULT = True
+DOUBT_MARGIN = "margin"
+DOUBT_BAND = "band"
+DOUBT_MULTIPLE = "multiple"
+NULL_CONFIDENCE_CONTRAST_SCALE = 0.25
+
+
+def contract_v2_enabled() -> bool:
+    raw = os.environ.get(ENV_CONTRACT_V2)
+    if raw is None:
+        return CONTRACT_V2_DEFAULT
+    return raw.strip().lower() in ("1", "true", "yes", "on")
 
 
 @dataclass(frozen=True)
@@ -78,9 +118,7 @@ class FieldReader(Protocol):
     ) -> dict[str, Any]: ...
 
 
-def sample_bubble_fills_at_spec(
-    page: RectifiedPage, bubbles: list[dict[str, Any]]
-) -> list[float]:
+def sample_bubble_fills_at_spec(page: RectifiedPage, bubbles: list[dict[str, Any]]) -> list[float]:
     """Fill en la posicion que dice el spec, sin registro local.
 
     Es lo que usan la firma de grilla y el afinado de esquinas (pipeline.py): ahi la
@@ -164,6 +202,61 @@ def bubble_samples(
     ]
 
 
+def empty_doubt_fields() -> dict[str, Any]:
+    return {"suggestedValue": None, "doubtReason": None, "nullConfidence": None}
+
+
+def doubt_fields(
+    field: dict[str, Any],
+    samples: list[BubbleSample],
+    state: str,
+    threshold: float,
+    ambiguity_margin: float,
+) -> dict[str, Any]:
+    if state == "ambiguous":
+        return {
+            "suggestedValue": suggested_value(field, samples, threshold),
+            "doubtReason": doubt_reason(samples, ambiguity_margin),
+            "nullConfidence": None,
+        }
+    if state == "multiple":
+        return {
+            "suggestedValue": None,
+            "doubtReason": DOUBT_MULTIPLE,
+            "nullConfidence": round(null_confidence(samples, threshold), 4),
+        }
+    return empty_doubt_fields()
+
+
+def suggested_value(
+    field: dict[str, Any], samples: list[BubbleSample], threshold: float
+) -> str | None:
+    over = [sample for sample in samples if sample.is_over(threshold)]
+    if not over:
+        return None
+    if field["selectMode"] == "multiple":
+        return "".join(sample.value for sample in over)
+    if len(over) == 1:
+        return over[0].value
+    return None
+
+
+def doubt_reason(samples: list[BubbleSample], ambiguity_margin: float) -> str:
+    if any(sample.uncertain and sample.margin < ambiguity_margin for sample in samples):
+        return DOUBT_MARGIN
+    return DOUBT_BAND
+
+
+def null_confidence(samples: list[BubbleSample], threshold: float) -> float:
+    over = [sample for sample in samples if sample.is_over(threshold)]
+    if len(over) < 2 or threshold >= 1.0:
+        return 0.0
+    fills = [sample.fill for sample in over]
+    weakest_strength = min(1.0, (min(fills) - threshold) / (1.0 - threshold))
+    contrast = (max(fills) - min(fills)) / NULL_CONFIDENCE_CONTRAST_SCALE
+    return max(0.0, weakest_strength * (1.0 - contrast))
+
+
 def read_digit_groups(
     bubbles: list[dict[str, Any]],
     fills: list[float],
@@ -236,7 +329,7 @@ class BubbleGroupReader:
         samples = bubble_samples(field["bubbles"], fills, page_threshold, ambiguity_margin)
         state, value, representative = self._classify(field, samples, threshold)
         needs_evidence = state in ("multiple", "ambiguous")
-        return {
+        reading = {
             "fieldId": field["fieldId"],
             "printedNumber": field["printedNumber"],
             "state": state,
@@ -246,6 +339,9 @@ class BubbleGroupReader:
             "margin": round(representative.margin, 4),
             "cropJpegBase64": _bubbles_crop_base64(page, field) if needs_evidence else None,
         }
+        if contract_v2_enabled():
+            reading.update(doubt_fields(field, samples, state, threshold, ambiguity_margin))
+        return reading
 
     def _classify(
         self, field: dict[str, Any], samples: list[BubbleSample], threshold: float
@@ -258,8 +354,10 @@ class BubbleGroupReader:
         if not over:
             return "blank", None, most_doubtful
         if field["selectMode"] == "multiple":
-            return "marked", "".join(sample.value for sample in over), max(
-                over, key=lambda sample: sample.fill
+            return (
+                "marked",
+                "".join(sample.value for sample in over),
+                max(over, key=lambda sample: sample.fill),
             )
         if len(over) == 1:
             return "marked", over[0].value, over[0]
@@ -287,7 +385,7 @@ class DigitGridReader:
     ) -> dict[str, Any]:
         groups = read_digit_groups(field["bubbles"], fills, page_threshold, ambiguity_margin)
         state, value, representative = self._classify(groups)
-        return {
+        reading = {
             "fieldId": field["fieldId"],
             "printedNumber": field["printedNumber"],
             "state": state,
@@ -297,6 +395,9 @@ class DigitGridReader:
             "margin": round(representative.margin, 4) if representative else 0.0,
             "cropJpegBase64": _bubbles_crop_base64(page, field) if state == "ambiguous" else None,
         }
+        if contract_v2_enabled():
+            reading.update(empty_doubt_fields())
+        return reading
 
     def _classify(
         self, groups: list[DigitGroupReading] | None
@@ -336,7 +437,7 @@ class CropRegionReader:
         ambiguity_margin: float = AMBIGUITY_MARGIN,
     ) -> dict[str, Any]:
         encoded = crop_region_jpeg(page, field["region"])
-        return {
+        reading = {
             "fieldId": field["fieldId"],
             "printedNumber": field["printedNumber"],
             "state": "marked",
@@ -346,6 +447,9 @@ class CropRegionReader:
             "margin": 1.0,
             "cropJpegBase64": base64.b64encode(encoded.tobytes()).decode("ascii"),
         }
+        if contract_v2_enabled():
+            reading.update(empty_doubt_fields())
+        return reading
 
 
 def _bubbles_crop_base64(page: RectifiedPage, field: dict[str, Any]) -> str:

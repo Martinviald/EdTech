@@ -152,6 +152,7 @@ def render(result: dict[str, Any], debug: list[dict[str, Any]], show_marks: bool
                 f"   score p10 {registration['scoreP10']}"
                 f"   al spec {registration['fallbackCount']}"
                 f"   heredados {registration['inheritedCount']}"
+                f"   saturados {registration.get('saturatedCount', 0)}"
             )
         if not show_marks:
             continue

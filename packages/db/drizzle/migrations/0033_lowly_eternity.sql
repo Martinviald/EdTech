@@ -1,0 +1,1 @@
+ALTER TABLE "sheet_scan_marks" ADD COLUMN "auto_resolved" boolean DEFAULT false NOT NULL;
