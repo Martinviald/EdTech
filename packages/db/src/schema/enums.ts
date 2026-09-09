@@ -84,6 +84,23 @@ export const instrumentApplicationPeriodEnum = pgEnum('instrument_application_pe
   'cierre',
 ]);
 
+export const processKindEnum = pgEnum('process_kind', [
+  'dia',
+  'simce_ensayo',
+  'paes_ensayo',
+  'evaluacion_interna',
+  'cambridge_mock',
+  'custom',
+]);
+
+export const processStatusEnum = pgEnum('process_status', [
+  'planned',
+  'in_progress',
+  'loading',
+  'closed',
+  'archived',
+]);
+
 export const instrumentStatusEnum = pgEnum('instrument_status', ['draft', 'published', 'archived']);
 
 export const sectionTypeEnum = pgEnum('section_type', [
@@ -325,12 +342,7 @@ export const sheetScanStateEnum = pgEnum('sheet_scan_state', [
   'superseded',
 ]);
 
-export const markStateEnum = pgEnum('mark_state', [
-  'marked',
-  'blank',
-  'multiple',
-  'ambiguous',
-]);
+export const markStateEnum = pgEnum('mark_state', ['marked', 'blank', 'multiple', 'ambiguous']);
 
 // Tipo de decisión del revisor sobre una marca dudosa. `annulled` = el alumno
 // respondió pero la respuesta se anula por regla de la prueba (doble marca);

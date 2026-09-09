@@ -424,3 +424,16 @@ DROP POLICY IF EXISTS "assessment_form_students_tenant_isolation" ON "assessment
 CREATE POLICY "assessment_form_students_tenant_isolation" ON "assessment_form_students"
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true));
+
+
+-- ── Procesos de medición ─────────────────────────────────────────────────────
+-- El proceso agrupa las evaluaciones de una ventana de aplicación (§ docs/
+-- diseno-procesos-de-medicion.md). Lleva `org_id` propio: es dato del colegio.
+ALTER TABLE "measurement_processes" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "measurement_processes" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "measurement_processes_tenant_isolation" ON "measurement_processes";
+CREATE POLICY "measurement_processes_tenant_isolation" ON "measurement_processes"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true))
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));

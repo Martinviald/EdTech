@@ -20,6 +20,9 @@ export type DashboardFilterValues = {
   instrumentId?: string;
   studentId?: string;
   academicYearId?: string;
+  // Proceso de medición (docs/diseno-procesos-de-medicion.md): acota el alcance a
+  // las evaluaciones de una ventana de aplicación con una sola clave.
+  processId?: string;
 };
 
 /** Claves de filtro que viven en la querystring. */
@@ -32,6 +35,7 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'instrumentId',
   'studentId',
   'academicYearId',
+  'processId',
 ];
 
 /**
@@ -92,6 +96,7 @@ export function parseDashboardFilters(
     instrumentId: pick('instrumentId'),
     studentId: pick('studentId'),
     academicYearId: pick('academicYearId'),
+    processId: pick('processId'),
   };
 }
 

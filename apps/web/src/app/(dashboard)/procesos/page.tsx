@@ -1,0 +1,86 @@
+import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
+import { CalendarRange } from 'lucide-react';
+import { auth } from '@/auth';
+import { canAccess, PROCESS_VIEWER_ROLES, type MeasurementProcessModel } from '@soe/types';
+import { CardSkeleton, EmptyState, PageContainer, PageHeader } from '@/components/shared';
+import { ROUTES } from '@/lib/routes';
+import { getProcesses } from './data';
+import { ProcessCard } from './components/process-card';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ProcesosPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const session = await auth();
+  if (!session?.user) redirect(ROUTES.login);
+  if (!canAccess(session.user.roles, PROCESS_VIEWER_ROLES)) redirect(ROUTES.dashboard);
+
+  const params = await searchParams;
+  const academicYearId = typeof params.academicYearId === 'string' ? params.academicYearId : null;
+  const query = academicYearId ? `?academicYearId=${academicYearId}` : '';
+
+  return (
+    <PageContainer>
+      <PageHeader
+        title="Procesos de medición"
+        description="Cada ventana de aplicación —un momento DIA, una toma de ensayo, una evaluación semestral— con su rendición, sus resultados y sus accesos directos."
+        icon={CalendarRange}
+      />
+      <Suspense key={query} fallback={<ProcessListSkeleton />}>
+        <ProcessList query={query} />
+      </Suspense>
+    </PageContainer>
+  );
+}
+
+async function ProcessList({ query }: { query: string }) {
+  const { data, total } = await getProcesses(query);
+
+  if (total === 0) {
+    return (
+      <EmptyState
+        icon={CalendarRange}
+        title="Todavía no hay procesos de medición"
+        description="Un proceso agrupa las evaluaciones de una misma ventana de aplicación. Al crearlo puedes seguir su rendición y abrir sus resultados desde un solo lugar."
+      />
+    );
+  }
+
+  const byYear = new Map<number | null, MeasurementProcessModel[]>();
+  for (const process of data) {
+    const bucket = byYear.get(process.academicYear);
+    if (bucket) bucket.push(process);
+    else byYear.set(process.academicYear, [process]);
+  }
+
+  return (
+    <div className="space-y-8">
+      {Array.from(byYear.entries()).map(([year, processes]) => (
+        <section key={year ?? 'sin-anio'} className="space-y-3">
+          <h2 className="text-muted-foreground text-sm font-medium">
+            {year ?? 'Sin año académico'}
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {processes.map((process) => (
+              <ProcessCard key={process.id} process={process} />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function ProcessListSkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <CardSkeleton rows={3} />
+      <CardSkeleton rows={3} />
+      <CardSkeleton rows={3} />
+    </div>
+  );
+}
