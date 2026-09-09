@@ -347,3 +347,39 @@ gen:omr-contracts`): además de los tres campos, el generador incorporó `formId
 `read-request` / `assess-request`, que ya estaba en Zod y faltaba en los JSON.
 
 Decisión: **avanza** a pendientes fase 5 (B1, backend y web).
+
+### 2026-09-09 · pendientes fase 6a · A3 — tierra de nadie: medida, no se cambia
+
+**Ciclo 6a-1 — medir (`tools/measure_band.py`, nuevo):** muestrea los fills como el motor,
+arma el umbral de la página y reclasifica cada campo bajo varios candidatos de banda
+(`CLUSTER_BAND_STD_FACTOR:CLUSTER_BAND_MIN_WIDTH`), cruzado con la verdad y, en el sintético,
+con el estilo del trazo que dibujó el generador (`plan_sheet` es determinista).
+
+| banda | real (14 fotos): ambiguas **solo** por la banda | sintético (48, todos los estilos) | dígito RUT al 50 % (`test_rut_identity`, `test_digit_grid`) |
+|---|---|---|---|
+| `max(2σ, 0.12)` vigente | 4: Bruno q22/q23 en 3 capturas, fills 0.69–0.77, umbral 0.53–0.59, verdad B | 0 | ambiguous ✔ |
+| `max(3σ, 0.12)` | 0 | 0 | **marked**: RUT con un dígito inventado |
+| `max(2.5σ, 0.10)` | 0 | 0 | falla 1 de 2 |
+| `max(3σ, 0.08)` | 4 vacías a 0.27–0.33 junto a marcas plenas | 0 | falla |
+| `max(2σ, 0.08)` | 17 | 0 | pasa |
+
+Ningún trazo-no-respuesta del sintético (cruz, tilde, relleno a medias, borrón, doble) depende
+de la banda: van a revisión por `margin` o `multiple`. Pero el dígito relleno a medias de la
+grilla RUT (CD-10) **sí** depende de ella, y con 3σ se escapa: el propio dígito a medias infla
+`σ_high` de un grupo de dígitos plenos, el borde alto de la banda se derrumba hasta el umbral y
+la identidad sale con un dígito inventado — exactamente lo que la regla de oro de identidad
+prohíbe. (El fallo es sensible al orden de los tests: aislados los dos pasan con 3σ; en archivo
+completo o suite fallan, señal de que el dígito queda justo en el borde.)
+
+**Ciclo 6a-2 — decidir:** no se cambia. Las 4 marcas claras de Bruno que la banda manda a
+revisión llegan con `suggestedValue` correcto (fase 4) y cuestan una tecla con B1 (fase 5);
+0 incorrectas antes y después. Tabla en el docstring de `app/classify.py`; dos tests nuevos
+en `test_classify.py` fijan la banda vigente (tick al 40 % adentro; ancho mínimo manda en
+grupos anchos).
+
+| instrumento | resultado |
+|---|---|
+| suite | 283 (+2) |
+| sintético 48 · real 14 | idénticos: 97.57 % / 2.26 % / 1 · 275 / 33 / 0 |
+
+Decisión: **cerrada sin cambio de constantes**; pasa a pendientes fase 6b (B2).

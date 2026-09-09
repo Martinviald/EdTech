@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from app.classify import AMBIGUITY_MARGIN, margin_of, page_threshold
+from app.classify import AMBIGUITY_MARGIN, PageThreshold, margin_of, page_threshold
 from app.pipeline import process_page
 from tests import synthetic as syn
 
@@ -156,3 +156,28 @@ def _assert_expected_marks(page: dict, marks_abcd: dict) -> None:
         assert mark["state"] == "marked"
         assert mark["value"] == expected
     assert by_number["8"]["state"] == "blank"
+
+
+def _page(std_low: float, std_high: float) -> PageThreshold:
+    return PageThreshold(
+        threshold=0.55,
+        separable=True,
+        gap=0.8,
+        low_mean=0.15,
+        high_mean=0.95,
+        std_low=std_low,
+        std_high=std_high,
+    )
+
+
+def test_a_faint_tick_on_a_page_of_full_fills_stays_in_no_mans_land() -> None:
+    page = _page(std_low=0.03, std_high=0.03)
+    assert page.ambiguity_band() == pytest.approx((0.27, 0.83))
+    assert page.is_in_no_mans_land(0.40)
+
+
+def test_the_minimum_width_keeps_light_marks_in_no_mans_land_on_wide_clusters() -> None:
+    wide = _page(std_low=0.05, std_high=0.06)
+    assert wide.ambiguity_band() == pytest.approx((0.27, 0.83))
+    assert wide.is_in_no_mans_land(0.77)
+    assert wide.is_in_no_mans_land(0.33)
