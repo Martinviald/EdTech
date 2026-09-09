@@ -1,17 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, lt, ne, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
   assessmentCourseAssignments,
   assessmentItemStats,
-  assessmentResults,
   assessmentSkillStats,
   assessments,
   classGroups,
   items,
   performanceBands,
   studentEnrollments,
-  students,
   taxonomyNodes,
 } from '@soe/db';
 import {
@@ -22,7 +20,10 @@ import {
   type ComparableUnitSummary,
   type DashboardAlert,
 } from '@soe/types';
-import { assessmentAcademicYears } from '../common/helpers/assessment-academic-year.helper';
+import {
+  assessmentAcademicYears,
+  scopedAssessmentResults,
+} from '../common/helpers/assessment-academic-year.helper';
 import type { Database } from '../database/database.types';
 
 type AlertDraft = Omit<DashboardAlert, 'dedupKey'> & { dedupKey?: string };
@@ -309,37 +310,30 @@ export class ComparableAlertsService {
 
     const currentBand = alias(performanceBands, 'current_band');
     const priorBand = alias(performanceBands, 'prior_band');
+    const scoped = scopedAssessmentResults(tx, assessmentIds);
     const assessmentYear = assessmentAcademicYears(tx);
 
     const rows = await tx
       .select({
-        assessmentId: assessmentResults.assessmentId,
+        assessmentId: scoped.assessmentId,
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
         dropped: sql<number>`count(*)::int`,
       })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(currentBand, eq(currentBand.id, assessmentResults.performanceBandId))
-      .innerJoin(priorBand, eq(priorBand.id, assessmentResults.priorPerformanceBandId))
-      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
+      .from(scoped)
+      .innerJoin(currentBand, eq(currentBand.id, scoped.performanceBandId))
+      .innerJoin(priorBand, eq(priorBand.id, scoped.priorPerformanceBandId))
+      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, scoped.assessmentId))
       .innerJoin(
         studentEnrollments,
         and(
-          eq(studentEnrollments.studentId, assessmentResults.studentId),
+          eq(studentEnrollments.studentId, scoped.studentId),
           eq(studentEnrollments.academicYearId, assessmentYear.academicYearId),
         ),
       )
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
-      .where(
-        and(
-          inArray(assessmentResults.assessmentId, assessmentIds),
-          isNull(students.deletedAt),
-          isNotNull(assessmentResults.priorPerformanceBandId),
-          lt(currentBand.order, priorBand.order),
-        ),
-      )
-      .groupBy(assessmentResults.assessmentId, classGroups.id, classGroups.name);
+      .where(and(isNotNull(scoped.priorPerformanceBandId), lt(currentBand.order, priorBand.order)))
+      .groupBy(scoped.assessmentId, classGroups.id, classGroups.name);
 
     const unitByAssessment = new Map<string, ComparableUnitSummary>();
     for (const unit of units) {
@@ -396,24 +390,24 @@ export class ComparableAlertsService {
       .where(and(...assignedConditions));
 
     const coverageAssessmentYear = assessmentAcademicYears(tx);
+    const coverageScoped = scopedAssessmentResults(tx, assessmentIds);
     const withResults = await tx
       .selectDistinct({
-        assessmentId: assessmentResults.assessmentId,
+        assessmentId: coverageScoped.assessmentId,
         classGroupId: studentEnrollments.classGroupId,
       })
-      .from(assessmentResults)
+      .from(coverageScoped)
       .innerJoin(
         coverageAssessmentYear,
-        eq(coverageAssessmentYear.assessmentId, assessmentResults.assessmentId),
+        eq(coverageAssessmentYear.assessmentId, coverageScoped.assessmentId),
       )
       .innerJoin(
         studentEnrollments,
         and(
-          eq(studentEnrollments.studentId, assessmentResults.studentId),
+          eq(studentEnrollments.studentId, coverageScoped.studentId),
           eq(studentEnrollments.academicYearId, coverageAssessmentYear.academicYearId),
         ),
-      )
-      .where(inArray(assessmentResults.assessmentId, assessmentIds));
+      );
 
     const covered = new Set(withResults.map((r) => `${r.assessmentId}:${r.classGroupId}`));
     const unitByAssessment = new Map<string, ComparableUnitSummary>();

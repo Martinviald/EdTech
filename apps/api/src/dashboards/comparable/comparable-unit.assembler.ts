@@ -19,7 +19,10 @@ import {
   type PerformanceBandDistributionBucket,
   type PerformanceBandInput,
 } from '@soe/types';
-import { assessmentAcademicYears } from '../../common/helpers/assessment-academic-year.helper';
+import {
+  assessmentAcademicYears,
+  scopedAssessmentResults,
+} from '../../common/helpers/assessment-academic-year.helper';
 import { loadCohortAchievementByAssessment } from '../../common/helpers/cohort-item-stats.helper';
 import {
   levelCountsToBandDistribution,
@@ -332,60 +335,48 @@ export class ComparableUnitAssembler {
     if (assessmentIds.length === 0) return empty;
     if (classGroupIds !== null && classGroupIds.length === 0) return empty;
 
-    const conditions = [
-      inArray(assessmentResults.assessmentId, assessmentIds),
-      eq(classGroups.orgId, orgId),
-      isNull(students.deletedAt),
-    ];
+    const conditions = [eq(classGroups.orgId, orgId)];
     if (classGroupIds !== null) conditions.push(inArray(classGroups.id, classGroupIds));
 
+    const scoped = scopedAssessmentResults(tx, assessmentIds);
     const assessmentYear = assessmentAcademicYears(tx);
     const enrollmentOfAssessmentYear = and(
-      eq(studentEnrollments.studentId, assessmentResults.studentId),
+      eq(studentEnrollments.studentId, scoped.studentId),
       eq(studentEnrollments.academicYearId, assessmentYear.academicYearId),
     );
 
     const totalsQuery = tx
       .select({
-        instrumentId: assessments.instrumentId,
+        instrumentId: scoped.instrumentId,
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
         gradeName: grades.name,
-        studentsAssessed: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
-        percentageSum: sql<string | null>`sum(${assessmentResults.percentage}::numeric)`,
-        percentageCount: sql<number>`count(${assessmentResults.percentage})::int`,
+        studentsAssessed: sql<number>`count(distinct ${scoped.studentId})::int`,
+        percentageSum: sql<string | null>`sum(${scoped.percentage}::numeric)`,
+        percentageCount: sql<number>`count(${scoped.percentage})::int`,
       })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
-      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
+      .from(scoped)
+      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, scoped.assessmentId))
       .innerJoin(studentEnrollments, enrollmentOfAssessmentYear)
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .leftJoin(grades, eq(grades.id, classGroups.gradeId))
       .where(and(...conditions))
-      .groupBy(assessments.instrumentId, classGroups.id, classGroups.name, grades.name);
+      .groupBy(scoped.instrumentId, classGroups.id, classGroups.name, grades.name);
 
     const classificationQuery = tx
       .select({
-        instrumentId: assessments.instrumentId,
+        instrumentId: scoped.instrumentId,
         classGroupId: classGroups.id,
-        performanceBandId: assessmentResults.performanceBandId,
-        percentage: assessmentResults.percentage,
+        performanceBandId: scoped.performanceBandId,
+        percentage: scoped.percentage,
         count: sql<number>`count(*)::int`,
       })
-      .from(assessmentResults)
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
-      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
-      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, assessmentResults.assessmentId))
+      .from(scoped)
+      .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, scoped.assessmentId))
       .innerJoin(studentEnrollments, enrollmentOfAssessmentYear)
       .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
       .where(and(...conditions))
-      .groupBy(
-        assessments.instrumentId,
-        classGroups.id,
-        assessmentResults.performanceBandId,
-        assessmentResults.percentage,
-      );
+      .groupBy(scoped.instrumentId, classGroups.id, scoped.performanceBandId, scoped.percentage);
 
     const [totals, classification] = await Promise.all([
       totalsQuery,

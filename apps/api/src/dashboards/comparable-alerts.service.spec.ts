@@ -14,6 +14,7 @@ function makeDb(): Database {
     groupBy: () => chain,
     orderBy: () => chain,
     as: () => chain,
+    offset: () => chain,
     then: <T>(resolve: (rows: T[]) => unknown) =>
       Promise.resolve([] as never).then(resolve as never),
   };
