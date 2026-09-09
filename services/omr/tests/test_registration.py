@@ -132,6 +132,36 @@ def test_register_group_follows_a_gradient_along_the_row(
             assert abs(fix.dy - 3) <= 1
 
 
+@pytest.mark.parametrize("dx,dy", [(24, -24), (-27, 10), (0, 30)])
+def test_a_shift_beyond_the_window_is_recovered_by_the_second_pass(
+    spec: dict, rectified: RectifiedPage, dx: int, dy: int
+) -> None:
+    from app.geometry import point_to_px, radius_to_px
+
+    page = shifted(rectified, dx, dy)
+    for field in spec["fields"]:
+        centers = [point_to_px(b["center"], rectified.size) for b in field["bubbles"]]
+        radius_px = radius_to_px(field["bubbles"][0]["radius"], rectified.size)
+        window = reg.search_window_px(centers, radius_px)
+        assert max(abs(dx), abs(dy)) > window
+
+        fixes = reg.register_group(page, field["bubbles"])
+
+        for fix in fixes:
+            assert not fix.fallback
+            assert fix.saturated
+            assert abs(fix.dx - dx) <= 1 and abs(fix.dy - dy) <= 1, (field["fieldId"], fix)
+    assert reg.summarize(fixes, True)["saturatedCount"] == len(fixes)
+
+
+def test_second_pass_runs_only_where_it_cannot_reach_the_neighbour() -> None:
+    question_layout = (80.0, reg.search_window_px([(0, 0), (80, 0)], 18), 18)
+    rut_grid = (22.4, reg.search_window_px([(0, 0), (0, 22)], 14), 14)
+
+    assert reg.second_pass_allowed(*question_layout)
+    assert not reg.second_pass_allowed(*rut_grid)
+
+
 def test_robust_line_ignores_one_outlier_and_caps_wild_slopes() -> None:
     intercept, slope = reg.robust_line([(0, -13), (80, -10), (160, -7), (240, -5)])
     assert abs(slope - 0.034) < 0.01
