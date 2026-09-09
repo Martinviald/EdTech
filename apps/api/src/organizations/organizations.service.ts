@@ -22,6 +22,7 @@ import {
   withOrgContext,
 } from '@soe/db';
 import {
+  TEACHING_ROLES,
   normalizeClassGroupSection,
   orgConfigSchema,
   resolveAllowedFeatures,
@@ -34,16 +35,9 @@ import {
   type UpdateOrganizationProfileDto,
   type UpdateOrgBrandingDto,
   type UpdateOrgFeaturesDto,
-  type UserRole,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { FilesService } from '../files/files.service';
-
-/**
- * Roles que pueden recibir carga académica en `teacher_assignments`.
- * Sin `as const`: `inArray` de Drizzle no acepta una tupla readonly.
- */
-const TEACHING_ROLES: UserRole[] = ['teacher', 'homeroom_teacher', 'eval_coordinator'];
 
 @Injectable()
 export class OrganizationsService {
@@ -299,7 +293,7 @@ export class OrganizationsService {
         and(
           eq(orgMemberships.orgId, orgId),
           eq(orgMemberships.isActive, true),
-          inArray(orgMemberships.role, TEACHING_ROLES),
+          inArray(orgMemberships.role, [...TEACHING_ROLES]),
           isNull(users.deletedAt),
         ),
       )
@@ -328,7 +322,7 @@ export class OrganizationsService {
         and(
           eq(orgMemberships.orgId, orgId),
           eq(orgMemberships.isActive, true),
-          inArray(orgMemberships.role, TEACHING_ROLES),
+          inArray(orgMemberships.role, [...TEACHING_ROLES]),
           isNull(orgMemberships.userId),
           isNotNull(orgMemberships.email),
         ),
