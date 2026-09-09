@@ -322,6 +322,23 @@ describe('ScanReviewService.getQueue', () => {
 
     await expect(service.getQueue(ORG_ID, BATCH_ID)).rejects.toBeInstanceOf(NotFoundException);
   });
+
+  it('B1: settings.quickConfirm sale de organizations.config.review y está apagado por defecto', async () => {
+    const enabled = makeService([
+      [{ id: BATCH_ID, spec: SPEC, orgConfig: { review: { quickConfirm: true } } }],
+      [],
+      [],
+      [],
+    ]);
+    const disabled = makeService([[{ id: BATCH_ID, spec: SPEC, orgConfig: null }], [], [], []]);
+
+    expect((await enabled.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
+      quickConfirm: true,
+    });
+    expect((await disabled.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
+      quickConfirm: false,
+    });
+  });
 });
 
 function resolveMarkRow(overrides: Record<string, unknown> = {}) {
@@ -336,6 +353,9 @@ function resolveMarkRow(overrides: Record<string, unknown> = {}) {
     threshold: '0.500',
     margin: '0.200',
     cropFileId: null,
+    suggestedValue: null,
+    doubtReason: null,
+    nullConfidence: null,
     batchId: BATCH_ID,
     batchStatus: 'needs_review',
     spec: SPEC,
@@ -353,6 +373,34 @@ describe('ScanReviewService.resolveMark', () => {
 
     await expect(
       service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'option', reviewedValue: 'Z' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('B1: "confirm" persiste la sugerencia del motor como decisión option', async () => {
+    const { service, updates } = makeService([
+      [resolveMarkRow({ suggestedValue: 'B', doubtReason: 'margin' })],
+      [{ total: 0 }],
+      [{ total: 0 }],
+    ]);
+
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'confirm' });
+
+    expect(updates[0]).toMatchObject({
+      reviewedValue: 'B',
+      reviewDecision: 'option',
+      reviewedById: USER_ID,
+    });
+    expect(model.reviewedValue).toBe('B');
+    expect(model.reviewedDecision).toBe('option');
+    expect(model.suggestedValue).toBe('B');
+  });
+
+  it('B1: "confirm" sobre una marca sin sugerencia responde 400 y no escribe', async () => {
+    const { service, updates } = makeService([[resolveMarkRow({ state: 'multiple' })]]);
+
+    await expect(
+      service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'confirm' }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(updates).toHaveLength(0);
   });

@@ -23,6 +23,13 @@ export function isMarkResolved(mark: ReviewMarkModel): boolean {
   return mark.reviewedById !== null;
 }
 
+/** "Sí" a la sugerencia (B1) equivale a elegir la alternativa sugerida; el backend la persiste como `option`. */
+function optimisticReviewedValue(mark: ReviewMarkModel, decision: ReviewMarkDto): string | null {
+  if (decision.decision === 'option') return decision.reviewedValue;
+  if (decision.decision === 'confirm') return mark.suggestedValue;
+  return null;
+}
+
 export function useReviewQueue(batchId: string, enabled: boolean) {
   return useQuery({
     queryKey: reviewQueueKeys.detail(batchId),
@@ -56,8 +63,9 @@ export function useResolveMark(batchId: string) {
                 mark.markId === markId
                   ? {
                       ...mark,
-                      reviewedValue: decision.decision === 'option' ? decision.reviewedValue : null,
-                      reviewedDecision: decision.decision,
+                      reviewedValue: optimisticReviewedValue(mark, decision),
+                      reviewedDecision:
+                        decision.decision === 'confirm' ? 'option' : decision.decision,
                       reviewedById: OPTIMISTIC_REVIEWER,
                     }
                   : mark,

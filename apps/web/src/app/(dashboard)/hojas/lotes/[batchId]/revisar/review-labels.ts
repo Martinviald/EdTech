@@ -1,4 +1,4 @@
-import type { MarksReadability, MarkState, PageRejectReason } from '@soe/types';
+import type { DoubtReason, MarksReadability, MarkState, PageRejectReason } from '@soe/types';
 
 export const REJECT_REASON_LABELS: Record<PageRejectReason, string> = {
   blurry: 'Imagen borrosa',
@@ -19,4 +19,10 @@ export const MARK_STATE_LABELS: Record<MarkState, string> = {
   blank: 'En blanco',
   multiple: 'Doble marca',
   ambiguous: 'Marca dudosa',
+};
+
+export const DOUBT_REASON_LABELS: Record<DoubtReason, string> = {
+  margin: 'el relleno quedó muy cerca del umbral de la hoja',
+  band: 'el relleno quedó a medio camino entre marcado y vacío',
+  multiple: 'hay más de una burbuja marcada',
 };

@@ -1,17 +1,29 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Ban, CheckCircle2, CircleOff, ImageOff } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Ban,
+  Check,
+  CheckCircle2,
+  CircleOff,
+  ImageOff,
+  X,
+} from 'lucide-react';
 import type { ReviewMarkDto, ReviewMarkModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { AlertCallout } from '@/components/shared';
 import { isMarkResolved, useResolveMark } from '../../../hooks/use-review-queue';
-import { MARK_STATE_LABELS } from './review-labels';
+import { DOUBT_REASON_LABELS, MARK_STATE_LABELS } from './review-labels';
 
 const BLANK_DECISION: ReviewMarkDto = { decision: 'blank' };
 const ANNULLED_DECISION: ReviewMarkDto = { decision: 'annulled' };
+const CONFIRM_DECISION: ReviewMarkDto = { decision: 'confirm' };
+const QUICK_YES_KEY = 'S';
+const QUICK_NO_KEY = 'N';
 
 /**
  * Teclas candidatas para "anulada", en orden. Se usa la primera que no sea una
@@ -32,8 +44,19 @@ function Kbd({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: ReviewMarkModel[] }) {
+interface MarkReviewPanelProps {
+  batchId: string;
+  marks: ReviewMarkModel[];
+  /**
+   * B1 (`organizations.config.review.quickConfirm`): una marca con sugerencia
+   * del motor se resuelve con Sí/No; al No se abren todas las opciones.
+   */
+  quickConfirm: boolean;
+}
+
+export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPanelProps) {
   const [index, setIndex] = useState(0);
+  const [declinedMarkIds, setDeclinedMarkIds] = useState<ReadonlySet<string>>(() => new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const resolveMark = useResolveMark(batchId);
 
@@ -87,9 +110,38 @@ export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: Re
     [current, resolveMark, findNextUnresolved, safeIndex, focusPanel],
   );
 
+  const declineSuggestion = useCallback(() => {
+    if (!current) return;
+    setDeclinedMarkIds((prev) => new Set(prev).add(current.markId));
+    focusPanel();
+  }, [current, focusPanel]);
+
+  const quickMode =
+    quickConfirm &&
+    current !== undefined &&
+    current.suggestedValue !== null &&
+    !isMarkResolved(current) &&
+    !declinedMarkIds.has(current.markId);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (!current) return;
+      if (quickMode) {
+        const key = e.key.toUpperCase();
+        if (key === QUICK_YES_KEY && !current.options.includes(QUICK_YES_KEY)) {
+          e.preventDefault();
+          resolve(CONFIRM_DECISION);
+          return;
+        }
+        if (
+          (key === QUICK_NO_KEY && !current.options.includes(QUICK_NO_KEY)) ||
+          e.key === 'Escape'
+        ) {
+          e.preventDefault();
+          declineSuggestion();
+          return;
+        }
+      }
       if (e.key === 'Enter' || e.key === 'ArrowRight') {
         e.preventDefault();
         goNext();
@@ -109,7 +161,7 @@ export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: Re
         resolve(BLANK_DECISION);
         return;
       }
-      if (upper === pickAnnulKey(current.options)) {
+      if (!quickMode && upper === pickAnnulKey(current.options)) {
         e.preventDefault();
         resolve(ANNULLED_DECISION);
         return;
@@ -119,7 +171,7 @@ export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: Re
         resolve({ decision: 'option', reviewedValue: upper });
       }
     },
-    [current, goNext, goPrev, resolve],
+    [current, quickMode, goNext, goPrev, resolve, declineSuggestion],
   );
 
   if (!current) return null;
@@ -141,11 +193,20 @@ export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: Re
             </span>
           </CardTitle>
           <p className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-            <Kbd>{current.options.join(' ')}</Kbd> alternativa · <Kbd>{blankKeyLabel}</Kbd> en
-            blanco ·{' '}
-            {annulKey && (
+            {quickMode ? (
               <>
-                <Kbd>{annulKey}</Kbd> anulada ·{' '}
+                <Kbd>{QUICK_YES_KEY}</Kbd> sí · <Kbd>{QUICK_NO_KEY}</Kbd> no ·{' '}
+                <Kbd>{current.options.join(' ')}</Kbd> otra alternativa ·{' '}
+              </>
+            ) : (
+              <>
+                <Kbd>{current.options.join(' ')}</Kbd> alternativa · <Kbd>{blankKeyLabel}</Kbd> en
+                blanco ·{' '}
+                {annulKey && (
+                  <>
+                    <Kbd>{annulKey}</Kbd> anulada ·{' '}
+                  </>
+                )}
               </>
             )}
             <Kbd>Enter</Kbd> siguiente · <Kbd>←</Kbd> anterior
@@ -210,60 +271,68 @@ export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: Re
               )}
             </div>
 
-            <div className="flex flex-col justify-center gap-3">
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-2">
-                {current.options.map((option) => {
-                  const selected =
-                    currentResolved &&
-                    current.reviewedDecision === 'option' &&
-                    current.reviewedValue === option;
-                  return (
-                    <Button
-                      key={option}
-                      type="button"
-                      variant={selected ? 'default' : 'outline'}
-                      size="lg"
-                      className="h-14 min-w-16 text-lg font-semibold"
-                      aria-label={`Marcar alternativa ${option}`}
-                      aria-pressed={selected}
-                      onClick={() => resolve({ decision: 'option', reviewedValue: option })}
-                    >
-                      {option}
-                    </Button>
-                  );
-                })}
+            {quickMode ? (
+              <QuickConfirmChoice
+                mark={current}
+                onConfirm={() => resolve(CONFIRM_DECISION)}
+                onDecline={declineSuggestion}
+              />
+            ) : (
+              <div className="flex flex-col justify-center gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-2">
+                  {current.options.map((option) => {
+                    const selected =
+                      currentResolved &&
+                      current.reviewedDecision === 'option' &&
+                      current.reviewedValue === option;
+                    return (
+                      <Button
+                        key={option}
+                        type="button"
+                        variant={selected ? 'default' : 'outline'}
+                        size="lg"
+                        className="h-14 min-w-16 text-lg font-semibold"
+                        aria-label={`Marcar alternativa ${option}`}
+                        aria-pressed={selected}
+                        onClick={() => resolve({ decision: 'option', reviewedValue: option })}
+                      >
+                        {option}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  type="button"
+                  variant={blankSelected ? 'default' : 'outline'}
+                  aria-label="Marcar como en blanco: el alumno no respondió"
+                  aria-pressed={blankSelected}
+                  onClick={() => resolve(BLANK_DECISION)}
+                >
+                  <CircleOff className="mr-2 size-4" aria-hidden />
+                  En blanco
+                </Button>
+                <Button
+                  type="button"
+                  variant={annulledSelected ? 'destructive' : 'outline'}
+                  aria-label="Anular la respuesta: el alumno respondió, pero la respuesta se anula por regla de la prueba"
+                  aria-pressed={annulledSelected}
+                  onClick={() => resolve(ANNULLED_DECISION)}
+                >
+                  <Ban className="mr-2 size-4" aria-hidden />
+                  Anulada
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Lectura de máquina: {current.value ?? 'sin valor'} · no se sobrescribe, tu
+                  decisión queda aparte.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  <strong className="font-medium text-foreground">En blanco</strong>: el alumno no
+                  respondió. <strong className="font-medium text-foreground">Anulada</strong>: sí
+                  respondió, pero la respuesta se anula por regla de la prueba (por ejemplo, marcó
+                  dos alternativas). Ambas puntúan 0; la diferencia queda registrada.
+                </p>
               </div>
-              <Button
-                type="button"
-                variant={blankSelected ? 'default' : 'outline'}
-                aria-label="Marcar como en blanco: el alumno no respondió"
-                aria-pressed={blankSelected}
-                onClick={() => resolve(BLANK_DECISION)}
-              >
-                <CircleOff className="mr-2 size-4" aria-hidden />
-                En blanco
-              </Button>
-              <Button
-                type="button"
-                variant={annulledSelected ? 'destructive' : 'outline'}
-                aria-label="Anular la respuesta: el alumno respondió, pero la respuesta se anula por regla de la prueba"
-                aria-pressed={annulledSelected}
-                onClick={() => resolve(ANNULLED_DECISION)}
-              >
-                <Ban className="mr-2 size-4" aria-hidden />
-                Anulada
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                Lectura de máquina: {current.value ?? 'sin valor'} · no se sobrescribe, tu decisión
-                queda aparte.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                <strong className="font-medium text-foreground">En blanco</strong>: el alumno no
-                respondió. <strong className="font-medium text-foreground">Anulada</strong>: sí
-                respondió, pero la respuesta se anula por regla de la prueba (por ejemplo, marcó dos
-                alternativas). Ambas puntúan 0; la diferencia queda registrada.
-              </p>
-            </div>
+            )}
           </div>
 
           <div className="mt-4 flex items-center justify-between">
@@ -298,5 +367,55 @@ export function MarkReviewPanel({ batchId, marks }: { batchId: string; marks: Re
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function QuickConfirmChoice({
+  mark,
+  onConfirm,
+  onDecline,
+}: {
+  mark: ReviewMarkModel;
+  onConfirm: () => void;
+  onDecline: () => void;
+}) {
+  const reason = mark.doubtReason ? DOUBT_REASON_LABELS[mark.doubtReason] : null;
+  return (
+    <div className="flex flex-col justify-center gap-3">
+      <p className="text-lg">
+        ¿Es la <strong className="font-semibold text-foreground">{mark.suggestedValue}</strong>?
+      </p>
+      <p className="text-xs text-muted-foreground">
+        El lector ve marcada la {mark.suggestedValue}
+        {reason ? `, pero ${reason}` : ''}. Confirma si el recorte coincide.
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          type="button"
+          size="lg"
+          className="h-14 text-lg font-semibold"
+          aria-label={`Sí, es la alternativa ${mark.suggestedValue}`}
+          onClick={onConfirm}
+        >
+          <Check className="mr-2 size-5" aria-hidden />
+          Sí
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="h-14 text-lg font-semibold"
+          aria-label="No, elegir otra alternativa, en blanco o anulada"
+          onClick={onDecline}
+        >
+          <X className="mr-2 size-5" aria-hidden />
+          No
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Lectura de máquina: {mark.value ?? 'sin valor'} · no se sobrescribe, tu decisión queda
+        aparte. Con No se abren todas las alternativas, en blanco y anulada.
+      </p>
+    </div>
   );
 }

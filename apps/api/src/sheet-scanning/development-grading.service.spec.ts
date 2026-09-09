@@ -77,7 +77,9 @@ function makeDb(selectResults: unknown[][]): {
         inserts.push({ table, rows });
         return {
           returning: () =>
-            Promise.resolve(rows.map((row, i) => ({ id: `job-${i + 1}`, responseId: row.responseId }))),
+            Promise.resolve(
+              rows.map((row, i) => ({ id: `job-${i + 1}`, responseId: row.responseId })),
+            ),
         };
       },
     }),
@@ -395,9 +397,7 @@ describe('DevelopmentGradingService.processConfirmedBatch', () => {
     const { inserts } = await runScheduledJob([manyCrops, manyItems, manyResponses, []]);
 
     expect(inserts[0].rows).toHaveLength(DEVELOPMENT_GRADING_BATCH_LIMIT);
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('1 recorte(s) del lote'),
-    );
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('1 recorte(s) del lote'));
   });
 
   it('deja el job failed cuando la salida del modelo no es JSON y no toca la response', async () => {

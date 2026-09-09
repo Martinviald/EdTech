@@ -145,6 +145,11 @@ export const reviewMarkSchema = z.discriminatedUnion('decision', [
   z.object({ decision: z.literal('option'), reviewedValue: z.string().min(1).max(20) }),
   z.object({ decision: z.literal('blank') }),
   z.object({ decision: z.literal('annulled') }),
+  /**
+   * B1: "sí" a la sugerencia del motor. Se persiste como `option` con
+   * `reviewedValue = suggestedValue`; una marca sin sugerencia responde 400.
+   */
+  z.object({ decision: z.literal('confirm') }),
 ]);
 
 export const assignScanIdentitySchema = z.object({
@@ -382,11 +387,17 @@ export type ReviewMarkModel = {
 };
 
 /** Orden por daño (C16): calidad primero (el profesor aún tiene las hojas), identidades después, marcas por margin ascendente. */
+/** Ajustes de la org que cambian cómo se revisa, no qué se revisa (B1). */
+export type ReviewQueueSettingsModel = {
+  quickConfirm: boolean;
+};
+
 export type ReviewQueueModel = {
   batchId: string;
   qualityRejected: ReviewScanModel[];
   identityUnresolved: ReviewScanModel[];
   ambiguousMarks: ReviewMarkModel[];
+  settings: ReviewQueueSettingsModel;
 };
 
 export type AssessCaptureIdentityModel = {
@@ -426,6 +437,20 @@ export type RegistrationMetricsModel = {
   alerts: { offMedianPx: number; fallbackRatio: number };
 };
 
+/**
+ * Cuánto acierta la sugerencia del motor (B1): entre las marcas con
+ * `suggestedValue` ya revisadas, `confirmed` = la decisión humana coincidió
+ * (con Sí o eligiendo la misma letra) y `rejected` = eligió otra cosa. Una
+ * tasa de rechazo sostenida cerca de 0 es la señal para revisar la tierra de
+ * nadie (A3); una alta, para revisar la sugerencia.
+ */
+export type SuggestionMetricsModel = {
+  marksWithSuggestion: number;
+  reviewed: number;
+  confirmed: number;
+  rejected: number;
+};
+
 export type SheetScanMetricsResponse = {
   batchesByStatus: Record<string, number>;
   rejectedPagesByReason: Record<string, number>;
@@ -433,6 +458,7 @@ export type SheetScanMetricsResponse = {
   reviewRatePercent: number;
   firmReadingOverrides: number;
   registration: RegistrationMetricsModel;
+  suggestions: SuggestionMetricsModel;
 };
 
 export type ConfirmBatchResponse = {
