@@ -89,6 +89,7 @@ export function MobileCameraCapture({
   const [gate, setGate] = useState<GateState>({ phase: 'live' });
   const [encoding, setEncoding] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [tipDismissed, setTipDismissed] = useState(false);
   const fallbackInputRef = useRef<HTMLInputElement | null>(null);
   const capturingRef = useRef(false);
   const supported = isCameraSupported();
@@ -256,6 +257,8 @@ export function MobileCameraCapture({
           <Verdict
             gate={gate}
             capturedCount={capturedCount}
+            tipDismissed={tipDismissed}
+            onDismissTip={() => setTipDismissed(true)}
             onRetake={() => setGate({ phase: 'live' })}
             onUploadAnyway={() => {
               if (gate.phase === 'blank-confirm') upload(gate.blob, gate.identity);
@@ -418,11 +421,15 @@ function FinishButton({
 function Verdict({
   gate,
   capturedCount,
+  tipDismissed,
+  onDismissTip,
   onRetake,
   onUploadAnyway,
 }: {
   gate: GateState;
   capturedCount: number;
+  tipDismissed: boolean;
+  onDismissTip: () => void;
   onRetake: () => void;
   onUploadAnyway: () => void;
 }) {
@@ -477,9 +484,11 @@ function Verdict({
     );
   }
 
-  if (capturedCount === 0) {
+  // Tapa la hoja mientras se encuadra, así que se puede cerrar a mano además de
+  // irse solo con la primera hoja aceptada.
+  if (capturedCount === 0 && !tipDismissed) {
     return (
-      <CaptureToast tone="info" title="Antes de la primera foto">
+      <CaptureToast tone="info" title="Antes de la primera foto" onDismiss={onDismissTip}>
         {CLEAR_SURFACE_TIP} {CLEAR_SURFACE_REASON}
       </CaptureToast>
     );

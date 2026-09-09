@@ -6,6 +6,7 @@ import {
   Info,
   Loader2,
   TriangleAlert,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -38,11 +39,14 @@ export function CaptureToast({
   title,
   children,
   actions,
+  onDismiss,
 }: {
   tone: CaptureToastTone;
   title: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
+  /** Cuando se pasa, el aviso trae una ✕ para cerrarlo. */
+  onDismiss?: () => void;
 }) {
   const Icon = TONE_ICON[tone];
   const hsl = TONE_HSL[tone];
@@ -60,10 +64,20 @@ export function CaptureToast({
           className={`mt-px size-5 shrink-0 ${tone === 'pending' ? 'animate-spin motion-reduce:animate-none' : ''}`}
           style={{ color }}
         />
-        <div className="min-w-0 space-y-0.5">
+        <div className="min-w-0 flex-1 space-y-0.5">
           <p className="text-[13px] font-semibold text-[hsl(var(--neutral-0))]">{title}</p>
           <p className="text-xs leading-[17px] text-[hsl(var(--neutral-300))]">{children}</p>
         </div>
+        {onDismiss && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label="Cerrar el aviso"
+            className="-mr-1 -mt-1 flex size-9 shrink-0 items-center justify-center rounded-full text-[hsl(var(--neutral-400))] transition-colors duration-fast hover:text-[hsl(var(--neutral-0))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--ring))]"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        )}
       </div>
       {actions && <div className="flex gap-2">{actions}</div>}
     </div>
