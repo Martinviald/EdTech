@@ -23,6 +23,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  withDefaultAcademicYear,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
 import { ComparabilityNotice } from '../components/comparability-notice';
@@ -67,11 +68,7 @@ export default async function ClasificacionPage({
   const performanceLevel = parsePerformanceLevel(params.performanceLevel);
 
   const filterQuery = buildDashboardQuery(filters);
-  const perfParams = new URLSearchParams(filterQuery ? filterQuery.slice(1) : '');
-  perfParams.set('page', String(page));
-  perfParams.set('limit', String(limit));
-  if (performanceLevel) perfParams.set('performanceLevel', performanceLevel);
-  const perfQuery = `?${perfParams.toString()}`;
+  const perfQuery = buildPerformanceQuery(filterQuery, page, limit, performanceLevel);
 
   return (
     <>
@@ -88,7 +85,12 @@ export default async function ClasificacionPage({
           </>
         }
       >
-        <PerformanceSection query={perfQuery} performanceLevel={performanceLevel} />
+        <PerformanceSection
+          filters={filters}
+          page={page}
+          limit={limit}
+          performanceLevel={performanceLevel}
+        />
       </Suspense>
     </>
   );
@@ -102,17 +104,47 @@ async function FiltersSection({
   filters: DashboardFilterValues;
 }) {
   const options = await getDashboardFilters(query);
-  return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
+  return (
+    <DashboardFilterBar
+      options={options}
+      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      basePath={BASE_PATH}
+    />
+  );
+}
+
+function buildPerformanceQuery(
+  filterQuery: string,
+  page: number,
+  limit: number,
+  performanceLevel: PerformanceLevel | undefined,
+): string {
+  const params = new URLSearchParams(filterQuery ? filterQuery.slice(1) : '');
+  params.set('page', String(page));
+  params.set('limit', String(limit));
+  if (performanceLevel) params.set('performanceLevel', performanceLevel);
+  return `?${params.toString()}`;
 }
 
 async function PerformanceSection({
-  query,
+  filters,
+  page,
+  limit,
   performanceLevel,
 }: {
-  query: string;
+  filters: DashboardFilterValues;
+  page: number;
+  limit: number;
   performanceLevel: PerformanceLevel | undefined;
 }) {
-  const performance = await getDashboardPerformance(query);
+  const options = await getDashboardFilters(buildDashboardQuery(filters));
+  const scopedQuery = buildPerformanceQuery(
+    buildDashboardQuery(withDefaultAcademicYear(filters, options.defaultAcademicYearId)),
+    page,
+    limit,
+    performanceLevel,
+  );
+  const performance = await getDashboardPerformance(scopedQuery);
   const students = performance.students;
 
   return (
