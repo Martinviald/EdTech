@@ -72,6 +72,7 @@ ingeniería resuelta hace décadas. El riesgo real no está en el algoritmo sino
 | [08-plan-identidad-qr-robusta.md](08-plan-identidad-qr-robusta.md) | Plan por fases de la estrategia 07, con gates medibles |
 | [09-robustez-de-encuadre.md](09-robustez-de-encuadre.md) | Por qué el detector elige el cuadrado equivocado: `_best_square` prefiere lo más cercano a la esquina de la imagen, no el fiducial |
 | [10-plan-seleccion-de-fiduciales.md](10-plan-seleccion-de-fiduciales.md) | Plan: cerrar el hueco del gate de homografía y elegir los fiduciales por firma de grilla |
+| [11-timeout-del-control-de-calidad.md](11-timeout-del-control-de-calidad.md) | Por qué el control de calidad necesita timeout y cancelación real: en el escáner móvil es lo único que bloquea el obturador |
 
 ## Orden de lectura para implementar
 

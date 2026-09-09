@@ -39,7 +39,8 @@ import {
  */
 type GateState =
   | { phase: 'live' }
-  | { phase: 'assessing'; sheetNumber: number }
+  | { phase: 'assessing'; sheetNumber: number; slow: boolean }
+  | { phase: 'assess-timeout' }
   | { phase: 'rejected'; reason: string; hint: string }
   | { phase: 'uploaded'; label: string | null }
   | {
@@ -58,6 +59,15 @@ type MobileCameraCaptureProps = {
   onAccepted: (file: File, identity: AssessCaptureIdentityModel | null) => void;
   onFinish: () => void;
 };
+
+/**
+ * Dos etapas, no un corte único. Una hoja son ~0,6 MB y el wifi de un colegio es
+ * lento de verdad: abortar temprano convertiría una subida sana en un rechazo
+ * falso. A los 8 s se avisa y se ofrece salida — la decisión es del usuario; a los
+ * 45 s se aborta solo, porque a esa altura el obturador lleva demasiado muerto.
+ */
+const ASSESS_SLOW_MS = 8_000;
+const ASSESS_TIMEOUT_MS = 45_000;
 
 function rejectionLabel(quality: PageQuality): string {
   if (quality.rejectReason === 'no_separable_marks' && quality.marksReadability === 'unreadable') {
@@ -92,6 +102,9 @@ export function MobileCameraCapture({
   const [tipDismissed, setTipDismissed] = useState(false);
   const fallbackInputRef = useRef<HTMLInputElement | null>(null);
   const capturingRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const abortCauseRef = useRef<'user' | 'timeout' | null>(null);
+  const timersRef = useRef<number[]>([]);
   const supported = isCameraSupported();
 
   const capturedCount = countCaptured(sheets, priorCount);
@@ -102,6 +115,17 @@ export function MobileCameraCapture({
   useEffect(() => {
     if (supported) void start();
   }, [supported, start]);
+
+  // Cancelar la evaluación en vuelo al desmontar: si no, su respuesta llegaría a un
+  // componente que ya no existe (o, peor, a uno remontado por `cameraEpoch`).
+  useEffect(
+    () => () => {
+      abortCauseRef.current = 'user';
+      abortRef.current?.abort();
+      for (const timer of timersRef.current) window.clearTimeout(timer);
+    },
+    [],
+  );
 
   // El aviso de «subiendo» se apaga solo: la subida corre en segundo plano y el
   // obturador ya está libre, así que no debe quedar tapando la guía en vivo.
@@ -131,26 +155,62 @@ export function MobileCameraCapture({
     setGate({ phase: 'uploaded', label });
   }
 
+  function clearGateTimers() {
+    for (const timer of timersRef.current) window.clearTimeout(timer);
+    timersRef.current = [];
+  }
+
+  function cancelAssess() {
+    abortCauseRef.current = 'user';
+    abortRef.current?.abort();
+  }
+
   function runGate(capture: CapturedJpeg) {
-    setGate({ phase: 'assessing', sheetNumber: capturedCount + 1 });
-    assess.mutate(capture.imageBase64, {
-      onSuccess: (result) => {
-        if (!result.accepted && looksBlank(result.quality)) {
-          setGate({ phase: 'blank-confirm', blob: capture.blob, identity: result.identity });
-          return;
-        }
-        if (!result.accepted) {
-          setGate({
-            phase: 'rejected',
-            reason: rejectionLabel(result.quality),
-            hint: rejectionHint(result.quality.rejectReason),
-          });
-          return;
-        }
-        upload(capture.blob, result.identity);
+    clearGateTimers();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    abortCauseRef.current = null;
+    setGate({ phase: 'assessing', sheetNumber: capturedCount + 1, slow: false });
+
+    timersRef.current = [
+      window.setTimeout(() => {
+        setGate((current) =>
+          current.phase === 'assessing' ? { ...current, slow: true } : current,
+        );
+      }, ASSESS_SLOW_MS),
+      window.setTimeout(() => {
+        abortCauseRef.current = 'timeout';
+        controller.abort();
+      }, ASSESS_TIMEOUT_MS),
+    ];
+
+    assess.mutate(
+      { imageBase64: capture.imageBase64, signal: controller.signal },
+      {
+        onSuccess: (result) => {
+          clearGateTimers();
+          if (!result.accepted && looksBlank(result.quality)) {
+            setGate({ phase: 'blank-confirm', blob: capture.blob, identity: result.identity });
+            return;
+          }
+          if (!result.accepted) {
+            setGate({
+              phase: 'rejected',
+              reason: rejectionLabel(result.quality),
+              hint: rejectionHint(result.quality.rejectReason),
+            });
+            return;
+          }
+          upload(capture.blob, result.identity);
+        },
+        onError: () => {
+          clearGateTimers();
+          const cause = abortCauseRef.current;
+          abortCauseRef.current = null;
+          setGate(cause === 'timeout' ? { phase: 'assess-timeout' } : { phase: 'live' });
+        },
       },
-      onError: () => setGate({ phase: 'live' }),
-    });
+    );
   }
 
   async function handleCapture() {
@@ -259,6 +319,7 @@ export function MobileCameraCapture({
             capturedCount={capturedCount}
             tipDismissed={tipDismissed}
             onDismissTip={() => setTipDismissed(true)}
+            onCancelAssess={cancelAssess}
             onRetake={() => setGate({ phase: 'live' })}
             onUploadAnyway={() => {
               if (gate.phase === 'blank-confirm') upload(gate.blob, gate.identity);
@@ -423,6 +484,7 @@ function Verdict({
   capturedCount,
   tipDismissed,
   onDismissTip,
+  onCancelAssess,
   onRetake,
   onUploadAnyway,
 }: {
@@ -430,13 +492,42 @@ function Verdict({
   capturedCount: number;
   tipDismissed: boolean;
   onDismissTip: () => void;
+  onCancelAssess: () => void;
   onRetake: () => void;
   onUploadAnyway: () => void;
 }) {
   if (gate.phase === 'assessing') {
-    return (
+    // Pasados los 8 s el aviso deja de prometer que «toma un segundo» y ofrece la
+    // salida, en vez de dejar al usuario mirando un obturador que no responde.
+    return gate.slow ? (
+      <CaptureToast
+        tone="pending"
+        title={`Sigue evaluando la hoja ${gate.sheetNumber}…`}
+        actions={
+          <Button
+            type="button"
+            size="lg"
+            variant="secondary"
+            className="w-full"
+            onClick={onCancelAssess}
+          >
+            Cancelar y volver a disparar
+          </Button>
+        }
+      >
+        La conexión está lenta. Puedes esperar o cancelar y tomar la foto de nuevo.
+      </CaptureToast>
+    ) : (
       <CaptureToast tone="pending" title={`Evaluando calidad de la hoja ${gate.sheetNumber}…`}>
         Toma un segundo. Puedes ir posicionando la hoja siguiente.
+      </CaptureToast>
+    );
+  }
+
+  if (gate.phase === 'assess-timeout') {
+    return (
+      <CaptureToast tone="danger" title="No se pudo evaluar la foto">
+        La conexión tardó demasiado y la hoja no entró al lote. Revisa la señal y vuelve a disparar.
       </CaptureToast>
     );
   }
@@ -556,6 +647,13 @@ function FallbackCapture({
       {gate.phase === 'rejected' && (
         <AlertCallout tone="danger" title="Foto rechazada: no entra al lote">
           {gate.reason}. {gate.hint}
+        </AlertCallout>
+      )}
+
+      {gate.phase === 'assess-timeout' && (
+        <AlertCallout tone="danger" title="No se pudo evaluar la foto">
+          La conexión tardó demasiado y la hoja no entró al lote. Revisa la señal y vuelve a
+          tomarla.
         </AlertCallout>
       )}
 
