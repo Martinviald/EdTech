@@ -1,3 +1,4 @@
+import type { MeasurementProcess } from '@soe/db';
 import {
   expandExpectedCells,
   expectedCellKey,
@@ -7,6 +8,11 @@ import {
   type ProcessCoverageCellStatus,
   type ProcessCoverageTotals,
 } from '@soe/types';
+
+export type ProcessRow = MeasurementProcess & {
+  academicYear: number | null;
+  taxonomyName: string | null;
+};
 
 export type CoverageAssessmentCell = {
   assessmentId: string;

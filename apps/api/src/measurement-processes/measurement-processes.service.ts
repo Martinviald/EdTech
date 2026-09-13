@@ -4,22 +4,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, countDistinct, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentCourseAssignments,
-  assessmentResults,
   assessments,
   classGroups,
   grades,
   instruments,
   measurementProcesses,
-  studentEnrollments,
-  students,
   subjects,
   taxonomies,
   withOrgContext,
-  type MeasurementProcess,
 } from '@soe/db';
 import {
   isExpectedScopeDefined,
@@ -37,24 +33,19 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import type { CoverageAssembly, ProcessRow } from './measurement-processes.helpers';
 import {
-  assembleCoverage,
-  type CoverageAssembly,
-  type CoverageAssessmentCell,
-  type CoverageCatalog,
-} from './measurement-processes.helpers';
-
-type ProcessRow = MeasurementProcess & { academicYear: number | null; taxonomyName: string | null };
-
-const EMPTY_COVERAGE: CoverageAssembly = {
-  totals: { expected: 0, missing: 0, scheduled: 0, partial: 0, complete: 0 },
-  cells: [],
-  unexpectedCells: [],
-};
+  EMPTY_COVERAGE,
+  ProcessCoverageService,
+  type ProcessAssessmentStats,
+} from './process-coverage.service';
 
 @Injectable()
 export class MeasurementProcessesService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly coverageService: ProcessCoverageService,
+  ) {}
 
   async list(
     user: JwtPayload,
@@ -84,8 +75,8 @@ export class MeasurementProcessesService {
       });
 
       const [coverageByProcess, statsByProcess] = await Promise.all([
-        this.loadCoverage(tx, orgId, rows),
-        this.loadAssessmentStats(
+        this.coverageService.load(tx, orgId, rows),
+        this.coverageService.loadAssessmentStats(
           tx,
           rows.map((r) => r.id),
         ),
@@ -112,8 +103,8 @@ export class MeasurementProcessesService {
     return withOrgContext(this.db, orgId, async (tx) => {
       const row = await this.requireProcess(tx, orgId, processId);
       const [coverage, stats] = await Promise.all([
-        this.loadCoverage(tx, orgId, [row]),
-        this.loadAssessmentStats(tx, [row.id]),
+        this.coverageService.load(tx, orgId, [row]),
+        this.coverageService.loadAssessmentStats(tx, [row.id]),
       ]);
       return this.toModel(row, coverage.get(row.id) ?? EMPTY_COVERAGE, stats.get(row.id));
     });
@@ -124,7 +115,8 @@ export class MeasurementProcessesService {
 
     return withOrgContext(this.db, orgId, async (tx) => {
       const row = await this.requireProcess(tx, orgId, processId);
-      const assembly = (await this.loadCoverage(tx, orgId, [row])).get(row.id) ?? EMPTY_COVERAGE;
+      const assembly =
+        (await this.coverageService.load(tx, orgId, [row])).get(row.id) ?? EMPTY_COVERAGE;
       return {
         processId: row.id,
         scopeDefined: isExpectedScopeDefined(row.expectedScope),
@@ -206,8 +198,8 @@ export class MeasurementProcessesService {
 
       const row = await this.requireProcess(tx, orgId, processId);
       const [coverage, stats] = await Promise.all([
-        this.loadCoverage(tx, orgId, [row]),
-        this.loadAssessmentStats(tx, [row.id]),
+        this.coverageService.load(tx, orgId, [row]),
+        this.coverageService.loadAssessmentStats(tx, [row.id]),
       ]);
       return this.toModel(row, coverage.get(row.id) ?? EMPTY_COVERAGE, stats.get(row.id));
     });
@@ -392,216 +384,6 @@ export class MeasurementProcessesService {
     return row;
   }
 
-  private async loadAssessmentStats(
-    tx: Database,
-    processIds: readonly string[],
-  ): Promise<Map<string, { assessmentCount: number; studentsAssessed: number }>> {
-    const stats = new Map<string, { assessmentCount: number; studentsAssessed: number }>();
-    if (processIds.length === 0) return stats;
-
-    const counts = await tx
-      .select({
-        processId: assessments.processId,
-        assessmentCount: sql<number>`count(*)::int`,
-      })
-      .from(assessments)
-      .where(inArray(assessments.processId, [...processIds]))
-      .groupBy(assessments.processId);
-
-    for (const row of counts) {
-      if (!row.processId) continue;
-      stats.set(row.processId, { assessmentCount: row.assessmentCount, studentsAssessed: 0 });
-    }
-
-    const studentCounts = await tx
-      .select({
-        processId: assessments.processId,
-        studentsAssessed: countDistinct(assessmentResults.studentId),
-      })
-      .from(assessmentResults)
-      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
-      .where(inArray(assessments.processId, [...processIds]))
-      .groupBy(assessments.processId);
-
-    for (const row of studentCounts) {
-      if (!row.processId) continue;
-      const entry = stats.get(row.processId);
-      if (entry) entry.studentsAssessed = Number(row.studentsAssessed);
-    }
-
-    return stats;
-  }
-
-  private async loadCoverage(
-    tx: Database,
-    orgId: string,
-    processRows: readonly ProcessRow[],
-  ): Promise<Map<string, CoverageAssembly>> {
-    const result = new Map<string, CoverageAssembly>();
-    if (processRows.length === 0) return result;
-
-    const processIds = processRows.map((p) => p.id);
-
-    const cellRows = await tx
-      .select({
-        processId: assessments.processId,
-        assessmentId: assessments.id,
-        assessmentName: assessments.name,
-        classGroupId: classGroups.id,
-        classGroupName: classGroups.name,
-        gradeShortName: grades.shortName,
-        gradeOrder: grades.order,
-        subjectId: instruments.subjectId,
-        subjectName: subjects.name,
-        subjectShortName: subjects.shortName,
-      })
-      .from(assessments)
-      .innerJoin(
-        assessmentCourseAssignments,
-        eq(assessmentCourseAssignments.assessmentId, assessments.id),
-      )
-      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
-      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .where(and(eq(assessments.orgId, orgId), inArray(assessments.processId, processIds)));
-
-    const assessmentIds = Array.from(new Set(cellRows.map((r) => r.assessmentId)));
-    const resultCounts = assessmentIds.length
-      ? await tx
-          .select({
-            assessmentId: assessmentResults.assessmentId,
-            classGroupId: studentEnrollments.classGroupId,
-            studentsWithResults: countDistinct(assessmentResults.studentId),
-          })
-          .from(assessmentResults)
-          .innerJoin(
-            studentEnrollments,
-            eq(studentEnrollments.studentId, assessmentResults.studentId),
-          )
-          .innerJoin(students, eq(students.id, assessmentResults.studentId))
-          .where(
-            and(inArray(assessmentResults.assessmentId, assessmentIds), isNull(students.deletedAt)),
-          )
-          .groupBy(assessmentResults.assessmentId, studentEnrollments.classGroupId)
-      : [];
-
-    const resultsByCell = new Map<string, number>();
-    for (const row of resultCounts) {
-      resultsByCell.set(`${row.assessmentId}:${row.classGroupId}`, Number(row.studentsWithResults));
-    }
-
-    const scopeClassGroupIds = new Set<string>();
-    const scopeSubjectIds = new Set<string>();
-    for (const process of processRows) {
-      for (const id of process.expectedScope?.classGroupIds ?? []) scopeClassGroupIds.add(id);
-      for (const id of process.expectedScope?.subjectIds ?? []) scopeSubjectIds.add(id);
-    }
-    for (const row of cellRows) scopeClassGroupIds.add(row.classGroupId);
-
-    const catalog = await this.loadCatalog(
-      tx,
-      orgId,
-      Array.from(scopeClassGroupIds),
-      Array.from(scopeSubjectIds),
-    );
-
-    const cellsByProcess = new Map<string, CoverageAssessmentCell[]>();
-    for (const row of cellRows) {
-      if (!row.processId) continue;
-      let bucket = cellsByProcess.get(row.processId);
-      if (!bucket) {
-        bucket = [];
-        cellsByProcess.set(row.processId, bucket);
-      }
-      bucket.push({
-        assessmentId: row.assessmentId,
-        assessmentName: row.assessmentName,
-        classGroupId: row.classGroupId,
-        classGroupName: row.classGroupName,
-        gradeShortName: row.gradeShortName,
-        gradeOrder: row.gradeOrder,
-        subjectId: row.subjectId,
-        subjectName: row.subjectName,
-        subjectShortName: row.subjectShortName,
-        studentsWithResults: resultsByCell.get(`${row.assessmentId}:${row.classGroupId}`) ?? 0,
-      });
-    }
-
-    for (const process of processRows) {
-      result.set(
-        process.id,
-        assembleCoverage(process.expectedScope, cellsByProcess.get(process.id) ?? [], catalog),
-      );
-    }
-
-    return result;
-  }
-
-  private async loadCatalog(
-    tx: Database,
-    orgId: string,
-    classGroupIds: readonly string[],
-    subjectIds: readonly string[],
-  ): Promise<CoverageCatalog> {
-    const catalog: CoverageCatalog = {
-      classGroups: new Map(),
-      subjects: new Map(),
-      studentsByClassGroup: new Map(),
-    };
-
-    if (classGroupIds.length > 0) {
-      const rows = await tx
-        .select({
-          id: classGroups.id,
-          name: classGroups.name,
-          gradeShortName: grades.shortName,
-          gradeOrder: grades.order,
-        })
-        .from(classGroups)
-        .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-        .where(and(eq(classGroups.orgId, orgId), inArray(classGroups.id, [...classGroupIds])));
-      for (const row of rows) {
-        catalog.classGroups.set(row.id, {
-          name: row.name,
-          gradeShortName: row.gradeShortName,
-          gradeOrder: row.gradeOrder,
-        });
-      }
-
-      const enrollmentCounts = await tx
-        .select({
-          classGroupId: studentEnrollments.classGroupId,
-          total: countDistinct(studentEnrollments.studentId),
-        })
-        .from(studentEnrollments)
-        .innerJoin(students, eq(students.id, studentEnrollments.studentId))
-        .where(
-          and(
-            inArray(studentEnrollments.classGroupId, [...classGroupIds]),
-            eq(studentEnrollments.status, 'active'),
-            isNull(students.deletedAt),
-          ),
-        )
-        .groupBy(studentEnrollments.classGroupId);
-      for (const row of enrollmentCounts) {
-        catalog.studentsByClassGroup.set(row.classGroupId, Number(row.total));
-      }
-    }
-
-    if (subjectIds.length > 0) {
-      const rows = await tx
-        .select({ id: subjects.id, name: subjects.name, shortName: subjects.shortName })
-        .from(subjects)
-        .where(inArray(subjects.id, [...subjectIds]));
-      for (const row of rows) {
-        catalog.subjects.set(row.id, { name: row.name, shortName: row.shortName });
-      }
-    }
-
-    return catalog;
-  }
-
   private async buildUniqueSlug(
     tx: Database,
     orgId: string,
@@ -627,7 +409,7 @@ export class MeasurementProcessesService {
   private toModel(
     row: ProcessRow,
     coverage: CoverageAssembly,
-    stats: { assessmentCount: number; studentsAssessed: number } | undefined,
+    stats: ProcessAssessmentStats | undefined,
   ): MeasurementProcessModel {
     const expectedScope: ExpectedScope = row.expectedScope ?? {};
     const scopeDefined = isExpectedScopeDefined(expectedScope);
