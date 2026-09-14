@@ -17,6 +17,9 @@ import {
   CAPTURE_FRAMING_TIP,
   CLEAR_SURFACE_REASON,
   CLEAR_SURFACE_TIP,
+  FOREIGN_SHEET_HINT,
+  FOREIGN_SHEET_REASON,
+  FOREIGN_SHEET_TITLE,
   rejectionHint,
 } from './capture-hints';
 import {
@@ -30,7 +33,7 @@ import { useAssessCapture } from '../hooks/use-assess-capture';
 type GateState =
   | { phase: 'live' }
   | { phase: 'assessing'; previewUrl: string }
-  | { phase: 'rejected'; previewUrl: string; reason: string; hint: string }
+  | { phase: 'rejected'; previewUrl: string; reason: string; hint: string; title?: string }
   | {
       phase: 'blank-confirm';
       previewUrl: string;
@@ -156,6 +159,28 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
             });
             return;
           }
+          // La hoja de otra tirada llega con la imagen intacta: presentarla como un
+          // fallo de calidad manda a repetir una foto que estaba bien.
+          if (result.rejection?.kind === 'layout_mismatch') {
+            setGate({
+              phase: 'rejected',
+              previewUrl,
+              title: FOREIGN_SHEET_TITLE,
+              reason: result.rejection.reason,
+              hint: '',
+            });
+            return;
+          }
+          if (result.rejection?.kind === 'other_print_run') {
+            setGate({
+              phase: 'rejected',
+              previewUrl,
+              title: FOREIGN_SHEET_TITLE,
+              reason: FOREIGN_SHEET_REASON,
+              hint: FOREIGN_SHEET_HINT,
+            });
+            return;
+          }
           if (!result.accepted) {
             setGate({
               phase: 'rejected',
@@ -263,6 +288,7 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
           {gate.phase === 'rejected' ? (
             <RejectedVerdict
               previewUrl={gate.previewUrl}
+              title={gate.title}
               reason={gate.reason}
               hint={gate.hint}
               onRetake={() => backToLive(gate.previewUrl)}
@@ -347,6 +373,7 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
 
           {gate.phase === 'rejected' ? (
             <RejectedVerdict
+              title={gate.title}
               reason={gate.reason}
               hint={gate.hint}
               onRetake={() => backToLive(gate.previewUrl)}
@@ -419,11 +446,13 @@ function BlankSheetVerdict({
 
 function RejectedVerdict({
   previewUrl,
+  title,
   reason,
   hint,
   onRetake,
 }: {
   previewUrl?: string;
+  title?: string;
   reason: string;
   hint: string;
   onRetake: () => void;
@@ -438,8 +467,11 @@ function RejectedVerdict({
           className="mx-auto max-h-64 rounded-lg border object-contain"
         />
       )}
-      <AlertCallout tone="danger" title="Foto rechazada: no entra al lote">
-        {reason}. {hint}
+      <AlertCallout
+        tone={title ? 'warning' : 'danger'}
+        title={title ?? 'Foto rechazada: no entra al lote'}
+      >
+        {title ? [reason, hint].filter(Boolean).join(' ') : `${reason}. ${hint}`}
       </AlertCallout>
       <Button type="button" size="lg" variant="outline" className="w-full" onClick={onRetake}>
         <RotateCcw className="mr-2 size-5" aria-hidden />

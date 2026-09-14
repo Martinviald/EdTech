@@ -30,3 +30,16 @@ const REJECT_REASON_CAPTURE_HINTS: Record<PageRejectReason, string> = {
 export function rejectionHint(reason: PageRejectReason | null): string {
   return reason ? REJECT_REASON_CAPTURE_HINTS[reason] : GENERIC_RETAKE_HINT;
 }
+
+// ── Hoja que no corresponde a la tirada ──────────────────────────────────────
+// La imagen puede estar perfecta: el problema es el papel, no la foto. Decirle a
+// quien captura que "la calidad es mala" lo manda a repetir una foto que estaba
+// bien, una y otra vez.
+
+export const FOREIGN_SHEET_TITLE = 'Esta hoja no es de esta tirada';
+
+export const FOREIGN_SHEET_REASON =
+  'La foto salió bien, pero el código impreso en la hoja pertenece a otra tirada.';
+
+export const FOREIGN_SHEET_HINT =
+  'Usa las hojas que imprimiste para esta tirada. Las otras se capturan abriendo una sesión sobre su propia tirada.';

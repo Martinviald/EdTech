@@ -1117,6 +1117,7 @@ describe('SheetScanService.assessCapture (CD-11)', () => {
 
     expect(result.accepted).toBe(false);
     expect(result.quality.rejectReason).toBe('blurry');
+    expect(result.rejection).toEqual({ kind: 'quality' });
     expect(result.identity).toEqual({
       printedSheetId: null,
       pageIndex: null,
@@ -1170,6 +1171,9 @@ describe('SheetScanService.assessCapture (CD-11)', () => {
       studentName: null,
       confidence: 0,
     });
+    // El cliente necesita el motivo: sin esto muestra "mala calidad" sobre una foto
+    // impecable y el usuario repite el disparo indefinidamente.
+    expect(result.rejection).toEqual({ kind: 'other_print_run' });
   });
 
   it('modo rut_bubbles: elige el resolver por el modo del spec y responde el alumno candidato', async () => {

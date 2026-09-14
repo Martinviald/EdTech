@@ -20,6 +20,7 @@ import {
   parseOmrQrPayload,
   type AssessCaptureDto,
   type AssessCaptureIdentityModel,
+  type AssessCaptureRejection,
   type AssessCaptureResponse,
   type BatchCountersModel,
   type BatchSourcesModel,
@@ -119,6 +120,24 @@ type EvidenceUploadParams = {
   ownerId: string;
   purpose: string;
 };
+
+/**
+ * Orden por precedencia: si la imagen no sirve no se puede confiar en el QR que se
+ * leyó de ella, así que la calidad manda. Después el desajuste de diseño, que trae
+ * su propio texto, y por último la hoja que simplemente no está en la tirada.
+ */
+function rejectionOf(
+  assessed: OmrAssessResult,
+  candidate: IdentityCandidate,
+  belongsToRun: boolean,
+): AssessCaptureRejection {
+  if (!assessed.quality.ok) return { kind: 'quality' };
+  if (candidate.batchRejection !== null) {
+    return { kind: 'layout_mismatch', reason: candidate.batchRejection.reason };
+  }
+  if (!belongsToRun) return { kind: 'other_print_run' };
+  return { kind: 'quality' };
+}
 
 @Injectable()
 export class SheetScanService {
@@ -374,10 +393,12 @@ export class SheetScanService {
       candidate,
     );
 
+    const accepted = assessed.quality.ok && candidate.batchRejection === null && belongsToRun;
     return {
-      accepted: assessed.quality.ok && candidate.batchRejection === null && belongsToRun,
+      accepted,
       quality: assessed.quality,
       identity,
+      rejection: accepted ? null : rejectionOf(assessed, candidate, belongsToRun),
     };
   }
 
