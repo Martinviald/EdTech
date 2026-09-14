@@ -18,6 +18,8 @@ import { OmrCalibrationController } from './omr-calibration.controller';
 import { OmrCalibrationService } from './omr-calibration.service';
 import { OMR_CLIENT } from './omr-client.types';
 import { HttpOmrClient } from './omr-http.client';
+import { ReviewSettingsController } from './review-settings.controller';
+import { ReviewSettingsService } from './review-settings.service';
 import {
   ScanReviewBatchesController,
   ScanReviewMarksController,
@@ -47,6 +49,7 @@ import { SheetScanService } from './sheet-scan.service';
     SheetScanBatchesController,
     SheetScanMetricsController,
     OmrCalibrationController,
+    ReviewSettingsController,
     ScanReviewBatchesController,
     ScanReviewMarksController,
     ScanReviewScansController,
@@ -63,6 +66,7 @@ import { SheetScanService } from './sheet-scan.service';
     ScanReviewService,
     DevelopmentGradingService,
     OmrCalibrationService,
+    ReviewSettingsService,
     QrIdentityResolver,
     RutBubbleResolver,
     ManualIdentityResolver,
