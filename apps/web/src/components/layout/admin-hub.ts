@@ -4,6 +4,7 @@ import {
   FolderTree,
   Gauge,
   Palette,
+  ScanSearch,
   SlidersHorizontal,
   UserCog,
   Users,
@@ -17,6 +18,7 @@ import {
   LLM_SETTINGS_ROLES,
   ORG_ACADEMIC_ADMIN_ROLES,
   ORG_BRANDING_ROLES,
+  REVIEW_SETTINGS_ROLES,
   STAFF_MANAGEMENT_ROLES,
   STUDENT_ROSTER_ROLES,
   TAXONOMY_ROLES,
@@ -69,6 +71,13 @@ export const CONFIG_HUB_OPTIONS: readonly AdminHubOption[] = [
     description: 'Logo, colores y textos que llevan tus materiales impresos.',
     icon: Palette,
     roles: ORG_BRANDING_ROLES,
+  },
+  {
+    href: ROUTES.configRevisionHojas,
+    label: 'Revisión de hojas',
+    description: 'Cómo se confirman las marcas dudosas y qué dobles marcas se anulan solas.',
+    icon: ScanSearch,
+    roles: REVIEW_SETTINGS_ROLES,
   },
 ];
 

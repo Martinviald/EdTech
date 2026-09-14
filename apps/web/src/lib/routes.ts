@@ -91,6 +91,7 @@ export const ROUTES = {
   configIdentidad: route('/configuracion/identidad'),
   configModelosIa: route('/configuracion/modelos-ia'),
   configObservabilidadIa: route('/configuracion/observabilidad-ia'),
+  configRevisionHojas: route('/configuracion/revision-hojas'),
 
   administracion: route('/administracion'),
   analisisIa: route('/analisis-ia'),
