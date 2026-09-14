@@ -44,13 +44,14 @@ type GateState =
   | { phase: 'live' }
   | { phase: 'assessing'; sheetNumber: number; slow: boolean }
   | { phase: 'assess-timeout' }
-  | { phase: 'rejected'; reason: string; hint: string }
+  | { phase: 'rejected'; reason: string; hint: string; label: string | null }
   | { phase: 'foreign-sheet'; detail: string | null }
   | { phase: 'uploaded'; label: string | null }
   | {
       phase: 'blank-confirm';
       blob: Blob;
       identity: AssessCaptureIdentityModel | null;
+      label: string | null;
     };
 
 type MobileCameraCaptureProps = {
@@ -193,8 +194,17 @@ export function MobileCameraCapture({
       {
         onSuccess: (result) => {
           clearGateTimers();
+          // El lector suele resolver la hoja aunque la foto no sirva. Guardar esa
+          // etiqueta es la diferencia entre «repite una foto» y «repite LA DE ANA»
+          // cuando hay treinta hojas sobre la mesa.
+          const label = result.identity ? assessIdentityLabel(result.identity) : null;
           if (!result.accepted && looksBlank(result.quality)) {
-            setGate({ phase: 'blank-confirm', blob: capture.blob, identity: result.identity });
+            setGate({
+              phase: 'blank-confirm',
+              blob: capture.blob,
+              identity: result.identity,
+              label,
+            });
             return;
           }
           // Una hoja de otra tirada puede venir con una foto impecable: culpar a la
@@ -212,6 +222,7 @@ export function MobileCameraCapture({
               phase: 'rejected',
               reason: rejectionLabel(result.quality),
               hint: rejectionHint(result.quality.rejectReason),
+              label,
             });
             return;
           }
@@ -555,8 +566,10 @@ function Verdict({
   }
 
   if (gate.phase === 'rejected') {
+    // Con la hoja identificada, el título dice CUÁL repetir; sin ella, el genérico.
     return (
-      <CaptureToast tone="danger" title="Foto rechazada: no entra al lote">
+      <CaptureToast tone="danger" title={gate.label ?? 'Foto rechazada: no entra al lote'}>
+        {gate.label ? 'No entra al lote: ' : ''}
         {gate.reason}. {gate.hint}
       </CaptureToast>
     );
@@ -566,7 +579,7 @@ function Verdict({
     return (
       <CaptureToast
         tone="warning"
-        title="Esta hoja parece no tener respuestas marcadas"
+        title={gate.label ?? 'Esta hoja parece no tener respuestas marcadas'}
         actions={
           <>
             <Button type="button" size="lg" className="flex-1" onClick={onUploadAnyway}>
@@ -584,6 +597,7 @@ function Verdict({
           </>
         }
       >
+        {gate.label ? 'Parece no tener respuestas marcadas. ' : ''}
         Súbela igual si no respondió: queda para revisión en el computador.
       </CaptureToast>
     );
