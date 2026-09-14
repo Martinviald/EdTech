@@ -237,3 +237,169 @@ Validación final **sin variable de entorno** (lo que corre en producción):
    (protocolo en `goldset/real/README.md`).
 
 Decisión: **listo para PR contra `dev`.**
+
+---
+
+## Pendientes (plan `analisis-omr-marcas/plan-pendientes-omr.md`)
+
+### 2026-09-08 · pendientes fase 2 · A1 — fallback masivo y `SCORE_MIN`
+
+**Ciclo 2a — medir.** El arnés puntúa ahora la plantilla de anillo también sobre **papel sin
+anillo** (4 posiciones a la derecha de cada fila, `_paper_scores`), además de sobre cada burbuja:
+
+| | mín | p1 |
+|---|---|---|
+| anillo real, vacías (648, 9 fotos) | **0.677** | 0.737 |
+| anillo real, marcadas (144) | **0.695** | 0.713 |
+| anillo real, 4 hojas del 2026-09-05 (352) | 0.709 | — |
+| anillo sintético limpio (`phone-*`, `scanner`) | 0.69 marcadas · 0.79 vacías | — |
+| anillo sintético `dirty` (marca sucia sobre el anillo) | 0.57 — esa burbuja **debe** heredar del grupo | 0.59 |
+
+| papel | máx | p99 |
+|---|---|---|
+| real (792 posiciones) | **0.586** | 0.584 |
+| sintético | 0.544 | 0.544 |
+
+Con `SCORE_MIN = 0.70` el corte tocaba los anillos reales (3 vacías y 1 marcada por debajo, en
+`diego-1621`) y dejaba 0 de margen. Fallback medido: 0 % en 13 fotos reales y 48 sintéticas.
+
+**Ciclo 2b — `SCORE_MIN` 0.70 → 0.63:** medio del hueco real (0.586 – 0.677), ±0.045 a cada lado.
+Tabla en el docstring de `app/registration.py`; test `test_score_min_sits_between_real_paper_and_the_worst_real_ring`.
+
+**Ciclo 2c — política:** `unregistrable(fixes)` = más de `FALLBACK_MAX_RATIO` (0.25) de las burbujas
+de la página muestreadas en la posición del spec → `_marks_readability` declara la página
+`unreadable` y el lote la rechaza con `no_separable_marks` (mismo veredicto en `assess_page`; sin
+motivo nuevo, sin cambio de contrato). Con `OMR_LOCAL_REGISTRATION=0` la política no actúa.
+Tests: página con la mitad de los campos sin anillo → rechazada (gate = lote), leída con el
+interruptor apagado; un solo campo sin anillo → tolerado.
+
+| instrumento | resultado |
+|---|---|
+| suite | 256 (27 de registro) |
+| sintético 48 | 97.57 % / 2.26 % / 1 — idéntico |
+| real 9 · real 4 (2026-09-05) | 194 / 26 / 0 · 81 / 7 / 0 — idénticos; ninguna hoja legible rechazada |
+| hueco mínimo motor | 0.486 · 0.439 — sin cambio |
+
+Decisión: **avanza** a pendientes fase 3 (A2).
+
+### 2026-09-09 · pendientes fase 3 · A2 — segunda pasada de la ventana
+
+Corte real ampliado con las 4 hojas del 2026-09-05 (`*-20260905`, Diego con dobles y triple):
+14 hojas, 13 legibles, 308 marcas.
+
+**Ciclo 3a — pasada anclada:** un ajuste que cae en el borde de la ventana (`|dx| ≥ W` o
+`|dy| ≥ W`) se vuelve a buscar centrado en la predicción de la recta del grupo, con la misma `W`,
+solo si `2W + máscara < distancia − R` (`second_pass_allowed`: sí en el layout de preguntas, no en
+la grilla RUT). En real funcionó de inmediato (`diego-1621`: 33 ajustes saturados recuperados,
+desplazamiento máximo 21.6 px contra `W` 16), pero en sintético los tests de corrimiento 24–30 px
+fallaban: con anillos finos y nítidos la primera pasada **ni llega al borde** — el pico cae en el
+spec con score de papel — y no había "saturado" que reintentar.
+
+**Ciclo 3b — pasada ancha:** si ningún ajuste del grupo es confiable y la geometría lo permite,
+se repite la búsqueda desde el spec con ventana `2W` (misma garantía contra el vecino). La pasada
+anclada queda para el caso parcial. `RingFix.saturated` y `saturatedCount` en el debug.
+
+| instrumento | resultado |
+|---|---|
+| suite | 260 (31 de registro; corrimientos 24/−24, −27/10, 0/30 recuperados a ≤ 1 px) |
+| real 14 | **275 / 33 / 0** (22 = `carla-1620` cropped; 11 revisiones: 5 dobles/triples reales + 6 marcas claras en tierra de nadie) |
+| Diego, 3 capturas de la misma hoja | Δfill de marcadas entre capturas **0.000–0.002** (antes 0.411 / 0.240 / 0.162 en el spec) |
+| saturados tras la segunda pasada | 0 en 12 hojas; `diego-1621` 33 recuperados |
+| sintético 48 | 97.57 % / 2.26 % / 1 — idéntico |
+| costo `register_group` por página (88 burbujas, 14 fotos, 3 repeticiones) | 30.4 ms con segunda pasada vs 29.5 ms sin ella: **+0.9 ms** |
+
+Decisión: **avanza** a pendientes fase 4 (contrato v2).
+
+### 2026-09-09 · pendientes fase 4 · contrato v2 — `suggestedValue`, `doubtReason`, `nullConfidence`
+
+Tres campos aditivos por marca (`app/readers.py`, `OMR_CONTRACT_V2`, default encendido; con `0`
+las claves no se emiten y el ScanResult vuelve a la forma v1). `state` y `value` no cambian: el
+motor dice además **qué sugiere y por qué duda**, para que la cola de revisión pueda confirmar con
+sí/no (B1) o anular sin revisar (B2) en las fases siguientes.
+
+- `suggestedValue` (solo `ambiguous`): la única burbuja sobre el umbral; en `selectMode: multiple`,
+  todas las que lo superan. `null` si ninguna o más de una.
+- `doubtReason`: `margin` (alguna burbuja con `margin < ambiguityMargin`), `band` (ninguna por
+  margen, alguna en tierra de nadie), `multiple`.
+- `nullConfidence` (solo `multiple`): fuerza de la burbuja más tenue sobre el umbral,
+  `(fill − umbral) / (1 − umbral)`, penalizada linealmente por el contraste entre la más oscura y la
+  más clara (`NULL_CONFIDENCE_CONTRAST_SCALE = 0.25` de fill lo anula).
+
+**Ciclo 4a — primera definición, descartada:** la fuerza como `margin` mínimo recortado a 1. En la
+hoja de Diego (rellenos plenos, umbral 0.62) el `margin` máximo alcanzable es 0.62, así que sus
+cuatro dobles evidentes (fills 0.99–1.00 en ambas burbujas) quedaban en 0.59–0.62: la confianza
+dependía del umbral de la página y no de las marcas. **Ciclo 4b:** fuerza normalizada por la
+distancia al relleno pleno; la misma doble llega a 0.96–1.00.
+
+| medición (corte real, 14 hojas, 308 marcas) | resultado |
+|---|---|
+| `ambiguous` con verdad (4: 2 marcas claras en tierra de nadie + 2 por margen) | **4 / 4** sugerencias coinciden con la verdad |
+| dobles/triples de Diego (q11 BC, q14 BC, q16 ABC, q20 AC; fills 0.99–1.00) | `nullConfidence` **0.957 · 1.000 · 0.979 · 1.000** |
+| Bruno q12 en 3 capturas (B 1.00 / C 0.77–0.81; la verdad transcribe BC) | **0.102 · 0.103 · 0.137** |
+| suite · sintético 48 · real | 277 (+17 de contrato v2) · 97.57 % / 2.26 % / 1, idéntico · 275 / 33 / 0 |
+| sintético, única `multiple` (`dirty-marcas-sucias-040` q11, verdad B: un borrón junto a la marca) | `nullConfidence` **0.0** — un borrón no es una nula |
+
+Bruno q12 es una doble legítima según la transcripción, pero con una burbuja 0.2 de fill más clara
+que la otra: la definición la deja en revisión, que es el comportamiento de hoy. Lo que B2 podrá
+anular sin revisar son las dobles con ambas burbujas plenas; el umbral se fija en la fase 6b con
+esta tabla, no antes. Los JSON Schema se regeneraron desde Zod (`pnpm --filter @soe/types
+gen:omr-contracts`): además de los tres campos, el generador incorporó `formId` en `layout-spec` /
+`read-request` / `assess-request`, que ya estaba en Zod y faltaba en los JSON.
+
+Decisión: **avanza** a pendientes fase 5 (B1, backend y web).
+
+### 2026-09-09 · pendientes fase 6a · A3 — tierra de nadie: medida, no se cambia
+
+**Ciclo 6a-1 — medir (`tools/measure_band.py`, nuevo):** muestrea los fills como el motor,
+arma el umbral de la página y reclasifica cada campo bajo varios candidatos de banda
+(`CLUSTER_BAND_STD_FACTOR:CLUSTER_BAND_MIN_WIDTH`), cruzado con la verdad y, en el sintético,
+con el estilo del trazo que dibujó el generador (`plan_sheet` es determinista).
+
+| banda | real (14 fotos): ambiguas **solo** por la banda | sintético (48, todos los estilos) | dígito RUT al 50 % (`test_rut_identity`, `test_digit_grid`) |
+|---|---|---|---|
+| `max(2σ, 0.12)` vigente | 4: Bruno q22/q23 en 3 capturas, fills 0.69–0.77, umbral 0.53–0.59, verdad B | 0 | ambiguous ✔ |
+| `max(3σ, 0.12)` | 0 | 0 | **marked**: RUT con un dígito inventado |
+| `max(2.5σ, 0.10)` | 0 | 0 | falla 1 de 2 |
+| `max(3σ, 0.08)` | 4 vacías a 0.27–0.33 junto a marcas plenas | 0 | falla |
+| `max(2σ, 0.08)` | 17 | 0 | pasa |
+
+Ningún trazo-no-respuesta del sintético (cruz, tilde, relleno a medias, borrón, doble) depende
+de la banda: van a revisión por `margin` o `multiple`. Pero el dígito relleno a medias de la
+grilla RUT (CD-10) **sí** depende de ella, y con 3σ se escapa: el propio dígito a medias infla
+`σ_high` de un grupo de dígitos plenos, el borde alto de la banda se derrumba hasta el umbral y
+la identidad sale con un dígito inventado — exactamente lo que la regla de oro de identidad
+prohíbe. (El fallo es sensible al orden de los tests: aislados los dos pasan con 3σ; en archivo
+completo o suite fallan, señal de que el dígito queda justo en el borde.)
+
+**Ciclo 6a-2 — decidir:** no se cambia. Las 4 marcas claras de Bruno que la banda manda a
+revisión llegan con `suggestedValue` correcto (fase 4) y cuestan una tecla con B1 (fase 5);
+0 incorrectas antes y después. Tabla en el docstring de `app/classify.py`; dos tests nuevos
+en `test_classify.py` fijan la banda vigente (tick al 40 % adentro; ancho mínimo manda en
+grupos anchos).
+
+| instrumento | resultado |
+|---|---|
+| suite | 283 (+2) |
+| sintético 48 · real 14 | idénticos: 97.57 % / 2.26 % / 1 · 275 / 33 / 0 |
+
+Decisión: **cerrada sin cambio de constantes**; pasa a pendientes fase 6b (B2).
+
+### 2026-09-09 · pendientes fase 6b · B2 — costo de la nula automática (ciclo 6b-1)
+
+El motor no cambia: `nullConfidence` es la de la fase 4. Se mide qué `multiple` tendrían
+confianza alta y cuántas de esas tienen una respuesta verdadera única (las que **no** se pueden
+anular solas). Ese número tiene que ser 0 para el corte que se automatice.
+
+| corte | `multiple` | con `nullConfidence` ≥ 0.9 | de esas, con respuesta verdadera única |
+|---|---|---|---|
+| real (14 fotos) | 7 (todas dobles legítimas según la transcripción) | 4: Diego q11 0.957, q16 0.979, q14 1.000, q20 1.000 | **0** |
+| sintético (48; `dirty` con dobles de 0.35 de cobertura y borrones) | 1 (`dirty-marcas-sucias-040` q11: borrón junto a la marca, verdad B) | 0 (`nullConfidence` 0.0) | **0** |
+
+Las 11 dobles sintéticas con la segunda burbuja a 0.35 de cobertura ni siquiera llegan a
+`multiple`: van a revisión por `margin`. Bruno q12 (doble legítima con una burbuja 0.2 más clara)
+queda en 0.10–0.14 y sigue en la cola: la definición es conservadora a propósito. Umbral
+recomendado `AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE = 0.9` (`packages/types`), encendido por org
+en `organizations.config.review.autoAnnulMinConfidence`; la implementación y sus pruebas
+(backend y web) están en `docs/diseno-lector-de-marcas/11-pendientes-registro-bitacora.md`.
+
+Decisión: **costo 0 medido**; se implementa detrás del ajuste por org (ciclo 6b-2).

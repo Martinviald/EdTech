@@ -18,9 +18,33 @@ export const reviewQueueKeys = {
 
 const OPTIMISTIC_REVIEWER = 'optimistic';
 
-/** Una marca cuenta como resuelta cuando un humano la tocó — "en blanco" y "anulada" son decisiones, no "pendiente" (§8.3). */
+/**
+ * Una marca cuenta como resuelta cuando tiene una decisión: la de un humano, o
+ * la nula automática (B2, `autoResolved`) que el sistema tomó al persistir.
+ * "En blanco" y "anulada" son decisiones, no "pendiente" (§8.3).
+ */
 export function isMarkResolved(mark: ReviewMarkModel): boolean {
-  return mark.reviewedById !== null;
+  return mark.reviewedDecision !== null;
+}
+
+function replaceMark(
+  queue: ReviewQueueModel,
+  markId: string,
+  replacement: (mark: ReviewMarkModel) => ReviewMarkModel,
+): ReviewQueueModel {
+  const apply = (mark: ReviewMarkModel) => (mark.markId === markId ? replacement(mark) : mark);
+  return {
+    ...queue,
+    ambiguousMarks: queue.ambiguousMarks.map(apply),
+    autoAnnulled: queue.autoAnnulled.map(apply),
+  };
+}
+
+/** "Sí" a la sugerencia (B1) equivale a elegir la alternativa sugerida; el backend la persiste como `option`. */
+function optimisticReviewedValue(mark: ReviewMarkModel, decision: ReviewMarkDto): string | null {
+  if (decision.decision === 'option') return decision.reviewedValue;
+  if (decision.decision === 'confirm') return mark.suggestedValue;
+  return null;
 }
 
 export function useReviewQueue(batchId: string, enabled: boolean) {
@@ -47,22 +71,19 @@ export function useResolveMark(batchId: string) {
     onMutate: async ({ markId, decision }) => {
       await queryClient.cancelQueries({ queryKey: queueKey });
       const previous = queryClient.getQueryData<ReviewQueueModel>(queueKey);
-      const previousMark = previous?.ambiguousMarks.find((mark) => mark.markId === markId);
+      const previousMark = [
+        ...(previous?.ambiguousMarks ?? []),
+        ...(previous?.autoAnnulled ?? []),
+      ].find((mark) => mark.markId === markId);
       queryClient.setQueryData<ReviewQueueModel>(queueKey, (old) =>
         old
-          ? {
-              ...old,
-              ambiguousMarks: old.ambiguousMarks.map((mark) =>
-                mark.markId === markId
-                  ? {
-                      ...mark,
-                      reviewedValue: decision.decision === 'option' ? decision.reviewedValue : null,
-                      reviewedDecision: decision.decision,
-                      reviewedById: OPTIMISTIC_REVIEWER,
-                    }
-                  : mark,
-              ),
-            }
+          ? replaceMark(old, markId, (mark) => ({
+              ...mark,
+              reviewedValue: optimisticReviewedValue(mark, decision),
+              reviewedDecision: decision.decision === 'confirm' ? 'option' : decision.decision,
+              reviewedById: OPTIMISTIC_REVIEWER,
+              autoResolved: false,
+            }))
           : old,
       );
       return { previousMark };
@@ -71,26 +92,12 @@ export function useResolveMark(batchId: string) {
       if (!context?.previousMark) return;
       const rollback = context.previousMark;
       queryClient.setQueryData<ReviewQueueModel>(queueKey, (old) =>
-        old
-          ? {
-              ...old,
-              ambiguousMarks: old.ambiguousMarks.map((mark) =>
-                mark.markId === variables.markId ? rollback : mark,
-              ),
-            }
-          : old,
+        old ? replaceMark(old, variables.markId, () => rollback) : old,
       );
     },
     onSuccess: (updated) => {
       queryClient.setQueryData<ReviewQueueModel>(queueKey, (old) =>
-        old
-          ? {
-              ...old,
-              ambiguousMarks: old.ambiguousMarks.map((mark) =>
-                mark.markId === updated.markId ? { ...mark, ...updated } : mark,
-              ),
-            }
-          : old,
+        old ? replaceMark(old, updated.markId, (mark) => ({ ...mark, ...updated })) : old,
       );
       void queryClient.invalidateQueries({ queryKey: batchStatusKeys.detail(batchId) });
     },

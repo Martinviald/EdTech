@@ -12,6 +12,7 @@ import {
   printedSheets,
   sheetLayouts,
   sheetPrintRuns,
+  organizations,
   sheetScanBatches,
   sheetScanMarks,
   sheetScans,
@@ -24,6 +25,7 @@ import type {
   ConfirmBatchResponse,
   DiscardScanDto,
   LayoutSpec,
+  DoubtReason,
   MarkReviewDecision,
   MarkState,
   PageQuality,
@@ -33,6 +35,7 @@ import type {
   ReviewScanModel,
   SheetScanState,
 } from '@soe/types';
+import { autoAnnulMinConfidence, isQuickConfirmEnabled } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
@@ -127,9 +130,13 @@ type MarkQueueRow = {
   threshold: string;
   margin: string;
   cropFileId: string | null;
+  suggestedValue: string | null;
+  doubtReason: DoubtReason | null;
+  nullConfidence: string | null;
   reviewedValue: string | null;
   reviewDecision: MarkReviewDecision | null;
   reviewedById: string | null;
+  autoResolved: boolean;
 };
 
 type ConfirmMarkRow = {
@@ -162,16 +169,21 @@ export class ScanReviewService {
   async getQueue(orgId: string, batchId: string): Promise<ReviewQueueModel> {
     return withOrgContext(this.db, orgId, async (tx) => {
       const [batch] = await tx
-        .select({ id: sheetScanBatches.id, spec: sheetLayouts.spec })
+        .select({
+          id: sheetScanBatches.id,
+          spec: sheetLayouts.spec,
+          orgConfig: organizations.config,
+        })
         .from(sheetScanBatches)
         .innerJoin(sheetPrintRuns, eq(sheetPrintRuns.id, sheetScanBatches.printRunId))
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .innerJoin(organizations, eq(organizations.id, sheetScanBatches.orgId))
         .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)))
         .limit(1);
       if (!batch) throw new NotFoundException('Lote de escaneo no encontrado');
 
       const scanRows = await this.selectBatchScans(tx, orgId, batchId);
-      const markRows = await this.selectPendingMarks(tx, orgId, batchId);
+      const markRows = await this.selectPendingMarks(tx, orgId, batchId, 'pending');
 
       const fileIds: string[] = [];
       for (const scan of scanRows) {
@@ -209,7 +221,33 @@ export class ScanReviewService {
         })
         .sort((a, b) => a.margin - b.margin);
 
-      return { batchId, qualityRejected, identityUnresolved, ambiguousMarks };
+      const autoRows = await this.selectPendingMarks(tx, orgId, batchId, 'auto');
+      const autoUrlByFileId = await this.buildFileUrlIndex(
+        tx,
+        orgId,
+        autoRows.flatMap((mark) => (mark.cropFileId ? [mark.cropFileId] : [])),
+      );
+      const autoAnnulled = autoRows.map((mark) => {
+        const scan = scanById.get(mark.scanId);
+        return this.toReviewMarkModel(
+          mark,
+          scan ? this.studentNameOf(scan) : null,
+          optionsByFieldId.get(mark.fieldId) ?? [],
+          mark.cropFileId ? (autoUrlByFileId.get(mark.cropFileId) ?? null) : null,
+        );
+      });
+
+      return {
+        batchId,
+        qualityRejected,
+        identityUnresolved,
+        ambiguousMarks,
+        autoAnnulled,
+        settings: {
+          quickConfirm: isQuickConfirmEnabled(batch.orgConfig),
+          autoAnnulMinConfidence: autoAnnulMinConfidence(batch.orgConfig),
+        },
+      };
     });
   }
 
@@ -233,6 +271,9 @@ export class ScanReviewService {
           threshold: sheetScanMarks.threshold,
           margin: sheetScanMarks.margin,
           cropFileId: sheetScanMarks.cropFileId,
+          suggestedValue: sheetScanMarks.suggestedValue,
+          doubtReason: sheetScanMarks.doubtReason,
+          nullConfidence: sheetScanMarks.nullConfidence,
           batchId: sheetScans.batchId,
           batchStatus: sheetScanBatches.status,
           scanState: sheetScans.state,
@@ -261,10 +302,12 @@ export class ScanReviewService {
       }
 
       const options = this.buildOptionsIndex(row.spec).get(row.fieldId) ?? [];
-      const reviewedValue = dto.decision === 'option' ? dto.reviewedValue : null;
-      if (dto.decision === 'option' && !options.includes(dto.reviewedValue)) {
+      const reviewedValue = this.reviewedValueFor(dto, row.suggestedValue, row.printedNumber);
+      const reviewDecision: MarkReviewDecision =
+        dto.decision === 'confirm' ? 'option' : dto.decision;
+      if (reviewedValue !== null && !options.includes(reviewedValue)) {
         throw new BadRequestException(
-          `"${dto.reviewedValue}" no es una alternativa válida para la pregunta ${row.printedNumber}. Alternativas: ${options.join(', ')}`,
+          `"${reviewedValue}" no es una alternativa válida para la pregunta ${row.printedNumber}. Alternativas: ${options.join(', ')}`,
         );
       }
 
@@ -272,9 +315,10 @@ export class ScanReviewService {
         .update(sheetScanMarks)
         .set({
           reviewedValue,
-          reviewDecision: dto.decision,
+          reviewDecision,
           reviewedById: userId,
           reviewedAt: new Date(),
+          autoResolved: false,
         })
         .where(eq(sheetScanMarks.id, markId));
 
@@ -299,11 +343,30 @@ export class ScanReviewService {
         margin: Number(row.margin),
         cropUrl,
         options,
+        suggestedValue: row.suggestedValue,
+        doubtReason: row.doubtReason,
+        nullConfidence: this.decimalOrNull(row.nullConfidence),
         reviewedValue,
-        reviewedDecision: dto.decision,
+        reviewedDecision: reviewDecision,
         reviewedById: userId,
+        autoResolved: false,
       };
     });
+  }
+
+  private reviewedValueFor(
+    dto: ReviewMarkDto,
+    suggestedValue: string | null,
+    printedNumber: string,
+  ): string | null {
+    if (dto.decision === 'option') return dto.reviewedValue;
+    if (dto.decision !== 'confirm') return null;
+    if (suggestedValue === null) {
+      throw new BadRequestException(
+        `La pregunta ${printedNumber} no tiene una alternativa sugerida para confirmar: elige una alternativa, en blanco o anulada.`,
+      );
+    }
+    return suggestedValue;
   }
 
   async assignIdentity(
@@ -699,7 +762,12 @@ export class ScanReviewService {
     tx: Database,
     orgId: string,
     batchId: string,
+    kind: 'pending' | 'auto',
   ): Promise<MarkQueueRow[]> {
+    const condition =
+      kind === 'pending'
+        ? isNull(sheetScanMarks.reviewedAt)
+        : and(eq(sheetScanMarks.autoResolved, true), isNull(sheetScanMarks.reviewedById));
     return tx
       .select({
         markId: sheetScanMarks.id,
@@ -712,9 +780,13 @@ export class ScanReviewService {
         threshold: sheetScanMarks.threshold,
         margin: sheetScanMarks.margin,
         cropFileId: sheetScanMarks.cropFileId,
+        suggestedValue: sheetScanMarks.suggestedValue,
+        doubtReason: sheetScanMarks.doubtReason,
+        nullConfidence: sheetScanMarks.nullConfidence,
         reviewedValue: sheetScanMarks.reviewedValue,
         reviewDecision: sheetScanMarks.reviewDecision,
         reviewedById: sheetScanMarks.reviewedById,
+        autoResolved: sheetScanMarks.autoResolved,
       })
       .from(sheetScanMarks)
       .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
@@ -724,7 +796,7 @@ export class ScanReviewService {
           eq(sheetScans.batchId, batchId),
           ne(sheetScans.state, 'superseded'),
           inArray(sheetScanMarks.state, PENDING_MARK_STATES),
-          isNull(sheetScanMarks.reviewedAt),
+          condition,
         ),
       );
   }
@@ -879,10 +951,18 @@ export class ScanReviewService {
       margin: Number(mark.margin),
       cropUrl,
       options,
+      suggestedValue: mark.suggestedValue ?? null,
+      doubtReason: mark.doubtReason ?? null,
+      nullConfidence: this.decimalOrNull(mark.nullConfidence),
       reviewedValue: mark.reviewedValue,
       reviewedDecision: mark.reviewDecision,
       reviewedById: mark.reviewedById,
+      autoResolved: mark.autoResolved ?? false,
     };
+  }
+
+  private decimalOrNull(value: string | null | undefined): number | null {
+    return value == null ? null : Number(value);
   }
 
   private studentNameOf(scan: ScanQueueRow): string | null {

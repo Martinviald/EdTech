@@ -1,0 +1,1 @@
+ALTER TABLE "sheet_scans" ADD COLUMN "diagnostics" jsonb;

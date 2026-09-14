@@ -8,7 +8,14 @@ import {
   sheetScans,
   withOrgContext,
 } from '@soe/db';
-import { PAGE_REJECT_REASONS, type SheetScanMetricsResponse } from '@soe/types';
+import {
+  PAGE_REJECT_REASONS,
+  REGISTRATION_ALERT_FALLBACK_RATIO,
+  REGISTRATION_ALERT_OFF_MEDIAN_PX,
+  type RegistrationMetricsModel,
+  type SheetScanMetricsResponse,
+  type SuggestionMetricsModel,
+} from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 
 const REVIEW_MARK_STATES = ['ambiguous', 'multiple'] as const;
@@ -18,6 +25,20 @@ const UNKNOWN_REJECT_REASON = 'unknown';
 const CROP_FIXED_MARK_CONDITION = sql`${sheetScanMarks.state} = 'marked' AND ${sheetScanMarks.fill} = 0 AND ${sheetScanMarks.threshold} = 0.5 AND ${sheetScanMarks.margin} = 1`;
 
 type CountByKey = { key: string | null; count: number };
+type SuggestionRow = {
+  marksWithSuggestion: number;
+  reviewed: number;
+  confirmed: number;
+};
+
+type RegistrationRow = {
+  pages: number;
+  offMedianPxAvg: number | string | null;
+  offMaxPxMax: number | string | null;
+  fallbackPages: number;
+  offsetAlertPages: number;
+  fallbackAlertPages: number;
+};
 
 @Injectable()
 export class SheetScanMetricsService {
@@ -73,14 +94,76 @@ export class SheetScanMetricsService {
         .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
         .where(and(activeScanMarks, CROP_FIXED_MARK_CONDITION));
 
+      const registration = sql`${sheetScans.diagnostics} -> 'registration'`;
+      const fallbackCount = sql`coalesce((${registration} ->> 'fallbackCount')::int, 0)`;
+      const bubbles = sql`coalesce((${registration} ->> 'bubbles')::int, 0)`;
+      const offMedianPx = sql`(${registration} ->> 'offMedianPx')::numeric`;
+      const [registrationRow] = await tx
+        .select({
+          pages: sql<number>`count(*)::int`,
+          offMedianPxAvg: sql<number | null>`avg(${offMedianPx})`,
+          offMaxPxMax: sql<number | null>`max((${registration} ->> 'offMaxPx')::numeric)`,
+          fallbackPages: sql<number>`count(*) filter (where ${fallbackCount} > 0)::int`,
+          offsetAlertPages: sql<number>`count(*) filter (where ${offMedianPx} > ${REGISTRATION_ALERT_OFF_MEDIAN_PX})::int`,
+          fallbackAlertPages: sql<number>`count(*) filter (where ${bubbles} > 0 and ${fallbackCount}::numeric / ${bubbles} > ${REGISTRATION_ALERT_FALLBACK_RATIO})::int`,
+        })
+        .from(sheetScans)
+        .where(
+          and(
+            eq(sheetScans.orgId, orgId),
+            ne(sheetScans.state, 'superseded'),
+            isNotNull(sheetScans.diagnostics),
+          ),
+        );
+
+      const suggestionMatches = sql`${sheetScanMarks.reviewedValue} = ${sheetScanMarks.suggestedValue}`;
+      const [suggestionRow] = await tx
+        .select({
+          marksWithSuggestion: sql<number>`count(*)::int`,
+          reviewed: sql<number>`count(*) filter (where ${sheetScanMarks.reviewedAt} is not null)::int`,
+          confirmed: sql<number>`count(*) filter (where ${suggestionMatches})::int`,
+        })
+        .from(sheetScanMarks)
+        .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
+        .where(and(activeScanMarks, isNotNull(sheetScanMarks.suggestedValue)));
+
       return this.assembleResponse(
         batchRows,
         rejectRows,
         markRows,
         overrideRow?.count ?? 0,
         cropFixedRow?.count ?? 0,
+        this.registrationMetrics(registrationRow),
+        this.suggestionMetrics(suggestionRow),
       );
     });
+  }
+
+  private suggestionMetrics(row: SuggestionRow | undefined): SuggestionMetricsModel {
+    const reviewed = Number(row?.reviewed ?? 0);
+    const confirmed = Number(row?.confirmed ?? 0);
+    return {
+      marksWithSuggestion: Number(row?.marksWithSuggestion ?? 0),
+      reviewed,
+      confirmed,
+      rejected: reviewed - confirmed,
+    };
+  }
+
+  private registrationMetrics(row: RegistrationRow | undefined): RegistrationMetricsModel {
+    const round1 = (value: number) => Math.round(value * 10) / 10;
+    return {
+      pagesWithDiagnostics: Number(row?.pages ?? 0),
+      offMedianPxAvg: row?.offMedianPxAvg == null ? null : round1(Number(row.offMedianPxAvg)),
+      offMaxPxMax: row?.offMaxPxMax == null ? null : round1(Number(row.offMaxPxMax)),
+      fallbackPages: Number(row?.fallbackPages ?? 0),
+      offsetAlertPages: Number(row?.offsetAlertPages ?? 0),
+      fallbackAlertPages: Number(row?.fallbackAlertPages ?? 0),
+      alerts: {
+        offMedianPx: REGISTRATION_ALERT_OFF_MEDIAN_PX,
+        fallbackRatio: REGISTRATION_ALERT_FALLBACK_RATIO,
+      },
+    };
   }
 
   private assembleResponse(
@@ -89,6 +172,8 @@ export class SheetScanMetricsService {
     markRows: CountByKey[],
     firmReadingOverrides: number,
     cropFixedMarks: number,
+    registration: RegistrationMetricsModel,
+    suggestions: SuggestionMetricsModel,
   ): SheetScanMetricsResponse {
     const marksByState = this.countsToRecord(markRows, markStateEnum.enumValues);
     return {
@@ -97,6 +182,8 @@ export class SheetScanMetricsService {
       marksByState,
       reviewRatePercent: this.reviewRatePercent(marksByState, cropFixedMarks),
       firmReadingOverrides,
+      registration,
+      suggestions,
     };
   }
 

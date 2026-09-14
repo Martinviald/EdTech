@@ -40,6 +40,47 @@ describe('ejemplos compartidos del contrato OMR', () => {
     expect(parsed.success).toBe(true);
   });
 
+  it('contrato v2: el ejemplo trae suggestedValue/doubtReason/nullConfidence y sin ellos también parsea', () => {
+    const example = loadExample('scan-result') as {
+      pages: Array<{ marks: Array<Record<string, unknown>> }>;
+    };
+    const marks = example.pages.flatMap((page) => page.marks);
+    expect(marks.some((mark) => mark.suggestedValue === 'B' && mark.doubtReason === 'margin')).toBe(
+      true,
+    );
+    expect(
+      marks.some((mark) => mark.doubtReason === 'multiple' && mark.nullConfidence === 0.88),
+    ).toBe(true);
+    const v1 = {
+      pages: example.pages.map((page) => ({
+        ...page,
+        marks: page.marks.map(
+          ({ suggestedValue: _s, doubtReason: _d, nullConfidence: _n, ...rest }) => rest,
+        ),
+      })),
+    };
+    expect(scanResultSchema.safeParse(v1).success).toBe(true);
+    expect(scanResultSchema.safeParse(example).success).toBe(true);
+  });
+
+  it('contrato v2: un doubtReason desconocido o una nullConfidence fuera de 0–1 no parsean', () => {
+    const example = loadExample('scan-result') as { pages: Array<{ marks: Array<object> }> };
+    const withBadReason = {
+      pages: example.pages.map((page) => ({
+        ...page,
+        marks: page.marks.map((mark) => ({ ...mark, doubtReason: 'unknown' })),
+      })),
+    };
+    const withBadConfidence = {
+      pages: example.pages.map((page) => ({
+        ...page,
+        marks: page.marks.map((mark) => ({ ...mark, nullConfidence: 1.5 })),
+      })),
+    };
+    expect(scanResultSchema.safeParse(withBadReason).success).toBe(false);
+    expect(scanResultSchema.safeParse(withBadConfidence).success).toBe(false);
+  });
+
   it('CD-15: una página con identity.qrRaw parsea y una del MVP sin qrRaw también', () => {
     const example = loadExample('scan-result') as { pages: Array<{ identity: object }> };
     const withQrRaw = {

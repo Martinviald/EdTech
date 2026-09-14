@@ -1,0 +1,37 @@
+{
+  "sheetId": "carla-20260905",
+  "layoutSpecFile": "../layout-spec.json",
+  "truthSource": "construction",
+  "physicalSheet": "carla",
+  "sourceFile": "839a105d-9b05-4ee3-905b-42e5e1dd4c4a-captura-3-1788620025839.jpg",
+  "transcriptions": [
+    {
+      "by": "autor-de-la-hoja",
+      "answers": {
+        "1": "A",
+        "2": "B",
+        "3": "C",
+        "4": "D",
+        "5": "B",
+        "6": "C",
+        "7": "B",
+        "8": "B",
+        "9": "B",
+        "10": "B",
+        "11": "C",
+        "12": "C",
+        "13": null,
+        "14": "C",
+        "15": "C",
+        "16": "C",
+        "18": "B",
+        "19": "B",
+        "20": "B",
+        "22": "B",
+        "23": "B",
+        "24": "A"
+      }
+    }
+  ],
+  "notes": "Escaneada en demo el 2026-09-05 (lote 40fb30b3, registro local en produccion). Diego con dobles y una triple marca agregadas ese dia: q11 B+C, q14 B+C, q16 A+B+C, q20 A+C."
+}
