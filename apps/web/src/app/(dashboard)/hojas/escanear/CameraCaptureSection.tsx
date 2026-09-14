@@ -46,10 +46,6 @@ type CameraCaptureSectionProps = {
   capturedIdentities: AssessCaptureIdentityModel[];
   capturedCount: number;
   onAccepted: (file: File, identity: AssessCaptureIdentityModel | null) => boolean;
-  /** Bloqueo externo: deshabilita la captura mientras el contenedor tiene trabajo en curso. */
-  blocked?: boolean;
-  /** Avisa al contenedor cuando el control de calidad está ocupado (para bloquear el resto de la vista). */
-  onBusyChange?: (busy: boolean) => void;
 } & (
   | { printRunId: string; transport?: undefined }
   | { printRunId?: undefined; transport: Pick<CaptureTransport, 'assess'> }
@@ -71,8 +67,7 @@ function looksBlank(quality: PageQuality): boolean {
 }
 
 export function CameraCaptureSection(props: CameraCaptureSectionProps) {
-  const { expectedSheets, capturedIdentities, capturedCount, onAccepted, blocked, onBusyChange } =
-    props;
+  const { expectedSheets, capturedIdentities, capturedCount, onAccepted } = props;
   const camera = useCameraCapture();
   const assess = useAssessCapture(
     props.transport !== undefined
@@ -198,7 +193,7 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
   }
 
   async function handleCapture() {
-    if (capturingRef.current || locked) return;
+    if (capturingRef.current || busy) return;
     capturingRef.current = true;
     try {
       const capture = await camera.captureJpeg();
@@ -233,22 +228,10 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
         entry.label !== null,
     );
   const useFallback = !supported || camera.status === 'denied' || camera.status === 'error';
+  // Sólo el control de calidad bloquea la captura. No hay bloqueo externo: acoplar
+  // el obturador a las subidas del contenedor impide encadenar lotes grandes, y esa
+  // decisión está cerrada en docs/diseno-lector-de-marcas/11.
   const busy = gate.phase === 'assessing' || encoding;
-  const locked = busy || blocked === true;
-
-  const busyRef = useRef(false);
-  busyRef.current = busy;
-  const onBusyChangeRef = useRef(onBusyChange);
-  onBusyChangeRef.current = onBusyChange;
-  useEffect(() => {
-    onBusyChangeRef.current?.(busy);
-  }, [busy]);
-  useEffect(
-    () => () => {
-      if (busyRef.current) onBusyChangeRef.current?.(false);
-    },
-    [],
-  );
 
   return (
     <div className="space-y-4">
@@ -314,20 +297,16 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
                 type="button"
                 size="lg"
                 className="w-full"
-                disabled={locked}
+                disabled={busy}
                 aria-busy={busy}
                 onClick={() => fallbackInputRef.current?.click()}
               >
-                {locked ? (
+                {busy ? (
                   <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
                 ) : (
                   <ImageUp className="mr-2 size-5" aria-hidden />
                 )}
-                {busy
-                  ? 'Evaluando la foto…'
-                  : blocked
-                    ? 'Espera un momento…'
-                    : 'Tomar foto de la hoja'}
+                {busy ? 'Evaluando la foto…' : 'Tomar foto de la hoja'}
               </Button>
             </>
           )}
@@ -388,16 +367,16 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
               type="button"
               size="lg"
               className="w-full sm:mx-auto sm:flex sm:max-w-md"
-              disabled={locked || camera.status !== 'active'}
+              disabled={busy || camera.status !== 'active'}
               aria-busy={busy}
               onClick={handleCapture}
             >
-              {locked ? (
+              {busy ? (
                 <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
               ) : (
                 <Camera className="mr-2 size-5" aria-hidden />
               )}
-              {busy ? 'Evaluando la foto…' : blocked ? 'Espera un momento…' : 'Capturar hoja'}
+              {busy ? 'Evaluando la foto…' : 'Capturar hoja'}
             </Button>
           )}
         </div>
