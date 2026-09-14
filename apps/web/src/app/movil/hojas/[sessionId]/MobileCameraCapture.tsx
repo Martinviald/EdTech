@@ -14,6 +14,9 @@ import { assessIdentityLabel } from '@/app/(dashboard)/hojas/escanear/capture-id
 import {
   CLEAR_SURFACE_REASON,
   CLEAR_SURFACE_TIP,
+  FOREIGN_SHEET_HINT,
+  FOREIGN_SHEET_REASON,
+  FOREIGN_SHEET_TITLE,
   rejectionHint,
 } from '@/app/(dashboard)/hojas/escanear/capture-hints';
 import {
@@ -42,6 +45,7 @@ type GateState =
   | { phase: 'assessing'; sheetNumber: number; slow: boolean }
   | { phase: 'assess-timeout' }
   | { phase: 'rejected'; reason: string; hint: string }
+  | { phase: 'foreign-sheet'; detail: string | null }
   | { phase: 'uploaded'; label: string | null }
   | {
       phase: 'blank-confirm';
@@ -191,6 +195,16 @@ export function MobileCameraCapture({
           clearGateTimers();
           if (!result.accepted && looksBlank(result.quality)) {
             setGate({ phase: 'blank-confirm', blob: capture.blob, identity: result.identity });
+            return;
+          }
+          // Una hoja de otra tirada puede venir con una foto impecable: culpar a la
+          // calidad manda a repetir una foto que estaba bien.
+          if (result.rejection?.kind === 'other_print_run') {
+            setGate({ phase: 'foreign-sheet', detail: null });
+            return;
+          }
+          if (result.rejection?.kind === 'layout_mismatch') {
+            setGate({ phase: 'foreign-sheet', detail: result.rejection.reason });
             return;
           }
           if (!result.accepted) {
@@ -524,6 +538,14 @@ function Verdict({
     );
   }
 
+  if (gate.phase === 'foreign-sheet') {
+    return (
+      <CaptureToast tone="warning" title={FOREIGN_SHEET_TITLE}>
+        {FOREIGN_SHEET_REASON} {FOREIGN_SHEET_HINT}
+      </CaptureToast>
+    );
+  }
+
   if (gate.phase === 'assess-timeout') {
     return (
       <CaptureToast tone="danger" title="No se pudo evaluar la foto">
@@ -647,6 +669,12 @@ function FallbackCapture({
       {gate.phase === 'rejected' && (
         <AlertCallout tone="danger" title="Foto rechazada: no entra al lote">
           {gate.reason}. {gate.hint}
+        </AlertCallout>
+      )}
+
+      {gate.phase === 'foreign-sheet' && (
+        <AlertCallout tone="warning" title={FOREIGN_SHEET_TITLE}>
+          {gate.detail ?? `${FOREIGN_SHEET_REASON} ${FOREIGN_SHEET_HINT}`}
         </AlertCallout>
       )}
 

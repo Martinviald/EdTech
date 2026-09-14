@@ -374,10 +374,27 @@ export type AssessCaptureIdentityModel = {
   confidence: number;
 };
 
+/**
+ * Por qué el gate de captura no aceptó la foto.
+ *
+ * Sin esto el cliente sólo ve `accepted: false` y `quality.rejectReason: null`, y
+ * termina culpando a la calidad de la imagen una hoja que salió perfecta pero que
+ * no pertenece a la tirada. El motivo lo sabe la API; hay que dejarlo salir.
+ */
+export type AssessCaptureRejection =
+  /** No pasó el control de calidad: el detalle está en `quality`. */
+  | { kind: 'quality' }
+  /** El diseño impreso no es el de la tirada: instrumento editado u hoja de otra tirada. */
+  | { kind: 'layout_mismatch'; reason: string }
+  /** El QR resolvió a una hoja que no está en esta tirada. */
+  | { kind: 'other_print_run' };
+
 export type AssessCaptureResponse = {
   accepted: boolean;
   quality: PageQuality;
   identity: AssessCaptureIdentityModel | null;
+  /** `null` cuando `accepted` es true. */
+  rejection: AssessCaptureRejection | null;
 };
 
 export type OmrCalibrationResponse = {
