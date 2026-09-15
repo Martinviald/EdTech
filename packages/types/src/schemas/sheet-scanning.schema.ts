@@ -9,6 +9,7 @@ import {
   type LayoutSpec,
   type OmrCalibration,
 } from './omr-layout.schema';
+import { orgReviewSettingsSchema, type OrgReviewSettings } from './feature.schema';
 import type {
   DoubtReason,
   MarksReadability,
@@ -170,6 +171,15 @@ export const assessCaptureSchema = z.object({
 
 export const updateOmrCalibrationSchema = omrCalibrationSchema;
 
+/**
+ * PATCH /organizations/me/review-settings. Parcial: cada campo es opcional y
+ * sólo se toca lo que viene. `autoAnnulMinConfidence: null` apaga la nula
+ * automática (se elimina la clave de `config.review`).
+ */
+export const updateOrgReviewSettingsSchema = orgReviewSettingsSchema.extend({
+  autoAnnulMinConfidence: z.number().min(0).max(1).nullable().optional(),
+});
+
 export const sheetLayoutQuerySchema = z.object({
   instrumentId: z.string().uuid().optional(),
   assessmentFormId: z.string().uuid().optional(),
@@ -204,6 +214,7 @@ export type AssignScanIdentityDto = z.infer<typeof assignScanIdentitySchema>;
 export type DiscardScanDto = z.infer<typeof discardScanSchema>;
 export type AssessCaptureDto = z.infer<typeof assessCaptureSchema>;
 export type UpdateOmrCalibrationDto = z.infer<typeof updateOmrCalibrationSchema>;
+export type UpdateOrgReviewSettingsDto = z.infer<typeof updateOrgReviewSettingsSchema>;
 export type SheetLayoutQueryDto = z.infer<typeof sheetLayoutQuerySchema>;
 export type PrintRunQueryDto = z.infer<typeof printRunQuerySchema>;
 export type ScanBatchQueryDto = z.infer<typeof scanBatchQuerySchema>;
@@ -444,6 +455,11 @@ export type AssessCaptureResponse = {
 export type OmrCalibrationResponse = {
   orgId: string;
   calibration: OmrCalibration;
+};
+
+export type OrgReviewSettingsResponse = {
+  orgId: string;
+  review: OrgReviewSettings;
 };
 
 /**
