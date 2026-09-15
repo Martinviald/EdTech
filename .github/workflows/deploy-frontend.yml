@@ -30,7 +30,14 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
+  # Gate: los deploys disparan con `push` a `main`, donde `ci.yml` (que corre en
+  # `pull_request`) ya no se ejecuta. Sin esto, un CI en rojo no impedía el deploy y
+  # un push directo a `main` no corría ninguna verificación.
+  checks:
+    uses: ./.github/workflows/checks.yml
+
   deploy:
+    needs: checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

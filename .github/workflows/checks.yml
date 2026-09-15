@@ -1,0 +1,140 @@
+name: Checks
+
+# Los cuatro gates de calidad, en UN solo lugar. Los invocan tanto `ci.yml` (en cada
+# PR) como los dos workflows de deploy (antes de tocar nada en AWS).
+#
+# Existe porque estaban definidos sólo en `ci.yml`, que corre en `pull_request`: los
+# deploys disparan con `push` a `main` y no dependían de ningún check. Un CI en rojo
+# no impedía el deploy, y un push directo a `main` no corría ninguna verificación.
+# Duplicar los pasos en cada workflow habría sido la otra salida, pero se
+# desincronizan solos; con `workflow_call` hay una definición y tres llamadores.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web (typecheck · lint · design-system)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # apps/web resuelve @soe/types y @soe/db (transpilePackages en next.config);
+      # se construyen para que typecheck y `next build` los encuentren. Mismo par
+      # que arma el deploy del front antes de `next build` (deploy-frontend.yml).
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/web typecheck
+
+      - name: Lint
+        run: pnpm --filter @soe/web lint
+
+      - name: Design System guard
+        run: pnpm --filter @soe/web lint:ds
+
+      # Build de producción: detecta errores que typecheck/lint NO ven —sobre todo
+      # violaciones de frontera cliente/servidor (RSC). Corre en checkout limpio sin
+      # `.env`, igual que el `next build` del deploy (que compila sin esas variables).
+      - name: Production build (next build)
+        run: pnpm --filter @soe/web build
+
+  db:
+    name: DB (typecheck · tests · gate del read-model)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # packages/db importa tipos de @soe/types (schemas con .$type<T>()).
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/db typecheck
+
+      # No tocan la BDD: son puros (pool de workers, holder de conexión, huella del
+      # cierre de imports). Corren en cualquier runner sin Postgres.
+      - name: Tests
+        run: pnpm --filter @soe/db test
+
+
+  types:
+    name: Types (typecheck · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @soe/types typecheck
+
+      # Los schemas Zod y las utilidades puras (calculadores, parsers) se validan acá.
+      # No tocan la BDD ni la red: corren en cualquier runner.
+      - name: Tests
+        run: pnpm --filter @soe/types test
+
+  api:
+    name: API (typecheck · lint · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # apps/api importa @soe/types y @soe/db por su `dist`; sin estos builds
+      # el typecheck no resuelve los paquetes del workspace.
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/api typecheck
+
+      - name: Lint
+        run: pnpm --filter @soe/api lint
+
+      # Los tests de la API viven acá y no en local: la suite levanta un worker de
+      # jest por core y no entra en una máquina de 8 GB.
+      #
+      # src/privacy/ queda fuera: sus specs escriben contra una BDD con seed
+      # (`db.update(students)`) y el runner no tiene Postgres. Ya fallaban antes de
+      # existir este job; incluirlas lo dejaría en rojo permanente y el gate no
+      # serviría para nada. Se reincorporan cuando el CI levante un Postgres.
+      - name: Tests
+        run: pnpm --filter @soe/api exec jest --ci --runInBand --testPathIgnorePatterns "src/privacy/"
