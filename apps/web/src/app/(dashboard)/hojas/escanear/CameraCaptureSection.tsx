@@ -17,6 +17,9 @@ import {
   CAPTURE_FRAMING_TIP,
   CLEAR_SURFACE_REASON,
   CLEAR_SURFACE_TIP,
+  FOREIGN_SHEET_HINT,
+  FOREIGN_SHEET_REASON,
+  FOREIGN_SHEET_TITLE,
   rejectionHint,
 } from './capture-hints';
 import {
@@ -30,7 +33,7 @@ import { useAssessCapture } from '../hooks/use-assess-capture';
 type GateState =
   | { phase: 'live' }
   | { phase: 'assessing'; previewUrl: string }
-  | { phase: 'rejected'; previewUrl: string; reason: string; hint: string }
+  | { phase: 'rejected'; previewUrl: string; reason: string; hint: string; title?: string }
   | {
       phase: 'blank-confirm';
       previewUrl: string;
@@ -43,10 +46,6 @@ type CameraCaptureSectionProps = {
   capturedIdentities: AssessCaptureIdentityModel[];
   capturedCount: number;
   onAccepted: (file: File, identity: AssessCaptureIdentityModel | null) => boolean;
-  /** Bloqueo externo: deshabilita la captura mientras el contenedor tiene trabajo en curso. */
-  blocked?: boolean;
-  /** Avisa al contenedor cuando el control de calidad está ocupado (para bloquear el resto de la vista). */
-  onBusyChange?: (busy: boolean) => void;
 } & (
   | { printRunId: string; transport?: undefined }
   | { printRunId?: undefined; transport: Pick<CaptureTransport, 'assess'> }
@@ -68,8 +67,7 @@ function looksBlank(quality: PageQuality): boolean {
 }
 
 export function CameraCaptureSection(props: CameraCaptureSectionProps) {
-  const { expectedSheets, capturedIdentities, capturedCount, onAccepted, blocked, onBusyChange } =
-    props;
+  const { expectedSheets, capturedIdentities, capturedCount, onAccepted } = props;
   const camera = useCameraCapture();
   const assess = useAssessCapture(
     props.transport !== undefined
@@ -143,34 +141,59 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
   function runGate(capture: CapturedJpeg) {
     const previewUrl = URL.createObjectURL(capture.blob);
     setGate({ phase: 'assessing', previewUrl });
-    assess.mutate(capture.imageBase64, {
-      onSuccess: (result) => {
-        if (!result.accepted && looksBlank(result.quality)) {
-          setGate({
-            phase: 'blank-confirm',
-            previewUrl,
-            blob: capture.blob,
-            identity: result.identity,
-          });
-          return;
-        }
-        if (!result.accepted) {
-          setGate({
-            phase: 'rejected',
-            previewUrl,
-            reason: rejectionLabel(result.quality),
-            hint: rejectionHint(result.quality.rejectReason),
-          });
-          return;
-        }
-        upload(capture.blob, result.identity, previewUrl);
+    assess.mutate(
+      { imageBase64: capture.imageBase64 },
+      {
+        onSuccess: (result) => {
+          if (!result.accepted && looksBlank(result.quality)) {
+            setGate({
+              phase: 'blank-confirm',
+              previewUrl,
+              blob: capture.blob,
+              identity: result.identity,
+            });
+            return;
+          }
+          // La hoja de otra tirada llega con la imagen intacta: presentarla como un
+          // fallo de calidad manda a repetir una foto que estaba bien.
+          if (result.rejection?.kind === 'layout_mismatch') {
+            setGate({
+              phase: 'rejected',
+              previewUrl,
+              title: FOREIGN_SHEET_TITLE,
+              reason: result.rejection.reason,
+              hint: '',
+            });
+            return;
+          }
+          if (result.rejection?.kind === 'other_print_run') {
+            setGate({
+              phase: 'rejected',
+              previewUrl,
+              title: FOREIGN_SHEET_TITLE,
+              reason: FOREIGN_SHEET_REASON,
+              hint: FOREIGN_SHEET_HINT,
+            });
+            return;
+          }
+          if (!result.accepted) {
+            setGate({
+              phase: 'rejected',
+              previewUrl,
+              reason: rejectionLabel(result.quality),
+              hint: rejectionHint(result.quality.rejectReason),
+            });
+            return;
+          }
+          upload(capture.blob, result.identity, previewUrl);
+        },
+        onError: () => backToLive(previewUrl),
       },
-      onError: () => backToLive(previewUrl),
-    });
+    );
   }
 
   async function handleCapture() {
-    if (capturingRef.current || locked) return;
+    if (capturingRef.current || busy) return;
     capturingRef.current = true;
     try {
       const capture = await camera.captureJpeg();
@@ -205,22 +228,10 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
         entry.label !== null,
     );
   const useFallback = !supported || camera.status === 'denied' || camera.status === 'error';
+  // Sólo el control de calidad bloquea la captura. No hay bloqueo externo: acoplar
+  // el obturador a las subidas del contenedor impide encadenar lotes grandes, y esa
+  // decisión está cerrada en docs/diseno-lector-de-marcas/11.
   const busy = gate.phase === 'assessing' || encoding;
-  const locked = busy || blocked === true;
-
-  const busyRef = useRef(false);
-  busyRef.current = busy;
-  const onBusyChangeRef = useRef(onBusyChange);
-  onBusyChangeRef.current = onBusyChange;
-  useEffect(() => {
-    onBusyChangeRef.current?.(busy);
-  }, [busy]);
-  useEffect(
-    () => () => {
-      if (busyRef.current) onBusyChangeRef.current?.(false);
-    },
-    [],
-  );
 
   return (
     <div className="space-y-4">
@@ -260,6 +271,7 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
           {gate.phase === 'rejected' ? (
             <RejectedVerdict
               previewUrl={gate.previewUrl}
+              title={gate.title}
               reason={gate.reason}
               hint={gate.hint}
               onRetake={() => backToLive(gate.previewUrl)}
@@ -285,20 +297,16 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
                 type="button"
                 size="lg"
                 className="w-full"
-                disabled={locked}
+                disabled={busy}
                 aria-busy={busy}
                 onClick={() => fallbackInputRef.current?.click()}
               >
-                {locked ? (
+                {busy ? (
                   <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
                 ) : (
                   <ImageUp className="mr-2 size-5" aria-hidden />
                 )}
-                {busy
-                  ? 'Evaluando la foto…'
-                  : blocked
-                    ? 'Espera un momento…'
-                    : 'Tomar foto de la hoja'}
+                {busy ? 'Evaluando la foto…' : 'Tomar foto de la hoja'}
               </Button>
             </>
           )}
@@ -344,6 +352,7 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
 
           {gate.phase === 'rejected' ? (
             <RejectedVerdict
+              title={gate.title}
               reason={gate.reason}
               hint={gate.hint}
               onRetake={() => backToLive(gate.previewUrl)}
@@ -358,16 +367,16 @@ export function CameraCaptureSection(props: CameraCaptureSectionProps) {
               type="button"
               size="lg"
               className="w-full sm:mx-auto sm:flex sm:max-w-md"
-              disabled={locked || camera.status !== 'active'}
+              disabled={busy || camera.status !== 'active'}
               aria-busy={busy}
               onClick={handleCapture}
             >
-              {locked ? (
+              {busy ? (
                 <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
               ) : (
                 <Camera className="mr-2 size-5" aria-hidden />
               )}
-              {busy ? 'Evaluando la foto…' : blocked ? 'Espera un momento…' : 'Capturar hoja'}
+              {busy ? 'Evaluando la foto…' : 'Capturar hoja'}
             </Button>
           )}
         </div>
@@ -416,11 +425,13 @@ function BlankSheetVerdict({
 
 function RejectedVerdict({
   previewUrl,
+  title,
   reason,
   hint,
   onRetake,
 }: {
   previewUrl?: string;
+  title?: string;
   reason: string;
   hint: string;
   onRetake: () => void;
@@ -435,8 +446,11 @@ function RejectedVerdict({
           className="mx-auto max-h-64 rounded-lg border object-contain"
         />
       )}
-      <AlertCallout tone="danger" title="Foto rechazada: no entra al lote">
-        {reason}. {hint}
+      <AlertCallout
+        tone={title ? 'warning' : 'danger'}
+        title={title ?? 'Foto rechazada: no entra al lote'}
+      >
+        {title ? [reason, hint].filter(Boolean).join(' ') : `${reason}. ${hint}`}
       </AlertCallout>
       <Button type="button" size="lg" variant="outline" className="w-full" onClick={onRetake}>
         <RotateCcw className="mr-2 size-5" aria-hidden />

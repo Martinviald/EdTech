@@ -18,6 +18,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  withDefaultAcademicYear,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
 import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
@@ -82,7 +83,13 @@ async function FiltersSection({
   filters: DashboardFilterValues;
 }) {
   const options = await getDashboardFilters(query);
-  return <DashboardFilterBar options={options} value={filters} basePath={BASE_PATH} />;
+  return (
+    <DashboardFilterBar
+      options={options}
+      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      basePath={BASE_PATH}
+    />
+  );
 }
 
 async function MapaCalorAction({ query }: { query: string }) {
@@ -101,7 +108,11 @@ async function HeatmapSection({
   filters: DashboardFilterValues;
   isTeacher: boolean;
 }) {
-  const [heatmap, options] = await Promise.all([getHeatmap(query), getDashboardFilters(query)]);
+  const options = await getDashboardFilters(query);
+  const scopedQuery = buildDashboardQuery(
+    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
+  );
+  const heatmap = await getHeatmap(scopedQuery);
 
   const hasData = heatmap.rows.length > 0 && heatmap.subjects.length > 0;
 

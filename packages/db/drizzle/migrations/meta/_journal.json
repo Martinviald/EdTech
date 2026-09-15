@@ -218,6 +218,27 @@
       "when": 1788893445545,
       "tag": "0030_nebulous_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1788922348958,
+      "tag": "0031_gifted_frightful_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788956293680,
+      "tag": "0032_flowery_rogue",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1788957777758,
+      "tag": "0033_lowly_eternity",
+      "breakpoints": true
     }
   ]
 }

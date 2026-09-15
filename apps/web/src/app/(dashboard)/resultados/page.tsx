@@ -28,6 +28,7 @@ import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  withDefaultAcademicYear,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
 import { ComparabilityNotice } from './components/comparability-notice';
@@ -65,7 +66,7 @@ export default async function ResultadosOverviewPage({
           </>
         }
       >
-        <PanoramaSections query={query} />
+        <PanoramaSections query={query} filters={filters} />
       </Suspense>
     </>
   );
@@ -79,7 +80,13 @@ async function FiltersSection({
   filters: DashboardFilterValues;
 }) {
   const options = await getDashboardFilters(query);
-  return <DashboardFilterBar options={options} value={filters} basePath={ROUTES.resultados} />;
+  return (
+    <DashboardFilterBar
+      options={options}
+      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      basePath={ROUTES.resultados}
+    />
+  );
 }
 
 /**
@@ -90,8 +97,18 @@ async function FiltersSection({
  * son CONTEOS (no promedian nada) y la matriz entrega un % por instrumento, que es el
  * nivel más grande donde un porcentaje todavía significa algo.
  */
-async function PanoramaSections({ query }: { query: string }) {
-  const comparable = await getComparableOverview(query);
+async function PanoramaSections({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  const scopedQuery = buildDashboardQuery(
+    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
+  );
+  const comparable = await getComparableOverview(scopedQuery);
 
   return (
     <>
@@ -115,7 +132,7 @@ async function PanoramaSections({ query }: { query: string }) {
       </div>
 
       <LiveAlertsBanner
-        query={query}
+        query={scopedQuery}
         initial={{ alerts: comparable.alerts, total: comparable.alertsTotal }}
       />
 
@@ -127,7 +144,7 @@ async function PanoramaSections({ query }: { query: string }) {
 
       {comparable.scope === 'teacher' ? (
         <Suspense fallback={<TableSkeleton />}>
-          <TeacherKpisSection query={query} />
+          <TeacherKpisSection query={scopedQuery} />
         </Suspense>
       ) : null}
     </>

@@ -131,9 +131,14 @@ export type FinishCaptureSessionResponse = {
  * apps/web; este tipo es el contrato congelado entre ambas.
  */
 export type CaptureTransport = {
-  assess(imageBase64: string): Promise<AssessCaptureResponse>;
-  createUploadIntent(
-    meta: Omit<CaptureUploadIntentDto, 'mimeType'>,
-  ): Promise<ScanUploadIntent>;
+  /**
+   * `signal` permite cancelar la evaluación en curso. Es opcional: el escáner de
+   * escritorio no lo usa. En el teléfono el visor lo necesita porque el control de
+   * calidad es lo único que bloquea el obturador — una petición que no responde
+   * dejaría la captura muerta, y un temporizador que sólo tocara la interfaz
+   * dejaría viva una petición capaz de escribir sobre un estado ya cambiado.
+   */
+  assess(imageBase64: string, signal?: AbortSignal): Promise<AssessCaptureResponse>;
+  createUploadIntent(meta: Omit<CaptureUploadIntentDto, 'mimeType'>): Promise<ScanUploadIntent>;
   confirmFile(fileId: string, sizeBytes: number): Promise<void>;
 };

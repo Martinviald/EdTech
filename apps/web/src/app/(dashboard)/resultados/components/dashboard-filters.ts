@@ -34,6 +34,26 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'academicYearId',
 ];
 
+/**
+ * Acota los filtros al año académico vigente cuando la URL no pide uno.
+ *
+ * Sin esto, las vistas listan la historia completa del colegio: en la demo son 258
+ * evaluaciones de dos años en `/evaluaciones` y 116 unidades en el panorama, cuando
+ * lo que se mira a diario es el año en curso. El año elegido es el que ya resuelve
+ * `/dashboards/filters` (`defaultAcademicYearId`: el pedido, o el vigente, o el más
+ * reciente con cursos), así que la barra de filtros y los datos hablan del mismo.
+ *
+ * No es un filtro escondido: se pasa también a la barra, que lo muestra seleccionado
+ * y permite cambiarlo o quitarlo para ver toda la historia.
+ */
+export function withDefaultAcademicYear(
+  value: DashboardFilterValues,
+  defaultAcademicYearId: string | null,
+): DashboardFilterValues {
+  if (value.academicYearId || !defaultAcademicYearId) return value;
+  return { ...value, academicYearId: defaultAcademicYearId };
+}
+
 /** ¿Hay algún filtro aplicado? Decide si un resultado vacío se explica por los filtros. */
 export function hasActiveFilters(value: DashboardFilterValues): boolean {
   return FILTER_KEYS.some((key) => {

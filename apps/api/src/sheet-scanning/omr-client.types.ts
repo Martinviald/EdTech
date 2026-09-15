@@ -1,9 +1,9 @@
-import type { OmrAssessRequest, OmrAssessResult, OmrReadRequest, ScanResult } from '@soe/types';
+import type { OmrAssessRequest, OmrAssessResult, OmrReadRequest, ScanReadResult } from '@soe/types';
 
 export const OMR_CLIENT = 'OMR_CLIENT';
 
 export interface OmrClient {
-  read(request: OmrReadRequest): Promise<ScanResult>;
+  read(request: OmrReadRequest): Promise<ScanReadResult>;
   assess(request: OmrAssessRequest): Promise<OmrAssessResult>;
 }
 
