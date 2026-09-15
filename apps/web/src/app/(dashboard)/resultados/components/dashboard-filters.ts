@@ -49,11 +49,17 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
  *
  * No es un filtro escondido: se pasa también a la barra, que lo muestra seleccionado
  * y permite cambiarlo o quitarlo para ver toda la historia.
+ *
+ * Excepción: un proceso de medición YA declara su propia ventana, y casi siempre la
+ * de un año que no es el vigente. Inyectarle encima el año por defecto cruzaba dos
+ * filtros incompatibles y dejaba el panorama en blanco — que es lo que pasaba al
+ * entrar por "Ver panorama" desde cualquier proceso de un año anterior.
  */
 export function withDefaultAcademicYear(
   value: DashboardFilterValues,
   defaultAcademicYearId: string | null,
 ): DashboardFilterValues {
+  if (value.processId) return value;
   if (value.academicYearId || !defaultAcademicYearId) return value;
   return { ...value, academicYearId: defaultAcademicYearId };
 }

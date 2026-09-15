@@ -7,6 +7,7 @@ import {
   INSTRUMENT_APPLICATION_PERIODS,
   type InstrumentApplicationPeriod,
 } from './instrument.schema';
+import type { ProcessStatus } from './measurement-process.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 4 — Dashboards core (H6.1, H6.2, H6.4, H6.5, H6.7, H6.8)
@@ -219,6 +220,18 @@ export type InstrumentFilterOption = {
   applicationPeriod: InstrumentApplicationPeriod | null;
 };
 
+/**
+ * Proceso de medición ofrecible como filtro. Sólo llegan los que tienen alguna
+ * evaluación dentro del alcance visible: un proceso planificado sin evaluaciones
+ * cargadas dejaría el panorama en blanco al elegirlo.
+ */
+export type ProcessFilterOption = {
+  id: string;
+  label: string;
+  academicYearId: string | null;
+  status: ProcessStatus;
+};
+
 export type DashboardFilterOptionsResponse = {
   subjects: FilterOption[];
   grades: FilterOption[];
@@ -238,6 +251,8 @@ export type DashboardFilterOptionsResponse = {
    * los elija.
    */
   applicationPeriodsWithData: InstrumentApplicationPeriod[];
+  /** Procesos de medición con evaluaciones en el alcance visible. */
+  processes: ProcessFilterOption[];
   /**
    * Año académico al que está acotado el catálogo de cursos: el pedido en la
    * query, o el vigente, o el más reciente con cursos. `null` si el usuario no
