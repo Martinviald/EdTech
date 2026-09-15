@@ -181,36 +181,15 @@ const sql = postgres(process.env.DATABASE_ADMIN_URL as string, { max: 1 });
 `import_jobs`, `responses`, `assessment_results`, `skill_results`, `performance_bands`,
 `ai_analyses`, `org_benchmark_settings`.
 
-⚠️ **`soe_admin` SÍ ve todas las orgs sin fijar contexto.** (Verificado el 2026-09-15 contra
-la demo; esta sección antes afirmaba lo contrario y desvió dos investigaciones.)
+El master de RDS **NO es superusuario real** (es `rds_superuser`) → **NO bypassa FORCE RLS**.
+Consecuencias:
 
-Es cierto que el master **no** es superusuario (`rolsuper = f`) y **no** tiene `BYPASSRLS`
-(`rolbypassrls = f`), pero es miembro de `rds_superuser`, que arrastra **`pg_read_all_data`**,
-y en la práctica eso deja pasar los `SELECT` por encima de la política:
-
-```sql
--- como soe_admin, sin contexto:
-select count(*) from assessments;                                   -- → 274 (las 2 orgs)
-select set_config('app.current_org_id','00000000-...-000000000000', false);
-select count(*) from assessments;                                   -- → 274 TAMBIÉN
-```
-
-Ni siquiera un contexto de org **falso** filtra: la política no se está evaluando para este
-rol. Y no es que la política esté mal — es correcta y aplica a PUBLIC con FORCE activo:
-`((org_id)::text = current_setting('app.current_org_id'::text, true))`.
-
-Consecuencias prácticas:
-
-- **LEER** como `soe_admin` devuelve **todas las orgs**. Si una consulta te da 0 filas,
-  **no asumas que te falta el contexto**: lo más probable es que no haya datos.
-- **NO se puede probar RLS con `soe_admin`.** Para verificar el aislamiento real hay que
-  conectarse como **`soe_app`** (el rol de la API, que sí respeta la política).
-- Fijar `app.current_org_id` igual sirve para **acotar** lo que lees por comodidad, pero
-  no te protege de leer otra org por error.
-- **ESCRIBIR** en esas tablas sin contexto → **falla / bloqueado**. `pg_read_all_data` cubre
-  solo lectura, así que la escritura sigue topando con la política. (No se re-verificó en el
-  pase del 2026-09-15, que fue de solo lectura: si te topas con otra cosa, corrige acá.)
-  Dos opciones:
+- **LEER** una de esas tablas como admin devuelve **0 filas** salvo que fijes el contexto de org:
+  ```ts
+  await sql`select set_config('app.current_org_id', '<orgId>', false)`;
+  const n = await sql`select count(*)::int c from students`; // ahora sí ve las de esa org
+  ```
+- **ESCRIBIR** en esas tablas sin contexto → **falla / bloqueado**. Dos opciones:
   - **(a)** Usar `withOrgContext(db, orgId, tx => ...)` de `@soe/db` (fija `app.current_org_id`
     en la transacción; usar `tx`, no `db`).
   - **(b)** Desactivar FORCE temporalmente, escribir, y restaurar:

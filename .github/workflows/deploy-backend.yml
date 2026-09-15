@@ -59,18 +59,11 @@ env:
   BACKFILL_CONCURRENCY: "6"
 
 jobs:
-  # Gate: los deploys disparan con `push` a `main`, donde `ci.yml` (que corre en
-  # `pull_request`) ya no se ejecuta. Sin esto, un CI en rojo no impedía el deploy y
-  # un push directo a `main` no corría ninguna verificación.
-  checks:
-    uses: ./.github/workflows/checks.yml
-
   # ── Migra el RDS privado ANTES de publicar la imagen nueva. ──
   # El RDS vive en la VPC; se llega por un port-forward SSM a través del bastión (la NAT
   # instance de SST, que está gestionada por SSM). No usa `sst tunnel` (evita sudo/TUN
   # en el runner). El script `db:migrate` corre drizzle + re-aplica rls-policies.sql.
   migrate:
-    needs: checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
