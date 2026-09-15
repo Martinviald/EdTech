@@ -18,9 +18,10 @@ interface HeaderLeadProps {
 
 /**
  * Cluster reutilizable de encabezado: [ícono] + título + descripción. Se compone
- * dentro de `CardHeader`, `DialogHeader`, `TabHeader`, etc. El ícono queda del
- * alto de título+descripción juntos (fila `items-stretch` + `HeaderIcon` cuadrado).
- * `PageHeader` usa el mismo `HeaderIcon` pero arma su propia fila (tiene más slots).
+ * dentro de `CardHeader`, `DialogHeader`, `TabHeader`, etc. El ícono es un cuadrado
+ * de tamaño fijo centrado contra el bloque de texto, lo tenga o no descripción.
+ * `PageHeader` usa el mismo `HeaderIcon` pero arma su propia fila (tiene más slots
+ * y alinea arriba, porque su bloque de texto puede crecer con eyebrow y metadata).
  */
 export function HeaderLead({
   title,
@@ -33,15 +34,13 @@ export function HeaderLead({
   className,
 }: HeaderLeadProps) {
   return (
-    <div className={cn('flex items-stretch gap-3', className)}>
+    <div className={cn('flex items-center gap-3', className)}>
       {icon ? <HeaderIcon icon={icon} variant={iconVariant} tone={iconTone} /> : null}
       <div className="flex min-w-0 flex-col justify-center gap-0.5">
         <TitleTag className={cn('text-base font-semibold leading-tight', titleClassName)}>
           {title}
         </TitleTag>
-        {description ? (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        ) : null}
+        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
       </div>
     </div>
   );
