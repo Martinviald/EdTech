@@ -41,6 +41,10 @@ export const ROUTES = {
   estudiantes: route('/estudiantes'),
   estudiante: (studentId: string) => route(`/estudiantes/${studentId}`),
 
+  procesos: route('/procesos'),
+  proceso: (processId: string) => route(`/procesos/${processId}`),
+  procesoRendicion: (processId: string) => route(`/procesos/${processId}/rendicion`),
+
   resultados: route('/resultados'),
   telemetria: route('/telemetria'),
   resultadosTableroMaestro: route('/resultados/tablero-maestro'),

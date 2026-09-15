@@ -32,6 +32,7 @@ import {
   type DashboardFilterValues,
 } from './components/dashboard-filters';
 import { ComparabilityNotice } from './components/comparability-notice';
+import { ProcessFilterNotice } from './components/process-filter-notice';
 import { formatAchievement } from './components/performance-level';
 import { getComparableOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
 
@@ -53,6 +54,15 @@ export default async function ResultadosOverviewPage({
   // sección. `key={query}` reinicia el skeleton al cambiar los filtros.
   return (
     <>
+      {filters.processId && (
+        <Suspense fallback={null}>
+          <ProcessFilterNotice
+            processId={filters.processId}
+            clearHref={`${ROUTES.resultados}${buildDashboardQuery({ ...filters, processId: undefined })}`}
+          />
+        </Suspense>
+      )}
+
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
       </Suspense>

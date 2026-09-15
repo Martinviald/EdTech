@@ -38,6 +38,7 @@ export const dashboardFiltersQuerySchema = z.object({
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   studentId: z.string().uuid().optional(),
   academicYearId: z.string().uuid().optional(),
+  processId: z.string().uuid().optional(),
 });
 export type DashboardFiltersQueryDto = z.infer<typeof dashboardFiltersQuerySchema>;
 
