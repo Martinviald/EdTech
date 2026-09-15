@@ -25,6 +25,12 @@ permissions:
 concurrency:
   group: sst-deploy-${{ github.ref }}
   cancel-in-progress: false
+  # `queue: single` (el default) deja UN solo run esperando: si llega un tercero al grupo,
+  # GitHub CANCELA al que estaba en cola. Con los tres deploys compartiendo grupo, cualquier
+  # push que toque web + api + services/omr a la vez perdía uno en silencio (pasó con #237:
+  # el deploy del OMR se canceló sin ejecutar un job y producción quedó con el lector viejo).
+  # `queue: max` encola hasta 100 y los procesa FIFO. Incompatible con cancel-in-progress: true.
+  queue: max
 
 env:
   AWS_REGION: us-east-1
