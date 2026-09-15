@@ -50,7 +50,14 @@ env:
   ECR_REPOSITORY: edtech-omr-demo # = aws.ecr.Repository name en sst.config.ts (stage demo)
 
 jobs:
+  # Gate: los deploys disparan con `push` a `main`, donde `ci.yml` (que corre en
+  # `pull_request`) ya no se ejecuta. Sin esto, un CI en rojo no impedía el deploy y
+  # un push directo a `main` no corría ninguna verificación.
+  checks:
+    uses: ./.github/workflows/checks.yml
+
   build-and-push:
+    needs: checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
