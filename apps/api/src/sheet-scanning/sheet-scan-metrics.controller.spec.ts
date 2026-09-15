@@ -12,6 +12,16 @@ const EMPTY_METRICS: SheetScanMetricsResponse = {
   marksByState: {},
   reviewRatePercent: 0,
   firmReadingOverrides: 0,
+  registration: {
+    pagesWithDiagnostics: 0,
+    offMedianPxAvg: null,
+    offMaxPxMax: null,
+    fallbackPages: 0,
+    offsetAlertPages: 0,
+    fallbackAlertPages: 0,
+    alerts: { offMedianPx: 10, fallbackRatio: 0.1 },
+  },
+  suggestions: { marksWithSuggestion: 0, reviewed: 0, confirmed: 0, rejected: 0 },
 };
 
 function makeController(): { controller: SheetScanMetricsController; getMetrics: jest.Mock } {

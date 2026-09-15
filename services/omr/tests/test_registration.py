@@ -132,6 +132,36 @@ def test_register_group_follows_a_gradient_along_the_row(
             assert abs(fix.dy - 3) <= 1
 
 
+@pytest.mark.parametrize("dx,dy", [(24, -24), (-27, 10), (0, 30)])
+def test_a_shift_beyond_the_window_is_recovered_by_the_second_pass(
+    spec: dict, rectified: RectifiedPage, dx: int, dy: int
+) -> None:
+    from app.geometry import point_to_px, radius_to_px
+
+    page = shifted(rectified, dx, dy)
+    for field in spec["fields"]:
+        centers = [point_to_px(b["center"], rectified.size) for b in field["bubbles"]]
+        radius_px = radius_to_px(field["bubbles"][0]["radius"], rectified.size)
+        window = reg.search_window_px(centers, radius_px)
+        assert max(abs(dx), abs(dy)) > window
+
+        fixes = reg.register_group(page, field["bubbles"])
+
+        for fix in fixes:
+            assert not fix.fallback
+            assert fix.saturated
+            assert abs(fix.dx - dx) <= 1 and abs(fix.dy - dy) <= 1, (field["fieldId"], fix)
+    assert reg.summarize(fixes, True)["saturatedCount"] == len(fixes)
+
+
+def test_second_pass_runs_only_where_it_cannot_reach_the_neighbour() -> None:
+    question_layout = (80.0, reg.search_window_px([(0, 0), (80, 0)], 18), 18)
+    rut_grid = (22.4, reg.search_window_px([(0, 0), (0, 22)], 14), 14)
+
+    assert reg.second_pass_allowed(*question_layout)
+    assert not reg.second_pass_allowed(*rut_grid)
+
+
 def test_robust_line_ignores_one_outlier_and_caps_wild_slopes() -> None:
     intercept, slope = reg.robust_line([(0, -13), (80, -10), (160, -7), (240, -5)])
     assert abs(slope - 0.034) < 0.01
@@ -294,6 +324,67 @@ def test_registering_a_whole_page_is_cheap(spec: dict, rectified: RectifiedPage)
     bubbles = sum(len(field["bubbles"]) for field in spec["fields"])
 
     assert per_page_ms / bubbles * 88 < 60
+
+
+def _cover_field_bubbles(gray: np.ndarray, spec: dict, field_ids: set[str]) -> np.ndarray:
+    """Tapa las 4 burbujas de esos campos con un cuadrado negro: hay tinta (la firma de
+    grilla pasa) pero no hay anillo que registrar (el grupo entero cae al spec)."""
+    covered = gray.copy()
+    radius_px = syn.bubble_radius_px(spec)
+    for field in spec["fields"]:
+        if field["fieldId"] not in field_ids:
+            continue
+        for bubble in field["bubbles"]:
+            cx, cy = syn.bubble_center_px(spec, field["fieldId"], bubble["value"])
+            side = round(radius_px * 1.5)
+            cv2.rectangle(covered, (cx - side, cy - side), (cx + side, cy + side), 25, -1)
+    return covered
+
+
+def test_a_page_with_too_many_unregistrable_groups_is_rejected_not_read(
+    spec: dict, clean_gray: np.ndarray, profile: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.pipeline import assess_page
+
+    half = {field["fieldId"] for field in spec["fields"][: len(spec["fields"]) // 2]}
+    covered = _cover_field_bubbles(clean_gray, spec, half)
+
+    monkeypatch.setenv(reg.ENV_FLAG, "1")
+    page = process_page(syn.to_bgr(covered), 0, spec, profile)
+    gate = assess_page(syn.to_bgr(covered), spec, profile)
+
+    assert page["quality"]["ok"] is False
+    assert page["quality"]["rejectReason"] == "no_separable_marks"
+    assert page["quality"]["marksReadability"] == "unreadable"
+    assert page["marks"] == []
+    assert gate["quality"]["rejectReason"] == page["quality"]["rejectReason"]
+    assert gate["quality"]["marksReadability"] == page["quality"]["marksReadability"]
+
+    monkeypatch.setenv(reg.ENV_FLAG, "0")
+    legacy = process_page(syn.to_bgr(covered), 0, spec, profile)
+    assert legacy["quality"]["ok"] is True
+
+
+def test_a_single_unregistrable_group_is_tolerated(
+    spec: dict, clean_gray: np.ndarray, profile: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    covered = _cover_field_bubbles(clean_gray, spec, {spec["fields"][0]["fieldId"]})
+
+    monkeypatch.setenv(reg.ENV_FLAG, "1")
+    page = process_page(syn.to_bgr(covered), 0, spec, profile)
+
+    assert page["quality"]["ok"] is True
+    states = {mark["fieldId"]: mark["state"] for mark in page["marks"]}
+    assert states[spec["fields"][0]["fieldId"]] == "multiple"
+    assert all(
+        state in ("marked", "blank")
+        for field, state in states.items()
+        if field != spec["fields"][0]["fieldId"]
+    )
+
+
+def test_score_min_sits_between_real_paper_and_the_worst_real_ring() -> None:
+    assert 0.586 < reg.SCORE_MIN < 0.677
 
 
 def test_env_flag_parsing(monkeypatch: pytest.MonkeyPatch) -> None:

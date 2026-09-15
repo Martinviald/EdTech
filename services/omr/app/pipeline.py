@@ -95,7 +95,7 @@ from .rectify import (
     refine_reconstruction,
     search_rectification,
 )
-from .registration import RingFix, local_registration_enabled, summarize
+from .registration import RingFix, local_registration_enabled, summarize, unregistrable
 from .sources import Fetch, build_page_source, fetch_url
 
 logger = logging.getLogger("omr.pipeline")
@@ -676,7 +676,10 @@ def _marks_readability(
 
     El ultimo elemento es el registro local de cada burbuja muestreada
     (app/registration.py), para el payload de debug; vacio con el interruptor
-    apagado.
+    apagado. Una pagina legible por sus fills pero con demasiadas burbujas sin
+    anillo confiable (`unregistrable`) se declara `unreadable`: con el registro
+    activo, leerla en la posicion del spec seria volver al modo de falla que el
+    registro cerro, y lo correcto es pedir otra foto.
     """
     logical_page = peek_logical_page_index(identity["raw"], file_page_index, spec["pageCount"])
     readable = [
@@ -696,6 +699,8 @@ def _marks_readability(
         return readable, fills_by_field, [], None, MARKS_READABLE, registration_log
     threshold = page_threshold(all_fills)
     verdict = readability_verdict(threshold, all_fills)
+    if verdict == MARKS_READABLE and unregistrable(registration_log):
+        verdict = MARKS_UNREADABLE
     return readable, fills_by_field, all_fills, threshold, verdict, registration_log
 
 
@@ -738,7 +743,7 @@ def _read_marks(
         "stdHigh": round(threshold.std_high, 4),
         "registration": summarize(registration_log, local_registration_enabled()),
     }
-    if not threshold.is_readable():
+    if verdict != MARKS_READABLE:
         _reject_page(quality, "no_separable_marks")
         return [], classify_debug
 

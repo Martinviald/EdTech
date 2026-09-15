@@ -53,6 +53,15 @@ def test_scan_result_example_validates() -> None:
     assert validate("scan-result", load_example("scan-result")) == []
 
 
+def test_scan_result_example_validates_without_contract_v2_keys() -> None:
+    example = load_example("scan-result")
+    for page in example["pages"]:
+        for mark in page["marks"]:
+            for key in ("suggestedValue", "doubtReason", "nullConfidence"):
+                mark.pop(key, None)
+    assert validate("scan-result", example) == []
+
+
 def test_layout_spec_example_validates() -> None:
     assert validate("layout-spec", load_example("read-request")["layoutSpec"]) == []
 

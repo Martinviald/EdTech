@@ -33,8 +33,8 @@ export function createAuthenticatedCaptureTransport(printRunId: string): Capture
 
 export function createCaptureTokenTransport(token: string): CaptureTransport {
   return {
-    assess: (imageBase64) =>
-      captureProxyPost<AssessCaptureResponse>('/assess', { imageBase64 }, token),
+    assess: (imageBase64, signal) =>
+      captureProxyPost<AssessCaptureResponse>('/assess', { imageBase64 }, token, signal),
     createUploadIntent: (meta) =>
       captureProxyPost<ScanUploadIntent>(
         '/upload-intent',
@@ -57,7 +57,12 @@ export function finishCaptureSession(token: string): Promise<FinishCaptureSessio
   return captureProxyPost<FinishCaptureSessionResponse>('/finish', {}, token);
 }
 
-async function captureProxyPost<T>(path: string, body: unknown, token?: string): Promise<T> {
+async function captureProxyPost<T>(
+  path: string,
+  body: unknown,
+  token?: string,
+  signal?: AbortSignal,
+): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`/api/capture-proxy${path}`, {
@@ -67,8 +72,12 @@ async function captureProxyPost<T>(path: string, body: unknown, token?: string):
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify(body),
+      signal,
     });
-  } catch {
+  } catch (err) {
+    // Una cancelación no es una caída de red: quien abortó sabe por qué lo hizo y
+    // necesita distinguirlo para no mostrar un error que no ocurrió.
+    if (err instanceof DOMException && err.name === 'AbortError') throw err;
     throw new ApiConnectionError();
   }
 

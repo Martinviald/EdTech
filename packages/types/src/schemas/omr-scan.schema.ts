@@ -13,6 +13,15 @@ export const MARK_STATES = ['marked', 'blank', 'multiple', 'ambiguous'] as const
 export type MarkState = (typeof MARK_STATES)[number];
 
 /**
+ * Contrato v2: por qué el motor dudó. `margin` = alguna burbuja del campo
+ * quedó a menos de `ambiguityMargin` del umbral; `band` = ninguna por margen,
+ * pero alguna cayó en la tierra de nadie entre los dos grupos de la página;
+ * `multiple` = más de una burbuja sobre el umbral en un campo de selección única.
+ */
+export const DOUBT_REASONS = ['margin', 'band', 'multiple'] as const;
+export type DoubtReason = (typeof DOUBT_REASONS)[number];
+
+/**
  * `blank` = el alumno NO marcó, con separación clara. Una página que no llegó a
  * escanearse no produce `blank`: no produce nada y el escaneo queda incompleto (G3).
  * `margin = |fill − threshold| / threshold` ordena la cola: lo más dudoso primero.
@@ -28,6 +37,20 @@ export const markReadingSchema = z.object({
   threshold: z.number().min(0).max(1),
   margin: z.number(),
   cropJpegBase64: z.string().nullable(),
+  /**
+   * Contrato v2 (aditivo, `OMR_CONTRACT_V2` en el servicio). Los tres son
+   * opcionales: un motor v1 no los trae y la lectura vale igual. Nunca cambian
+   * `state`/`value`: son la sugerencia y la explicación que la cola de revisión
+   * puede usar (B1: confirmar con sí/no; B2: anular sin revisar).
+   * `suggestedValue`: en `ambiguous`, la única burbuja sobre el umbral (todas
+   * las que lo superan si el campo es de selección múltiple); `null` si no hay
+   * una sola. `nullConfidence`: sólo en `multiple`, 0–1, qué tan seguro es que
+   * la doble marca sea una nula real (dos igual de rellenas → alto; una clara
+   * y una tenue → bajo).
+   */
+  suggestedValue: z.string().nullable().optional(),
+  doubtReason: z.enum(DOUBT_REASONS).nullable().optional(),
+  nullConfidence: z.number().min(0).max(1).nullable().optional(),
 });
 
 export const PAGE_REJECT_REASONS = [
@@ -111,6 +134,75 @@ export type MarkReading = z.infer<typeof markReadingSchema>;
 export type PageQuality = z.infer<typeof pageQualitySchema>;
 export type ScannedPage = z.infer<typeof scannedPageSchema>;
 export type ScanResult = z.infer<typeof scanResultSchema>;
+
+// ── Diagnóstico por página (`POST /v1/read?debug=1`) ─────────────────────────
+// NO es parte del contrato ScanResult: es el payload `debug` que el servicio
+// emite junto al resultado y que el backend persiste en `sheet_scans.diagnostics`
+// para monitorear el registro local de burbujas (services/omr/app/registration.py)
+// sin cambiar cómo se interpreta la lectura. Todo es opcional: un servicio viejo
+// o una página rechazada no lo traen, y su ausencia o invalidez JAMÁS bloquea
+// una lectura (el cliente la registra y sigue con `result`).
+
+/** Resumen del registro local: cuánto se corrió cada burbuja respecto del spec. */
+export const registrationDiagnosticsSchema = z.object({
+  enabled: z.boolean(),
+  bubbles: z.number().int().min(0),
+  offMedianPx: z.number().optional(),
+  offP90Px: z.number().optional(),
+  offMaxPx: z.number().optional(),
+  scoreP10: z.number().optional(),
+  fallbackCount: z.number().int().min(0).optional(),
+  inheritedCount: z.number().int().min(0).optional(),
+  saturatedCount: z.number().int().min(0).optional(),
+});
+
+/** Contraste por pregunta (fill mayor − segundo) según lo que se decidió. */
+export const fieldContrastDiagnosticsSchema = z.object({
+  markedMin: z.number().nullable(),
+  markedCount: z.number().int().min(0),
+  blankMax: z.number().nullable(),
+  blankCount: z.number().int().min(0),
+});
+
+export const pageDiagnosticsSchema = z.object({
+  threshold: z.number().nullable().optional(),
+  gap: z.number().nullable().optional(),
+  separable: z.boolean().nullable().optional(),
+  allMarked: z.boolean().nullable().optional(),
+  stdLow: z.number().nullable().optional(),
+  stdHigh: z.number().nullable().optional(),
+  orientationDegrees: z.number().optional(),
+  illuminationFlattened: z.boolean().optional(),
+  registration: registrationDiagnosticsSchema.nullable().optional(),
+  fieldContrast: fieldContrastDiagnosticsSchema.nullable().optional(),
+  timingsMs: z.record(z.string(), z.number()).optional(),
+});
+
+export const scanDebugPageSchema = pageDiagnosticsSchema.extend({
+  pageIndex: z.number().int().min(0),
+});
+
+export const scanDebugSchema = z.object({
+  pages: z.array(scanDebugPageSchema),
+});
+
+export type RegistrationDiagnostics = z.infer<typeof registrationDiagnosticsSchema>;
+export type FieldContrastDiagnostics = z.infer<typeof fieldContrastDiagnosticsSchema>;
+export type PageDiagnostics = z.infer<typeof pageDiagnosticsSchema>;
+
+/** Una página leída con su diagnóstico ya emparejado por `pageIndex` (lo arma el cliente HTTP). */
+export type ScannedPageWithDiagnostics = ScannedPage & { diagnostics?: PageDiagnostics | null };
+export type ScanReadResult = { pages: ScannedPageWithDiagnostics[] };
+
+/**
+ * Umbrales de alerta sobre el registro, por página. Salen de la validación del
+ * registro local (services/omr/goldset/README-registro.md): fotos reales sanas
+ * dan desplazamiento mediano 4–13 px y 0 % de fallback; una mediana mayor a 10 px
+ * o más de un 10 % de burbujas al fallback dicen que una impresora o una cámara
+ * se corrió y hay que mirar el lote antes de que aparezca un error.
+ */
+export const REGISTRATION_ALERT_OFF_MEDIAN_PX = 10;
+export const REGISTRATION_ALERT_FALLBACK_RATIO = 0.1;
 
 /** Un archivo fuente por llamada: un PDF multipágina O una lista ordenada de fotos (CD-2). */
 export const omrReadSourceSchema = z

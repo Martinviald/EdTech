@@ -32,6 +32,32 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
  * este schema valida/extrae sólo las claves que F2 conoce y deja pasar el resto
  * (`.passthrough()`) para no perder configuración de otros dominios.
  */
+/**
+ * Ajustes de la cola de revisión de hojas (B1). `quickConfirm`: cuando el motor
+ * sugiere una alternativa en una marca dudosa, el revisor la confirma con
+ * Sí/No en vez de elegir entre todas las opciones. Apagado por defecto en el
+ * primer ciclo; se enciende por org.
+ */
+export const orgReviewSettingsSchema = z.object({
+  quickConfirm: z.boolean().optional(),
+  /**
+   * B2: una doble marca (`multiple`) cuya `nullConfidence` alcance este valor
+   * se anula sola al persistir (`reviewDecision = annulled`, `autoResolved`),
+   * no entra a la cola y sigue reabrible. Ausente = apagado. Valor recomendado:
+   * AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE.
+   */
+  autoAnnulMinConfidence: z.number().min(0).max(1).optional(),
+});
+export type OrgReviewSettings = z.infer<typeof orgReviewSettingsSchema>;
+
+/**
+ * Medido sobre el corte real (services/omr/goldset/README-registro.md, pendientes
+ * fase 4 y 6b): las dobles con ambas burbujas plenas dan 0.96–1.00; una doble con
+ * una burbuja 0.2 de fill más clara que la otra, 0.10–0.14; un borrón junto a la
+ * marca, 0.0. Con 0.9 se anulan solas las primeras y las otras siguen en revisión.
+ */
+export const AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE = 0.9;
+
 export const orgConfigSchema = z
   .object({
     /** Lista de features pagas habilitadas. `undefined` = default (ver isFeatureAllowed). */
@@ -44,9 +70,28 @@ export const orgConfigSchema = z
     omrCalibration: omrCalibrationSchema.optional(),
     /** Retención de imágenes escaneadas en días (CD-14). undefined = default 180. */
     omrRetentionDays: z.number().int().positive().optional(),
+    /** Cola de revisión de hojas (B1). Ver orgReviewSettingsSchema. */
+    review: orgReviewSettingsSchema.optional(),
   })
   .passthrough();
 export type OrgConfig = z.infer<typeof orgConfigSchema>;
+
+/** Umbral de nula automática de la org (B2), o `null` si está apagada. */
+export function autoAnnulMinConfidence(
+  config: OrgConfig | Record<string, unknown> | null | undefined,
+): number | null {
+  const parsed = orgConfigSchema.safeParse(config ?? {});
+  if (!parsed.success) return null;
+  return parsed.data.review?.autoAnnulMinConfidence ?? null;
+}
+
+/** ¿La org confirma sugerencias del motor con Sí/No? Apagado salvo `config.review.quickConfirm: true`. */
+export function isQuickConfirmEnabled(
+  config: OrgConfig | Record<string, unknown> | null | undefined,
+): boolean {
+  const parsed = orgConfigSchema.safeParse(config ?? {});
+  return parsed.success && parsed.data.review?.quickConfirm === true;
+}
 
 /**
  * ¿La org tiene habilitada esta feature paga?

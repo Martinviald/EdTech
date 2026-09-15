@@ -1,5 +1,5 @@
 {
-  "id": "91c1bcda-b630-4f3f-bbe2-8c983da64b92",
+  "id": "7419ba20-17cb-4114-af09-2be58ffdf151",
   "prevId": "3697c99d-a54a-4ee6-b0df-fbcc966b871d",
   "version": "7",
   "dialect": "postgresql",
@@ -3331,213 +3331,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.measurement_processes": {
-      "name": "measurement_processes",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "org_id": {
-          "name": "org_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "academic_year_id": {
-          "name": "academic_year_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "slug": {
-          "name": "slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "process_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "period": {
-          "name": "period",
-          "type": "instrument_application_period",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "taxonomy_id": {
-          "name": "taxonomy_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "process_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'planned'"
-        },
-        "starts_on": {
-          "name": "starts_on",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ends_on": {
-          "name": "ends_on",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expected_scope": {
-          "name": "expected_scope",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "owner_id": {
-          "name": "owner_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_measurement_processes_org_year": {
-          "name": "idx_measurement_processes_org_year",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "academic_year_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "measurement_processes_org_id_organizations_id_fk": {
-          "name": "measurement_processes_org_id_organizations_id_fk",
-          "tableFrom": "measurement_processes",
-          "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "measurement_processes_academic_year_id_academic_years_id_fk": {
-          "name": "measurement_processes_academic_year_id_academic_years_id_fk",
-          "tableFrom": "measurement_processes",
-          "tableTo": "academic_years",
-          "columnsFrom": [
-            "academic_year_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "measurement_processes_taxonomy_id_taxonomies_id_fk": {
-          "name": "measurement_processes_taxonomy_id_taxonomies_id_fk",
-          "tableFrom": "measurement_processes",
-          "tableTo": "taxonomies",
-          "columnsFrom": [
-            "taxonomy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "measurement_processes_owner_id_users_id_fk": {
-          "name": "measurement_processes_owner_id_users_id_fk",
-          "tableFrom": "measurement_processes",
-          "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "measurement_processes_org_slug_unique": {
-          "name": "measurement_processes_org_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "org_id",
-            "slug"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.assessment_course_assignments": {
       "name": "assessment_course_assignments",
       "schema": "",
@@ -3799,12 +3592,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "process_id": {
-          "name": "process_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -3881,23 +3668,7 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "idx_assessments_process": {
-          "name": "idx_assessments_process",
-          "columns": [
-            {
-              "expression": "process_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "assessments_org_id_organizations_id_fk": {
           "name": "assessments_org_id_organizations_id_fk",
@@ -3923,19 +3694,6 @@
             "id"
           ],
           "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "assessments_process_id_measurement_processes_id_fk": {
-          "name": "assessments_process_id_measurement_processes_id_fk",
-          "tableFrom": "assessments",
-          "tableTo": "measurement_processes",
-          "columnsFrom": [
-            "process_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "assessments_administered_by_id_users_id_fk": {
@@ -8522,6 +8280,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "diagnostics": {
+          "name": "diagnostics",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
         "resolved_student_id": {
           "name": "resolved_student_id",
           "type": "uuid",
@@ -9386,29 +9150,6 @@
         "elementary",
         "adequate",
         "advanced"
-      ]
-    },
-    "public.process_kind": {
-      "name": "process_kind",
-      "schema": "public",
-      "values": [
-        "dia",
-        "simce_ensayo",
-        "paes_ensayo",
-        "evaluacion_interna",
-        "cambridge_mock",
-        "custom"
-      ]
-    },
-    "public.process_status": {
-      "name": "process_status",
-      "schema": "public",
-      "values": [
-        "planned",
-        "in_progress",
-        "loading",
-        "closed",
-        "archived"
       ]
     },
     "public.remedial_material_type": {

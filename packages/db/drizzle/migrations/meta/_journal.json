@@ -222,8 +222,29 @@
     {
       "idx": 31,
       "version": "7",
-      "when": 1788956491299,
-      "tag": "0031_thick_jackpot",
+      "when": 1788922348958,
+      "tag": "0031_gifted_frightful_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788956293680,
+      "tag": "0032_flowery_rogue",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1788957777758,
+      "tag": "0033_lowly_eternity",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789480629072,
+      "tag": "0034_public_nitro",
       "breakpoints": true
     }
   ]

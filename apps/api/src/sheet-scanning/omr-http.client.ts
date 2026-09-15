@@ -1,18 +1,27 @@
+import { Logger } from '@nestjs/common';
 import {
   omrAssessResultSchema,
+  scanDebugSchema,
   scanResultSchema,
   type OmrAssessRequest,
   type OmrAssessResult,
   type OmrReadRequest,
+  type PageDiagnostics,
+  type ScanReadResult,
   type ScanResult,
 } from '@soe/types';
-import type { ZodType } from 'zod';
+import { z, type ZodType, type ZodTypeDef } from 'zod';
 import {
   OmrPageTimeoutError,
   OmrServiceUnavailableError,
   OmrSourceUnreadableError,
   type OmrClient,
 } from './omr-client.types';
+
+const readBodySchema = z.union([
+  z.object({ result: scanResultSchema, debug: z.unknown().optional() }),
+  scanResultSchema.transform((result) => ({ result, debug: undefined as unknown })),
+]);
 
 export class OmrInvalidResponseError extends Error {
   constructor(message: string) {
@@ -61,6 +70,7 @@ type PostOutcome<T> =
   | { kind: 'source-unreadable'; detail: string };
 
 export class HttpOmrClient implements OmrClient {
+  private readonly logger = new Logger(HttpOmrClient.name);
   private readonly serviceUrl: string;
   private readonly timeoutMs: number;
   private readonly fetchFn: OmrFetchFn;
@@ -73,8 +83,39 @@ export class HttpOmrClient implements OmrClient {
     this.serviceToken = options.serviceToken ?? process.env.OMR_SERVICE_TOKEN ?? null;
   }
 
-  read(request: OmrReadRequest): Promise<ScanResult> {
-    return this.postWithRetry('/v1/read', request, scanResultSchema, 'ScanResult');
+  async read(request: OmrReadRequest): Promise<ScanReadResult> {
+    const body = await this.postWithRetry(
+      '/v1/read?debug=1',
+      request,
+      readBodySchema,
+      'ScanResult',
+    );
+    return this.attachDiagnostics(body.result, body.debug);
+  }
+
+  private attachDiagnostics(result: ScanResult, debug: unknown): ScanReadResult {
+    const byPage = new Map<number, PageDiagnostics>();
+    if (debug !== undefined) {
+      const parsed = scanDebugSchema.safeParse(debug);
+      if (parsed.success) {
+        for (const { pageIndex, ...diagnostics } of parsed.data.pages) {
+          byPage.set(pageIndex, diagnostics);
+        }
+      } else {
+        this.logger.warn(
+          `El diagnóstico del lector no valida y se descarta (la lectura sigue): ${parsed.error.issues
+            .slice(0, 3)
+            .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+            .join('; ')}`,
+        );
+      }
+    }
+    return {
+      pages: result.pages.map((page) => ({
+        ...page,
+        diagnostics: byPage.get(page.pageIndex) ?? null,
+      })),
+    };
   }
 
   assess(request: OmrAssessRequest): Promise<OmrAssessResult> {
@@ -84,7 +125,7 @@ export class HttpOmrClient implements OmrClient {
   private async postWithRetry<T>(
     path: string,
     request: unknown,
-    schema: ZodType<T>,
+    schema: ZodType<T, ZodTypeDef, unknown>,
     resultName: string,
   ): Promise<T> {
     const first = await this.postOnce(path, request, schema, resultName);
@@ -107,7 +148,7 @@ export class HttpOmrClient implements OmrClient {
   private async postOnce<T>(
     path: string,
     request: unknown,
-    schema: ZodType<T>,
+    schema: ZodType<T, ZodTypeDef, unknown>,
     resultName: string,
   ): Promise<PostOutcome<T>> {
     const controller = new AbortController();
@@ -163,7 +204,7 @@ export class HttpOmrClient implements OmrClient {
   private async parseBody<T>(
     response: OmrFetchResponse,
     signal: AbortSignal,
-    schema: ZodType<T>,
+    schema: ZodType<T, ZodTypeDef, unknown>,
     resultName: string,
   ): Promise<T> {
     let body: unknown;

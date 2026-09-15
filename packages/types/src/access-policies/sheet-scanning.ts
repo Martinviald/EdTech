@@ -23,3 +23,7 @@ export const SHEET_REVIEW_ROLES: readonly UserRole[] = [
 ];
 
 export const OMR_CALIBRATION_ROLES: readonly UserRole[] = SHEET_MANAGEMENT_ROLES;
+
+// Ajustes de la cola de revisión (Sí/No rápido, nula automática): mismo público
+// que la calibración OMR, es configuración del mismo lector.
+export const REVIEW_SETTINGS_ROLES: readonly UserRole[] = SHEET_MANAGEMENT_ROLES;

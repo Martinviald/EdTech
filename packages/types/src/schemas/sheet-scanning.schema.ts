@@ -9,7 +9,14 @@ import {
   type LayoutSpec,
   type OmrCalibration,
 } from './omr-layout.schema';
-import type { MarksReadability, MarkState, PageQuality, PageRejectReason } from './omr-scan.schema';
+import { orgReviewSettingsSchema, type OrgReviewSettings } from './feature.schema';
+import type {
+  DoubtReason,
+  MarksReadability,
+  MarkState,
+  PageQuality,
+  PageRejectReason,
+} from './omr-scan.schema';
 
 // ── Lector de marcas (E22) — contrato API ⇄ web del módulo sheet-scanning ────
 // Response Models EXACTOS (lección S2: frontend y backend compilan contra el
@@ -139,6 +146,11 @@ export const reviewMarkSchema = z.discriminatedUnion('decision', [
   z.object({ decision: z.literal('option'), reviewedValue: z.string().min(1).max(20) }),
   z.object({ decision: z.literal('blank') }),
   z.object({ decision: z.literal('annulled') }),
+  /**
+   * B1: "sí" a la sugerencia del motor. Se persiste como `option` con
+   * `reviewedValue = suggestedValue`; una marca sin sugerencia responde 400.
+   */
+  z.object({ decision: z.literal('confirm') }),
 ]);
 
 export const assignScanIdentitySchema = z.object({
@@ -158,6 +170,15 @@ export const assessCaptureSchema = z.object({
 });
 
 export const updateOmrCalibrationSchema = omrCalibrationSchema;
+
+/**
+ * PATCH /organizations/me/review-settings. Parcial: cada campo es opcional y
+ * sólo se toca lo que viene. `autoAnnulMinConfidence: null` apaga la nula
+ * automática (se elimina la clave de `config.review`).
+ */
+export const updateOrgReviewSettingsSchema = orgReviewSettingsSchema.extend({
+  autoAnnulMinConfidence: z.number().min(0).max(1).nullable().optional(),
+});
 
 export const sheetLayoutQuerySchema = z.object({
   instrumentId: z.string().uuid().optional(),
@@ -193,6 +214,7 @@ export type AssignScanIdentityDto = z.infer<typeof assignScanIdentitySchema>;
 export type DiscardScanDto = z.infer<typeof discardScanSchema>;
 export type AssessCaptureDto = z.infer<typeof assessCaptureSchema>;
 export type UpdateOmrCalibrationDto = z.infer<typeof updateOmrCalibrationSchema>;
+export type UpdateOrgReviewSettingsDto = z.infer<typeof updateOrgReviewSettingsSchema>;
 export type SheetLayoutQueryDto = z.infer<typeof sheetLayoutQuerySchema>;
 export type PrintRunQueryDto = z.infer<typeof printRunQuerySchema>;
 export type ScanBatchQueryDto = z.infer<typeof scanBatchQuerySchema>;
@@ -304,6 +326,19 @@ export type BatchSourcesModel = {
   ready: number;
 };
 
+/**
+ * Resumen del registro local de burbujas sobre las páginas leídas del lote
+ * (agregado de `sheet_scans.diagnostics`). `null` cuando ninguna página trae
+ * diagnóstico (servicio viejo o lote sin páginas leídas). Solo lo trae el
+ * detalle de un lote, no el listado.
+ */
+export type BatchDiagnosticsModel = {
+  pages: number;
+  offMedianPxAvg: number | null;
+  offMaxPxMax: number | null;
+  fallbackPages: number;
+};
+
 export type BatchStatusModel = {
   id: string;
   printRunId: string;
@@ -315,6 +350,7 @@ export type BatchStatusModel = {
   failureReason: string | null;
   counters: BatchCountersModel;
   sources: BatchSourcesModel;
+  diagnostics?: BatchDiagnosticsModel | null;
   createdAt: string | Date;
   updatedAt: string | Date;
 };
@@ -351,18 +387,37 @@ export type ReviewMarkModel = {
   cropUrl: string | null;
   /** Alternativas del campo según el spec, para resolver con una tecla (C16). */
   options: string[];
+  /** Contrato v2 del motor (ver `markReadingSchema`); `null` con un motor v1 o cuando no aplica. */
+  suggestedValue: string | null;
+  doubtReason: DoubtReason | null;
+  nullConfidence: number | null;
   reviewedValue: string | null;
   /** `null` = nadie la revisó todavía. */
   reviewedDecision: MarkReviewDecision | null;
   reviewedById: string | null;
+  /**
+   * B2: la decisión la tomó el sistema al persistir (doble marca anulada por
+   * `nullConfidence` alta). `reviewedById` queda `null`; una decisión humana
+   * posterior la vuelve `false`.
+   */
+  autoResolved: boolean;
 };
 
 /** Orden por daño (C16): calidad primero (el profesor aún tiene las hojas), identidades después, marcas por margin ascendente. */
+/** Ajustes de la org que cambian cómo se revisa, no qué se revisa (B1). */
+export type ReviewQueueSettingsModel = {
+  quickConfirm: boolean;
+  autoAnnulMinConfidence: number | null;
+};
+
 export type ReviewQueueModel = {
   batchId: string;
   qualityRejected: ReviewScanModel[];
   identityUnresolved: ReviewScanModel[];
   ambiguousMarks: ReviewMarkModel[];
+  /** B2: dobles anuladas por el sistema; no cuentan como pendientes, pero se ven y se pueden corregir. */
+  autoAnnulled: ReviewMarkModel[];
+  settings: ReviewQueueSettingsModel;
 };
 
 export type AssessCaptureIdentityModel = {
@@ -374,15 +429,68 @@ export type AssessCaptureIdentityModel = {
   confidence: number;
 };
 
+/**
+ * Por qué el gate de captura no aceptó la foto.
+ *
+ * Sin esto el cliente sólo ve `accepted: false` y `quality.rejectReason: null`, y
+ * termina culpando a la calidad de la imagen una hoja que salió perfecta pero que
+ * no pertenece a la tirada. El motivo lo sabe la API; hay que dejarlo salir.
+ */
+export type AssessCaptureRejection =
+  /** No pasó el control de calidad: el detalle está en `quality`. */
+  | { kind: 'quality' }
+  /** El diseño impreso no es el de la tirada: instrumento editado u hoja de otra tirada. */
+  | { kind: 'layout_mismatch'; reason: string }
+  /** El QR resolvió a una hoja que no está en esta tirada. */
+  | { kind: 'other_print_run' };
+
 export type AssessCaptureResponse = {
   accepted: boolean;
   quality: PageQuality;
   identity: AssessCaptureIdentityModel | null;
+  /** `null` cuando `accepted` es true. */
+  rejection: AssessCaptureRejection | null;
 };
 
 export type OmrCalibrationResponse = {
   orgId: string;
   calibration: OmrCalibration;
+};
+
+export type OrgReviewSettingsResponse = {
+  orgId: string;
+  review: OrgReviewSettings;
+};
+
+/**
+ * Monitoreo del registro local de burbujas sobre las páginas leídas de la org.
+ * `offsetAlertPages` y `fallbackAlertPages` cuentan páginas por encima de
+ * `alerts` (REGISTRATION_ALERT_* en omr-scan.schema): si suben, una impresora
+ * o una cámara se corrió y hay que mirar esos lotes antes de que aparezca un
+ * error confiado.
+ */
+export type RegistrationMetricsModel = {
+  pagesWithDiagnostics: number;
+  offMedianPxAvg: number | null;
+  offMaxPxMax: number | null;
+  fallbackPages: number;
+  offsetAlertPages: number;
+  fallbackAlertPages: number;
+  alerts: { offMedianPx: number; fallbackRatio: number };
+};
+
+/**
+ * Cuánto acierta la sugerencia del motor (B1): entre las marcas con
+ * `suggestedValue` ya revisadas, `confirmed` = la decisión humana coincidió
+ * (con Sí o eligiendo la misma letra) y `rejected` = eligió otra cosa. Una
+ * tasa de rechazo sostenida cerca de 0 es la señal para revisar la tierra de
+ * nadie (A3); una alta, para revisar la sugerencia.
+ */
+export type SuggestionMetricsModel = {
+  marksWithSuggestion: number;
+  reviewed: number;
+  confirmed: number;
+  rejected: number;
 };
 
 export type SheetScanMetricsResponse = {
@@ -391,6 +499,8 @@ export type SheetScanMetricsResponse = {
   marksByState: Record<string, number>;
   reviewRatePercent: number;
   firmReadingOverrides: number;
+  registration: RegistrationMetricsModel;
+  suggestions: SuggestionMetricsModel;
 };
 
 export type ConfirmBatchResponse = {

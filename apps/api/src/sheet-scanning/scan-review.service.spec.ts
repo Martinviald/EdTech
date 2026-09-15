@@ -197,9 +197,13 @@ function markQueueRow(overrides: Record<string, unknown>) {
     threshold: '0.500',
     margin: '0.200',
     cropFileId: null,
+    suggestedValue: null,
+    doubtReason: null,
+    nullConfidence: null,
     reviewedValue: null,
     reviewDecision: null,
     reviewedById: null,
+    autoResolved: false,
     ...overrides,
   };
 }
@@ -273,6 +277,9 @@ describe('ScanReviewService.getQueue', () => {
         fieldId: 'f3',
         printedNumber: '3',
         cropFileId: 'file-crop',
+        suggestedValue: 'V',
+        doubtReason: 'band',
+        nullConfidence: '0.880',
       }),
     ];
     const { service } = makeService([
@@ -287,12 +294,91 @@ describe('ScanReviewService.getQueue', () => {
     expect(queue.ambiguousMarks[0].options).toEqual(['V', 'F']);
     expect(queue.ambiguousMarks[0].cropUrl).toBe('https://signed/file-crop');
     expect(queue.ambiguousMarks[0].studentName).toBe('Ana Pérez');
+    expect(queue.ambiguousMarks[0]).toMatchObject({
+      suggestedValue: 'V',
+      doubtReason: 'band',
+      nullConfidence: 0.88,
+    });
+  });
+
+  it('una marca persistida por un motor v1 expone los campos del contrato v2 en null', async () => {
+    const { service } = makeService([
+      [{ id: BATCH_ID, spec: SPEC }],
+      [scanQueueRow({ scanId: 'scan-read' })],
+      [markQueueRow({ markId: 'mark-v1', scanId: 'scan-read' })],
+      [],
+    ]);
+
+    const queue = await service.getQueue(ORG_ID, BATCH_ID);
+
+    expect(queue.ambiguousMarks[0]).toMatchObject({
+      suggestedValue: null,
+      doubtReason: null,
+      nullConfidence: null,
+    });
   });
 
   it('lanza NotFound cuando el lote no existe en la org', async () => {
     const { service } = makeService([[]]);
 
     await expect(service.getQueue(ORG_ID, BATCH_ID)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('B2: las dobles anuladas por el sistema salen aparte, con su recorte firmado, y no como pendientes', async () => {
+    const { service } = makeService([
+      [{ id: BATCH_ID, spec: SPEC, orgConfig: { review: { autoAnnulMinConfidence: 0.9 } } }],
+      [scanQueueRow({ scanId: 'scan-read' })],
+      [],
+      [
+        markQueueRow({
+          markId: 'mark-auto',
+          scanId: 'scan-read',
+          fieldId: 'f3',
+          printedNumber: '3',
+          state: 'multiple',
+          cropFileId: 'file-crop',
+          nullConfidence: '0.980',
+          reviewDecision: 'annulled',
+          autoResolved: true,
+        }),
+      ],
+      [{ id: 'file-crop' }],
+    ]);
+
+    const queue = await service.getQueue(ORG_ID, BATCH_ID);
+
+    expect(queue.ambiguousMarks).toEqual([]);
+    expect(queue.autoAnnulled).toHaveLength(1);
+    expect(queue.autoAnnulled[0]).toMatchObject({
+      markId: 'mark-auto',
+      autoResolved: true,
+      reviewedDecision: 'annulled',
+      reviewedById: null,
+      nullConfidence: 0.98,
+      cropUrl: 'https://signed/file-crop',
+      options: ['V', 'F'],
+      studentName: 'Ana Pérez',
+    });
+    expect(queue.settings.autoAnnulMinConfidence).toBe(0.9);
+  });
+
+  it('B1: settings.quickConfirm sale de organizations.config.review y está apagado por defecto', async () => {
+    const enabled = makeService([
+      [{ id: BATCH_ID, spec: SPEC, orgConfig: { review: { quickConfirm: true } } }],
+      [],
+      [],
+      [],
+    ]);
+    const disabled = makeService([[{ id: BATCH_ID, spec: SPEC, orgConfig: null }], [], [], []]);
+
+    expect((await enabled.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
+      quickConfirm: true,
+      autoAnnulMinConfidence: null,
+    });
+    expect((await disabled.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
+      quickConfirm: false,
+      autoAnnulMinConfidence: null,
+    });
   });
 });
 
@@ -308,6 +394,9 @@ function resolveMarkRow(overrides: Record<string, unknown> = {}) {
     threshold: '0.500',
     margin: '0.200',
     cropFileId: null,
+    suggestedValue: null,
+    doubtReason: null,
+    nullConfidence: null,
     batchId: BATCH_ID,
     batchStatus: 'needs_review',
     spec: SPEC,
@@ -325,6 +414,55 @@ describe('ScanReviewService.resolveMark', () => {
 
     await expect(
       service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'option', reviewedValue: 'Z' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('B1: "confirm" persiste la sugerencia del motor como decisión option', async () => {
+    const { service, updates } = makeService([
+      [resolveMarkRow({ suggestedValue: 'B', doubtReason: 'margin' })],
+      [{ total: 0 }],
+      [{ total: 0 }],
+    ]);
+
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'confirm' });
+
+    expect(updates[0]).toMatchObject({
+      reviewedValue: 'B',
+      reviewDecision: 'option',
+      reviewedById: USER_ID,
+    });
+    expect(model.reviewedValue).toBe('B');
+    expect(model.reviewedDecision).toBe('option');
+    expect(model.suggestedValue).toBe('B');
+  });
+
+  it('B2: corregir una nula automática la vuelve decisión humana (autoResolved false)', async () => {
+    const { service, updates } = makeService([
+      [resolveMarkRow({ state: 'multiple', nullConfidence: '0.980' })],
+      [{ total: 0 }],
+      [{ total: 0 }],
+    ]);
+
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, {
+      decision: 'option',
+      reviewedValue: 'B',
+    });
+
+    expect(updates[0]).toMatchObject({
+      reviewedValue: 'B',
+      reviewDecision: 'option',
+      reviewedById: USER_ID,
+      autoResolved: false,
+    });
+    expect(model.autoResolved).toBe(false);
+  });
+
+  it('B1: "confirm" sobre una marca sin sugerencia responde 400 y no escribe', async () => {
+    const { service, updates } = makeService([[resolveMarkRow({ state: 'multiple' })]]);
+
+    await expect(
+      service.resolveMark(ORG_ID, USER_ID, MARK_ID, { decision: 'confirm' }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(updates).toHaveLength(0);
   });

@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
   Inbox,
@@ -267,6 +268,20 @@ export default function StyleguidePage() {
           <Input placeholder="Deshabilitado" disabled />
           <Input type="email" placeholder="correo@colegio.cl" />
           <Input type="password" placeholder="Contraseña" />
+        </div>
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Switch id="sg-switch-off" aria-label="Interruptor apagado" />
+            <span className="text-sm">Apagado</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="sg-switch-on" defaultChecked aria-label="Interruptor encendido" />
+            <span className="text-sm">Encendido</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="sg-switch-disabled" disabled aria-label="Interruptor deshabilitado" />
+            <span className="text-sm text-muted-foreground">Deshabilitado</span>
+          </div>
         </div>
       </section>
 

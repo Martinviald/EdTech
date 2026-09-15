@@ -1,5 +1,6 @@
 import {
   bigint,
+  boolean,
   decimal,
   index,
   integer,
@@ -12,7 +13,14 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
-import type { CaptureProfile, CaptureSessionCapture, LayoutSpec, PageQuality } from '@soe/types';
+import type {
+  CaptureProfile,
+  CaptureSessionCapture,
+  LayoutSpec,
+  DoubtReason,
+  PageDiagnostics,
+  PageQuality,
+} from '@soe/types';
 import {
   captureSessionStatusEnum,
   markReviewDecisionEnum,
@@ -184,6 +192,10 @@ export const sheetScans = pgTable(
     imageHash: text('image_hash').notNull(),
     state: sheetScanStateEnum('state').notNull(),
     quality: jsonb('quality').$type<PageQuality>().notNull(),
+    // Payload `debug` del lector (registro local de burbujas, contraste por
+    // pregunta, umbral/hueco de Otsu, tiempos). Es monitoreo, no contrato: NULL
+    // si el servicio no lo emitió; nunca condiciona la lectura ni la revisión.
+    diagnostics: jsonb('diagnostics').$type<PageDiagnostics>(),
     resolvedStudentId: uuid('resolved_student_id').references(() => students.id),
     identityConfidence: decimal('identity_confidence', { precision: 4, scale: 3 }),
     identityEvidence: jsonb('identity_evidence').$type<Record<string, unknown>>(),
@@ -228,6 +240,10 @@ export const sheetScanMarks = pgTable(
     threshold: decimal('threshold', { precision: 4, scale: 3 }).notNull(),
     margin: decimal('margin', { precision: 6, scale: 3 }).notNull(),
     cropFileId: uuid('crop_file_id').references(() => files.id),
+    suggestedValue: text('suggested_value'),
+    doubtReason: text('doubt_reason').$type<DoubtReason>(),
+    nullConfidence: decimal('null_confidence', { precision: 4, scale: 3 }),
+    autoResolved: boolean('auto_resolved').notNull().default(false),
     reviewedValue: text('reviewed_value'),
     reviewDecision: markReviewDecisionEnum('review_decision'),
     reviewedById: uuid('reviewed_by_id').references(() => users.id),

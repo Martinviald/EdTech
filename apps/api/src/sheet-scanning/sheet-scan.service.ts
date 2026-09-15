@@ -1,8 +1,9 @@
 import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
 import {
   files,
+  organizations,
   printedSheets,
   sheetLayouts,
   sheetPrintRuns,
@@ -17,15 +18,18 @@ import {
   DEFAULT_CAPTURE_PROFILES,
   MARK_STATES,
   SHEET_SCAN_STATES,
+  autoAnnulMinConfidence,
   parseOmrQrPayload,
   type AssessCaptureDto,
   type AssessCaptureIdentityModel,
+  type AssessCaptureRejection,
   type AssessCaptureResponse,
   type BatchCountersModel,
   type BatchSourcesModel,
   type BatchStatusModel,
   type CaptureProfile,
   type CreateScanBatchDto,
+  type MarkReading,
   type CreateScanBatchResponse,
   type LayoutSpec,
   type MarkState,
@@ -35,7 +39,9 @@ import {
   type PaginatedResponse,
   type ScanBatchQueryDto,
   type ScanUploadIntent,
+  type BatchDiagnosticsModel,
   type ScannedPage,
+  type ScannedPageWithDiagnostics,
   type SheetScanBatchStatus,
   type SheetScanState,
 } from '@soe/types';
@@ -76,12 +82,15 @@ const ORPHANED_PROCESSING_FAILURE_MESSAGE =
 const UNEXPECTED_FAILURE_MESSAGE =
   'Ocurrió un error inesperado al procesar el lote. Reintenta el procesamiento; si el problema persiste, contacta a soporte.';
 
+const round1 = (value: number): number => Math.round(value * 10) / 10;
+
 type JobContext = {
   printRunId: string;
   spec: LayoutSpec;
   specHash: string;
   captureProfile: CaptureProfile;
   sourceFiles: FileRecord[];
+  autoAnnulMinConfidence: number | null;
 };
 
 type RunSheetLookup = {
@@ -119,6 +128,24 @@ type EvidenceUploadParams = {
   ownerId: string;
   purpose: string;
 };
+
+/**
+ * Orden por precedencia: si la imagen no sirve no se puede confiar en el QR que se
+ * leyó de ella, así que la calidad manda. Después el desajuste de diseño, que trae
+ * su propio texto, y por último la hoja que simplemente no está en la tirada.
+ */
+function rejectionOf(
+  assessed: OmrAssessResult,
+  candidate: IdentityCandidate,
+  belongsToRun: boolean,
+): AssessCaptureRejection {
+  if (!assessed.quality.ok) return { kind: 'quality' };
+  if (candidate.batchRejection !== null) {
+    return { kind: 'layout_mismatch', reason: candidate.batchRejection.reason };
+  }
+  if (!belongsToRun) return { kind: 'other_print_run' };
+  return { kind: 'quality' };
+}
 
 @Injectable()
 export class SheetScanService {
@@ -239,13 +266,45 @@ export class SheetScanService {
         new Map([[row.id, row.sheetCount]]),
       );
       const sources = await this.loadSourceProgress(tx, [row]);
-      return this.toBatchModel(
+      const model = this.toBatchModel(
         row,
         counters.get(row.id) ?? this.emptyCounters(row.sheetCount),
         sources.get(row.id) ?? this.emptySources(row),
         orphanedIds.has(row.id),
       );
+      return { ...model, diagnostics: await this.loadBatchDiagnostics(tx, orgId, row.id) };
     });
+  }
+
+  private async loadBatchDiagnostics(
+    tx: Database,
+    orgId: string,
+    batchId: string,
+  ): Promise<BatchDiagnosticsModel | null> {
+    const registration = sql`${sheetScans.diagnostics} -> 'registration'`;
+    const [row] = await tx
+      .select({
+        pages: sql<number>`count(*)::int`,
+        offMedianPxAvg: sql<number | null>`avg((${registration} ->> 'offMedianPx')::numeric)`,
+        offMaxPxMax: sql<number | null>`max((${registration} ->> 'offMaxPx')::numeric)`,
+        fallbackPages: sql<number>`count(*) filter (where coalesce((${registration} ->> 'fallbackCount')::int, 0) > 0)::int`,
+      })
+      .from(sheetScans)
+      .where(
+        and(
+          eq(sheetScans.orgId, orgId),
+          eq(sheetScans.batchId, batchId),
+          ne(sheetScans.state, 'superseded'),
+          isNotNull(sheetScans.diagnostics),
+        ),
+      );
+    if (!row || Number(row.pages) === 0) return null;
+    return {
+      pages: Number(row.pages),
+      offMedianPxAvg: row.offMedianPxAvg === null ? null : round1(Number(row.offMedianPxAvg)),
+      offMaxPxMax: row.offMaxPxMax === null ? null : round1(Number(row.offMaxPxMax)),
+      fallbackPages: Number(row.fallbackPages),
+    };
   }
 
   async list(
@@ -374,10 +433,12 @@ export class SheetScanService {
       candidate,
     );
 
+    const accepted = assessed.quality.ok && candidate.batchRejection === null && belongsToRun;
     return {
-      accepted: assessed.quality.ok && candidate.batchRejection === null && belongsToRun,
+      accepted,
       quality: assessed.quality,
       identity,
+      rejection: accepted ? null : rejectionOf(assessed, candidate, belongsToRun),
     };
   }
 
@@ -531,10 +592,12 @@ export class SheetScanService {
           captureProfile: sheetScanBatches.captureProfile,
           spec: sheetLayouts.spec,
           specHash: sheetLayouts.specHash,
+          orgConfig: organizations.config,
         })
         .from(sheetScanBatches)
         .innerJoin(sheetPrintRuns, eq(sheetPrintRuns.id, sheetScanBatches.printRunId))
         .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .innerJoin(organizations, eq(organizations.id, sheetScanBatches.orgId))
         .where(and(eq(sheetScanBatches.id, batchId), eq(sheetScanBatches.orgId, orgId)))
         .limit(1);
       if (!row) throw new NotFoundException('Lote de escaneo no encontrado');
@@ -551,6 +614,7 @@ export class SheetScanService {
         specHash: row.specHash,
         captureProfile: row.captureProfile,
         sourceFiles,
+        autoAnnulMinConfidence: autoAnnulMinConfidence(row.orgConfig),
       };
     });
   }
@@ -578,7 +642,7 @@ export class SheetScanService {
         if (candidate.batchRejection !== null) {
           return { rejectionReason: candidate.batchRejection.reason, pagesTotal };
         }
-        await this.persistPage(orgId, batchId, sourceFile.id, page, candidate);
+        await this.persistPage(orgId, batchId, sourceFile.id, page, candidate, context);
       }
     }
     return { rejectionReason: null, pagesTotal };
@@ -614,8 +678,9 @@ export class SheetScanService {
     orgId: string,
     batchId: string,
     sourceFileId: string,
-    page: ScannedPage,
+    page: ScannedPageWithDiagnostics,
     candidate: IdentityCandidate,
+    context: Pick<JobContext, 'autoAnnulMinConfidence'>,
   ): Promise<void> {
     const qrPayload = this.qrPayloadOf(page.identity);
     const pageIndex = qrPayload?.pageIndex ?? page.pageIndex;
@@ -673,6 +738,7 @@ export class SheetScanService {
         imageHash: page.imageSha256,
         state: this.resolveScanState(page, candidate),
         quality: page.quality,
+        diagnostics: page.diagnostics ?? null,
         resolvedStudentId: candidate.studentId,
         identityConfidence: candidate.confidence.toFixed(3),
         identityEvidence: candidate.evidence,
@@ -694,10 +760,37 @@ export class SheetScanService {
             threshold: mark.threshold.toFixed(3),
             margin: Math.min(mark.margin, 999.999).toFixed(3),
             cropFileId: cropFileIdByField.get(mark.fieldId) ?? null,
+            suggestedValue: mark.suggestedValue ?? null,
+            doubtReason: mark.doubtReason ?? null,
+            nullConfidence: mark.nullConfidence == null ? null : mark.nullConfidence.toFixed(3),
+            ...this.autoAnnulment(mark, context.autoAnnulMinConfidence),
           })),
         );
       }
     });
+  }
+
+  private autoAnnulment(
+    mark: MarkReading,
+    minConfidence: number | null,
+  ): Pick<
+    typeof sheetScanMarks.$inferInsert,
+    'reviewDecision' | 'reviewedValue' | 'reviewedAt' | 'autoResolved'
+  > {
+    if (
+      minConfidence === null ||
+      mark.state !== 'multiple' ||
+      mark.nullConfidence == null ||
+      mark.nullConfidence < minConfidence
+    ) {
+      return {};
+    }
+    return {
+      reviewDecision: 'annulled',
+      reviewedValue: null,
+      reviewedAt: new Date(),
+      autoResolved: true,
+    };
   }
 
   private async checkIdempotency(
