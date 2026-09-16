@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { PERFORMANCE_LEVELS, type AssessmentStatus, type PerformanceLevel } from '../enums';
 import type { ComparabilityMeta } from '../comparability';
 import type { PerformanceBandView } from './performance-band.schema';
-import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
+import { csvArraySchema, searchTermSchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import {
   INSTRUMENT_APPLICATION_PERIODS,
   type InstrumentApplicationPeriod,
@@ -40,6 +40,10 @@ export const dashboardFiltersQuerySchema = z.object({
   studentId: z.string().uuid().optional(),
   academicYearId: z.string().uuid().optional(),
   processId: z.string().uuid().optional(),
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): acota a las
+  // evaluaciones cuyo nombre (o el de su instrumento) CONTIENE el término, sin
+  // distinguir mayúsculas ni tildes. Un término inválido degrada a "sin filtro".
+  q: searchTermSchema,
 });
 export type DashboardFiltersQueryDto = z.infer<typeof dashboardFiltersQuerySchema>;
 

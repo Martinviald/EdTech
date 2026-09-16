@@ -68,6 +68,7 @@ import {
   resolveClassGroupScope,
   type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
+import { assessmentNameMatches } from '../common/helpers/assessment-name-search.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import {
   resolveEffectiveBands,
@@ -1637,6 +1638,7 @@ export class DashboardsService {
       if (inScope) conditions.push(inScope);
     }
     if (query.processId) conditions.push(eq(assessments.processId, query.processId));
+    if (query.q) conditions.push(assessmentNameMatches(query.q));
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
     if (query.instrumentType?.length) {

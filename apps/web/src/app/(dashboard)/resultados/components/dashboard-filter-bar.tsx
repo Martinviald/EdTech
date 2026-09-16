@@ -6,6 +6,7 @@ import type { Route } from 'next';
 import {
   INSTRUMENT_APPLICATION_PERIODS,
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
+  MIN_SEARCH_TERM_LENGTH,
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
 import { FilterX } from 'lucide-react';
@@ -17,6 +18,8 @@ import {
   hasActiveFilters,
   type DashboardFilterValues,
 } from './dashboard-filters';
+import { AssessmentSearchField } from './assessment-search-field';
+import { useDebouncedSearch } from './use-debounced-search';
 
 // La lógica pura de filtros (tipo, claves, parse/serialize) vive en
 // `./dashboard-filters` (módulo sin 'use client') para que las páginas server la
@@ -68,6 +71,19 @@ export function DashboardFilterBar({
     [router, searchParams, basePath],
   );
 
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md). Los tres
+  // disparadores (temporizador, Enter, botón) pasan por `applyFilters`, que ya
+  // borra `page` y ya envuelve el push en la transición.
+  const submitSearch = useCallback(
+    (nextTerm: string) => applyFilters({ q: nextTerm || null }),
+    [applyFilters],
+  );
+  const search = useDebouncedSearch({
+    initialTerm: value.q ?? '',
+    minLength: MIN_SEARCH_TERM_LENGTH,
+    onSubmit: submitSearch,
+  });
+
   const updateSingle = useCallback(
     (key: keyof DashboardFilterValues, next: string) => applyFilters({ [key]: next || null }),
     [applyFilters],
@@ -109,15 +125,18 @@ export function DashboardFilterBar({
     [applyFilters, options.classGroups, value.classGroupId],
   );
 
+  const resetSearch = search.reset;
   const clearAll = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     for (const key of FILTER_KEYS) params.delete(key);
     params.delete('page');
     const qs = params.toString();
+    // Sin esto el input quedaría con texto mientras la URL ya no tiene `q`.
+    resetSearch();
     startTransition(() => {
       router.push(`${basePath}${qs ? `?${qs}` : ''}` as Route);
     });
-  }, [router, searchParams, basePath]);
+  }, [router, searchParams, basePath, resetSearch]);
 
   const hasActive = hasActiveFilters(value);
 
@@ -167,6 +186,20 @@ export function DashboardFilterBar({
   });
 
   const fields: FilterField[] = [
+    {
+      key: 'q',
+      label: 'Buscar',
+      control: (
+        <AssessmentSearchField
+          term={search.term}
+          onTermChange={search.setTerm}
+          onSubmit={search.submitNow}
+          isDebouncing={search.isDebouncing}
+          isTooShort={search.isTooShort}
+          minLength={MIN_SEARCH_TERM_LENGTH}
+        />
+      ),
+    },
     {
       key: 'academicYearId',
       label: 'Período',
@@ -269,7 +302,10 @@ export function DashboardFilterBar({
   return (
     <FilterBar
       fields={fields}
-      pending={isPending}
+      // El `isPending` de la transición NO se enciende durante la espera del
+      // temporizador: sin `isDebouncing` la barra se ve muerta justo en esos
+      // segundos (docs/diseno-buscador-evaluaciones.md §D9).
+      pending={isPending || search.isDebouncing}
       actions={
         <Button
           variant="ghost"

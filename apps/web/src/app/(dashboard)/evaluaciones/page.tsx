@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ClipboardList, FileUp } from 'lucide-react';
+import type { Route } from 'next';
+import { ClipboardList, FileUp, SearchX } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
 import { canAccess, DASHBOARD_VIEWER_ROLES, ANSWER_SHEET_IMPORT_ROLES } from '@soe/types';
@@ -80,6 +81,12 @@ async function AssessmentsSection({
   );
   const assessments = assessmentList.data;
 
+  if (assessments.length === 0 && filters.q) {
+    return (
+      <SearchEmptyState filters={withDefaultAcademicYear(filters, options.defaultAcademicYearId)} />
+    );
+  }
+
   if (assessments.length === 0) {
     return (
       <EmptyState
@@ -105,4 +112,36 @@ async function AssessmentsSection({
   }
 
   return <AssessmentList assessments={assessments} />;
+}
+
+/**
+ * Vacío causado por la búsqueda. Nombra el término y ofrece las dos salidas.
+ *
+ * La segunda importa tanto como la primera: `withDefaultAcademicYear` acota al
+ * año vigente cuando la URL no pide uno, así que buscar "Diagnóstico 2025"
+ * parado en 2026 devuelve cero sin que nada en pantalla lo explique.
+ */
+function SearchEmptyState({ filters }: { filters: DashboardFilterValues }) {
+  const withoutSearch = `${ROUTES.evaluaciones}${buildDashboardQuery({ ...filters, q: undefined })}`;
+  const allPeriods = `${ROUTES.evaluaciones}${buildDashboardQuery({ ...filters, academicYearId: undefined })}`;
+
+  return (
+    <EmptyState
+      icon={SearchX}
+      title={`Ninguna evaluación coincide con «${filters.q}»`}
+      description="La búsqueda se combina con el resto de los filtros, así que puede estar acotada por el período, la asignatura o el nivel seleccionados."
+      action={
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button asChild variant="outline">
+            <Link href={withoutSearch as Route}>Quitar la búsqueda</Link>
+          </Button>
+          {filters.academicYearId ? (
+            <Button asChild variant="outline">
+              <Link href={allPeriods as Route}>Buscar en todos los períodos</Link>
+            </Button>
+          ) : null}
+        </div>
+      }
+    />
+  );
 }

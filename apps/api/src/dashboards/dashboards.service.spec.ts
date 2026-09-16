@@ -1401,3 +1401,72 @@ describe('DashboardsService.getTeacherKpis', () => {
     expect(res.courses).toEqual([]);
   });
 });
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Buscador por palabras (docs/diseno-buscador-evaluaciones.md)
+//
+// El término es un filtro más: entra al mismo array de condiciones de
+// `resolveScopedAssessments`, dentro de la transacción con contexto de org que
+// ya existía. Estos tests miran el SQL compilado del `where`, que es donde se
+// nota si el filtro llegó, si escapó los comodines y si se cuela cuando no debe.
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe('DashboardsService — buscador por palabras', () => {
+  function makeSearchDb() {
+    return makeDb([
+      [scopedAssessment('a1')],
+      [{ studentsEvaluated: 10 }],
+      [{ assessmentId: 'a1' }],
+      [],
+    ]);
+  }
+
+  it('con término, el alcance agrega la condición por nombre', async () => {
+    const db = makeSearchDb();
+    await makeService(db).getOverview(makeUser({ activeRole: 'school_admin' }), {
+      q: 'matematica',
+    });
+
+    const where = db.__whereSql(1);
+    expect(where).toContain('unaccent');
+    expect(where).toContain('ilike');
+    expect(where).toContain('"assessments"."name"');
+    expect(where).toContain('"instruments"."name"');
+  });
+
+  it('sin término, el alcance queda exactamente como antes', async () => {
+    const db = makeSearchDb();
+    await makeService(db).getOverview(makeUser({ activeRole: 'school_admin' }), {});
+
+    expect(db.__whereSql(1)).not.toContain('unaccent');
+  });
+
+  it('un término que el schema ya colapsó a undefined no agrega condición', async () => {
+    const db = makeSearchDb();
+    await makeService(db).getOverview(makeUser({ activeRole: 'school_admin' }), {
+      q: undefined,
+    });
+
+    expect(db.__whereSql(1)).not.toContain('unaccent');
+  });
+
+  it('el término viaja como parámetro vinculado, nunca interpolado en el SQL', async () => {
+    const db = makeSearchDb();
+    await makeService(db).getOverview(makeUser({ activeRole: 'school_admin' }), {
+      q: "100%' or 1=1 --",
+    });
+
+    expect(db.__whereSql(1)).not.toContain('1=1');
+    expect(db.__whereSql(1)).not.toContain('100%');
+  });
+
+  it('el panorama comparable hereda el mismo filtro', async () => {
+    const db = makeDb([[scopedAssessment('a1')]]);
+    await makeService(db).resolveScopeForComparableOverview(
+      makeUser({ activeRole: 'school_admin' }),
+      { q: 'matematica' },
+    );
+
+    expect(db.__whereSql(1)).toContain('unaccent');
+  });
+});

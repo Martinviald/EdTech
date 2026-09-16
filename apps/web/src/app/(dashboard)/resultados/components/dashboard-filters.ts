@@ -23,7 +23,14 @@ export type DashboardFilterValues = {
   // Proceso de medición (docs/diseno-procesos-de-medicion.md): acota el alcance a
   // las evaluaciones de una ventana de aplicación con una sola clave.
   processId?: string;
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): texto libre que
+  // acota por nombre de evaluación o de instrumento. Es un filtro más, no un modo
+  // aparte: se combina con AND con el resto y vive en la URL.
+  q?: string;
 };
+
+/** Tope de longitud del término, espejo de `MAX_SEARCH_TERM_LENGTH` del backend. */
+const MAX_SEARCH_TERM_LENGTH = 100;
 
 /** Claves de filtro que viven en la querystring. */
 export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
@@ -36,6 +43,7 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'studentId',
   'academicYearId',
   'processId',
+  'q',
 ];
 
 /**
@@ -103,6 +111,7 @@ export function parseDashboardFilters(
     studentId: pick('studentId'),
     academicYearId: pick('academicYearId'),
     processId: pick('processId'),
+    q: pick('q')?.trim().slice(0, MAX_SEARCH_TERM_LENGTH) || undefined,
   };
 }
 

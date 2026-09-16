@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
+import type { Route } from 'next';
 import { GraduationCap, ClipboardList, TriangleAlert } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
@@ -150,7 +151,18 @@ async function PanoramaSections({
 
       <ComparabilityNotice comparability={comparable.comparability} />
 
-      <ComparableUnitsTable units={comparable.units} />
+      <ComparableUnitsTable
+        units={comparable.units}
+        search={
+          filters.q
+            ? {
+                term: filters.q,
+                clearHref:
+                  `${ROUTES.resultados}${buildDashboardQuery({ ...filters, q: undefined })}` as Route,
+              }
+            : undefined
+        }
+      />
 
       {comparable.scope === 'teacher' ? (
         <Suspense fallback={<TableSkeleton />}>
