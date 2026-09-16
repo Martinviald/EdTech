@@ -1236,6 +1236,46 @@ describe('ItemAnalysisService.listAssessments', () => {
     expect(() => assessmentListQuerySchema.parse({ gradeId: 'no-uuid' })).toThrow();
   });
 
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md). El término
+  // nunca es un error: un `?q=a` pegado en un link degrada a "sin filtro" en vez
+  // de tumbar la lista con un 400.
+  it('q: un término inválido degrada a "sin filtro", nunca a un error', () => {
+    expect(assessmentListQuerySchema.parse({ q: 'matematica' }).q).toBe('matematica');
+    expect(assessmentListQuerySchema.parse({ q: '  lectura  ' }).q).toBe('lectura');
+    expect(assessmentListQuerySchema.parse({ q: 'a' }).q).toBeUndefined();
+    expect(assessmentListQuerySchema.parse({ q: '   ' }).q).toBeUndefined();
+    expect(assessmentListQuerySchema.parse({}).q).toBeUndefined();
+    expect(() => assessmentListQuerySchema.parse({ q: 'a' })).not.toThrow();
+  });
+
+  it('q: el service lo aplica sin agregar viajes a la base', async () => {
+    const rows = () => [
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Matemática — Intermedio',
+          administeredAt: new Date('2026-08-03T00:00:00Z'),
+          instrumentName: 'DIA Matemática 5° Básico 2026 — Intermedio',
+          instrumentType: 'dia',
+          subjectName: 'Matemáticas',
+          gradeName: '5° básico',
+        },
+      ],
+      [{ assessmentId: ASSESSMENT_ID, count: 37 }],
+    ];
+    const sinTermino = makeDb(rows());
+    await makeService(sinTermino).listAssessments(makeUser(), {});
+
+    const conTermino = makeDb(rows());
+    const res = await makeService(conTermino).listAssessments(
+      makeUser(),
+      assessmentListQuerySchema.parse({ q: 'matematica' }),
+    );
+
+    expect(conTermino.__selectCalls()).toBe(sinTermino.__selectCalls());
+    expect(res.data).toHaveLength(1);
+  });
+
   it('filtros multi-valor: el service los aplica sin romper la consulta', async () => {
     const db = makeDb([
       [
