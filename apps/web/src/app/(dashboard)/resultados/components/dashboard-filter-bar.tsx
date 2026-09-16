@@ -156,6 +156,16 @@ export function DashboardFilterBar({
   // dejar al usuario filtrando a ciegas.
   const periodsWithData = new Set(options.applicationPeriodsWithData);
 
+  // El nombre de un proceso no siempre trae el año ("Cierre" vs "DIA Cierre 2026"),
+  // y el desplegable mezcla años: se antepone el período sólo cuando falta, para no
+  // dejar dos entradas homónimas indistinguibles.
+  const periodLabels = new Map(options.periods.map((p) => [p.id, p.label]));
+  const processOptions = options.processes.map((p) => {
+    const periodLabel = p.academicYearId ? periodLabels.get(p.academicYearId) : undefined;
+    const needsPeriod = periodLabel && !p.label.includes(periodLabel);
+    return { id: p.id, label: needsPeriod ? `${p.label} · ${periodLabel}` : p.label };
+  });
+
   const fields: FilterField[] = [
     {
       key: 'academicYearId',
@@ -164,6 +174,15 @@ export function DashboardFilterBar({
       value: value.academicYearId,
       options: options.periods.map((p) => ({ id: p.id, label: p.label })),
       onChange: (v) => updateSingle('academicYearId', v),
+    },
+    {
+      key: 'processId',
+      label: 'Proceso de medición',
+      placeholder: 'Todos los procesos',
+      value: value.processId,
+      options: processOptions,
+      onChange: (v) => updateSingle('processId', v),
+      hidden: processOptions.length === 0,
     },
     {
       key: 'subjectId',

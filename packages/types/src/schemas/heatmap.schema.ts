@@ -28,6 +28,8 @@ export const heatmapQuerySchema = z.object({
   // Momento DIA (T2-27): sólo aplica a instrumentos con ciclo (ej. DIA).
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   academicYearId: z.string().uuid().optional(),
+  // Proceso de medición: acota a las evaluaciones de una ventana de aplicación.
+  processId: z.string().uuid().optional(),
 });
 export type HeatmapQueryDto = z.infer<typeof heatmapQuerySchema>;
 

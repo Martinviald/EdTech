@@ -11,6 +11,7 @@ import {
   gradingScales,
   grades,
   instruments,
+  measurementProcesses,
   skillResults,
   studentEnrollments,
   students,
@@ -277,6 +278,7 @@ export class DashboardsService {
       periods: [],
       instruments: [],
       applicationPeriodsWithData: [],
+      processes: [],
       defaultAcademicYearId: null,
     };
     if (!orgId) return empty;
@@ -434,6 +436,35 @@ export class DashboardsService {
               );
       const instrumentIdsWithData = new Set(dataInstrumentRows.map((r) => r.instrumentId));
 
+      const processRows =
+        scopedCgIds.length === 0
+          ? []
+          : await tx
+              .selectDistinct({
+                id: measurementProcesses.id,
+                name: measurementProcesses.name,
+                academicYearId: measurementProcesses.academicYearId,
+                status: measurementProcesses.status,
+                startsOn: measurementProcesses.startsOn,
+              })
+              .from(measurementProcesses)
+              .innerJoin(assessments, eq(assessments.processId, measurementProcesses.id))
+              .innerJoin(
+                assessmentCourseAssignments,
+                eq(assessmentCourseAssignments.assessmentId, assessments.id),
+              )
+              .where(
+                and(
+                  eq(measurementProcesses.orgId, orgId),
+                  isNull(measurementProcesses.deletedAt),
+                  inArray(assessmentCourseAssignments.classGroupId, scopedCgIds),
+                ),
+              )
+              .orderBy(
+                sql`${measurementProcesses.startsOn} desc nulls last`,
+                measurementProcesses.name,
+              );
+
       return {
         applicationPeriodsWithData: periodRows
           .map((r) => r.applicationPeriod)
@@ -447,6 +478,12 @@ export class DashboardsService {
           academicYearId: r.academicYearId,
         })),
         periods,
+        processes: processRows.map((r) => ({
+          id: r.id,
+          label: r.name,
+          academicYearId: r.academicYearId,
+          status: r.status,
+        })),
         defaultAcademicYearId: academicYearId,
         instruments: instrumentRows
           .filter((r) => instrumentIdsWithData.has(r.id))

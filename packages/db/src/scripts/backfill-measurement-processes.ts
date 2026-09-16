@@ -2,14 +2,17 @@ import { config } from 'dotenv';
 import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
-import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
   INSTRUMENT_TYPE_LABELS,
   PROCESS_KIND_BY_INSTRUMENT_TYPE,
+  expandExpectedCells,
+  expectedCellKey,
   slugify,
   uniqueSlug,
   type ExpectedScope,
+  type ExpectedScopeCell,
   type InstrumentApplicationPeriod,
   type InstrumentType,
   type ProcessKind,
@@ -49,6 +52,7 @@ type ProcessGroup = {
   assessmentIds: Set<string>;
   classGroupIds: Set<string>;
   subjectIds: Set<string>;
+  observedCellKeys: Set<string>;
   taxonomyIds: Set<string>;
   administeredDates: Date[];
 };
@@ -116,6 +120,7 @@ function buildGroups(rows: readonly AssessmentRow[]): {
         assessmentIds: new Set(),
         classGroupIds: new Set(),
         subjectIds: new Set(),
+        observedCellKeys: new Set(),
         taxonomyIds: new Set(),
         administeredDates: [],
       };
@@ -123,12 +128,143 @@ function buildGroups(rows: readonly AssessmentRow[]): {
     }
     group.assessmentIds.add(row.assessmentId);
     group.classGroupIds.add(row.classGroupId);
-    if (row.subjectId) group.subjectIds.add(row.subjectId);
+    if (row.subjectId) {
+      group.subjectIds.add(row.subjectId);
+      group.observedCellKeys.add(
+        expectedCellKey({ classGroupId: row.classGroupId, subjectId: row.subjectId }),
+      );
+    }
     if (row.taxonomyId) group.taxonomyIds.add(row.taxonomyId);
     if (row.administeredAt) group.administeredDates.push(row.administeredAt);
   }
 
   return { groups: Array.from(groups.values()), multiYearAssessmentIds };
+}
+
+function buildExcludedCells(group: ProcessGroup): ExpectedScopeCell[] {
+  const excluded: ExpectedScopeCell[] = [];
+  for (const classGroupId of group.classGroupIds) {
+    for (const subjectId of group.subjectIds) {
+      const cell = { classGroupId, subjectId };
+      if (group.observedCellKeys.has(expectedCellKey(cell))) continue;
+      excluded.push(cell);
+    }
+  }
+  return excluded;
+}
+
+type Database = ReturnType<typeof createDbClient>;
+
+function sameCellSet(a: readonly ExpectedScopeCell[], b: ReadonlySet<string>): boolean {
+  if (a.length !== b.size) return false;
+  return a.every((cell) => b.has(expectedCellKey(cell)));
+}
+
+/**
+ * Un `expected_scope` derivado describe lo que YA está cargado, así que su cobertura
+ * debe dar 100%. La primera versión del backfill guardaba sólo `classGroupIds` y
+ * `subjectIds`, y el denominador salía del producto cartesiano: los pares (curso,
+ * asignatura) que nunca se aplicaron aparecían como celdas faltantes. Esta pasada
+ * recalcula el alcance de todo proceso derivado a partir de sus evaluaciones
+ * enlazadas y anota los pares no observados en `excludedCells`.
+ */
+async function repairDerivedScopes(
+  db: Database,
+  orgId: string | null,
+  dryRun: boolean,
+): Promise<void> {
+  const conditions = [
+    isNull(measurementProcesses.deletedAt),
+    sql`${measurementProcesses.expectedScope}->>'derived' = 'true'`,
+  ];
+  if (orgId) conditions.push(eq(measurementProcesses.orgId, orgId));
+
+  const derived = await db
+    .select({
+      id: measurementProcesses.id,
+      name: measurementProcesses.name,
+      expectedScope: measurementProcesses.expectedScope,
+    })
+    .from(measurementProcesses)
+    .where(and(...conditions));
+  if (derived.length === 0) return;
+
+  const cellRows = await db
+    .select({
+      processId: assessments.processId,
+      classGroupId: assessmentCourseAssignments.classGroupId,
+      subjectId: instruments.subjectId,
+    })
+    .from(assessments)
+    .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+    .innerJoin(
+      assessmentCourseAssignments,
+      eq(assessmentCourseAssignments.assessmentId, assessments.id),
+    )
+    .where(
+      and(
+        inArray(
+          assessments.processId,
+          derived.map((p) => p.id),
+        ),
+        isNull(instruments.deletedAt),
+      ),
+    );
+
+  const observedByProcess = new Map<string, Set<string>>();
+  const classGroupsByProcess = new Map<string, Set<string>>();
+  const subjectsByProcess = new Map<string, Set<string>>();
+  for (const row of cellRows) {
+    if (!row.processId || !row.subjectId) continue;
+    let observed = observedByProcess.get(row.processId);
+    if (!observed) {
+      observed = new Set();
+      observedByProcess.set(row.processId, observed);
+      classGroupsByProcess.set(row.processId, new Set());
+      subjectsByProcess.set(row.processId, new Set());
+    }
+    observed.add(expectedCellKey({ classGroupId: row.classGroupId, subjectId: row.subjectId }));
+    classGroupsByProcess.get(row.processId)?.add(row.classGroupId);
+    subjectsByProcess.get(row.processId)?.add(row.subjectId);
+  }
+
+  let repaired = 0;
+  for (const process of derived) {
+    const observed = observedByProcess.get(process.id) ?? new Set<string>();
+    if (sameCellSet(expandExpectedCells(process.expectedScope), observed)) continue;
+
+    const classGroupIds = Array.from(classGroupsByProcess.get(process.id) ?? []);
+    const subjectIds = Array.from(subjectsByProcess.get(process.id) ?? []);
+    const excludedCells: ExpectedScopeCell[] = [];
+    for (const classGroupId of classGroupIds) {
+      for (const subjectId of subjectIds) {
+        const cell = { classGroupId, subjectId };
+        if (observed.has(expectedCellKey(cell))) continue;
+        excludedCells.push(cell);
+      }
+    }
+
+    repaired += 1;
+    console.log(
+      `${dryRun ? '· [dry-run]' : '✓'} alcance derivado corregido: ${process.name} — ` +
+        `${observed.size} celda(s) reales, ${excludedCells.length} excluida(s)`,
+    );
+    if (dryRun) continue;
+
+    await db
+      .update(measurementProcesses)
+      .set({
+        expectedScope: { classGroupIds, subjectIds, excludedCells, derived: true },
+        updatedAt: new Date(),
+      })
+      .where(eq(measurementProcesses.id, process.id));
+  }
+
+  if (repaired > 0) {
+    console.log(
+      `\n${dryRun ? 'Se corregiría(n)' : 'Se corrigió(eron)'} ${repaired} alcance(s) derivado(s).\n`,
+    );
+  }
 }
 
 function resolveSlug(orgId: string, baseSlug: string, takenSlugs: Set<string>): string {
@@ -147,6 +283,8 @@ async function main(): Promise<void> {
   const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   const db = createDbClient(databaseUrl);
+
+  await repairDerivedScopes(db, orgId, dryRun);
 
   const baseConditions = [isNull(assessments.processId), isNull(instruments.deletedAt)];
   if (orgId) baseConditions.push(eq(assessments.orgId, orgId));
@@ -214,16 +352,23 @@ async function main(): Promise<void> {
     const name = processName(group);
     const baseSlug = slugify(name);
     const existingId = existingBySlug.get(`${group.orgId}|${baseSlug}`);
-    const cells = group.classGroupIds.size * group.subjectIds.size;
+    const gridCells = group.classGroupIds.size * group.subjectIds.size;
+    const observedCells = group.observedCellKeys.size;
     const flags: string[] = [];
     if (group.assessmentIds.size === 1) flags.push('⚠️ una sola celda');
     if (group.subjectIds.size === 0) flags.push('⚠️ sin asignatura en el instrumento');
-    if (cells > 0 && group.assessmentIds.size > cells) flags.push('⚠️ más evaluaciones que celdas');
+    if (observedCells > 0 && group.assessmentIds.size > observedCells) {
+      flags.push('⚠️ más evaluaciones que celdas');
+    }
+    if (gridCells > observedCells) {
+      flags.push(`${gridCells - observedCells} celda(s) de la grilla excluida(s)`);
+    }
     if (!group.period) flags.push('sin momento');
 
     console.log(
       `${dryRun ? '· [dry-run]' : '✓'} ${name} — ${group.assessmentIds.size} evaluación(es), ` +
-        `${group.classGroupIds.size} curso(s) × ${group.subjectIds.size} asignatura(s)` +
+        `${group.classGroupIds.size} curso(s) × ${group.subjectIds.size} asignatura(s) ` +
+        `→ ${observedCells} celda(s)` +
         (flags.length > 0 ? `  ${flags.join(' · ')}` : ''),
     );
 
@@ -238,6 +383,7 @@ async function main(): Promise<void> {
     const expectedScope: ExpectedScope = {
       classGroupIds: Array.from(group.classGroupIds),
       subjectIds: Array.from(group.subjectIds),
+      excludedCells: buildExcludedCells(group),
       derived: true,
     };
     const kind: ProcessKind = PROCESS_KIND_BY_INSTRUMENT_TYPE[group.instrumentType] ?? 'custom';
@@ -306,7 +452,13 @@ async function main(): Promise<void> {
   console.log(
     '\nNota: el expected_scope derivado se marca `derived: true` — describe lo que ya estaba',
   );
-  console.log('cargado, así que su cobertura siempre da 100%. No lo uses para procesos vivos.');
+  console.log(
+    'cargado, no lo que se esperaba rendir. Los pares (curso, asignatura) que nunca se aplicaron',
+  );
+  console.log(
+    'quedan en `excludedCells`, así que su cobertura da 100%. No lo uses para procesos vivos:',
+  );
+  console.log('declara el alcance a mano para que las celdas faltantes se puedan medir.');
 
   process.exit(0);
 }
