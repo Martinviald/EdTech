@@ -27,6 +27,14 @@ expresar en los archivos `src/schema/*.ts`. Por eso viven en SQL plano versionad
 3. En la API, toda query a esa tabla debe correr dentro de
    `withOrgContext(db, orgId, tx => ...)`.
 
+## Otro SQL fuera de Drizzle: `sql/search-extensions.sql`
+
+Mismo mecanismo que el RLS, para lo que drizzle-kit tampoco genera: las extensiones
+de PostgreSQL. Hoy contiene `CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public`,
+que el buscador por palabras necesita para que "matematica" encuentre "Matemática"
+(ver `docs/diseno-buscador-evaluaciones.md`). `src/migrate.ts` lo re-aplica **siempre**,
+al inicio de `db:migrate` (antes de las migraciones y del RLS), de forma idempotente.
+
 ## Tablas con RLS activo
 
 `students`, `assessments`, `import_jobs` (org_id directo) y `responses`,
