@@ -46,13 +46,17 @@ export function AssessmentSearchField({
         onSubmit();
       }}
     >
+      {/* Input de texto y no `type="search"`: ese tipo dibuja su propio botón de
+          limpiar pegado al borde derecho, justo encima del botón de enviar, y el
+          repo no resetea `::-webkit-search-cancel-button` en ninguna parte. La
+          semántica de búsqueda ya la da el `role="search"` del formulario, que es
+          también lo que hace el buscador de estudiantes. */}
       <div className="relative">
         <Search
           className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden
         />
         <Input
-          type="search"
           value={term}
           onChange={(e) => onTermChange(e.target.value)}
           placeholder="Nombre de evaluación o instrumento"
