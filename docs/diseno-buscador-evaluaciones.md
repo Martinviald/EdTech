@@ -1,6 +1,8 @@
 # Diseño — Buscador por palabras en Evaluaciones y Resultados
 
-> Estado: **propuesta**, sin implementar.
+> Estado: **implementado** en `feat/buscador-evaluaciones`. Las correcciones que la
+> realidad del código impuso sobre la propuesta original van marcadas
+> **⟨corregido al implementar⟩** en cada sección.
 > Ámbito: `packages/types`, `apps/api`, `apps/web`, `packages/db` (solo una sentencia SQL idempotente, sin migración de schema).
 > Relacionado: `docs/diseno-procesos-de-medicion.md`, `docs/diseno-panorama-comparable.md`, `.claude/rules/frontend/07-navigation-reactivity.md`.
 
@@ -28,6 +30,11 @@ SQL nuevas (una por servicio) y **un** control nuevo en la barra de filtros que 
 
 Ambas vistas ya comparten el mismo componente de filtros, `DashboardFilterBar`
 (`apps/web/src/app/(dashboard)/resultados/components/dashboard-filter-bar.tsx:30`):
+
+> **⟨corregido al implementar⟩** `FilterBar`, `MultiSelectFilter` y `EmptyState` ya no viven en
+> `@/components/patterns` sino en `@/components/shared` (la renombrada que el plan de migración
+> dejaba pendiente ya ocurrió). Las referencias a `components/patterns` de este documento hay que
+> leerlas como `components/shared`.
 
 | Vista | Ruta | Endpoint que acota | Schema de query |
 |---|---|---|---|
@@ -107,6 +114,13 @@ debounce como tal existe en `apps/web/src/components/assistant/context-picker.ts
 hoy `/evaluaciones?processId=…` y `/resultados/mapa-calor?processId=…` ignoran ese filtro en
 silencio. Es un hallazgo incidental (§10, P5) y la razón por la que este diseño agrega `q` a los
 **tres** schemas desde la primera ola.
+
+> **⟨corregido al implementar⟩** La mitad del hallazgo ya está resuelta: la PR #243
+> (`feat/filtro-proceso-y-ajustes-ui`, mergeada a `dev` el 2026-09-16) agregó `processId` a
+> `heatmapQuerySchema` y su condición en `HeatmapService.buildConditions()`. Lo que **sigue**
+> faltando es `processId` en `assessmentListQuerySchema`: `/evaluaciones` continúa ignorándolo en
+> silencio. Queda fuera del alcance de esta rama a propósito, para no mezclar dos features en una
+> PR. Ver §10 (P5).
 
 ---
 
@@ -478,13 +492,24 @@ Agregar `q: searchTermSchema` a `dashboardFiltersQuerySchema`, después de `proc
 
 Se propaga solo a: `dashboardPerformanceQuerySchema` (`:46`), `dashboardSkillBreakdownQuerySchema`
 (`:63`) y `comparableOverviewQuerySchema` (`comparable-overview.schema.ts:27`, que es el mismo
-objeto). **Y también** a los tool schemas del asistente y del MCP que reusan este schema:
-`apps/api/src/assistant/tools/get-dashboard-overview.tool.ts:74`,
-`get-dashboard-skills.tool.ts:75`, `list-filter-options.tool.ts:49`,
-`apps/api/src/mcp/tools/get-skill-gaps.tool.ts:21` y `get-assessment-overview.tool.ts:22`. Es un
-efecto **deseable** (el asistente gana un filtro por nombre), pero hay que verificarlo: esos tools
-publican su `inputSchema` hacia el modelo, así que el campo aparece en la descripción de la
-herramienta.
+objeto).
+
+> **⟨corregido al implementar⟩** La propuesta afirmaba que los cinco tools del asistente y del MCP
+> que reusan este schema publicarían `q` hacia el modelo. Es cierto sólo para **dos** de los cinco:
+>
+> | Tool | Cómo declara su `inputSchema` | ¿El modelo ve `q`? | ¿El servicio aplica el filtro? |
+> |---|---|---|---|
+> | `mcp/tools/get-skill-gaps.tool.ts` | `inputSchema: dashboardFiltersQuerySchema` | **Sí** | Sí (`DashboardsService.getSkills`) |
+> | `mcp/tools/get-assessment-overview.tool.ts` | `inputSchema: dashboardFiltersQuerySchema` | **Sí** | Sí (`DashboardsService.getOverview`) |
+> | `assistant/tools/get-dashboard-overview.tool.ts` | JSON Schema escrito a mano | No | Sí |
+> | `assistant/tools/get-dashboard-skills.tool.ts` | JSON Schema escrito a mano | No | Sí |
+> | `assistant/tools/list-filter-options.tool.ts` | `{ type: 'object', properties: {}, required: [] }` | No | **No** (por diseño, D2) |
+>
+> Los tres del asistente declaran su JSON Schema a mano y sólo usan el schema Zod para el
+> `safeParse` interno, que ignora las claves que no declara. Así que el riesgo que R11 señalaba —
+> que `list-filter-options` le ofreciera al modelo un filtro que después ignora — **no existe**:
+> ese tool publica un `inputSchema` vacío. Los dos que sí exponen `q` son justamente los dos que
+> lo aplican. No hubo nada que corregir en el código.
 
 **`packages/types/src/schemas/item-analysis.schema.ts`** *(modificar, `:38-45`)*
 
@@ -510,6 +535,11 @@ Sin comentarios, según `.claude/rules/backend/02-no-comments.md`.
 
 **`packages/types/src/utils/index.ts`** *(modificar)* — `export * from './search-term';`, junto a
 `./teacher-search` (`:24`).
+
+> **⟨corregido al implementar⟩** La nota "sin comentarios" de arriba es un error de ámbito:
+> `.claude/rules/backend/02-no-comments.md` aplica a `apps/api`, no a `packages/types`, cuyos
+> archivos (`teacher-search.ts`, `common.schema.ts`) sí llevan JSDoc. `search-term.ts` sigue el
+> registro de sus hermanos. El helper de `apps/api` sí va sin comentarios.
 
 ### 6.2 `apps/api` — el filtro
 
@@ -621,6 +651,11 @@ importable desde Server Components (`dashboard-filters.ts:1-7`).
 
    Solo tokens (`text-muted-foreground`, `bg-card`, `text-destructive`), nunca escalas crudas, según
    `AGENTS.md` §4 y `.claude/rules/frontend/02-ui-conventions.md`.
+
+> **⟨corregido al implementar⟩** El control no quedó inline dentro del array `fields`, sino en su
+> propio archivo, `assessment-search-field.tsx`: `dashboard-filter-bar.tsx` ya arma nueve campos y
+> éste es el único con texto de ayuda y tres estados. El `<form>` envuelve sólo el input, así que
+> Enter lo captura el `onSubmit` del formulario sin depender de un `onKeyDown`.
 3. `pending={isPending || isDebouncing}` en el `<FilterBar>` (`:253`).
 4. En `clearAll` (`:112-120`): llamar también a `reset()` del hook, o el input quedaría con texto
    mientras la URL ya no tiene `q`.
@@ -649,6 +684,11 @@ Mismo problema: hoy el vacío dice "Aún no hay evaluaciones con resultados", qu
 la búsqueda la que vació la tabla. Recibir una prop opcional (`searchTerm` o el `hasActiveFilters` ya
 calculado) y cambiar el copy a `Ninguna evaluación coincide con la búsqueda` con el mismo enlace de
 salida.
+
+> **⟨corregido al implementar⟩** La prop quedó como `search?: { term: string; clearHref: Route }`:
+> el componente no puede construir el enlace de salida por su cuenta (no conoce los filtros ni la
+> ruta base), así que lo recibe ya armado desde `resultados/page.tsx`. El término va aparte para
+> poder nombrarlo en el título, igual que en `/evaluaciones`.
 
 ### 6.4 `packages/db` — la extensión
 
@@ -822,6 +862,14 @@ que el servicio construye (hay precedente en
 
 ### `apps/web`
 
+> **⟨corregido al implementar⟩** Estos tests **no se escribieron**, y no por criterio sino por un
+> hecho verificable: `apps/web` **no tiene runner de tests**. Su `package.json` no declara script
+> `test` ni depende de jest, vitest, `@testing-library/*`, jsdom ni happy-dom. Cubrir el hook
+> exigiría montar toda esa infraestructura en la app web, que es una decisión de proyecto aparte y
+> no cabe en esta PR. Lo que sí queda verificado del lado del cliente es la cadena de tipos
+> (`typecheck`), el lint y el guard del design system. La lista de abajo queda como el contrato a
+> cubrir el día que la app web tenga con qué.
+
 `use-debounced-search.spec.ts` (React Testing Library + timers falsos), si se decide cubrirlo:
 
 - Tres teclas seguidas producen **un** solo `onSubmit`, a los 3000 ms de la última.
@@ -864,3 +912,58 @@ controles para salir de su propia búsqueda. **Recomendación:** no.
 proceso de medición, aunque la página de evaluaciones se lo pasa en la querystring
 (`evaluaciones/page.tsx:35`). No es parte de esta feature, pero se arregla en los mismos dos archivos
 y con la misma forma que `q` (dos líneas de schema + dos condiciones). **¿Se aprovecha el viaje?**
+
+> **⟨estado al implementar⟩** Medio resuelto y medio abierto:
+> - **Mapa de calor: resuelto.** La PR #243 agregó `processId` a `heatmapQuerySchema` y su
+>   condición en `HeatmapService.buildConditions()`.
+> - **`/evaluaciones`: sigue abierto.** `assessmentListQuerySchema` todavía no declara `processId`,
+>   así que la lista de evaluaciones sigue ignorándolo en silencio. **No se arregló acá a
+>   propósito**, para no mezclar dos features en una PR. Sigue siendo dos líneas: `processId:
+>   z.string().uuid().optional()` en el schema y
+>   `if (query.processId) conditions.push(eq(assessments.processId, query.processId));` en
+>   `ItemAnalysisService.listAssessments`. Queda como hueco conocido.
+
+---
+
+## 11. Verificación de la implementación
+
+Medido contra la base local `soe_dev` (21 evaluaciones, 59 instrumentos) con una sesión real.
+
+**Semántica en SQL** — `public.unaccent('Matemática')` → `Matematica`. Sobre el join
+`assessments × instruments`: `matematica` y `MATEMÁTICA` devuelven **las mismas 6 filas** de 21.
+Una evaluación sin nombre propio se encuentra por su instrumento (`NULL OR TRUE` = `TRUE`,
+comprobado).
+
+**El escape no es teórico.** Con el término `DIA%Lectura`: escapado (lo que hace el helper) → **0**
+filas; sin escapar → **15**. Igual con `DIA_Lectura`. Ese es exactamente el bug que hoy tienen los
+seis `ilike` del repo.
+
+**Los tres endpoints, con una sesión real:**
+
+| Término | `/item-analysis/assessments` | `/dashboards/comparable-overview` | `/heatmap` |
+|---|---|---|---|
+| sin `q` | 12 | 10 unidades / 13 evals | 32 filas / 2 asignaturas |
+| `matematica` | 5 | 4 / 6 | 29 / 1 |
+| `MATEMÁTICA` | **5** (idéntico) | **4 / 6** (idéntico) | **29 / 1** (idéntico) |
+| `lectura` | 7 | 6 / 7 | 3 / 1 |
+| `zzzz` | 0 | 0 / 0 | 0 / 0 |
+
+Las particiones cierran exactamente: 5 + 7 = 12, 4 + 6 = 10 unidades, 6 + 7 = 13 evaluaciones,
+29 + 3 = 32 filas. El filtro acota y no pierde ni duplica nada.
+
+**Un término inválido nunca es un error.** `?q=a`, `?q=` y `?q=%20%20` devuelven **200** con el
+conjunto completo (12), no 400. `?q=100%25` devuelve 200 con 0 filas.
+
+**Los catálogos NO se achican (D2, confirmado).** En `/evaluaciones?q=matematica` la lista muestra
+3 evaluaciones, pero el dropdown de instrumentos sigue ofreciendo los 6 instrumentos de Lectura: el
+usuario nunca se queda sin controles para salir de su propia búsqueda.
+
+**Los vacíos explican la causa.** `/evaluaciones?q=zzzz` renderiza "Ninguna evaluación coincide con
+«zzzz»" con los dos enlaces de salida, y el input vuelve pre-llenado con `zzzz` desde la URL.
+
+**Lo que NO se verificó en ejecución:** el comportamiento temporal del cliente (los 3 s, Enter, el
+botón, el indicador durante la espera y el reset de `page`). `apps/web` no tiene runner de tests
+(ver §9) y no hubo navegador disponible en la sesión. Queda verificado por lectura de código y por
+la cadena de tipos: `pending={isPending || search.isDebouncing}` llega a `FilterBar`, que renderiza
+`<TopProgressBar active={pending} />`; y los tres disparadores pasan por `applyFilters`, que ya hace
+`params.delete('page')`.
