@@ -28,29 +28,29 @@
     {
      "position": 1,
      "type": "multiple_choice",
-     "stem": "Considera el número racional x ubicado en la recta numérica entre y , tal que la 7 5 4 3 distancia entre x y es el doble de la distancia entre y x. 7 5 ¿Cuál es el valor de x? 61",
+     "stem": "Considera el número racional x ubicado en la recta numérica entre 4/7 y 3/5, tal que la distancia entre x y 4/7 es el doble de la distancia entre 3/5 y x. ¿Cuál es el valor de x?",
      "correctKey": "C",
      "responseFormat": "choice",
      "hasFigure": false,
      "alternatives": [
       {
        "key": "A",
-       "text": "105 41",
+       "text": "61/105",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "70 62",
+       "text": "41/70",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "105 21",
+       "text": "62/105",
        "isCorrect": true
       },
       {
        "key": "D",
-       "text": "35",
+       "text": "21/35",
        "isCorrect": false
       },
       {
@@ -86,7 +86,7 @@
       },
       {
        "key": "D",
-       "text": "$233 600 3. El Rol Único Tributario (RUT) se compone de dos partes separadas por un guion: un número de siete u ocho dígitos y un dígito verificador. El dígito verificador puede ser un dígito o la letra K y se obtiene mediante el siguiente algoritmo: Considera que el RUT es AB.CDE.FGH – V (en el caso de tener siete dígitos, se considera A = 0 ). 1. Se debe calcular la siguiente suma: 3·A+2·B+7·C+6·D+5·E+4·F+3·G+2·H 2. Se debe dividir la suma calculada por 11 para encontrar el resto n.",
+       "text": "$233 600",
        "isCorrect": true
       },
       {
@@ -100,7 +100,7 @@
     {
      "position": 3,
      "type": "multiple_choice",
-     "stem": "Según el valor del resto n, el dígito verificador V es: • 11 − n, si (11 − n) ≤ 9 • K, si (11 − n) = 10 • 0, si (11 − n) = 11 ¿Cuál es el dígito verificador del RUT 60.910.000 – □?",
+     "stem": "El Rol Único Tributario (RUT) se compone de dos partes separadas por un guion: un número de siete u ocho dígitos y un dígito verificador. El dígito verificador puede ser un dígito o la letra K y se obtiene mediante el siguiente algoritmo: Considera que el RUT es AB.CDE.FGH – V (en el caso de tener siete dígitos, se considera A = 0). 1. Se debe calcular la siguiente suma: 3·A + 2·B + 7·C + 6·D + 5·E + 4·F + 3·G + 2·H. 2. Se debe dividir la suma calculada por 11 para encontrar el resto n. 3. Según el valor del resto n, el dígito verificador V es: • 11 − n, si (11 − n) ≤ 9 • K, si (11 − n) = 10 • 0, si (11 − n) = 11. ¿Cuál es el dígito verificador del RUT 60.910.000 – □?",
      "correctKey": "C",
      "responseFormat": "choice",
      "hasFigure": true,
@@ -320,7 +320,7 @@
     {
      "position": 9,
      "type": "multiple_choice",
-     "stem": "Para expresar 8 · 3 16 − 2 como la multiplicación de dos números, se realiza el siguiente procedimiento, en el cual se comete un error. Ä√ ä3 √ Paso 1: se resuelve la potencia 2 , obteniéndose 2 2. Ä√ ä √ √ Paso 2: se realiza la multiplicación de raíces 8 · 3 16, obteniéndose 6 128. √ 6 √ Paso 3: se descompone y reduce la raíz 128, obteniéndose 2 6 2. √ 6 √ Ä√ 6 √ ä Paso 4: se factoriza la resta 2 2 − 2 2, obteniéndose 2 2− 2 . ¿En cuál de los pasos se cometió el error?",
+     "stem": "Para expresar √8 · ∛16 − (√2)³ como la multiplicación de dos números, se realiza el siguiente procedimiento, en el cual se comete un error. Paso 1: se resuelve la potencia (√2)³, obteniéndose 2√2. Paso 2: se realiza la multiplicación de raíces (√8) · ∛16, obteniéndose ⁶√128. Paso 3: se descompone y reduce la raíz ⁶√128, obteniéndose 2·⁶√2. Paso 4: se factoriza la resta 2·⁶√2 − 2√2, obteniéndose 2(⁶√2 − √2). ¿En cuál de los pasos se cometió el error?",
      "correctKey": "B",
      "responseFormat": "choice",
      "hasFigure": false,
@@ -576,7 +576,7 @@
     {
      "position": 16,
      "type": "multiple_choice",
-     "stem": "Una persona compró un marco de p cm de largo para colocar una foto cuyos lados están en razón 16 : 9 y que aún no imprime. Debe dejarle un paspartú de tres centímetros, el cual corresponde a un espacio en blanco entre el marco y la foto, tal como se representa en la siguiente figura: Para imprimir la foto del tamaño correcto y sin perder su proporción, le piden la medida de la diagonal que tiene que tener la foto en pulgadas. Si una pulgada es equivalente a 2,54 centímetros, ¿cuál de las siguientes expresiones representa la medida de la diagonal que tiene que entregar, en pulgadas? … 337",
+     "stem": "Una persona compró un marco de p cm de largo para colocar una foto cuyos lados están en razón 16 : 9 y que aún no imprime. Debe dejarle un paspartú de tres centímetros, el cual corresponde a un espacio en blanco entre el marco y la foto, tal como se representa en la siguiente figura: Para imprimir la foto del tamaño correcto y sin perder su proporción, le piden la medida de la diagonal que tiene que tener la foto en pulgadas. Si una pulgada es equivalente a 2,54 centímetros, ¿cuál de las siguientes expresiones representa la medida de la diagonal que tiene que entregar, en pulgadas?",
      "correctKey": "C",
      "responseFormat": "choice",
      "hasFigure": true,
@@ -584,22 +584,22 @@
      "alternatives": [
       {
        "key": "A",
-       "text": "p· 256 … 337",
+       "text": "p · √(337/256)",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "2,54 · (p − 6) · 256 … 337 (p − 6) ·",
+       "text": "2,54 · (p − 6) · √(337/256)",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "256 2,54 … 337 p·",
+       "text": "((p − 6) · √(337/256)) / 2,54",
        "isCorrect": true
       },
       {
        "key": "D",
-       "text": "256 2,54",
+       "text": "(p · √(337/256)) / 2,54",
        "isCorrect": false
       },
       {
@@ -652,7 +652,7 @@
     {
      "position": 18,
      "type": "multiple_choice",
-     "stem": "El volumen y la presión de un gas se comportan de manera inversamente proporcional cuando la temperatura es constante. En el siguiente gráfico se presentan algunos valores del comportamiento de un gas en particular. Si se considera que el gas tiene una presión de p atmósferas, ¿cuál de las siguientes expresiones representa la variación absoluta en el volumen del gas, en litros, cuando la presión disminuye en dos atmósferas? 20",
+     "stem": "El volumen y la presión de un gas se comportan de manera inversamente proporcional cuando la temperatura es constante. En el siguiente gráfico se presentan algunos valores del comportamiento de un gas en particular. Si se considera que el gas tiene una presión de p atmósferas, ¿cuál de las siguientes expresiones representa la variación absoluta en el volumen del gas, en litros, cuando la presión disminuye en dos atmósferas?",
      "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": true,
@@ -660,22 +660,22 @@
      "alternatives": [
       {
        "key": "A",
-       "text": "−2 p",
+       "text": "20/p − 2",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "2 20",
+       "text": "2",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "p−2 40",
+       "text": "20/(p − 2)",
        "isCorrect": false
       },
       {
        "key": "D",
-       "text": "p(p − 2)",
+       "text": "40/(p(p − 2))",
        "isCorrect": true
       },
       {
@@ -790,7 +790,7 @@
       },
       {
        "key": "D",
-       "text": "25 000x − 14 000x ≥ 3 000 000 + 260 000 2 r x 5",
+       "text": "25 000x − 14 000x ≥ 3 000 000 + 260 000",
        "isCorrect": true
       },
       {
@@ -804,24 +804,24 @@
     {
      "position": 22,
      "type": "multiple_choice",
-     "stem": "Considera la inecuación x + < − , en x, tal que su conjunto solución es 3 4 6 12 1 ò ï −∞, − y r es un número real. 3 ¿Cuál es el valor de r?",
+     "stem": "Considera la inecuación (2/3)x + r/4 < x/6 − 5/12, en x, tal que su conjunto solución es ]−∞, −1/3[ y r es un número real. ¿Cuál es el valor de r?",
      "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": false,
      "alternatives": [
       {
        "key": "A",
-       "text": "1 2",
+       "text": "1",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "3 1",
+       "text": "2/3",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "− 2",
+       "text": "−1/2",
        "isCorrect": false
       },
       {
@@ -1060,29 +1060,29 @@
     {
      "position": 29,
      "type": "multiple_choice",
-     "stem": "Considera la función f definida por f(x) = 2x2 + (2k + 1)x + k + , tal que k es 8 un número real. 5 Si la coordenada x del vértice es − , ¿cuál es la coordenada y del vértice? 4",
+     "stem": "Considera la función f definida por f(x) = 2x² + (2k + 1)x + k + 9/8, tal que k es un número real. Si la coordenada x del vértice es −5/4, ¿cuál es la coordenada y del vértice?",
      "correctKey": "C",
      "responseFormat": "choice",
      "hasFigure": false,
      "alternatives": [
       {
        "key": "A",
-       "text": "−8 17",
+       "text": "−8",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "− 4",
+       "text": "−17/4",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "0 25",
+       "text": "0",
        "isCorrect": true
       },
       {
        "key": "D",
-       "text": "4",
+       "text": "25/4",
        "isCorrect": false
       },
       {
@@ -1154,7 +1154,7 @@
       },
       {
        "key": "D",
-       "text": "En el cuarto cuadrante W",
+       "text": "En el cuarto cuadrante",
        "isCorrect": true
       },
       {
@@ -1318,7 +1318,7 @@
     {
      "position": 36,
      "type": "multiple_choice",
-     "stem": "Se colocan 27 cubos de hielo de arista cm en un recipiente cúbico de arista 2 9a interior cm. 2 Se sabe que cuando el agua se congela, su volumen aumenta en un 10 %. Si se considera que no se evapora el agua en el proceso, ¿a qué altura del recipiente, en centímetros, llega el agua una vez que los hielos se derriten? 5",
+     "stem": "Se colocan 27 cubos de hielo de arista a/2 cm en un recipiente cúbico de arista interior 9a/2 cm. Se sabe que cuando el agua se congela, su volumen aumenta en un 10 %. Si se considera que no se evapora el agua en el proceso, ¿a qué altura del recipiente, en centímetros, llega el agua una vez que los hielos se derriten?",
      "correctKey": null,
      "responseFormat": "choice",
      "hasFigure": false,
@@ -1326,22 +1326,22 @@
      "alternatives": [
       {
        "key": "A",
-       "text": "a 33 11",
+       "text": "(5/33)a",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "a 60 30",
+       "text": "(11/60)a",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "a 11 33",
+       "text": "(30/11)a",
        "isCorrect": false
       },
       {
        "key": "D",
-       "text": "a 10 → → →",
+       "text": "(33/10)a",
        "isCorrect": false
       },
       {
@@ -1593,24 +1593,24 @@
      "alternatives": [
       {
        "key": "A",
-       "text": "Horas de Cantidad de B) Horas de Cantidad de estudio semanal estudiantes estudio semanal estudiantes [1, 2[ 16 [1, 2[ 16 [2, 3[ 32 [2, 3[ 16 [3, 4[ 40 [3, 4[ 8 [4, 5[ 60 [4, 5[ 20 [5, 6[ 80 [5, 6[ 20 [6, 7] 100 [6, 7] 20 C) Horas de Cantidad de D) Horas de Cantidad de estudio semanal estudiantes estudio semanal estudiantes [1, 2[ 64 [1, 2[ 64 [2, 3[ 128 [2, 3[ 64 [3, 4[ 160 [3, 4[ 32 [4, 5[ 240 [4, 5[ 80 [5, 6[ 320 [5, 6[ 80 [6,7] 400 [6, 7] 80",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 16; [2, 3[ → 32; [3, 4[ → 40; [4, 5[ → 60; [5, 6[ → 80; [6, 7] → 100",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "(alternativa B: notación no transcrita del cuadernillo)",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 16; [2, 3[ → 16; [3, 4[ → 8; [4, 5[ → 20; [5, 6[ → 20; [6, 7] → 20",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "C",
-       "text": "(alternativa C: notación no transcrita del cuadernillo)",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 64; [2, 3[ → 128; [3, 4[ → 160; [4, 5[ → 240; [5, 6[ → 320; [6, 7] → 400",
        "isCorrect": false,
        "isImage": true
       },
       {
        "key": "D",
-       "text": "(alternativa D: notación no transcrita del cuadernillo)",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 64; [2, 3[ → 64; [3, 4[ → 32; [4, 5[ → 80; [5, 6[ → 80; [6, 7] → 80",
        "isCorrect": true,
        "isImage": true
       },
@@ -1736,7 +1736,7 @@
     {
      "position": 47,
      "type": "multiple_choice",
-     "stem": "Se dibujaron varias figuras siguiendo una secuencia de puntos, tal como se representa en la siguiente imagen: Si se dibujaron 1000 figuras siguiendo esta secuencia y se selecciona una de ellas al azar, ¿cuál es la probabilidad de que esta tenga dibujados al menos 32 puntos? 30",
+     "stem": "Se dibujaron varias figuras siguiendo una secuencia de puntos, tal como se representa en la siguiente imagen: Si se dibujaron 1000 figuras siguiendo esta secuencia y se selecciona una de ellas al azar, ¿cuál es la probabilidad de que esta tenga dibujados al menos 32 puntos?",
      "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": true,
@@ -1744,22 +1744,22 @@
      "alternatives": [
       {
        "key": "A",
-       "text": "1000 31",
+       "text": "30/1000",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "1000 969",
+       "text": "31/1000",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "1000 970",
+       "text": "969/1000",
        "isCorrect": false
       },
       {
        "key": "D",
-       "text": "1000",
+       "text": "970/1000",
        "isCorrect": true
       },
       {
@@ -1774,7 +1774,7 @@
     {
      "position": 48,
      "type": "multiple_choice",
-     "stem": "En un juego se tiene una bolsa con seis bolas numeradas del 1 al 6, todas del mismo tipo. Para su desarrollo se dejan caer al azar las bolas por un tubo, llegando hasta un tope que determina el orden final, tal como se representa a continuación: Se gana el juego si se obtiene una secuencia que comience y termine con un número par. ¿Cuál es la probabilidad de ganar en el juego? 1",
+     "stem": "En un juego se tiene una bolsa con seis bolas numeradas del 1 al 6, todas del mismo tipo. Para su desarrollo se dejan caer al azar las bolas por un tubo, llegando hasta un tope que determina el orden final, tal como se representa a continuación: Se gana el juego si se obtiene una secuencia que comience y termine con un número par. ¿Cuál es la probabilidad de ganar en el juego?",
      "correctKey": "B",
      "responseFormat": "choice",
      "hasFigure": true,
@@ -1782,22 +1782,22 @@
      "alternatives": [
       {
        "key": "A",
-       "text": "6 1",
+       "text": "1/6",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "5 1",
+       "text": "1/5",
        "isCorrect": true
       },
       {
        "key": "C",
-       "text": "4 1",
+       "text": "1/4",
        "isCorrect": false
       },
       {
        "key": "D",
-       "text": "3",
+       "text": "1/3",
        "isCorrect": false
       },
       {
@@ -1812,7 +1812,7 @@
     {
      "position": 49,
      "type": "multiple_choice",
-     "stem": "En un juego de lotería cada cartón tiene tres números del 1 al 99, los cuales no se repiten. Este juego se gana si los tres números que se sortean coinciden con los números del cartón. Una persona compró un cartón que tiene los siguientes números: Si los números ganadores se eligen al azar, no se repiten y no importa el orden en que estos se saquen, ¿cuál es la probabilidad de que la persona gane? 1",
+     "stem": "En un juego de lotería cada cartón tiene tres números del 1 al 99, los cuales no se repiten. Este juego se gana si los tres números que se sortean coinciden con los números del cartón. Una persona compró un cartón que tiene los siguientes números: Si los números ganadores se eligen al azar, no se repiten y no importa el orden en que estos se saquen, ¿cuál es la probabilidad de que la persona gane?",
      "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": true,
@@ -1820,22 +1820,22 @@
      "alternatives": [
       {
        "key": "A",
-       "text": "993 1",
+       "text": "1/99³",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "99 · 98 · 97 3",
+       "text": "1/(99 · 98 · 97)",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "99 · 98 · 97 6",
+       "text": "3/(99 · 98 · 97)",
        "isCorrect": false
       },
       {
        "key": "D",
-       "text": "99 · 98 · 97",
+       "text": "6/(99 · 98 · 97)",
        "isCorrect": true
       },
       {
@@ -1850,29 +1850,29 @@
     {
      "position": 50,
      "type": "multiple_choice",
-     "stem": "Se encuestó a un grupo de estudiantes para conocer qué sabor de helados les gusta entre vainilla y chocolate, y todos ellos señalaron al menos uno de estos sabores. De acuerdo con los resultados de la encuesta, se sabe que si se escoge a un estudiante del grupo al azar, la probabilidad de que le guste el helado de vainilla y el helado de chocolate es 0,15, y la probabilidad de que le guste solo el helado de chocolate es 0,70. Si se escoge al azar a un estudiante del grupo, ¿cuál es la probabilidad de que le guste el helado de chocolate dado que le gusta el helado de vainilla? 3",
+     "stem": "Se encuestó a un grupo de estudiantes para conocer qué sabor de helados les gusta entre vainilla y chocolate, y todos ellos señalaron al menos uno de estos sabores. De acuerdo con los resultados de la encuesta, se sabe que si se escoge a un estudiante del grupo al azar, la probabilidad de que le guste el helado de vainilla y el helado de chocolate es 0,15, y la probabilidad de que le guste solo el helado de chocolate es 0,70. Si se escoge al azar a un estudiante del grupo, ¿cuál es la probabilidad de que le guste el helado de chocolate dado que le gusta el helado de vainilla?",
      "correctKey": "D",
      "responseFormat": "choice",
      "hasFigure": false,
      "alternatives": [
       {
        "key": "A",
-       "text": "20 3",
+       "text": "3/20",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "14 1",
+       "text": "3/14",
        "isCorrect": false
       },
       {
        "key": "C",
-       "text": "15 1",
+       "text": "1/15",
        "isCorrect": false
       },
       {
        "key": "D",
-       "text": "2",
+       "text": "1/2",
        "isCorrect": true
       },
       {
@@ -1886,29 +1886,29 @@
     {
      "position": 51,
      "type": "multiple_choice",
-     "stem": "En un grupo de 100 hombres y 100 mujeres, cada uno de ellos tiene un piercing o tatuajes, pero no ambos. De los hombres, 25 indican tener piercing y el resto tener tatuajes; de las mujeres, 35 indican tener piercing y el resto declara tener tatuajes. Si se selecciona al azar a una persona de las entrevistadas, ¿cuál es la probabilidad de que esta persona sea hombre dado que tiene tatuajes? 75",
+     "stem": "En un grupo de 100 hombres y 100 mujeres, cada uno de ellos tiene un piercing o tatuajes, pero no ambos. De los hombres, 25 indican tener piercing y el resto tener tatuajes; de las mujeres, 35 indican tener piercing y el resto declara tener tatuajes. Si se selecciona al azar a una persona de las entrevistadas, ¿cuál es la probabilidad de que esta persona sea hombre dado que tiene tatuajes?",
      "correctKey": "B",
      "responseFormat": "choice",
      "hasFigure": false,
      "alternatives": [
       {
        "key": "A",
-       "text": "200 75",
+       "text": "75/200",
        "isCorrect": false
       },
       {
        "key": "B",
-       "text": "140 100",
+       "text": "75/140",
        "isCorrect": true
       },
       {
        "key": "C",
-       "text": "140 75",
+       "text": "100/140",
        "isCorrect": false
       },
       {
        "key": "D",
-       "text": "100 b",
+       "text": "75/100",
        "isCorrect": false
       },
       {
@@ -2180,6 +2180,37 @@
     25
    ],
    "nota": "el parser marcaba hasFigure en 50 de 55 items: pdftotext aplana la notacion matematica y eso se lee como figura faltante. Los falsos positivos mas tercos fueron el vinculo de una raiz (#9) y los corchetes de un intervalo (#22)."
+  },
+  "contentFixes": {
+   "items": [
+    1,
+    2,
+    3,
+    9,
+    16,
+    18,
+    21,
+    22,
+    29,
+    31,
+    36,
+    43,
+    47,
+    48,
+    49,
+    50,
+    51
+   ],
+   "metodo": "notacion reconstruida desde `pdftotext -bbox` con coordenadas (numerador sobre la regla, denominador debajo) y contrastada con la pagina renderizada; cada digito escrito se verifico contra la capa de texto de su banda",
+   "nota": "el parser emitia el numerador de una fraccion al FINAL del elemento anterior: por eso el enunciado terminaba en un numero suelto y cada alternativa arrastraba el numerador de la siguiente. Ademas la alternativa D del #2 se habia comido el enunciado del #3, y las 4 tablas del #43 cayeron todas dentro de la alternativa A.",
+   "sinCorregir": [
+    6,
+    10,
+    14,
+    23,
+    44,
+    53
+   ]
   }
  }
 }
