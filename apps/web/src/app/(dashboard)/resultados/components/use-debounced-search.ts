@@ -5,17 +5,24 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 /**
  * Espera tras la última tecla antes de disparar la búsqueda sola.
  *
- * Tres segundos es mucho más que los 250 ms del selector de contexto, y es
- * deliberado: acá el debounce NO es el disparador principal — Enter y el botón
- * "Buscar" lo son — sino la red de seguridad para quien escribe y se queda
- * mirando. Detrás hay un re-render completo del árbol RSC (el panorama entero,
- * no un autocomplete sobre un índice), y las conexiones de colegio son el
- * escenario de diseño de este producto.
+ * Empezó en 3 s, apostando a que detrás había una consulta cara que convenía no
+ * repetir. Medido contra la API con la base de desarrollo, no lo era:
+ * `comparable-overview` —el endpoint que sostenía ese argumento— promedia 182 ms
+ * sin término y 68 ms con uno (el filtro achica el alcance antes de resolver
+ * unidades comparables y alertas); `dashboards/overview` 26 ms e
+ * `item-analysis/assessments` 11 ms. Si una consulta de más cuesta eso, esperar
+ * tres segundos compra muy poco y se lee como una aplicación colgada.
  *
- * Bajarlo es un cambio de esta línea. La recomendación del diseño, para revisar
- * después de usarlo, es 800 ms (docs/diseno-buscador-evaluaciones.md §D8).
+ * 500 ms deja pasar la pausa normal entre teclas y se mantiene bien por debajo
+ * del segundo, el umbral donde una interfaz deja de sentirse reactiva. El
+ * debounce sigue siendo la red de seguridad, no el disparador principal: Enter y
+ * el botón "Buscar" disparan al instante.
+ *
+ * ⚠️ La medición es sobre la demo (12 evaluaciones, 77 alumnos). Es un piso, no
+ * un techo: con la carga de un colegio real conviene volver a medir antes de
+ * bajarlo más. Ver docs/diseno-buscador-evaluaciones.md §D8.
  */
-export const SEARCH_DEBOUNCE_MS = 3000;
+export const SEARCH_DEBOUNCE_MS = 500;
 
 type UseDebouncedSearchOptions = {
   /** Término que hoy está en la URL. Es la referencia de "ya buscado". */

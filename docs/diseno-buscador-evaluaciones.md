@@ -15,7 +15,7 @@ visibles a las que **contienen** el término en el nombre de la evaluación o en
 instrumento, sin distinguir mayúsculas ni tildes.
 
 El término viaja como un filtro más (`?q=…` en la URL), se combina con los filtros existentes con
-AND, y se dispara 3 segundos después de dejar de teclear, al presionar Enter o al hacer clic en el
+AND, y se dispara 500 ms después de dejar de teclear, al presionar Enter o al hacer clic en el
 botón de buscar.
 
 Es un cambio pequeño y concentrado: **un** parámetro nuevo en tres schemas Zod, **tres** condiciones
@@ -312,39 +312,47 @@ porque `processId` **no tiene control visible** en la barra. La búsqueda sí ti
 input con el término escrito **es** el indicador. Inventar un sistema de chips solo para este filtro
 sería incoherente con los otros ocho.
 
-### D8 — Disparo: 3 s de debounce, Enter y botón
+### D8 — Disparo: 500 ms de debounce, Enter y botón
 
 Los tres caminos escriben la misma URL y pasan por el mismo `applyFilters`.
 
-**Sobre los 3 segundos.** Lo habitual es 300-500 ms, y el repo ya tiene un debounce de 250 ms
-(`context-picker.tsx:81`). Tres segundos es entre seis y doce veces eso, y el riesgo es real: un
-campo que no reacciona durante tres segundos se lee como una aplicación colgada, el usuario vuelve a
-teclear o recarga, y termina esperando más que si el disparo hubiera sido inmediato.
+**Sobre el valor.** Se implementaron primero los 3 s pedidos, apostando a que detrás había una
+consulta cara que convenía no repetir. **Medido, no lo era** ⟨corregido tras probarlo⟩. Tres corridas
+por caso contra la API con la base de desarrollo:
 
-Dicho eso, **acá hay un argumento genuino a favor del valor alto**, y conviene que quede escrito
-porque no es el caso general:
+| Endpoint | Sin término | Con término |
+|---|---|---|
+| `dashboards/comparable-overview` | 182 ms (59–412) | 68 ms (40–120) |
+| `dashboards/overview` | 26 ms | 15 ms |
+| `item-analysis/assessments` | 11 ms | 10 ms |
 
-1. La consulta que hay detrás no es barata. En `/resultados`, cada cambio de filtro re-renderiza el
-   árbol RSC completo y vuelve a pedir `comparable-overview`, que resuelve unidades comparables,
-   bandas, líneas base y alertas (`comparable-overview.service.ts:88-115`). No es un autocomplete
-   sobre un índice; es el panorama entero.
-2. **Hay dos disparadores explícitos.** Con Enter y un botón "Buscar" disponibles, el debounce deja
-   de ser el camino principal y pasa a ser una red de seguridad para quien escribe y se queda
-   mirando. Una red de seguridad puede permitirse ser lenta; un disparador principal no.
-3. Las conexiones de colegio son el escenario de diseño de este producto. Menos ida y vuelta es
-   mejor.
+`comparable-overview` era el endpoint que sostenía el argumento del valor alto, y con término es
+**más rápido**: el filtro achica el alcance antes de resolver unidades comparables, bandas, líneas
+base y alertas. Si una consulta de más cuesta eso, esperar tres segundos compra muy poco, y un campo
+que no reacciona durante tres segundos se lee como una aplicación colgada.
 
-**Decisión: se implementan los 3 s tal como se pidieron**, como una constante única y con nombre:
+De los tres argumentos originales a favor del valor alto, el primero se cae. Siguen en pie, más
+blandos, los otros dos:
+
+1. ~~La consulta de fondo no es barata.~~ Medida: decenas de milisegundos.
+2. **Hay dos disparadores explícitos.** Con Enter y un botón "Buscar", el debounce no es el camino
+   principal sino la red de seguridad para quien escribe y se queda mirando.
+3. Las conexiones de colegio son el escenario de diseño de este producto.
+
+**Decisión: 500 ms**, como constante única y con nombre:
 
 ```ts
-export const SEARCH_DEBOUNCE_MS = 3000;
+export const SEARCH_DEBOUNCE_MS = 500;
 ```
 
-en `use-debounced-search.ts`. Bajarlo es un cambio de una línea en un solo archivo.
+en `use-debounced-search.ts`. Deja pasar la pausa normal entre teclas y se mantiene bien por debajo
+del segundo, que es el umbral donde una interfaz deja de sentirse reactiva. Los 800 ms que este
+documento recomendaba antes eran un número redondo elegido bajo ese mismo umbral, sin nada medido de
+esta aplicación detrás.
 
-**Recomendación para revisar después de usarlo:** 800 ms. Es suficiente para no disparar en cada
-pausa de tecleo, y queda por debajo del segundo, que es el umbral donde una interfaz deja de
-sentirse reactiva. **No se implementa ahora**: queda como nota para medir con uso real.
+⚠️ **La medición es sobre la demo** (12 evaluaciones, 77 alumnos) y sólo cubre la API: no incluye el
+re-render RSC ni la conexión del colegio. Es un piso, no un techo. Con la carga de un colegio real
+—el Sagrado Corazón tiene 1.306 alumnos— conviene volver a medir antes de bajarlo más.
 
 La condición de disparo por debounce, por Enter y por botón es la misma: el término normalizado debe
 tener al menos `MIN_SEARCH_TERM_LENGTH` caracteres (D10) **y** ser distinto del que ya está en la URL.
@@ -353,10 +361,10 @@ mismo.
 
 ### D9 — Feedback: el `isPending` de la transición no alcanza
 
-Este es el detalle que hace o rompe la experiencia con 3 s.
+Este es el detalle que hace o rompe la experiencia con cualquier debounce perceptible.
 
 `useTransition().isPending` solo se enciende cuando se llama a `router.push`, es decir **después** de
-que expiren los 3 segundos. Durante esos tres segundos, `isPending` es `false` y la UI no tiene nada
+que expire el temporizador. Durante esa espera, `isPending` es `false` y la UI no tiene nada
 que mostrar. Por eso hace falta un segundo estado, propio del hook:
 
 | Estado | Cuándo | Qué se ve |
@@ -418,7 +426,7 @@ en este diseño**; hay condiciones nuevas en consultas existentes.
 ```
 Usuario escribe "matematica" en /resultados
   │
-  ├─ Enter · botón · o 3 s sin teclear
+  ├─ Enter · botón · o 500 ms sin teclear
   │
   ▼
 DashboardFilterBar.applyFilters({ q: 'matematica' })     dashboard-filter-bar.tsx:49
@@ -612,7 +620,7 @@ la querystring completa.
 `'use client'`)*
 
 ```ts
-export const SEARCH_DEBOUNCE_MS = 3000;
+export const SEARCH_DEBOUNCE_MS = 500;
 ```
 
 Hook `useDebouncedSearch({ initialTerm, minLength, onSubmit })` que devuelve
@@ -755,10 +763,10 @@ esta máquina tiene 8 GB.
 `use-debounced-search.ts`, el campo en `DashboardFilterBar`, `q` en `DashboardFilterValues` /
 `FILTER_KEYS` / `parseDashboardFilters`.
 
-**Verificación:** en `/evaluaciones` y en `/resultados`, escribir y (a) esperar 3 s, (b) presionar
+**Verificación:** en `/evaluaciones` y en `/resultados`, escribir y (a) esperar el debounce, (b) presionar
 Enter, (c) hacer clic en el botón: los tres producen la misma URL con `?q=`. La URL sobrevive a un
 refresh y a "atrás". "Limpiar filtros" vacía el input **y** la URL. En `/resultados/clasificacion`,
-buscar estando en la página 3 devuelve a la página 1. Durante los 3 s se ve el texto de pendiente;
+buscar estando en la página 3 devuelve a la página 1. Durante la espera se ve el texto de pendiente;
 tras el push, la `TopProgressBar`.
 
 ### Ola 3 — Los vacíos
@@ -872,7 +880,7 @@ que el servicio construye (hay precedente en
 
 `use-debounced-search.spec.ts` (React Testing Library + timers falsos), si se decide cubrirlo:
 
-- Tres teclas seguidas producen **un** solo `onSubmit`, a los 3000 ms de la última.
+- Tres teclas seguidas producen **un** solo `onSubmit`, a los `SEARCH_DEBOUNCE_MS` de la última.
 - `submitNow` dispara de inmediato y **cancela** el temporizador (no hay segundo `onSubmit`).
 - Un término por debajo del mínimo nunca llama a `onSubmit`.
 - Un término igual al `initialTerm` nunca llama a `onSubmit`.
@@ -889,8 +897,9 @@ la vista.
 
 ## 10. Preguntas abiertas
 
-**P1 — ¿3 s o 800 ms?** El diseño implementa 3 s como se pidió y deja la constante aislada. La
-recomendación es revisarlo después de usarlo una semana. **Decide el usuario**; no bloquea nada.
+**P1 — ¿cuánto debounce?** ⟨resuelta⟩ Se probó con 3 s, se midió la latencia real de los tres
+endpoints (§D8) y se bajó a **500 ms**. Volver a medir con la carga de un colegio real antes de
+tocarlo de nuevo.
 
 **P2 — ¿Se busca también en `instruments.short_name`?** Hoy no se muestra en ninguna de las dos
 vistas, pero los nombres cortos del DIA ("DIA M1 6°") son lo que un profesor podría escribir. Agregar
@@ -961,7 +970,7 @@ usuario nunca se queda sin controles para salir de su propia búsqueda.
 **Los vacíos explican la causa.** `/evaluaciones?q=zzzz` renderiza "Ninguna evaluación coincide con
 «zzzz»" con los dos enlaces de salida, y el input vuelve pre-llenado con `zzzz` desde la URL.
 
-**Lo que NO se verificó en ejecución:** el comportamiento temporal del cliente (los 3 s, Enter, el
+**Lo que NO se verificó en ejecución:** el comportamiento temporal del cliente (el debounce, Enter, el
 botón, el indicador durante la espera y el reset de `page`). `apps/web` no tiene runner de tests
 (ver §9) y no hubo navegador disponible en la sesión. Queda verificado por lectura de código y por
 la cadena de tipos: `pending={isPending || search.isDebouncing}` llega a `FilterBar`, que renderiza
