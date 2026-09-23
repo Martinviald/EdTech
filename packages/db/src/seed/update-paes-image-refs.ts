@@ -23,7 +23,7 @@ import { items } from '../schema/items';
 const DATA_DIR = resolve(__dirname, '../../data/instruments-paes');
 
 type Json = {
-  sections: { items: { position: number; imageRef?: string | null }[] }[];
+  sections?: { items: { position: number; imageRef?: string | null }[] }[];
 };
 
 export async function updatePaesImageRefs(db: Database): Promise<void> {
@@ -34,6 +34,10 @@ export async function updatePaesImageRefs(db: Database): Promise<void> {
     for (const f of readdirSync(dir)) {
       if (!f.endsWith('.json')) continue;
       const d = JSON.parse(readFileSync(resolve(dir, f), 'utf-8')) as Json;
+      // El directorio no trae sólo instrumentos: también catálogos y tablas de
+      // especificaciones (`m2-tabla-especificaciones.json`). Sin esta guarda, el primer
+      // JSON sin `sections` aborta la corrida entera con "d.sections is not iterable".
+      if (!Array.isArray(d.sections)) continue;
       const porPos = new Map<number, string>();
       for (const s of d.sections) {
         for (const it of s.items) if (it.imageRef) porPos.set(it.position, it.imageRef);
