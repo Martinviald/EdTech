@@ -109,7 +109,18 @@ type CourseArtifact = {
   applicationPeriod: string;
   questionCount: number;
   itemTypes: Record<string, string | null>;
-  rows: Array<{ rut: string; nombre: string; answers: Record<string, string | null> }>;
+  rows: Array<{
+    rut: string;
+    nombre: string;
+    answers: Record<string, string | null>;
+    /**
+     * Puntaje que ya asignó una persona, por posición. Para cuando la planilla no
+     * trae lo que escribió el alumno sino el juicio de quien corrigió (p. ej. un
+     * código de rúbrica en un ítem de completación): se guarda como corrección
+     * humana con su motivo, sin inventar la respuesta ni pasarla por la estrategia.
+     */
+    humanScores?: Record<string, { code: string; score: number; reason: string }>;
+  }>;
 };
 
 const argv = process.argv.slice(2);
@@ -700,6 +711,44 @@ async function main() {
           const maxScore = (item.scoringConfig as { points?: number } | null)?.points ?? 1;
           const rawAnswer = row.answers[String(item.position)] ?? null;
           const nodeIds = tagsByItem.get(item.id) ?? [];
+
+          const human = row.humanScores?.[String(item.position)];
+          if (human) {
+            if (!(human.score >= 0 && human.score <= maxScore)) {
+              throw new Error(
+                `Puntaje humano ${human.score} fuera de [0, ${maxScore}] en ${r.course.sourceFile} P${item.position} (${row.rut})`,
+              );
+            }
+            const isCorrect = human.score >= maxScore;
+            const value = { teacherCode: human.code };
+            autoScorableItems += 1;
+            responseRows.push({
+              assessmentId: '',
+              studentId,
+              itemId: item.id,
+              value,
+              isCorrect,
+              rawScore: null,
+              maxScore: maxScore.toFixed(2),
+              humanScore: { score: human.score, overrideReason: human.reason },
+              finalScore: human.score.toFixed(2),
+              scoredBy: 'human',
+              scoredAt: now,
+            });
+            calc.push({
+              studentId,
+              itemId: item.id,
+              itemPosition: item.position,
+              rawScore: null,
+              maxScore,
+              finalScore: human.score,
+              isCorrect,
+              taxonomyNodeIds: nodeIds,
+              value,
+              hasAlternatives: itemHasAlternatives(item.content),
+            });
+            continue;
+          }
 
           const answer =
             typeof rawAnswer === 'string' && rawAnswer.trim() ? rawAnswer.trim() : null;
