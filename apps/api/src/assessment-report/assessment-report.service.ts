@@ -1092,7 +1092,7 @@ export class AssessmentReportService {
       .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
       .leftJoin(grades, eq(grades.id, classGroups.gradeId))
       .where(and(...conditions))
-      .orderBy(asc(classGroups.name));
+      .orderBy(asc(grades.order), asc(classGroups.name));
 
     return rows.map((r) => ({
       id: r.id,

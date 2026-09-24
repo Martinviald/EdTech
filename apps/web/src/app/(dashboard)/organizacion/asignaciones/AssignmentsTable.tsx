@@ -52,7 +52,10 @@ export function AssignmentsTable({
       const cg = r.subjectClass.classGroup;
       seen.set(cg.id, { id: cg.id, label: `${cg.gradeShortName} · ${cg.name}` });
     });
-    return [...seen.values()].sort((a, b) => a.label.localeCompare(b.label));
+    // Sin re-ordenar: el API ya entrega las filas por nivel escolar y nombre. Ordenar
+    // por la etiqueta ("1B · A", "1M · A", "2B · A"…) mezclaba básica con media y
+    // dejaba prekínder y kínder al final.
+    return [...seen.values()];
   }, [rows]);
 
   const subjectOptions = useMemo(() => {

@@ -11,7 +11,7 @@ export class CatalogController {
   @Public()
   @Get('subjects')
   async getSubjects() {
-    return this.db.select().from(subjects);
+    return this.db.select().from(subjects).orderBy(asc(subjects.name));
   }
 
   @Public()
