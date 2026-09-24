@@ -34,12 +34,21 @@ import type { RawAnswerCount } from '../utils/raw-answer-distribution';
  * exactamente la MISMA querystring que `/dashboards/filters` (ver la página
  * `/evaluaciones`). Con un DTO escalar, elegir dos niveles reventaba en un 400
  * ("Invalid uuid") y `instrumentType` en CSV no matcheaba nada en silencio.
+ *
+ * ⚠️ `instrumentId` es la TERCERA clave que faltaba acá (después de
+ * `applicationPeriod`): la página `/evaluaciones` la manda en la querystring, el
+ * `z.object` la descartaba sin error y la lista seguía mostrando TODOS los
+ * instrumentos. Quien elegía un ensayo veía los resultados de otro sin ninguna
+ * señal de que el filtro no se había aplicado. Cada filtro nuevo de la barra
+ * tiene que declararse acá Y aplicarse en `listAssessments`; falta una de las
+ * dos y el filtro es decorativo.
  */
 export const assessmentListQuerySchema = z.object({
   subjectId: uuidCsvSchema,
   gradeId: uuidCsvSchema,
   classGroupId: uuidCsvSchema,
   academicYearId: z.string().uuid().optional(),
+  instrumentId: uuidCsvSchema,
   instrumentType: stringCsvSchema,
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): mismo contrato

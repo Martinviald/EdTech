@@ -24,7 +24,11 @@ export function ReviewSettingsForm({ initial }: ReviewSettingsFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [quickConfirm, setQuickConfirm] = useState(initial.review.quickConfirm === true);
+  // Mismo default que `isQuickConfirmEnabled`: ausente = encendido. Con
+  // `=== true` el toggle aparecía apagado aunque la función lo diera por
+  // encendido, y guardar el formulario sin tocarlo escribía un `false` que nadie
+  // eligió.
+  const [quickConfirm, setQuickConfirm] = useState(initial.review.quickConfirm !== false);
   const [autoAnnulEnabled, setAutoAnnulEnabled] = useState(
     initial.review.autoAnnulMinConfidence !== undefined,
   );

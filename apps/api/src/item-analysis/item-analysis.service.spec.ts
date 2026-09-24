@@ -1193,6 +1193,50 @@ describe('ItemAnalysisService.listAssessments', () => {
     expect(none.applicationPeriod).toBeUndefined();
   });
 
+  // Regresión: el DTO tampoco declaraba `instrumentId`. La página /evaluaciones
+  // lo mandaba en la querystring, `z.object` lo descartaba en silencio y la lista
+  // devolvía TODOS los instrumentos: elegir un ensayo mostraba los resultados de
+  // otro sin ninguna señal. Es el mismo bug que `applicationPeriod`, dos capas:
+  // declararlo en el DTO y aplicarlo en la consulta.
+  it('acepta instrumentId y lo normaliza a array', () => {
+    const uno = assessmentListQuerySchema.parse({ instrumentId: ASSESSMENT_ID });
+    expect(uno.instrumentId).toEqual([ASSESSMENT_ID]);
+
+    const csv = assessmentListQuerySchema.parse({
+      instrumentId: `${ASSESSMENT_ID},${CLASS_GROUP_ID}`,
+    });
+    expect(csv.instrumentId).toEqual([ASSESSMENT_ID, CLASS_GROUP_ID]);
+
+    const vacio = assessmentListQuerySchema.parse({ instrumentId: '' });
+    expect(vacio.instrumentId).toBeUndefined();
+  });
+
+  it('rechaza un instrumentId que no es uuid', () => {
+    expect(() => assessmentListQuerySchema.parse({ instrumentId: 'no-uuid' })).toThrow();
+  });
+
+  it('instrumentId: el service lo aplica sin romper la consulta', async () => {
+    const db = makeDb([
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'PAES M2 — Ensayo 5',
+          administeredAt: new Date('2026-09-23T00:00:00Z'),
+          instrumentName: 'PAES M2 — Ensayo 5 (Tanda 5) · IV° Medio 2026',
+          instrumentType: 'paes',
+          subjectName: 'Matemáticas',
+          gradeName: 'IV° medio',
+        },
+      ],
+      [{ assessmentId: ASSESSMENT_ID, count: 17 }],
+    ]);
+    const service = makeService(db);
+
+    const dto = assessmentListQuerySchema.parse({ instrumentId: ASSESSMENT_ID });
+    const res = await service.listAssessments(makeUser(), dto);
+    expect(res.data).toHaveLength(1);
+  });
+
   it('rechaza un momento que no es del enum', () => {
     expect(() => assessmentListQuerySchema.parse({ applicationPeriod: 'trimestral' })).toThrow();
   });

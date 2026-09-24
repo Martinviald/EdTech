@@ -35,8 +35,13 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
 /**
  * Ajustes de la cola de revisión de hojas (B1). `quickConfirm`: cuando el motor
  * sugiere una alternativa en una marca dudosa, el revisor la confirma con
- * Sí/No en vez de elegir entre todas las opciones. Apagado por defecto en el
- * primer ciclo; se enciende por org.
+ * Sí/No en vez de elegir entre todas las opciones.
+ *
+ * ⚠️ **Ausente = ENCENDIDO.** Nació apagado "para el primer ciclo" y nadie lo
+ * encendió nunca: en el primer uso real el revisor tuvo que teclear a mano las 5
+ * marcas dudosas, y en las 5 escribió exactamente la alternativa que el motor ya
+ * había sugerido. El trabajo estaba hecho y la UI no lo mostraba. Sólo un
+ * `false` explícito lo apaga.
  */
 export const orgReviewSettingsSchema = z.object({
   quickConfirm: z.boolean().optional(),
@@ -85,12 +90,20 @@ export function autoAnnulMinConfidence(
   return parsed.data.review?.autoAnnulMinConfidence ?? null;
 }
 
-/** ¿La org confirma sugerencias del motor con Sí/No? Apagado salvo `config.review.quickConfirm: true`. */
+/**
+ * ¿La org confirma sugerencias del motor con Sí/No? **Encendido salvo que la org
+ * haya guardado `config.review.quickConfirm: false`.**
+ *
+ * Si el config no parsea se responde `true`: quedarse sin la confirmación rápida
+ * por un JSONB corrupto sería degradar la revisión en silencio, y el peor caso de
+ * tenerla encendida es una pregunta de más en pantalla.
+ */
 export function isQuickConfirmEnabled(
   config: OrgConfig | Record<string, unknown> | null | undefined,
 ): boolean {
   const parsed = orgConfigSchema.safeParse(config ?? {});
-  return parsed.success && parsed.data.review?.quickConfirm === true;
+  if (!parsed.success) return true;
+  return parsed.data.review?.quickConfirm !== false;
 }
 
 /**
