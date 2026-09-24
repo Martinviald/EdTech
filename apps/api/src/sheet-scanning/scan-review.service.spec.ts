@@ -177,6 +177,8 @@ function scanQueueRow(overrides: Record<string, unknown>) {
     resolvedStudentId: STUDENT_1,
     identityConfidence: '1.000',
     thumbFileId: null,
+    sourceFileId: null,
+    sourcePageIndex: null,
     sheetFirstName: 'Ana',
     sheetLastName: 'Pérez',
     resolvedFirstName: 'Ana',
@@ -267,6 +269,47 @@ describe('ScanReviewService.getQueue', () => {
     });
     expect(queue.ambiguousMarks.map((m) => m.markId)).toEqual(['mark-peor', 'mark-dudosa']);
     expect(queue.ambiguousMarks[0].margin).toBeCloseTo(0.05);
+  });
+
+  // Regresión de la hoja de RESERVA. El motor sólo genera thumb si la calidad
+  // falla o el QR es ilegible; una reserva tiene los dos bien, así que llegaba a
+  // la cola de identidad SIN ninguna imagen y había que elegir al alumno a ciegas
+  // — el nombre está escrito a mano en la hoja. Ahora viaja la hoja original.
+  it('una hoja sin thumb expone la hoja original para poder identificarla', async () => {
+    const scans = [
+      scanQueueRow({
+        scanId: 'scan-reserva',
+        state: 'identity_unresolved',
+        sheetStudentId: null,
+        resolvedStudentId: null,
+        sheetFirstName: null,
+        sheetLastName: null,
+        resolvedFirstName: null,
+        resolvedLastName: null,
+        thumbFileId: null,
+        sourceFileId: 'file-origen',
+        sourcePageIndex: 4,
+      }),
+    ];
+    const { service } = makeService([
+      [{ id: BATCH_ID, spec: SPEC }],
+      scans,
+      [],
+      [{ id: 'file-origen', mimeType: 'application/pdf' }],
+    ]);
+
+    const queue = await service.getQueue(ORG_ID, BATCH_ID);
+
+    expect(queue.identityUnresolved).toHaveLength(1);
+    expect(queue.identityUnresolved[0]).toMatchObject({
+      scanId: 'scan-reserva',
+      thumbUrl: null,
+      sourceUrl: 'https://signed/file-origen',
+      // El tipo NO es decorativo: con un PDF hay que abrirlo como PDF, no como
+      // imagen, o la vista queda en blanco sin ningún error.
+      sourceContentType: 'application/pdf',
+      sourcePageIndex: 4,
+    });
   });
 
   it('arma las options de cada marca desde el spec y firma el crop', async () => {

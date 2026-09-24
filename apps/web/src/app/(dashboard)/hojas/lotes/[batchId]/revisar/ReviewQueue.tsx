@@ -427,6 +427,78 @@ function IdentitySection({
   );
 }
 
+/**
+ * La hoja original, a resolución completa, para poder LEER algo de ella.
+ *
+ * Existe aparte de `ScanPreviewDialog` por dos razones concretas:
+ *
+ * 1. Ese diálogo se auto-anula con `if (!scan.thumbUrl) return <ScanThumb />`, y
+ *    una hoja de RESERVA llega justo sin thumb: el motor sólo lo genera si la
+ *    calidad falla o el QR es ilegible, y una reserva tiene los dos bien. O sea
+ *    que reusarlo acá no habría mostrado nada.
+ * 2. El thumb son 400 px de ancho: sirve para ver si hay marcas, no para leer un
+ *    nombre escrito a mano, que es exactamente lo que hay que hacer con una hoja
+ *    de reserva.
+ *
+ * ⚠️ El archivo subido puede ser un PDF con todas las páginas del lote adentro
+ * (`application/pdf` está permitido). Por eso ramifica por `sourceContentType`:
+ * un `<img>` apuntado a un PDF muestra una imagen rota sin error ni log.
+ */
+function SheetSourceDialog({ scan }: { scan: ReviewScanModel }) {
+  const [open, setOpen] = useState(false);
+  if (!scan.sourceUrl) return null;
+
+  const esPdf = scan.sourceContentType === 'application/pdf';
+  const href = esPdf
+    ? `${scan.sourceUrl}#page=${(scan.sourcePageIndex ?? scan.pageIndex) + 1}`
+    : scan.sourceUrl;
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          Ver la hoja
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader>
+          <DialogTitle>Hoja escaneada</DialogTitle>
+          <DialogDescription>
+            {scanOriginLabel(scan)}. El nombre del alumno está escrito a mano en la cabecera: úsalo
+            para elegirlo en la lista.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="max-h-[70vh] overflow-auto rounded-md border bg-muted/40 p-2">
+          {esPdf ? (
+            <iframe
+              src={href}
+              title={`Hoja escaneada, página ${(scan.sourcePageIndex ?? scan.pageIndex) + 1}`}
+              className="h-[65vh] w-full rounded bg-card"
+            />
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={href}
+              alt={`Hoja escaneada, página ${scan.pageIndex + 1}`}
+              className="w-full rounded bg-card object-contain"
+            />
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cerrar
+          </Button>
+          <Button asChild variant="ghost">
+            <a href={href} target="_blank" rel="noreferrer">
+              Abrir en una pestaña
+            </a>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function IdentityRow({
   batchId,
   scan,
@@ -464,6 +536,8 @@ function IdentityRow({
         </p>
       </div>
       <div className="flex items-center gap-2">
+        {/* Sin ver la hoja, elegir al alumno es adivinar: el nombre está escrito a mano. */}
+        <SheetSourceDialog scan={scan} />
         <Select value={studentId} onValueChange={setStudentId} disabled={!rosterAvailable}>
           <SelectTrigger
             className="w-56"
