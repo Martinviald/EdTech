@@ -81,7 +81,6 @@ export const ROUTES = {
   materialImprimir: (id: string) => route(`/materiales/${id}/imprimir`),
 
   organizacion: route('/organizacion'),
-  organizacionAsignaciones: route('/organizacion/asignaciones'),
   organizacionConfigurar: route('/organizacion/configurar'),
 
   configuracion: route('/configuracion'),
@@ -98,6 +97,7 @@ export const ROUTES = {
   benchmarking: route('/benchmarking'),
   compararInstrumentos: route('/comparar-instrumentos'),
   equipo: route('/equipo'),
+  equipoAsignaciones: route('/equipo/asignaciones'),
   equipoMiembro: (userId: string) => route(`/equipo/${userId}`),
   alumnos: route('/alumnos'),
   instrumentoEnunciado: (instrumentId: string) => route(`/instrumentos/${instrumentId}/enunciado`),

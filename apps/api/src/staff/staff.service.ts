@@ -181,7 +181,7 @@ export class StaffService {
     // `AdminService.createUser`. Sirve para algo concreto: `teacher_assignments.user_id`
     // es NOT NULL contra `users.id`, así que sin fila en `users` el invitado NO puede
     // recibir carga académica — era la razón por la que no aparecía en el selector de
-    // /organizacion/asignaciones.
+    // /equipo/asignaciones.
     //
     // SIN NOMBRE (import masivo por CSV, que sólo trae email,role) → membership
     // pendiente con `user_id NULL`, exactamente como antes.

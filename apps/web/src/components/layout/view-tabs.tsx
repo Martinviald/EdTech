@@ -1,5 +1,4 @@
 import {
-  Building2,
   FileQuestion,
   Grid3x3,
   Layers,
@@ -9,6 +8,7 @@ import {
   Lightbulb,
   Table2,
   TrendingUp,
+  UserCog,
   UsersRound,
   type LucideIcon,
 } from 'lucide-react';
@@ -32,9 +32,9 @@ export const RESULTADOS_TABS: readonly ViewTab[] = [
   { href: ROUTES.resultadosTrayectoria, label: 'Trayectoria', icon: TrendingUp, exact: true },
 ];
 
-export const ORGANIZACION_TABS: readonly ViewTab[] = [
-  { href: ROUTES.organizacion, label: 'Información básica', icon: Building2, exact: true },
-  { href: ROUTES.organizacionAsignaciones, label: 'Asignaciones docentes', icon: UsersRound },
+export const EQUIPO_TABS: readonly ViewTab[] = [
+  { href: ROUTES.equipo, label: 'Miembros', icon: UserCog, exact: true },
+  { href: ROUTES.equipoAsignaciones, label: 'Asignaciones docentes', icon: UsersRound },
 ];
 
 export const BANCO_TABS: readonly ViewTab[] = [
