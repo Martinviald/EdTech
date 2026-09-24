@@ -35,7 +35,7 @@ export async function createAssignmentAction(
 
   try {
     await createAssignment(orgId, parsed.data);
-    revalidatePath(ROUTES.organizacionAsignaciones);
+    revalidatePath(ROUTES.equipoAsignaciones);
     return { ok: true };
   } catch (err) {
     if (err instanceof Error) {
@@ -75,7 +75,7 @@ export async function deleteAssignmentAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await deleteAssignment(orgId, assignmentId);
-    revalidatePath(ROUTES.organizacionAsignaciones);
+    revalidatePath(ROUTES.equipoAsignaciones);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Error desconocido' };
