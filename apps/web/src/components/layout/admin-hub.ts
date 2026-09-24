@@ -13,6 +13,7 @@ import {
 
 import {
   AI_OBSERVABILITY_VIEWER_ROLES,
+  ASSIGNMENTS_ROLES,
   canAccess,
   GRADING_SCALE_ROLES,
   LLM_SETTINGS_ROLES,
@@ -85,16 +86,18 @@ export const ADMIN_HUB_OPTIONS: readonly AdminHubOption[] = [
   {
     href: ROUTES.organizacion,
     label: 'Mi Colegio',
-    description: 'Perfil institucional, estructura académica y asignaciones docentes.',
+    description: 'Perfil institucional y estructura académica.',
     icon: Building2,
     roles: ORG_ACADEMIC_ADMIN_ROLES,
   },
   {
     href: ROUTES.equipo,
     label: 'Equipo',
-    description: 'Invita docentes y coordinadores, y gestiona sus roles.',
+    description: 'Invita docentes y coordinadores, gestiona sus roles y asígnales cursos.',
     icon: UserCog,
-    roles: STAFF_MANAGEMENT_ROLES,
+    // Unión: el academic_director no gestiona miembros pero sí asignaciones docentes,
+    // que viven en este hub (`/equipo` lo lleva directo a esa pestaña).
+    roles: [...new Set([...STAFF_MANAGEMENT_ROLES, ...ASSIGNMENTS_ROLES])],
   },
   {
     href: ROUTES.alumnos,

@@ -34,7 +34,7 @@ const emailField = z.string().trim().toLowerCase().email('Correo inválido').max
  * invitación:
  *
  *  · CON nombre  → se crea la fila en `users` de una vez (`users.name` es NOT NULL),
- *    así el invitado ya es asignable en /organizacion/asignaciones sin esperar a que
+ *    así el invitado ya es asignable en /equipo/asignaciones sin esperar a que
  *    inicie sesión.
  *  · SIN nombre  → membership pendiente con `user_id NULL`, como siempre. Sigue sin
  *    poder recibir carga académica hasta su primer login.
