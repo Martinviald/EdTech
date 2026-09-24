@@ -322,7 +322,11 @@ export class DashboardsService {
         .from(classGroups)
         .innerJoin(grades, eq(grades.id, classGroups.gradeId))
         .where(and(...cgConditions))
-        .orderBy(classGroups.name);
+        // Por nivel escolar y después por nombre. Sólo por nombre, los cursos que se
+        // llaman por su sección ("A", "B") salían todos los "A" de todos los niveles
+        // y después los "B"; y como `gradeMap` conserva el orden de inserción, el
+        // desplegable de niveles heredaba ese desorden.
+        .orderBy(grades.order, classGroups.name);
 
       const visibleClassGroupIds = classGroupRows.map((r) => r.id);
       const gradeMap = new Map<string, string>();
