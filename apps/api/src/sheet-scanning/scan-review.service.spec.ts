@@ -362,21 +362,35 @@ describe('ScanReviewService.getQueue', () => {
     expect(queue.settings.autoAnnulMinConfidence).toBe(0.9);
   });
 
-  it('B1: settings.quickConfirm sale de organizations.config.review y está apagado por defecto', async () => {
-    const enabled = makeService([
+  // El default se invirtió: `quickConfirm` nació apagado, nadie lo encendió, y en
+  // el primer uso real el revisor tecleó a mano 5 marcas cuya alternativa el motor
+  // ya había sugerido. Ahora ausente = ENCENDIDO y sólo un `false` explícito lo
+  // apaga. La nula automática NO cambió: sigue apagada salvo valor explícito.
+  it('B1: settings.quickConfirm sale de organizations.config.review y está ENCENDIDO por defecto', async () => {
+    const sinConfig = makeService([[{ id: BATCH_ID, spec: SPEC, orgConfig: null }], [], [], []]);
+    const apagadoExplicito = makeService([
+      [{ id: BATCH_ID, spec: SPEC, orgConfig: { review: { quickConfirm: false } } }],
+      [],
+      [],
+      [],
+    ]);
+    const encendidoExplicito = makeService([
       [{ id: BATCH_ID, spec: SPEC, orgConfig: { review: { quickConfirm: true } } }],
       [],
       [],
       [],
     ]);
-    const disabled = makeService([[{ id: BATCH_ID, spec: SPEC, orgConfig: null }], [], [], []]);
 
-    expect((await enabled.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
+    expect((await sinConfig.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
       quickConfirm: true,
       autoAnnulMinConfidence: null,
     });
-    expect((await disabled.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
+    expect((await apagadoExplicito.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
       quickConfirm: false,
+      autoAnnulMinConfidence: null,
+    });
+    expect((await encendidoExplicito.service.getQueue(ORG_ID, BATCH_ID)).settings).toEqual({
+      quickConfirm: true,
       autoAnnulMinConfidence: null,
     });
   });
