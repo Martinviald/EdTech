@@ -51,6 +51,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { McpModule } from './mcp/mcp.module';
 import { SheetScanningModule } from './sheet-scanning/sheet-scanning.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
+import { MeasurementProcessesModule } from './measurement-processes/measurement-processes.module';
 import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
 
 @Module({
@@ -89,6 +90,7 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
     PerformanceBandsModule,
     // ── Sprint 4: dashboards core y analítica de series temporales ──
     DashboardsModule,
+    MeasurementProcessesModule,
     AnalyticsModule,
     // ── Sprint 5: dashboards avanzados (heatmap, tabla cruzada, distractores) ──
     HeatmapModule,

@@ -1,1 +1,0 @@
-CREATE INDEX "sheet_scan_batches_run_status_idx" ON "sheet_scan_batches" USING btree ("print_run_id","status");

@@ -1,0 +1,2216 @@
+{
+ "instrument": {
+  "name": "PAES M2 — Ensayo 5 (Tanda 5) · IV° Medio 2026",
+  "subject": "Competencia Matemática 2",
+  "subjectCode": "MATH",
+  "grade": "IV° Medio",
+  "gradeCode": "4TH_MEDIO",
+  "year": 2026,
+  "applicationPeriod": null,
+  "type": "paes",
+  "isOfficial": false,
+  "paes": {
+   "prueba": "M2",
+   "tanda": "Tanda 5",
+   "mencion": null,
+   "appliedOn": "2026-09-23",
+   "basadoEn": "DEMRE INV 2026"
+  }
+ },
+ "sections": [
+  {
+   "order": 1,
+   "name": "Prueba completa",
+   "type": "multiple_choice",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 1,
+     "type": "multiple_choice",
+     "stem": "Considera el número racional x ubicado en la recta numérica entre 4/7 y 3/5, tal que la distancia entre x y 4/7 es el doble de la distancia entre 3/5 y x. ¿Cuál es el valor de x?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "61/105",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "41/70",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "62/105",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "21/35",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 2,
+     "type": "multiple_choice",
+     "stem": "Se desea pintar el interior de una vivienda, de la cual se deben cubrir 130 m2 con dos capas de pintura. Para esto se comprarán galones de pintura que tienen un rendimiento entre 35 m2 y 45 m2 y un precio unitario de $29 200. Si se decide comprar la mínima cantidad de galones que asegure que no faltará pintura, ¿cuánto dinero se gastará?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$146 000",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "$175 200",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "$204 400",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "$233 600",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 3,
+     "type": "multiple_choice",
+     "stem": "El Rol Único Tributario (RUT) se compone de dos partes separadas por un guion: un número de siete u ocho dígitos y un dígito verificador. El dígito verificador puede ser un dígito o la letra K y se obtiene mediante el siguiente algoritmo: Considera que el RUT es AB.CDE.FGH – V (en el caso de tener siete dígitos, se considera A = 0). 1. Se debe calcular la siguiente suma: 3·A + 2·B + 7·C + 6·D + 5·E + 4·F + 3·G + 2·H. 2. Se debe dividir la suma calculada por 11 para encontrar el resto n. 3. Según el valor del resto n, el dígito verificador V es: • 11 − n, si (11 − n) ≤ 9 • K, si (11 − n) = 10 • 0, si (11 − n) = 11. ¿Cuál es el dígito verificador del RUT 60.910.000 – □?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "K",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "7",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/03.png"
+    },
+    {
+     "position": 4,
+     "type": "multiple_choice",
+     "stem": "Si el 25 % de M es N, ¿qué porcentaje de N es M?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4%",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "25 %",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "75 %",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "400 %",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 5,
+     "type": "multiple_choice",
+     "stem": "Considera que 1200 se aumenta en su 15 % y el número que se obtiene se disminuye en su 5 %. ¿Cuál de las siguientes expresiones representa el número final que se obtiene?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1200 · 1,15 · 0,95",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "1200 · 0,15 · 0,05",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1200 · 1,15 − 1200 · 0,95",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1200 · 0,15 − 1200 · 0,05",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 6,
+     "type": "multiple_choice",
+     "stem": "Para medir la popularidad de un artista en redes sociales, se analizó la cantidad de búsquedas diarias que tuvo durante tres días seguidos. Se detectó que el artista descendió un 4 % cada día respecto al día anterior, presentando 276 480 búsquedas el último día. ¿Cuál es la cantidad de búsquedas que se realizaron de este artista el primer día? 276 480",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,962 276 480",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "0,042",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "276 480 · 0,962",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "276 480 · 0,042",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 7,
+     "type": "multiple_choice",
+     "stem": "Al terminar cada día trabajado en una obra de construcción, se calcula el porcentaje de la obra que queda por realizar, usando la siguiente expresión: 100 · (1 − k) % ¿Qué representa k en esta expresión?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El porcentaje de avance de la obra durante el último día trabajado, escrito en decimal.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El porcentaje de avance de la obra hasta el último día trabajado, escrito en decimal.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El porcentaje de avance de la obra de cada uno de los días de trabajo, escrito en decimal.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El porcentaje que queda por realizar de la obra al término del último día de trabajo, escrito en decimal.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 8,
+     "type": "multiple_choice",
+     "stem": "En la tabla adjunta se presenta la masa de dos partículas. Partícula Masa Protón 1,67 · 10−27 kg Electrón 9,11 · 10−31 kg ¿Cuál es la diferencia positiva entre las masas de las partículas?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(9,11 − 1,67) · 10−58 kg",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(9,11 − 1,67) · 10−4 kg 1,67 − 9,11 · 10−4 · 10−27 kg \u0001",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1,67 − 9,11 · 10−4 · 10−31 kg \u0001",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "√ √ Ä√ ä3",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/08.png"
+    },
+    {
+     "position": 9,
+     "type": "multiple_choice",
+     "stem": "Para expresar √8 · ∛16 − (√2)³ como la multiplicación de dos números, se realiza el siguiente procedimiento, en el cual se comete un error. Paso 1: se resuelve la potencia (√2)³, obteniéndose 2√2. Paso 2: se realiza la multiplicación de raíces (√8) · ∛16, obteniéndose ⁶√128. Paso 3: se descompone y reduce la raíz ⁶√128, obteniéndose 2·⁶√2. Paso 4: se factoriza la resta 2·⁶√2 − 2√2, obteniéndose 2(⁶√2 − √2). ¿En cuál de los pasos se cometió el error?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el Paso 1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el Paso 2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "En el Paso 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el Paso 4",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 10,
+     "type": "multiple_choice",
+     "stem": "Si log 2 ≈ 0,30 y log 3 ≈ 0,48, ¿cuál de las siguientes expresiones corresponde a una aproximación de log2 15?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,70 + 0,48 4,8 + 0,30",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,30 1 + 0,48",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2 · 0,30 0,70 + 0,48",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "0,30",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 11,
+     "type": "multiple_choice",
+     "stem": "En un laboratorio se estudiaron dos cultivos de bacterias, para los cuales se registraron los siguientes datos: Cantidad inicial de bacterias Minutos que tardan en duplicarse Cultivo A 100 10 Cultivo B 200 20 ¿Cuántas bacterias en total tendrán los dos cultivos transcurridos 40 minutos desde el inicio del estudio?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "400",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "800",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2400",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "4800 W",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/11.png"
+    },
+    {
+     "position": 12,
+     "type": "multiple_choice",
+     "stem": "El nivel de intensidad sonora β , en dB, y la intensidad acústica I, en , se m2 relacionan mediante la expresión β = 10 · log(I) + 120, tal que β ≥ 0 . En la siguiente tabla se presentan los niveles máximos permisibles de intensidad sonora en zonas residenciales durante el día según la legislación chilena. De 7:00 a 21:00 De 21:00 a 7:00 55 dB 45 dB ¿Cuál es el máximo permisible de intensidad acústica en zonas residenciales a las 23:00? W",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "10−6,5 m2 W",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "10−7,5 m2 W",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "107,5 m2 W",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1016,5 m2 »",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/12.png"
+    },
+    {
+     "position": 13,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes expresiones es igual a n (3n )2 · 6(n2 ) · 4n ? 2",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "62n",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "6n+2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "3n · 6n · 4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "32 · 62n · 4",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 14,
+     "type": "multiple_choice",
+     "stem": "En cierto tipo de cuenta de ahorro, una institución financiera ofrece un interés compuesto mensual de 1,5 % al capital que se deposite. Una persona abre una de estas cuentas de ahorro y deposita un capital inicial de $350 000 y lo tiene tres meses sin realizar retiros ni depósitos. ¿Cuál de las siguientes expresiones representa el interés que se produce en ese periodo de tiempo?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "$350 000 · 0,0153",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "$350 000 · 1,153",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "$350 000 · (1,0153 − 1)",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "$350 000 · (1,153 − 1)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 15,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes expresiones es igual a (3a + 5b)(5b − 3a) − (5b − 3a)2 ?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "−30ab",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "6a (5b − 3a)",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "10b (3a − 5b)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2 (9a2 − 25b2 − 15ab)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 16,
+     "type": "multiple_choice",
+     "stem": "Una persona compró un marco de p cm de largo para colocar una foto cuyos lados están en razón 16 : 9 y que aún no imprime. Debe dejarle un paspartú de tres centímetros, el cual corresponde a un espacio en blanco entre el marco y la foto, tal como se representa en la siguiente figura: Para imprimir la foto del tamaño correcto y sin perder su proporción, le piden la medida de la diagonal que tiene que tener la foto en pulgadas. Si una pulgada es equivalente a 2,54 centímetros, ¿cuál de las siguientes expresiones representa la medida de la diagonal que tiene que entregar, en pulgadas?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "p · √(337/256)",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,54 · (p − 6) · √(337/256)",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "((p − 6) · √(337/256)) / 2,54",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "(p · √(337/256)) / 2,54",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/16.png"
+    },
+    {
+     "position": 17,
+     "type": "multiple_choice",
+     "stem": "En la siguiente figura se representa la gráfica de una relación de proporcionalidad inversa y la gráfica de una relación de proporcionalidad directa. m ¿Cuál de las siguientes expresiones es igual a , en términos de b y q? c q",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "b q2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "b2 b",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "q b",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "q2",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/17.png"
+    },
+    {
+     "position": 18,
+     "type": "multiple_choice",
+     "stem": "El volumen y la presión de un gas se comportan de manera inversamente proporcional cuando la temperatura es constante. En el siguiente gráfico se presentan algunos valores del comportamiento de un gas en particular. Si se considera que el gas tiene una presión de p atmósferas, ¿cuál de las siguientes expresiones representa la variación absoluta en el volumen del gas, en litros, cuando la presión disminuye en dos atmósferas?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "20/p − 2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "20/(p − 2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "40/(p(p − 2))",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/18.png"
+    },
+    {
+     "position": 19,
+     "type": "multiple_choice",
+     "stem": "La densidad ρ de un cuerpo, en gramos por centímetro cúbico, se calcula como m ρ= , tal que m es la masa del cuerpo, en gramos, y V es su volumen, V en centímetros cúbicos. g Considera dos esferas macizas, una de plata de densidad ρplata = 10,5 y la g cm3 otra de piedra de alabastro de densidad ρalabastro = 2,7 . cm3 Si ambas esferas tienen un volumen de 81 cm3 , ¿cuál es la diferencia positiva de sus masas?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1069,2 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "850,5 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "631,8 g",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "218,7 g 1",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 20,
+     "type": "multiple_choice",
+     "stem": "Considera la inecuación 2 (5 − 3x) ≥ − . 2 ¿Cuál de los siguientes gráficos representa el conjunto solución de la inecuación?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/20.png"
+    },
+    {
+     "position": 21,
+     "type": "multiple_choice",
+     "stem": "El costo de producción de un artículo es de $14 000 por unidad, además de un costo fijo de $260 000. Si se venden todos los artículos producidos a $25 000 cada uno, ¿cuál de las siguientes inecuaciones permite determinar el intervalo de las cantidades x de artículos que se deben producir para obtener una ganancia de al menos $3 000 000?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "25 000x − 14 000x ≤ 3 000 000 − 260 000",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "25 000x − 14 000x ≤ 3 000 000 + 260 000",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "25 000x − 14 000x ≥ 3 000 000 − 260 000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "25 000x − 14 000x ≥ 3 000 000 + 260 000",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 22,
+     "type": "multiple_choice",
+     "stem": "Considera la inecuación (2/3)x + r/4 < x/6 − 5/12, en x, tal que su conjunto solución es ]−∞, −1/3[ y r es un número real. ¿Cuál es el valor de r?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2/3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "−1/2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "−1",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 23,
+     "type": "multiple_choice",
+     "stem": "Para medir la temperatura se utilizan comúnmente las escalas Celsius, Fahrenheit y Kelvin. Considera que la relación entre grados Celsius (c) y grados Fahrenheit (f) está dada 5 por la ecuación c = · (f − 32). 9 Para transformar de grados Celsius a Kelvin (k) hay que sumar 273,15 a la magnitud en grados Celsius. ¿Cuál de las siguientes ecuaciones relaciona correctamente la temperatura en Kelvin con la temperatura en grados Fahrenheit? 9",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "f= · (k + 273,15) + 32 5 9",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "f= · (k − 273,15) + 32 5 9",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "f= · k + 273,15 + 32 5 9",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "f= · k − 273,15 + 32 5",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 24,
+     "type": "multiple_choice",
+     "stem": "Una persona viajó en vehículo a la playa recorriendo dos tramos de igual longitud. km El primer tramo lo recorrió con una rapidez media de 120 y el segundo tramo, h km con una rapidez media de 80 , recorriendo ambos tramos en un total de 6 horas. h ¿Cuánto tiempo más demoró en recorrer el segundo tramo en comparación con el primero?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2 h 50 min",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2 h 30 min",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1 h 20 min",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1 h 12 min",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 25,
+     "type": "multiple_choice",
+     "stem": "Una persona tiene 50 monedas, algunas de $500 y otras de $100, tal que todas juntas masan 375 g. Para determinar cuánto dinero tiene, establece lo siguiente: Esta persona añade cinco monedas de $500 a lo que ya tenía, y plantea un nuevo sistema de ecuaciones, en el que x e y reflejan la cantidad actual de monedas de cada tipo que tiene. ¿Cuál de los siguientes sistemas permite determinar los valores de x e y actualizados?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(x + 5) + y = 50 6,5x + 9y = 375 + 5 · 6,5",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "x + (y + 5) = 50 6,5x + 9y = 375 + 5 · 9",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "x + y = 50 + 5 6,5x + 9y = 375 + 5 · 6,5",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "x + y = 50 + 5 6,5x + 9y = 375 + 5 · 9",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/25.png"
+    },
+    {
+     "position": 26,
+     "type": "multiple_choice",
+     "stem": "En una panadería, el precio de venta del kilogramo de pan es de $p, el cual se calcula para obtener un 25 % de ganancia sobre el costo de producción. Si el costo de producción aumenta en $q y se quiere seguir obteniendo un 25 % de ganancia sobre este, ¿cuál de las siguientes funciones modela el nuevo precio de venta de x kilogramos de pan?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "h(x) = (p + 1,25q) · x",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "g(x) = (p + q) · 1,25x",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "p(x) = (0,75p + q) · x",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "m(x) = (0,25p + q) · x",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 27,
+     "type": "multiple_choice",
+     "stem": "Considera la función f definida por f(x) = ax2 + bx + c, tal que a, b y c son números reales distintos de cero. ¿Cuál de las siguientes funciones representa la gráfica de la función f reflejada con respecto al eje X?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "p(x) = −ax2 + bx + c",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "q(x) = −ax2 − bx − c",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "s(x) = −ax2 + bx − c",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "t(x) = ax2 − bx + c",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 28,
+     "type": "multiple_choice",
+     "stem": "Considera la gráfica de la función cuadrática f , con dominio el conjunto de los números reales, de la forma f(x) = ax2 + bx + c. ¿Cuál de las siguientes expresiones es igual a b?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "−3a 3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "− a 2 3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "a 2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "3a 9",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/28.png"
+    },
+    {
+     "position": 29,
+     "type": "multiple_choice",
+     "stem": "Considera la función f definida por f(x) = 2x² + (2k + 1)x + k + 9/8, tal que k es un número real. Si la coordenada x del vértice es −5/4, ¿cuál es la coordenada y del vértice?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "−8",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "−17/4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "25/4",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 30,
+     "type": "multiple_choice",
+     "stem": "En las especificaciones de un cohete en miniatura, se registra una función que modela la altura que alcanzaría el cohete desde su lanzamiento hasta que toca el suelo. La función registrada es h(x) = −5x2 + 80x, tal que h representa la altura, en metros, con respecto al tiempo x transcurrido desde que fue lanzado el cohete, en segundos. ¿Cuál es la altura máxima que alcanzaría este cohete?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "320 metros",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "560 metros",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "700 metros",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "960 metros",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 31,
+     "type": "multiple_choice",
+     "stem": "Considera la función f , con dominio el conjunto de los números reales, definida por f(x) = x2 − bx + c. La gráfica de f pasa por los puntos (−p, 0) y (2p, 0), con p > 0. ¿En qué cuadrante se encuentra el vértice de la parábola?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el primer cuadrante",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el segundo cuadrante",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En el tercer cuadrante",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el cuarto cuadrante",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 32,
+     "type": "multiple_choice",
+     "stem": "La radiación emitida por un cuerpo negro, en 2 , se puede calcular como σ · T4 , m tal que T es su temperatura en Kelvin (K) y σ es una constante. W Un cuerpo negro que emite una radiación de 5,678 tiene una temperatura m2 de 100 K. ¿Cuál es la radiación de un cuerpo negro que tiene una temperatura de 200 K? W",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "11,356 m2 W",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "34,068 m2 W",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "45,424 m2 W",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "90,848 m2",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 33,
+     "type": "multiple_choice",
+     "stem": "Considera el triángulo rectángulo ABC de la figura adjunta, al que se le ha trazado su altura CD. Para calcular la medida de CD, se realiza el siguiente procedimiento, en el cual se comete un error. √ Paso 1: se calcula la medida de AB como 32 + 42 y se obtiene que mide 5 cm. Paso 2: se aplica el teorema de Pitágoras en los triángulos ADC y CDB y se obtienen las igualdades 42 + AD2 = CD2 y 32 + (5 − AD)2 = CD2 , respectivamente. Paso 3: se igualan las ecuaciones obtenidas en el Paso 2 y, al resolver la ecuación 9 42 + AD2 = 32 + (5 − AD)2 , se obtiene que AD = cm. 5 Paso 4: se reemplaza el valor de AD en la igualdad 42 + AD2 = CD2 y, al √ 481 despejar, se obtiene que CD = cm. 5 ¿En cuál de los pasos se cometió el error?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "En el Paso 1",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En el Paso 2",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "En el Paso 3",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "En el Paso 4",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/33.png"
+    },
+    {
+     "position": 34,
+     "type": "multiple_choice",
+     "stem": "Sobre un cuadrado de lado L cm y centro O, se dibuja otro cuadrado de centro O, a cuyo lado es del lado del cuadrado anterior, con a y b números enteros positivos. b Luego, se pinta de color gris la superficie delimitada por los contornos de estos dos cuadrados, tal como se representa a continuación: a Luego, sobre esta figura, se dibuja otro cuadrado de centro O cuyo lado es del lado b del último cuadrado dibujado y se pinta la superficie delimitada por los contornos de estos cuadrados, tal como se representa a continuación: Si se repite cinco veces el proceso de pintar la superficie delimitada entre los cuadrados, ¿cuál es el área, en cm2 , de la última superficie pintada? a \u0010 a \u00115 ã Å\u0010 \u00114",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "L2 − b b a \u0010 a \u00114 ã Å\u0010 \u00115 2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "L − b b a \u0010 a \u00118 ã Å\u0010 \u001110",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "L2 − b b a \u0010 a \u001110 ã Å\u0010 \u00118 2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "L − b b",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/34.png"
+    },
+    {
+     "position": 35,
+     "type": "multiple_choice",
+     "stem": "Julieta compró un espejo con forma de hexágono regular, el cual está inscrito en una base circular de madera de 40 cm de diámetro, tal como se representa en la siguiente figura. Para que el espejo combine con la decoración de su baño, cubrirá las partes visibles de la base de madera con un mosaico de cerámicas. ¿Cuál es el área de la base de madera que debe cubrir Julieta con el mosaico de cerámicas, en cm2 ? √",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "400π − 600 3 √",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "400π − 100 3 √",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1600π − 1200 3 √",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1600π − 600 3 a",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/35.png"
+    },
+    {
+     "position": 36,
+     "type": "multiple_choice",
+     "stem": "Se colocan 27 cubos de hielo de arista a/2 cm en un recipiente cúbico de arista interior 9a/2 cm. Se sabe que cuando el agua se congela, su volumen aumenta en un 10 %. Si se considera que no se evapora el agua en el proceso, ¿a qué altura del recipiente, en centímetros, llega el agua una vez que los hielos se derriten?",
+     "correctKey": null,
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "points": 0,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(5/33)a",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(11/60)a",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "(30/11)a",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "(33/10)a",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 37,
+     "type": "multiple_choice",
+     "stem": "En el gráfico de la figura adjunta se representan los vectores u , v y w. →Ä→ →ä ¿Cuáles son las coordenadas del vector v − u +2 w ?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(−6, 1)",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(0, 5)",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "(0, −1)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "(0, 7)",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/37.png"
+    },
+    {
+     "position": 38,
+     "type": "multiple_choice",
+     "stem": "Se simula un sistema planetario, en dos dimensiones, compuesto por un planeta (circunferencia grande) y una luna (circunferencia pequeña) en un plano cartesiano. Cada minuto, el planeta rota en torno al origen del sistema cartesiano y en sentido antihorario y la luna rota en torno al centro del planeta y en sentido horario, tal como se ejemplifica en la siguiente figura: Considera la posición del planeta transcurridos 5 minutos. ¿Cuál de las siguientes imágenes representa mejor la posición de la luna con respecto al planeta en ese momento?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/38.png"
+    },
+    {
+     "position": 39,
+     "type": "multiple_choice",
+     "stem": "Se dibuja un triángulo en el primer cuadrante del plano cartesiano. p Si a este triángulo se le aplica una homotecia de razón − con centro en el origen del 2 plano cartesiano, ¿cuál de las siguientes afirmaciones se puede deducir en relación con el triángulo homotético?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cuando p = 4, su perímetro es el doble del perímetro del original.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Cuando p = 2, su área es mayor que el área del original.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Cuando p < 0, su perímetro es menor que el perímetro del original.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cuando p > 0, se ubica en el primer cuadrante.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 40,
+     "type": "multiple_choice",
+     "stem": "El diámetro del sol se puede estimar con una homotecia usando una caja con un orificio como se representa en la siguiente figura: La proyección del sol en la caja es un círculo que tiene diámetro d centímetros, ¿cuál de las siguientes expresiones representa el diámetro del sol, en kilómetros? L",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "·d D L",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "·D d d",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "·D L d",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "L",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/40.png"
+    },
+    {
+     "position": 41,
+     "type": "multiple_choice",
+     "stem": "Un cuadrado de lado L ubicado sobre los ejes del plano cartesiano se rota en sentido horario en torno a uno de sus vértices, tal como se representa en la siguiente figura: ¿Cuál es la coordenada x del punto P luego de la rotación?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "L · cos(θ)",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "L · sen(θ)",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "L − L · cos(θ)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "L − L · sen(θ)",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/41.png"
+    },
+    {
+     "position": 42,
+     "type": "multiple_choice",
+     "stem": "Cuando un rayo de luz pasa de un medio a otro, el ángulo de incidencia θ1 en el primer medio y el ángulo de refracción θ2 con el que entra al otro medio son distintos. Este cambio de ángulo depende de los índices de refracción (n1 y n2 ) de ambos medios, y está dado por la ecuación n1 · sen(θ1 ) = n2 · sen(θ2 ). La siguiente figura representa esta situación: Considera un rayo que pasa de un medio de índice de refracción m a otro de índice de refracción p, tal que la medida del ángulo de incidencia es el doble de la medida del ángulo de refracción. Si para todo ángulo α se cumple que sen(2α) = 2 · sen(α) · cos(α), ¿cuál de las siguientes expresiones representa al coseno del ángulo de refracción? 2p",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "m 2m",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "p m",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2p p",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2m",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/42.png"
+    },
+    {
+     "position": 43,
+     "type": "multiple_choice",
+     "stem": "En el siguiente histograma se representan los resultados de una encuesta en la que se le preguntó a un grupo de 400 estudiantes cuántas horas estudian semanalmente. ¿Cuál de las siguientes tablas de frecuencia representa los resultados de la encuesta?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 16; [2, 3[ → 32; [3, 4[ → 40; [4, 5[ → 60; [5, 6[ → 80; [6, 7] → 100",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 16; [2, 3[ → 16; [3, 4[ → 8; [4, 5[ → 20; [5, 6[ → 20; [6, 7] → 20",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 64; [2, 3[ → 128; [3, 4[ → 160; [4, 5[ → 240; [5, 6[ → 320; [6, 7] → 400",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "Horas de estudio semanal / Cantidad de estudiantes: [1, 2[ → 64; [2, 3[ → 64; [3, 4[ → 32; [4, 5[ → 80; [5, 6[ → 80; [6, 7] → 80",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/43.png"
+    },
+    {
+     "position": 44,
+     "type": "multiple_choice",
+     "stem": "Una prueba tiene un puntaje máximo de 60 puntos. La calificación, en términos del puntaje P obtenido, se calcula mediante las siguientes expresiones: P − 36 • Para puntajes menores o iguales que 36 puntos: +4 12 P − 60 • Para puntajes mayores que 36 puntos: +7 8 Considera que los estudiantes de un curso que obtuvieron la menor y mayor calificación en la prueba lograron un 40 % y un 80 % del puntaje máximo, respectivamente. ¿Cuál es la diferencia entre la calificación mayor y la calificación menor de los estudiantes de este curso?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2,0",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,5",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "3,0",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4,5",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "En la siguiente figura se presentan los diagramas de cajón de una característica para tres grupos de datos, A, B y C. ¿Cuál de los siguientes argumentos justifica que el rango intercuartílico de los datos del grupo C es menor que el rango intercuartílico de los datos del grupo A y que el rango intercuartílico de los datos del grupo B?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Que la diferencia entre el valor máximo y mínimo de C es menor que la diferencia entre el valor máximo y mínimo de A y de B.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Que el cuartil 1 es el mismo para los tres grupos de datos y el cuartil 3 de C es menor que el cuartil 3 de A y de B.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Que la diferencia entre el percentil 75 y el valor máximo de C es menor que la de A y de B.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Que el cuartil 3 de C es menor que el cuartil 3 de A y de B y el cuartil 2 es el mismo para los tres grupos de datos.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/45.png"
+    },
+    {
+     "position": 46,
+     "type": "multiple_choice",
+     "stem": "Considera los datos 4, 8, 5, p y q, cuyo promedio es 5. ¿Cuál de las siguientes condiciones permite asegurar que su desviación estándar es menor que 5?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "p=q",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "pq < 100",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "p+q=8",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "p<8−q",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 47,
+     "type": "multiple_choice",
+     "stem": "Se dibujaron varias figuras siguiendo una secuencia de puntos, tal como se representa en la siguiente imagen: Si se dibujaron 1000 figuras siguiendo esta secuencia y se selecciona una de ellas al azar, ¿cuál es la probabilidad de que esta tenga dibujados al menos 32 puntos?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "30/1000",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "31/1000",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "969/1000",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "970/1000",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/47.png"
+    },
+    {
+     "position": 48,
+     "type": "multiple_choice",
+     "stem": "En un juego se tiene una bolsa con seis bolas numeradas del 1 al 6, todas del mismo tipo. Para su desarrollo se dejan caer al azar las bolas por un tubo, llegando hasta un tope que determina el orden final, tal como se representa a continuación: Se gana el juego si se obtiene una secuencia que comience y termine con un número par. ¿Cuál es la probabilidad de ganar en el juego?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1/6",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1/5",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "1/4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1/3",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/48.png"
+    },
+    {
+     "position": 49,
+     "type": "multiple_choice",
+     "stem": "En un juego de lotería cada cartón tiene tres números del 1 al 99, los cuales no se repiten. Este juego se gana si los tres números que se sortean coinciden con los números del cartón. Una persona compró un cartón que tiene los siguientes números: Si los números ganadores se eligen al azar, no se repiten y no importa el orden en que estos se saquen, ¿cuál es la probabilidad de que la persona gane?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1/99³",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1/(99 · 98 · 97)",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "3/(99 · 98 · 97)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6/(99 · 98 · 97)",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/49.png"
+    },
+    {
+     "position": 50,
+     "type": "multiple_choice",
+     "stem": "Se encuestó a un grupo de estudiantes para conocer qué sabor de helados les gusta entre vainilla y chocolate, y todos ellos señalaron al menos uno de estos sabores. De acuerdo con los resultados de la encuesta, se sabe que si se escoge a un estudiante del grupo al azar, la probabilidad de que le guste el helado de vainilla y el helado de chocolate es 0,15, y la probabilidad de que le guste solo el helado de chocolate es 0,70. Si se escoge al azar a un estudiante del grupo, ¿cuál es la probabilidad de que le guste el helado de chocolate dado que le gusta el helado de vainilla?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3/20",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "3/14",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1/15",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1/2",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 51,
+     "type": "multiple_choice",
+     "stem": "En un grupo de 100 hombres y 100 mujeres, cada uno de ellos tiene un piercing o tatuajes, pero no ambos. De los hombres, 25 indican tener piercing y el resto tener tatuajes; de las mujeres, 35 indican tener piercing y el resto declara tener tatuajes. Si se selecciona al azar a una persona de las entrevistadas, ¿cuál es la probabilidad de que esta persona sea hombre dado que tiene tatuajes?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "75/200",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "75/140",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "100/140",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "75/100",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "(alternativa E: notación no transcrita del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 52,
+     "type": "multiple_choice",
+     "stem": "Considera la igualdad z = log a 5 + log . b a Se puede determinar el valor de z, si se conoce el valor de: (1) ab a (2) b",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 53,
+     "type": "multiple_choice",
+     "stem": "Considera los números reales x e y, con x ̸= y y x ̸= −y. \u00012 x2 − y2 Se puede determinar el número que representa la expresión , si se (x + y)2 sabe que: (1) x − y = 10 (2) x+y=6",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 54,
+     "type": "multiple_choice",
+     "stem": "Una persona forrará por completo un cofre utilizando un tipo de tela llamada arpillera. El cofre tiene la forma de un prisma recto de base cuadrada y su tapa tiene la forma de la mitad de un cilindro, tal como se representa a continuación: Considera que la arpillera tiene un costo de $3500 por metro cuadrado. Se puede determinar cuánto le costará forrar el cofre, si se conoce: (1) la medida del radio del cilindro. (2) la medida del ancho, alto y largo del cofre.",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional",
+       "isCorrect": false
+      }
+     ],
+     "imageRef": "item/global/paes-m2-e5-2026/item_figure/54.png"
+    },
+    {
+     "position": 55,
+     "type": "multiple_choice",
+     "stem": "En una urna se tienen 5 bolitas entre bolitas azules y rojas, todas del mismo tipo. Al extraer dos bolitas sin reposición, se puede determinar la probabilidad de que la segunda sea azul dado que la primera fue roja, si: (1) al sacar cinco bolitas con reposición se conoce la probabilidad de que todas sean azules. (2) al sacar dos bolitas sin reposición se conoce la probabilidad de que una sea azul y la otra sea roja.",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(1) por sí sola",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "(2) por sí sola",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Ambas juntas, (1) y (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cada una por sí sola, (1) ó (2)",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "Se requiere información adicional IMPORTANTE ■ Este folleto está protegido bajo Registro de Propiedad Intelectual de la Universidad de Chile. ■ Está prohibida la reproducción, transmisión total o parcial de este folleto, por cualquier medio o método. ■ Es obligatorio devolver íntegramente este folleto antes de abandonar la sala. ■ Es obligatorio devolver la hoja de respuestas antes de abandonar la sala. Proceso de Admisión 2 0 2 6",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pauta": {
+  "source": {
+   "instrumentJson": "M2-E5-con-pauta.json"
+  }
+ },
+ "extraction": {
+  "itemCount": 55,
+  "warnings": [
+   "#1: notación matemática partida en líneas",
+   "#16: notación matemática partida en líneas",
+   "#18: notación matemática partida en líneas",
+   "#22: notación matemática partida en líneas",
+   "#29: notación matemática partida en líneas",
+   "#43: 1 alternativas",
+   "#47: notación matemática partida en líneas",
+   "#48: notación matemática partida en líneas",
+   "#49: notación matemática partida en líneas",
+   "#50: notación matemática partida en líneas",
+   "#51: notación matemática partida en líneas",
+   "Alternativas normalizadas a A-E en 51 ítems para que la hoja de respuestas tenga 5 burbujas en todos: un ítem con menos burbujas impresas que opciones reales deja al alumno sin dónde marcar. Las agregadas van con texto vacío y NO son la clave."
+  ],
+  "needsHumanReview": true,
+  "figureAudit": {
+   "metodo": "tinta no textual medida sobre la pagina renderizada a 150 dpi, confirmada con la revision visual de las 55 bandas",
+   "conFigura": [
+    3,
+    8,
+    11,
+    12,
+    16,
+    17,
+    18,
+    20,
+    25,
+    28,
+    33,
+    34,
+    35,
+    37,
+    38,
+    40,
+    41,
+    42,
+    43,
+    45,
+    47,
+    48,
+    49,
+    54
+   ],
+   "dibujoOGrafico": [
+    16,
+    17,
+    18,
+    20,
+    25,
+    28,
+    33,
+    34,
+    35,
+    37,
+    38,
+    40,
+    41,
+    42,
+    43,
+    45,
+    47,
+    48,
+    49,
+    54
+   ],
+   "tablaORecuadro": [
+    3,
+    8,
+    11,
+    12
+   ],
+   "descartadosPorNotacion": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10,
+    13,
+    14,
+    15,
+    19,
+    21,
+    22,
+    23,
+    24,
+    26,
+    27,
+    29,
+    30,
+    31,
+    32,
+    36,
+    39,
+    44,
+    46,
+    50,
+    51,
+    52,
+    53,
+    55
+   ],
+   "sinElContenidoEnElEnunciado": [
+    3,
+    25
+   ],
+   "nota": "el parser marcaba hasFigure en 50 de 55 items: pdftotext aplana la notacion matematica y eso se lee como figura faltante. Los falsos positivos mas tercos fueron el vinculo de una raiz (#9) y los corchetes de un intervalo (#22)."
+  },
+  "contentFixes": {
+   "items": [
+    1,
+    2,
+    3,
+    9,
+    16,
+    18,
+    21,
+    22,
+    29,
+    31,
+    36,
+    43,
+    47,
+    48,
+    49,
+    50,
+    51
+   ],
+   "metodo": "notacion reconstruida desde `pdftotext -bbox` con coordenadas (numerador sobre la regla, denominador debajo) y contrastada con la pagina renderizada; cada digito escrito se verifico contra la capa de texto de su banda",
+   "nota": "el parser emitia el numerador de una fraccion al FINAL del elemento anterior: por eso el enunciado terminaba en un numero suelto y cada alternativa arrastraba el numerador de la siguiente. Ademas la alternativa D del #2 se habia comido el enunciado del #3, y las 4 tablas del #43 cayeron todas dentro de la alternativa A.",
+   "sinCorregir": [
+    6,
+    10,
+    14,
+    23,
+    44,
+    53
+   ]
+  }
+ }
+}

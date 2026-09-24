@@ -10,6 +10,7 @@ export * from './files';
 export * from './items';
 export * from './item-collections';
 export * from './item-edit-proposals';
+export * from './measurement-processes';
 export * from './assessments';
 export * from './responses';
 export * from './results';

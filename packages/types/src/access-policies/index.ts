@@ -31,3 +31,4 @@ export * from './documents';
 export * from './sheet-scanning';
 export * from './telemetry';
 export * from './feedback';
+export * from './measurement-processes';

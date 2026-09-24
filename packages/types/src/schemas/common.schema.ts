@@ -72,3 +72,33 @@ export const uuidCsvSchema = csvArraySchema(z.string().uuid());
 
 /** CSV/array de strings no vacíos desde la query string. Ver {@link csvArraySchema}. */
 export const stringCsvSchema = csvArraySchema(z.string().min(1));
+
+/**
+ * Mínimo de caracteres para que un término de búsqueda filtre. Con uno solo,
+ * `%a%` coincide con casi todo y el buscador deja de acotar nada. Mismo umbral
+ * que `MIN_TEACHER_QUERY_LENGTH`.
+ */
+export const MIN_SEARCH_TERM_LENGTH = 2;
+
+/** Tope de longitud del término: se TRUNCA, nunca se rechaza. */
+export const MAX_SEARCH_TERM_LENGTH = 100;
+
+/**
+ * Término de búsqueda libre desde la query string (`?q=…`).
+ *
+ * Transforma en vez de validar: vacío, sólo espacios o por debajo del mínimo se
+ * colapsan a `undefined` ("sin filtro"). Un `?q=a` pegado en un link no puede
+ * tumbar el dashboard entero con un 400 — mismo criterio permisivo que
+ * {@link csvArraySchema} con un array vacío.
+ *
+ * Acepta el parámetro repetido (`?q=a&q=b` → `'a'`) porque `URLSearchParams` lo
+ * permite y Nest lo entrega como array.
+ */
+export const searchTermSchema = z
+  .union([z.string(), z.array(z.string())])
+  .optional()
+  .transform((value) => {
+    const raw = Array.isArray(value) ? value[0] : value;
+    const trimmed = (raw ?? '').trim().slice(0, MAX_SEARCH_TERM_LENGTH);
+    return trimmed.length >= MIN_SEARCH_TERM_LENGTH ? trimmed : undefined;
+  });
