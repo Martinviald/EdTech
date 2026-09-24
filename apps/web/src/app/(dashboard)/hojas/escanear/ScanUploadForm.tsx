@@ -87,6 +87,8 @@ export type PrintRunOption = {
   createdLabel: string;
   assessmentName: string | null;
   imprimirHref: Route;
+  /** Ya tiene un lote confirmado. No la excluye —re-escanear es válido— pero se avisa. */
+  hasConfirmedBatch: boolean;
 };
 
 type UploadStatus = 'queued' | 'uploading' | 'confirming' | 'done' | 'error';
@@ -294,10 +296,7 @@ export function ScanUploadForm({
     else toast.error('Sigue habiendo archivos con error. Puedes reintentar de nuevo.');
   }
 
-  function handleCameraAccepted(
-    file: File,
-    identity: AssessCaptureIdentityModel | null,
-  ): boolean {
+  function handleCameraAccepted(file: File, identity: AssessCaptureIdentityModel | null): boolean {
     if (files.length >= MAX_FILES) {
       toast.error(`Máximo ${MAX_FILES} archivos por lote: la foto no se agregó.`);
       return false;

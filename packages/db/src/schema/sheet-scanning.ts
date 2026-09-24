@@ -146,28 +146,40 @@ export const printedSheets = pgTable(
 );
 
 /** Un lote subido. Unidad de trabajo del JobDispatcher (D12); polling desde el frontend. */
-export const sheetScanBatches = pgTable('sheet_scan_batches', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orgId: uuid('org_id')
-    .notNull()
-    .references(() => organizations.id),
-  printRunId: uuid('print_run_id')
-    .notNull()
-    .references(() => sheetPrintRuns.id),
-  status: sheetScanBatchStatusEnum('status').default('pending').notNull(),
-  captureProfile: jsonb('capture_profile').$type<CaptureProfile>().notNull(),
-  sourceFileIds: jsonb('source_file_ids').$type<string[]>().notNull(),
-  pagesTotal: integer('pages_total'),
-  pagesRead: integer('pages_read').default(0).notNull(),
-  reviewPending: integer('review_pending').default(0).notNull(),
-  // Estado de dominio, no excepción: motivo de `failed` (infra, reintentable) o
-  // `rejected` (hash de layout distinto — G1, ningún reintento lo arregla).
-  failureReason: text('failure_reason'),
-  importJobId: uuid('import_job_id').references(() => importJobs.id),
-  createdById: uuid('created_by_id').references(() => users.id),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const sheetScanBatches = pgTable(
+  'sheet_scan_batches',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id),
+    printRunId: uuid('print_run_id')
+      .notNull()
+      .references(() => sheetPrintRuns.id),
+    status: sheetScanBatchStatusEnum('status').default('pending').notNull(),
+    captureProfile: jsonb('capture_profile').$type<CaptureProfile>().notNull(),
+    sourceFileIds: jsonb('source_file_ids').$type<string[]>().notNull(),
+    pagesTotal: integer('pages_total'),
+    pagesRead: integer('pages_read').default(0).notNull(),
+    reviewPending: integer('review_pending').default(0).notNull(),
+    // Estado de dominio, no excepción: motivo de `failed` (infra, reintentable) o
+    // `rejected` (hash de layout distinto — G1, ningún reintento lo arregla).
+    failureReason: text('failure_reason'),
+    importJobId: uuid('import_job_id').references(() => importJobs.id),
+    createdById: uuid('created_by_id').references(() => users.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    // El listado de tiradas deriva "ya corregida" con un EXISTS sobre esta tabla
+    // por (print_run_id, status). La tabla no tenía NINGÚN índice, así que ese
+    // EXISTS era un seq scan por cada listado. Es el único índice que agrega la
+    // bandera derivada — la alternativa era una columna `status` en
+    // `sheet_print_runs`, o sea una segunda fuente de verdad que se
+    // desincroniza.
+    index('sheet_scan_batches_run_status_idx').on(t.printRunId, t.status),
+  ],
+);
 
 /**
  * El escaneo de UNA PÁGINA de una hoja. Idempotente por (printedSheetId,

@@ -34,7 +34,6 @@ import { DownloadPdfButton } from '../../components/DownloadPdfButton';
 import { AssignAssessmentControl } from '../../components/AssignAssessmentControl';
 import { PrintRunDateControl } from '../../components/PrintRunDateControl';
 import { HOJAS_ROUTES } from '../../lib/routes';
-import { listInstrumentsForSheets } from '../../lib/instruments';
 import { listAssessmentOptions } from '../../lib/assessment-options';
 import { formatSheetDate } from '../../lib/format';
 import { PrintRunForm, type CourseOption } from './PrintRunForm';
@@ -74,15 +73,14 @@ export default async function ImprimirPage({ params }: PageProps) {
 
 async function SetupSection({ layoutId, orgId }: { layoutId: string; orgId: string }) {
   const layout = await getLayoutOrNotFound(layoutId);
-  const [classGroups, instruments, assessments, forms] = await Promise.all([
+  const [classGroups, assessments, forms] = await Promise.all([
     listClassGroupsForUser(orgId),
-    listInstrumentsForSheets(),
     listAssessmentOptions(layout.instrumentId),
     apiGet<AssessmentFormListResponse>(`/sheet-print-runs/forms?layoutId=${layoutId}`),
   ]);
 
-  const instrumentName =
-    instruments.data.find((i) => i.id === layout.instrumentId)?.name ?? 'Instrumento sin nombre';
+  // El nombre viene en el layout: ya no se busca en la página de 100 instrumentos.
+  const instrumentName = layout.instrumentName ?? 'Instrumento sin nombre';
 
   return (
     <div className="space-y-4">

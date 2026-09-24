@@ -32,7 +32,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { HOJAS_ROUTES } from '../lib/routes';
-import { listInstrumentsForSheets } from '../lib/instruments';
 import { listAssessmentOptionsByInstrument } from '../lib/assessment-options';
 import { assessmentLabel } from '../lib/assessments';
 import { formatSheetDate } from '../lib/format';
@@ -72,11 +71,12 @@ const fetchPrintRunOptions = cache(
     assessmentsByInstrument: Record<string, PrintRunAssessmentOption[]>;
     labelsById: Map<string, string>;
   }> => {
-    const [runs, instruments] = await Promise.all([
-      apiGet<PaginatedResponse<PrintRunModel>>('/sheet-print-runs?page=1&limit=100'),
-      listInstrumentsForSheets(),
-    ]);
-    const instrumentNames = new Map(instruments.data.map((i) => [i.id, i.name]));
+    // El nombre del instrumento viene en la tirada (`run.instrumentName`): ya no
+    // hace falta el mapa de `/instruments`, que con 128 instrumentos en la org
+    // dejaba fuera a los nuevos y los mostraba "sin nombre".
+    const runs = await apiGet<PaginatedResponse<PrintRunModel>>(
+      '/sheet-print-runs?page=1&limit=100',
+    );
     const assessmentsByInstrument = await listAssessmentOptionsByInstrument(
       runs.data.map((run) => run.instrumentId),
     );
@@ -89,7 +89,7 @@ const fetchPrintRunOptions = cache(
         id: run.id,
         instrumentId: run.instrumentId,
         courseLabel: run.classGroupName ?? 'Sin curso',
-        instrumentName: instrumentNames.get(run.instrumentId) ?? 'Instrumento sin nombre',
+        instrumentName: run.instrumentName ?? 'Instrumento sin nombre',
         sheetCount: run.sheetCount,
         createdLabel: formatSheetDate(run.createdAt),
         assessmentName: assessment
@@ -98,13 +98,20 @@ const fetchPrintRunOptions = cache(
             ? 'Evaluación asociada'
             : null,
         imprimirHref: HOJAS_ROUTES.imprimir(run.layoutId),
+        hasConfirmedBatch: run.hasConfirmedBatch,
       } satisfies PrintRunOption;
     });
+
+    // Las ya corregidas siguen disponibles —re-escanear una hoja que llegó tarde
+    // es legítimo y el modelo lo soporta con `superseded`— pero van al final, para
+    // que la de arriba sea la que falta corregir y no una ya cerrada.
+    options.sort((a, b) => Number(a.hasConfirmedBatch) - Number(b.hasConfirmedBatch));
 
     const labelsById = new Map(
       options.map((o) => [
         o.id,
-        `${o.courseLabel} — ${o.instrumentName} — ${o.sheetCount} hojas · ${o.createdLabel}`,
+        `${o.courseLabel} — ${o.instrumentName} — ${o.sheetCount} hojas · ${o.createdLabel}` +
+          (o.hasConfirmedBatch ? ' · ya corregida' : ''),
       ]),
     );
     return { options, assessmentsByInstrument, labelsById };
