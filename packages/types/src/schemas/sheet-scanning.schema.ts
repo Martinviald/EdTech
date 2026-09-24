@@ -242,6 +242,8 @@ export type FreezeLayoutResponse = {
 export type SheetLayoutSummaryModel = {
   id: string;
   instrumentId: string;
+  /** Nombre del instrumento, resuelto en el servidor (ver `PrintRunModel.instrumentName`). */
+  instrumentName: string | null;
   /** Forma que cubre el layout; null = el instrumento completo. */
   assessmentFormId: string | null;
   version: number;
@@ -270,8 +272,27 @@ export type PrintRunModel = {
   layoutId: string;
   layoutVersion: number;
   instrumentId: string;
+  /**
+   * Nombre del instrumento, resuelto en el servidor.
+   *
+   * ⚠️ Antes la web lo suplía con un mapa que armaba pidiendo
+   * `/instruments?page=1&pageSize=100` ordenado por `created_at` ASC. Con 128
+   * instrumentos en la org, todo instrumento NUEVO quedaba fuera de esa página y
+   * su tirada se mostraba como "Instrumento sin nombre" — justo las que se están
+   * usando. Subir el `pageSize` no era opción (el schema lo topa en 100).
+   */
+  instrumentName: string | null;
   classGroupId: string | null;
   classGroupName: string | null;
+  /**
+   * La tirada ya tiene al menos un lote CONFIRMADO, o sea que se corrigió.
+   *
+   * Derivado de `sheet_scan_batches`, no una columna: una columna sería una
+   * segunda fuente de verdad que se desincroniza del estado real de los lotes.
+   * No sirve para OCULTAR la tirada —re-escanear es legítimo y el modelo lo
+   * soporta con `superseded`— sino para etiquetarla y ordenarla al final.
+   */
+  hasConfirmedBatch: boolean;
   assessmentId: string | null;
   assessmentFormId?: string | null;
   administeredAt: string | Date | null;

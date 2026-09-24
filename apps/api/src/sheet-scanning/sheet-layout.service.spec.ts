@@ -284,8 +284,10 @@ describe('SheetLayoutService.getFrozen / list', () => {
     createdAt: new Date('2026-08-01T12:00:00Z'),
   };
 
-  it('getFrozen devuelve el SheetLayoutModel completo', async () => {
-    const { db } = makeDb([[layoutRow]]);
+  // La consulta joinea `instruments` para resolver el nombre en el servidor, así
+  // que devuelve { layout, instrumentName } y no la fila plana.
+  it('getFrozen devuelve el SheetLayoutModel completo, con el nombre del instrumento', async () => {
+    const { db } = makeDb([[{ layout: layoutRow, instrumentName: 'PAES M2 — Ensayo 5' }]]);
     const service = new SheetLayoutService(db);
 
     const model = await service.getFrozen(ORG_ID, 'layout-1');
@@ -293,12 +295,24 @@ describe('SheetLayoutService.getFrozen / list', () => {
     expect(model).toMatchObject({
       id: 'layout-1',
       instrumentId: INSTRUMENT_ID,
+      instrumentName: 'PAES M2 — Ensayo 5',
       version: 2,
       specHash: 'abcdefabcdefabcd',
       pageCount: 1,
       fieldCount: 3,
     });
     expect(model.spec).toEqual(layoutRow.spec);
+  });
+
+  // Un instrumento borrado deja el join en null: el modelo lo expone como null y
+  // la UI decide el texto, en vez de inventar un nombre acá.
+  it('getFrozen tolera que el instrumento no resuelva', async () => {
+    const { db } = makeDb([[{ layout: layoutRow, instrumentName: null }]]);
+    const service = new SheetLayoutService(db);
+
+    const model = await service.getFrozen(ORG_ID, 'layout-1');
+
+    expect(model.instrumentName).toBeNull();
   });
 
   it('getFrozen lanza NotFound cuando el layout no existe en la org', async () => {
@@ -309,7 +323,10 @@ describe('SheetLayoutService.getFrozen / list', () => {
   });
 
   it('list devuelve la envoltura paginada { data, total, page, limit }', async () => {
-    const { db } = makeDb([[{ total: 7 }], [layoutRow]]);
+    const { db } = makeDb([
+      [{ total: 7 }],
+      [{ layout: layoutRow, instrumentName: 'PAES M2 — Ensayo 5' }],
+    ]);
     const service = new SheetLayoutService(db);
 
     const result = await service.list(ORG_ID, { page: 2, limit: 5 });
@@ -318,7 +335,12 @@ describe('SheetLayoutService.getFrozen / list', () => {
     expect(result.page).toBe(2);
     expect(result.limit).toBe(5);
     expect(result.data).toHaveLength(1);
-    expect(result.data[0]).toMatchObject({ id: 'layout-1', fieldCount: 3, pageCount: 1 });
+    expect(result.data[0]).toMatchObject({
+      id: 'layout-1',
+      instrumentName: 'PAES M2 — Ensayo 5',
+      fieldCount: 3,
+      pageCount: 1,
+    });
     expect(result.data[0]).not.toHaveProperty('spec');
   });
 });

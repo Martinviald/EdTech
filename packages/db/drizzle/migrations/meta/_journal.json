@@ -239,6 +239,13 @@
       "when": 1788957777758,
       "tag": "0033_lowly_eternity",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790263703621,
+      "tag": "0034_brief_captain_flint",
+      "breakpoints": true
     }
   ]
 }

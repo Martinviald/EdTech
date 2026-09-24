@@ -27,6 +27,7 @@ import { DesignSheetDialog } from './components/DesignSheetDialog';
 import { DownloadPdfButton } from './components/DownloadPdfButton';
 import { HOJAS_ROUTES } from './lib/routes';
 import { listInstrumentsForSheets } from './lib/instruments';
+import { Badge } from '@/components/ui/badge';
 import { formatSheetDate } from './lib/format';
 
 export default async function HojasPage() {
@@ -82,10 +83,11 @@ async function DesignSheetAction() {
 }
 
 async function LayoutsSection() {
-  const [layouts, instruments] = await Promise.all([
-    apiGet<PaginatedResponse<SheetLayoutSummaryModel>>('/sheet-layouts?page=1&limit=50'),
-    listInstrumentsForSheets(),
-  ]);
+  // El nombre del instrumento viene en cada layout: ya no hace falta traer el
+  // listado de instrumentos para armar un mapa.
+  const layouts = await apiGet<PaginatedResponse<SheetLayoutSummaryModel>>(
+    '/sheet-layouts?page=1&limit=50',
+  );
 
   if (layouts.data.length === 0) {
     return (
@@ -96,8 +98,6 @@ async function LayoutsSection() {
       />
     );
   }
-
-  const instrumentNames = new Map(instruments.data.map((i) => [i.id, i.name]));
 
   return (
     <div className="overflow-x-auto rounded-lg border">
@@ -117,7 +117,7 @@ async function LayoutsSection() {
           {layouts.data.map((layout) => (
             <TableRow key={layout.id}>
               <TableCell className="font-medium">
-                {instrumentNames.get(layout.instrumentId) ?? 'Instrumento sin nombre'}
+                {layout.instrumentName ?? 'Instrumento sin nombre'}
               </TableCell>
               <TableCell>v{layout.version}</TableCell>
               <TableCell className="hidden md:table-cell">
@@ -145,10 +145,7 @@ async function LayoutsSection() {
 }
 
 async function PrintRunsSection() {
-  const [runs, instruments] = await Promise.all([
-    apiGet<PaginatedResponse<PrintRunModel>>('/sheet-print-runs?page=1&limit=50'),
-    listInstrumentsForSheets(),
-  ]);
+  const runs = await apiGet<PaginatedResponse<PrintRunModel>>('/sheet-print-runs?page=1&limit=50');
 
   if (runs.data.length === 0) {
     return (
@@ -160,7 +157,12 @@ async function PrintRunsSection() {
     );
   }
 
-  const instrumentNames = new Map(instruments.data.map((i) => [i.id, i.name]));
+  // Las tiradas ya corregidas no se ocultan —re-escanear es legítimo, y el modelo
+  // lo soporta con `superseded`— pero bajan al final y van etiquetadas: mezcladas
+  // arriba con las pendientes se ofrecían como si no se hubiera hecho nada.
+  const ordenadas = [...runs.data].sort(
+    (a, b) => Number(a.hasConfirmedBatch) - Number(b.hasConfirmedBatch),
+  );
 
   return (
     <div className="overflow-x-auto rounded-lg border">
@@ -176,10 +178,13 @@ async function PrintRunsSection() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {runs.data.map((run) => (
-            <TableRow key={run.id}>
+          {ordenadas.map((run) => (
+            <TableRow key={run.id} className={run.hasConfirmedBatch ? 'text-muted-foreground' : ''}>
               <TableCell className="font-medium">
-                {instrumentNames.get(run.instrumentId) ?? 'Instrumento sin nombre'}
+                <span className="flex flex-wrap items-center gap-2">
+                  {run.instrumentName ?? 'Instrumento sin nombre'}
+                  {run.hasConfirmedBatch ? <Badge variant="outline">Ya corregida</Badge> : null}
+                </span>
               </TableCell>
               <TableCell>{run.classGroupName ?? '—'}</TableCell>
               <TableCell className="hidden sm:table-cell">{run.sheetCount}</TableCell>
