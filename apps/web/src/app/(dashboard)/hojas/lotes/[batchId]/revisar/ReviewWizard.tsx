@@ -140,7 +140,7 @@ export function ReviewWizard({
               <MarkReviewPanel
                 batchId={batchId}
                 marks={marks}
-                quickConfirm={queue?.settings.quickConfirm ?? false}
+                quickConfirm={queue?.settings.quickConfirm ?? true}
               />
             ) : (
               <AlertCallout tone="success" icon={CheckCircle2} title="No hay marcas dudosas">
