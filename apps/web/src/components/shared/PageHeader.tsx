@@ -63,7 +63,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   const TitleTag = variant === 'secondary' ? 'h2' : 'h1';
   const textColumn = (
-    <div className="space-y-2">
+    <div className="min-w-0 space-y-2">
       {eyebrow ? (
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0">
           {eyebrow}
@@ -93,7 +93,7 @@ export function PageHeader({
       {breadcrumb}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         {icon ? (
-          <div className="flex items-stretch gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <HeaderIcon icon={icon} variant={iconVariant} tone={iconTone} />
             {textColumn}
           </div>

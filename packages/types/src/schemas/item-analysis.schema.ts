@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
+import { csvArraySchema, searchTermSchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 import type { AnswerKey, ScoreCategoryDistribution } from '../utils/answer-key';
 import type { RawAnswerCount } from '../utils/raw-answer-distribution';
@@ -51,6 +51,10 @@ export const assessmentListQuerySchema = z.object({
   instrumentId: uuidCsvSchema,
   instrumentType: stringCsvSchema,
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): mismo contrato
+  // que `dashboardFiltersQuerySchema.q`. Va en los tres schemas a la vez para que
+  // ninguna pestaña muestre el buscador y lo ignore en silencio.
+  q: searchTermSchema,
 });
 export type AssessmentListQueryDto = z.infer<typeof assessmentListQuerySchema>;
 

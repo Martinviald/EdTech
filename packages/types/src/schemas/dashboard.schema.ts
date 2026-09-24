@@ -2,11 +2,12 @@ import { z } from 'zod';
 import { PERFORMANCE_LEVELS, type AssessmentStatus, type PerformanceLevel } from '../enums';
 import type { ComparabilityMeta } from '../comparability';
 import type { PerformanceBandView } from './performance-band.schema';
-import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
+import { csvArraySchema, searchTermSchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import {
   INSTRUMENT_APPLICATION_PERIODS,
   type InstrumentApplicationPeriod,
 } from './instrument.schema';
+import type { ProcessStatus } from './measurement-process.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 4 — Dashboards core (H6.1, H6.2, H6.4, H6.5, H6.7, H6.8)
@@ -38,6 +39,11 @@ export const dashboardFiltersQuerySchema = z.object({
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   studentId: z.string().uuid().optional(),
   academicYearId: z.string().uuid().optional(),
+  processId: z.string().uuid().optional(),
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): acota a las
+  // evaluaciones cuyo nombre (o el de su instrumento) CONTIENE el término, sin
+  // distinguir mayúsculas ni tildes. Un término inválido degrada a "sin filtro".
+  q: searchTermSchema,
 });
 export type DashboardFiltersQueryDto = z.infer<typeof dashboardFiltersQuerySchema>;
 
@@ -218,6 +224,18 @@ export type InstrumentFilterOption = {
   applicationPeriod: InstrumentApplicationPeriod | null;
 };
 
+/**
+ * Proceso de medición ofrecible como filtro. Sólo llegan los que tienen alguna
+ * evaluación dentro del alcance visible: un proceso planificado sin evaluaciones
+ * cargadas dejaría el panorama en blanco al elegirlo.
+ */
+export type ProcessFilterOption = {
+  id: string;
+  label: string;
+  academicYearId: string | null;
+  status: ProcessStatus;
+};
+
 export type DashboardFilterOptionsResponse = {
   subjects: FilterOption[];
   grades: FilterOption[];
@@ -237,6 +255,8 @@ export type DashboardFilterOptionsResponse = {
    * los elija.
    */
   applicationPeriodsWithData: InstrumentApplicationPeriod[];
+  /** Procesos de medición con evaluaciones en el alcance visible. */
+  processes: ProcessFilterOption[];
   /**
    * Año académico al que está acotado el catálogo de cursos: el pedido en la
    * query, o el vigente, o el más reciente con cursos. `null` si el usuario no

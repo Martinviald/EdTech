@@ -239,6 +239,20 @@
       "when": 1788957777758,
       "tag": "0033_lowly_eternity",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789480629072,
+      "tag": "0034_public_nitro",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790265950534,
+      "tag": "0035_breezy_king_bedlam",
+      "breakpoints": true
     }
   ]
 }

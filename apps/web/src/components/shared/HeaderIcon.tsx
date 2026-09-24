@@ -12,17 +12,23 @@ interface HeaderIconProps {
   variant?: HeaderIconVariant;
   /** Color de marca/estado. Todos vienen de tokens semánticos. */
   tone?: HeaderIconTone;
-  /** Se aplica al wrapper que estira; útil para fijar tamaño en uso aislado (`size-10`). */
+  /** Sobrescribe el tamaño por defecto (`size-10`) u otros estilos de la caja. */
   className?: string;
 }
 
 /**
- * Cajita de ícono de encabezado, siempre cuadrada. El wrapper externo estira a la
- * altura de la fila (`self-stretch`, requiere padre flex `items-stretch`); la caja
- * interna toma esa altura con `h-full` y deriva el ancho con `aspect-square`. Se
- * anida así a propósito: `aspect-square` sobre un item flex directo no funciona
- * (el motor de flex ya resolvió su ancho antes del aspect-ratio → pastilla). En
- * uso aislado (sin fila que estire) pásale un tamaño por `className` (`size-10`).
+ * Cajita de ícono de encabezado, siempre cuadrada y de tamaño FIJO (`size-10`
+ * salvo override por `className`). El ícono ocupa la mitad de la caja.
+ *
+ * ⚠️ No volver al patrón anterior (wrapper `self-stretch` + caja interna
+ * `aspect-square h-full`) para que el ícono creciera con el alto de la fila: ese
+ * sizing es circular y el navegador lo resuelve en dos pasadas que no concuerdan.
+ * En la pasada de ancho la altura del wrapper todavía es indefinida, así que
+ * `h-full` cae a `auto` y el wrapper queda fijado en ~36px; recién después
+ * `self-stretch` lo estira, `h-full` resuelve al alto real de la fila y
+ * `aspect-square` recalcula un ancho mayor que ya no cabe. La caja desbordaba a
+ * su wrapper, se comía el `gap` de la fila y se solapaba con el título — y tanto
+ * más cuanto más alto el encabezado.
  */
 export function HeaderIcon({
   icon: Icon,
@@ -31,16 +37,16 @@ export function HeaderIcon({
   className,
 }: HeaderIconProps) {
   return (
-    <div aria-hidden className={cn('flex shrink-0 self-stretch', className)}>
-      <div
-        className={cn(
-          'flex aspect-square h-full min-h-9 items-center justify-center rounded-lg',
-          HEADER_ICON_TONE_CLASS[variant][tone],
-          variant === 'filled' && 'shadow-sm',
-        )}
-      >
-        <Icon className="size-1/2 min-h-4 min-w-4 max-h-6 max-w-6" />
-      </div>
+    <div
+      aria-hidden
+      className={cn(
+        'flex size-10 shrink-0 items-center justify-center rounded-lg',
+        HEADER_ICON_TONE_CLASS[variant][tone],
+        variant === 'filled' && 'shadow-sm',
+        className,
+      )}
+    >
+      <Icon className="size-1/2" />
     </div>
   );
 }

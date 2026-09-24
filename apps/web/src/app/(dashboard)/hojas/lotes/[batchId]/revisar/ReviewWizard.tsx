@@ -140,7 +140,7 @@ export function ReviewWizard({
               <MarkReviewPanel
                 batchId={batchId}
                 marks={marks}
-                quickConfirm={queue?.settings.quickConfirm ?? false}
+                quickConfirm={queue?.settings.quickConfirm ?? true}
               />
             ) : (
               <AlertCallout tone="success" icon={CheckCircle2} title="No hay marcas dudosas">
@@ -393,7 +393,12 @@ function ReadyToProcessStep({ batchId, batch }: { batchId: string; batch: BatchS
 
 function ProcessingStep({ batch }: { batch: BatchStatusModel }) {
   return (
-    <AlertCallout tone="info" icon={Loader2} title="El lector está procesando el lote">
+    <AlertCallout
+      tone="info"
+      icon={Loader2}
+      iconClassName="animate-spin"
+      title="El lector está procesando el lote"
+    >
       <p>
         Esta vista se actualiza sola cada pocos segundos. Cuando termine la lectura vas a poder
         continuar con la revisión: no hay nada que hacer todavía.

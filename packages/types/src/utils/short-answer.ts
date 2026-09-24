@@ -15,7 +15,7 @@
 export type ShortAnswerMatch = 'match' | 'mismatch' | 'undecidable';
 
 export type ShortAnswerOptions = {
-  comparison?: 'numeric' | 'text';
+  comparison?: 'numeric' | 'text' | 'sequence';
   unit?: string;
   caseSensitive?: boolean;
 };
@@ -74,6 +74,15 @@ function isAmbiguous(value: string): boolean {
   return /\d\s*[-+*][\s]*\d/.test(value) && !FRACTION.test(value);
 }
 
+/**
+ * Los números de una secuencia, en orden: `3-1-4-2`, `3,1,4,2`, `2 – 4 – 3 – 1`
+ * y `(5,6)` / `(5;6)` son la misma lista escrita distinto. Un guion pegado a un
+ * dígito separa (`3-1`); sólo es signo cuando abre el número (`(-3,2)`).
+ */
+function sequenceOf(value: string): number[] {
+  return (value.match(/(?<!\d)-?\d+/g) ?? []).map(Number);
+}
+
 function looksNumeric(value: string): boolean {
   return parseRational(value) !== null;
 }
@@ -102,6 +111,24 @@ export function matchesAcceptedAnswer(
 
   const mode = options.comparison ?? inferComparisonMode(accepted);
   const withoutUnit = collapseWhitespace(stripUnit(cleaned, options.unit));
+
+  if (mode === 'sequence') {
+    const given = sequenceOf(withoutUnit);
+    if (given.length === 0) return 'mismatch';
+    const same = (key: number[]) => {
+      // Un escáner pega las casillas de un orden (`3142`): se separa sólo si la
+      // clave es un orden de 3+ dígitos sueltos y trae exactamente esa cantidad.
+      // Un par (`56` contra `(5,6)`) no: podría ser el número 56.
+      const pasted =
+        given.length === 1 &&
+        key.length >= 3 &&
+        key.every((n) => n >= 0 && n <= 9) &&
+        String(given[0]).length === key.length;
+      const digits = pasted ? String(given[0]).split('').map(Number) : given;
+      return key.length === digits.length && key.every((n, i) => n === digits[i]);
+    };
+    return accepted.some((candidate) => same(sequenceOf(candidate))) ? 'match' : 'mismatch';
+  }
 
   if (mode === 'numeric') {
     const normalized = tightenFractionSlash(withoutUnit);

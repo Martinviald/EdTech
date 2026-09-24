@@ -93,7 +93,12 @@ export class InstrumentsService {
         .select()
         .from(instruments)
         .where(where)
-        .orderBy(instruments.createdAt)
+        // Más nuevos primero. Estaba ASC, y con paginación eso ESCONDE lo recién
+        // cargado: con 128 instrumentos en la org, el selector de "Diseñar hoja"
+        // pedía los primeros 100 y el instrumento nº 127 —el que se acaba de
+        // cargar, el que se quiere usar— no aparecía. Para un listado de
+        // instrumentos, reciente-primero es además el orden útil.
+        .orderBy(desc(instruments.createdAt))
         .limit(pageSize)
         .offset(offset),
       this.db.select({ total: count() }).from(instruments).where(where),

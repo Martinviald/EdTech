@@ -62,6 +62,7 @@ import {
   resolveClassGroupScope,
   type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
+import { assessmentNameMatches } from '../common/helpers/assessment-name-search.helper';
 
 // Roles "administrativos" — ven todos los cursos de la org. Cualquier otro rol
 // con acceso (teacher, homeroom_teacher) ve sólo los cursos donde tiene
@@ -149,6 +150,7 @@ export class ItemAnalysisService {
       if (query.academicYearId) {
         conditions.push(eq(classGroups.academicYearId, query.academicYearId));
       }
+      if (query.q) conditions.push(assessmentNameMatches(query.q));
       if (!scope.scopeAll) {
         // Alcance en sus dos dimensiones: el curso ya está en el join, la
         // asignatura viene del instrumento. Los cursos de jefatura pasan

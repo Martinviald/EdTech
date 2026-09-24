@@ -19,11 +19,11 @@
   "curriculum/skill": 21,
   "curriculum/subdomain": 41,
   "curriculum/text_type": 6,
-  "dia/descriptor": 1047,
+  "dia/descriptor": 1064,
   "dia/domain": 5,
   "dia/subdomain": 29,
-  "descriptor": 1345,
-  "total": 2220
+  "descriptor": 1362,
+  "total": 2237
  },
  "nodes": [
   {
@@ -25383,6 +25383,193 @@
    "source": "dia",
    "level": "2_basico",
    "order": 11
+  },
+  {
+   "code": "MATH-2B-OA05-I3",
+   "type": "descriptor",
+   "name": "Componen números naturales hasta 100.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 3
+  },
+  {
+   "code": "MATH-2B-OA02-I7",
+   "type": "descriptor",
+   "name": "Leen números naturales hasta 100.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 7
+  },
+  {
+   "code": "MATH-2B-OA03-I4",
+   "type": "descriptor",
+   "name": "Comparan números naturales hasta 100.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-2B-OA03-I5",
+   "type": "descriptor",
+   "name": "Ordenan números naturales hasta 100.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 5
+  },
+  {
+   "code": "MATH-2B-OA07-I3",
+   "type": "descriptor",
+   "name": "Identifican unidades y decenas de números naturales hasta 100.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 3
+  },
+  {
+   "code": "MATH-2B-OA11-I6",
+   "type": "descriptor",
+   "name": "Representa una situación multiplicativa utilizando una adición de sumandos iguales.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 6
+  },
+  {
+   "code": "MATH-2B-OA12-I5",
+   "type": "descriptor",
+   "name": "Identifican términos faltantes en patrones numéricos crecientes cuyos términos son naturales hasta el 100.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 5
+  },
+  {
+   "code": "MATH-2B-OA13-I4",
+   "type": "descriptor",
+   "name": "Identifican el signo de igualdad o desigualdad que relaciona dos números dados hasta 20.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-2B-OA14-I1",
+   "type": "descriptor",
+   "name": "Identifican la posición de objetos o personas con relación a otras personas, incluyendo derecha e izquierda.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 1
+  },
+  {
+   "code": "MATH-2B-OA15-I4",
+   "type": "descriptor",
+   "name": "Identifican figuras 2D, a partir de sus características.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-2B-OA19-I3",
+   "type": "descriptor",
+   "name": "Miden la longitud de objetos usando unidades estandarizadas (centímetro).",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 3
+  },
+  {
+   "code": "MATH-2B-OA17-I1",
+   "type": "descriptor",
+   "name": "Identifican días en el calendario.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 1
+  },
+  {
+   "code": "MATH-2B-OA18-I1",
+   "type": "descriptor",
+   "name": "Leen horas y medias horas en relojes digitales.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 1
+  },
+  {
+   "code": "MATH-2B-OA21-I3",
+   "type": "descriptor",
+   "name": "Identifican el gráfico de barra simple sin escala que organiza un conjunto de datos.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 3
+  },
+  {
+   "code": "MATH-2B-OA09-I12",
+   "type": "descriptor",
+   "name": "Resuelven problemas que requieren calcular una adición con números naturales sin canje.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 12
+  },
+  {
+   "code": "MATH-2B-OA10-I1",
+   "type": "descriptor",
+   "name": "Identifican la operación inversa de una sustracción o una adición de números naturales.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 1
+  },
+  {
+   "code": "MATH-2B-OA09-I13",
+   "type": "descriptor",
+   "name": "Identifican errores en la aplicación del algoritmo de la adición en el contexto de la resolución de problemas y justifican su razonamiento.",
+   "parentCode": "DIA-MATH-2B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "2_basico",
+   "order": 13
   }
  ],
  "mappings": [
@@ -30975,6 +31162,111 @@
    "sourceCode": "SCI-6B-OA18-I2",
    "targetCode": "SCI-SK-OBSERVAR-Y-PREGUNTAR",
    "mappingType": "related"
+  },
+  {
+   "sourceCode": "MATH-2B-OA05-I3",
+   "targetCode": "MATH-2B-OA05",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA02-I7",
+   "targetCode": "MATH-2B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA03-I4",
+   "targetCode": "MATH-2B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA03-I5",
+   "targetCode": "MATH-2B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA07-I3",
+   "targetCode": "MATH-2B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA11-I6",
+   "targetCode": "MATH-2B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA09-I11",
+   "targetCode": "MATH-2B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA12-I5",
+   "targetCode": "MATH-2B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA13-I4",
+   "targetCode": "MATH-2B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA14-I1",
+   "targetCode": "MATH-2B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA15-I4",
+   "targetCode": "MATH-2B-OA15",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA16-I3",
+   "targetCode": "MATH-2B-OA16",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA19-I3",
+   "targetCode": "MATH-2B-OA19",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA17-I1",
+   "targetCode": "MATH-2B-OA17",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA18-I1",
+   "targetCode": "MATH-2B-OA18",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA22-I3",
+   "targetCode": "MATH-2B-OA22",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA22-I4",
+   "targetCode": "MATH-2B-OA22",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA21-I3",
+   "targetCode": "MATH-2B-OA21",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA09-I12",
+   "targetCode": "MATH-2B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA10-I1",
+   "targetCode": "MATH-2B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-2B-OA09-I13",
+   "targetCode": "MATH-2B-OA09",
+   "mappingType": "subset"
   }
  ]
 }

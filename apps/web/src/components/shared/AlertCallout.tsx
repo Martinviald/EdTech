@@ -4,7 +4,10 @@ import { cn } from '@/lib/utils';
 
 export type CalloutTone = 'info' | 'success' | 'warning' | 'danger';
 
-const TONE_STYLES: Record<CalloutTone, { container: string; icon: string; defaultIcon: LucideIcon }> = {
+const TONE_STYLES: Record<
+  CalloutTone,
+  { container: string; icon: string; defaultIcon: LucideIcon }
+> = {
   info: { container: 'border-info/30 bg-info/5', icon: 'text-info', defaultIcon: Info },
   success: {
     container: 'border-success/30 bg-success/5',
@@ -28,6 +31,12 @@ interface AlertCalloutProps {
   title?: string;
   /** Sobrescribe el icono por defecto del tono. */
   icon?: LucideIcon;
+  /**
+   * Clases extra para el icono. Existe porque el icono tenía su `className`
+   * fijo: al pasarle un `Loader2` como icono, se pintaba quieto y la caja de
+   * "procesando" parecía colgada en vez de trabajando.
+   */
+  iconClassName?: string;
   children?: React.ReactNode;
   className?: string;
 }
@@ -41,6 +50,7 @@ export function AlertCallout({
   tone = 'info',
   title,
   icon,
+  iconClassName,
   children,
   className,
 }: AlertCalloutProps) {
@@ -52,7 +62,7 @@ export function AlertCallout({
       role="status"
       className={cn('flex gap-3 rounded-lg border p-4 text-sm', styles.container, className)}
     >
-      <Icon className={cn('mt-0.5 size-5 shrink-0', styles.icon)} aria-hidden />
+      <Icon className={cn('mt-0.5 size-5 shrink-0', styles.icon, iconClassName)} aria-hidden />
       <div className="space-y-1">
         {title ? <p className="font-medium text-foreground">{title}</p> : null}
         {children ? <div className="text-muted-foreground">{children}</div> : null}

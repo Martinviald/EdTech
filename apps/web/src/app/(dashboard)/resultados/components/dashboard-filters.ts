@@ -20,7 +20,17 @@ export type DashboardFilterValues = {
   instrumentId?: string;
   studentId?: string;
   academicYearId?: string;
+  // Proceso de medición (docs/diseno-procesos-de-medicion.md): acota el alcance a
+  // las evaluaciones de una ventana de aplicación con una sola clave.
+  processId?: string;
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): texto libre que
+  // acota por nombre de evaluación o de instrumento. Es un filtro más, no un modo
+  // aparte: se combina con AND con el resto y vive en la URL.
+  q?: string;
 };
+
+/** Tope de longitud del término, espejo de `MAX_SEARCH_TERM_LENGTH` del backend. */
+const MAX_SEARCH_TERM_LENGTH = 100;
 
 /** Claves de filtro que viven en la querystring. */
 export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
@@ -32,6 +42,8 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'instrumentId',
   'studentId',
   'academicYearId',
+  'processId',
+  'q',
 ];
 
 /**
@@ -45,11 +57,17 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
  *
  * No es un filtro escondido: se pasa también a la barra, que lo muestra seleccionado
  * y permite cambiarlo o quitarlo para ver toda la historia.
+ *
+ * Excepción: un proceso de medición YA declara su propia ventana, y casi siempre la
+ * de un año que no es el vigente. Inyectarle encima el año por defecto cruzaba dos
+ * filtros incompatibles y dejaba el panorama en blanco — que es lo que pasaba al
+ * entrar por "Ver panorama" desde cualquier proceso de un año anterior.
  */
 export function withDefaultAcademicYear(
   value: DashboardFilterValues,
   defaultAcademicYearId: string | null,
 ): DashboardFilterValues {
+  if (value.processId) return value;
   if (value.academicYearId || !defaultAcademicYearId) return value;
   return { ...value, academicYearId: defaultAcademicYearId };
 }
@@ -92,6 +110,8 @@ export function parseDashboardFilters(
     instrumentId: pick('instrumentId'),
     studentId: pick('studentId'),
     academicYearId: pick('academicYearId'),
+    processId: pick('processId'),
+    q: pick('q')?.trim().slice(0, MAX_SEARCH_TERM_LENGTH) || undefined,
   };
 }
 

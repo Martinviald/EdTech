@@ -242,6 +242,8 @@ export type FreezeLayoutResponse = {
 export type SheetLayoutSummaryModel = {
   id: string;
   instrumentId: string;
+  /** Nombre del instrumento, resuelto en el servidor (ver `PrintRunModel.instrumentName`). */
+  instrumentName: string | null;
   /** Forma que cubre el layout; null = el instrumento completo. */
   assessmentFormId: string | null;
   version: number;
@@ -270,8 +272,27 @@ export type PrintRunModel = {
   layoutId: string;
   layoutVersion: number;
   instrumentId: string;
+  /**
+   * Nombre del instrumento, resuelto en el servidor.
+   *
+   * ⚠️ Antes la web lo suplía con un mapa que armaba pidiendo
+   * `/instruments?page=1&pageSize=100` ordenado por `created_at` ASC. Con 128
+   * instrumentos en la org, todo instrumento NUEVO quedaba fuera de esa página y
+   * su tirada se mostraba como "Instrumento sin nombre" — justo las que se están
+   * usando. Subir el `pageSize` no era opción (el schema lo topa en 100).
+   */
+  instrumentName: string | null;
   classGroupId: string | null;
   classGroupName: string | null;
+  /**
+   * La tirada ya tiene al menos un lote CONFIRMADO, o sea que se corrigió.
+   *
+   * Derivado de `sheet_scan_batches`, no una columna: una columna sería una
+   * segunda fuente de verdad que se desincroniza del estado real de los lotes.
+   * No sirve para OCULTAR la tirada —re-escanear es legítimo y el modelo lo
+   * soporta con `superseded`— sino para etiquetarla y ordenarla al final.
+   */
+  hasConfirmedBatch: boolean;
   assessmentId: string | null;
   assessmentFormId?: string | null;
   administeredAt: string | Date | null;
@@ -372,6 +393,26 @@ export type ReviewScanModel = {
   studentName: string | null;
   identityConfidence: number | null;
   thumbUrl: string | null;
+  /**
+   * La hoja ORIGINAL escaneada, a resolución completa. Existe porque el thumb no
+   * alcanza para el trabajo que hay que hacer con ella.
+   *
+   * Cuando la hoja es una RESERVA —QR legible, calidad OK, pero sin alumno
+   * asignado— el motor no genera thumb (su `needs_thumb` mira calidad e
+   * ilegibilidad del QR, no la identidad) y la pantalla pedía elegir al alumno
+   * SIN mostrar nada. El nombre está escrito a mano en la hoja: sin verla, la
+   * decisión es a ciegas. Y el thumb, que son 400 px de ancho, tampoco serviría
+   * para leerlo.
+   *
+   * ⚠️ `sourceContentType` NO es decorativo: el archivo subido puede ser un PDF
+   * (está en `ALLOWED_SOURCE_MIME_TYPES`) con todas las páginas del lote adentro.
+   * Apuntarle un `<img>` muestra una imagen rota sin error ni log. Quien lo pinte
+   * tiene que ramificar por tipo y usar `sourcePageIndex` para el PDF.
+   */
+  sourceUrl: string | null;
+  sourceContentType: string | null;
+  /** Página del archivo subido (0-based), para abrir el PDF en la hoja correcta. */
+  sourcePageIndex: number | null;
 };
 
 export type ReviewMarkModel = {
