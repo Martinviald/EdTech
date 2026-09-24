@@ -8,14 +8,14 @@ import {
   listOrgTeachers,
   listSubjectClasses,
 } from '@/lib/teacherAssignmentsApi';
-import { OrgHubHeader } from '../components/OrgHubHeader';
+import { EquipoHubHeader } from '../components/EquipoHubHeader';
 import { AssignmentsTable } from './AssignmentsTable';
 import { CreateAssignmentDialog } from './CreateAssignmentDialog';
 
 export default async function AsignacionesPage() {
   const session = await auth();
   if (!session?.user?.orgId) redirect(ROUTES.login);
-  if (!canAccess(session.user.roles, ASSIGNMENTS_ROLES)) redirect(ROUTES.organizacion);
+  if (!canAccess(session.user.roles, ASSIGNMENTS_ROLES)) redirect(ROUTES.dashboard);
 
   const orgId = session.user.orgId;
 
@@ -27,7 +27,7 @@ export default async function AsignacionesPage() {
 
   return (
     <PageContainer>
-      <OrgHubHeader />
+      <EquipoHubHeader />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-2xl text-sm text-muted-foreground">

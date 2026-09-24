@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
     return [
       { source: '/banco-items', destination: '/banco-contenido', permanent: false },
       { source: '/banco-items/:path*', destination: '/banco-contenido/:path*', permanent: false },
+      // Las asignaciones docentes se mudaron del hub de Organización al de Equipo.
+      {
+        source: '/organizacion/asignaciones',
+        destination: '/equipo/asignaciones',
+        permanent: false,
+      },
     ];
   },
 };

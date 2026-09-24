@@ -78,10 +78,10 @@ const STATIC_TITLES: Record<string, PageTitle> = {
   [ROUTES.telemetria]: { title: 'Telemetría de uso' },
 
   [ROUTES.equipo]: { title: 'Equipo', parent: adminHubParent() },
+  [ROUTES.equipoAsignaciones]: { title: 'Equipo', parent: adminHubParent() },
   [ROUTES.marcosAcademicos]: { title: 'Marcos Académicos', parent: adminHubParent() },
 
   [ROUTES.organizacion]: { title: 'Mi Colegio', parent: adminHubParent() },
-  [ROUTES.organizacionAsignaciones]: { title: 'Mi Colegio', parent: adminHubParent() },
   [ROUTES.organizacionConfigurar]: {
     title: 'Configurar colegio',
     parent: { href: ROUTES.organizacion, label: 'Mi Colegio' },
