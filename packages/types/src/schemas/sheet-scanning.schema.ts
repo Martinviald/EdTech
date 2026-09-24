@@ -372,6 +372,26 @@ export type ReviewScanModel = {
   studentName: string | null;
   identityConfidence: number | null;
   thumbUrl: string | null;
+  /**
+   * La hoja ORIGINAL escaneada, a resolución completa. Existe porque el thumb no
+   * alcanza para el trabajo que hay que hacer con ella.
+   *
+   * Cuando la hoja es una RESERVA —QR legible, calidad OK, pero sin alumno
+   * asignado— el motor no genera thumb (su `needs_thumb` mira calidad e
+   * ilegibilidad del QR, no la identidad) y la pantalla pedía elegir al alumno
+   * SIN mostrar nada. El nombre está escrito a mano en la hoja: sin verla, la
+   * decisión es a ciegas. Y el thumb, que son 400 px de ancho, tampoco serviría
+   * para leerlo.
+   *
+   * ⚠️ `sourceContentType` NO es decorativo: el archivo subido puede ser un PDF
+   * (está en `ALLOWED_SOURCE_MIME_TYPES`) con todas las páginas del lote adentro.
+   * Apuntarle un `<img>` muestra una imagen rota sin error ni log. Quien lo pinte
+   * tiene que ramificar por tipo y usar `sourcePageIndex` para el PDF.
+   */
+  sourceUrl: string | null;
+  sourceContentType: string | null;
+  /** Página del archivo subido (0-based), para abrir el PDF en la hoja correcta. */
+  sourcePageIndex: number | null;
 };
 
 export type ReviewMarkModel = {

@@ -113,6 +113,8 @@ type ScanQueueRow = {
   resolvedStudentId: string | null;
   identityConfidence: string | null;
   thumbFileId: string | null;
+  sourceFileId: string | null;
+  sourcePageIndex: number | null;
   sheetFirstName: string | null;
   sheetLastName: string | null;
   resolvedFirstName: string | null;
@@ -187,14 +189,19 @@ export class ScanReviewService {
 
       const fileIds: string[] = [];
       for (const scan of scanRows) {
-        if (PENDING_SCAN_STATES.includes(scan.state) && scan.thumbFileId) {
-          fileIds.push(scan.thumbFileId);
-        }
+        if (!PENDING_SCAN_STATES.includes(scan.state)) continue;
+        if (scan.thumbFileId) fileIds.push(scan.thumbFileId);
+        // La hoja original: es lo único que sirve para leer un nombre escrito a
+        // mano, y una hoja de RESERVA llega acá sin thumb (el motor sólo lo genera
+        // si la calidad falla o el QR es ilegible, y una reserva tiene los dos
+        // bien).
+        if (scan.sourceFileId) fileIds.push(scan.sourceFileId);
       }
       for (const mark of markRows) {
         if (mark.cropFileId) fileIds.push(mark.cropFileId);
       }
-      const urlByFileId = await this.buildFileUrlIndex(tx, orgId, fileIds);
+      const fileIndex = await this.buildFileIndex(tx, orgId, fileIds);
+      const urlByFileId = new Map([...fileIndex].map(([id, f]) => [id, f.url]));
 
       const scanById = new Map<string, ScanQueueRow>();
       const qualityRejected: ReviewScanModel[] = [];
@@ -202,9 +209,9 @@ export class ScanReviewService {
       for (const scan of scanRows) {
         scanById.set(scan.scanId, scan);
         if (scan.state === 'quality_rejected') {
-          qualityRejected.push(this.toReviewScanModel(scan, urlByFileId));
+          qualityRejected.push(this.toReviewScanModel(scan, urlByFileId, fileIndex));
         } else if (scan.state === 'identity_unresolved') {
-          identityUnresolved.push(this.toReviewScanModel(scan, urlByFileId));
+          identityUnresolved.push(this.toReviewScanModel(scan, urlByFileId, fileIndex));
         }
       }
 
@@ -421,10 +428,16 @@ export class ScanReviewService {
 
       await this.recountReviewPending(tx, orgId, row.batchId);
 
-      const thumbUrl = row.thumbFileId
-        ? ((await this.buildFileUrlIndex(tx, orgId, [row.thumbFileId])).get(row.thumbFileId) ??
-          null)
-        : null;
+      // El mismo índice resuelve thumb y hoja original: la respuesta de esta
+      // acción alimenta la misma fila que la cola, así que tiene que traer lo
+      // mismo o la imagen desaparecería al confirmar.
+      const idx = await this.buildFileIndex(
+        tx,
+        orgId,
+        [row.thumbFileId, row.sourceFileId].filter((x): x is string => x !== null),
+      );
+      const thumbUrl = row.thumbFileId ? (idx.get(row.thumbFileId)?.url ?? null) : null;
+      const source = row.sourceFileId ? idx.get(row.sourceFileId) : undefined;
 
       return {
         scanId,
@@ -437,6 +450,9 @@ export class ScanReviewService {
         studentName: this.fullName(student.firstName, student.lastName),
         identityConfidence: 1,
         thumbUrl,
+        sourceUrl: source?.url ?? null,
+        sourceContentType: source?.contentType ?? null,
+        sourcePageIndex: row.sourcePageIndex,
       };
     });
   }
@@ -467,10 +483,16 @@ export class ScanReviewService {
 
       await this.recountReviewPending(tx, orgId, row.batchId);
 
-      const thumbUrl = row.thumbFileId
-        ? ((await this.buildFileUrlIndex(tx, orgId, [row.thumbFileId])).get(row.thumbFileId) ??
-          null)
-        : null;
+      // El mismo índice resuelve thumb y hoja original: la respuesta de esta
+      // acción alimenta la misma fila que la cola, así que tiene que traer lo
+      // mismo o la imagen desaparecería al confirmar.
+      const idx = await this.buildFileIndex(
+        tx,
+        orgId,
+        [row.thumbFileId, row.sourceFileId].filter((x): x is string => x !== null),
+      );
+      const thumbUrl = row.thumbFileId ? (idx.get(row.thumbFileId)?.url ?? null) : null;
+      const source = row.sourceFileId ? idx.get(row.sourceFileId) : undefined;
 
       return {
         scanId,
@@ -485,6 +507,9 @@ export class ScanReviewService {
           this.fullName(row.sheetFirstName, row.sheetLastName),
         identityConfidence: row.identityConfidence !== null ? Number(row.identityConfidence) : null,
         thumbUrl,
+        sourceUrl: source?.url ?? null,
+        sourceContentType: source?.contentType ?? null,
+        sourcePageIndex: row.sourcePageIndex,
       };
     });
   }
@@ -746,6 +771,8 @@ export class ScanReviewService {
         resolvedStudentId: sheetScans.resolvedStudentId,
         identityConfidence: sheetScans.identityConfidence,
         thumbFileId: sheetScans.thumbFileId,
+        sourceFileId: sheetScans.sourceFileId,
+        sourcePageIndex: sheetScans.sourcePageIndex,
         sheetFirstName: students.firstName,
         sheetLastName: students.lastName,
         resolvedFirstName: resolvedStudents.firstName,
@@ -815,6 +842,8 @@ export class ScanReviewService {
         identityConfidence: sheetScans.identityConfidence,
         identityEvidence: sheetScans.identityEvidence,
         thumbFileId: sheetScans.thumbFileId,
+        sourceFileId: sheetScans.sourceFileId,
+        sourcePageIndex: sheetScans.sourcePageIndex,
         sheetSequence: printedSheets.sequence,
         sheetStudentId: printedSheets.studentId,
         sheetFirstName: students.firstName,
@@ -884,14 +913,33 @@ export class ScanReviewService {
     fileIds: string[],
   ): Promise<Map<string, string | null>> {
     if (fileIds.length === 0) return new Map();
+    return new Map(
+      [...(await this.buildFileIndex(tx, orgId, fileIds))].map(([id, f]) => [id, f.url]),
+    );
+  }
+
+  /**
+   * URL y tipo de contenido por archivo. El tipo importa: el archivo subido puede
+   * ser un PDF con todas las páginas del lote, y quien lo pinte necesita saberlo
+   * para no apuntarle un `<img>` (que falla en silencio).
+   */
+  private async buildFileIndex(
+    tx: Database,
+    orgId: string,
+    fileIds: string[],
+  ): Promise<Map<string, { url: string | null; contentType: string | null }>> {
+    const index = new Map<string, { url: string | null; contentType: string | null }>();
+    if (fileIds.length === 0) return index;
     const uniqueIds = Array.from(new Set(fileIds));
     const rows: FileRecord[] = await tx
       .select()
       .from(files)
       .where(and(eq(files.orgId, orgId), inArray(files.id, uniqueIds)));
-    const index = new Map<string, string | null>();
     for (const row of rows) {
-      index.set(row.id, this.filesService.buildDownloadUrl(row, 'inline') ?? null);
+      index.set(row.id, {
+        url: this.filesService.buildDownloadUrl(row, 'inline') ?? null,
+        contentType: row.mimeType ?? null,
+      });
     }
     return index;
   }
@@ -918,7 +966,9 @@ export class ScanReviewService {
   private toReviewScanModel(
     scan: ScanQueueRow,
     urlByFileId: Map<string, string | null>,
+    fileIndex?: Map<string, { url: string | null; contentType: string | null }>,
   ): ReviewScanModel {
+    const source = scan.sourceFileId ? fileIndex?.get(scan.sourceFileId) : undefined;
     return {
       scanId: scan.scanId,
       state: scan.state,
@@ -930,6 +980,9 @@ export class ScanReviewService {
       studentName: this.studentNameOf(scan),
       identityConfidence: scan.identityConfidence !== null ? Number(scan.identityConfidence) : null,
       thumbUrl: scan.thumbFileId ? (urlByFileId.get(scan.thumbFileId) ?? null) : null,
+      sourceUrl: source?.url ?? null,
+      sourceContentType: source?.contentType ?? null,
+      sourcePageIndex: scan.sourcePageIndex,
     };
   }
 
