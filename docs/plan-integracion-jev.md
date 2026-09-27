@@ -155,7 +155,9 @@ Los schemas de objetos usan `.strict()` (z.object descarta claves desconocidas s
 | `created_at`, `updated_at` | timestamp NOT NULL default now                                        |
 
 Índices únicos parciales: `(feature) WHERE org_id IS NULL` y `(org_id, feature) WHERE org_id IS NOT NULL`.
-RLS: misma política que `llm_settings` (`org_id IS NULL OR org_id = current_org_id`).
+RLS: lectura como `llm_settings` (`org_id IS NULL OR org_id = current_org_id`), pero el
+`WITH CHECK` exige `org_id = current_org_id`: la API solo escribe overrides de su propia
+org; las filas globales se escriben con el rol admin.
 
 **`decision_calls`** (registro de cada llamada; bajo RLS por `org_id`):
 
@@ -179,7 +181,8 @@ RLS: misma política que `llm_settings` (`org_id IS NULL OR org_id = current_org
 | `created_at`                    | timestamp NOT NULL default now                                                          |
 
 Índice: `(org_id, feature, created_at)`. Sin `updated_at` ni `deleted_at`: es un log inmutable.
-RLS: `org_id = current_org_id` (política de org directa) en `rls-policies.sql`.
+RLS: solo políticas de `SELECT` e `INSERT` por `org_id = current_org_id`: para el rol de
+la API, `UPDATE` y `DELETE` no afectan filas (log inmutable).
 
 La migración NO la genera B: la genero yo al final, sobre `dev` actualizado.
 
@@ -195,7 +198,11 @@ La migración NO la genera B: la genero yo al final, sobre `dev` actualizado.
   motor está disponible.
 - Código de error extra `aborted`: la cancelación del llamador (`signal`) no cuenta
   como falla del proveedor.
-- Limitador de concurrencia en proceso (máx. 8 llamadas simultáneas).
+- Limitador de concurrencia en proceso (máx. 8 llamadas simultáneas). La sombra se
+  descarta si hay 16 o más en espera y usa un timeout de 5 s por defecto.
+- `redactState()` se aplica al estado antes de llamar al motor (punto único de salida).
+- La configuración se cachea 30 s por (org, funcionalidad): el juez consulta una vez por
+  lote, no una vez por ítem.
 - Registro en `decision_calls` dentro de `withOrgContext`.
 
 ### Otros archivos (dueño: B)

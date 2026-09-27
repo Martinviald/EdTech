@@ -9,7 +9,9 @@ import {
   type DecisionMode,
   type DecisionThresholds,
 } from '@soe/types';
+import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
+import { DECISION_CONFIG_CACHE_TTL_MS } from './decisions.constants';
 
 export interface DecisionRuntimeConfig {
   engine: DecisionEngineId;
@@ -19,11 +21,33 @@ export interface DecisionRuntimeConfig {
   source: 'default' | 'global' | 'org';
 }
 
+interface CachedConfig {
+  config: Promise<DecisionRuntimeConfig>;
+  expiresAt: number;
+}
+
 @Injectable()
 export class DecisionsConfigService {
+  private readonly cache = new Map<string, CachedConfig>();
+
   constructor(@InjectDb() private readonly db: Database) {}
 
   async resolve(orgId: string, feature: DecisionFeature): Promise<DecisionRuntimeConfig> {
+    const cacheKey = `${orgId}:${feature}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.config;
+    }
+    const config = this.resolveUncached(orgId, feature);
+    this.cache.set(cacheKey, { config, expiresAt: Date.now() + DECISION_CONFIG_CACHE_TTL_MS });
+    config.catch(() => this.cache.delete(cacheKey));
+    return config;
+  }
+
+  private async resolveUncached(
+    orgId: string,
+    feature: DecisionFeature,
+  ): Promise<DecisionRuntimeConfig> {
     const codeDefault = DECISION_FEATURE_DEFAULTS[feature];
     const row = await this.findMostSpecificSetting(orgId, feature);
     if (!row) {
@@ -31,6 +55,13 @@ export class DecisionsConfigService {
     }
 
     const thresholds = decisionThresholdsSchema.safeParse(row.thresholds);
+    if (!thresholds.success) {
+      reportServerError(thresholds.error, {
+        scope: 'decision_settings.thresholds',
+        orgId,
+        feature,
+      });
+    }
     return {
       engine: row.engine,
       model: row.model,

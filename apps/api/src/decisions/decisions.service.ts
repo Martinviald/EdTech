@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   DecisionError,
+  redactState,
   type DecisionEngine,
   type DecisionQuestions,
   type DecisionRequest,
@@ -10,7 +11,12 @@ import type { DecisionFeature, DecisionThresholds } from '@soe/types';
 import { reportServerError } from '../common/observability/report-error';
 import { ConcurrencyLimiter } from './concurrency-limiter';
 import { DecisionCallsRecorder } from './decision-calls.recorder';
-import { DECISION_ENGINES, DECISION_MAX_CONCURRENCY } from './decisions.constants';
+import {
+  DECISION_ENGINES,
+  DECISION_MAX_CONCURRENCY,
+  DECISION_MAX_SHADOW_BACKLOG,
+  DECISION_SHADOW_TIMEOUT_MS,
+} from './decisions.constants';
 import { DecisionsConfigService, type DecisionRuntimeConfig } from './decisions-config.service';
 
 export type DecisionOutcome<Q extends DecisionQuestions> = DecisionResult<Q> & {
@@ -70,9 +76,19 @@ export class DecisionsService {
     if (cfg?.mode !== 'shadow') return;
     const engine = this.registry.get(cfg.engine);
     if (!engine?.isAvailable()) return;
+    if (this.limiter.pending >= DECISION_MAX_SHADOW_BACKLOG) {
+      this.logger.warn(
+        `Sombra ${feature}: se descarta, hay ${this.limiter.pending} llamadas en espera`,
+      );
+      return;
+    }
 
+    const shadowRequest = {
+      ...request,
+      timeoutMs: request.timeoutMs ?? DECISION_SHADOW_TIMEOUT_MS,
+    };
     try {
-      await this.runAndRecord(engine, cfg, orgId, feature, 'shadow', request, options);
+      await this.runAndRecord(engine, cfg, orgId, feature, 'shadow', shadowRequest, options);
     } catch (error) {
       const decisionError = this.toDecisionError(error);
       this.logger.warn(`Sombra ${feature}: ${decisionError.code} — ${decisionError.message}`);
@@ -100,31 +116,32 @@ export class DecisionsService {
     request: DecisionRequest<Q>,
     options: ShadowOptions,
   ): Promise<DecisionResult<Q>> {
+    const { state } = redactState(request.state);
+    const model = request.model ?? cfg.model;
     const common = {
       orgId,
       feature,
       engine: cfg.engine,
       mode,
-      state: request.state,
+      state,
       baseline: options.baseline ?? null,
       correlationId: options.correlationId ?? null,
     };
 
     let result: DecisionResult<Q>;
+    const startedAt = performance.now();
     try {
-      result = await this.limiter.run(() =>
-        engine.evaluate({ ...request, model: request.model ?? cfg.model }),
-      );
+      result = await this.limiter.run(() => engine.evaluate({ ...request, state, model }));
     } catch (error) {
       const decisionError = this.toDecisionError(error);
       await this.recorder.record({
         ...common,
-        model: null,
+        model,
         answers: null,
         errorCode: decisionError.code,
         inputTokens: 0,
         outputTokens: 0,
-        latencyMs: null,
+        latencyMs: performance.now() - startedAt,
       });
       throw decisionError;
     }
