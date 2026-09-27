@@ -7,14 +7,32 @@
 
 ## Estado
 
-| Fase | Contenido | Estado |
-|---|---|---|
-| 0 | Worktree, contratos, esqueleto del paquete | ✅ |
-| 1 | Paquete (A) · capa de datos + CI (B) · goldset + calibración (C) | ⏳ |
-| 2 | Integración NestJS + juez remedial en sombra + migración | ⏳ |
-| 3 | Calibración real contra Jev (requiere `TYPESAFE_API_KEY`) | ⏳ |
-| 4 | Documentación + code review | ⏳ |
-| 5 | PR + CI verde | ⏳ |
+| Fase | Contenido                                                                     | Estado |
+| ---- | ----------------------------------------------------------------------------- | ------ |
+| 0    | Worktree, contratos, esqueleto del paquete                                    | ✅     |
+| 1    | Paquete (A) · capa de datos + CI (B) · goldset + calibración (C)              | ✅     |
+| 2    | Integración NestJS + juez remedial en sombra + migración `0036_decisions`     | ✅     |
+| 3    | Calibración real contra Jev → [`docs/calibracion-jev.md`](calibracion-jev.md) | ✅     |
+| 4    | Documentación + code review                                                   | ✅     |
+| 5    | PR + CI verde                                                                 | ⏳     |
+
+## Resultados de la calibración (2026-09-27, `jev-1.13.0`, instrucciones en español)
+
+- **Juez remedial, `clave` (solve-then-check):** 97,7 % fuera de matemática (42/43, y el
+  único error vino con confianza 0,48); **58,3 % en matemática**, con un error a
+  confianza 0,97 (eligió el paso intermedio de una traslación + reflexión). Coincide
+  con la advertencia de TypeSafe sobre aritmética: **matemática nunca en automático**.
+- **Noul del juez:** `respuesta_unica` y `habilidad` separan bien (P(sí) media ≈ 0,9 en
+  ítems válidos). `factual` no: sobre ítems oficiales válidos da P(sí) media ≈ 0,7 y
+  12–17 % queda bajo 0,5. Hay que reformularla antes de usarla como gate.
+- **Taxonomía (`hierarchicalChoice`):** la hoja coincide con el tag humano en 66,7 %
+  (37,5 % en descriptores DIA y OA Mineduc; 71–73 % en PAES). Ningún umbral llega a
+  95 % de exactitud por nivel: sirve como **sugerencia** para que una persona confirme,
+  no para etiquetar solo.
+- **Costo y latencia:** 258 llamadas, p50 ≈ 300 ms, p95 ≈ 450 ms, US$0,009 en total.
+
+Recomendación: pasar `remedial_judge` a `shadow` en demo para juntar datos reales, y
+evaluar `live` solo para `clave` fuera de matemática con umbral `auto >= 0,85`.
 
 ## Decisiones de diseño
 
@@ -43,17 +61,17 @@ actualizar este documento.**
 
 Archivos del paquete (dueño: subagente A):
 
-| Archivo | Exporta |
-|---|---|
-| `contracts.ts` | (ya escrito) tipos, `DecisionError`, `DECISION_LIMITS`, umbrales |
-| `questions.ts` | `noul()`, `choice()`, `score()` + `validateQuestions(questions)` + `estimateTokens(value)` + `assertWithinLimits(state, questions)` |
-| `jev/jev-engine.ts` | `JevDecisionEngine` + `JevEngineConfig` (`apiKey?`, `baseURL?`, `defaultModel?` = `'jev-1.13.0'`, `timeoutMs?`, `maxRetries?`, `fetch?`) |
-| `jev/jev-mapping.ts` | Traducción request/response SDK ↔ contratos; errores SDK → `DecisionError` |
-| `fake/fake-engine.ts` | `FakeDecisionEngine` (respuestas programables por id de pregunta o función; registra las llamadas) |
-| `routing.ts` | `routeByConfidence(confidence, t)`, `routeNoul(probability, t)`, `assertValidThresholds` |
-| `hierarchical.ts` | `hierarchicalChoice(engine, opts)` — descenso codicioso por un árbol |
-| `redact.ts` | `redactState(state) → { state, redactions }` |
-| `index.ts` | Re-exporta todo lo público. **No** re-exporta nada del SDK. |
+| Archivo               | Exporta                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `contracts.ts`        | (ya escrito) tipos, `DecisionError`, `DECISION_LIMITS`, umbrales                                                                         |
+| `questions.ts`        | `noul()`, `choice()`, `score()` + `validateQuestions(questions)` + `estimateTokens(value)` + `assertWithinLimits(state, questions)`      |
+| `jev/jev-engine.ts`   | `JevDecisionEngine` + `JevEngineConfig` (`apiKey?`, `baseURL?`, `defaultModel?` = `'jev-1.13.0'`, `timeoutMs?`, `maxRetries?`, `fetch?`) |
+| `jev/jev-mapping.ts`  | Traducción request/response SDK ↔ contratos; errores SDK → `DecisionError`                                                               |
+| `fake/fake-engine.ts` | `FakeDecisionEngine` (respuestas programables por id de pregunta o función; registra las llamadas)                                       |
+| `routing.ts`          | `routeByConfidence(confidence, t)`, `routeNoul(probability, t)`, `assertValidThresholds`                                                 |
+| `hierarchical.ts`     | `hierarchicalChoice(engine, opts)` — descenso codicioso por un árbol                                                                     |
+| `redact.ts`           | `redactState(state) → { state, redactions }`                                                                                             |
+| `index.ts`            | Re-exporta todo lo público. **No** re-exporta nada del SDK.                                                                              |
 
 Semántica fijada:
 
@@ -75,13 +93,13 @@ Semántica fijada:
 - **`redactState`**: recorre strings y objetos. Reemplaza por `'[redactado]'`: RUT
   (`\b\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]\b`), emails y el VALOR de las claves cuyo nombre
   (sin tildes, minúsculas) sea uno de `nombre, nombres, apellido, apellidos, name,
-  first_name, last_name, full_name, rut, email, correo, telefono, phone`.
+first_name, last_name, full_name, rut, email, correo, telefono, phone`.
   `redactions` = cantidad de reemplazos.
 - **`hierarchicalChoice(engine, { state, instructions, tree, minConfidence, model? })`**:
   `tree: DecisionTreeNode[]` con `{ id, label, description?, children? }`. En cada
   nivel pregunta un Choice sobre los hijos; baja mientras `confidence >= minConfidence`
   y haya hijos. Devuelve `{ path: { id, confidence }[], stoppedBecause: 'leaf' |
-  'low_confidence' }` (el nodo de baja confianza NO entra al path). Más de 255
+'low_confidence' }` (el nodo de baja confianza NO entra al path). Más de 255
   hermanos → `invalid_request`.
 
 ### Tipos compartidos — `packages/types/src/schemas/decisions.schema.ts` (dueño: B)
@@ -125,40 +143,40 @@ Los schemas de objetos usan `.strict()` (z.object descarta claves desconocidas s
 
 **`decision_settings`** (patrón idéntico a `llm_settings`: `org_id` nullable = global):
 
-| Columna | Tipo |
-|---|---|
-| `id` | uuid PK defaultRandom |
-| `org_id` | uuid NULL → organizations (cascade) |
-| `feature` | text NOT NULL `$type<DecisionFeature>` |
-| `engine` | text NOT NULL default `'jev'` `$type<DecisionEngineId>` |
-| `model` | text NOT NULL |
-| `mode` | enum `decision_mode` (`off`,`shadow`,`live`) NOT NULL default `'off'` |
-| `thresholds` | jsonb NOT NULL default `{}` `$type<DecisionThresholds>` |
-| `created_at`, `updated_at` | timestamp NOT NULL default now |
+| Columna                    | Tipo                                                                  |
+| -------------------------- | --------------------------------------------------------------------- |
+| `id`                       | uuid PK defaultRandom                                                 |
+| `org_id`                   | uuid NULL → organizations (cascade)                                   |
+| `feature`                  | text NOT NULL `$type<DecisionFeature>`                                |
+| `engine`                   | text NOT NULL default `'jev'` `$type<DecisionEngineId>`               |
+| `model`                    | text NOT NULL                                                         |
+| `mode`                     | enum `decision_mode` (`off`,`shadow`,`live`) NOT NULL default `'off'` |
+| `thresholds`               | jsonb NOT NULL default `{}` `$type<DecisionThresholds>`               |
+| `created_at`, `updated_at` | timestamp NOT NULL default now                                        |
 
 Índices únicos parciales: `(feature) WHERE org_id IS NULL` y `(org_id, feature) WHERE org_id IS NOT NULL`.
 RLS: misma política que `llm_settings` (`org_id IS NULL OR org_id = current_org_id`).
 
 **`decision_calls`** (registro de cada llamada; bajo RLS por `org_id`):
 
-| Columna | Tipo |
-|---|---|
-| `id` | uuid PK |
-| `org_id` | uuid NOT NULL → organizations (cascade) |
-| `feature` | text NOT NULL `$type<DecisionFeature>` |
-| `engine` | text NOT NULL `$type<DecisionEngineId>` |
-| `model` | text NULL (versionado; null si falló antes de responder) |
-| `mode` | `decision_mode` NOT NULL (`shadow` o `live`) |
-| `status` | enum `decision_call_status` (`ok`,`error`) NOT NULL |
-| `error_code` | text NULL |
-| `answers` | jsonb NULL `$type<Record<string, DecisionAnswerRecord>>` |
-| `baseline` | jsonb NULL `$type<Record<string, unknown>>` — lo que decidió el sistema actual (sombra) |
-| `state_hash` | text NOT NULL (sha256 hex del JSON del estado) |
-| `correlation_id` | text NULL (p. ej. id del material remedial) |
-| `input_tokens`, `output_tokens` | integer NOT NULL default 0 |
-| `latency_ms` | integer NULL |
-| `cost_usd` | numeric(14,9) NULL |
-| `created_at` | timestamp NOT NULL default now |
+| Columna                         | Tipo                                                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------- |
+| `id`                            | uuid PK                                                                                 |
+| `org_id`                        | uuid NOT NULL → organizations (cascade)                                                 |
+| `feature`                       | text NOT NULL `$type<DecisionFeature>`                                                  |
+| `engine`                        | text NOT NULL `$type<DecisionEngineId>`                                                 |
+| `model`                         | text NULL (versionado; null si falló antes de responder)                                |
+| `mode`                          | `decision_mode` NOT NULL (`shadow` o `live`)                                            |
+| `status`                        | enum `decision_call_status` (`ok`,`error`) NOT NULL                                     |
+| `error_code`                    | text NULL                                                                               |
+| `answers`                       | jsonb NULL `$type<Record<string, DecisionAnswerRecord>>`                                |
+| `baseline`                      | jsonb NULL `$type<Record<string, unknown>>` — lo que decidió el sistema actual (sombra) |
+| `state_hash`                    | text NOT NULL (sha256 hex del JSON del estado)                                          |
+| `correlation_id`                | text NULL (p. ej. id del material remedial)                                             |
+| `input_tokens`, `output_tokens` | integer NOT NULL default 0                                                              |
+| `latency_ms`                    | integer NULL                                                                            |
+| `cost_usd`                      | numeric(14,9) NULL                                                                      |
+| `created_at`                    | timestamp NOT NULL default now                                                          |
 
 Índice: `(org_id, feature, created_at)`. Sin `updated_at` ni `deleted_at`: es un log inmutable.
 RLS: `org_id = current_org_id` (política de org directa) en `rls-policies.sql`.
@@ -172,8 +190,11 @@ La migración NO la genera B: la genero yo al final, sobre `dev` actualizado.
   `DecisionError('disabled')`; `shadow` lanza `DecisionError('disabled')` también
   (en sombra solo se usa `shadow()`); `live` devuelve el resultado y registra.
 - `DecisionsService.shadow(orgId, feature, request, { baseline, correlationId })` →
-  `void`, nunca lanza, nunca bloquea al llamador. Solo corre si el modo es `shadow`
-  o `live` y el motor está disponible.
+  nunca lanza, nunca bloquea al llamador. Solo corre si el modo es `shadow` (en
+  `live` el consumidor ya llama a `evaluate`; correr ambos duplicaría el costo) y el
+  motor está disponible.
+- Código de error extra `aborted`: la cancelación del llamador (`signal`) no cuenta
+  como falla del proveedor.
 - Limitador de concurrencia en proceso (máx. 8 llamadas simultáneas).
 - Registro en `decision_calls` dentro de `withOrgContext`.
 
@@ -190,6 +211,7 @@ La migración NO la genera B: la genero yo al final, sobre `dev` actualizado.
 ### Calibración (dueño: C) — `scripts/decisions/`
 
 Goldsets sin datos de alumnos, en `scripts/decisions/data/` (gitignoreado):
+
 - **Juez remedial:** ítems remediales generados. Verdad para `clave` = la
   alternativa `isCorrect`. Para `unico`/`factual`/`habilidad` solo hay acuerdo con el
   juez LLM (no es verdad).

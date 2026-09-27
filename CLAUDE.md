@@ -29,6 +29,7 @@
 | Validación | Zod (en `packages/types`) | Toda validación de entrada usa Zod. Sin class-validator standalone. |
 | Monorepo | Turborepo + pnpm workspaces | No mezclar npm ni yarn. |
 | IA | Gemini 2.0 Flash (multimodal) | Claude API para etiquetado IA de ítems (H3.11). |
+| Decisiones IA | Jev (TypeSafe AI) vía `@soe/decisions` | **Propuesta, pendiente de consenso.** Solo decisiones tipadas (Noul/Choice/Score) con confianza; nunca texto. Ver `packages/decisions/README.md`. |
 | Queue | BullMQ + Redis (F3+) | En F1 los jobs asíncronos usan `import_jobs` en DB. |
 | Infra | AWS + SST | No deployar en Vercel sin consultar. |
 
@@ -63,6 +64,7 @@
 │   │       ├── schemas/       # Un archivo por entidad
 │   │       ├── utils/         # Helpers compartidos (roles, rut, curso-parser)
 │   │       └── access-policies.ts  # Constantes de acceso por rol (CURRICULUM_ROLES, etc.)
+│   ├── decisions/    # Motor de decisiones tipadas (Jev); el SDK solo en src/jev/
 │   └── ui/           # Componentes shadcn/ui compartidos
 └── docs/             # Documentación del proyecto
 ```
@@ -353,6 +355,8 @@ No hacer commit con errores de typecheck o lint. El CI bloquea PRs que fallen.
 | Borrar registros de alumnos con `DELETE` | Datos legalmente sensibles (Ley 19.628) | Soft delete con `deleted_at` |
 | Comparar `user.role === 'xxx'` directamente | No funciona con multi-rol; ignora los otros roles del usuario | `userHasRole(user.roles, 'xxx')` o `userHasAnyRole(user.roles, ALLOWED)` |
 | Duplicar listas de roles inline en páginas/controllers | DRY violation, riesgo de desincronización | Usar constantes de `packages/types/src/access-policies.ts` con `canAccess()` |
+| Importar `@typesafe-ai/sdk` fuera de `packages/decisions/src/jev/` | Acopla el producto a un proveedor y salta el registro y los modos | `DecisionsService` en la API, `@soe/decisions` fuera de ella |
+| Pedirle a Jev aritmética, conteo o fechas | Falla con confianza alta (calibración: 58 % en matemática PAES) | Calcula en código; a Jev solo juicios semánticos |
 
 ---
 
