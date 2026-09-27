@@ -1,0 +1,403 @@
+# Diseño — El proceso de medición como puerta de entrada
+
+## Resumen
+
+Hoy `/evaluaciones` y `/resultados` abren mostrando todo el año académico vigente, sin jerarquía:
+una lista ordenada por fecha y un panorama que no dice por dónde empezar a mirar. Este documento
+define tres cambios para que ambas vistas **abran ya respondiendo algo**:
+
+1. El **proceso de medición más reciente con resultados** queda preseleccionado al entrar.
+2. `/evaluaciones` ordena por **gravedad** en vez de por fecha.
+3. `/resultados` abre con una **banda de previsualización** del proceso: cobertura, alumnos
+   evaluados, alertas y las unidades más graves.
+
+Ninguno de los tres inventa una métrica nueva. Los tres se apoyan en la maquinaria de unidades
+comparables y alertas que ya existe.
+
+---
+
+## 1. El problema
+
+Un directivo entra a la plataforma el lunes después de cerrar un momento DIA. Lo que quiere saber es
+"cómo nos fue en esto que acabamos de rendir". Lo que encuentra:
+
+- En `/evaluaciones`, una lista de todas las evaluaciones del año ordenada por fecha de aplicación.
+  La del proceso recién cerrado está arriba sólo por coincidencia cronológica, mezclada con las de
+  otros procesos del mismo período.
+- En `/resultados`, el panorama completo del año. Correcto, pero sin foco: hay que aplicar tres o
+  cuatro filtros para llegar a la pregunta que se traía.
+
+El trabajo de procesos de medición (`docs/diseno-procesos-de-medicion.md`) ya creó la entidad que
+agrupa "esto que acabamos de rendir". Falta que las vistas la usen como punto de partida.
+
+---
+
+## 2. ⚠️ Lo que hay que arreglar antes: el filtro de proceso es decorativo en `/evaluaciones`
+
+Esto no es parte de la feature nueva: es un bug vivo, encontrado al diseñarla.
+
+`/evaluaciones` reutiliza la barra de filtros del panorama —importa `DashboardFilterBar`,
+`parseDashboardFilters`, `withDefaultAcademicYear` y `buildDashboardQuery` desde
+`../resultados/components/` (`apps/web/src/app/(dashboard)/evaluaciones/page.tsx:11-17`). Como
+`processId` está en `FILTER_KEYS`
+(`apps/web/src/app/(dashboard)/resultados/components/dashboard-filters.ts`), pasa lo siguiente:
+
+1. El selector **"Proceso de medición" se dibuja** en `/evaluaciones`.
+2. Al elegir uno, `buildDashboardQuery` lo pone en la querystring.
+3. `getEvaluacionesAssessments(query)` lo manda al backend.
+4. `assessmentListQuerySchema` (`packages/types/src/schemas/item-analysis.schema.ts:46-56`) **no lo
+   declara**, así que el `z.object` lo descarta sin error.
+5. `listAssessments` nunca lo aplica.
+
+Resultado: eliges un proceso, la lista no cambia, y nada avisa. Es exactamente la clase de defecto
+que el propio schema documenta desde el arreglo de `instrumentId`, en el comentario que encabeza ese
+`z.object`:
+
+> Cada filtro nuevo de la barra tiene que declararse acá **Y** aplicarse en `listAssessments`; falta
+> una de las dos y el filtro es decorativo.
+
+`processId` es el cuarto caso, después de `applicationPeriod`, `instrumentId` y el que ya se arregló
+en `heatmapQuerySchema`. **Se arregla en la Ola 1**, antes de construir nada encima: un default que
+apunta a un filtro que no filtra es peor que no tener default.
+
+---
+
+## 3. La tensión de fondo: qué NO puede significar "alarmante"
+
+El pedido original dice que `/evaluaciones` muestre "las evaluaciones con resultados más
+alarmantes". La lectura intuitiva —ordenar por peor porcentaje de logro— es precisamente el
+antipatrón que este producto ya descartó.
+
+`docs/diseno-panorama-comparable.md` (#1C) eliminó el "% de logro global" porque promediar
+instrumentos de distinta dificultad y distinta escala no produce un número interpretable. Un DIA
+cuyo Nivel I corta en ~33% y un curso en 55% está bien; con un umbral absoluto de 60 salía alertado
+igual. Ese fue el defecto de las alertas `low_achievement` y `critical_skill` originales.
+
+Ordenar una lista de evaluaciones por logro crudo reintroduciría el mismo error, esta vez como
+criterio de ordenamiento en lugar de como umbral.
+
+### La definición legítima ya está construida
+
+`packages/types/src/comparability.ts:288-301` fija los umbrales, todos **relativos al instrumento o
+a su propio comparable**, nunca absolutos:
+
+| Señal                                             | high  | medium |
+| ------------------------------------------------- | ----- | ------ |
+| % de alumnos en la banda inferior del instrumento | 40    | 25     |
+| Caída en pp contra el baseline comparable         | 10    | 5      |
+| Curso bajo el promedio de su propia unidad        | 15 pp | 8 pp   |
+| Eje bajo el promedio de su unidad                 | 20 pp | 12 pp  |
+| % de acierto de un ítem                           | 20    | 35     |
+| Días aplicada sin resultados                      | 14    | —      |
+
+Y `ComparableUnitSummary` (`packages/types/src/schemas/comparable-overview.schema.ts:44-66`) ya trae
+por unidad: `severity`, `lowestBandShare`, `averageAchievement` —legítimo, porque no mezcla
+instrumentos— y, crucialmente, **`assessmentIds: string[]`**.
+
+Ese es el puente. Cada evaluación hereda la severidad de su unidad comparable, que se calculó con el
+corte de su propio instrumento. No hace falta inventar una métrica.
+
+---
+
+## 4. Decisiones de diseño
+
+### D1 — "El último proceso" es el más reciente **con resultados**
+
+No el más reciente a secas.
+
+Un proceso en estado `planned` o `loading` puede ser el más nuevo y no tener una sola fila de
+resultados. Preseleccionarlo abriría ambas vistas en blanco — que es exactamente el bug que se
+arregló hace poco en `withDefaultAcademicYear`, donde el año vigente inyectado por defecto vaciaba
+el panorama de cualquier proceso de un año anterior.
+
+**Criterio:** el proceso de `studentsAssessed > 0` con la ventana más reciente
+(`startsOn desc nulls last`), dentro del alcance del usuario. `MeasurementProcessModel` ya expone
+`studentsAssessed` (`packages/types/src/schemas/measurement-process.schema.ts:151`).
+
+Si no hay ninguno, **no se preselecciona nada** y las vistas se comportan como hoy. El default nunca
+puede ser la causa de una vista vacía.
+
+**Alternativa descartada:** "el proceso del año vigente más reciente". Un colegio que cierra el año
+en diciembre y entra en enero vería preseleccionado un proceso del año nuevo, todavía sin datos.
+
+### D2 — El default lo resuelve el backend, junto al catálogo
+
+`/dashboards/filters` ya devuelve `processes: ProcessFilterOption[]` y `defaultAcademicYearId`
+(`packages/types/src/schemas/dashboard.schema.ts`). El patrón "el servidor resuelve cuál es el
+default y el cliente lo aplica" ya existe y está probado.
+
+Se agrega `defaultProcessId: string | null` a `DashboardFilterOptionsResponse`, resuelto en
+`getFilterOptions` con el mismo criterio de alcance que ya acota `processes` (sólo procesos con
+evaluaciones en los cursos visibles del usuario).
+
+**Por qué en el backend y no en el cliente:** el cliente tendría que pedir la lista de procesos,
+mirar `studentsAssessed` y elegir. Eso es lógica de negocio en el frontend, y además el catálogo de
+`processes` que viaja hoy no incluye `studentsAssessed`. Resolverlo en el servidor evita ambas
+cosas.
+
+### D3 — El proceso gana sobre el año académico
+
+Ya está implementado: `withDefaultAcademicYear` tiene la guarda `if (value.processId) return value;`
+porque un proceso declara su propia ventana y cruzarlo con el año vigente vaciaba la vista.
+
+La regla completa de precedencia al entrar sin filtros en la URL:
+
+```
+¿hay defaultProcessId?
+├─ sí → se aplica processId; NO se inyecta año (el proceso ya lo acota)
+└─ no → se inyecta defaultAcademicYearId, como hoy
+```
+
+### D4 — Visible, escapable, y se vuelve a aplicar en cada entrada nueva
+
+Tres propiedades no negociables, heredadas de cómo se comporta hoy el año por defecto:
+
+- **Visible:** el selector muestra el proceso seleccionado. Nunca es un filtro escondido.
+- **Escapable:** un clic lo quita y la vista pasa a mostrar todo.
+- **Se re-aplica:** si lo quitas, esa navegación queda sin filtro; al volver a entrar desde el menú,
+  vuelve a preseleccionarse.
+
+La tercera es la discutible. Se elige por coherencia: es exactamente cómo se comporta
+`defaultAcademicYearId` hoy, y tener dos defaults de la misma barra con memorias distintas sería
+más confuso que cualquiera de las dos reglas por separado. Queda como **P1** en §9.
+
+### D5 — La gravedad de una evaluación es la severidad de su unidad comparable
+
+`ComparableUnitSummary.assessmentIds` da el mapeo directo. Para cada evaluación de la lista:
+
+```
+gravedad(evaluación) = severidad de la unidad comparable que la contiene
+orden = severidad desc → alumnos afectados desc → fecha de aplicación desc
+```
+
+`compareSeverity` (`packages/types/src/comparability.ts:268`) ya implementa el orden de severidad y
+manda las unidades sin severidad al final. Se reutiliza tal cual.
+
+`AssessmentOption` (`item-analysis.schema.ts:62-71`) suma tres campos:
+
+```ts
+severity: 'high' | 'medium' | 'low' | null;
+lowestBandShare: number | null;
+alertCount: number;
+```
+
+`null` en severidad significa "no clasificable" —instrumento sin bandas ni baseline—, no "está
+bien", y la UI debe decirlo así: sin badge, no con un badge verde.
+
+### D6 — ⚠️ Las evaluaciones sin resultados no entran en este orden, porque no están en la lista
+
+Al diseñar se propuso que "una evaluación aplicada hace más de 14 días sin resultados cargados
+ordene como alarmante". **No se puede, sin un cambio mayor de alcance.**
+
+`listAssessments` filtra explícitamente a las evaluaciones que tienen resultados
+(`apps/api/src/item-analysis/item-analysis.service.ts:123-128`): un `exists` sobre
+`assessment_results` **o** sobre `assessment_item_stats`. El comentario dice por qué: "para que la
+matriz nunca salga vacía", y la segunda rama existe para que una evaluación cargada desde un informe
+oficial —sin niveles por alumno— no desaparezca de toda la app.
+
+Es decir: las evaluaciones estancadas, que son las más accionables, **hoy son invisibles en
+`/evaluaciones`**. Levantar ese filtro cambia el contrato de la vista y de su matriz, y arrastra al
+hub de cada evaluación.
+
+**Decisión: fuera de alcance en esta iteración.** El hueco de cobertura ya se cubre por otra vía: la
+alerta `stale_assessment` existe, se emite con `contextKind: 'assessment'`
+(`apps/api/src/dashboards/comparable-alerts.service.ts:486-489`) y aparece en la banda de alertas de
+`/resultados`. La previsualización de §D8 la va a mostrar.
+
+Queda anotado como **P2** en §9.
+
+### D7 — El orden por gravedad es el default, no el único
+
+Se agrega un selector de orden con dos opciones: **Gravedad** (default) y **Fecha de aplicación**.
+
+Sin esto, quien entra buscando "la que aplicamos ayer" pierde el orden cronológico que tiene hoy, y
+la vista se vuelve peor para la mitad de los usos. El parámetro viaja en la URL como el resto de los
+filtros (`sort=severity|recent`), así que una vista ordenada por fecha es compartible.
+
+### D8 — La banda de previsualización de `/resultados`
+
+Se renderiza sobre la barra de filtros cuando hay un proceso activo — sea por default o elegido a
+mano. Reemplaza al aviso actual `ProcessFilterNotice`, que hoy sólo dice "Acotado a: …" y vive
+únicamente en la pestaña Resumen.
+
+Contenido, y de dónde sale cada dato:
+
+| Bloque                                   | Origen                                                       |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| Nombre, tipo, momento, año, estado       | `GET /measurement-processes/:id`                             |
+| Ventana de aplicación                    | `startsOn` / `endsOn`                                        |
+| Cobertura (celdas completas / esperadas) | `coverage` del mismo modelo                                  |
+| Alumnos evaluados · evaluaciones         | `totals` de `comparable-overview`                            |
+| Alertas por severidad                    | `alerts` + `alertsTotal` de `comparable-overview`            |
+| Las 2-3 unidades más graves              | `units` de `comparable-overview`, ya ordenadas por severidad |
+| Enlaces                                  | "Ver el proceso" · "Quitar el filtro"                        |
+
+Todo esto ya viaja hoy en respuestas que la página pide de todos modos. **La banda compone; no
+agrega ni una query nueva.**
+
+⚠️ Con un proceso de alcance derivado (`scopeDerived: true`), la cobertura da 100% por construcción
+—describe lo ya cargado, no lo que se esperaba rendir—. La banda debe rotularlo, no presentar ese
+100% como logro. La tarjeta de proceso ya tiene la frase para reutilizar.
+
+---
+
+## 5. Contrato
+
+### `packages/types`
+
+**`schemas/dashboard.schema.ts`**
+
+```ts
+export type DashboardFilterOptionsResponse = {
+  // …
+  processes: ProcessFilterOption[];
+  /** Proceso preseleccionado al entrar sin filtros: el más reciente CON resultados. */
+  defaultProcessId: string | null;
+  defaultAcademicYearId: string | null;
+};
+```
+
+**`schemas/item-analysis.schema.ts`**
+
+```ts
+export const ASSESSMENT_SORTS = ['severity', 'recent'] as const;
+
+export const assessmentListQuerySchema = z.object({
+  // …
+  processId: z.string().uuid().optional(),
+  sort: z.enum(ASSESSMENT_SORTS).default('severity'),
+});
+
+export type AssessmentOption = {
+  // …
+  severity: 'high' | 'medium' | 'low' | null;
+  lowestBandShare: number | null;
+  alertCount: number;
+};
+```
+
+### `apps/api`
+
+- `dashboards.service.ts` → `getFilterOptions` resuelve `defaultProcessId`.
+- `item-analysis.service.ts` → `listAssessments` aplica `processId` y resuelve la gravedad.
+- Ninguna migración. `assessments.process_id` ya existe desde `0034_public_nitro.sql`.
+
+### `apps/web`
+
+- `dashboard-filters.ts` → `withDefaultProcess(value, defaultProcessId)`, hermana de
+  `withDefaultAcademicYear`, aplicada **antes** que ella.
+- `dashboard-filter-bar.tsx` → el selector de orden en `/evaluaciones`.
+- `resultados/components/process-preview-banner.tsx` _(nuevo)_ → reemplaza a
+  `process-filter-notice.tsx`.
+- `evaluaciones/components/assessment-list.tsx` → badge de severidad por fila.
+
+---
+
+## 6. Plan de implementación
+
+### Ola 1 — Cerrar el filtro decorativo _(prerrequisito)_
+
+`processId` en `assessmentListQuerySchema` **y** aplicado en `listAssessments`. Sin esto, el default
+de la Ola 2 apunta a un filtro que no filtra.
+
+**Verificable:** elegir un proceso en `/evaluaciones` cambia la lista. Contrastar el conteo contra
+`assessmentCount` del proceso.
+
+### Ola 2 — El default
+
+`defaultProcessId` en el backend + `withDefaultProcess` en el cliente, aplicado en las dos vistas.
+
+**Verificable:** entrar a `/evaluaciones` y a `/resultados` sin querystring preselecciona el mismo
+proceso, visible en la barra; quitarlo muestra todo; volver a entrar lo repone. Con la base de
+desarrollo, el elegido debe ser un proceso con `studentsAssessed > 0`.
+
+### Ola 3 — La banda de previsualización
+
+Es la de menos backend nuevo y la más visible. Podría adelantarse a la Ola 2 si se quiere algo
+mostrable antes.
+
+**Verificable:** entrar a `/resultados` con un proceso activo muestra la banda con cobertura,
+alertas y las unidades más graves; con un proceso de alcance derivado, el 100% sale rotulado.
+
+### Ola 4 — El orden por gravedad
+
+La más cara y la única con riesgo de rendimiento (§7). Va al final a propósito: las tres anteriores
+entregan valor sin ella.
+
+**Verificable:** `/evaluaciones` abre ordenada por gravedad; el selector de orden vuelve a fecha; el
+orden viaja en la URL.
+
+---
+
+## 7. Riesgos
+
+### R1 — El costo del orden por gravedad _(sin medir)_
+
+Resolver la severidad de cada evaluación obliga a armar las unidades comparables del alcance, que es
+lo que hace `comparable-overview.service.ts`. Medido en la base de desarrollo, ese endpoint promedia
+**182 ms** sin filtro y 68 ms con uno — pero son 12 evaluaciones. Un colegio real tiene ~258.
+
+`/evaluaciones` **no pagina** (`AssessmentListResponse` es `{ data }`, sin `total` ni `page`), así
+que el orden se calcula sobre la lista entera.
+
+**Antes de construir la Ola 4 hay que medir con volumen realista.** Si duele, la salida es apoyarse
+en el read-model de cohorte (`assessment_item_stats`) en vez de rearmar unidades al vuelo. No se
+decide ahora: se mide primero.
+
+### R2 — El default que vacía la vista
+
+Mitigado por D1 (sólo procesos con resultados) y por la guarda de D3. El caso de prueba obligatorio:
+un proceso `planned` recién creado **no** debe ser el default.
+
+### R3 — Cobertura derivada al 100%
+
+Los 8 procesos de la base de desarrollo vienen del backfill y son todos `derived: true`, así que la
+banda va a mostrar 100% de cobertura en todos. **No es representativo del caso real.** Para revisar
+la banda en serio hay que declarar a mano el alcance de un proceso y forzar celdas faltantes.
+
+### R4 — Dos vistas, una barra
+
+`/evaluaciones` y `/resultados` comparten `DashboardFilterBar`. El selector de orden sólo aplica a la
+primera: hay que pasarlo por prop y no dibujarlo en el panorama. Un campo que aparece donde no hace
+nada es el mismo defecto del §2, en versión visual.
+
+---
+
+## 8. Tests
+
+**Puros (`packages/types`)**
+
+- `compareSeverity` con `null` mezclado: las sin severidad van al final.
+- `withDefaultProcess`: no pisa un `processId` explícito; no hace nada con `defaultProcessId` nulo.
+- Precedencia: con `defaultProcessId` presente, `withDefaultAcademicYear` no inyecta año.
+
+**Servicio (`apps/api`)**
+
+- `getFilterOptions` elige el proceso más reciente **con** resultados, no el más reciente.
+- Sin procesos con resultados → `defaultProcessId: null`.
+- `listAssessments` con `processId` devuelve sólo las evaluaciones enlazadas.
+- El orden `severity` respeta severidad → alumnos afectados → fecha.
+- El alcance docente sigue acotando: un profesor no ve procesos de cursos ajenos.
+
+**Manual**
+
+- La banda con un proceso derivado y con uno de alcance declarado.
+- Quitar el default y volver a entrar.
+
+---
+
+## 9. Preguntas abiertas
+
+**P1 — ¿El default se re-aplica o se pega?** D4 elige re-aplicar, por coherencia con el año
+académico. La alternativa —que una vez que lo quitas no vuelva— requiere persistir la preferencia
+por usuario y convierte dos defaults de la misma barra en dos comportamientos distintos. **Decide el
+usuario**; no bloquea nada.
+
+**P2 — ¿Se muestran las evaluaciones sin resultados?** Hoy `listAssessments` las excluye (§D6), así
+que las estancadas son invisibles justo en la vista donde más servirían. Levantar ese filtro toca el
+contrato de la lista, de su matriz y del hub de evaluación. **Fuera de alcance acá**, pero vale
+decidirlo aparte.
+
+**P3 — ¿La banda también en `/evaluaciones`?** §D8 la pone sólo en `/resultados`. Poner la misma
+banda en ambas es coherente, pero en una lista de trabajo puede ser ruido. **Recomendación:** no en
+esta iteración.
