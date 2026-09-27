@@ -52,6 +52,7 @@ import { McpModule } from './mcp/mcp.module';
 import { SheetScanningModule } from './sheet-scanning/sheet-scanning.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
 import { MeasurementProcessesModule } from './measurement-processes/measurement-processes.module';
+import { DecisionsModule } from './decisions/decisions.module';
 import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
 
 @Module({
@@ -124,6 +125,7 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
     SheetScanningModule,
     // ── Telemetría de uso (analítica de producto): ingesta + agregación ──
     TelemetryModule,
+    DecisionsModule,
   ],
   controllers: [AppController],
   providers: [

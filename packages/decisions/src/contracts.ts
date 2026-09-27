@@ -160,6 +160,8 @@ export const DECISION_ERROR_CODES = [
   /** 429 / 529 tras agotar los reintentos. */
   'rate_limited',
   'timeout',
+  /** El llamador canceló la llamada (`signal`). No es una falla del proveedor. */
+  'aborted',
   /** 401 / 403: key inválida o sin permiso. */
   'auth',
   /** Cualquier otra falla del proveedor (5xx, conexión, respuesta inesperada). */

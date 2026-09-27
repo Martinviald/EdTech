@@ -437,3 +437,32 @@ CREATE POLICY "measurement_processes_tenant_isolation" ON "measurement_processes
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true))
   WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+
+-- ── Motor de decisiones (`@soe/decisions`) — ver docs/plan-integracion-jev.md ──
+-- decision_settings: config del motor por funcionalidad. org_id NULLABLE, mismo
+-- criterio que llm_settings: las filas globales (org_id IS NULL) son config de
+-- plataforma, legibles sin contexto de org y escritas por la API bajo el role guard
+-- platform_admin. No contienen PII (motor, modelo, modo y umbrales).
+ALTER TABLE "decision_settings" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "decision_settings" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "decision_settings_tenant_isolation" ON "decision_settings";
+CREATE POLICY "decision_settings_tenant_isolation" ON "decision_settings"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  );
+
+-- decision_calls: log inmutable de llamadas al motor. org_id NOT NULL directo (como
+-- students): cada colegio ve sólo sus llamadas. Aunque no guarda el estado en claro
+-- (sólo su sha256), `answers`, `baseline` y `correlation_id` describen material del
+-- colegio. Se escribe siempre dentro de withOrgContext(orgId).
+ALTER TABLE "decision_calls" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "decision_calls" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "decision_calls_tenant_isolation" ON "decision_calls";
+CREATE POLICY "decision_calls_tenant_isolation" ON "decision_calls"
+  AS PERMISSIVE FOR ALL
+  USING (org_id::text = current_setting('app.current_org_id', true));

@@ -46,6 +46,9 @@ tenants y legibles sin contexto de org). En `llm_settings` la config global la
 escribe la API (panel /configuracion/modelos-ia); la autorización es el role guard
 `platform_admin`, no el RLS.
 
+`decision_settings` sigue el mismo patrón que `llm_settings` (org_id NULLABLE) y
+`decision_calls` usa `org_id` directo (log del motor de decisiones).
+
 ## withOrgContext (regla de la capa de aplicación)
 
 `set_config('app.current_org_id', orgId, true)` se fija por transacción mediante

@@ -376,3 +376,11 @@ export const captureSessionStatusEnum = pgEnum('capture_session_status', [
   'revoked',
   'expired',
 ]);
+
+// ── Motor de decisiones (`@soe/decisions`) — ver docs/plan-integracion-jev.md ──
+// Modo por funcionalidad: `off` no corre; `shadow` corre y registra sin decidir;
+// `live` decide. Mismos valores que DECISION_MODES de @soe/types.
+export const decisionModeEnum = pgEnum('decision_mode', ['off', 'shadow', 'live']);
+
+// Resultado de una llamada registrada en decision_calls.
+export const decisionCallStatusEnum = pgEnum('decision_call_status', ['ok', 'error']);

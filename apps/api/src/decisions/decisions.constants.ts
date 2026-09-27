@@ -1,0 +1,3 @@
+export const DECISION_ENGINES = Symbol('DECISION_ENGINES');
+
+export const DECISION_MAX_CONCURRENCY = 8;
