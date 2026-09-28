@@ -107,10 +107,13 @@ export async function ProcessPreviewBanner({
               <GraduationCap className="size-3.5" aria-hidden />
               Alumnos evaluados
             </p>
+            {/* El conteo del proceso, NO el de `comparable.totals`: ése suma por
+                unidad comparable, así que un alumno evaluado en cuatro asignaturas
+                cuenta cuatro veces. Con datos realistas la diferencia es visible
+                (490 contra 850 en el mismo proceso) y bajo la misma etiqueta que
+                usa la ficha del proceso sería contradecirse. */}
             <p className="text-xl font-semibold">
-              {(comparable?.totals.studentsEvaluated ?? process.studentsAssessed).toLocaleString(
-                'es-CL',
-              )}
+              {process.studentsAssessed.toLocaleString('es-CL')}
             </p>
           </div>
           <div className="space-y-1">
