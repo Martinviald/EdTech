@@ -5,7 +5,15 @@ import type { Route } from 'next';
 import { ClipboardList, FileUp, SearchX } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import { canAccess, DASHBOARD_VIEWER_ROLES, ANSWER_SHEET_IMPORT_ROLES } from '@soe/types';
+import {
+  canAccess,
+  attachSeverity,
+  sortAssessments,
+  ASSESSMENT_SORTS,
+  DASHBOARD_VIEWER_ROLES,
+  ANSWER_SHEET_IMPORT_ROLES,
+  type AssessmentSort,
+} from '@soe/types';
 import { PageContainer, EmptyState, FilterBarSkeleton, TableSkeleton } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { DashboardFilterBar } from '../resultados/components/dashboard-filter-bar';
@@ -16,7 +24,11 @@ import {
   type DashboardFilterValues,
 } from '../resultados/components/dashboard-filters';
 import { AssessmentList } from './components/assessment-list';
-import { getEvaluacionesFilters, getEvaluacionesAssessments } from './data';
+import {
+  getEvaluacionesFilters,
+  getEvaluacionesAssessments,
+  getEvaluacionesComparable,
+} from './data';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +45,18 @@ export default async function EvaluacionesPage({
 
   const params = await searchParams;
   const filters = parseDashboardFilters(params);
+  const sort = parseAssessmentSort(params);
+  // El selector de orden conserva los filtros: sin esto, cambiar el orden
+  // descartaba el proceso, la búsqueda y todo lo demás de la URL.
+  const sortHref = (next: AssessmentSort) => {
+    const next_params = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (key === 'sort' || value == null) continue;
+      for (const v of Array.isArray(value) ? value : [value]) next_params.append(key, v);
+    }
+    next_params.set('sort', next);
+    return `${BASE_PATH}?${next_params.toString()}`;
+  };
   const filterQuery = buildDashboardQuery(filters);
   const canImport = canAccess(session.user.roles, ANSWER_SHEET_IMPORT_ROLES);
 
@@ -43,7 +67,13 @@ export default async function EvaluacionesPage({
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
-        <AssessmentsSection filters={filters} query={filterQuery} canImport={canImport} />
+        <AssessmentsSection
+          filters={filters}
+          query={filterQuery}
+          sort={sort}
+          sortHref={sortHref}
+          canImport={canImport}
+        />
       </Suspense>
     </PageContainer>
   );
@@ -66,20 +96,42 @@ async function FiltersSection({
   );
 }
 
+/** El orden pedido en la URL; `severity` por defecto. */
+function parseAssessmentSort(
+  params: Record<string, string | string[] | undefined>,
+): AssessmentSort {
+  const raw = params.sort;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return ASSESSMENT_SORTS.includes(value as AssessmentSort)
+    ? (value as AssessmentSort)
+    : 'severity';
+}
+
 async function AssessmentsSection({
   filters,
   query,
+  sort,
+  sortHref,
   canImport,
 }: {
   filters: DashboardFilterValues;
   query: string;
+  sort: AssessmentSort;
+  sortHref: (next: AssessmentSort) => string;
   canImport: boolean;
 }) {
   const options = await getEvaluacionesFilters(query);
-  const assessmentList = await getEvaluacionesAssessments(
-    buildDashboardQuery(withEntryDefaults(filters, options)),
+  const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
+  // La lista y las unidades comparables son independientes: en paralelo, y si las
+  // unidades fallan la lista igual se muestra (sin gravedad, ordenada por fecha).
+  const [assessmentList, comparable] = await Promise.all([
+    getEvaluacionesAssessments(scopedQuery),
+    getEvaluacionesComparable(scopedQuery).catch(() => null),
+  ]);
+  const assessments = sortAssessments(
+    attachSeverity(assessmentList.data, comparable?.units ?? []),
+    comparable ? sort : 'recent',
   );
-  const assessments = assessmentList.data;
 
   if (assessments.length === 0 && filters.q) {
     return <SearchEmptyState filters={withEntryDefaults(filters, options)} />;
@@ -109,7 +161,7 @@ async function AssessmentsSection({
     );
   }
 
-  return <AssessmentList assessments={assessments} />;
+  return <AssessmentList assessments={assessments} sort={sort} sortHref={sortHref} />;
 }
 
 /**

@@ -26,3 +26,4 @@ export * from './sheet-guide-geometry';
 export * from './expected-scope';
 export * from './slug';
 export * from './search-term';
+export * from './assessment-severity';
