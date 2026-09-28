@@ -479,9 +479,14 @@ export class DashboardsService {
                 await tx
                   .selectDistinct({ processId: assessments.processId })
                   .from(assessments)
+                  .innerJoin(
+                    assessmentCourseAssignments,
+                    eq(assessmentCourseAssignments.assessmentId, assessments.id),
+                  )
                   .where(
                     and(
                       eq(assessments.orgId, orgId),
+                      inArray(assessmentCourseAssignments.classGroupId, scopedCgIds),
                       inArray(
                         assessments.processId,
                         processRows.map((r) => r.id),
@@ -513,7 +518,12 @@ export class DashboardsService {
           status: r.status,
           hasResults: processIdsWithResults.has(r.id),
         })),
-        defaultProcessId: processRows.find((r) => processIdsWithResults.has(r.id))?.id ?? null,
+        defaultProcessId:
+          processRows.find(
+            (r) =>
+              processIdsWithResults.has(r.id) &&
+              (!query.academicYearId || r.academicYearId === query.academicYearId),
+          )?.id ?? null,
         defaultAcademicYearId: academicYearId,
         instruments: instrumentRows
           .filter((r) => instrumentIdsWithData.has(r.id))

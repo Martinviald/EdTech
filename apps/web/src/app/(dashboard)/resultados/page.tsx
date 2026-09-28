@@ -29,6 +29,7 @@ import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  buildDashboardHref,
   buildClearProcessQuery,
   withEntryDefaults,
   type DashboardFilterValues,
@@ -177,7 +178,7 @@ async function PanoramaSections({
             ? {
                 term: filters.q,
                 clearHref:
-                  `${ROUTES.resultados}${buildDashboardQuery({ ...filters, q: undefined })}` as Route,
+                  `${ROUTES.resultados}${buildDashboardHref({ ...filters, q: undefined })}` as Route,
               }
             : undefined
         }

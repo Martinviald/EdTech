@@ -75,7 +75,10 @@ export async function ProcessPreviewBanner({
     .join(' · ');
 
   const severities = comparable ? countBySeverity(comparable.alerts) : [];
-  const topUnits = (comparable?.units ?? []).slice(0, 3);
+  // Sólo las que TIENEN severidad. `severity: null` es "no clasificable" —el
+  // instrumento no define bandas—, no "está mal": listarla bajo "requieren
+  // atención" afirma algo que nadie midió.
+  const topUnits = (comparable?.units ?? []).filter((u) => u.severity != null).slice(0, 3);
 
   return (
     <Card className="border-primary/30 bg-primary/5">

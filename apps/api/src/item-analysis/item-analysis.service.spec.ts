@@ -1237,11 +1237,7 @@ describe('ItemAnalysisService.listAssessments', () => {
     expect(res.data).toHaveLength(1);
   });
 
-  // Regresión: CUARTA clave del mismo patrón. `processId` viajaba en la
-  // querystring desde que la barra de /evaluaciones reutiliza `DashboardFilterBar`,
-  // el `z.object` lo descartaba y elegir un proceso de medición no cambiaba la
-  // lista. Escalar, no CSV: una evaluación pertenece a un solo proceso.
-  it('acepta processId y lo deja escalar', () => {
+  it('acepta processId escalar y lo descarta vacío (regresión: 4ª clave del patrón)', () => {
     const uno = assessmentListQuerySchema.parse({ processId: ASSESSMENT_ID });
     expect(uno.processId).toBe(ASSESSMENT_ID);
 

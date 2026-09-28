@@ -111,6 +111,11 @@ export function withDefaultProcess(
   defaultProcessId: string | null,
 ): DashboardFilterValues {
   if (value.processOptOut || value.processId || !defaultProcessId) return value;
+  // Guarda simétrica a la de `withDefaultAcademicYear`. Si el usuario eligió un
+  // año a mano, preseleccionarle encima un proceso —que casi siempre es de OTRO
+  // año— cruza dos filtros incompatibles y deja la vista en blanco. Pidió un año:
+  // se le da el año.
+  if (value.academicYearId) return value;
   return { ...value, processId: defaultProcessId };
 }
 
@@ -276,6 +281,20 @@ export function toScalarFilters(f: DashboardFilterValues): DashboardScalarFilter
     studentId: f.studentId,
     academicYearId: f.academicYearId,
   };
+}
+
+/**
+ * Querystring para un ENLACE de la vista (no para la API): igual que
+ * {@link buildDashboardQuery} pero conservando la marca de opt-out.
+ *
+ * `buildDashboardQuery` la omite a propósito —no es un filtro y no viaja al
+ * backend—, pero un enlace construido con ella devolvía al usuario el proceso por
+ * defecto que acababa de quitar. Todo `href` que se arme desde filtros usa ésta.
+ */
+export function buildDashboardHref(value: DashboardFilterValues): string {
+  const base = buildDashboardQuery(value);
+  if (!value.processOptOut) return base;
+  return base ? `${base}&${PROCESS_OPT_OUT_KEY}=1` : `?${PROCESS_OPT_OUT_KEY}=1`;
 }
 
 /**

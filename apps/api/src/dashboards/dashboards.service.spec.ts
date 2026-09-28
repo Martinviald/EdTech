@@ -730,6 +730,84 @@ describe('DashboardsService.getFilterOptions', () => {
     expect(res.defaultAcademicYearId).toBe('ay1');
   });
 
+  function filterOptionsDb(processRows: unknown[], withResults: unknown[]) {
+    return makeDb([
+      [{ academicYearId: 'ay1', year: 2025, isCurrent: true }],
+      [{ id: 'cg1', name: '2°A', gradeId: 'g1', academicYearId: 'ay1', gradeName: '2° Básico' }],
+      [{ id: 'sub1', name: 'Lenguaje' }],
+      [{ id: 'i1', name: 'DIA', type: 'dia', subjectId: 'sub1', gradeId: 'g1' }],
+      [{ id: 'ay1', year: 2025, isCurrent: true }],
+      [{ id: 'cg1' }],
+      [],
+      [{ instrumentId: 'i1' }],
+      processRows,
+      withResults,
+    ]);
+  }
+
+  const P_NUEVO = {
+    id: 'p-nuevo',
+    name: 'Cierre 2026',
+    academicYearId: 'ay1',
+    status: 'planned',
+    startsOn: '2026-11-01',
+  };
+  const P_VIEJO = {
+    id: 'p-viejo',
+    name: 'Diagnóstico 2026',
+    academicYearId: 'ay1',
+    status: 'closed',
+    startsOn: '2026-03-01',
+  };
+
+  it('el default es el más reciente CON resultados, no el más reciente', async () => {
+    const svc = makeService(filterOptionsDb([P_NUEVO, P_VIEJO], [{ processId: 'p-viejo' }]));
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+
+    expect(res.defaultProcessId).toBe('p-viejo');
+    expect(res.processes.find((p) => p.id === 'p-nuevo')!.hasResults).toBe(false);
+    expect(res.processes.find((p) => p.id === 'p-viejo')!.hasResults).toBe(true);
+  });
+
+  it('ningún proceso con resultados → defaultProcessId null, nunca uno vacío', async () => {
+    const svc = makeService(filterOptionsDb([P_NUEVO, P_VIEJO], []));
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+
+    expect(res.defaultProcessId).toBeNull();
+    expect(res.processes.every((p) => !p.hasResults)).toBe(true);
+  });
+
+  it('sin procesos visibles no hay default', async () => {
+    const svc = makeService(filterOptionsDb([], []));
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {});
+
+    expect(res.processes).toEqual([]);
+    expect(res.defaultProcessId).toBeNull();
+  });
+
+  // Con `academicYearId` pedido NO se consulta `resolveCatalogAcademicYear`, así
+  // que el orden de respuestas del mock arranca una más arriba.
+  it('con año pedido, el default sale de ESE año y no de otro', async () => {
+    const otroAnio = { ...P_NUEVO, id: 'p-otro-anio', academicYearId: 'ay-2025' };
+    const db = makeDb([
+      [{ id: 'cg1', name: '2°A', gradeId: 'g1', academicYearId: 'ay1', gradeName: '2° Básico' }],
+      [{ id: 'sub1', name: 'Lenguaje' }],
+      [{ id: 'i1', name: 'DIA', type: 'dia', subjectId: 'sub1', gradeId: 'g1' }],
+      [{ id: 'ay1', year: 2025, isCurrent: true }],
+      [{ id: 'cg1' }],
+      [],
+      [{ instrumentId: 'i1' }],
+      [otroAnio, P_VIEJO],
+      [{ processId: 'p-otro-anio' }, { processId: 'p-viejo' }],
+    ]);
+    const svc = makeService(db);
+    const res = await svc.getFilterOptions(makeUser({ activeRole: 'school_admin' }), {
+      academicYearId: 'ay1',
+    });
+
+    expect(res.defaultProcessId).toBe('p-viejo');
+  });
+
   // P3 — el selector de instrumento sólo lista los que tienen datos en el alcance.
   it('filtra del selector los instrumentos sin datos', async () => {
     const db = makeDb([

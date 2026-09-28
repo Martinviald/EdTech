@@ -205,7 +205,10 @@ export function DashboardFilterBar({
   const processOptions = options.processes.map((p) => {
     const periodLabel = p.academicYearId ? periodLabels.get(p.academicYearId) : undefined;
     const needsPeriod = periodLabel && !p.label.includes(periodLabel);
-    return { id: p.id, label: needsPeriod ? `${p.label} · ${periodLabel}` : p.label };
+    const base = needsPeriod ? `${p.label} · ${periodLabel}` : p.label;
+    // Mismo criterio que los momentos sin evaluaciones: se anota en vez de
+    // ocultarse, para no dejar a nadie filtrando a ciegas hacia una vista vacía.
+    return { id: p.id, label: p.hasResults ? base : `${base} · sin resultados` };
   });
 
   const fields: FilterField[] = [

@@ -21,6 +21,8 @@ import {
   parseDashboardFilters,
   withEntryDefaults,
   buildDashboardQuery,
+  buildDashboardHref,
+  buildClearProcessQuery,
   type DashboardFilterValues,
 } from '../resultados/components/dashboard-filters';
 import { AssessmentList } from './components/assessment-list';
@@ -173,8 +175,9 @@ async function AssessmentsSection({
  * devuelve cero sin que nada en pantalla lo explique.
  */
 function SearchEmptyState({ filters }: { filters: DashboardFilterValues }) {
-  const withoutSearch = `${ROUTES.evaluaciones}${buildDashboardQuery({ ...filters, q: undefined })}`;
-  const allPeriods = `${ROUTES.evaluaciones}${buildDashboardQuery({ ...filters, academicYearId: undefined })}`;
+  const withoutSearch = `${ROUTES.evaluaciones}${buildDashboardHref({ ...filters, q: undefined })}`;
+  const allPeriods = `${ROUTES.evaluaciones}${buildDashboardHref({ ...filters, academicYearId: undefined })}`;
+  const allProcesses = `${ROUTES.evaluaciones}${buildClearProcessQuery({ ...filters, q: undefined })}`;
 
   return (
     <EmptyState
@@ -186,6 +189,11 @@ function SearchEmptyState({ filters }: { filters: DashboardFilterValues }) {
           <Button asChild variant="outline">
             <Link href={withoutSearch as Route}>Quitar la búsqueda</Link>
           </Button>
+          {filters.processId ? (
+            <Button asChild variant="outline">
+              <Link href={allProcesses as Route}>Buscar en todos los procesos</Link>
+            </Button>
+          ) : null}
           {filters.academicYearId ? (
             <Button asChild variant="outline">
               <Link href={allPeriods as Route}>Buscar en todos los períodos</Link>

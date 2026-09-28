@@ -232,8 +232,12 @@ Contenido, y de dónde sale cada dato:
 | Las 2-3 unidades más graves              | `units` de `comparable-overview`, ya ordenadas por severidad |
 | Enlaces                                  | "Ver el proceso" · "Quitar el filtro"                        |
 
-Todo esto ya viaja hoy en respuestas que la página pide de todos modos. **La banda compone; no
-agrega ni una query nueva.**
+Las alertas, las unidades y los totales ya viajan en una respuesta que la página pide de todos
+modos: `getComparableOverview` está cacheado por-request y el `scopedQuery` es idéntico, así que
+esa llamada se deduplica. ⟨corregido al implementar⟩ **La banda sí agrega una query**: el
+`GET /measurement-processes/:id` de la cabecera, 11-23 ms medidos. Antes lo pagaba sólo quien
+llegaba con `processId` en la URL; ahora, con la preselección, lo paga toda entrada a
+`/resultados`.
 
 ⚠️ Con un proceso de alcance derivado (`scopeDerived: true`), la cobertura da 100% por construcción
 —describe lo ya cargado, no lo que se esperaba rendir—. La banda debe rotularlo, no presentar ese
