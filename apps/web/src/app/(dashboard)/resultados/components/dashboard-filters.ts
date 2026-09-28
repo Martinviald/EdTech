@@ -278,6 +278,16 @@ export function toScalarFilters(f: DashboardFilterValues): DashboardScalarFilter
   };
 }
 
+/**
+ * Querystring que quita el proceso Y deja la marca de que fue a propósito.
+ * Sin `noProcess=1` el default se reinyecta en el mismo render y el enlace no
+ * hace nada visible.
+ */
+export function buildClearProcessQuery(value: DashboardFilterValues): string {
+  const base = buildDashboardQuery({ ...value, processId: undefined });
+  return base ? `${base}&${PROCESS_OPT_OUT_KEY}=1` : `?${PROCESS_OPT_OUT_KEY}=1`;
+}
+
 /** Serializa los filtros a una querystring (orden estable, sin claves vacías). */
 export function buildDashboardQuery(value: DashboardFilterValues): string {
   const params = new URLSearchParams();

@@ -29,11 +29,12 @@ import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
+  buildClearProcessQuery,
   withEntryDefaults,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
 import { ComparabilityNotice } from './components/comparability-notice';
-import { ProcessFilterNotice } from './components/process-filter-notice';
+import { ProcessPreviewBanner } from './components/process-preview-banner';
 import { formatAchievement } from './components/performance-level';
 import { getComparableOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
 
@@ -55,14 +56,9 @@ export default async function ResultadosOverviewPage({
   // sección. `key={query}` reinicia el skeleton al cambiar los filtros.
   return (
     <>
-      {filters.processId && (
-        <Suspense fallback={null}>
-          <ProcessFilterNotice
-            processId={filters.processId}
-            clearHref={`${ROUTES.resultados}${buildDashboardQuery({ ...filters, processId: undefined })}`}
-          />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <ProcessPreviewSection query={query} filters={filters} />
+      </Suspense>
 
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
@@ -80,6 +76,31 @@ export default async function ResultadosOverviewPage({
         <PanoramaSections query={query} filters={filters} />
       </Suspense>
     </>
+  );
+}
+
+/**
+ * La previsualización del proceso activo. Resuelve los defaults de entrada acá
+ * porque `processId` puede venir de la URL o de la preselección, y la banda tiene
+ * que aparecer en ambos casos.
+ */
+async function ProcessPreviewSection({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  const scoped = withEntryDefaults(filters, options);
+  if (!scoped.processId) return null;
+
+  return (
+    <ProcessPreviewBanner
+      processId={scoped.processId}
+      scopedQuery={buildDashboardQuery(scoped)}
+      clearHref={`${ROUTES.resultados}${buildClearProcessQuery(scoped)}`}
+    />
   );
 }
 
