@@ -23,7 +23,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
-  withDefaultAcademicYear,
+  withEntryDefaults,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
 import { ComparabilityNotice } from '../components/comparability-notice';
@@ -107,7 +107,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={BASE_PATH}
     />
   );
@@ -139,7 +139,7 @@ async function PerformanceSection({
 }) {
   const options = await getDashboardFilters(buildDashboardQuery(filters));
   const scopedQuery = buildPerformanceQuery(
-    buildDashboardQuery(withDefaultAcademicYear(filters, options.defaultAcademicYearId)),
+    buildDashboardQuery(withEntryDefaults(filters, options)),
     page,
     limit,
     performanceLevel,

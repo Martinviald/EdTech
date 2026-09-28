@@ -49,6 +49,10 @@ export const assessmentListQuerySchema = z.object({
   classGroupId: uuidCsvSchema,
   academicYearId: z.string().uuid().optional(),
   instrumentId: uuidCsvSchema,
+  // Proceso de medición: la CUARTA clave que faltaba. La barra ya dibujaba el
+  // selector (la página reutiliza `DashboardFilterBar`) y la querystring ya lo
+  // llevaba, así que elegir un proceso no cambiaba nada y nada lo avisaba.
+  processId: z.string().uuid().optional(),
   instrumentType: stringCsvSchema,
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): mismo contrato

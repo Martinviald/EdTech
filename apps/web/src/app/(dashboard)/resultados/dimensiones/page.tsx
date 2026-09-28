@@ -10,7 +10,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
-  withDefaultAcademicYear,
+  withEntryDefaults,
   toScalarFilters,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
@@ -87,7 +87,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={BASE_PATH}
     />
   );
@@ -101,9 +101,7 @@ async function DimensionesAction({
   filters: DashboardFilterValues;
 }) {
   const options = await getDashboardFilters(query);
-  const scopedQuery = buildDashboardQuery(
-    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
-  );
+  const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
   const skillsResponse = await getDashboardSkills(scopedQuery);
   if (skillsResponse.skills.length === 0) return null;
   return <AskAiButton prompt={ASK_AI_PROMPT} />;
@@ -119,9 +117,7 @@ async function SkillsSection({
   assessmentId?: string;
 }) {
   const options = await getDashboardFilters(query);
-  const scopedQuery = buildDashboardQuery(
-    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
-  );
+  const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
   const skillsResponse = await getDashboardSkills(scopedQuery);
   const skills = skillsResponse.skills;
 

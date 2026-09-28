@@ -29,11 +29,13 @@ import { DashboardFilterBar } from './components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
-  withDefaultAcademicYear,
+  buildDashboardHref,
+  buildClearProcessQuery,
+  withEntryDefaults,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
 import { ComparabilityNotice } from './components/comparability-notice';
-import { ProcessFilterNotice } from './components/process-filter-notice';
+import { ProcessPreviewBanner } from './components/process-preview-banner';
 import { formatAchievement } from './components/performance-level';
 import { getComparableOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
 
@@ -55,14 +57,9 @@ export default async function ResultadosOverviewPage({
   // sección. `key={query}` reinicia el skeleton al cambiar los filtros.
   return (
     <>
-      {filters.processId && (
-        <Suspense fallback={null}>
-          <ProcessFilterNotice
-            processId={filters.processId}
-            clearHref={`${ROUTES.resultados}${buildDashboardQuery({ ...filters, processId: undefined })}`}
-          />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <ProcessPreviewSection query={query} filters={filters} />
+      </Suspense>
 
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
@@ -83,6 +80,31 @@ export default async function ResultadosOverviewPage({
   );
 }
 
+/**
+ * La previsualización del proceso activo. Resuelve los defaults de entrada acá
+ * porque `processId` puede venir de la URL o de la preselección, y la banda tiene
+ * que aparecer en ambos casos.
+ */
+async function ProcessPreviewSection({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  const scoped = withEntryDefaults(filters, options);
+  if (!scoped.processId) return null;
+
+  return (
+    <ProcessPreviewBanner
+      processId={scoped.processId}
+      scopedQuery={buildDashboardQuery(scoped)}
+      clearHref={`${ROUTES.resultados}${buildClearProcessQuery(scoped)}`}
+    />
+  );
+}
+
 async function FiltersSection({
   query,
   filters,
@@ -94,7 +116,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={ROUTES.resultados}
     />
   );
@@ -116,9 +138,7 @@ async function PanoramaSections({
   filters: DashboardFilterValues;
 }) {
   const options = await getDashboardFilters(query);
-  const scopedQuery = buildDashboardQuery(
-    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
-  );
+  const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
   const comparable = await getComparableOverview(scopedQuery);
 
   return (
@@ -158,7 +178,7 @@ async function PanoramaSections({
             ? {
                 term: filters.q,
                 clearHref:
-                  `${ROUTES.resultados}${buildDashboardQuery({ ...filters, q: undefined })}` as Route,
+                  `${ROUTES.resultados}${buildDashboardHref({ ...filters, q: undefined })}` as Route,
               }
             : undefined
         }
