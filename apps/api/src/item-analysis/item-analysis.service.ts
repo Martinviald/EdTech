@@ -135,6 +135,7 @@ export class ItemAnalysisService {
       if (query.instrumentId?.length) {
         conditions.push(inArray(assessments.instrumentId, query.instrumentId));
       }
+      if (query.processId) conditions.push(eq(assessments.processId, query.processId));
       if (query.instrumentType?.length) {
         conditions.push(inArray(sql`${instruments.type}::text`, query.instrumentType));
       }

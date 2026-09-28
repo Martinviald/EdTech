@@ -1237,6 +1237,44 @@ describe('ItemAnalysisService.listAssessments', () => {
     expect(res.data).toHaveLength(1);
   });
 
+  // Regresión: CUARTA clave del mismo patrón. `processId` viajaba en la
+  // querystring desde que la barra de /evaluaciones reutiliza `DashboardFilterBar`,
+  // el `z.object` lo descartaba y elegir un proceso de medición no cambiaba la
+  // lista. Escalar, no CSV: una evaluación pertenece a un solo proceso.
+  it('acepta processId y lo deja escalar', () => {
+    const uno = assessmentListQuerySchema.parse({ processId: ASSESSMENT_ID });
+    expect(uno.processId).toBe(ASSESSMENT_ID);
+
+    const vacio = assessmentListQuerySchema.parse({});
+    expect(vacio.processId).toBeUndefined();
+  });
+
+  it('rechaza un processId que no es uuid', () => {
+    expect(() => assessmentListQuerySchema.parse({ processId: 'no-uuid' })).toThrow();
+  });
+
+  it('processId: el service lo aplica sin romper la consulta', async () => {
+    const db = makeDb([
+      [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Lectura 6° — Cierre',
+          administeredAt: new Date('2026-09-23T00:00:00Z'),
+          instrumentName: 'DIA Lectura 6° básico Cierre 2026',
+          instrumentType: 'dia',
+          subjectName: 'Lenguaje y Comunicación',
+          gradeName: '6° básico',
+        },
+      ],
+      [{ assessmentId: ASSESSMENT_ID, count: 31 }],
+    ]);
+    const service = makeService(db);
+
+    const dto = assessmentListQuerySchema.parse({ processId: ASSESSMENT_ID });
+    const res = await service.listAssessments(makeUser(), dto);
+    expect(res.data).toHaveLength(1);
+  });
+
   it('rechaza un momento que no es del enum', () => {
     expect(() => assessmentListQuerySchema.parse({ applicationPeriod: 'trimestral' })).toThrow();
   });

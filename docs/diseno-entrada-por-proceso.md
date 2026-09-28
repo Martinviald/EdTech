@@ -295,37 +295,78 @@ export type AssessmentOption = {
 
 ## 6. Plan de implementación
 
+**Modo de ejecución: autónomo.** Las cuatro olas se construyen seguidas, sin pausa de aprobación
+entre una y otra. Cada ola termina con su verificación propia corrida y su exit code leído; si una
+falla, se arregla antes de seguir, no se acumula deuda para el final. El corte para consultar al
+usuario es únicamente un hallazgo que invalide una decisión del §4 — no el avance de fase.
+
+**Orden fijo.** La Ola 1 es prerrequisito real (un default sobre un filtro que no filtra es peor que
+ningún default) y la Ola 4 depende de una medición que no existe todavía (R1). Las Olas 2 y 3 son
+independientes entre sí.
+
+### Disciplina de recursos — la restricción que manda
+
+La máquina de desarrollo tiene 8 GB. **Un proceso pesado a la vez**, siempre: nunca dos builds,
+typechecks o suites en paralelo, ni míos ni de un subagente. Autonomía no es permiso para saturar la
+máquina.
+
+Esto condiciona el uso de subagentes: **no se paraleliza la implementación**. Las cuatro olas se
+escriben en un solo worktree, en secuencia, para que los builds queden serializados por
+construcción.
+
+### Dónde entran los subagentes, y por qué sólo ahí
+
+Dos, con un trabajo que no compite por CPU con los builds y que mejora el resultado de verdad:
+
+1. **Medición de R1, antes de la Ola 4.** El documento dice que el costo del orden por gravedad hay
+   que medirlo con volumen realista antes de construirlo. Es trabajo independiente, de sólo lectura
+   sobre la base, y su respuesta decide la implementación (rearmar unidades al vuelo vs. apoyarse en
+   `assessment_item_stats`). Corre mientras se escriben las Olas 1-3.
+2. **Revisión adversarial del conjunto, antes de abrir la PR.** Un par de ojos que no escribió el
+   código, con el encargo explícito de buscar el filtro decorativo número cinco, el default que
+   vacía una vista y la consulta O(N²) en el ensamblado.
+
+**No se usan subagentes para** escribir las olas en paralelo (viola la regla de recursos y los
+peores bugs aparecen entre tareas de agentes), ni para tareas que cuesta más encargar que hacer.
+
 ### Ola 1 — Cerrar el filtro decorativo _(prerrequisito)_
 
-`processId` en `assessmentListQuerySchema` **y** aplicado en `listAssessments`. Sin esto, el default
-de la Ola 2 apunta a un filtro que no filtra.
+`processId` en `assessmentListQuerySchema` **y** aplicado en `listAssessments`.
 
-**Verificable:** elegir un proceso en `/evaluaciones` cambia la lista. Contrastar el conteo contra
-`assessmentCount` del proceso.
+**Verificación:** `pnpm --filter @soe/types build` y `--filter @soe/api typecheck` en verde; elegir
+un proceso en `/evaluaciones` cambia la lista, y el conteo cuadra contra el `assessmentCount` del
+proceso consultado por API.
 
 ### Ola 2 — El default
 
-`defaultProcessId` en el backend + `withDefaultProcess` en el cliente, aplicado en las dos vistas.
+`defaultProcessId` en `getFilterOptions` + `withDefaultProcess` en el cliente, aplicado en las dos
+vistas, antes que `withDefaultAcademicYear`.
 
-**Verificable:** entrar a `/evaluaciones` y a `/resultados` sin querystring preselecciona el mismo
-proceso, visible en la barra; quitarlo muestra todo; volver a entrar lo repone. Con la base de
-desarrollo, el elegido debe ser un proceso con `studentsAssessed > 0`.
+**Verificación:** entrar a `/evaluaciones` y a `/resultados` sin querystring preselecciona el mismo
+proceso, visible en la barra; quitarlo muestra todo; volver a entrar lo repone. El elegido tiene
+`studentsAssessed > 0`, contrastado contra la base. Test de servicio: un proceso `planned` sin
+resultados **no** puede salir como default.
 
 ### Ola 3 — La banda de previsualización
 
-Es la de menos backend nuevo y la más visible. Podría adelantarse a la Ola 2 si se quiere algo
-mostrable antes.
+Reemplaza a `ProcessFilterNotice`. Cero queries nuevas: compone datos que la página ya pide.
 
-**Verificable:** entrar a `/resultados` con un proceso activo muestra la banda con cobertura,
-alertas y las unidades más graves; con un proceso de alcance derivado, el 100% sale rotulado.
+**Verificación:** con un proceso activo se ve la banda con cobertura, alertas y unidades más graves;
+con un proceso de alcance derivado el 100% sale rotulado como derivado, no como logro.
 
 ### Ola 4 — El orden por gravedad
 
-La más cara y la única con riesgo de rendimiento (§7). Va al final a propósito: las tres anteriores
-entregan valor sin ella.
+Se construye **con la medición de R1 ya en mano**, no antes. Si el costo resulta prohibitivo, la ola
+entrega el selector de orden y la severidad por fila apoyándose en el read-model, y se documenta el
+desvío en este archivo.
 
-**Verificable:** `/evaluaciones` abre ordenada por gravedad; el selector de orden vuelve a fecha; el
-orden viaja en la URL.
+**Verificación:** `/evaluaciones` abre ordenada por gravedad; el selector vuelve a fecha; el orden
+viaja en la URL. Latencia de la lista medida antes y después, con el número escrito en la PR.
+
+### Cierre
+
+Una sola PR contra `dev` con las cuatro olas en commits separados, la revisión adversarial aplicada
+y este documento actualizado con lo que la realidad haya corregido.
 
 ---
 
