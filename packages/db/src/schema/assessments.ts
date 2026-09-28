@@ -51,7 +51,14 @@ export const assessments = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => [index('idx_assessments_process').on(table.processId)],
+  (table) => [
+    index('idx_assessments_process').on(table.processId),
+    // Sirve la política RLS `assessments_tenant_isolation`, que ahora compara
+    // `org_id = <uuid>` y no `org_id::text` (packages/db/sql/rls-policies.sql). De esta
+    // tabla cuelgan por EXISTS las políticas de responses / assessment_results /
+    // skill_results / assessment_*_stats, así que su plan se propaga a todas ellas.
+    index('idx_assessments_org').on(table.orgId),
+  ],
 );
 
 export const assessmentCourseAssignments = pgTable(
