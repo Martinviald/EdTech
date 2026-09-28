@@ -280,6 +280,7 @@ export class DashboardsService {
       instruments: [],
       applicationPeriodsWithData: [],
       processes: [],
+      defaultProcessId: null,
       defaultAcademicYearId: null,
     };
     if (!orgId) return empty;
@@ -470,6 +471,28 @@ export class DashboardsService {
                 measurementProcesses.name,
               );
 
+      const processIdsWithResults =
+        processRows.length === 0
+          ? new Set<string>()
+          : new Set(
+              (
+                await tx
+                  .selectDistinct({ processId: assessments.processId })
+                  .from(assessments)
+                  .where(
+                    and(
+                      eq(assessments.orgId, orgId),
+                      inArray(
+                        assessments.processId,
+                        processRows.map((r) => r.id),
+                      ),
+                      sql`(exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})
+          or exists (select 1 from ${assessmentItemStats} where ${assessmentItemStats.assessmentId} = ${assessments.id}))`,
+                    ),
+                  )
+              ).flatMap((r) => (r.processId ? [r.processId] : [])),
+            );
+
       return {
         applicationPeriodsWithData: periodRows
           .map((r) => r.applicationPeriod)
@@ -488,7 +511,9 @@ export class DashboardsService {
           label: r.name,
           academicYearId: r.academicYearId,
           status: r.status,
+          hasResults: processIdsWithResults.has(r.id),
         })),
+        defaultProcessId: processRows.find((r) => processIdsWithResults.has(r.id))?.id ?? null,
         defaultAcademicYearId: academicYearId,
         instruments: instrumentRows
           .filter((r) => instrumentIdsWithData.has(r.id))

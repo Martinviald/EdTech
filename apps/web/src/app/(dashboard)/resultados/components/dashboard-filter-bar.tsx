@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { FilterBar, MultiSelectFilter, type FilterField } from '@/components/shared';
 import {
   FILTER_KEYS,
+  PROCESS_OPT_OUT_KEY,
   classGroupSelectOptionsMulti,
   hasActiveFilters,
   type DashboardFilterValues,
@@ -126,10 +127,32 @@ export function DashboardFilterBar({
   );
 
   const resetSearch = search.reset;
+  // El proceso por defecto necesita su propia marca de "quitado": borrar la clave
+  // de la URL no alcanza, porque la preselección la volvería a poner en el acto.
+  const updateProcess = useCallback(
+    (next: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (next) {
+        params.set('processId', next);
+        params.delete(PROCESS_OPT_OUT_KEY);
+      } else {
+        params.delete('processId');
+        params.set(PROCESS_OPT_OUT_KEY, '1');
+      }
+      params.delete('page');
+      const qs = params.toString();
+      startTransition(() => {
+        router.push(`${basePath}${qs ? `?${qs}` : ''}` as Route);
+      });
+    },
+    [router, searchParams, basePath],
+  );
+
   const clearAll = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     for (const key of FILTER_KEYS) params.delete(key);
     params.delete('page');
+    params.set(PROCESS_OPT_OUT_KEY, '1');
     const qs = params.toString();
     // Sin esto el input quedaría con texto mientras la URL ya no tiene `q`.
     resetSearch();
@@ -214,7 +237,7 @@ export function DashboardFilterBar({
       placeholder: 'Todos los procesos',
       value: value.processId,
       options: processOptions,
-      onChange: (v) => updateSingle('processId', v),
+      onChange: updateProcess,
       hidden: processOptions.length === 0,
     },
     {

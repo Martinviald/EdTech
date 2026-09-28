@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { DashboardFilterBar } from '../resultados/components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
-  withDefaultAcademicYear,
+  withEntryDefaults,
   buildDashboardQuery,
   type DashboardFilterValues,
 } from '../resultados/components/dashboard-filters';
@@ -60,7 +60,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={BASE_PATH}
     />
   );
@@ -77,14 +77,12 @@ async function AssessmentsSection({
 }) {
   const options = await getEvaluacionesFilters(query);
   const assessmentList = await getEvaluacionesAssessments(
-    buildDashboardQuery(withDefaultAcademicYear(filters, options.defaultAcademicYearId)),
+    buildDashboardQuery(withEntryDefaults(filters, options)),
   );
   const assessments = assessmentList.data;
 
   if (assessments.length === 0 && filters.q) {
-    return (
-      <SearchEmptyState filters={withDefaultAcademicYear(filters, options.defaultAcademicYearId)} />
-    );
+    return <SearchEmptyState filters={withEntryDefaults(filters, options)} />;
   }
 
   if (assessments.length === 0) {
@@ -117,9 +115,10 @@ async function AssessmentsSection({
 /**
  * Vacío causado por la búsqueda. Nombra el término y ofrece las dos salidas.
  *
- * La segunda importa tanto como la primera: `withDefaultAcademicYear` acota al
- * año vigente cuando la URL no pide uno, así que buscar "Diagnóstico 2025"
- * parado en 2026 devuelve cero sin que nada en pantalla lo explique.
+ * La segunda importa tanto como la primera: `withEntryDefaults` acota al proceso
+ * más reciente con resultados —y, si no hay, al año vigente— cuando la URL no pide
+ * nada, así que buscar "Diagnóstico 2025" parado en el proceso de Cierre 2026
+ * devuelve cero sin que nada en pantalla lo explique.
  */
 function SearchEmptyState({ filters }: { filters: DashboardFilterValues }) {
   const withoutSearch = `${ROUTES.evaluaciones}${buildDashboardQuery({ ...filters, q: undefined })}`;
