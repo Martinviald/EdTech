@@ -437,3 +437,43 @@ CREATE POLICY "measurement_processes_tenant_isolation" ON "measurement_processes
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true))
   WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+
+-- ── Motor de decisiones (`@soe/decisions`) — ver docs/plan-integracion-jev.md ──
+-- decision_settings: config del motor por funcionalidad. org_id NULLABLE, mismo
+-- criterio que llm_settings: las filas globales (org_id IS NULL) son config de
+-- plataforma, legibles por todos los tenants. A diferencia de llm_settings, la API NO
+-- puede escribir filas globales: el WITH CHECK exige org_id = contexto, así que un
+-- tenant solo crea o cambia su propio override. Las globales (modo y umbrales que
+-- valen para todos los colegios) se escriben con el rol admin (migrate/seed), que
+-- no pasa por RLS. No contienen PII (motor, modelo, modo y umbrales).
+ALTER TABLE "decision_settings" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "decision_settings" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "decision_settings_tenant_isolation" ON "decision_settings";
+CREATE POLICY "decision_settings_tenant_isolation" ON "decision_settings"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  )
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+-- decision_calls: log inmutable de llamadas al motor. org_id NOT NULL directo (como
+-- students): cada colegio ve sólo sus llamadas. Aunque no guarda el estado en claro
+-- (sólo su sha256), `answers`, `baseline` y `correlation_id` describen material del
+-- colegio. Se escribe siempre dentro de withOrgContext(orgId). Inmutable también a
+-- nivel de motor: solo hay políticas de SELECT e INSERT, así que UPDATE y DELETE
+-- no afectan ninguna fila para el rol de la API.
+ALTER TABLE "decision_calls" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "decision_calls" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "decision_calls_tenant_isolation" ON "decision_calls";
+CREATE POLICY "decision_calls_tenant_isolation" ON "decision_calls"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id::text = current_setting('app.current_org_id', true));
+
+DROP POLICY IF EXISTS "decision_calls_tenant_insert" ON "decision_calls";
+CREATE POLICY "decision_calls_tenant_insert" ON "decision_calls"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));

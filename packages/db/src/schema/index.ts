@@ -21,6 +21,7 @@ export * from './benchmark';
 export * from './remedial';
 export * from './assistant';
 export * from './llm-settings';
+export * from './decisions';
 export * from './documents';
 export * from './mcp';
 export * from './sheet-scanning';

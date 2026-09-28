@@ -1,6 +1,6 @@
 name: Checks
 
-# Los cuatro gates de calidad, en UN solo lugar. Los invocan tanto `ci.yml` (en cada
+# Los gates de calidad, en UN solo lugar. Los invocan tanto `ci.yml` (en cada
 # PR) como los dos workflows de deploy (antes de tocar nada en AWS).
 #
 # Existe porque estaban definidos sólo en `ci.yml`, que corre en `pull_request`: los
@@ -103,6 +103,28 @@ jobs:
       - name: Tests
         run: pnpm --filter @soe/types test
 
+  decisions:
+    name: Decisions (typecheck · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @soe/decisions typecheck
+
+      # Tests puros: no llaman a Jev ni necesitan TYPESAFE_API_KEY en el runner.
+      - name: Tests
+        run: pnpm --filter @soe/decisions test
+
   api:
     name: API (typecheck · lint · tests)
     runs-on: ubuntu-latest
@@ -118,10 +140,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # apps/api importa @soe/types y @soe/db por su `dist`; sin estos builds
-      # el typecheck no resuelve los paquetes del workspace.
+      # apps/api importa @soe/types, @soe/db y @soe/decisions por su `dist`; sin
+      # estos builds el typecheck no resuelve los paquetes del workspace.
       - name: Build workspace deps
-        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build && pnpm --filter @soe/decisions build
 
       - name: Typecheck
         run: pnpm --filter @soe/api typecheck

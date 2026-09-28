@@ -68,3 +68,6 @@ scripts/cscj/**/*.json
 
 # Snapshots de no-regresión del panorama (apps/api/scripts/snapshot-panorama.ts)
 apps/api/tmp/
+
+# Goldsets y resultados de calibración del motor de decisiones (contenido de pruebas DIA/PAES)
+scripts/decisions/data/
