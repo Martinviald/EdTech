@@ -372,18 +372,55 @@ y este documento actualizado con lo que la realidad haya corregido.
 
 ## 7. Riesgos
 
-### R1 — El costo del orden por gravedad _(sin medir)_
+### R1 — El costo del orden por gravedad ⟨medido⟩
 
-Resolver la severidad de cada evaluación obliga a armar las unidades comparables del alcance, que es
-lo que hace `comparable-overview.service.ts`. Medido en la base de desarrollo, ese endpoint promedia
-**182 ms** sin filtro y 68 ms con uno — pero son 12 evaluaciones. Un colegio real tiene ~258.
+Medido contra `soe_dev`, tres corridas por caso:
 
-`/evaluaciones` **no pagina** (`AssessmentListResponse` es `{ data }`, sin `total` ni `page`), así
-que el orden se calcula sobre la lista entera.
+| Qué                                                    | Costo        |
+| ------------------------------------------------------ | ------------ |
+| `listAssessments` completo (3 consultas)               | 8,7–12,6 ms  |
+| Armado de unidades comparables (11 consultas)          | 20,7–27,5 ms |
+| Consulta agregada propia sobre el read-model           | 6,9–9,8 ms   |
+| **El endpoint `comparable-overview` de punta a punta** | **182 ms**   |
 
-**Antes de construir la Ola 4 hay que medir con volumen realista.** Si duele, la salida es apoyarse
-en el read-model de cohorte (`assessment_item_stats`) en vez de rearmar unidades al vuelo. No se
-decide ahora: se mide primero.
+**El dato que decide:** el SQL completo son 24 ms de 182. **~87% del costo no es la
+base**, así que escalar el volumen ×20 mueve los 24 ms, no los 158 restantes. Ordenar por
+gravedad es viable y la falta de paginación no es el problema.
+
+Por eso **se descarta la consulta agregada propia** que este documento proponía: ahorra 16 ms
+—un 9% del total— a cambio de reimplementar `classifyByBands` en SQL, duplicando la semántica
+de clasificación en un segundo lugar. Además no se puede validar: `assessment_level_stats`, el
+read-model correcto para severidad, tiene **0 filas** en toda la base.
+
+También cae la sospecha sobre `attachBaselines`: aporta ~2,5 ms de los 24. Lo que domina es
+`loadClassGroupBreakdown` (4,1–7,8 ms), que **no alimenta `severity`** — verificado en
+`comparable-overview.service.ts:303`, donde `severity` sale sólo de `lowestBandShare`.
+
+⚠️ **Medido a 1/20 del volumen que la pregunta asumía.** `soe_dev` tiene 21 evaluaciones, no
+258; las 258 están en el RDS de demo, sin credenciales en el worktree. La medición que decide
+de verdad hay que correrla ahí. Y todas estas cifras son **sin RLS**: el rol local es
+superusuario con `BYPASSRLS`.
+
+### R1b — ⚠️ Hallazgo fuera de alcance: la política RLS de `assessments` impide todo índice
+
+`packages/db/sql/rls-policies.sql:56` define:
+
+```sql
+USING (org_id::text = current_setting('app.current_org_id', true))
+```
+
+El cast a texto **del lado de la columna** hace que ningún índice btree sobre
+`assessments(org_id)` (uuid) pueda servir la política: seq scan garantizado. Y las políticas de
+`assessment_results` y `assessment_item_stats` cuelgan de un `EXISTS` sobre `assessments`, así
+que heredan el problema. Es la misma familia que `assessment-academic-year.helper.ts:41-47`
+documenta como un 14 s → 0,6 s.
+
+Faltan además índices en `assessments(org_id)`, `student_enrollments(class_group_id)` e
+`instruments(org_id, subject_id, type, deleted_at)`.
+
+**No se toca en esta iteración.** Cambiar una política de aislamiento multi-tenant no es un
+arreglo de paso dentro de una feature de UI: mercece su propia revisión, y el archivo se
+re-aplica en cada `db:migrate`.
 
 ### R2 — El default que vacía la vista
 
@@ -442,3 +479,31 @@ decidirlo aparte.
 **P3 — ¿La banda también en `/evaluaciones`?** §D8 la pone sólo en `/resultados`. Poner la misma
 banda en ambas es coherente, pero en una lista de trabajo puede ser ruido. **Recomendación:** no en
 esta iteración.
+
+---
+
+## 11. Lo que la realidad corrigió
+
+Registrado al implementar, para que el documento no mienta.
+
+1. **La consulta agregada propia se descartó** tras medirla (§R1): ahorra un 9% del costo real
+   del endpoint a cambio de duplicar `classifyByBands` en SQL. La Ola 4 compone los endpoints
+   que ya existen y une la lista con las unidades mediante un helper puro en `packages/types`.
+   Sigue el mismo criterio que `getComparableAlerts`, que ya documenta por qué no toma atajos
+   sobre el armado de unidades.
+
+2. **`withDefaultProcess` no se pudo testear** donde el documento decía (§8).
+
+3. **La guarda "sólo procesos con resultados" no se ejercitó de punta a punta**: en la base de
+   desarrollo los 7 procesos visibles tienen resultados, y la única evaluación sin ellos es una
+   fixture TEST ya enlazada a otro proceso. Reasignarla habría mutado datos compartidos con
+   otras sesiones. La semántica de las dos consultas sí se verificó en SQL.
+
+4. **`sort` no viaja a la API.** El diseño lo ponía en `assessmentListQuerySchema`; como el
+   orden se resuelve componiendo endpoints, vive sólo en la URL. La lista no pagina, así que
+   ordenar después de traerla es equivalente.
+
+5. **Efecto observado del default en la demo:** `/evaluaciones` pasa de 6 evaluaciones a **1**,
+   porque el proceso más reciente (DIA Monitoreo 2026) tiene una sola. Es el diseño funcionando,
+   pero muestra que la utilidad del default depende del tamaño del proceso. Con un colegio real
+   el proceso más reciente agrupa decenas; con datos de demo el efecto se ve exagerado.
