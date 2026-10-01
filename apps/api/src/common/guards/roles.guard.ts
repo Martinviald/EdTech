@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { userHasAnyRole, type UserRole } from '@soe/types';
 import { ROLES_KEY } from '../decorators/roles.decorator';
@@ -14,6 +20,8 @@ import type { JwtPayload } from '../../auth/jwt-payload.types';
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
+  private readonly logger = new Logger(RolesGuard.name);
+
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -23,9 +31,23 @@ export class RolesGuard implements CanActivate {
     ]);
     if (!required?.length) return true;
 
-    const { user } = context.switchToHttp().getRequest<{ user: JwtPayload }>();
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user: JwtPayload; method: string; url: string }>();
+    const { user } = request;
     if (user.isPlatformAdmin) return true;
     if (!userHasAnyRole(user.roles, required)) {
+      this.logger.warn(
+        JSON.stringify({
+          event: 'role_denied',
+          method: request.method,
+          url: request.url,
+          userId: user.userId,
+          orgId: user.orgId,
+          roles: user.roles,
+          required,
+        }),
+      );
       throw new ForbiddenException('Rol insuficiente para esta operación');
     }
     return true;
