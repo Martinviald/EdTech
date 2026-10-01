@@ -18,7 +18,8 @@ import {
 import { parseMembersCsv, type ParsedMembersCsv } from '@/lib/csv-parser';
 import { bulkInviteMembers } from './actions';
 
-const SAMPLE_CSV = 'email,role\nprofesor1@colegio.cl,teacher\nprofesor2@colegio.cl,coordinator\n';
+const SAMPLE_CSV =
+  'email,role\nprofesor1@colegio.cl,teacher\nprofesor2@colegio.cl,eval_coordinator\n';
 
 const SAMPLE_CSV_HREF = `data:text/csv;charset=utf-8,${encodeURIComponent(SAMPLE_CSV)}`;
 

@@ -21,7 +21,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (session.user.isPlatformAdmin && !session.user.orgId) redirect(ROUTES.admin);
   if (!session.user.orgId) redirect(ROUTES.login);
 
-  const org = await getCurrentOrg(session.user.orgId);
+  const orgId = session.user.orgId;
+  const org = await getCurrentOrg(orgId).catch(() => ({
+    id: orgId,
+    name: session.user.orgs.find((o) => o.id === orgId)?.name ?? '',
+  }));
 
   // Asistente embebido (E21): solo si el usuario tiene rol directivo Y la feature
   // de tier pago está habilitada. El gating real lo impone el backend; esto decide

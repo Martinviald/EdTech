@@ -8,19 +8,27 @@ import { userRoleSchema } from './user.schema';
  *  - foundation_director, platform_admin: roles de red de colegios / plataforma,
  *    se crean solo desde super-admin.
  *  - guardian: apoderados se vinculan vía inscripción de alumnos, no por whitelist.
+ *  - dept_head, coordinator: todavía no tienen alcance propio (departamento,
+ *    ciclo); hoy operan como un directivo con menos permisos y sin definición
+ *    clara. Se habilitan cuando exista ese alcance.
+ *  - homeroom_teacher: la jefatura se lee de `scope.classGroupIds` y no hay UI
+ *    para elegir el curso, así que invitado así queda como "profesor jefe de
+ *    nada".
+ *
+ * Los memberships que ya existen con esos roles siguen funcionando: esto solo
+ * limita qué se puede invitar desde /equipo (modal y CSV).
  */
 export const ASSIGNABLE_SCHOOL_ROLES = [
   'school_admin',
   'academic_director',
   'cycle_director',
-  'dept_head',
-  'coordinator',
   'eval_coordinator',
   'teacher',
-  'homeroom_teacher',
 ] as const;
 
-export const assignableSchoolRoleSchema = z.enum(ASSIGNABLE_SCHOOL_ROLES);
+export const assignableSchoolRoleSchema = z.enum(ASSIGNABLE_SCHOOL_ROLES, {
+  errorMap: () => ({ message: 'Rol no disponible para invitar desde el colegio' }),
+});
 export type AssignableSchoolRole = z.infer<typeof assignableSchoolRoleSchema>;
 
 const emailField = z.string().trim().toLowerCase().email('Correo inválido').max(320);

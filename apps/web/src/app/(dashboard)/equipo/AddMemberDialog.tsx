@@ -30,11 +30,8 @@ const ROLE_LABELS: Record<AssignableSchoolRole, string> = {
   school_admin: 'Administrador(a) del colegio',
   academic_director: 'Director(a) académico(a)',
   cycle_director: 'Director(a) de ciclo',
-  dept_head: 'Jefe(a) de departamento',
-  coordinator: 'Coordinador(a)',
   eval_coordinator: 'Coordinador(a) de evaluación',
   teacher: 'Docente',
-  homeroom_teacher: 'Profesor(a) jefe',
 };
 
 export function AddMemberDialog() {
