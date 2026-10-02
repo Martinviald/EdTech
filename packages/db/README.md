@@ -27,6 +27,14 @@ expresar en los archivos `src/schema/*.ts`. Por eso viven en SQL plano versionad
 3. En la API, toda query a esa tabla debe correr dentro de
    `withOrgContext(db, orgId, tx => ...)`.
 
+## Otro SQL fuera de Drizzle: `sql/search-extensions.sql`
+
+Mismo mecanismo que el RLS, para lo que drizzle-kit tampoco genera: las extensiones
+de PostgreSQL. Hoy contiene `CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public`,
+que el buscador por palabras necesita para que "matematica" encuentre "Matemática"
+(ver `docs/diseno-buscador-evaluaciones.md`). `src/migrate.ts` lo re-aplica **siempre**,
+al inicio de `db:migrate` (antes de las migraciones y del RLS), de forma idempotente.
+
 ## Tablas con RLS activo
 
 `students`, `assessments`, `import_jobs` (org_id directo) y `responses`,
@@ -37,6 +45,9 @@ expresar en los archivos `src/schema/*.ts`. Por eso viven en SQL plano versionad
 tenants y legibles sin contexto de org). En `llm_settings` la config global la
 escribe la API (panel /configuracion/modelos-ia); la autorización es el role guard
 `platform_admin`, no el RLS.
+
+`decision_settings` sigue el mismo patrón que `llm_settings` (org_id NULLABLE) y
+`decision_calls` usa `org_id` directo (log del motor de decisiones).
 
 ## withOrgContext (regla de la capa de aplicación)
 

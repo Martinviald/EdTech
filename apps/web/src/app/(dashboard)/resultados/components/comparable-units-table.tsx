@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { ArrowRight, Inbox, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowRight, Inbox, SearchX, TrendingDown, TrendingUp } from 'lucide-react';
 import type { ComparableUnitSummary, UnitSeverity } from '@soe/types';
 import { EmptyState } from '@/components/shared';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -76,7 +77,18 @@ function DeltaChip({ unit }: { unit: ComparableUnitSummary }) {
   );
 }
 
-export function ComparableUnitsTable({ units }: { units: ComparableUnitSummary[] }) {
+export function ComparableUnitsTable({
+  units,
+  search,
+}: {
+  units: ComparableUnitSummary[];
+  /**
+   * Búsqueda vigente y el enlace que la quita. Sin esto, un vacío causado por el
+   * buscador se explicaría como "aún no hay evaluaciones con resultados", que es
+   * falso y deja al usuario sin saber qué lo vació.
+   */
+  search?: { term: string; clearHref: Route };
+}) {
   return (
     <Card>
       <CardHeader>
@@ -87,7 +99,18 @@ export function ComparableUnitsTable({ units }: { units: ComparableUnitSummary[]
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {units.length === 0 ? (
+        {units.length === 0 && search ? (
+          <EmptyState
+            icon={SearchX}
+            title={`Ninguna evaluación coincide con «${search.term}»`}
+            description="La búsqueda se combina con el resto de los filtros, así que puede estar acotada por el período, la asignatura o el nivel seleccionados."
+            action={
+              <Button asChild variant="outline">
+                <Link href={search.clearHref}>Quitar la búsqueda</Link>
+              </Button>
+            }
+          />
+        ) : units.length === 0 ? (
           <EmptyState
             icon={Inbox}
             title="Aún no hay evaluaciones con resultados"

@@ -44,6 +44,8 @@ describe('list_filter_options tool', () => {
       periods: [],
       instruments: [],
       applicationPeriodsWithData: [],
+      processes: [],
+      defaultProcessId: null,
       defaultAcademicYearId: null,
     };
     const getFilterOptions = jest.fn().mockResolvedValue(response);

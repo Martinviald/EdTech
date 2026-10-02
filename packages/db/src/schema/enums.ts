@@ -84,6 +84,23 @@ export const instrumentApplicationPeriodEnum = pgEnum('instrument_application_pe
   'cierre',
 ]);
 
+export const processKindEnum = pgEnum('process_kind', [
+  'dia',
+  'simce_ensayo',
+  'paes_ensayo',
+  'evaluacion_interna',
+  'cambridge_mock',
+  'custom',
+]);
+
+export const processStatusEnum = pgEnum('process_status', [
+  'planned',
+  'in_progress',
+  'loading',
+  'closed',
+  'archived',
+]);
+
 export const instrumentStatusEnum = pgEnum('instrument_status', ['draft', 'published', 'archived']);
 
 export const sectionTypeEnum = pgEnum('section_type', [
@@ -325,12 +342,7 @@ export const sheetScanStateEnum = pgEnum('sheet_scan_state', [
   'superseded',
 ]);
 
-export const markStateEnum = pgEnum('mark_state', [
-  'marked',
-  'blank',
-  'multiple',
-  'ambiguous',
-]);
+export const markStateEnum = pgEnum('mark_state', ['marked', 'blank', 'multiple', 'ambiguous']);
 
 // Tipo de decisión del revisor sobre una marca dudosa. `annulled` = el alumno
 // respondió pero la respuesta se anula por regla de la prueba (doble marca);
@@ -364,3 +376,11 @@ export const captureSessionStatusEnum = pgEnum('capture_session_status', [
   'revoked',
   'expired',
 ]);
+
+// ── Motor de decisiones (`@soe/decisions`) — ver docs/plan-integracion-jev.md ──
+// Modo por funcionalidad: `off` no corre; `shadow` corre y registra sin decidir;
+// `live` decide. Mismos valores que DECISION_MODES de @soe/types.
+export const decisionModeEnum = pgEnum('decision_mode', ['off', 'shadow', 'live']);
+
+// Resultado de una llamada registrada en decision_calls.
+export const decisionCallStatusEnum = pgEnum('decision_call_status', ['ok', 'error']);

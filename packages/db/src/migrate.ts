@@ -12,6 +12,11 @@ config({ path: resolve(__dirname, '../../../.env') });
 // cualquier db:generate / aplanamiento de migraciones. Ver sql/rls-policies.sql.
 const RLS_POLICIES_PATH = resolve(__dirname, '../sql/rls-policies.sql');
 
+// Mismo mecanismo para las extensiones que el buscador necesita (`unaccent`):
+// tampoco las genera drizzle-kit, así que se re-aplican en cada migración.
+// Ver sql/search-extensions.sql y docs/diseno-buscador-evaluaciones.md §D4.
+const SEARCH_EXTENSIONS_PATH = resolve(__dirname, '../sql/search-extensions.sql');
+
 async function main() {
   // migrate y seed usan un rol privilegiado (owner/superuser) que puede hacer DDL
   // y cargar datos sin contexto de org. La API usa DATABASE_URL (rol sujeto a RLS).
@@ -22,6 +27,10 @@ async function main() {
 
   const sql = postgres(databaseUrl, { max: 1 });
   const db = drizzle(sql);
+
+  console.log('Applying search extensions (idempotent)...');
+  await sql.unsafe(readFileSync(SEARCH_EXTENSIONS_PATH, 'utf-8'));
+  console.log('Search extensions applied.');
 
   console.log('Running migrations...');
   await migrate(db, { migrationsFolder: './drizzle/migrations' });
