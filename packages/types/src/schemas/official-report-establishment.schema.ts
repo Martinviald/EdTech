@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
+import type { PerformanceBandView } from './performance-band.schema';
 import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 import type { OfficialReportVariant } from './official-report-common.schema';
 
@@ -48,6 +49,20 @@ export type EstablishmentLevelCell = {
   level: PerformanceLevel;
   count: number;
   total: number; // estudiantes del grado en esa asignatura (denominador)
+  percentage: number; // 0..100
+};
+
+/**
+ * Celda de la Tabla 1.1–1.4 cuando la asignatura se clasifica por las BANDAS del
+ * instrumento (ej. DIA Nivel I/II/III): % de estudiantes de un grado en una banda.
+ * Es la misma clasificación que usa el informe por evaluación, así que ambos
+ * coinciden. `total` = estudiantes del grado con banda resuelta.
+ */
+export type EstablishmentBandCell = {
+  gradeId: string;
+  bandKey: string;
+  count: number;
+  total: number;
   percentage: number; // 0..100
 };
 
@@ -103,6 +118,11 @@ export type EstablishmentSubjectSection = {
   grades: EstablishmentGradeColumn[]; // grados con datos (columnas), ordenados
   // Tabla 1.1–1.4 (una por asignatura): % de estudiantes por grado × nivel.
   levelDistribution: EstablishmentLevelCell[];
+  // Presentes sólo si TODOS los instrumentos de la asignatura tienen bandas y
+  // comparten el mismo set de claves. Cuando vienen, son la fuente de verdad de
+  // la Tabla 1.1–1.4 (la UI ignora `levels`/`levelDistribution`).
+  bands?: PerformanceBandView[];
+  bandDistribution?: EstablishmentBandCell[];
   // Tabla 1.5–1.8 (una por asignatura): comparación mujeres vs hombres por grado.
   sexComparison: EstablishmentSexComparisonRow[];
   // Tabla 1.9 (parte de la asignatura): conteo M/H/Total por grado.

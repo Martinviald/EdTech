@@ -35,6 +35,7 @@ import {
   type DonutSlice,
 } from './report-charts';
 import { resolveDisclaimers } from './report-copy';
+import { bandLegacyLevel } from './band-levels';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TKT-24 — Informe oficial por curso. Server Component: recibe el
@@ -312,25 +313,6 @@ function levelSlices(
   });
 }
 
-/**
- * Nivel legacy equivalente de una banda por la posición relativa de su `order`
- * dentro del set (misma proyección que `bandToLegacyLevel` del backend). Sólo se
- * usa para heredar el color/estilo de la paleta de niveles cuando la banda no trae
- * un color propio — la etiqueta mostrada es SIEMPRE la real de la banda.
- */
-function bandLegacyLevel(order: number, orders: readonly number[]): PerformanceLevel {
-  const n = orders.length;
-  if (n <= 1) return 'adequate';
-  const sorted = [...orders].sort((a, b) => a - b);
-  const idx = sorted.indexOf(order);
-  const ratio = idx / (n - 1);
-  const bucket = Math.min(
-    PERFORMANCE_LEVEL_ORDER.length - 1,
-    Math.round(ratio * (PERFORMANCE_LEVEL_ORDER.length - 1)),
-  );
-  return PERFORMANCE_LEVEL_ORDER[bucket]!;
-}
-
 /** Color (hex) de una banda: el suyo si es hex, si no el del nivel equivalente. */
 function bandColor(bucket: PerformanceBandDistributionBucket, orders: readonly number[]): string {
   if (bucket.color && bucket.color.startsWith('#')) return bucket.color;
@@ -484,7 +466,6 @@ function StudentTable({
                     en Diagnóstico la franja de logro lo muestra por posición. */}
                 {!isDiagnostic && s.requiresSupport ? (
                   <span className="ml-2 rounded-sm bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
-
                     Requiere apoyo
                   </span>
                 ) : null}
