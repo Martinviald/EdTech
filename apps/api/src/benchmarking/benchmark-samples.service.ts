@@ -100,7 +100,12 @@ export class BenchmarkSamplesService {
       for (const row of instrumentRows) {
         if (row.refreshedAt > refreshedAt) refreshedAt = row.refreshedAt;
       }
-      samples.push({ instrumentId, ...aggregate, refreshedAt: refreshedAt.toISOString() });
+      samples.push({
+        instrumentId,
+        ...aggregate,
+        items: aggregate.items.filter((item) => item.schoolCount >= BENCHMARK_K_MIN_SCHOOLS),
+        refreshedAt: refreshedAt.toISOString(),
+      });
     }
     return samples;
   }

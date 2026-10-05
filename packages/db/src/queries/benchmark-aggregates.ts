@@ -9,7 +9,7 @@
  * colegios con resultados reales veían "Aún no hay instrumentos para comparar".
  *
  * Estrategia anti-leak (CLAUDE.md §5.2): la FUENTE (`assessment_results`,
- * `skill_results` — bajo RLS) se lee SIEMPRE dentro de `withOrgContext(orgId)`, org
+ * `assessment_skill_stats`, `assessment_item_stats` — bajo RLS) se lee SIEMPRE dentro de `withOrgContext(orgId)`, org
  * por org. El destino (`benchmark_aggregates`, SIN RLS) se escribe cross-tenant con
  * `db`. El read-model nunca contiene PII: sólo agregados por (org × instrumento ×
  * nivel × asignatura).
@@ -34,7 +34,7 @@ import {
 } from '../schema/benchmark';
 import { instruments } from '../schema/instruments';
 import { organizations } from '../schema/organizations';
-import { assessmentItemStats, assessmentResults, skillResults } from '../schema/results';
+import { assessmentItemStats, assessmentResults, assessmentSkillStats } from '../schema/results';
 import { taxonomyNodes } from '../schema/taxonomy';
 import { withOrgContext } from '../with-org-context';
 import { resolveEffectiveBandsForInstruments, type EffectiveBands } from './effective-bands';
@@ -235,7 +235,7 @@ async function refreshOrgItemAggregates(
 }
 
 /**
- * Agrega `assessment_results` + `skill_results` de la org bajo `withOrgContext`.
+ * Agrega `assessment_results` + `assessment_skill_stats` de la org bajo `withOrgContext`.
  * Agrupa por instrumento; gradeId/subjectId vienen del instrumento.
  *
  * `bandCounts` cuenta por la banda PROPIA del instrumento (clave/etiqueta/orden): se
@@ -298,20 +298,25 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
       if (band) countBand(acc.bandCounts, band);
     }
 
+    // Mismo cálculo que el logro por nodo de las vistas y alertas del colegio
+    // (aciertos / total desde el read-model de cohorte): así el Δ contra la muestra
+    // compara la misma métrica, e incluye a los colegios importados sólo por informe.
     const perSkillRows = await tx
       .select({
         instrumentId: instruments.id,
-        nodeId: skillResults.nodeId,
+        nodeId: assessmentSkillStats.nodeId,
         nodeName: taxonomyNodes.name,
-        achievement: sql<string | null>`round(avg(${skillResults.percentage}), 2)`,
-        studentCount: sql<number>`count(distinct ${skillResults.studentId})::int`,
+        achievement: sql<
+          string | null
+        >`round(sum(${assessmentSkillStats.correctCount})::numeric * 100 / nullif(sum(${assessmentSkillStats.totalCount}), 0), 2)`,
+        studentCount: sql<number>`sum(${assessmentSkillStats.studentCount})::int`,
       })
-      .from(skillResults)
-      .innerJoin(assessments, eq(skillResults.assessmentId, assessments.id))
+      .from(assessmentSkillStats)
+      .innerJoin(assessments, eq(assessmentSkillStats.assessmentId, assessments.id))
       .innerJoin(instruments, eq(assessments.instrumentId, instruments.id))
-      .innerJoin(taxonomyNodes, eq(skillResults.nodeId, taxonomyNodes.id))
+      .innerJoin(taxonomyNodes, eq(assessmentSkillStats.nodeId, taxonomyNodes.id))
       .where(eq(assessments.orgId, orgId))
-      .groupBy(instruments.id, skillResults.nodeId, taxonomyNodes.name);
+      .groupBy(instruments.id, assessmentSkillStats.nodeId, taxonomyNodes.name);
 
     const perSkillByInstrument = new Map<string, BenchmarkSkillAggregate[]>();
     for (const row of perSkillRows) {

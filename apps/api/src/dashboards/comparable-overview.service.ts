@@ -115,7 +115,13 @@ export class ComparableOverviewService {
       });
 
       const studentsEvaluated = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
-      const { samples, itemSamples } = await this.loadSamples(user, orgId, summaries);
+      const { samples, itemSamples } = await this.loadSamples(
+        user,
+        orgId,
+        summaries,
+        isTeacherScope,
+        (query.classGroupId?.length ?? 0) > 0,
+      );
       const alerts = await this.alerts.deriveAlerts(
         tx,
         orgId,
@@ -158,8 +164,10 @@ export class ComparableOverviewService {
     user: JwtPayload,
     orgId: string,
     units: ComparableUnitSummary[],
+    isTeacherScope: boolean,
+    courseFiltered: boolean,
   ): Promise<{ samples: InstrumentSampleLookup | null; itemSamples: ItemSampleLookup | null }> {
-    if (!canAccess(user.roles, BENCHMARKING_VIEWER_ROLES)) {
+    if (isTeacherScope || !canAccess(user.roles, BENCHMARKING_VIEWER_ROLES)) {
       return { samples: null, itemSamples: null };
     }
     const instrumentIds = units.map((unit) => unit.instrumentId);
@@ -168,7 +176,14 @@ export class ComparableOverviewService {
       this.benchmarkSamples.getItemSamples(instrumentIds),
     ]);
     return {
-      samples: new Map(entries.map((entry) => [entry.instrumentId, entry])),
+      samples: new Map(
+        entries.map((entry) => [
+          entry.instrumentId,
+          courseFiltered && entry.you
+            ? { ...entry, you: { ...entry.you, percentile: null, typicalZone: null } }
+            : entry,
+        ]),
+      ),
       itemSamples: new Map(items.map((item) => [item.instrumentId, item])),
     };
   }

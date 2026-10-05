@@ -267,7 +267,21 @@ describe('BenchmarkSamplesService.getItemSamples', () => {
     });
     const byItem = new Map(sample!.items.map((i) => [i.itemId, i]));
     expect(byItem.get(ITEM_A)).toMatchObject({ correctRate: 36.73, schoolCount: 2 });
-    expect(byItem.get(ITEM_B)).toMatchObject({ correctRate: 82.35, schoolCount: 1 });
+    expect(byItem.has(ITEM_B)).toBe(false);
+  });
+
+  it('omite los ítems que rindió un solo colegio aunque el instrumento cumpla k', async () => {
+    const db = makeDb([
+      [
+        itemRow(),
+        itemRow({ orgId: 'org-b', correctCount: 6, responseCount: 18 }),
+        itemRow({ orgId: 'org-b', itemId: ITEM_B, correctCount: 9, responseCount: 18 }),
+      ],
+    ]);
+
+    const [sample] = await makeService(db).getItemSamples([INSTRUMENT]);
+
+    expect(sample!.items.map((i) => i.itemId)).toEqual([ITEM_A]);
   });
 
   it('omite los instrumentos que no cumplen k-anonimato', async () => {
