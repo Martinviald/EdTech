@@ -7,6 +7,7 @@ import {
   instruments,
   studentEnrollments,
   withOrgContext,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
@@ -36,7 +37,6 @@ import {
 } from '../common/helpers/class-group-scope.helper';
 import { ComparableUnitAssembler } from '../dashboards/comparable/comparable-unit.assembler';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { loadStudentAssessments } from './lib/load-student-assessments';
 
 type ResolvedFilters = {

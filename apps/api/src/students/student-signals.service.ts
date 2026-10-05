@@ -12,6 +12,7 @@ import {
   students,
   subjects,
   withOrgContext,
+  loadBandsForInstruments,
 } from '@soe/db';
 import {
   ALERT_THRESHOLDS,
@@ -32,7 +33,6 @@ import {
   resolveClassGroupScope,
   type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
-import { loadBandsForInstruments } from '../performance-bands/lib/load-instrument-bands';
 
 const MAX_ROWS = 500;
 

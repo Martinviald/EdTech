@@ -16,7 +16,7 @@
   en `benchmark_aggregates` (que no tiene RLS). Así la fuente se lee con aislamiento y el read-model se
   construye cross-tenant. Snapshotea `optOutGlobalPool` y las dimensiones (`dependence/region/commune/
   networkOrgId = organizations.parent_id`) en cada fila.
-- **k-anonimato — FUENTE ÚNICA:** importar `BENCHMARK_K_MIN_SCHOOLS` (3) y `BENCHMARK_N_MIN_STUDENTS`
+- **k-anonimato — FUENTE ÚNICA:** importar `BENCHMARK_K_MIN_SCHOOLS` (2, provisorio; era 3) y `BENCHMARK_N_MIN_STUDENTS`
   (20) de `@soe/types`. En modo **global**, si la cohorte tiene `< k` colegios **o** `< n` alumnos →
   `suppressed=true` y NO se exponen `cohort`/`yourSchool` comparativos (disclaimer de muestra insuficiente).
 - **Modos (H7.4):** `global` = pool anónimo, excluye orgs con `optOutGlobalPool=true`, aplica k-anonimato.

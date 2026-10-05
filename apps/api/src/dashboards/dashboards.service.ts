@@ -18,6 +18,9 @@ import {
   subjects,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBands,
+  resolveEffectiveBandsForInstruments,
+  type EffectiveBands,
 } from '@soe/db';
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
@@ -68,11 +71,6 @@ import {
   type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import {
-  resolveEffectiveBands,
-  resolveEffectiveBandsForInstruments,
-  type EffectiveBands,
-} from '../performance-bands/lib/resolve-effective-bands';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {

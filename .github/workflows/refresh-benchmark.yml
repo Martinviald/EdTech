@@ -1,0 +1,62 @@
+name: Refresh benchmark read-model (diario)
+
+# `benchmark_aggregates` es el read-model cross-tenant que lee /benchmarking. El deploy
+# de backend lo refresca, pero los resultados que entran entre deploys (ingesta desde
+# la app, loaders contra demo) no aparecen hasta el próximo push a main. Este job cierra
+# ese hueco una vez al día. Es upsert idempotente y tarda segundos.
+#
+# También sirve para refrescar a mano tras una carga (workflow_dispatch).
+
+on:
+  schedule:
+    # Todos los días 06:30 UTC (~02:30-03:30 en Chile): fuera de horario de colegios.
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# MISMO grupo que los deploys: ambos escriben read-models del stage. Nunca a la vez.
+concurrency:
+  group: sst-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  STAGE: demo
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # La clasificación por bandas importa `@soe/types`, que se consume compilado.
+      - name: Build @soe/types
+        run: pnpm --filter @soe/types build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Open RDS tunnel (SSM port-forward via bastion)
+        uses: ./.github/actions/rds-tunnel
+        with:
+          stage: ${{ env.STAGE }}
+          db-password: ${{ secrets.DB_MASTER_PASSWORD }}
+
+      - name: Refresh benchmark_aggregates
+        run: pnpm --filter @soe/db db:refresh:benchmark

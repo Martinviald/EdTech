@@ -147,11 +147,10 @@ describe('BenchmarkingService.compare (global)', () => {
 
   it('suprime la cohorte por k-anonimato cuando hay < k colegios', async () => {
     const your = aggRow({ orgId: 'org-you' });
-    // 2 colegios (< BENCHMARK_K_MIN_SCHOOLS=3) aunque tengan muchos alumnos
-    const cohort = [
-      aggRow({ orgId: 'a', studentCount: 100 }),
-      aggRow({ orgId: 'b', studentCount: 100 }),
-    ];
+    // k - 1 colegios aunque tengan muchos alumnos
+    const cohort = Array.from({ length: BENCHMARK_K_MIN_SCHOOLS - 1 }, (_, i) =>
+      aggRow({ orgId: `org-${i}`, studentCount: 100 }),
+    );
     expect(cohort.length).toBeLessThan(BENCHMARK_K_MIN_SCHOOLS);
     const db = makeDb([[{ name: 'Prueba X' }], [your], cohort]);
     const svc = makeService(db);
@@ -167,9 +166,27 @@ describe('BenchmarkingService.compare (global)', () => {
     expect((db.__inserts[0].values as { suppressed: boolean }).suppressed).toBe(true);
   });
 
+  it('muestra la cohorte con exactamente k colegios y ≥ n alumnos', async () => {
+    const your = aggRow({ orgId: 'org-you', studentCount: BENCHMARK_N_MIN_STUDENTS });
+    const cohort = [
+      your,
+      ...Array.from({ length: BENCHMARK_K_MIN_SCHOOLS - 1 }, (_, i) =>
+        aggRow({ orgId: `org-${i}`, studentCount: BENCHMARK_N_MIN_STUDENTS }),
+      ),
+    ];
+    const db = makeDb([[{ name: 'Prueba X' }], [your], cohort]);
+    const svc = makeService(db);
+
+    const res = await svc.compare(makeUser(), baseQuery);
+
+    expect(res.suppressed).toBe(false);
+    expect(res.cohort!.schoolCount).toBe(BENCHMARK_K_MIN_SCHOOLS);
+    expect(res.yourSchool).not.toBeNull();
+  });
+
   it('suprime la cohorte por k-anonimato cuando hay < n alumnos', async () => {
     const your = aggRow({ orgId: 'org-you' });
-    // 3 colegios pero pocos alumnos en total (< BENCHMARK_N_MIN_STUDENTS=20)
+    // k+ colegios pero pocos alumnos en total (< BENCHMARK_N_MIN_STUDENTS=20)
     const cohort = [
       aggRow({ orgId: 'a', studentCount: 5 }),
       aggRow({ orgId: 'b', studentCount: 5 }),
