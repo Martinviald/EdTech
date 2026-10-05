@@ -52,8 +52,8 @@ function selectedOptionKey(
   const match = instruments.find(
     (i) =>
       i.instrumentId === instrumentId &&
-      (i.gradeId ?? '') === (gradeId ?? '') &&
-      (i.subjectId ?? '') === (subjectId ?? ''),
+      (gradeId === undefined || (i.gradeId ?? '') === gradeId) &&
+      (subjectId === undefined || (i.subjectId ?? '') === subjectId),
   );
   if (!match) return undefined;
   return [match.instrumentId, match.gradeId ?? '', match.subjectId ?? ''].join('|');

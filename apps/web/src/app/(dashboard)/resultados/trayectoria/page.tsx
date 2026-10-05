@@ -5,6 +5,7 @@ import type { Route } from 'next';
 import { ArrowRight, LineChart as LineChartIcon, Target, TrendingUp, Users } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
+import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import {
   ANALYTICS_VIEWER_ROLES,
   canAccess,
@@ -15,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   EmptyState,
   MetricComparison,
+  SampleDeltaChip,
   FilterBarSkeleton,
   CardSkeleton,
   type MetricDelta,
@@ -146,7 +148,11 @@ export default async function TrayectoriaPage({
       </Suspense>
 
       <Suspense fallback={<CardSkeleton rows={6} />}>
-        <TrajectorySection selection={selection} query={query} />
+        <TrajectorySection
+          selection={selection}
+          query={query}
+          canSeeSample={canSeeBenchmark(session.user.roles)}
+        />
       </Suspense>
     </>
   );
@@ -174,9 +180,11 @@ async function TrayectoriaAction({ query }: { query: string | null }) {
 async function TrajectorySection({
   selection,
   query,
+  canSeeSample,
 }: {
   selection: TrajectorySelection;
   query: string | null;
+  canSeeSample: boolean;
 }) {
   if (!query) {
     return (
@@ -233,6 +241,18 @@ async function TrajectorySection({
           icon={Target}
           comparisons={comparisons}
           hint={data.classGroupName ? `Curso ${data.classGroupName}` : 'Todo el nivel'}
+          footer={
+            canSeeSample ? (
+              <Suspense fallback={null}>
+                <TrajectorySampleChip
+                  instrumentId={current.instrumentId}
+                  instrumentName={current.instrumentName}
+                  value={current.averageAchievement}
+                  subject={data.classGroupName ? 'course' : 'school'}
+                />
+              </Suspense>
+            ) : undefined
+          }
         />
         <MetricComparison
           label={`Alumnos evaluados · ${currentLabel}`}
@@ -335,4 +355,27 @@ function TrajectoryCard({ summary, children }: { summary: string; children: Reac
 function lowestBandShare(distribution: { order: number; percentage: number }[]): number {
   const lowest = distribution.reduce((min, b) => (b.order < min.order ? b : min));
   return lowest.percentage;
+}
+
+async function TrajectorySampleChip({
+  instrumentId,
+  instrumentName,
+  value,
+  subject,
+}: {
+  instrumentId: string;
+  instrumentName: string;
+  value: number | null;
+  subject: 'school' | 'course';
+}) {
+  const entry = await getInstrumentSample(instrumentId);
+  return (
+    <SampleDeltaChip
+      entry={entry}
+      value={value}
+      subject={subject}
+      instrumentName={instrumentName}
+      surface="resultados.trayectoria"
+    />
+  );
 }

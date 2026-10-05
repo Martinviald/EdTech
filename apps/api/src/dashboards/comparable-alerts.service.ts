@@ -13,12 +13,17 @@ import {
   taxonomyNodes,
 } from '@soe/db';
 import {
+  ALERT_BASIS_BY_TYPE,
   ALERT_THRESHOLDS,
   AUTO_SCORABLE_ITEM_TYPES,
   ALERT_HIDDEN_NODE_TYPES,
+  sampleDeltaPp,
   type AlertSeverity,
   type ComparableUnitSummary,
   type DashboardAlert,
+  type DashboardAlertCohort,
+  type InstrumentSample,
+  type InstrumentSampleEntry,
 } from '@soe/types';
 import {
   assessmentAcademicYears,
@@ -26,7 +31,12 @@ import {
 } from '../common/helpers/assessment-academic-year.helper';
 import type { Database } from '../database/database.types';
 
-type AlertDraft = Omit<DashboardAlert, 'dedupKey'> & { dedupKey?: string };
+type AlertDraft = Omit<DashboardAlert, 'dedupKey' | 'basis' | 'cohort'> & {
+  dedupKey?: string;
+  cohort?: DashboardAlertCohort | null;
+};
+
+export type InstrumentSampleLookup = ReadonlyMap<string, InstrumentSampleEntry>;
 
 @Injectable()
 export class ComparableAlertsService {
@@ -35,6 +45,7 @@ export class ComparableAlertsService {
     orgId: string,
     units: ComparableUnitSummary[],
     classGroupIds: string[] | null,
+    samples: InstrumentSampleLookup | null = null,
   ): Promise<DashboardAlert[]> {
     if (units.length === 0) return [];
 
@@ -42,6 +53,7 @@ export class ComparableAlertsService {
       ...this.bandConcentrationAlerts(units),
       ...this.movementAlerts(units),
       ...this.classBelowUnitAlerts(units),
+      ...this.sampleAlerts(units, samples),
       ...(await this.skillGapAlerts(tx, units)),
       ...(await this.itemGapAlerts(tx, units)),
       ...(await this.bandRegressionAlerts(tx, units)),
@@ -57,7 +69,12 @@ export class ComparableAlertsService {
       const dedupKey =
         draft.dedupKey ?? `${draft.type}:${draft.unitKey ?? '-'}:${draft.contextId ?? '-'}`;
       if (byKey.has(dedupKey)) continue;
-      byKey.set(dedupKey, { ...draft, dedupKey });
+      byKey.set(dedupKey, {
+        ...draft,
+        dedupKey,
+        basis: ALERT_BASIS_BY_TYPE[draft.type],
+        cohort: draft.cohort ?? null,
+      });
     }
 
     return Array.from(byKey.values()).sort((a, b) => {
@@ -65,6 +82,90 @@ export class ComparableAlertsService {
       if (bySeverity !== 0) return bySeverity;
       return (b.studentsAffected ?? 0) - (a.studentsAffected ?? 0);
     });
+  }
+
+  private sampleAlerts(
+    units: ComparableUnitSummary[],
+    samples: InstrumentSampleLookup | null,
+  ): AlertDraft[] {
+    if (!samples) return [];
+    const drafts: AlertDraft[] = [];
+    for (const unit of units) {
+      const entry = samples.get(unit.instrumentId);
+      const sample = entry?.global;
+      if (!entry || !sample) continue;
+
+      const unitSeverity = this.belowSampleSeverity(unit.averageAchievement, sample);
+      if (unitSeverity && unit.averageAchievement !== null) {
+        drafts.push({
+          type: 'below_sample',
+          severity: unitSeverity,
+          message: `${unit.instrumentName}: ${unit.averageAchievement.toFixed(1)}% de logro, bajo la zona típica de la muestra (${this.formatZone(sample)})`,
+          contextKind: 'assessment',
+          contextId: unit.assessmentIds[0] ?? null,
+          contextLabel: unit.instrumentName,
+          value: unit.averageAchievement,
+          unitKey: unit.key,
+          unitLabel: unit.instrumentName,
+          studentsAffected: unit.studentsAssessed,
+          cohort: this.cohortOf(unit.averageAchievement, sample, entry.you?.percentile ?? null),
+        });
+      }
+
+      if (unit.byClassGroup.length < 2) continue;
+      for (const course of unit.byClassGroup) {
+        const severity = this.belowSampleSeverity(course.averageAchievement, sample);
+        if (!severity || course.averageAchievement === null) continue;
+        drafts.push({
+          type: 'class_below_sample',
+          severity,
+          message: `${course.classGroupName}: ${course.averageAchievement.toFixed(1)}% en ${unit.instrumentName}, bajo la zona típica de la muestra (${this.formatZone(sample)})`,
+          contextKind: 'class_group',
+          contextId: course.classGroupId,
+          contextLabel: course.classGroupName,
+          value: course.averageAchievement,
+          unitKey: unit.key,
+          unitLabel: unit.instrumentName,
+          studentsAffected: course.studentsAssessed,
+          cohort: this.cohortOf(course.averageAchievement, sample, null),
+        });
+      }
+    }
+    return drafts;
+  }
+
+  private belowSampleSeverity(
+    value: number | null,
+    sample: InstrumentSample,
+  ): AlertSeverity | null {
+    const delta = sampleDeltaPp(value, sample.avgAchievement);
+    if (value === null || delta === null) return null;
+    const { belowSamplePp } = ALERT_THRESHOLDS.cohort;
+    if (sample.p10 !== null && value < sample.p10 && delta <= -belowSamplePp.high) return 'high';
+    if (sample.p25 !== null && value < sample.p25 && delta <= -belowSamplePp.medium)
+      return 'medium';
+    return null;
+  }
+
+  private cohortOf(
+    value: number | null,
+    sample: InstrumentSample,
+    percentile: number | null,
+  ): DashboardAlertCohort {
+    const delta = sampleDeltaPp(value, sample.avgAchievement);
+    return {
+      sampleValue: sample.avgAchievement,
+      schoolCount: sample.schoolCount,
+      studentCount: sample.studentCount,
+      percentile,
+      similarToSample: delta !== null && Math.abs(delta) < ALERT_THRESHOLDS.cohort.similarPp,
+    };
+  }
+
+  private formatZone(sample: InstrumentSample): string {
+    const low = sample.p25 === null ? '—' : sample.p25.toFixed(1);
+    const high = sample.p75 === null ? '—' : sample.p75.toFixed(1);
+    return `${low}–${high}%`;
   }
 
   private bandConcentrationAlerts(units: ComparableUnitSummary[]): AlertDraft[] {

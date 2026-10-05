@@ -9,7 +9,9 @@ import {
   loadBandsForInstruments,
 } from '@soe/db';
 import {
+  BENCHMARKING_VIEWER_ROLES,
   buildComparabilityMeta,
+  canAccess,
   compareSeverity,
   deltaInPoints,
   deriveGenerationalHighlights,
@@ -26,7 +28,8 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { CohortLevelCount } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { ComparableAlertsService } from './comparable-alerts.service';
+import { BenchmarkSamplesService } from '../benchmarking/benchmark-samples.service';
+import { ComparableAlertsService, type InstrumentSampleLookup } from './comparable-alerts.service';
 import {
   ComparableUnitAssembler,
   type AchievementByAssessment,
@@ -60,6 +63,7 @@ export class ComparableOverviewService {
     private readonly dashboards: DashboardsService,
     private readonly alerts: ComparableAlertsService,
     private readonly assembler: ComparableUnitAssembler,
+    private readonly benchmarkSamples: BenchmarkSamplesService,
   ) {}
 
   async getComparableOverview(
@@ -107,7 +111,8 @@ export class ComparableOverviewService {
       });
 
       const studentsEvaluated = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
-      const alerts = await this.alerts.deriveAlerts(tx, orgId, summaries, classGroupIds);
+      const samples = await this.loadSamples(user, orgId, summaries);
+      const alerts = await this.alerts.deriveAlerts(tx, orgId, summaries, classGroupIds, samples);
 
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
@@ -136,6 +141,19 @@ export class ComparableOverviewService {
   ): Promise<ComparableAlertsResponse> {
     const { alerts, alertsTotal } = await this.getComparableOverview(user, query);
     return { alerts, alertsTotal };
+  }
+
+  private async loadSamples(
+    user: JwtPayload,
+    orgId: string,
+    units: ComparableUnitSummary[],
+  ): Promise<InstrumentSampleLookup | null> {
+    if (!canAccess(user.roles, BENCHMARKING_VIEWER_ROLES)) return null;
+    const entries = await this.benchmarkSamples.getSamples(
+      orgId,
+      units.map((unit) => unit.instrumentId),
+    );
+    return new Map(entries.map((entry) => [entry.instrumentId, entry]));
   }
 
   private recencyRank(value: Date | string | null): number {

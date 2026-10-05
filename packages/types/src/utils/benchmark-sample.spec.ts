@@ -4,6 +4,7 @@ import {
   percentileOf,
   percentileRank,
   sampleDeltaPp,
+  sampleSizeLabel,
   sumBandCounts,
   weightedAverage,
   type SampleSourceRow,
@@ -72,6 +73,13 @@ describe('sampleDeltaPp', () => {
   it('resta en pp y propaga nulos', () => {
     expect(sampleDeltaPp(62, 58.25)).toBe(3.75);
     expect(sampleDeltaPp(null, 58)).toBeNull();
+  });
+});
+
+describe('sampleSizeLabel', () => {
+  it('pluraliza colegios y alumnos', () => {
+    expect(sampleSizeLabel({ schoolCount: 2, studentCount: 103 })).toBe('2 colegios · 103 alumnos');
+    expect(sampleSizeLabel({ schoolCount: 1, studentCount: 1 })).toBe('1 colegio · 1 alumno');
   });
 });
 

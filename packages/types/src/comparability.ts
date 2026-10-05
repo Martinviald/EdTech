@@ -298,6 +298,15 @@ export const ALERT_THRESHOLDS = {
   itemCorrectRate: { high: 20, medium: 35 },
   /** Días desde la aplicación sin resultados para considerarla estancada. */
   staleAssessmentDays: 14,
+  /**
+   * Alertas relativas a la muestra de colegios (docs/diseno-benchmarking-en-contexto.md §9.4):
+   * exigen POSICIÓN (bajo el p25 / p10 de los colegios) y MAGNITUD (Δ en pp) a la vez.
+   */
+  cohort: {
+    belowSamplePp: { high: 10, medium: 5 },
+    /** Bajo este |Δ| (pp) el resultado se considera similar al de la muestra. */
+    similarPp: 5,
+  },
 } as const;
 
 /**

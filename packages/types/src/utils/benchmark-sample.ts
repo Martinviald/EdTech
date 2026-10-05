@@ -31,6 +31,13 @@ export type SampleAggregate = {
   perSkill: SampleSkillStat[];
 };
 
+/** "2 colegios · 103 alumnos": tamaño de una muestra, siempre visible junto al contraste. */
+export function sampleSizeLabel(sample: { schoolCount: number; studentCount: number }): string {
+  const schools = `${sample.schoolCount} ${sample.schoolCount === 1 ? 'colegio' : 'colegios'}`;
+  const students = `${sample.studentCount} ${sample.studentCount === 1 ? 'alumno' : 'alumnos'}`;
+  return `${schools} · ${students}`;
+}
+
 export function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }

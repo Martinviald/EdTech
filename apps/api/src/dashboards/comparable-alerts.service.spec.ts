@@ -1,5 +1,5 @@
 import type { Database } from '@soe/db';
-import type { ComparableUnitSummary } from '@soe/types';
+import type { ComparableUnitSummary, InstrumentSample } from '@soe/types';
 import { ComparableAlertsService } from './comparable-alerts.service';
 
 // Las familias que se calculan EN MEMORIA a partir de las unidades (concentración en
@@ -265,5 +265,180 @@ describe('ComparableAlertsService — prioridad y dedup', () => {
 
     expect(new Set(keys).size).toBe(keys.length);
     expect(keys).toContain('band_concentration:i1:cg1');
+  });
+});
+
+function makeSample(overrides: Partial<InstrumentSample> = {}): InstrumentSample {
+  return {
+    instrumentId: 'i1',
+    scope: 'global',
+    label: 'Muestra',
+    schoolCount: 12,
+    studentCount: 900,
+    avgAchievement: 66,
+    p10: 52,
+    p25: 58,
+    median: 65,
+    p75: 72,
+    bandCounts: [],
+    perSkill: [],
+    refreshedAt: '2026-10-05T06:30:00.000Z',
+    ...overrides,
+  };
+}
+
+function samplesFor(sample: InstrumentSample | null, percentile: number | null = 20) {
+  return new Map([
+    [
+      'i1',
+      {
+        instrumentId: 'i1',
+        global: sample,
+        network: null,
+        you: { avgAchievement: 60, studentCount: 100, percentile, typicalZone: 'below' as const },
+      },
+    ],
+  ]);
+}
+
+function course(id: string, averageAchievement: number | null) {
+  return {
+    classGroupId: id,
+    classGroupName: id,
+    gradeName: null,
+    studentsAssessed: 30,
+    averageAchievement,
+    lowestBandShare: null,
+  };
+}
+
+describe('ComparableAlertsService — alertas relativas a la muestra', () => {
+  it('sin muestras no emite alertas relativas y marca la base de las existentes', async () => {
+    const unit = makeUnit({ averageAchievement: 40 });
+
+    const alerts = await svc.deriveAlerts(makeDb(), 'org-1', [unit], null);
+
+    expect(alerts.some((a) => a.basis === 'cohort')).toBe(false);
+    expect(alerts.every((a) => a.cohort === null)).toBe(true);
+  });
+
+  it('exige posición y magnitud: bajo el p25 pero a menos de 5 pp no alerta', async () => {
+    const unit = makeUnit({ averageAchievement: 57 });
+
+    const alerts = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [unit],
+      null,
+      samplesFor(makeSample({ avgAchievement: 60, p25: 58 })),
+    );
+
+    expect(alerts.filter((a) => a.type === 'below_sample')).toHaveLength(0);
+  });
+
+  it('bajo el p25 y 5 pp o más bajo la muestra es medium', async () => {
+    const unit = makeUnit({ averageAchievement: 57 });
+
+    const alerts = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [unit],
+      null,
+      samplesFor(makeSample()),
+    );
+    const alert = alerts.find((a) => a.type === 'below_sample');
+
+    expect(alert).toMatchObject({
+      severity: 'medium',
+      basis: 'cohort',
+      value: 57,
+      cohort: {
+        sampleValue: 66,
+        schoolCount: 12,
+        studentCount: 900,
+        percentile: 20,
+        similarToSample: false,
+      },
+    });
+    expect(alert!.message).toContain('bajo la zona típica de la muestra (58.0–72.0%)');
+  });
+
+  it('bajo el p10 y 10 pp o más bajo la muestra es high', async () => {
+    const unit = makeUnit({ averageAchievement: 50 });
+
+    const alerts = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [unit],
+      null,
+      samplesFor(makeSample()),
+    );
+
+    expect(alerts.find((a) => a.type === 'below_sample')!.severity).toBe('high');
+  });
+
+  it('con dos colegios el más bajo sólo alerta si la diferencia es material', async () => {
+    const twoSchools = makeSample({
+      schoolCount: 2,
+      studentCount: 103,
+      avgAchievement: 71.91,
+      p10: 71.75,
+      p25: 72.07,
+      p75: 73.16,
+    });
+
+    const close = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [makeUnit({ averageAchievement: 71.53 })],
+      null,
+      samplesFor(twoSchools),
+    );
+    expect(close.filter((a) => a.basis === 'cohort')).toHaveLength(0);
+  });
+
+  it('alerta por curso bajo la muestra sólo cuando la unidad tiene más de un curso', async () => {
+    const single = makeUnit({ averageAchievement: 70, byClassGroup: [course('8°A', 50)] });
+    const several = makeUnit({
+      averageAchievement: 70,
+      byClassGroup: [course('8°A', 50), course('8°B', 75)],
+    });
+
+    const onlyOne = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [single],
+      null,
+      samplesFor(makeSample()),
+    );
+    const many = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [several],
+      null,
+      samplesFor(makeSample()),
+    );
+
+    expect(onlyOne.filter((a) => a.type === 'class_below_sample')).toHaveLength(0);
+    const courseAlerts = many.filter((a) => a.type === 'class_below_sample');
+    expect(courseAlerts).toHaveLength(1);
+    expect(courseAlerts[0]).toMatchObject({
+      severity: 'high',
+      contextKind: 'class_group',
+      contextId: '8°A',
+      cohort: { percentile: null },
+    });
+  });
+
+  it('una muestra suprimida por k-anonimato no genera alertas', async () => {
+    const alerts = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [makeUnit({ averageAchievement: 30 })],
+      null,
+      samplesFor(null),
+    );
+
+    expect(alerts.filter((a) => a.basis === 'cohort')).toHaveLength(0);
   });
 });

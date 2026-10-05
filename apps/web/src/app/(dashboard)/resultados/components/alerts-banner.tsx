@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowRight, CircleCheck, TriangleAlert } from 'lucide-react';
-import type { DashboardAlert } from '@soe/types';
-import { EmptyState } from '@/components/shared';
+import { sampleSizeLabel, type DashboardAlert } from '@soe/types';
+import { EmptyState, StatusBadge } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ROUTES } from '@/lib/routes';
@@ -84,11 +84,19 @@ export function AlertsBanner({ alerts, total }: { alerts: DashboardAlert[]; tota
                   key={`${alert.type}-${alert.contextId ?? idx}`}
                   className={`flex flex-col gap-2 rounded-md border-l-4 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${TONE[alert.severity]}`}
                 >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">{alert.message}</p>
+                  <div className="min-w-0 space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">
+                      {alert.message}
+                      {alert.basis === 'cohort' ? (
+                        <StatusBadge tone="info" className="ml-2 align-middle">
+                          vs muestra
+                        </StatusBadge>
+                      ) : null}
+                    </p>
                     {alert.unitLabel ? (
                       <p className="text-xs text-muted-foreground">{alert.unitLabel}</p>
                     ) : null}
+                    <CohortContext alert={alert} />
                   </div>
                   {href ? (
                     <Button variant="outline" size="sm" asChild className="shrink-0">
@@ -111,6 +119,31 @@ export function AlertsBanner({ alerts, total }: { alerts: DashboardAlert[]; tota
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Contra qué muestra se leyó la alerta (docs/diseno-benchmarking-en-contexto.md §9).
+ * Siempre con el tamaño de la muestra a la vista: con pocos colegios, una alerta
+ * "vs muestra" se lee distinto que con cien.
+ */
+function CohortContext({ alert }: { alert: DashboardAlert }) {
+  const cohort = alert.cohort;
+  if (!cohort) return null;
+  const sampleValue = cohort.sampleValue === null ? '—' : `${cohort.sampleValue.toFixed(1)}%`;
+  const size = sampleSizeLabel(cohort);
+  if (alert.basis === 'cohort') {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Muestra: {sampleValue} · {size}
+      </p>
+    );
+  }
+  if (!cohort.similarToSample) return null;
+  return (
+    <p className="text-xs text-muted-foreground">
+      Resultado similar en la muestra ({sampleValue} · {size})
+    </p>
   );
 }
 

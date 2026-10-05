@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
@@ -23,9 +24,16 @@ import {
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
   type AssessmentReportResponse,
+  type InstrumentSampleEntry,
   type UserRole,
 } from '@soe/types';
-import { EmptyState, StatCard, KpiGridSkeleton, CardSkeleton } from '@/components/shared';
+import {
+  EmptyState,
+  StatCard,
+  KpiGridSkeleton,
+  CardSkeleton,
+  SampleDeltaChip,
+} from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   formatAchievement,
@@ -118,6 +126,9 @@ async function ResumenContent({
   }
 
   const { summary } = report;
+  const samplePromise = canSeeBenchmark(roles)
+    ? getInstrumentSample(report.meta.instrumentId)
+    : undefined;
 
   // El DIA es un diagnóstico por niveles de logro (I/II/III), no por notas:
   // ocultamos "Nota promedio" para este tipo de instrumento aunque tenga escala.
@@ -174,6 +185,18 @@ async function ResumenContent({
           value={formatAchievement(summary.averageAchievement)}
           hint={`Nivel: ${performanceLevelLabel(summary.performanceLevel)}`}
           icon={Target}
+          footer={
+            samplePromise ? (
+              <Suspense fallback={null}>
+                <ResumenSampleChip
+                  samplePromise={samplePromise}
+                  value={summary.averageAchievement}
+                  subject={classGroupId ? 'course' : 'school'}
+                  instrumentName={report.meta.instrumentName}
+                />
+              </Suspense>
+            ) : undefined
+          }
         />
         {/* TKT-04: notas/escala solo si el instrumento tiene escala configurada.
             Sin escala, se ocultan estas tarjetas (no se muestra el default 4.0). */}
@@ -239,5 +262,28 @@ async function ResumenContent({
         ))}
       </section>
     </div>
+  );
+}
+
+async function ResumenSampleChip({
+  samplePromise,
+  value,
+  subject,
+  instrumentName,
+}: {
+  samplePromise: Promise<InstrumentSampleEntry | null>;
+  value: number | null;
+  subject: 'school' | 'course';
+  instrumentName: string;
+}) {
+  const entry = await samplePromise;
+  return (
+    <SampleDeltaChip
+      entry={entry}
+      value={value}
+      subject={subject}
+      instrumentName={instrumentName}
+      surface="evaluacion.resumen.logro"
+    />
   );
 }
