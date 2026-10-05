@@ -510,11 +510,12 @@ async function main() {
     }
     const itemsByInstrument = new Map<string, typeof allItems>();
 
-  // Guarda de secciones electivas (ver assertNoElectiveSections): con ramas a elección este
-  // cargador le fabricaría a cada alumno respuestas por las que no rindió.
-  for (const instId of new Set(artifact.courses.map((c) => c.instrumentId))) {
-    await assertNoElectiveSections(db, instId, 'import-paes-2026-responses');
-  }
+    // Guarda de secciones electivas (ver assertNoElectiveSections): con ramas a elección este
+    // cargador le fabricaría a cada alumno respuestas por las que no rindió. Corre sobre `tx`:
+    // el pool tiene una sola conexión y la transacción la retiene.
+    for (const instId of new Set(artifact.courses.map((c) => c.instrumentId))) {
+      await assertNoElectiveSections(tx, instId, 'import-paes-2026-responses');
+    }
 
     for (const item of allItems) {
       if (item.instrumentId == null) continue;
