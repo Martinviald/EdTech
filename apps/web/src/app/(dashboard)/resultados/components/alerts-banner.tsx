@@ -87,8 +87,7 @@ export function AlertsBanner({ alerts, total }: { alerts: DashboardAlert[]; tota
                   <div className="min-w-0 space-y-0.5">
                     <p className="text-sm font-medium text-foreground">
                       {alert.message}
-                      {alert.basis === 'cohort' ||
-                      (alert.cohort !== null && !alert.cohort.similarToSample) ? (
+                      {alert.basis === 'cohort' || alert.cohort?.similarToSample === false ? (
                         <StatusBadge tone="info" className="ml-2 align-middle">
                           vs muestra
                         </StatusBadge>

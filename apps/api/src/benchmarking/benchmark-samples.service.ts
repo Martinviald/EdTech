@@ -59,11 +59,14 @@ export class BenchmarkSamplesService {
     return { data };
   }
 
-  async getItemSamples(instrumentIds: readonly string[]): Promise<InstrumentItemSamples[]> {
+  async getItemSamples(
+    instrumentIds: readonly string[],
+    db: Database = this.db,
+  ): Promise<InstrumentItemSamples[]> {
     const uniqueIds = Array.from(new Set(instrumentIds));
     if (uniqueIds.length === 0) return [];
 
-    const rows = await this.db
+    const rows = await db
       .select({
         orgId: benchmarkItemAggregates.orgId,
         instrumentId: benchmarkItemAggregates.instrumentId,
@@ -113,16 +116,17 @@ export class BenchmarkSamplesService {
   async getSamples(
     orgId: string,
     instrumentIds: readonly string[],
+    db: Database = this.db,
   ): Promise<InstrumentSampleEntry[]> {
     const uniqueIds = Array.from(new Set(instrumentIds));
     if (uniqueIds.length === 0) return [];
 
     const [rows, network] = await Promise.all([
-      this.db
+      db
         .select()
         .from(benchmarkAggregates)
         .where(inArray(benchmarkAggregates.instrumentId, uniqueIds)),
-      this.resolveNetwork(orgId),
+      this.resolveNetwork(orgId, db),
     ]);
 
     const rowsByInstrument = new Map<string, BenchmarkAggregate[]>();
@@ -213,14 +217,14 @@ export class BenchmarkSamplesService {
     return Number.isFinite(n) ? n : null;
   }
 
-  private async resolveNetwork(orgId: string): Promise<NetworkRef | null> {
-    const [org] = await this.db
+  private async resolveNetwork(orgId: string, db: Database): Promise<NetworkRef | null> {
+    const [org] = await db
       .select({ parentId: organizations.parentId })
       .from(organizations)
       .where(eq(organizations.id, orgId))
       .limit(1);
     if (!org?.parentId) return null;
-    const [parent] = await this.db
+    const [parent] = await db
       .select({ id: organizations.id, name: organizations.name, type: organizations.type })
       .from(organizations)
       .where(eq(organizations.id, org.parentId))

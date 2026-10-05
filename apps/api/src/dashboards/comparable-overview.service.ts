@@ -116,6 +116,7 @@ export class ComparableOverviewService {
 
       const studentsEvaluated = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
       const { samples, itemSamples } = await this.loadSamples(
+        tx,
         user,
         orgId,
         summaries,
@@ -161,6 +162,7 @@ export class ComparableOverviewService {
   }
 
   private async loadSamples(
+    tx: Database,
     user: JwtPayload,
     orgId: string,
     units: ComparableUnitSummary[],
@@ -172,8 +174,8 @@ export class ComparableOverviewService {
     }
     const instrumentIds = units.map((unit) => unit.instrumentId);
     const [entries, items] = await Promise.all([
-      this.benchmarkSamples.getSamples(orgId, instrumentIds),
-      this.benchmarkSamples.getItemSamples(instrumentIds),
+      this.benchmarkSamples.getSamples(orgId, instrumentIds, tx),
+      this.benchmarkSamples.getItemSamples(instrumentIds, tx),
     ]);
     return {
       samples: new Map(

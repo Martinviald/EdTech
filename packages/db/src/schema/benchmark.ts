@@ -87,6 +87,10 @@ export const benchmarkAggregates = pgTable(
     // Métricas agregadas (sin PII).
     studentCount: integer('student_count').notNull().default(0),
     avgAchievement: decimal('avg_achievement', { precision: 5, scale: 2 }),
+    // ⚠️ OBSOLETA: proyección legacy de 4 niveles que ya no se escribe ni se lee. Se
+    // mantiene sólo para que el backend anterior siga funcionando durante el deploy
+    // (expand/contract); se elimina en una migración posterior.
+    bandDistribution: jsonb('band_distribution').$type<Record<string, number>>(),
     // Conteo por banda PROPIA del instrumento (clave/etiqueta/orden), la misma escala que
     // muestran las vistas de resultados.
     bandCounts: jsonb('band_counts').$type<BenchmarkBandCount[]>(),

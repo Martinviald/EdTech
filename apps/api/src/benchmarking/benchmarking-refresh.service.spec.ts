@@ -62,4 +62,32 @@ describe('BenchmarkingRefreshService', () => {
       operation: 'benchmark-refresh-org',
     });
   });
+
+  it('agrupa los refresh de una misma org: uno en curso y a lo sumo uno pendiente', async () => {
+    let finish: () => void = () => undefined;
+    refreshMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = () => resolve({ refreshedOrgs: 1, refreshedRows: 1, refreshedItemRows: 0 });
+        }),
+    );
+    refreshMock.mockResolvedValue({ refreshedOrgs: 1, refreshedRows: 1, refreshedItemRows: 0 });
+    const service = makeService();
+
+    service.refreshOrgInBackground('org-1');
+    service.refreshOrgInBackground('org-1');
+    service.refreshOrgInBackground('org-1');
+    service.refreshOrgInBackground('org-2');
+
+    expect(refreshMock).toHaveBeenCalledTimes(2);
+    finish();
+    await flushPromises();
+
+    expect(refreshMock).toHaveBeenCalledTimes(3);
+    expect(refreshMock.mock.calls.map((call) => call[1])).toEqual([
+      { orgId: 'org-1' },
+      { orgId: 'org-2' },
+      { orgId: 'org-1' },
+    ]);
+  });
 });

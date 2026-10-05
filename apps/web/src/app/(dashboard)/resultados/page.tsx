@@ -190,7 +190,7 @@ async function PanoramaSections({
 
       <ComparabilityNotice comparability={comparable.comparability} />
 
-      {canSeeSample && comparable.units.length > 0 ? (
+      {canSeeSample && comparable.scope !== 'teacher' && comparable.units.length > 0 ? (
         <Suspense fallback={<ComparableUnitsTable units={comparable.units} search={search} />}>
           <UnitsTableWithSamples
             units={comparable.units}

@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MiniBands({ row, bands }: { row: NetworkSchoolRow; bands: readonly BenchmarkBandRef[] }) {
-  const percentages = bandPercentages(row.bandCounts);
+  const percentages = bandPercentages(row.bandCounts ?? []);
   return (
     <div
       className="flex h-3 w-32 overflow-hidden rounded-full bg-muted"
@@ -51,7 +51,7 @@ export function NetworkTable({ schools }: { schools: NetworkSchoolRow[] }) {
   const sorted = [...schools].sort((a, b) =>
     a.orgName.localeCompare(b.orgName, 'es'),
   );
-  const bands = unionBands(schools.map((school) => school.bandCounts));
+  const bands = unionBands(schools.map((school) => school.bandCounts ?? []));
 
   return (
     <Card>

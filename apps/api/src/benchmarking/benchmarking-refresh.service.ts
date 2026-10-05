@@ -22,9 +22,22 @@ export class BenchmarkingRefreshService {
     };
   }
 
+  private readonly runningOrgs = new Set<string>();
+  private readonly pendingOrgs = new Set<string>();
+
   refreshOrgInBackground(orgId: string): void {
-    refreshBenchmarkAggregates(this.db, { orgId }).catch((error: unknown) => {
-      reportServerError(error, { orgId, operation: 'benchmark-refresh-org' });
-    });
+    if (this.runningOrgs.has(orgId)) {
+      this.pendingOrgs.add(orgId);
+      return;
+    }
+    this.runningOrgs.add(orgId);
+    refreshBenchmarkAggregates(this.db, { orgId })
+      .catch((error: unknown) => {
+        reportServerError(error, { orgId, operation: 'benchmark-refresh-org' });
+      })
+      .finally(() => {
+        this.runningOrgs.delete(orgId);
+        if (this.pendingOrgs.delete(orgId)) this.refreshOrgInBackground(orgId);
+      });
   }
 }

@@ -1,1 +1,0 @@
-ALTER TABLE "benchmark_aggregates" DROP COLUMN "band_distribution";

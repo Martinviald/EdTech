@@ -33,7 +33,7 @@
 ### 1.3 Lo que la promoción `dev → main` tiene que cuidar
 
 - **Migraciones divergentes.** Las migraciones de esta feature (`band_counts` en la fase 0, la tabla
-  por ítem en la fase 3 y el `DROP COLUMN` de la fase 4) nacen en la cadena de `dev`. La cadena
+  por ítem en la fase 3) nacen en la cadena de `dev`. La cadena
   canónica es la de `main` porque es la que despliega: al promover, se adopta la cadena de `main` y se
   **regenera** con `pnpm db:generate` (ver `feedback-sync-dev-main-migraciones`). Revisar que la
   migración regenerada sólo toque lo de esta feature.
@@ -327,7 +327,7 @@ Mismo k que la muestra de instrumento.
 | # | Ticket | Tamaño |
 | --- | --- | --- |
 | 4.1 | `/benchmarking` consume `InstrumentSample` y `band_counts`; `band-presentation.ts` pasa a los niveles del instrumento. | M |
-| 4.2 | Quitar `band_distribution` (columna, refresh, contrato y `BenchmarkComparisonResponse`) cuando nada la lea. Migración de `DROP COLUMN`. | S |
+| 4.2 | Quitar `band_distribution` del refresh, del contrato y de `BenchmarkComparisonResponse`. La **columna** queda en la base, marcada como obsoleta y sin escrituras: el backend anterior todavía la lee mientras dura el deploy (migración antes de publicar la imagen nueva). El `DROP COLUMN` va en una release posterior (expand/contract). | S |
 
 **Verificación:** `git grep bandDistribution` sólo devuelve usos de las vistas de resultados, que no
 son del benchmarking.

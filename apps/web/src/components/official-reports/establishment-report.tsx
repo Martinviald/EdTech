@@ -236,7 +236,7 @@ function BandDistributionTable({
                   <td key={g.gradeId} className="px-3 py-2 text-center tabular-nums">
                     {cell ? fmtPct(cell.percentage, 0) : '—'}
                     {sampleShare === undefined ? null : (
-                      <span className="block text-xs text-muted-foreground">
+                      <span className="block text-xs text-muted-foreground print:hidden">
                         Muestra {fmtPct(sampleShare, 0)}
                       </span>
                     )}
