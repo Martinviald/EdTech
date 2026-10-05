@@ -52,6 +52,7 @@ import {
   createDbClient,
   withOrgContext,
   type Database,
+  loadInstrumentBands,
 } from '@soe/db';
 import {
   buildLevelStatCounts,
@@ -59,7 +60,6 @@ import {
   type OfficialReportImportFile,
   type PerformanceBandInput,
 } from '@soe/types';
-import { loadInstrumentBands } from '../src/performance-bands/lib/load-instrument-bands';
 
 const CSCJ_ORG = 'c5c10000-0000-0000-0000-000000000001';
 const REPORT_YEAR = 2025;

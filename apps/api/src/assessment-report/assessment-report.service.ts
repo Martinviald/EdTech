@@ -18,6 +18,7 @@ import {
   subjects,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   RESULT_HIDDEN_NODE_TYPES,
@@ -62,7 +63,6 @@ import {
   levelCountsToLegacyDistribution,
 } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 import {
   resolveClassGroupScope,

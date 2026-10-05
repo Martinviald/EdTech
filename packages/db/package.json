@@ -35,6 +35,7 @@
     "db:import:item-tags": "tsx src/seed/import-item-tags.ts",
     "db:seed:performance-bands": "tsx src/seed/seed-performance-bands.ts",
     "db:backfill:cohort-stats": "tsx src/scripts/backfill-cohort-stats.ts",
+    "db:refresh:benchmark": "tsx src/scripts/refresh-benchmark-aggregates.ts",
     "db:retype:items": "tsx src/scripts/retype-matching-truefalse-items.ts",
     "db:backfill:application-period": "tsx src/scripts/backfill-application-period.ts",
     "db:fix:application-period": "tsx src/scripts/split-instrument-by-application-period.ts",

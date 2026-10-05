@@ -11,6 +11,7 @@ import {
   students,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   REQUIRES_SUPPORT_LEVEL,
@@ -34,7 +35,6 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 import {
   loadCohortLevelCounts,

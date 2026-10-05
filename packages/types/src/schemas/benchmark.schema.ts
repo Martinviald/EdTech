@@ -14,7 +14,11 @@ import { z } from 'zod';
 // Una cohorte del pool GLOBAL solo se muestra si tiene ≥ k colegios Y ≥ n alumnos;
 // si no, se SUPRIME (anti-reidentificación, Ley 19.628). El modo RED es identificado
 // por acuerdo del sostenedor y NO aplica supresión por k.
-export const BENCHMARK_K_MIN_SCHOOLS = 3 as const;
+// ⚠️ k = 2 es PROVISORIO: con dos colegios cada uno puede despejar el agregado del
+// otro restando el suyo. Se aceptó porque los dos colegios reales de hoy (CSCJ y San
+// Agustín) son de la misma red, Fundación Tupungato. Volver a 3 cuando entre un
+// colegio fuera de esa red.
+export const BENCHMARK_K_MIN_SCHOOLS = 2 as const;
 export const BENCHMARK_N_MIN_STUDENTS = 20 as const;
 
 export const benchmarkModeSchema = z.enum(['global', 'network']);
@@ -128,7 +132,7 @@ export const benchmarkComparisonResponseSchema = z.object({
   instrumentName: z.string(),
   // Supresión por k-anonimato (solo modo global): si true, no se exponen cohort/yourSchool.
   suppressed: z.boolean(),
-  suppressionReason: z.string().nullable(), // p.ej. "Cohorte insuficiente (< 3 colegios / < 20 alumnos)"
+  suppressionReason: z.string().nullable(), // p.ej. "Cohorte insuficiente (< 2 colegios / < 20 alumnos)"
   yourSchool: schoolBenchmarkSchema.nullable(),
   cohort: cohortBenchmarkSchema.nullable(),
   // Solo modo `network`: comparación identificada con los colegios del sostenedor.
