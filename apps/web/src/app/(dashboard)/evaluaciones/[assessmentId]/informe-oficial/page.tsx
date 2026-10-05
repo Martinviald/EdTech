@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
-import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
+import { canSeeBenchmark, getInstrumentSample, getItemSampleRates } from '@/lib/benchmark-samples';
 import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
@@ -61,22 +61,17 @@ export default async function InformeOficialPage({
       </div>
 
       {report ? (
-        <CourseReport
-          report={report}
-          studentReportBasePath={ROUTES.evaluacionInformeAlumnoBase(assessmentId)}
-          generalSample={
-            canSeeBenchmark(session.user.roles) ? (
-              <Suspense fallback={null}>
-                <CourseReportSampleLine
-                  instrumentId={report.meta.instrumentId}
-                  instrumentName={report.meta.instrumentName}
-                  value={report.generalResult.averageAchievement}
-                  subject={classGroupId ? 'course' : 'school'}
-                />
-              </Suspense>
-            ) : undefined
-          }
-        />
+        canSeeBenchmark(session.user.roles) ? (
+          <Suspense fallback={courseReport(report, classGroupId, assessmentId, true, null)}>
+            <CourseReportWithItemSamples
+              report={report}
+              classGroupId={classGroupId}
+              assessmentId={assessmentId}
+            />
+          </Suspense>
+        ) : (
+          courseReport(report, classGroupId, assessmentId, false, null)
+        )
       ) : (
         <EmptyState
           icon={Inbox}
@@ -125,4 +120,45 @@ async function CourseReportSampleLine({
       />
     </div>
   );
+}
+
+function courseReport(
+  report: OfficialCourseReportResponse,
+  classGroupId: string | undefined,
+  assessmentId: string,
+  canSeeSample: boolean,
+  itemSamples: ReadonlyMap<string, number | null> | null,
+) {
+  return (
+    <CourseReport
+      report={report}
+      studentReportBasePath={ROUTES.evaluacionInformeAlumnoBase(assessmentId)}
+      itemSamples={itemSamples}
+      generalSample={
+        canSeeSample ? (
+          <Suspense fallback={null}>
+            <CourseReportSampleLine
+              instrumentId={report.meta.instrumentId}
+              instrumentName={report.meta.instrumentName}
+              value={report.generalResult.averageAchievement}
+              subject={classGroupId ? 'course' : 'school'}
+            />
+          </Suspense>
+        ) : undefined
+      }
+    />
+  );
+}
+
+async function CourseReportWithItemSamples({
+  report,
+  classGroupId,
+  assessmentId,
+}: {
+  report: OfficialCourseReportResponse;
+  classGroupId: string | undefined;
+  assessmentId: string;
+}) {
+  const itemSamples = await getItemSampleRates(report.meta.instrumentId);
+  return courseReport(report, classGroupId, assessmentId, true, itemSamples);
 }

@@ -29,7 +29,11 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { CohortLevelCount } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import { BenchmarkSamplesService } from '../benchmarking/benchmark-samples.service';
-import { ComparableAlertsService, type InstrumentSampleLookup } from './comparable-alerts.service';
+import {
+  ComparableAlertsService,
+  type InstrumentSampleLookup,
+  type ItemSampleLookup,
+} from './comparable-alerts.service';
 import {
   ComparableUnitAssembler,
   type AchievementByAssessment,
@@ -111,8 +115,15 @@ export class ComparableOverviewService {
       });
 
       const studentsEvaluated = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
-      const samples = await this.loadSamples(user, orgId, summaries);
-      const alerts = await this.alerts.deriveAlerts(tx, orgId, summaries, classGroupIds, samples);
+      const { samples, itemSamples } = await this.loadSamples(user, orgId, summaries);
+      const alerts = await this.alerts.deriveAlerts(
+        tx,
+        orgId,
+        summaries,
+        classGroupIds,
+        samples,
+        itemSamples,
+      );
 
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
@@ -147,13 +158,19 @@ export class ComparableOverviewService {
     user: JwtPayload,
     orgId: string,
     units: ComparableUnitSummary[],
-  ): Promise<InstrumentSampleLookup | null> {
-    if (!canAccess(user.roles, BENCHMARKING_VIEWER_ROLES)) return null;
-    const entries = await this.benchmarkSamples.getSamples(
-      orgId,
-      units.map((unit) => unit.instrumentId),
-    );
-    return new Map(entries.map((entry) => [entry.instrumentId, entry]));
+  ): Promise<{ samples: InstrumentSampleLookup | null; itemSamples: ItemSampleLookup | null }> {
+    if (!canAccess(user.roles, BENCHMARKING_VIEWER_ROLES)) {
+      return { samples: null, itemSamples: null };
+    }
+    const instrumentIds = units.map((unit) => unit.instrumentId);
+    const [entries, items] = await Promise.all([
+      this.benchmarkSamples.getSamples(orgId, instrumentIds),
+      this.benchmarkSamples.getItemSamples(instrumentIds),
+    ]);
+    return {
+      samples: new Map(entries.map((entry) => [entry.instrumentId, entry])),
+      itemSamples: new Map(items.map((item) => [item.instrumentId, item])),
+    };
   }
 
   private recencyRank(value: Date | string | null): number {

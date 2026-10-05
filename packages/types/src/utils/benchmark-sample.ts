@@ -1,4 +1,5 @@
 import type {
+  ItemSampleStat,
   BenchmarkBandCount,
   BenchmarkSkillAggregate,
   SampleSkillStat,
@@ -191,4 +192,56 @@ export function aggregateSample(rows: readonly SampleSourceRow[]): SampleAggrega
     bandCounts: sumBandCounts(rows.map((r) => r.bandCounts)),
     perSkill: aggregateSampleSkills(rows),
   };
+}
+
+/** Fila de un colegio para un ítem (lo que aporta `benchmark_item_aggregates`). */
+export type ItemSampleSourceRow = {
+  orgId: string;
+  itemId: string;
+  correctCount: number;
+  responseCount: number;
+};
+
+export type ItemSampleAggregate = {
+  schoolCount: number;
+  studentCount: number;
+  items: ItemSampleStat[];
+};
+
+/**
+ * % de acierto de la muestra por ítem: suma de aciertos sobre suma de respuestas de
+ * todos los colegios. `studentCount` aproxima a los alumnos con el máximo de
+ * respuestas que tuvo cada colegio en algún ítem del instrumento.
+ */
+export function aggregateItemSample(rows: readonly ItemSampleSourceRow[]): ItemSampleAggregate {
+  const byItem = new Map<string, { correct: number; responses: number; orgs: Set<string> }>();
+  const maxResponsesByOrg = new Map<string, number>();
+  for (const row of rows) {
+    let acc = byItem.get(row.itemId);
+    if (!acc) {
+      acc = { correct: 0, responses: 0, orgs: new Set() };
+      byItem.set(row.itemId, acc);
+    }
+    acc.correct += row.correctCount;
+    acc.responses += row.responseCount;
+    acc.orgs.add(row.orgId);
+    maxResponsesByOrg.set(
+      row.orgId,
+      Math.max(maxResponsesByOrg.get(row.orgId) ?? 0, row.responseCount),
+    );
+  }
+
+  let studentCount = 0;
+  for (const responses of maxResponsesByOrg.values()) studentCount += responses;
+
+  const items: ItemSampleStat[] = [];
+  for (const [itemId, acc] of byItem) {
+    items.push({
+      itemId,
+      correctRate: acc.responses === 0 ? null : round2((acc.correct / acc.responses) * 100),
+      responseCount: acc.responses,
+      schoolCount: acc.orgs.size,
+    });
+  }
+  return { schoolCount: maxResponsesByOrg.size, studentCount, items };
 }

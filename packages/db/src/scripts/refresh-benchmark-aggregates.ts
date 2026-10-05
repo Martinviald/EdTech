@@ -36,9 +36,12 @@ async function main(): Promise<void> {
   const db = createDbClient(databaseUrl, { maxConnections: 2 });
   try {
     const started = Date.now();
-    const { refreshedOrgs, refreshedRows } = await refreshBenchmarkAggregates(db, { orgId });
+    const { refreshedOrgs, refreshedRows, refreshedItemRows } = await refreshBenchmarkAggregates(
+      db,
+      { orgId },
+    );
     console.log(
-      `[refresh-benchmark] ${refreshedOrgs} orgs, ${refreshedRows} filas en ${Date.now() - started} ms`,
+      `[refresh-benchmark] ${refreshedOrgs} orgs, ${refreshedRows} filas, ${refreshedItemRows} ítems en ${Date.now() - started} ms`,
     );
   } finally {
     await db.$client.end({ timeout: 5 });

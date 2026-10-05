@@ -232,3 +232,56 @@ describe('BenchmarkSamplesService.getSamplesForUser', () => {
     ).rejects.toThrow('Usuario sin organización activa');
   });
 });
+
+const ITEM_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const ITEM_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+function itemRow(overrides: Record<string, unknown> = {}) {
+  return {
+    orgId: 'org-a',
+    instrumentId: INSTRUMENT,
+    itemId: ITEM_A,
+    correctCount: 30,
+    responseCount: 80,
+    refreshedAt: new Date('2026-10-05T06:30:00Z'),
+    ...overrides,
+  };
+}
+
+describe('BenchmarkSamplesService.getItemSamples', () => {
+  it('agrega el % de acierto por ítem de todos los colegios del instrumento', async () => {
+    const db = makeDb([
+      [
+        itemRow(),
+        itemRow({ itemId: ITEM_B, correctCount: 70, responseCount: 85 }),
+        itemRow({ orgId: 'org-b', correctCount: 6, responseCount: 18 }),
+      ],
+    ]);
+
+    const [sample] = await makeService(db).getItemSamples([INSTRUMENT]);
+
+    expect(sample).toMatchObject({
+      instrumentId: INSTRUMENT,
+      schoolCount: 2,
+      studentCount: 103,
+      refreshedAt: '2026-10-05T06:30:00.000Z',
+    });
+    const byItem = new Map(sample!.items.map((i) => [i.itemId, i]));
+    expect(byItem.get(ITEM_A)).toMatchObject({ correctRate: 36.73, schoolCount: 2 });
+    expect(byItem.get(ITEM_B)).toMatchObject({ correctRate: 82.35, schoolCount: 1 });
+  });
+
+  it('omite los instrumentos que no cumplen k-anonimato', async () => {
+    const db = makeDb([[itemRow(), itemRow({ itemId: ITEM_B })]]);
+
+    await expect(makeService(db).getItemSamples([INSTRUMENT])).resolves.toEqual([]);
+  });
+
+  it('sin instrumentos no consulta la base', async () => {
+    const db = makeDb([]);
+    const select = jest.spyOn(db, 'select');
+
+    await expect(makeService(db).getItemSamples([])).resolves.toEqual([]);
+    expect(select).not.toHaveBeenCalled();
+  });
+});

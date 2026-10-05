@@ -124,6 +124,30 @@ export const instrumentSamplesResponseSchema = z.object({
 });
 export type InstrumentSamplesResponse = z.infer<typeof instrumentSamplesResponseSchema>;
 
+/** % de acierto de la muestra en un ítem (fase 3: muestra por ítem). */
+export const itemSampleStatSchema = z.object({
+  itemId: z.string().uuid(),
+  correctRate: z.number().nullable(), // 0..100
+  responseCount: z.number().int(),
+  schoolCount: z.number().int(),
+});
+export type ItemSampleStat = z.infer<typeof itemSampleStatSchema>;
+
+/** Muestra global por ítem de un instrumento. Sólo viaja si cumple k-anonimato. */
+export const instrumentItemSamplesSchema = z.object({
+  instrumentId: z.string().uuid(),
+  schoolCount: z.number().int(),
+  studentCount: z.number().int(),
+  items: z.array(itemSampleStatSchema),
+  refreshedAt: z.string(),
+});
+export type InstrumentItemSamples = z.infer<typeof instrumentItemSamplesSchema>;
+
+export const instrumentItemSamplesResponseSchema = z.object({
+  data: z.array(instrumentItemSamplesSchema),
+});
+export type InstrumentItemSamplesResponse = z.infer<typeof instrumentItemSamplesResponseSchema>;
+
 /** `?instrumentIds=a,b,c` (también acepta el parámetro repetido). */
 export const instrumentSamplesQuerySchema = z.object({
   instrumentIds: z.preprocess((value) => {

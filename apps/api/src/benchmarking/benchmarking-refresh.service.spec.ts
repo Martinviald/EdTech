@@ -34,7 +34,7 @@ describe('BenchmarkingRefreshService', () => {
   });
 
   it('refresh reconstruye el read-model completo y reporta los totales', async () => {
-    refreshMock.mockResolvedValue({ refreshedOrgs: 2, refreshedRows: 130 });
+    refreshMock.mockResolvedValue({ refreshedOrgs: 2, refreshedRows: 130, refreshedItemRows: 900 });
 
     const res = await makeService().refresh();
 

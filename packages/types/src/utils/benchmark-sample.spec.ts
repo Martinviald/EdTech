@@ -1,4 +1,5 @@
 import {
+  aggregateItemSample,
   aggregateSample,
   classifyTypicalZone,
   percentileOf,
@@ -147,5 +148,33 @@ describe('aggregateSample', () => {
       bandCounts: [],
       perSkill: [],
     });
+  });
+});
+
+describe('aggregateItemSample', () => {
+  it('suma aciertos y respuestas de todos los colegios por ítem', () => {
+    const sample = aggregateItemSample([
+      { orgId: 'a', itemId: 'i1', correctCount: 30, responseCount: 80 },
+      { orgId: 'a', itemId: 'i2', correctCount: 70, responseCount: 85 },
+      { orgId: 'b', itemId: 'i1', correctCount: 6, responseCount: 18 },
+    ]);
+
+    expect(sample.schoolCount).toBe(2);
+    expect(sample.studentCount).toBe(103);
+    const byItem = new Map(sample.items.map((i) => [i.itemId, i]));
+    expect(byItem.get('i1')).toEqual({
+      itemId: 'i1',
+      correctRate: 36.73,
+      responseCount: 98,
+      schoolCount: 2,
+    });
+    expect(byItem.get('i2')).toMatchObject({ correctRate: 82.35, schoolCount: 1 });
+  });
+
+  it('un ítem sin respuestas queda sin tasa', () => {
+    const sample = aggregateItemSample([
+      { orgId: 'a', itemId: 'i1', correctCount: 0, responseCount: 0 },
+    ]);
+    expect(sample.items[0]!.correctRate).toBeNull();
   });
 });

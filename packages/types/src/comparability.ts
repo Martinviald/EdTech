@@ -308,6 +308,8 @@ export const ALERT_THRESHOLDS = {
     skillBelowSamplePp: { high: 20, medium: 12 },
     /** % en la banda inferior que supera al de la muestra en estos pp. */
     bandConcentrationAbovePp: { high: 20, medium: 10 },
+    /** % de acierto de un ítem bajo el de la muestra en estos pp. */
+    itemBelowSamplePp: { high: 25, medium: 15 },
     /** Bajo este |Δ| (pp) el resultado se considera similar al de la muestra. */
     similarPp: 5,
   },

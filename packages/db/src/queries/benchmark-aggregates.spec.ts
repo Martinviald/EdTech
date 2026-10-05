@@ -336,6 +336,33 @@ describe('refreshBenchmarkAggregates', () => {
     expect(values.bandCounts).toEqual([]);
   });
 
+  it('refresca aciertos por ítem con el snapshot del opt-out, aunque la org no tenga resultados', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
+      [{ optOut: true }],
+      [],
+      [
+        { instrumentId: 'inst-1', itemId: 'item-1', correctCount: 30, responseCount: 80 },
+        { instrumentId: 'inst-1', itemId: 'item-2', correctCount: '70', responseCount: '85' },
+      ],
+    ]);
+
+    const res = await refreshBenchmarkAggregates(db);
+
+    expect(res).toEqual({ refreshedOrgs: 0, refreshedRows: 0, refreshedItemRows: 2 });
+    expect(db.__upserts).toHaveLength(1);
+    expect(db.__upserts[0]?.values).toEqual([
+      expect.objectContaining({
+        orgId: 'org-1',
+        itemId: 'item-1',
+        correctCount: 30,
+        responseCount: 80,
+        optOutGlobalPool: true,
+      }),
+      expect.objectContaining({ itemId: 'item-2', correctCount: 70, responseCount: 85 }),
+    ]);
+  });
+
   it('snapshotea optOutGlobalPool=true de org_benchmark_settings', async () => {
     const db = makeDb([
       [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],

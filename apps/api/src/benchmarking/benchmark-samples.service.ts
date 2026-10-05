@@ -1,8 +1,9 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import {
   benchmarkAccessLogs,
   benchmarkAggregates,
+  benchmarkItemAggregates,
   organizations,
   withOrgContext,
   type BenchmarkAggregate,
@@ -10,10 +11,13 @@ import {
 import {
   BENCHMARK_K_MIN_SCHOOLS,
   BENCHMARK_N_MIN_STUDENTS,
+  aggregateItemSample,
   aggregateSample,
   classifyTypicalZone,
   percentileRank,
   type BenchmarkSampleScope,
+  type InstrumentItemSamples,
+  type InstrumentItemSamplesResponse,
   type InstrumentSample,
   type InstrumentSampleEntry,
   type InstrumentSamplesQueryDto,
@@ -41,6 +45,64 @@ export class BenchmarkSamplesService {
     const data = await this.getSamples(user.orgId, query.instrumentIds);
     await this.writeAccessLog(user.orgId, user.userId, query.instrumentIds);
     return { data };
+  }
+
+  async getItemSamplesForUser(
+    user: JwtPayload,
+    query: InstrumentSamplesQueryDto,
+  ): Promise<InstrumentItemSamplesResponse> {
+    if (user.orgId === null) {
+      throw new ForbiddenException('Usuario sin organización activa');
+    }
+    const data = await this.getItemSamples(query.instrumentIds);
+    await this.writeAccessLog(user.orgId, user.userId, query.instrumentIds);
+    return { data };
+  }
+
+  async getItemSamples(instrumentIds: readonly string[]): Promise<InstrumentItemSamples[]> {
+    const uniqueIds = Array.from(new Set(instrumentIds));
+    if (uniqueIds.length === 0) return [];
+
+    const rows = await this.db
+      .select({
+        orgId: benchmarkItemAggregates.orgId,
+        instrumentId: benchmarkItemAggregates.instrumentId,
+        itemId: benchmarkItemAggregates.itemId,
+        correctCount: benchmarkItemAggregates.correctCount,
+        responseCount: benchmarkItemAggregates.responseCount,
+        refreshedAt: benchmarkItemAggregates.refreshedAt,
+      })
+      .from(benchmarkItemAggregates)
+      .where(
+        and(
+          inArray(benchmarkItemAggregates.instrumentId, uniqueIds),
+          eq(benchmarkItemAggregates.optOutGlobalPool, false),
+        ),
+      );
+
+    const rowsByInstrument = new Map<string, typeof rows>();
+    for (const row of rows) {
+      const bucket = rowsByInstrument.get(row.instrumentId);
+      if (bucket) bucket.push(row);
+      else rowsByInstrument.set(row.instrumentId, [row]);
+    }
+
+    const samples: InstrumentItemSamples[] = [];
+    for (const [instrumentId, instrumentRows] of rowsByInstrument) {
+      const aggregate = aggregateItemSample(instrumentRows);
+      if (
+        aggregate.schoolCount < BENCHMARK_K_MIN_SCHOOLS ||
+        aggregate.studentCount < BENCHMARK_N_MIN_STUDENTS
+      ) {
+        continue;
+      }
+      let refreshedAt = instrumentRows[0]!.refreshedAt;
+      for (const row of instrumentRows) {
+        if (row.refreshedAt > refreshedAt) refreshedAt = row.refreshedAt;
+      }
+      samples.push({ instrumentId, ...aggregate, refreshedAt: refreshedAt.toISOString() });
+    }
+    return samples;
   }
 
   async getSamples(

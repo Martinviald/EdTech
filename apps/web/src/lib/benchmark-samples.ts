@@ -4,6 +4,8 @@ import {
   BENCHMARK_SAMPLES_MAX_INSTRUMENTS,
   BENCHMARKING_VIEWER_ROLES,
   canAccess,
+  type InstrumentItemSamples,
+  type InstrumentItemSamplesResponse,
   type InstrumentSampleEntry,
   type InstrumentSamplesResponse,
   type UserRole,
@@ -58,4 +60,27 @@ export async function getInstrumentSample(
   if (!instrumentId) return null;
   const samples = await getInstrumentSamples([instrumentId]);
   return samples.get(instrumentId) ?? null;
+}
+
+const fetchItemSamples = cache(
+  async (instrumentId: string): Promise<InstrumentItemSamples | null> => {
+    try {
+      const response = await apiGet<InstrumentItemSamplesResponse>(
+        `/benchmarking/samples/items?instrumentIds=${instrumentId}`,
+      );
+      return response.data.find((sample) => sample.instrumentId === instrumentId) ?? null;
+    } catch (error) {
+      reportServerError(error, { operation: 'benchmark-item-samples', instrumentId });
+      return null;
+    }
+  },
+);
+
+/** % de acierto de la muestra por ítem del instrumento (itemId → %), o null si no hay muestra. */
+export async function getItemSampleRates(
+  instrumentId: string | null | undefined,
+): Promise<ReadonlyMap<string, number | null> | null> {
+  if (!instrumentId) return null;
+  const sample = await fetchItemSamples(instrumentId);
+  return sample ? new Map(sample.items.map((item) => [item.itemId, item.correctRate])) : null;
 }

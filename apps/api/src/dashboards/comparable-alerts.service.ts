@@ -24,7 +24,9 @@ import {
   type DashboardAlertCohort,
   type DashboardAlertType,
   type InstrumentSample,
+  type InstrumentItemSamples,
   type InstrumentSampleEntry,
+  type ItemSampleStat,
   type SampleSkillStat,
 } from '@soe/types';
 import {
@@ -50,9 +52,24 @@ const FUSES_INTO: Partial<Record<DashboardAlertType, DashboardAlertType>> = {
   band_concentration_above_sample: 'band_concentration',
   skill_below_sample: 'skill_gap',
   class_below_sample: 'class_below_org',
+  item_below_sample: 'item_gap',
 };
 
 export type InstrumentSampleLookup = ReadonlyMap<string, InstrumentSampleEntry>;
+export type ItemSampleLookup = ReadonlyMap<string, InstrumentItemSamples>;
+
+type ItemSampleIndex = Map<
+  string,
+  { instrument: InstrumentItemSamples; byItem: Map<string, ItemSampleStat> }
+>;
+
+type ItemRate = {
+  unit: ComparableUnitSummary;
+  itemId: string;
+  label: string;
+  rate: number;
+  responses: number;
+};
 
 @Injectable()
 export class ComparableAlertsService {
@@ -62,10 +79,13 @@ export class ComparableAlertsService {
     units: ComparableUnitSummary[],
     classGroupIds: string[] | null,
     samples: InstrumentSampleLookup | null = null,
+    itemSamples: ItemSampleLookup | null = null,
   ): Promise<DashboardAlert[]> {
     if (units.length === 0) return [];
 
     const nodeAchievements = await this.loadNodeAchievements(tx, units);
+    const itemRates = await this.loadItemRates(tx, units);
+    const itemSampleIndex = this.indexItemSamples(itemSamples);
     const drafts: AlertDraft[] = [
       ...this.bandConcentrationAlerts(units, samples),
       ...this.bandConcentrationAboveSampleAlerts(units, samples),
@@ -74,7 +94,8 @@ export class ComparableAlertsService {
       ...this.sampleAlerts(units, samples),
       ...this.skillGapAlerts(nodeAchievements),
       ...this.skillBelowSampleAlerts(nodeAchievements, samples),
-      ...(await this.itemGapAlerts(tx, units)),
+      ...this.itemGapAlerts(itemRates, itemSampleIndex),
+      ...this.itemBelowSampleAlerts(itemRates, itemSampleIndex),
       ...(await this.bandRegressionAlerts(tx, units)),
       ...(await this.coverageAlerts(tx, orgId, units, classGroupIds)),
     ];
@@ -552,7 +573,7 @@ export class ComparableAlertsService {
     return drafts;
   }
 
-  private async itemGapAlerts(tx: Database, units: ComparableUnitSummary[]): Promise<AlertDraft[]> {
+  private async loadItemRates(tx: Database, units: ComparableUnitSummary[]): Promise<ItemRate[]> {
     const assessmentIds = units.flatMap((u) => u.assessmentIds);
     if (assessmentIds.length === 0) return [];
 
@@ -605,26 +626,106 @@ export class ComparableAlertsService {
       byUnitItem.set(key, entry);
     }
 
-    const drafts: AlertDraft[] = [];
+    const rates: ItemRate[] = [];
     for (const entry of byUnitItem.values()) {
       if (entry.responses === 0) continue;
-      const rate = (entry.correct / entry.responses) * 100;
-      const severity = inverseThresholdSeverity(rate, ALERT_THRESHOLDS.itemCorrectRate);
+      rates.push({
+        unit: entry.unit,
+        itemId: entry.itemId,
+        label: entry.label,
+        rate: (entry.correct / entry.responses) * 100,
+        responses: entry.responses,
+      });
+    }
+    return rates;
+  }
+
+  private indexItemSamples(itemSamples: ItemSampleLookup | null): ItemSampleIndex | null {
+    if (!itemSamples) return null;
+    const index: ItemSampleIndex = new Map();
+    for (const [instrumentId, instrument] of itemSamples) {
+      index.set(instrumentId, {
+        instrument,
+        byItem: new Map(instrument.items.map((item) => [item.itemId, item])),
+      });
+    }
+    return index;
+  }
+
+  private itemGapAlerts(rates: ItemRate[], itemSamples: ItemSampleIndex | null): AlertDraft[] {
+    const drafts: AlertDraft[] = [];
+    for (const entry of rates) {
+      const severity = inverseThresholdSeverity(entry.rate, ALERT_THRESHOLDS.itemCorrectRate);
       if (!severity) continue;
+      const sample = this.itemSampleOf(entry, itemSamples);
       drafts.push({
         type: 'item_gap',
         severity,
-        message: `${entry.label} de ${entry.unit.instrumentName}: sólo ${rate.toFixed(0)}% de acierto`,
+        message: `${entry.label} de ${entry.unit.instrumentName}: sólo ${entry.rate.toFixed(0)}% de acierto`,
         contextKind: 'item',
         contextId: entry.itemId,
         contextLabel: entry.label,
-        value: Number(rate.toFixed(1)),
+        value: Number(entry.rate.toFixed(1)),
         unitKey: entry.unit.key,
         unitLabel: entry.unit.instrumentName,
         studentsAffected: entry.responses,
+        cohort: sample ? this.itemCohortOf(entry.rate, sample) : null,
       });
     }
     return drafts;
+  }
+
+  private itemBelowSampleAlerts(
+    rates: ItemRate[],
+    itemSamples: ItemSampleIndex | null,
+  ): AlertDraft[] {
+    if (!itemSamples) return [];
+    const drafts: AlertDraft[] = [];
+    for (const entry of rates) {
+      const sample = this.itemSampleOf(entry, itemSamples);
+      const delta = sampleDeltaPp(entry.rate, sample?.item.correctRate ?? null);
+      if (!sample || delta === null) continue;
+      const severity = thresholdSeverity(-delta, ALERT_THRESHOLDS.cohort.itemBelowSamplePp);
+      if (!severity) continue;
+      drafts.push({
+        type: 'item_below_sample',
+        severity,
+        message: `${entry.label} de ${entry.unit.instrumentName}: ${entry.rate.toFixed(0)}% de acierto, ${Math.abs(delta).toFixed(0)} pp bajo la muestra`,
+        contextKind: 'item',
+        contextId: entry.itemId,
+        contextLabel: entry.label,
+        value: Number(entry.rate.toFixed(1)),
+        unitKey: entry.unit.key,
+        unitLabel: entry.unit.instrumentName,
+        studentsAffected: entry.responses,
+        cohort: this.itemCohortOf(entry.rate, sample),
+        fusionReason: `${Math.abs(delta).toFixed(0)} pp bajo la muestra`,
+      });
+    }
+    return drafts;
+  }
+
+  private itemSampleOf(
+    entry: ItemRate,
+    itemSamples: ItemSampleIndex | null,
+  ): { item: ItemSampleStat; instrument: InstrumentItemSamples } | null {
+    const indexed = itemSamples?.get(entry.unit.instrumentId);
+    const item = indexed?.byItem.get(entry.itemId);
+    return indexed && item ? { item, instrument: indexed.instrument } : null;
+  }
+
+  private itemCohortOf(
+    rate: number,
+    sample: { item: ItemSampleStat; instrument: InstrumentItemSamples },
+  ): DashboardAlertCohort {
+    const delta = sampleDeltaPp(rate, sample.item.correctRate);
+    return {
+      sampleValue: sample.item.correctRate,
+      schoolCount: sample.instrument.schoolCount,
+      studentCount: sample.instrument.studentCount,
+      percentile: null,
+      similarToSample: delta !== null && Math.abs(delta) < ALERT_THRESHOLDS.cohort.similarPp,
+    };
   }
 
   private async bandRegressionAlerts(

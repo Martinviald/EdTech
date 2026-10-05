@@ -56,12 +56,15 @@ export function CourseReport({
   report,
   studentReportBasePath,
   generalSample,
+  itemSamples,
 }: {
   report: OfficialCourseReportResponse;
   /** Base para enlazar el informe individual por alumno (TKT-26). */
   studentReportBasePath?: string;
   /** Contraste del resultado general con la muestra de colegios (benchmarking en contexto). */
   generalSample?: ReactNode;
+  /** % de acierto de la muestra de colegios por ítem (itemId → %). */
+  itemSamples?: ReadonlyMap<string, number | null> | null;
 }) {
   const { meta, generalResult, skillAxes, specTable, studentResults, reflectionPrompts } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
@@ -205,7 +208,7 @@ export function CourseReport({
         title="Resultados por pregunta"
         description="Tabla de especificaciones: para cada pregunta, el OA/eje/habilidad evaluado y la distribución de respuestas (la alternativa correcta en negrita)."
       >
-        <SpecTable rows={specTable} />
+        <SpecTable rows={specTable} itemSamples={itemSamples} />
       </ReportSection>
 
       {/* ── Sección 5 — Resultados por estudiante ── */}
@@ -339,7 +342,14 @@ function bandSlices(distribution: PerformanceBandDistributionBucket[]): DonutSli
 
 // ── Tabla de especificaciones ─────────────────────────────────────────────────
 
-function SpecTable({ rows }: { rows: OfficialSpecTableRow[] }) {
+function SpecTable({
+  rows,
+  itemSamples,
+}: {
+  rows: OfficialSpecTableRow[];
+  itemSamples?: ReadonlyMap<string, number | null> | null;
+}) {
+  const showSample = Boolean(itemSamples && itemSamples.size > 0);
   if (rows.length === 0) {
     return <p className="text-sm text-muted-foreground">Sin preguntas para mostrar.</p>;
   }
@@ -356,6 +366,9 @@ function SpecTable({ rows }: { rows: OfficialSpecTableRow[] }) {
             <th className="px-3 py-2 font-medium">Indicador</th>
             <th className="px-3 py-2 font-medium">Distribución de respuestas</th>
             <th className="px-3 py-2 text-right font-medium">% Logro</th>
+            {showSample ? (
+              <th className="px-3 py-2 text-right font-medium print:hidden">% Muestra</th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
@@ -371,6 +384,11 @@ function SpecTable({ rows }: { rows: OfficialSpecTableRow[] }) {
                 <ResponseDistribution row={row} />
               </td>
               <td className="px-3 py-2 text-right tabular-nums">{fmtPct(row.correctRate)}</td>
+              {showSample ? (
+                <td className="px-3 py-2 text-right tabular-nums text-muted-foreground print:hidden">
+                  {fmtPct(itemSamples?.get(row.itemId) ?? null)}
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>

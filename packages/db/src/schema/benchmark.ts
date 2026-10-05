@@ -19,6 +19,7 @@ import type {
 import { benchmarkModeEnum, schoolDependenceEnum } from './enums';
 import { organizations } from './organizations';
 import { instruments } from './instruments';
+import { items } from './items';
 import { users } from './users';
 
 /**
@@ -116,6 +117,61 @@ export const benchmarkAggregates = pgTable(
     index('benchmark_aggregates_network_idx').on(table.networkOrgId),
   ],
 );
+
+/**
+ * Read-model de benchmarking POR ÍTEM (fase 3 de docs/plan-benchmarking-en-contexto.md):
+ * aciertos y respuestas de cada colegio en cada ítem, agregados de
+ * `assessment_item_stats`. Alimenta la columna "% muestra" del informe de curso y la
+ * alerta `item_below_sample`.
+ *
+ * ⚠️ Misma EXCEPCIÓN DELIBERADA A RLS que `benchmark_aggregates`: se lee cross-tenant y
+ * por eso sólo guarda conteos por (org × ítem), nunca PII. El servicio sólo expone el
+ * agregado de la muestra y aplica k-anonimato. `optOutGlobalPool` es el snapshot del
+ * opt-out al refrescar.
+ */
+export const benchmarkItemAggregates = pgTable(
+  'benchmark_item_aggregates',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    instrumentId: uuid('instrument_id')
+      .notNull()
+      .references(() => instruments.id, { onDelete: 'cascade' }),
+    itemId: uuid('item_id')
+      .notNull()
+      .references(() => items.id, { onDelete: 'cascade' }),
+    correctCount: integer('correct_count').notNull().default(0),
+    responseCount: integer('response_count').notNull().default(0),
+    optOutGlobalPool: boolean('opt_out_global_pool').notNull().default(false),
+    refreshedAt: timestamp('refreshed_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    unique('benchmark_item_aggregates_org_item_uq').on(table.orgId, table.itemId),
+    index('benchmark_item_aggregates_instrument_idx').on(table.instrumentId),
+  ],
+);
+
+export const benchmarkItemAggregatesRelations = relations(benchmarkItemAggregates, ({ one }) => ({
+  org: one(organizations, {
+    fields: [benchmarkItemAggregates.orgId],
+    references: [organizations.id],
+  }),
+  instrument: one(instruments, {
+    fields: [benchmarkItemAggregates.instrumentId],
+    references: [instruments.id],
+  }),
+  item: one(items, {
+    fields: [benchmarkItemAggregates.itemId],
+    references: [items.id],
+  }),
+}));
+
+export type BenchmarkItemAggregate = typeof benchmarkItemAggregates.$inferSelect;
+export type NewBenchmarkItemAggregate = typeof benchmarkItemAggregates.$inferInsert;
 
 /**
  * Auditoría de accesos al benchmarking (F2 S4 — H7.6, compliance Ley 19.628).

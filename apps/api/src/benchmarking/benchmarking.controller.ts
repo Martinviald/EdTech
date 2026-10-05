@@ -35,6 +35,13 @@ export class BenchmarkingController {
     return this.samplesService.getSamplesForUser(user, dto);
   }
 
+  @Get('samples/items')
+  @Roles(...BENCHMARKING_VIEWER_ROLES)
+  getItemSamples(@CurrentUser() user: JwtPayload, @Query() query: unknown) {
+    const dto = instrumentSamplesQuerySchema.parse(query ?? {});
+    return this.samplesService.getItemSamplesForUser(user, dto);
+  }
+
   /** GET /api/benchmarking/instruments — instrumentos comparables de la org. */
   @Get('instruments')
   @Roles(...BENCHMARKING_VIEWER_ROLES)

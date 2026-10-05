@@ -136,6 +136,7 @@ export const DASHBOARD_ALERT_TYPES = [
   'class_below_sample',
   'skill_below_sample',
   'band_concentration_above_sample',
+  'item_below_sample',
 ] as const;
 export type DashboardAlertType = (typeof DASHBOARD_ALERT_TYPES)[number];
 
@@ -161,6 +162,7 @@ export const ALERT_BASIS_BY_TYPE: Record<DashboardAlertType, AlertBasis> = {
   class_below_sample: 'cohort',
   skill_below_sample: 'cohort',
   band_concentration_above_sample: 'cohort',
+  item_below_sample: 'cohort',
 };
 
 /** La muestra contra la que se leyó la alerta. */

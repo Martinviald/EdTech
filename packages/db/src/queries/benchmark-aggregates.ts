@@ -31,10 +31,14 @@ import {
 } from '@soe/types';
 import type { Database } from '../client';
 import { assessments } from '../schema/assessments';
-import { benchmarkAggregates, orgBenchmarkSettings } from '../schema/benchmark';
+import {
+  benchmarkAggregates,
+  benchmarkItemAggregates,
+  orgBenchmarkSettings,
+} from '../schema/benchmark';
 import { gradingScales, instruments } from '../schema/instruments';
 import { organizations } from '../schema/organizations';
-import { assessmentResults, skillResults } from '../schema/results';
+import { assessmentItemStats, assessmentResults, skillResults } from '../schema/results';
 import { taxonomyNodes } from '../schema/taxonomy';
 import { withOrgContext } from '../with-org-context';
 import { resolveEffectiveBandsForInstruments, type EffectiveBands } from './effective-bands';
@@ -42,7 +46,11 @@ import { resolveEffectiveBandsForInstruments, type EffectiveBands } from './effe
 export type BenchmarkRefreshSummary = {
   refreshedOrgs: number;
   refreshedRows: number;
+  refreshedItemRows: number;
 };
+
+/** Postgres topa en 65535 parámetros por statement; una fila por ítem usa ~10. */
+const ITEM_UPSERT_CHUNK = 500;
 
 export type RefreshBenchmarkAggregatesOptions = {
   /** Sólo esta org. Sin él, recorre todos los colegios no eliminados. */
@@ -112,10 +120,12 @@ export async function refreshBenchmarkAggregates(
 
   let refreshedOrgs = 0;
   let refreshedRows = 0;
+  const optOutByOrg = new Map<string, boolean>();
 
   for (const org of orgs) {
     const networkOrgId = await deriveNetworkOrgId(db, org.parentId);
     const optOutGlobalPool = await readOptOut(db, org.id);
+    optOutByOrg.set(org.id, optOutGlobalPool);
     const rows = await buildOrgRows(db, org.id);
 
     if (rows.length === 0) continue;
@@ -172,7 +182,66 @@ export async function refreshBenchmarkAggregates(
     refreshedRows += rows.length;
   }
 
-  return { refreshedOrgs, refreshedRows };
+  let refreshedItemRows = 0;
+  for (const [orgId, optOutGlobalPool] of optOutByOrg) {
+    refreshedItemRows += await refreshOrgItemAggregates(db, orgId, optOutGlobalPool);
+  }
+
+  return { refreshedOrgs, refreshedRows, refreshedItemRows };
+}
+
+/**
+ * Aciertos y respuestas por (org × ítem) desde `assessment_item_stats` (RLS → bajo
+ * `withOrgContext`), upsert en `benchmark_item_aggregates` (sin RLS) por lotes.
+ */
+async function refreshOrgItemAggregates(
+  db: Database,
+  orgId: string,
+  optOutGlobalPool: boolean,
+): Promise<number> {
+  const rows = await withOrgContext(db, orgId, async (tx) =>
+    tx
+      .select({
+        instrumentId: assessments.instrumentId,
+        itemId: assessmentItemStats.itemId,
+        correctCount: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
+        responseCount: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
+      })
+      .from(assessmentItemStats)
+      .innerJoin(assessments, eq(assessmentItemStats.assessmentId, assessments.id))
+      .where(eq(assessments.orgId, orgId))
+      .groupBy(assessments.instrumentId, assessmentItemStats.itemId),
+  );
+  if (rows.length === 0) return 0;
+
+  const now = new Date();
+  for (let i = 0; i < rows.length; i += ITEM_UPSERT_CHUNK) {
+    const chunk = rows.slice(i, i + ITEM_UPSERT_CHUNK).map((row) => ({
+      orgId,
+      instrumentId: row.instrumentId,
+      itemId: row.itemId,
+      correctCount: Number(row.correctCount),
+      responseCount: Number(row.responseCount),
+      optOutGlobalPool,
+      refreshedAt: now,
+      updatedAt: now,
+    }));
+    await db
+      .insert(benchmarkItemAggregates)
+      .values(chunk)
+      .onConflictDoUpdate({
+        target: [benchmarkItemAggregates.orgId, benchmarkItemAggregates.itemId],
+        set: {
+          instrumentId: sql`excluded.instrument_id`,
+          correctCount: sql`excluded.correct_count`,
+          responseCount: sql`excluded.response_count`,
+          optOutGlobalPool: sql`excluded.opt_out_global_pool`,
+          refreshedAt: sql`excluded.refreshed_at`,
+          updatedAt: sql`excluded.updated_at`,
+        },
+      });
+  }
+  return rows.length;
 }
 
 /**

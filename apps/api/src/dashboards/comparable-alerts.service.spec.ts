@@ -621,3 +621,101 @@ describe('ComparableAlertsService — ejes y concentración frente a la muestra'
     });
   });
 });
+
+function makeDbWithResults(results: unknown[][]): Database {
+  let calls = 0;
+  const build = (rows: unknown[]) => {
+    const chain = {
+      from: () => chain,
+      where: () => chain,
+      innerJoin: () => chain,
+      leftJoin: () => chain,
+      groupBy: () => chain,
+      orderBy: () => chain,
+      as: () => chain,
+      offset: () => chain,
+      then: <T>(resolve: (rows: T[]) => unknown) =>
+        Promise.resolve(rows as never).then(resolve as never),
+    };
+    return chain;
+  };
+  return {
+    select: () => build(results[calls++] ?? []),
+    selectDistinct: () => build([]),
+  } as unknown as Database;
+}
+
+function itemRateRow(correct: number) {
+  return { assessmentId: 'a1', itemId: 'item-7', position: 7, correct, responses: 100 };
+}
+
+function itemSamplesFor(correctRate: number) {
+  return new Map([
+    [
+      'i1',
+      {
+        instrumentId: 'i1',
+        schoolCount: 12,
+        studentCount: 900,
+        refreshedAt: '2026-10-05T06:30:00.000Z',
+        items: [{ itemId: 'item-7', correctRate, responseCount: 900, schoolCount: 12 }],
+      },
+    ],
+  ]);
+}
+
+describe('ComparableAlertsService — ítems frente a la muestra', () => {
+  it('un ítem difícil para todos conserva su severidad y se rotula similar', async () => {
+    const alerts = await svc.deriveAlerts(
+      makeDbWithResults([[], [itemRateRow(18)]]),
+      'org-1',
+      [makeUnit()],
+      null,
+      null,
+      itemSamplesFor(17),
+    );
+    const item = alerts.filter((a) => a.contextId === 'item-7');
+
+    expect(item).toHaveLength(1);
+    expect(item[0]).toMatchObject({
+      type: 'item_gap',
+      severity: 'high',
+      basis: 'absolute',
+      cohort: { sampleValue: 17, similarToSample: true, schoolCount: 12 },
+    });
+  });
+
+  it('un ítem bajo el umbral y muy bajo la muestra queda en una sola alerta', async () => {
+    const alerts = await svc.deriveAlerts(
+      makeDbWithResults([[], [itemRateRow(18)]]),
+      'org-1',
+      [makeUnit()],
+      null,
+      null,
+      itemSamplesFor(60),
+    );
+    const item = alerts.filter((a) => a.contextId === 'item-7');
+
+    expect(item).toHaveLength(1);
+    expect(item[0]).toMatchObject({ type: 'item_gap', cohort: { similarToSample: false } });
+    expect(item[0]!.message).toContain('y 42 pp bajo la muestra');
+  });
+
+  it('un ítem sobre el umbral absoluto pero muy bajo la muestra es item_below_sample', async () => {
+    const alerts = await svc.deriveAlerts(
+      makeDbWithResults([[], [itemRateRow(45)]]),
+      'org-1',
+      [makeUnit()],
+      null,
+      null,
+      itemSamplesFor(75),
+    );
+
+    expect(alerts.find((a) => a.contextId === 'item-7')).toMatchObject({
+      type: 'item_below_sample',
+      severity: 'high',
+      basis: 'cohort',
+      cohort: { sampleValue: 75 },
+    });
+  });
+});
