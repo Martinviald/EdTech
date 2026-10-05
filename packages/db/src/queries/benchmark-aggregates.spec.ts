@@ -160,7 +160,7 @@ describe('refreshBenchmarkAggregates', () => {
     expect(db.__transactionRan).toBe(true);
     expect(db.__upserts).toHaveLength(1);
 
-    const values = db.__upserts[0].values as Record<string, unknown>;
+    const values = db.__upserts[0]?.values as Record<string, unknown>;
     expect(values.orgId).toBe('org-1');
     expect(values.instrumentId).toBe('inst-1');
     expect(values.optOutGlobalPool).toBe(false);
@@ -202,7 +202,7 @@ describe('refreshBenchmarkAggregates', () => {
     ]);
     await refreshBenchmarkAggregates(db);
 
-    const values = db.__upserts[0].values as { bandDistribution: unknown };
+    const values = db.__upserts[0]?.values as { bandDistribution: unknown };
     expect(values.bandDistribution).toEqual({
       insufficient: 1,
       elementary: 1,
@@ -232,7 +232,7 @@ describe('refreshBenchmarkAggregates', () => {
     ]);
     await refreshBenchmarkAggregates(db);
 
-    const values = db.__upserts[0].values as { bandDistribution: unknown };
+    const values = db.__upserts[0]?.values as { bandDistribution: unknown };
     // % 30 → nivel-1 → insufficient; % 90 → nivel-3 → advanced.
     expect(values.bandDistribution).toEqual({
       insufficient: 1,
@@ -255,7 +255,7 @@ describe('refreshBenchmarkAggregates', () => {
     ]);
     await refreshBenchmarkAggregates(db);
 
-    const values = db.__upserts[0].values as {
+    const values = db.__upserts[0]?.values as {
       bandDistribution: unknown;
       avgAchievement: string | null;
     };
@@ -280,7 +280,7 @@ describe('refreshBenchmarkAggregates', () => {
     ]);
     await refreshBenchmarkAggregates(db);
 
-    const values = db.__upserts[0].values as { optOutGlobalPool: boolean };
+    const values = db.__upserts[0]?.values as { optOutGlobalPool: boolean };
     expect(values.optOutGlobalPool).toBe(true);
   });
 
@@ -296,7 +296,7 @@ describe('refreshBenchmarkAggregates', () => {
     ]);
     await refreshBenchmarkAggregates(db);
 
-    const values = db.__upserts[0].values as { networkOrgId: string | null };
+    const values = db.__upserts[0]?.values as { networkOrgId: string | null };
     expect(values.networkOrgId).toBe('p1');
   });
 
