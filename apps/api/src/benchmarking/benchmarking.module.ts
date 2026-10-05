@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { BenchmarkingController } from './benchmarking.controller';
 import { BenchmarkingService } from './benchmarking.service';
 import { BenchmarkingRefreshService } from './benchmarking-refresh.service';
-import { FeatureGuard } from '../common/guards/feature.guard';
+import { BenchmarkSamplesService } from './benchmark-samples.service';
 
 /**
  * F2 S4 — Benchmarking Institucional (H7.1–H7.4, H7.6).
@@ -11,7 +11,7 @@ import { FeatureGuard } from '../common/guards/feature.guard';
  */
 @Module({
   controllers: [BenchmarkingController],
-  providers: [BenchmarkingService, BenchmarkingRefreshService, FeatureGuard],
-  exports: [BenchmarkingService, BenchmarkingRefreshService],
+  providers: [BenchmarkingService, BenchmarkingRefreshService, BenchmarkSamplesService],
+  exports: [BenchmarkingService, BenchmarkingRefreshService, BenchmarkSamplesService],
 })
 export class BenchmarkingModule {}

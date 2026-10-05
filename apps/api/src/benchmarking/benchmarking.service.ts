@@ -13,6 +13,10 @@ import {
 import {
   BENCHMARK_K_MIN_SCHOOLS,
   BENCHMARK_N_MIN_STUDENTS,
+  meanOf,
+  percentileOf,
+  percentileRank,
+  round2,
   type BenchmarkAccessLogModel,
   type BenchmarkAuditListQueryDto,
   type BenchmarkAuditListResponse,
@@ -292,7 +296,7 @@ export class BenchmarkingService {
     return {
       schoolCount: rows.length,
       studentCount,
-      avgAchievement: mean(achievements),
+      avgAchievement: meanOf(achievements),
       median: percentileOf(achievements, 50),
       p25: percentileOf(achievements, 25),
       p75: percentileOf(achievements, 75),
@@ -549,40 +553,4 @@ function toNum(value: string | number | null): number | null {
   if (value === null) return null;
   const n = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(n) ? n : null;
-}
-
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
-function mean(sorted: number[]): number | null {
-  if (sorted.length === 0) return null;
-  return round2(sorted.reduce((a, b) => a + b, 0) / sorted.length);
-}
-
-/** Percentil (interpolación lineal) sobre un array ya ordenado ascendente. */
-function percentileOf(sorted: number[], p: number): number | null {
-  if (sorted.length === 0) return null;
-  if (sorted.length === 1) return round2(sorted[0]);
-  const rank = (p / 100) * (sorted.length - 1);
-  const low = Math.floor(rank);
-  const high = Math.ceil(rank);
-  if (low === high) return round2(sorted[low]);
-  const weight = rank - low;
-  return round2(sorted[low] * (1 - weight) + sorted[high] * weight);
-}
-
-/**
- * Posición percentil de `value` dentro de `values` (0..100). Método de "rango
- * percentil": % de valores estrictamente menores + mitad de los iguales.
- */
-function percentileRank(values: number[], value: number | null): number | null {
-  if (value === null || values.length === 0) return null;
-  let below = 0;
-  let equal = 0;
-  for (const v of values) {
-    if (v < value) below += 1;
-    else if (v === value) equal += 1;
-  }
-  return round2(((below + equal / 2) / values.length) * 100);
 }

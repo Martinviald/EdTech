@@ -75,6 +75,7 @@ function resultRow(
     studentId: string;
     percentage: string | null;
     performanceLevel: string | null;
+    performanceBandId: string | null;
   }> = {},
 ) {
   return {
@@ -85,6 +86,7 @@ function resultRow(
     studentId: 'stu-1',
     percentage: '62.50',
     performanceLevel: null,
+    performanceBandId: null,
     ...overrides,
   };
 }
@@ -267,6 +269,71 @@ describe('refreshBenchmarkAggregates', () => {
     });
     // Sin ningún percentage → avgAchievement null.
     expect(values.avgAchievement).toBeNull();
+  });
+
+  it('cuenta band_counts por la banda propia del instrumento, sin proyectar', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
+      [{ optOut: false }],
+      [
+        resultRow({ studentId: 'a', percentage: '30.00' }),
+        resultRow({ studentId: 'b', percentage: '55.00' }),
+        resultRow({ studentId: 'c', percentage: '80.00' }),
+        resultRow({ studentId: 'd', percentage: '100.00' }),
+      ],
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
+      [],
+    ]);
+    await refreshBenchmarkAggregates(db);
+
+    const values = db.__upserts[0]?.values as { bandCounts: unknown };
+    expect(values.bandCounts).toEqual([
+      { bandKey: 'nivel-1', label: 'nivel-1', order: 0, count: 1 },
+      { bandKey: 'nivel-2', label: 'nivel-2', order: 1, count: 1 },
+      { bandKey: 'nivel-3', label: 'nivel-3', order: 2, count: 2 },
+    ]);
+  });
+
+  it('cuenta las filas band-only en band_counts por su banda persistida', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
+      [{ optOut: false }],
+      [
+        resultRow({
+          studentId: 'a',
+          percentage: null,
+          performanceLevel: 'adequate',
+          performanceBandId: 'band-inst-1-nivel-2',
+        }),
+        resultRow({ studentId: 'b', percentage: null, performanceLevel: 'advanced' }),
+      ],
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
+    ]);
+    await refreshBenchmarkAggregates(db);
+
+    const values = db.__upserts[0]?.values as { bandCounts: unknown };
+    expect(values.bandCounts).toEqual([
+      { bandKey: 'nivel-2', label: 'nivel-2', order: 1, count: 1 },
+    ]);
+  });
+
+  it('sin bandas efectivas deja band_counts vacío', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
+      [{ optOut: false }],
+      [resultRow({ studentId: 'a', percentage: '55.00' })],
+      [familyRow('inst-1', 2026)],
+      [],
+      [familyRow('inst-1', 2026)],
+      [],
+      [],
+    ]);
+    await refreshBenchmarkAggregates(db);
+
+    const values = db.__upserts[0]?.values as { bandCounts: unknown };
+    expect(values.bandCounts).toEqual([]);
   });
 
   it('snapshotea optOutGlobalPool=true de org_benchmark_settings', async () => {

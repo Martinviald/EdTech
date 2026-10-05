@@ -11,8 +11,6 @@ import {
 } from '@soe/types';
 import { PageContainer, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FeatureUpgradeNotice } from '@/components/feature-gate';
-import { isFeatureEnabled } from '@/lib/features';
 import { ROUTES } from '@/lib/routes';
 import { BenchmarkToolbar } from './components/benchmark-toolbar';
 import { ComparisonView } from './components/comparison-view';
@@ -82,9 +80,6 @@ export default async function BenchmarkingPage({
   if (!session?.user) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, BENCHMARKING_VIEWER_ROLES)) {
     redirect(ROUTES.dashboard);
-  }
-  if (!(await isFeatureEnabled('benchmarking'))) {
-    return <FeatureUpgradeNotice feature="benchmarking" />;
   }
 
   const params = await searchParams;

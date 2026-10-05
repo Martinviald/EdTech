@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { refreshBenchmarkAggregates } from '@soe/db';
 import type { BenchmarkRefreshResponse } from '@soe/types';
+import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
 
 @Injectable()
@@ -19,5 +20,11 @@ export class BenchmarkingRefreshService {
       refreshedRows,
       refreshedAt: new Date().toISOString(),
     };
+  }
+
+  refreshOrgInBackground(orgId: string): void {
+    refreshBenchmarkAggregates(this.db, { orgId }).catch((error: unknown) => {
+      reportServerError(error, { orgId, operation: 'benchmark-refresh-org' });
+    });
   }
 }

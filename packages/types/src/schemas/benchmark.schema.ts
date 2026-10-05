@@ -44,6 +44,98 @@ export const benchmarkSkillAggregateSchema = z.object({
 });
 export type BenchmarkSkillAggregate = z.infer<typeof benchmarkSkillAggregateSchema>;
 
+/**
+ * Conteo de alumnos por banda PROPIA del instrumento (p. ej. DIA Nivel I/II/III).
+ * Reemplaza a la proyección legacy de 4 niveles para todo lo que se muestra al lado
+ * de las vistas de resultados, que hablan en las bandas del instrumento.
+ */
+export const benchmarkBandCountSchema = z.object({
+  bandKey: z.string(),
+  label: z.string(),
+  order: z.number().int(),
+  count: z.number().int(),
+});
+export type BenchmarkBandCount = z.infer<typeof benchmarkBandCountSchema>;
+
+// ── Muestra por instrumento (benchmarking en contexto) ──
+// Ver docs/diseno-benchmarking-en-contexto.md §4–§5 y §8.2.
+
+export const BENCHMARK_SAMPLES_MAX_INSTRUMENTS = 50 as const;
+
+/** Bajo esta diferencia (pp) el colegio se muestra "≈ muestra". */
+export const BENCHMARK_SAMPLE_EQUAL_PP = 0.5 as const;
+
+export const benchmarkSampleScopeSchema = z.enum(['global', 'network']);
+export type BenchmarkSampleScope = z.infer<typeof benchmarkSampleScopeSchema>;
+
+/** Posición frente a la zona típica (p25–p75 del % de logro de los colegios). */
+export const typicalZoneSchema = z.enum(['below', 'within', 'above']);
+export type TypicalZone = z.infer<typeof typicalZoneSchema>;
+
+/** Estadística de la muestra en un nodo de la taxonomía. */
+export const sampleSkillStatSchema = z.object({
+  nodeId: z.string(),
+  nodeName: z.string(),
+  achievement: z.number().nullable(), // ponderado por alumnos
+  studentCount: z.number().int(),
+  schoolCount: z.number().int(),
+  p10: z.number().nullable(), // sobre el % de los colegios en el nodo
+  p25: z.number().nullable(),
+});
+export type SampleSkillStat = z.infer<typeof sampleSkillStatSchema>;
+
+/** Muestra de un instrumento: los colegios que lo rindieron, agregados. */
+export const instrumentSampleSchema = z.object({
+  instrumentId: z.string().uuid(),
+  scope: benchmarkSampleScopeSchema,
+  label: z.string(), // "Muestra" | nombre de la red
+  schoolCount: z.number().int(),
+  studentCount: z.number().int(),
+  avgAchievement: z.number().nullable(), // ponderado por alumnos
+  p10: z.number().nullable(), // percentiles sobre el % de logro de los colegios
+  p25: z.number().nullable(),
+  median: z.number().nullable(),
+  p75: z.number().nullable(),
+  bandCounts: z.array(benchmarkBandCountSchema),
+  perSkill: z.array(sampleSkillStatSchema),
+  refreshedAt: z.string(),
+});
+export type InstrumentSample = z.infer<typeof instrumentSampleSchema>;
+
+/** Dónde queda el colegio del caller dentro de la muestra global. */
+export const yourSamplePositionSchema = z.object({
+  avgAchievement: z.number().nullable(),
+  studentCount: z.number().int(),
+  percentile: z.number().nullable(),
+  typicalZone: typicalZoneSchema.nullable(),
+});
+export type YourSamplePosition = z.infer<typeof yourSamplePositionSchema>;
+
+export const instrumentSampleEntrySchema = z.object({
+  instrumentId: z.string().uuid(),
+  global: instrumentSampleSchema.nullable(), // null si no cumple k-anonimato
+  network: instrumentSampleSchema.nullable(), // null si el colegio no tiene red
+  you: yourSamplePositionSchema.nullable(), // null si el colegio no rindió el instrumento
+});
+export type InstrumentSampleEntry = z.infer<typeof instrumentSampleEntrySchema>;
+
+export const instrumentSamplesResponseSchema = z.object({
+  data: z.array(instrumentSampleEntrySchema),
+});
+export type InstrumentSamplesResponse = z.infer<typeof instrumentSamplesResponseSchema>;
+
+/** `?instrumentIds=a,b,c` (también acepta el parámetro repetido). */
+export const instrumentSamplesQuerySchema = z.object({
+  instrumentIds: z.preprocess((value) => {
+    const raw = Array.isArray(value) ? value : [value];
+    return raw
+      .flatMap((v) => (typeof v === 'string' ? v.split(',') : []))
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0);
+  }, z.array(z.string().uuid()).min(1).max(BENCHMARK_SAMPLES_MAX_INSTRUMENTS)),
+});
+export type InstrumentSamplesQueryDto = z.infer<typeof instrumentSamplesQuerySchema>;
+
 // ── Selector de instrumentos comparables ──
 
 /** Un instrumento sobre el que la org tiene datos y puede compararse. */

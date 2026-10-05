@@ -1,0 +1,1 @@
+ALTER TABLE "benchmark_aggregates" ADD COLUMN "band_counts" jsonb;

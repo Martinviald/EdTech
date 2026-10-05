@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import {
@@ -41,6 +42,7 @@ import {
   type ScoringConfig,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { BenchmarkingRefreshService } from '../benchmarking/benchmarking-refresh.service';
 import { InjectDb, type Database } from '../database/database.types';
 import {
   ANSWER_SHEET_IMPORT_POLICY,
@@ -89,6 +91,7 @@ export class AnswerSheetsService {
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly previewStore: AnswerSheetPreviewStore,
+    @Optional() private readonly benchmarkRefresh?: BenchmarkingRefreshService,
   ) {}
 
   /**
@@ -617,6 +620,7 @@ export class AnswerSheetsService {
 
     // 7. Limpiar el preview store: el token es de un solo uso.
     this.previewStore.delete(body.previewToken);
+    this.benchmarkRefresh?.refreshOrgInBackground(orgId);
 
     const status: AnswerSheetConfirmResponse['status'] =
       errors.length === 0 ? 'completed' : processedStudentIds.size === 0 ? 'failed' : 'partial';

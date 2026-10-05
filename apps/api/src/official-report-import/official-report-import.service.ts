@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import {
@@ -41,6 +42,7 @@ import {
   type SkillCohortStats,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { BenchmarkingRefreshService } from '../benchmarking/benchmarking-refresh.service';
 import { InjectDb, type Database } from '../database/database.types';
 import { evaluateGates, resolveLevelBand, type GateContext } from './lib/evaluate-gates';
 import { OfficialReportPreviewStore } from './lib/preview-store';
@@ -64,6 +66,7 @@ export class OfficialReportImportService {
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly previewStore: OfficialReportPreviewStore,
+    @Optional() private readonly benchmarkRefresh?: BenchmarkingRefreshService,
   ) {}
 
   /**
@@ -319,6 +322,7 @@ export class OfficialReportImportService {
 
     // El token es de un solo uso.
     this.previewStore.delete(body.previewToken);
+    this.benchmarkRefresh?.refreshOrgInBackground(orgId);
 
     return {
       jobId: result.jobId,
