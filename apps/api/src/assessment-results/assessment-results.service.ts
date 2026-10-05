@@ -20,6 +20,7 @@ import {
   students,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   CAPABILITY_UNAVAILABLE_CODE,
@@ -45,7 +46,6 @@ import {
   loadResponsesForPersist,
   persistAssessmentResults,
 } from './lib/persist-results';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import {
   resolveClassGroupScope,
   type ClassGroupScope,

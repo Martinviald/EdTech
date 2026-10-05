@@ -9,6 +9,7 @@ import {
   students,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBandsForInstruments,
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
@@ -42,7 +43,6 @@ import {
   resolveClassGroupScope,
   resolveStudentSubjectFilter,
 } from '../common/helpers/class-group-scope.helper';
-import { resolveEffectiveBandsForInstruments } from '../performance-bands/lib/resolve-effective-bands';
 import { loadStudentAssessments } from './lib/load-student-assessments';
 import { buildTree } from '../taxonomies/lib/tree-builder';
 

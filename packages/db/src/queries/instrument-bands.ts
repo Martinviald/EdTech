@@ -8,9 +8,9 @@
 // se usan las globales (org_id NULL, ej. cortes oficiales DIA).
 
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
-import { performanceBands } from '@soe/db';
+import type { Database } from '../client';
+import { performanceBands } from '../schema/results';
 import type { PerformanceBandInput } from '@soe/types';
-import type { Database } from '../../database/database.types';
 
 type BandRow = {
   id: string;
