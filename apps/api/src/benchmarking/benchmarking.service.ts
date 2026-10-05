@@ -13,14 +13,14 @@ import {
 import {
   BENCHMARK_K_MIN_SCHOOLS,
   BENCHMARK_N_MIN_STUDENTS,
-  meanOf,
   percentileOf,
   percentileRank,
   round2,
+  sumBandCounts,
+  weightedAverage,
   type BenchmarkAccessLogModel,
   type BenchmarkAuditListQueryDto,
   type BenchmarkAuditListResponse,
-  type BenchmarkBandDistribution,
   type BenchmarkComparisonQueryDto,
   type BenchmarkComparisonResponse,
   type BenchmarkInstrumentListResponse,
@@ -33,13 +33,6 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-
-const EMPTY_BANDS: BenchmarkBandDistribution = {
-  insufficient: 0,
-  elementary: 0,
-  adequate: 0,
-  advanced: 0,
-};
 
 const THRESHOLDS = {
   kMinSchools: BENCHMARK_K_MIN_SCHOOLS,
@@ -219,7 +212,7 @@ export class BenchmarkingService {
       isYou: row.orgId === orgId,
       avgAchievement: toNum(row.avgAchievement),
       studentCount: row.studentCount,
-      bandDistribution: row.bandDistribution ?? { ...EMPTY_BANDS },
+      bandCounts: row.bandCounts ?? [],
     }));
 
     return {
@@ -291,16 +284,17 @@ export class BenchmarkingService {
       .sort((a, b) => a - b);
 
     const studentCount = rows.reduce((sum, r) => sum + r.studentCount, 0);
-    const bandDistribution = this.sumBands(rows);
 
     return {
       schoolCount: rows.length,
       studentCount,
-      avgAchievement: meanOf(achievements),
+      avgAchievement: weightedAverage(
+        rows.map((r) => ({ value: toNum(r.avgAchievement), weight: r.studentCount })),
+      ),
       median: percentileOf(achievements, 50),
       p25: percentileOf(achievements, 25),
       p75: percentileOf(achievements, 75),
-      bandDistribution,
+      bandCounts: sumBandCounts(rows.map((r) => r.bandCounts)),
       perSkill: this.buildCohortSkills(rows, yourRow),
     };
   }
@@ -320,7 +314,7 @@ export class BenchmarkingService {
     return {
       avgAchievement: yourAchievement,
       studentCount: yourRow.studentCount,
-      bandDistribution: yourRow.bandDistribution ?? { ...EMPTY_BANDS },
+      bandCounts: yourRow.bandCounts ?? [],
       percentile: percentileRank(cohortAchievements, yourAchievement),
       perSkill: yourRow.perSkill ?? [],
     };
@@ -369,21 +363,6 @@ export class BenchmarkingService {
       });
     }
     return result.sort((a, b) => a.nodeName.localeCompare(b.nodeName));
-  }
-
-  private sumBands(rows: BenchmarkAggregate[]): BenchmarkBandDistribution {
-    return rows.reduce<BenchmarkBandDistribution>(
-      (acc, row) => {
-        const b = row.bandDistribution ?? EMPTY_BANDS;
-        return {
-          insufficient: acc.insufficient + b.insufficient,
-          elementary: acc.elementary + b.elementary,
-          adequate: acc.adequate + b.adequate,
-          advanced: acc.advanced + b.advanced,
-        };
-      },
-      { ...EMPTY_BANDS },
-    );
   }
 
   // ───────────────────────────────────────────────────────────────────────────

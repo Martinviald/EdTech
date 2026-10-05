@@ -11,11 +11,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import type {
-  BenchmarkBandCount,
-  BenchmarkBandDistribution,
-  BenchmarkSkillAggregate,
-} from '@soe/types';
+import type { BenchmarkBandCount, BenchmarkSkillAggregate } from '@soe/types';
 import { benchmarkModeEnum, schoolDependenceEnum } from './enums';
 import { organizations } from './organizations';
 import { instruments } from './instruments';
@@ -91,9 +87,8 @@ export const benchmarkAggregates = pgTable(
     // Métricas agregadas (sin PII).
     studentCount: integer('student_count').notNull().default(0),
     avgAchievement: decimal('avg_achievement', { precision: 5, scale: 2 }),
-    bandDistribution: jsonb('band_distribution').$type<BenchmarkBandDistribution>(),
-    // Conteo por banda PROPIA del instrumento (clave/etiqueta/orden). Es lo que se muestra
-    // al lado de las vistas de resultados; `band_distribution` es la proyección legacy.
+    // Conteo por banda PROPIA del instrumento (clave/etiqueta/orden), la misma escala que
+    // muestran las vistas de resultados.
     bandCounts: jsonb('band_counts').$type<BenchmarkBandCount[]>(),
     perSkill: jsonb('per_skill').$type<BenchmarkSkillAggregate[]>(),
     // Snapshot del opt-out del pool global al refrescar (ver doc arriba).

@@ -20,14 +20,10 @@
  */
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import {
-  bandToLegacyLevel,
   classifyByBands,
-  percentageToPerformanceLevel,
   type BenchmarkBandCount,
-  type BenchmarkBandDistribution,
   type BenchmarkSkillAggregate,
   type PerformanceBandInput,
-  type PerformanceLevel,
 } from '@soe/types';
 import type { Database } from '../client';
 import { assessments } from '../schema/assessments';
@@ -36,7 +32,7 @@ import {
   benchmarkItemAggregates,
   orgBenchmarkSettings,
 } from '../schema/benchmark';
-import { gradingScales, instruments } from '../schema/instruments';
+import { instruments } from '../schema/instruments';
 import { organizations } from '../schema/organizations';
 import { assessmentItemStats, assessmentResults, skillResults } from '../schema/results';
 import { taxonomyNodes } from '../schema/taxonomy';
@@ -64,7 +60,6 @@ type OrgAggregateRow = {
   subjectId: string | null;
   studentCount: number;
   avgAchievement: string | null;
-  bandDistribution: BenchmarkBandDistribution;
   bandCounts: BenchmarkBandCount[];
   perSkill: BenchmarkSkillAggregate[];
 };
@@ -76,20 +71,17 @@ type InstrumentAccumulator = {
   students: Set<string>;
   pctSum: number;
   pctCount: number;
-  bandDistribution: BenchmarkBandDistribution;
   bandCounts: Map<string, BenchmarkBandCount>;
 };
 
 /**
- * Clasificador de bandas de un instrumento pre-indexado UNA vez: guarda las bandas
- * y el nivel legacy ya resuelto por banda, para clasificar cada `percentage` en
- * O(bandas) sin recalcular la proyección por fila. Sin bandas efectivas
- * (`source: 'none'`) queda `bands` vacío y se cae a `percentageToPerformanceLevel`.
+ * Bandas efectivas de un instrumento indexadas UNA vez por id, para resolver la banda
+ * persistida de las filas band-only sin recorrer el set por fila. Sin bandas efectivas
+ * (`source: 'none'`) queda `bands` vacío y el resultado no suma a `band_counts`.
  */
 type BandClassifier = {
   bands: PerformanceBandInput[];
   bandById: Map<string, PerformanceBandInput>;
-  legacyByBandId: Map<string, PerformanceLevel>;
 };
 
 /**
@@ -143,7 +135,6 @@ export async function refreshBenchmarkAggregates(
         networkOrgId,
         studentCount: row.studentCount,
         avgAchievement: row.avgAchievement,
-        bandDistribution: row.bandDistribution,
         bandCounts: row.bandCounts,
         perSkill: row.perSkill,
         optOutGlobalPool,
@@ -168,7 +159,6 @@ export async function refreshBenchmarkAggregates(
             networkOrgId: value.networkOrgId,
             studentCount: value.studentCount,
             avgAchievement: value.avgAchievement,
-            bandDistribution: value.bandDistribution,
             bandCounts: value.bandCounts,
             perSkill: value.perSkill,
             optOutGlobalPool: value.optOutGlobalPool,
@@ -248,18 +238,12 @@ async function refreshOrgItemAggregates(
  * Agrega `assessment_results` + `skill_results` de la org bajo `withOrgContext`.
  * Agrupa por instrumento; gradeId/subjectId vienen del instrumento.
  *
- * La distribución por banda NO sale de la columna legacy `performanceLevel`: se
- * clasifica el `percentage` de cada resultado con las bandas EFECTIVAS del
- * instrumento (propias → versión anterior de su familia, ver `effective-bands`) y se
- * proyecta al enum de 4 niveles con `bandToLegacyLevel`. Sin bandas efectivas se cae
- * al corte legacy vía `percentageToPerformanceLevel`. Las filas band-only (informe
- * oficial: `percentage` NULL, `performanceLevel` ya persistido) se cuentan por su
- * nivel persistido.
- *
- * `bandCounts` cuenta por la banda PROPIA del instrumento (clave/etiqueta/orden), sin
- * proyectar: es lo que se pone al lado de las vistas de resultados. Las filas band-only
- * cuentan por su `performance_band_id` persistido; sin banda (o sin bandas efectivas)
- * no suman.
+ * `bandCounts` cuenta por la banda PROPIA del instrumento (clave/etiqueta/orden): se
+ * clasifica el `percentage` de cada resultado con las bandas EFECTIVAS del instrumento
+ * (propias → versión anterior de su familia, ver `effective-bands`). Las filas band-only
+ * (informe oficial: `percentage` NULL) cuentan por su `performance_band_id` persistido;
+ * sin banda, o sin bandas efectivas, no suman. Nunca se proyecta a la escala legacy de
+ * 4 niveles: es lo que se pone al lado de las vistas de resultados.
  */
 async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRow[]> {
   return withOrgContext(db, orgId, async (tx) => {
@@ -268,16 +252,13 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
         instrumentId: instruments.id,
         gradeId: instruments.gradeId,
         subjectId: instruments.subjectId,
-        gradingScaleConfig: gradingScales.config,
         studentId: assessmentResults.studentId,
         percentage: assessmentResults.percentage,
-        performanceLevel: assessmentResults.performanceLevel,
         performanceBandId: assessmentResults.performanceBandId,
       })
       .from(assessmentResults)
       .innerJoin(assessments, eq(assessmentResults.assessmentId, assessments.id))
       .innerJoin(instruments, eq(assessments.instrumentId, instruments.id))
-      .leftJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
       .where(eq(assessments.orgId, orgId));
 
     if (resultRows.length === 0) return [];
@@ -299,7 +280,6 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
           students: new Set<string>(),
           pctSum: 0,
           pctCount: 0,
-          bandDistribution: { insufficient: 0, elementary: 0, adequate: 0, advanced: 0 },
           bandCounts: new Map<string, BenchmarkBandCount>(),
         };
         accByInstrument.set(row.instrumentId, acc);
@@ -310,15 +290,11 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
         acc.pctSum += pct;
         acc.pctCount += 1;
       }
-      const classifier = bandClassifiers.get(row.instrumentId);
-      const level = classifyResultLevel(
+      const band = classifyResultBand(
         pct,
-        row.performanceLevel,
-        classifier,
-        row.gradingScaleConfig,
+        row.performanceBandId ?? null,
+        bandClassifiers.get(row.instrumentId),
       );
-      if (level !== null) acc.bandDistribution[level] += 1;
-      const band = classifyResultBand(pct, row.performanceBandId ?? null, classifier);
       if (band) countBand(acc.bandCounts, band);
     }
 
@@ -357,7 +333,6 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
         subjectId: acc.subjectId,
         studentCount: acc.students.size,
         avgAchievement: acc.pctCount === 0 ? null : (acc.pctSum / acc.pctCount).toFixed(2),
-        bandDistribution: acc.bandDistribution,
         bandCounts: Array.from(acc.bandCounts.values()).sort((a, b) => a.order - b.order),
         perSkill: perSkillByInstrument.get(instrumentId) ?? [],
       });
@@ -397,13 +372,7 @@ async function deriveNetworkOrgId(db: Database, parentId: string | null): Promis
 
 function buildBandClassifier(effective: EffectiveBands): BandClassifier {
   const bands = effective.bands;
-  const legacyByBandId = new Map<string, PerformanceLevel>();
-  const bandById = new Map<string, PerformanceBandInput>();
-  for (const band of bands) {
-    legacyByBandId.set(band.id, bandToLegacyLevel(band, bands));
-    bandById.set(band.id, band);
-  }
-  return { bands, bandById, legacyByBandId };
+  return { bands, bandById: new Map(bands.map((band) => [band.id, band])) };
 }
 
 function classifyResultBand(
@@ -422,21 +391,4 @@ function countBand(counts: Map<string, BenchmarkBandCount>, band: PerformanceBan
   const current = counts.get(band.key);
   if (current) current.count += 1;
   else counts.set(band.key, { bandKey: band.key, label: band.label, order: band.order, count: 1 });
-}
-
-function classifyResultLevel(
-  percentage: number | null,
-  persistedLevel: PerformanceLevel | null,
-  classifier: BandClassifier | undefined,
-  gradingScaleConfig: unknown,
-): PerformanceLevel | null {
-  if (percentage === null) return persistedLevel;
-  if (classifier && classifier.bands.length > 0) {
-    const band = classifyByBands(percentage / 100, classifier.bands);
-    if (band) return classifier.legacyByBandId.get(band.id) ?? null;
-    return null;
-  }
-  return percentageToPerformanceLevel(percentage / 100, {
-    config: gradingScaleConfig as never,
-  });
 }

@@ -71,10 +71,8 @@ function resultRow(
     instrumentId: string;
     gradeId: string | null;
     subjectId: string | null;
-    gradingScaleConfig: unknown;
     studentId: string;
     percentage: string | null;
-    performanceLevel: string | null;
     performanceBandId: string | null;
   }> = {},
 ) {
@@ -82,10 +80,8 @@ function resultRow(
     instrumentId: 'inst-1',
     gradeId: 'g1',
     subjectId: 's1',
-    gradingScaleConfig: null,
     studentId: 'stu-1',
     percentage: '62.50',
-    performanceLevel: null,
     performanceBandId: null,
     ...overrides,
   };
@@ -170,47 +166,16 @@ describe('refreshBenchmarkAggregates', () => {
     // Conteo de alumnos distintos y % promedio en memoria.
     expect(values.studentCount).toBe(2);
     expect(values.avgAchievement).toBe('55.00');
-    // % 30 → nivel-1 (order 0) → insufficient; % 80 → nivel-3 (order 2) → advanced.
-    expect(values.bandDistribution).toEqual({
-      insufficient: 1,
-      elementary: 0,
-      adequate: 0,
-      advanced: 1,
-    });
+    expect(values.bandCounts).toEqual([
+      { bandKey: 'nivel-1', label: 'nivel-1', order: 0, count: 1 },
+      { bandKey: 'nivel-3', label: 'nivel-3', order: 2, count: 1 },
+    ]);
+    expect(Object.keys(values)).not.toContain('bandDistribution');
     expect(values.perSkill).toEqual([
       { nodeId: 'node-1', nodeName: 'Comprensión', achievement: 55, studentCount: 30 },
     ]);
     expect(Object.keys(values)).not.toContain('studentId');
     expect(Object.keys(values)).not.toContain('studentName');
-  });
-
-  it('sin bandas efectivas (source none) clasifica por el corte legacy 40/70/85', async () => {
-    const db = makeDb([
-      [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
-      [{ optOut: false }],
-      // Un alumno por cada bucket legacy: 30 insufficient, 55 elementary, 78 adequate, 90 advanced.
-      [
-        resultRow({ studentId: 'a', percentage: '30.00' }),
-        resultRow({ studentId: 'b', percentage: '55.00' }),
-        resultRow({ studentId: 'c', percentage: '78.00' }),
-        resultRow({ studentId: 'd', percentage: '90.00' }),
-      ],
-      // resolveEffectiveBands: sin bandas propias ni versión anterior → source none.
-      [familyRow('inst-1', 2026)], // loadFamilyRows
-      [], // loadBandsForInstruments(targets): sin bandas propias
-      [familyRow('inst-1', 2026)], // loadFamilyCandidates: solo el propio, sin previa
-      [], // loadBandsForInstruments(candidatos): sin bandas
-      [], // perSkill
-    ]);
-    await refreshBenchmarkAggregates(db);
-
-    const values = db.__upserts[0]?.values as { bandDistribution: unknown };
-    expect(values.bandDistribution).toEqual({
-      insufficient: 1,
-      elementary: 1,
-      adequate: 1,
-      advanced: 1,
-    });
   });
 
   it('sin bandas propias usa las de la versión anterior de su familia', async () => {
@@ -234,23 +199,20 @@ describe('refreshBenchmarkAggregates', () => {
     ]);
     await refreshBenchmarkAggregates(db);
 
-    const values = db.__upserts[0]?.values as { bandDistribution: unknown };
-    // % 30 → nivel-1 → insufficient; % 90 → nivel-3 → advanced.
-    expect(values.bandDistribution).toEqual({
-      insufficient: 1,
-      elementary: 0,
-      adequate: 0,
-      advanced: 1,
-    });
+    const values = db.__upserts[0]?.values as { bandCounts: unknown };
+    expect(values.bandCounts).toEqual([
+      { bandKey: 'nivel-1', label: 'nivel-1', order: 0, count: 1 },
+      { bandKey: 'nivel-3', label: 'nivel-3', order: 2, count: 1 },
+    ]);
   });
 
-  it('cuenta las filas band-only (percentage NULL) por su nivel persistido', async () => {
+  it('las filas band-only sin banda persistida no suman al logro ni a band_counts', async () => {
     const db = makeDb([
       [{ id: 'org-1', parentId: null, dependence: null, region: null, commune: null }],
       [{ optOut: false }],
       [
-        resultRow({ studentId: 'a', percentage: null, performanceLevel: 'insufficient' }),
-        resultRow({ studentId: 'b', percentage: null, performanceLevel: 'advanced' }),
+        resultRow({ studentId: 'a', percentage: null }),
+        resultRow({ studentId: 'b', percentage: null }),
       ],
       [familyRow('inst-1', 2026)],
       THREE_BANDS,
@@ -258,17 +220,13 @@ describe('refreshBenchmarkAggregates', () => {
     await refreshBenchmarkAggregates(db);
 
     const values = db.__upserts[0]?.values as {
-      bandDistribution: unknown;
+      bandCounts: unknown;
       avgAchievement: string | null;
+      studentCount: number;
     };
-    expect(values.bandDistribution).toEqual({
-      insufficient: 1,
-      elementary: 0,
-      adequate: 0,
-      advanced: 1,
-    });
-    // Sin ningún percentage → avgAchievement null.
+    expect(values.bandCounts).toEqual([]);
     expect(values.avgAchievement).toBeNull();
+    expect(values.studentCount).toBe(2);
   });
 
   it('cuenta band_counts por la banda propia del instrumento, sin proyectar', async () => {
@@ -303,10 +261,9 @@ describe('refreshBenchmarkAggregates', () => {
         resultRow({
           studentId: 'a',
           percentage: null,
-          performanceLevel: 'adequate',
           performanceBandId: 'band-inst-1-nivel-2',
         }),
-        resultRow({ studentId: 'b', percentage: null, performanceLevel: 'advanced' }),
+        resultRow({ studentId: 'b', percentage: null }),
       ],
       [familyRow('inst-1', 2026)],
       THREE_BANDS,

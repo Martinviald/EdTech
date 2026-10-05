@@ -26,15 +26,6 @@ export type BenchmarkMode = z.infer<typeof benchmarkModeSchema>;
 
 // ── Sub-modelos de agregados (compartidos con el read-model en @soe/db) ──
 
-/** Conteo de alumnos por banda de desempeño. */
-export const benchmarkBandDistributionSchema = z.object({
-  insufficient: z.number().int(),
-  elementary: z.number().int(),
-  adequate: z.number().int(),
-  advanced: z.number().int(),
-});
-export type BenchmarkBandDistribution = z.infer<typeof benchmarkBandDistributionSchema>;
-
 /** Agregado por habilidad (nodo de taxonomía) — guardado en el read-model. */
 export const benchmarkSkillAggregateSchema = z.object({
   nodeId: z.string(),
@@ -201,7 +192,7 @@ export type BenchmarkComparisonQueryDto = z.infer<typeof benchmarkComparisonQuer
 export const schoolBenchmarkSchema = z.object({
   avgAchievement: z.number().nullable(), // % logro
   studentCount: z.number().int(),
-  bandDistribution: benchmarkBandDistributionSchema,
+  bandCounts: z.array(benchmarkBandCountSchema), // niveles propios del instrumento
   percentile: z.number().nullable(), // posición percentil dentro de la cohorte (0..100)
   perSkill: z.array(benchmarkSkillAggregateSchema),
 });
@@ -225,7 +216,7 @@ export const cohortBenchmarkSchema = z.object({
   median: z.number().nullable(), // mediana del % logro entre colegios
   p25: z.number().nullable(),
   p75: z.number().nullable(),
-  bandDistribution: benchmarkBandDistributionSchema, // proporciones agregadas de la cohorte
+  bandCounts: z.array(benchmarkBandCountSchema), // suma de la cohorte, niveles del instrumento
   perSkill: z.array(cohortSkillStatSchema),
 });
 export type CohortBenchmark = z.infer<typeof cohortBenchmarkSchema>;
@@ -237,7 +228,7 @@ export const networkSchoolRowSchema = z.object({
   isYou: z.boolean(),
   avgAchievement: z.number().nullable(),
   studentCount: z.number().int(),
-  bandDistribution: benchmarkBandDistributionSchema,
+  bandCounts: z.array(benchmarkBandCountSchema),
 });
 export type NetworkSchoolRow = z.infer<typeof networkSchoolRowSchema>;
 

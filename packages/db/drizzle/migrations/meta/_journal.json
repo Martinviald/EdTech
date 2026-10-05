@@ -274,6 +274,13 @@
       "when": 1791170068975,
       "tag": "0038_benchmark_item_aggregates",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1791203055061,
+      "tag": "0039_benchmark_drop_band_distribution",
+      "breakpoints": true
     }
   ]
 }

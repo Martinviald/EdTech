@@ -60,7 +60,6 @@ function aggRow(overrides: Record<string, unknown> = {}) {
     networkOrgId: null,
     studentCount: 20,
     avgAchievement: '60.00',
-    bandDistribution: null,
     bandCounts: DIA_BANDS(2, 10, 8),
     perSkill: [],
     optOutGlobalPool: false,
