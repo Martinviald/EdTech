@@ -47,7 +47,9 @@
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
     "db:import:planta-docente": "tsx src/seed/import-planta-docente.ts",
     "test": "jest",
-    "db:cohort-stamp": "tsx src/scripts/cohort-stats-stamp.ts"
+    "db:cohort-stamp": "tsx src/scripts/cohort-stats-stamp.ts",
+    "golden:master-board": "tsx src/scripts/golden-master-board.ts",
+    "fixture:process-candidates": "tsx src/scripts/export-process-candidates.ts"
   },
   "dependencies": {
     "@soe/types": "workspace:*",
