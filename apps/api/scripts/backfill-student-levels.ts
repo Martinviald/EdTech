@@ -66,13 +66,13 @@ import {
   students,
   withOrgContext,
   type Database,
+  loadInstrumentBands,
 } from '@soe/db';
 import {
   officialReportImportFileSchema,
   type OfficialReportImportFile,
   type PerformanceBandInput,
 } from '@soe/types';
-import { loadInstrumentBands } from '../src/performance-bands/lib/load-instrument-bands';
 import { resolveLevelBand } from '../src/official-report-import/lib/evaluate-gates';
 import {
   matchReportName,
