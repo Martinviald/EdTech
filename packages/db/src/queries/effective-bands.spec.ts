@@ -1,9 +1,6 @@
-import type { Database } from '@soe/db';
+import type { Database } from '../client';
 import type { PerformanceBandInput } from '@soe/types';
-import {
-  resolveEffectiveBands,
-  resolveEffectiveBandsForInstruments,
-} from './resolve-effective-bands';
+import { resolveEffectiveBands, resolveEffectiveBandsForInstruments } from './effective-bands';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Mock de Database por escenario (mismo patrón que heatmap.service.spec):

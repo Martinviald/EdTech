@@ -12,6 +12,7 @@ import {
   students,
   subjects,
   withOrgContext,
+  resolveEffectiveBandsForInstruments,
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
@@ -33,7 +34,6 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
-import { resolveEffectiveBandsForInstruments } from '../performance-bands/lib/resolve-effective-bands';
 import { ReportSupportService } from './report-support.service';
 import { compareSexes } from './lib/sex-comparison';
 

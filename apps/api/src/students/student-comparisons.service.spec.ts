@@ -13,7 +13,8 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { ComparableUnitAssembler } from '../dashboards/comparable/comparable-unit.assembler';
 import { StudentComparisonsService } from './student-comparisons.service';
 
-jest.mock('../performance-bands/lib/resolve-effective-bands', () => ({
+jest.mock('@soe/db', () => ({
+  ...jest.requireActual('@soe/db'),
   resolveEffectiveBands: jest.fn(async () => ({ bands: DIA_BANDS, source: 'own' })),
 }));
 

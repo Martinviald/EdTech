@@ -13,15 +13,15 @@
 //   3. Nada → `source: 'none'`, para que el caller caiga al legacy.
 
 import { and, inArray, isNull } from 'drizzle-orm';
-import { instruments } from '@soe/db';
+import type { Database } from '../client';
+import { instruments } from '../schema/instruments';
 import { buildInstrumentFamilyKey } from '@soe/types';
 import type {
   ComparabilityInstrumentRef,
   InstrumentApplicationPeriod,
   PerformanceBandInput,
 } from '@soe/types';
-import type { Database } from '../../database/database.types';
-import { loadBandsForInstruments } from './load-instrument-bands';
+import { loadBandsForInstruments } from './instrument-bands';
 
 export type EffectiveBandsSource = 'own' | 'previous_version' | 'none';
 export type EffectiveBands = { bands: PerformanceBandInput[]; source: EffectiveBandsSource };

@@ -1,5 +1,5 @@
-import type { Database } from '@soe/db';
-import { BenchmarkingRefreshService } from './benchmarking-refresh.service';
+import type { Database } from '../client';
+import { refreshBenchmarkAggregates } from './benchmark-aggregates';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Mock de Database para el refresh.
@@ -36,8 +36,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
     for (const m of ['from', 'innerJoin', 'leftJoin', 'where', 'groupBy', 'orderBy', 'limit']) {
       chain[m] = passthrough;
     }
-    chain.then = (resolve: (rows: unknown[]) => unknown) =>
-      Promise.resolve(rows).then(resolve);
+    chain.then = (resolve: (rows: unknown[]) => unknown) => Promise.resolve(rows).then(resolve);
     return chain;
   }
 
@@ -65,12 +64,6 @@ function makeDb(selectResults: unknown[][]): DbMock {
   } as unknown as DbMock;
 
   return db;
-}
-
-function makeService(db: Database): BenchmarkingRefreshService {
-  return new (BenchmarkingRefreshService as new (
-    db: Database,
-  ) => BenchmarkingRefreshService)(db);
 }
 
 function resultRow(
@@ -127,7 +120,7 @@ const THREE_BANDS = [
   bandRow('inst-1', 'nivel-3', 2, '0.70', '1.00'),
 ];
 
-describe('BenchmarkingRefreshService.refresh', () => {
+describe('refreshBenchmarkAggregates', () => {
   it('agrega la fuente por org y hace upsert sin PII en el read-model', async () => {
     const db = makeDb([
       // orgs
@@ -160,13 +153,10 @@ describe('BenchmarkingRefreshService.refresh', () => {
         },
       ],
     ]);
-    const svc = makeService(db);
-
-    const res = await svc.refresh();
+    const res = await refreshBenchmarkAggregates(db);
 
     expect(res.refreshedOrgs).toBe(1);
     expect(res.refreshedRows).toBe(1);
-    expect(typeof res.refreshedAt).toBe('string');
     expect(db.__transactionRan).toBe(true);
     expect(db.__upserts).toHaveLength(1);
 
@@ -210,9 +200,7 @@ describe('BenchmarkingRefreshService.refresh', () => {
       [], // loadBandsForInstruments(candidatos): sin bandas
       [], // perSkill
     ]);
-    const svc = makeService(db);
-
-    await svc.refresh();
+    await refreshBenchmarkAggregates(db);
 
     const values = db.__upserts[0].values as { bandDistribution: unknown };
     expect(values.bandDistribution).toEqual({
@@ -242,9 +230,7 @@ describe('BenchmarkingRefreshService.refresh', () => {
         bandRow('inst-0', 'nivel-3', 2, '0.70', '1.00'),
       ],
     ]);
-    const svc = makeService(db);
-
-    await svc.refresh();
+    await refreshBenchmarkAggregates(db);
 
     const values = db.__upserts[0].values as { bandDistribution: unknown };
     // % 30 → nivel-1 → insufficient; % 90 → nivel-3 → advanced.
@@ -267,9 +253,7 @@ describe('BenchmarkingRefreshService.refresh', () => {
       [familyRow('inst-1', 2026)],
       THREE_BANDS,
     ]);
-    const svc = makeService(db);
-
-    await svc.refresh();
+    await refreshBenchmarkAggregates(db);
 
     const values = db.__upserts[0].values as {
       bandDistribution: unknown;
@@ -294,9 +278,7 @@ describe('BenchmarkingRefreshService.refresh', () => {
       THREE_BANDS,
       [], // perSkill vacío
     ]);
-    const svc = makeService(db);
-
-    await svc.refresh();
+    await refreshBenchmarkAggregates(db);
 
     const values = db.__upserts[0].values as { optOutGlobalPool: boolean };
     expect(values.optOutGlobalPool).toBe(true);
@@ -312,9 +294,7 @@ describe('BenchmarkingRefreshService.refresh', () => {
       THREE_BANDS,
       [],
     ]);
-    const svc = makeService(db);
-
-    await svc.refresh();
+    await refreshBenchmarkAggregates(db);
 
     const values = db.__upserts[0].values as { networkOrgId: string | null };
     expect(values.networkOrgId).toBe('p1');
@@ -337,9 +317,7 @@ describe('BenchmarkingRefreshService.refresh', () => {
       [{ optOut: false }],
       [],
     ]);
-    const svc = makeService(db);
-
-    const res = await svc.refresh();
+    const res = await refreshBenchmarkAggregates(db);
 
     expect(res.refreshedOrgs).toBe(1); // solo org-1 produjo filas
     expect(res.refreshedRows).toBe(1);

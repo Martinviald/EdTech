@@ -22,6 +22,7 @@ import {
   students,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   buildLevelStatCounts,
@@ -41,7 +42,6 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 import { evaluateGates, resolveLevelBand, type GateContext } from './lib/evaluate-gates';
 import { OfficialReportPreviewStore } from './lib/preview-store';
 import type { InstrumentItemForImport } from './lib/report-to-item-stats';

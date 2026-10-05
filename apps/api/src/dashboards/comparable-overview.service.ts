@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
-import { assessments, grades, instruments, subjects, withOrgContext } from '@soe/db';
+import {
+  assessments,
+  grades,
+  instruments,
+  subjects,
+  withOrgContext,
+  loadBandsForInstruments,
+} from '@soe/db';
 import {
   buildComparabilityMeta,
   compareSeverity,
@@ -19,7 +26,6 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { CohortLevelCount } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { loadBandsForInstruments } from '../performance-bands/lib/load-instrument-bands';
 import { ComparableAlertsService } from './comparable-alerts.service';
 import {
   ComparableUnitAssembler,

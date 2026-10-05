@@ -17,6 +17,7 @@ import {
   loadSectionRoles,
   resolveElectiveScope,
   type ElectiveScope,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   CAPABILITY_UNAVAILABLE_CODE,
@@ -46,7 +47,6 @@ import {
   loadResponsesForPersist,
   persistAssessmentResults,
 } from '../assessment-results/lib/persist-results';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
 import { AnswerSheetPreviewStore } from './lib/preview-store';
 import { parseGradecamCsv } from './lib/parsers/gradecam-parser';
