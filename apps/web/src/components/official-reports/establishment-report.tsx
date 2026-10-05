@@ -1,4 +1,5 @@
 import type {
+  InstrumentSampleEntry,
   OfficialEstablishmentReportResponse,
   EstablishmentSubjectSection,
   EstablishmentGradeColumn,
@@ -43,7 +44,16 @@ const SEX_TITLE: Record<SexComparisonResult, string> = {
   insufficient_sample: 'Muestra insuficiente para el cálculo',
 };
 
-export function EstablishmentReport({ report }: { report: OfficialEstablishmentReportResponse }) {
+export type EstablishmentSamples = ReadonlyMap<string, InstrumentSampleEntry>;
+
+export function EstablishmentReport({
+  report,
+  samples,
+}: {
+  report: OfficialEstablishmentReportResponse;
+  /** Muestra de benchmarking por instrumento; sólo llega para roles directivos. */
+  samples?: EstablishmentSamples | null;
+}) {
   const { meta, subjects, sexDataAvailable, scopeNotes } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
   const levelDefinitions = resolveLevelDefinitions(report.levelDefinitions);
@@ -91,6 +101,7 @@ export function EstablishmentReport({ report }: { report: OfficialEstablishmentR
             subject={subject}
             tableIndex={i + 1}
             sexDataAvailable={sexDataAvailable}
+            samples={samples}
           />
         ))
       )}
@@ -102,10 +113,12 @@ function SubjectBlock({
   subject,
   tableIndex,
   sexDataAvailable,
+  samples,
 }: {
   subject: EstablishmentSubjectSection;
   tableIndex: number;
   sexDataAvailable: boolean;
+  samples?: EstablishmentSamples | null;
 }) {
   return (
     <ReportSection title={subject.subjectName}>
@@ -114,7 +127,7 @@ function SubjectBlock({
         <p className="text-sm font-medium">
           Tabla 1.{tableIndex} — Estudiantes por nivel de logro (%)
         </p>
-        <LevelDistributionTable subject={subject} />
+        <LevelDistributionTable subject={subject} samples={samples} />
       </div>
 
       {/* Tabla 1.(4+x) — comparación por sexo, o nota si no hay dato */}
@@ -141,29 +154,59 @@ function SubjectBlock({
   );
 }
 
-function LevelDistributionTable({ subject }: { subject: EstablishmentSubjectSection }) {
+function LevelDistributionTable({
+  subject,
+  samples,
+}: {
+  subject: EstablishmentSubjectSection;
+  samples?: EstablishmentSamples | null;
+}) {
   if (subject.bands && subject.bands.length > 0 && subject.bandDistribution) {
     return (
       <BandDistributionTable
         grades={subject.grades}
         bands={subject.bands}
         cells={subject.bandDistribution}
+        samples={samples}
       />
     );
   }
   return <LegacyLevelDistributionTable subject={subject} />;
 }
 
+/** % de la muestra por banda para cada grado con un solo instrumento y la misma escala. */
+function sampleSharesByGrade(
+  grades: EstablishmentGradeColumn[],
+  bands: PerformanceBandView[],
+  samples: EstablishmentSamples | null | undefined,
+): Map<string, Map<string, number>> {
+  const result = new Map<string, Map<string, number>>();
+  if (!samples) return result;
+  for (const grade of grades) {
+    const bandCounts = grade.instrumentId
+      ? samples.get(grade.instrumentId)?.global?.bandCounts
+      : null;
+    if (!bandCounts || bandCounts.length === 0) continue;
+    const total = bandCounts.reduce((acc, band) => acc + band.count, 0);
+    const shares = new Map(bandCounts.map((band) => [band.bandKey, (band.count / total) * 100]));
+    if (total > 0 && bands.every((band) => shares.has(band.key))) result.set(grade.gradeId, shares);
+  }
+  return result;
+}
+
 function BandDistributionTable({
   grades,
   bands,
   cells,
+  samples,
 }: {
   grades: EstablishmentGradeColumn[];
   bands: PerformanceBandView[];
   cells: EstablishmentBandCell[];
+  samples?: EstablishmentSamples | null;
 }) {
   const byCell = new Map(cells.map((c) => [`${c.gradeId}|${c.bandKey}`, c]));
+  const sampleShares = sampleSharesByGrade(grades, bands, samples);
   const orderedBands = [...bands].sort((a, b) => a.order - b.order);
   const orders = orderedBands.map((b) => b.order);
 
@@ -188,9 +231,15 @@ function BandDistributionTable({
               </th>
               {grades.map((g) => {
                 const cell = byCell.get(`${g.gradeId}|${band.key}`);
+                const sampleShare = sampleShares.get(g.gradeId)?.get(band.key);
                 return (
                   <td key={g.gradeId} className="px-3 py-2 text-center tabular-nums">
                     {cell ? fmtPct(cell.percentage, 0) : '—'}
+                    {sampleShare === undefined ? null : (
+                      <span className="block text-xs text-muted-foreground">
+                        Muestra {fmtPct(sampleShare, 0)}
+                      </span>
+                    )}
                   </td>
                 );
               })}

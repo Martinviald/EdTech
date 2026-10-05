@@ -189,12 +189,33 @@ export function ReportBody({
       )}
 
       {/* 4. Logro por habilidad (dimensión + drill-down si hay evaluación) */}
-      <SkillsSection
-        report={report}
-        skillsBreakdown={skillsBreakdown}
-        assessmentId={assessmentId}
-        classGroupId={classGroupId}
-      />
+      {samplePromise ? (
+        <Suspense
+          fallback={
+            <SkillsSection
+              report={report}
+              skillsBreakdown={skillsBreakdown}
+              assessmentId={assessmentId}
+              classGroupId={classGroupId}
+            />
+          }
+        >
+          <SkillsSectionWithSample
+            report={report}
+            skillsBreakdown={skillsBreakdown}
+            assessmentId={assessmentId}
+            classGroupId={classGroupId}
+            samplePromise={samplePromise}
+          />
+        </Suspense>
+      ) : (
+        <SkillsSection
+          report={report}
+          skillsBreakdown={skillsBreakdown}
+          assessmentId={assessmentId}
+          classGroupId={classGroupId}
+        />
+      )}
 
       {/* 5. Análisis de preguntas (T2-17: clickeable → panel de detalle) */}
       <ItemsAnalysisTable
@@ -460,17 +481,33 @@ function CourseComparison({
 
 // ── Habilidades ───────────────────────────────────────────────────────────────
 
-function SkillsSection({
-  report,
-  skillsBreakdown,
-  assessmentId,
-  classGroupId,
+async function SkillsSectionWithSample({
+  samplePromise,
+  ...props
 }: {
   report: AssessmentReportResponse;
   skillsBreakdown?: SkillAchievementModel[];
   assessmentId?: string;
   classGroupId?: string;
+  samplePromise: Promise<InstrumentSampleEntry | null>;
 }) {
+  return <SkillsSection {...props} sample={await samplePromise} />;
+}
+
+function SkillsSection({
+  report,
+  skillsBreakdown,
+  assessmentId,
+  classGroupId,
+  sample,
+}: {
+  report: AssessmentReportResponse;
+  skillsBreakdown?: SkillAchievementModel[];
+  assessmentId?: string;
+  classGroupId?: string;
+  sample?: InstrumentSampleEntry | null;
+}) {
+  const global = sample?.global;
   // TKT-11/TKT-10: con una evaluación en contexto se usa el desglose interactivo
   // por dimensión (dropdown habilidad/contenido/OA/eje) con drill-down: clic en un
   // nodo abre el modal de sus preguntas y clic en una pregunta abre su detalle.
@@ -488,6 +525,15 @@ function SkillsSection({
             skills={skillsBreakdown}
             filters={{ classGroupId }}
             assessmentId={assessmentId}
+            sample={
+              global
+                ? {
+                    label: global.label,
+                    sizeLabel: sampleSizeLabel(global),
+                    skills: global.perSkill,
+                  }
+                : null
+            }
           />
         </CardContent>
       </Card>

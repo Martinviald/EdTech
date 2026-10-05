@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -54,10 +55,13 @@ const DEV_CATEGORY_LABELS: Record<string, string> = {
 export function CourseReport({
   report,
   studentReportBasePath,
+  generalSample,
 }: {
   report: OfficialCourseReportResponse;
   /** Base para enlazar el informe individual por alumno (TKT-26). */
   studentReportBasePath?: string;
+  /** Contraste del resultado general con la muestra de colegios (benchmarking en contexto). */
+  generalSample?: ReactNode;
 }) {
   const { meta, generalResult, skillAxes, specTable, studentResults, reflectionPrompts } = report;
   const disclaimers = resolveDisclaimers(meta.disclaimers);
@@ -143,6 +147,7 @@ export function CourseReport({
             value={String(generalResult.studentsConsidered)}
           />
         </div>
+        {generalSample}
 
         {!isDiagnostic ? (
           <div className="rounded-md border p-4">

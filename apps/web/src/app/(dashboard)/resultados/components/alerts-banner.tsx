@@ -132,17 +132,16 @@ function CohortContext({ alert }: { alert: DashboardAlert }) {
   if (!cohort) return null;
   const sampleValue = cohort.sampleValue === null ? '—' : `${cohort.sampleValue.toFixed(1)}%`;
   const size = sampleSizeLabel(cohort);
-  if (alert.basis === 'cohort') {
+  if (alert.basis !== 'cohort' && cohort.similarToSample) {
     return (
       <p className="text-xs text-muted-foreground">
-        Muestra: {sampleValue} · {size}
+        Resultado similar en la muestra ({sampleValue} · {size})
       </p>
     );
   }
-  if (!cohort.similarToSample) return null;
   return (
     <p className="text-xs text-muted-foreground">
-      Resultado similar en la muestra ({sampleValue} · {size})
+      Muestra: {sampleValue} · {size}
     </p>
   );
 }

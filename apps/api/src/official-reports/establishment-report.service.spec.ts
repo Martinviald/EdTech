@@ -164,3 +164,20 @@ describe('EstablishmentReportService — distribución por banda del instrumento
     expect(section!.bands).toBeUndefined();
   });
 });
+
+describe('EstablishmentReportService — instrumento por columna de grado', () => {
+  it('expone el instrumento cuando todo el grado rindió el mismo y null cuando se mezclan', () => {
+    const rows = [
+      row(1, 60),
+      row(2, 70),
+      row(3, 60, { gradeId: 'g7', gradeOrder: 7, instrumentId: 'lectura-7-intermedio' }),
+      row(4, 80, { gradeId: 'g7', gradeOrder: 7, instrumentId: 'lectura-7-cierre' }),
+    ];
+    const [section] = run(rows, new Map());
+
+    expect(section!.grades).toEqual([
+      expect.objectContaining({ gradeId: 'g6', instrumentId: 'lectura-6' }),
+      expect.objectContaining({ gradeId: 'g7', instrumentId: null }),
+    ]);
+  });
+});

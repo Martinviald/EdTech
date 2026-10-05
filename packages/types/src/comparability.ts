@@ -304,6 +304,10 @@ export const ALERT_THRESHOLDS = {
    */
   cohort: {
     belowSamplePp: { high: 10, medium: 5 },
+    /** Un eje: bajo el p25/p10 de los colegios en ese nodo y estos pp bajo la muestra. */
+    skillBelowSamplePp: { high: 20, medium: 12 },
+    /** % en la banda inferior que supera al de la muestra en estos pp. */
+    bandConcentrationAbovePp: { high: 20, medium: 10 },
     /** Bajo este |Δ| (pp) el resultado se considera similar al de la muestra. */
     similarPp: 5,
   },

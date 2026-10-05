@@ -1,14 +1,17 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
   OFFICIAL_REPORT_VIEWER_ROLES,
+  sampleSizeLabel,
   type OfficialCourseReportResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/shared';
+import { EmptyState, SampleDeltaChip } from '@/components/shared';
 import { CourseReport } from '@/components/official-reports/course-report';
 import { PrintToolbar } from '@/components/official-reports/print-toolbar';
 import { AssessmentCourseFilter } from '../components/course-filter';
@@ -61,6 +64,18 @@ export default async function InformeOficialPage({
         <CourseReport
           report={report}
           studentReportBasePath={ROUTES.evaluacionInformeAlumnoBase(assessmentId)}
+          generalSample={
+            canSeeBenchmark(session.user.roles) ? (
+              <Suspense fallback={null}>
+                <CourseReportSampleLine
+                  instrumentId={report.meta.instrumentId}
+                  instrumentName={report.meta.instrumentName}
+                  value={report.generalResult.averageAchievement}
+                  subject={classGroupId ? 'course' : 'school'}
+                />
+              </Suspense>
+            ) : undefined
+          }
         />
       ) : (
         <EmptyState
@@ -69,6 +84,45 @@ export default async function InformeOficialPage({
           description="No hay resultados para el curso seleccionado o no tienes acceso. Ajusta el filtro de curso o verifica tus cursos asignados."
         />
       )}
+    </div>
+  );
+}
+
+async function CourseReportSampleLine({
+  instrumentId,
+  instrumentName,
+  value,
+  subject,
+}: {
+  instrumentId: string;
+  instrumentName: string;
+  value: number | null;
+  subject: 'school' | 'course';
+}) {
+  const entry = await getInstrumentSample(instrumentId);
+  const global = entry?.global;
+  if (!entry || !global) return null;
+  const totalInBands = global.bandCounts.reduce((acc, band) => acc + band.count, 0);
+  const bands =
+    totalInBands > 0
+      ? global.bandCounts
+          .map((band) => `${band.label} ${((band.count / totalInBands) * 100).toFixed(0)}%`)
+          .join(' · ')
+      : null;
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground print:hidden">
+      <span>
+        Muestra de colegios:{' '}
+        {global.avgAchievement === null ? '—' : `${global.avgAchievement.toFixed(1)}%`} de logro
+        {bands ? ` · ${bands}` : ''} · {sampleSizeLabel(global)}
+      </span>
+      <SampleDeltaChip
+        entry={entry}
+        value={value}
+        subject={subject}
+        instrumentName={instrumentName}
+        surface="evaluacion.informe-oficial"
+      />
     </div>
   );
 }

@@ -22,8 +22,10 @@ import {
   type ComparableUnitSummary,
   type DashboardAlert,
   type DashboardAlertCohort,
+  type DashboardAlertType,
   type InstrumentSample,
   type InstrumentSampleEntry,
+  type SampleSkillStat,
 } from '@soe/types';
 import {
   assessmentAcademicYears,
@@ -34,6 +36,20 @@ import type { Database } from '../database/database.types';
 type AlertDraft = Omit<DashboardAlert, 'dedupKey' | 'basis' | 'cohort'> & {
   dedupKey?: string;
   cohort?: DashboardAlertCohort | null;
+  fusionReason?: string;
+};
+
+type NodeAchievement = {
+  unit: ComparableUnitSummary;
+  nodeId: string;
+  nodeName: string;
+  achievement: number;
+};
+
+const FUSES_INTO: Partial<Record<DashboardAlertType, DashboardAlertType>> = {
+  band_concentration_above_sample: 'band_concentration',
+  skill_below_sample: 'skill_gap',
+  class_below_sample: 'class_below_org',
 };
 
 export type InstrumentSampleLookup = ReadonlyMap<string, InstrumentSampleEntry>;
@@ -49,12 +65,15 @@ export class ComparableAlertsService {
   ): Promise<DashboardAlert[]> {
     if (units.length === 0) return [];
 
+    const nodeAchievements = await this.loadNodeAchievements(tx, units);
     const drafts: AlertDraft[] = [
-      ...this.bandConcentrationAlerts(units),
+      ...this.bandConcentrationAlerts(units, samples),
+      ...this.bandConcentrationAboveSampleAlerts(units, samples),
       ...this.movementAlerts(units),
       ...this.classBelowUnitAlerts(units),
       ...this.sampleAlerts(units, samples),
-      ...(await this.skillGapAlerts(tx, units)),
+      ...this.skillGapAlerts(nodeAchievements),
+      ...this.skillBelowSampleAlerts(nodeAchievements, samples),
       ...(await this.itemGapAlerts(tx, units)),
       ...(await this.bandRegressionAlerts(tx, units)),
       ...(await this.coverageAlerts(tx, orgId, units, classGroupIds)),
@@ -64,24 +83,66 @@ export class ComparableAlertsService {
   }
 
   private dedupeAndRank(drafts: AlertDraft[]): DashboardAlert[] {
-    const byKey = new Map<string, DashboardAlert>();
+    const byKey = new Map<string, AlertDraft & { dedupKey: string }>();
     for (const draft of drafts) {
-      const dedupKey =
-        draft.dedupKey ?? `${draft.type}:${draft.unitKey ?? '-'}:${draft.contextId ?? '-'}`;
+      const dedupKey = draft.dedupKey ?? this.defaultDedupKey(draft.type, draft);
       if (byKey.has(dedupKey)) continue;
-      byKey.set(dedupKey, {
-        ...draft,
-        dedupKey,
-        basis: ALERT_BASIS_BY_TYPE[draft.type],
-        cohort: draft.cohort ?? null,
-      });
+      byKey.set(dedupKey, { ...draft, dedupKey });
     }
+    this.fuseWithSample(byKey);
 
-    return Array.from(byKey.values()).sort((a, b) => {
+    const alerts = Array.from(byKey.values(), (draft) => this.toAlert(draft));
+    return alerts.sort((a, b) => {
       const bySeverity = severityRank(a.severity) - severityRank(b.severity);
       if (bySeverity !== 0) return bySeverity;
       return (b.studentsAffected ?? 0) - (a.studentsAffected ?? 0);
     });
+  }
+
+  private toAlert(draft: AlertDraft & { dedupKey: string }): DashboardAlert {
+    return {
+      type: draft.type,
+      severity: draft.severity,
+      message: draft.message,
+      contextKind: draft.contextKind,
+      contextId: draft.contextId,
+      contextLabel: draft.contextLabel,
+      value: draft.value,
+      unitKey: draft.unitKey,
+      unitLabel: draft.unitLabel,
+      studentsAffected: draft.studentsAffected,
+      dedupKey: draft.dedupKey,
+      basis: ALERT_BASIS_BY_TYPE[draft.type],
+      cohort: draft.cohort ?? null,
+    };
+  }
+
+  private defaultDedupKey(
+    type: DashboardAlertType,
+    draft: Pick<AlertDraft, 'unitKey' | 'contextId'>,
+  ): string {
+    return `${type}:${draft.unitKey ?? '-'}:${draft.contextId ?? '-'}`;
+  }
+
+  private fuseWithSample(byKey: Map<string, AlertDraft & { dedupKey: string }>): void {
+    for (const [key, relative] of [...byKey]) {
+      const target = FUSES_INTO[relative.type];
+      if (!target) continue;
+      const base = byKey.get(this.defaultDedupKey(target, relative));
+      if (!base) continue;
+      byKey.set(base.dedupKey, {
+        ...base,
+        severity:
+          severityRank(relative.severity) < severityRank(base.severity)
+            ? relative.severity
+            : base.severity,
+        message: relative.fusionReason
+          ? `${base.message}, y ${relative.fusionReason}`
+          : base.message,
+        cohort: relative.cohort ?? base.cohort ?? null,
+      });
+      byKey.delete(key);
+    }
   }
 
   private sampleAlerts(
@@ -128,6 +189,7 @@ export class ComparableAlertsService {
           unitLabel: unit.instrumentName,
           studentsAffected: course.studentsAssessed,
           cohort: this.cohortOf(course.averageAchievement, sample, null),
+          fusionReason: `bajo la zona típica de la muestra (${this.formatZone(sample)})`,
         });
       }
     }
@@ -168,9 +230,156 @@ export class ComparableAlertsService {
     return `${low}–${high}%`;
   }
 
-  private bandConcentrationAlerts(units: ComparableUnitSummary[]): AlertDraft[] {
+  private skillBelowSampleAlerts(
+    nodes: NodeAchievement[],
+    samples: InstrumentSampleLookup | null,
+  ): AlertDraft[] {
+    if (!samples) return [];
+    const drafts: AlertDraft[] = [];
+    const skillsByInstrument = new Map<string, Map<string, SampleSkillStat>>();
+    for (const entry of nodes) {
+      const sample = samples.get(entry.unit.instrumentId)?.global;
+      if (!sample) continue;
+      let skills = skillsByInstrument.get(sample.instrumentId);
+      if (!skills) {
+        skills = new Map(sample.perSkill.map((skill) => [skill.nodeId, skill]));
+        skillsByInstrument.set(sample.instrumentId, skills);
+      }
+      const skill = skills.get(entry.nodeId);
+      const sampleAchievement = skill?.achievement ?? null;
+      const delta = sampleDeltaPp(entry.achievement, sampleAchievement);
+      if (!skill || delta === null || sampleAchievement === null) continue;
+      const severity = this.skillBelowSampleSeverity(entry.achievement, delta, skill);
+      if (!severity) continue;
+      drafts.push({
+        type: 'skill_below_sample',
+        severity,
+        message: `En ${entry.unit.instrumentName}, ${shorten(entry.nodeName)} está ${Math.abs(delta).toFixed(1)} pp bajo la muestra (${entry.achievement.toFixed(0)}% vs ${sampleAchievement.toFixed(0)}%)`,
+        contextKind: 'taxonomy_node',
+        contextId: entry.nodeId,
+        contextLabel: entry.nodeName,
+        value: Number(entry.achievement.toFixed(1)),
+        unitKey: entry.unit.key,
+        unitLabel: entry.unit.instrumentName,
+        studentsAffected: entry.unit.studentsAssessed,
+        cohort: {
+          sampleValue: skill.achievement,
+          schoolCount: skill.schoolCount,
+          studentCount: skill.studentCount,
+          percentile: null,
+          similarToSample: false,
+        },
+        fusionReason: `${Math.abs(delta).toFixed(1)} pp bajo la muestra`,
+      });
+    }
+    return drafts;
+  }
+
+  private skillBelowSampleSeverity(
+    achievement: number,
+    delta: number,
+    skill: SampleSkillStat,
+  ): AlertSeverity | null {
+    const { skillBelowSamplePp } = ALERT_THRESHOLDS.cohort;
+    if (skill.p10 !== null && achievement < skill.p10 && delta <= -skillBelowSamplePp.high) {
+      return 'high';
+    }
+    if (skill.p25 !== null && achievement < skill.p25 && delta <= -skillBelowSamplePp.medium) {
+      return 'medium';
+    }
+    return null;
+  }
+
+  private bandConcentrationAboveSampleAlerts(
+    units: ComparableUnitSummary[],
+    samples: InstrumentSampleLookup | null,
+  ): AlertDraft[] {
+    if (!samples) return [];
     const drafts: AlertDraft[] = [];
     for (const unit of units) {
+      const sample = samples.get(unit.instrumentId)?.global;
+      const sampleShare = sample ? this.sampleLowestBandShare(unit, sample) : null;
+      if (!sample || sampleShare === null) continue;
+      const bandLabel = this.lowestBand(unit)?.label ?? 'el nivel más bajo';
+      for (const course of unit.byClassGroup) {
+        const share = course.lowestBandShare;
+        const excess = share === null ? null : share - sampleShare;
+        const severity = thresholdSeverity(
+          excess,
+          ALERT_THRESHOLDS.cohort.bandConcentrationAbovePp,
+        );
+        if (!severity || share === null || excess === null) continue;
+        drafts.push({
+          type: 'band_concentration_above_sample',
+          severity,
+          message: `${course.classGroupName}: ${share.toFixed(0)}% en ${bandLabel} de ${unit.instrumentName}, ${excess.toFixed(0)} pp más que la muestra (${sampleShare.toFixed(0)}%)`,
+          contextKind: 'class_group',
+          contextId: course.classGroupId,
+          contextLabel: course.classGroupName,
+          value: Number(share.toFixed(1)),
+          unitKey: unit.key,
+          unitLabel: unit.instrumentName,
+          studentsAffected: Math.round((share / 100) * course.studentsAssessed),
+          cohort: this.bandCohortOf(share, sampleShare, sample),
+          fusionReason: `${excess.toFixed(0)} pp más que la muestra (${sampleShare.toFixed(0)}%)`,
+        });
+      }
+    }
+    return drafts;
+  }
+
+  private lowestBand(unit: ComparableUnitSummary): { key: string; label: string } | null {
+    let lowest: { key: string; label: string; order: number } | null = null;
+    for (const band of unit.bands ?? []) {
+      if (!lowest || band.order < lowest.order) lowest = band;
+    }
+    return lowest;
+  }
+
+  private sampleLowestBandShare(
+    unit: ComparableUnitSummary,
+    sample: InstrumentSample,
+  ): number | null {
+    const lowestKey = this.lowestBand(unit)?.key;
+    if (!lowestKey || sample.bandCounts.length === 0) return null;
+    let total = 0;
+    let lowestCount: number | null = null;
+    let lowestOrder = Infinity;
+    let lowestSampleKey: string | null = null;
+    for (const band of sample.bandCounts) {
+      total += band.count;
+      if (band.order < lowestOrder) {
+        lowestOrder = band.order;
+        lowestSampleKey = band.bandKey;
+        lowestCount = band.count;
+      }
+    }
+    if (total === 0 || lowestSampleKey !== lowestKey || lowestCount === null) return null;
+    return (lowestCount / total) * 100;
+  }
+
+  private bandCohortOf(
+    share: number,
+    sampleShare: number,
+    sample: InstrumentSample,
+  ): DashboardAlertCohort {
+    return {
+      sampleValue: Number(sampleShare.toFixed(1)),
+      schoolCount: sample.schoolCount,
+      studentCount: sample.studentCount,
+      percentile: null,
+      similarToSample: Math.abs(share - sampleShare) < ALERT_THRESHOLDS.cohort.similarPp,
+    };
+  }
+
+  private bandConcentrationAlerts(
+    units: ComparableUnitSummary[],
+    samples: InstrumentSampleLookup | null,
+  ): AlertDraft[] {
+    const drafts: AlertDraft[] = [];
+    for (const unit of units) {
+      const sample = samples?.get(unit.instrumentId)?.global ?? null;
+      const sampleShare = sample ? this.sampleLowestBandShare(unit, sample) : null;
       for (const course of unit.byClassGroup) {
         const share = course.lowestBandShare;
         const severity = thresholdSeverity(share, ALERT_THRESHOLDS.bandConcentration);
@@ -187,6 +396,8 @@ export class ComparableAlertsService {
           unitKey: unit.key,
           unitLabel: unit.instrumentName,
           studentsAffected: Math.round((share / 100) * course.studentsAssessed),
+          cohort:
+            sample && sampleShare !== null ? this.bandCohortOf(share, sampleShare, sample) : null,
         });
       }
     }
@@ -244,10 +455,10 @@ export class ComparableAlertsService {
     return drafts;
   }
 
-  private async skillGapAlerts(
+  private async loadNodeAchievements(
     tx: Database,
     units: ComparableUnitSummary[],
-  ): Promise<AlertDraft[]> {
+  ): Promise<NodeAchievement[]> {
     const assessmentIds = units.flatMap((u) => u.assessmentIds);
     if (assessmentIds.length === 0) return [];
 
@@ -304,10 +515,24 @@ export class ComparableAlertsService {
       byUnitNode.set(key, entry);
     }
 
-    const drafts: AlertDraft[] = [];
+    const achievements: NodeAchievement[] = [];
     for (const entry of byUnitNode.values()) {
-      if (entry.total === 0 || entry.unit.averageAchievement == null) continue;
-      const achievement = (entry.correct / entry.total) * 100;
+      if (entry.total === 0) continue;
+      achievements.push({
+        unit: entry.unit,
+        nodeId: entry.nodeId,
+        nodeName: entry.nodeName,
+        achievement: (entry.correct / entry.total) * 100,
+      });
+    }
+    return achievements;
+  }
+
+  private skillGapAlerts(nodes: NodeAchievement[]): AlertDraft[] {
+    const drafts: AlertDraft[] = [];
+    for (const entry of nodes) {
+      if (entry.unit.averageAchievement == null) continue;
+      const achievement = entry.achievement;
       const gap = entry.unit.averageAchievement - achievement;
       const severity = thresholdSeverity(gap, ALERT_THRESHOLDS.skillGapPp);
       if (!severity) continue;

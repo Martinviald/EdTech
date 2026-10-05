@@ -398,10 +398,10 @@ describe('ComparableAlertsService — alertas relativas a la muestra', () => {
   });
 
   it('alerta por curso bajo la muestra sólo cuando la unidad tiene más de un curso', async () => {
-    const single = makeUnit({ averageAchievement: 70, byClassGroup: [course('8°A', 50)] });
+    const single = makeUnit({ averageAchievement: 52, byClassGroup: [course('8°A', 50)] });
     const several = makeUnit({
-      averageAchievement: 70,
-      byClassGroup: [course('8°A', 50), course('8°B', 75)],
+      averageAchievement: 52,
+      byClassGroup: [course('8°A', 50), course('8°B', 60)],
     });
 
     const onlyOne = await svc.deriveAlerts(
@@ -424,10 +424,36 @@ describe('ComparableAlertsService — alertas relativas a la muestra', () => {
     expect(courseAlerts).toHaveLength(1);
     expect(courseAlerts[0]).toMatchObject({
       severity: 'high',
+      basis: 'cohort',
       contextKind: 'class_group',
       contextId: '8°A',
       cohort: { percentile: null },
     });
+  });
+
+  it('un curso bajo su unidad y bajo la muestra queda en una sola alerta con las dos razones', async () => {
+    const unit = makeUnit({
+      averageAchievement: 70,
+      byClassGroup: [course('8°A', 50), course('8°B', 75)],
+    });
+
+    const alerts = await svc.deriveAlerts(
+      makeDb(),
+      'org-1',
+      [unit],
+      null,
+      samplesFor(makeSample()),
+    );
+    const course8A = alerts.filter((a) => a.contextId === '8°A');
+
+    expect(course8A).toHaveLength(1);
+    expect(course8A[0]).toMatchObject({
+      type: 'class_below_org',
+      basis: 'internal',
+      severity: 'high',
+      cohort: { sampleValue: 66 },
+    });
+    expect(course8A[0]!.message).toContain('y bajo la zona típica de la muestra');
   });
 
   it('una muestra suprimida por k-anonimato no genera alertas', async () => {
@@ -440,5 +466,158 @@ describe('ComparableAlertsService — alertas relativas a la muestra', () => {
     );
 
     expect(alerts.filter((a) => a.basis === 'cohort')).toHaveLength(0);
+  });
+});
+
+function makeDbWithNodeRows(nodeRows: unknown[]): Database {
+  let calls = 0;
+  const build = (rows: unknown[]) => {
+    const chain = {
+      from: () => chain,
+      where: () => chain,
+      innerJoin: () => chain,
+      leftJoin: () => chain,
+      groupBy: () => chain,
+      orderBy: () => chain,
+      as: () => chain,
+      offset: () => chain,
+      then: <T>(resolve: (rows: T[]) => unknown) =>
+        Promise.resolve(rows as never).then(resolve as never),
+    };
+    return chain;
+  };
+  return {
+    select: () => build(calls++ === 0 ? nodeRows : []),
+    selectDistinct: () => build([]),
+  } as unknown as Database;
+}
+
+const NODE_ROW = {
+  assessmentId: 'a1',
+  nodeId: 'n1',
+  nodeName: 'Inferir',
+  scoreSum: '30',
+  totalSum: '100',
+  students: 30,
+};
+
+const SKILL = {
+  nodeId: 'n1',
+  nodeName: 'Inferir',
+  achievement: 60,
+  studentCount: 800,
+  schoolCount: 12,
+  p10: 40,
+  p25: 50,
+};
+
+describe('ComparableAlertsService — ejes y concentración frente a la muestra', () => {
+  it('un eje muy bajo la muestra y bajo su p10 es skill_below_sample high', async () => {
+    const unit = makeUnit({ averageAchievement: 35 });
+
+    const alerts = await svc.deriveAlerts(
+      makeDbWithNodeRows([NODE_ROW]),
+      'org-1',
+      [unit],
+      null,
+      samplesFor(makeSample({ perSkill: [SKILL] })),
+    );
+    const skill = alerts.find((a) => a.contextId === 'n1');
+
+    expect(skill).toMatchObject({
+      type: 'skill_below_sample',
+      severity: 'high',
+      basis: 'cohort',
+      cohort: { sampleValue: 60, schoolCount: 12, studentCount: 800 },
+    });
+  });
+
+  it('fusiona el eje bajo su unidad y bajo la muestra en una sola alerta', async () => {
+    const unit = makeUnit({ averageAchievement: 70 });
+
+    const alerts = await svc.deriveAlerts(
+      makeDbWithNodeRows([NODE_ROW]),
+      'org-1',
+      [unit],
+      null,
+      samplesFor(makeSample({ perSkill: [SKILL] })),
+    );
+    const nodeAlerts = alerts.filter((a) => a.contextId === 'n1');
+
+    expect(nodeAlerts).toHaveLength(1);
+    expect(nodeAlerts[0]).toMatchObject({
+      type: 'skill_gap',
+      basis: 'internal',
+      severity: 'high',
+      cohort: { sampleValue: 60 },
+    });
+    expect(nodeAlerts[0]!.message).toContain('y 30.0 pp bajo la muestra');
+  });
+
+  it('concentración en la banda inferior muy sobre la muestra se fusiona con la absoluta', async () => {
+    const unit = makeUnit({
+      byClassGroup: [course('8°B', 40), course('8°C', 70)].map((c, i) => ({
+        ...c,
+        lowestBandShare: i === 0 ? 62 : 10,
+      })),
+    });
+    const sample = makeSample({
+      bandCounts: [
+        { bandKey: 'nivel_1', label: 'Nivel I', order: 0, count: 20 },
+        { bandKey: 'nivel_2', label: 'Nivel II', order: 1, count: 80 },
+      ],
+    });
+
+    const alerts = await svc.deriveAlerts(makeDb(), 'org-1', [unit], null, samplesFor(sample));
+    const course8B = alerts.filter(
+      (a) => a.contextId === '8°B' && a.type.startsWith('band_concentration'),
+    );
+
+    expect(course8B).toHaveLength(1);
+    expect(course8B[0]).toMatchObject({
+      type: 'band_concentration',
+      severity: 'high',
+      cohort: { sampleValue: 20, similarToSample: false },
+    });
+    expect(course8B[0]!.message).toContain('pp más que la muestra (20%)');
+  });
+
+  it('una concentración parecida a la de la muestra conserva su severidad y se rotula similar', async () => {
+    const unit = makeUnit({
+      byClassGroup: [{ ...course('8°B', 50), lowestBandShare: 30 }],
+    });
+    const sample = makeSample({
+      bandCounts: [
+        { bandKey: 'nivel_1', label: 'Nivel I', order: 0, count: 28 },
+        { bandKey: 'nivel_2', label: 'Nivel II', order: 1, count: 72 },
+      ],
+    });
+
+    const alerts = await svc.deriveAlerts(makeDb(), 'org-1', [unit], null, samplesFor(sample));
+    const concentration = alerts.filter((a) => a.contextId === '8°B');
+
+    expect(concentration).toHaveLength(1);
+    expect(concentration[0]).toMatchObject({
+      type: 'band_concentration',
+      severity: 'medium',
+      basis: 'absolute',
+      cohort: { sampleValue: 28, similarToSample: true },
+    });
+  });
+
+  it('no compara concentraciones si la banda inferior de la muestra es otra', async () => {
+    const unit = makeUnit({
+      byClassGroup: [{ ...course('8°B', 50), lowestBandShare: 62 }],
+    });
+    const sample = makeSample({
+      bandCounts: [{ bandKey: 'otra_escala', label: 'Bajo', order: 0, count: 5 }],
+    });
+
+    const alerts = await svc.deriveAlerts(makeDb(), 'org-1', [unit], null, samplesFor(sample));
+
+    expect(alerts.find((a) => a.contextId === '8°B')).toMatchObject({
+      type: 'band_concentration',
+      cohort: null,
+    });
   });
 });
