@@ -23,3 +23,5 @@ export * from './omr-qr';
 export * from './sheet-date';
 export * from './teacher-search';
 export * from './sheet-guide-geometry';
+export * from './expected-scope';
+export * from './slug';

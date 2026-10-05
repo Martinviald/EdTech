@@ -1,4 +1,13 @@
-import { jsonb, pgTable, primaryKey, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import {
+  index,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import {
   assessmentModeEnum,
@@ -11,31 +20,39 @@ import { organizations } from './organizations';
 import { classGroups } from './academic';
 import { instruments } from './instruments';
 import { users } from './users';
+import { measurementProcesses } from './measurement-processes';
 import { students } from './students';
 
-export const assessments = pgTable('assessments', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orgId: uuid('org_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  instrumentId: uuid('instrument_id')
-    .notNull()
-    .references(() => instruments.id),
-  name: text('name'),
-  administeredById: uuid('administered_by_id').references(() => users.id),
-  mode: assessmentModeEnum('mode').default('paper').notNull(),
-  status: assessmentStatusEnum('status').default('scheduled').notNull(),
-  // Granularidad del dato disponible. Columna tipada y no `config` JSONB porque se
-  // ramifica y se filtra en SQL (CLAUDE.md §5.4). `item_level` por defecto: la
-  // migración es inerte para todo lo existente.
-  dataGranularity: dataGranularityEnum('data_granularity').default('item_level').notNull(),
-  scheduledFor: timestamp('scheduled_for'),
-  administeredAt: timestamp('administered_at'),
-  config: jsonb('config').$type<Record<string, unknown>>().default({}),
-  notes: text('notes'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const assessments = pgTable(
+  'assessments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    instrumentId: uuid('instrument_id')
+      .notNull()
+      .references(() => instruments.id),
+    processId: uuid('process_id').references(() => measurementProcesses.id, {
+      onDelete: 'set null',
+    }),
+    name: text('name'),
+    administeredById: uuid('administered_by_id').references(() => users.id),
+    mode: assessmentModeEnum('mode').default('paper').notNull(),
+    status: assessmentStatusEnum('status').default('scheduled').notNull(),
+    // Granularidad del dato disponible. Columna tipada y no `config` JSONB porque se
+    // ramifica y se filtra en SQL (CLAUDE.md §5.4). `item_level` por defecto: la
+    // migración es inerte para todo lo existente.
+    dataGranularity: dataGranularityEnum('data_granularity').default('item_level').notNull(),
+    scheduledFor: timestamp('scheduled_for'),
+    administeredAt: timestamp('administered_at'),
+    config: jsonb('config').$type<Record<string, unknown>>().default({}),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [index('idx_assessments_process').on(table.processId)],
+);
 
 export const assessmentCourseAssignments = pgTable(
   'assessment_course_assignments',
@@ -128,6 +145,10 @@ export const assessmentsRelations = relations(assessments, ({ one, many }) => ({
   instrument: one(instruments, {
     fields: [assessments.instrumentId],
     references: [instruments.id],
+  }),
+  process: one(measurementProcesses, {
+    fields: [assessments.processId],
+    references: [measurementProcesses.id],
   }),
   administeredBy: one(users, {
     fields: [assessments.administeredById],
