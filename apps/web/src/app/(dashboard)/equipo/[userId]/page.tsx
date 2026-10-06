@@ -118,7 +118,7 @@ export default async function TeacherPerformancePage({
                             {metric?.display ?? '—'}
                           </TableCell>
                           <TableCell className="text-center">
-                            <PerformanceBadge level={metric?.level ?? null} />
+                            <PerformanceBadge level={metric?.level?.color ?? null} />
                           </TableCell>
                           <TableCell className="text-right tabular-nums text-muted-foreground">
                             {subject.studentsAssessed}

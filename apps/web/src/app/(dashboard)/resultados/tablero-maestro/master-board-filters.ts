@@ -70,7 +70,7 @@ export function hasSelectedTake(values: MasterBoardFilterValues): boolean {
 export function takeKeyOf(values: MasterBoardFilterValues): string | null {
   if (values.assessmentId?.length) return 'custom';
   if (values.academicYearId && values.instrumentType) {
-    return `${values.academicYearId}:${values.instrumentType}:${values.applicationPeriod ?? '_'}`;
+    return `legacy:${values.academicYearId}:${values.instrumentType}:${values.applicationPeriod ?? '_'}`;
   }
   return null;
 }
@@ -81,7 +81,7 @@ export function takeToFilterValues(
 ): MasterBoardFilterValues {
   return {
     academicYearId: take.academicYearId,
-    instrumentType: take.instrumentType,
+    instrumentType: take.instrumentType ?? undefined,
     applicationPeriod: take.applicationPeriod ?? undefined,
     metric,
   };

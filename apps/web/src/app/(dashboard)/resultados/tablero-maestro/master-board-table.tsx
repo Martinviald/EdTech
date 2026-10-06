@@ -64,7 +64,7 @@ function MetricLines({ metrics }: { metrics: MetricValue[] }) {
         <p key={metric.key} className="text-xs">
           <span className="text-muted-foreground">{metric.label}:</span>{' '}
           <span className="font-medium">{metric.display}</span>
-          {metric.level ? ` · ${PERFORMANCE_LEVEL_LABELS[metric.level]}` : ''}
+          {metric.level ? ` · ${metric.level.label}` : ''}
         </p>
       ))}
     </>
@@ -171,7 +171,7 @@ function GradeCell({ cell, metricKey }: { cell: MasterBoardCell; metricKey: Metr
         <TableCell
           className={cn(
             'text-center text-sm font-bold tabular-nums',
-            cellClass(metric?.level ?? null),
+            cellClass(metric?.level?.color ?? null),
           )}
         >
           {metric?.display ?? '—'}
@@ -206,7 +206,7 @@ function CourseCell({
         <TableCell
           className={cn(
             'text-center text-sm font-semibold tabular-nums',
-            cellClass(metric?.level ?? null),
+            cellClass(metric?.level?.color ?? null),
             href && 'transition-opacity hover:opacity-80',
           )}
         >
