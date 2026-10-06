@@ -86,6 +86,10 @@ en_db pnpm exec tsx src/seed/seed-paes-taxonomy.ts > "$OUT/logs/taxonomia-paes.t
 en_db pnpm exec tsx src/seed/add-taxonomy-nodes.ts > "$OUT/logs/taxonomia-nodos.txt" 2>&1
 tail -1 "$OUT/logs/taxonomia-paes.txt"
 
+paso "5b. Catálogo oficial de líneas de prueba (M1, M2, Ciencias, Speaking)"
+en_db pnpm -s db:seed:test-tracks > "$OUT/logs/test-tracks.txt" 2>&1
+grep -E "insertadas|sin cambios" "$OUT/logs/test-tracks.txt"
+
 paso "6. Instrumentos DIA 2026 + PAES 2026 (22 del repo + M1/M2 Ensayo 5 de sus ramas)"
 for dir in instruments-2026 instruments-2026-hist-cien instruments-2026-historia instruments-2026-ingles; do
   en_db env INSTRUMENTS_DATA_DIR="data/$dir" pnpm -s db:import:instruments > "$OUT/logs/instr-$dir.txt" 2>&1
@@ -98,6 +102,15 @@ for asig in CIE CL HIS M1 M2; do
 done
 git -C "$ROOT" show "$M1_E5_REF" > "$OUT/instruments-paes/M1/M1-E5-con-pauta.json"
 git -C "$ROOT" show "$M2_E5_REF" > "$OUT/instruments-paes/M2/M2-E5-con-pauta.json"
+for linea in M1 M2; do
+  python3 - "$OUT/instruments-paes/$linea/$linea-E5-con-pauta.json" "$linea" <<'PY'
+import json, sys
+ruta, linea = sys.argv[1], sys.argv[2]
+documento = json.load(open(ruta, encoding="utf-8"))
+documento["instrument"]["track"] = linea
+json.dump(documento, open(ruta, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+PY
+done
 en_db env INSTRUMENTS_DATA_DIR="$OUT/instruments-paes" pnpm -s db:import:instruments > "$OUT/logs/instr-paes.txt" 2>&1
 resumen "$OUT/logs/instr-paes.txt"
 

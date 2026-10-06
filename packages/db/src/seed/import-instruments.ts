@@ -6,6 +6,10 @@
  * Idempotencia: por `instruments.config->>'sourceJson'` (borra el árbol previo y recrea).
  * Valida cada `content` con validateItemContent() de @soe/types antes de insertar.
  * NO aplica tags (ver import-item-tags.ts). NO se llama desde db:seed (no es data demo).
+ *
+ * Líneas de prueba: `instrument.track` y `sections[].track` son códigos del catálogo
+ * `test_tracks` (db:seed:test-tracks). Se resuelven TODOS antes de escribir nada: un código
+ * inexistente, de otra asignatura o privado aborta la corrida completa (falla en seco).
  */
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
@@ -15,8 +19,12 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { and, eq, sql } from 'drizzle-orm';
 import {
   hasMultipleCorrectAlternatives,
+  indexTestTracksByCode,
+  resolveTestTrack,
+  sectionRoleDeclarationSchema,
   toApplicationPeriod,
   validateItemContent,
+  type TestTrackRef,
 } from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { instruments, instrumentSections, sectionAttachments } from '../schema/instruments';
@@ -24,6 +32,7 @@ import { itemTaxonomyTags, items } from '../schema/items';
 import { subjects, grades } from '../schema/academic';
 import { taxonomies } from '../schema/taxonomy';
 import { responses } from '../schema/responses';
+import { testTracks } from '../schema/test-tracks';
 
 // Override opcional (INSTRUMENTS_DATA_DIR) para cargar un set aislado sin re-importar el resto
 // (ej. la tanda DIA 2026 en su propio dir, sin tocar los instrumentos 2025 ya cargados).
@@ -97,6 +106,8 @@ type Section = {
   electiveGroup?: string | null;
   /** Cuál de las alternativas es esta sección (ej. "BIO"). */
   electiveKey?: string | null;
+  /** Código de la línea de prueba de una rama electiva (ej. "BIO"). Solo en `elective`. */
+  track?: string | null;
   instructions?: string;
   passage?: Passage | null;
   /**
@@ -108,7 +119,7 @@ type Section = {
   imageRef?: string | null;
   items: Item[];
 };
-type InstrumentJson = {
+export type InstrumentJson = {
   instrument: {
     name: string;
     subject: string;
@@ -119,6 +130,8 @@ type InstrumentJson = {
     applicationPeriod: string;
     type: string;
     isOfficial?: boolean;
+    /** Código de la línea de prueba del instrumento (ej. "M1"). Ausente ⇒ la prueba es la asignatura. */
+    track?: string | null;
   };
   sections: Section[];
   pauta?: { source?: { instrumentJson?: string }; rubrics?: unknown[] };
@@ -418,6 +431,47 @@ async function assertSafeToRecreate(
   );
 }
 
+export type ResolvedImportTracks = {
+  instrumentTrackId: string | null;
+  sectionTrackIds: (string | null)[];
+};
+
+/**
+ * Resuelve las líneas que declara un JSON de instrumento contra el catálogo (sin tocar la
+ * BDD). Lanza con el detalle si algo no calza; el importador lo llama para todos los
+ * archivos antes de escribir el primero.
+ */
+export function resolveImportTracks(
+  doc: InstrumentJson,
+  owner: { subjectId: string; orgId: string | null },
+  tracksByCode: ReadonlyMap<string, readonly TestTrackRef[]>,
+): ResolvedImportTracks {
+  const label = doc.instrument.name;
+  const instrumentTrackId = doc.instrument.track
+    ? resolveTestTrack(doc.instrument.track, { label, ...owner }, tracksByCode).id
+    : null;
+  const sectionTrackIds = doc.sections.map((section) => {
+    const declaration = sectionRoleDeclarationSchema.safeParse({
+      role: section.role ?? 'core',
+      electiveGroup: section.electiveGroup ?? null,
+      electiveKey: section.electiveKey ?? null,
+      track: section.track ?? null,
+    });
+    if (!declaration.success) {
+      const detail = declaration.error.issues.map((i) => i.message).join('; ');
+      throw new Error(`${label} › sección "${section.name}": ${detail}`);
+    }
+    return declaration.data.track
+      ? resolveTestTrack(
+          declaration.data.track,
+          { label: `${label} › sección "${section.name}"`, ...owner },
+          tracksByCode,
+        ).id
+      : null;
+  });
+  return { instrumentTrackId, sectionTrackIds };
+}
+
 export async function importInstruments(db: Database): Promise<void> {
   const subjRows = await db.select({ id: subjects.id, code: subjects.code }).from(subjects);
   const gradeRows = await db.select({ id: grades.id, code: grades.code }).from(grades);
@@ -445,13 +499,42 @@ export async function importInstruments(db: Database): Promise<void> {
     for (const f of readdirSync(dir)) if (f.endsWith('.json')) files.push(resolve(dir, f));
   }
 
+  const tracksByCode = indexTestTracksByCode(
+    await db
+      .select({
+        id: testTracks.id,
+        orgId: testTracks.orgId,
+        subjectId: testTracks.subjectId,
+        code: testTracks.code,
+      })
+      .from(testTracks),
+  );
+  const docs = files
+    .sort()
+    .map((file) => JSON.parse(readFileSync(file, 'utf-8')) as InstrumentJson);
+  const tracksByDoc = new Map<InstrumentJson, ResolvedImportTracks>();
+  const trackErrors: string[] = [];
+  for (const d of docs) {
+    const sId = subjId.get(d.instrument.subjectCode);
+    if (!sId) continue;
+    try {
+      tracksByDoc.set(d, resolveImportTracks(d, { subjectId: sId, orgId: null }, tracksByCode));
+    } catch (e) {
+      trackErrors.push(e instanceof Error ? e.message : String(e));
+    }
+  }
+  if (trackErrors.length > 0) {
+    throw new Error(
+      `Líneas de prueba no resueltas; no se importó nada:\n  · ${trackErrors.join('\n  · ')}`,
+    );
+  }
+
   let nInst = 0,
     nSec = 0,
     nItem = 0;
   const issues: string[] = [];
 
-  for (const file of files.sort()) {
-    const d = JSON.parse(readFileSync(file, 'utf-8')) as InstrumentJson;
+  for (const d of docs) {
     const ins = d.instrument;
     const sourceJson = d.pauta?.source?.instrumentJson ?? `imported/${ins.name}`;
     const sId = subjId.get(ins.subjectCode) ?? null;
@@ -460,6 +543,7 @@ export async function importInstruments(db: Database): Promise<void> {
       issues.push(`${ins.name}: subject/grade no resuelto (${ins.subjectCode}/${ins.gradeCode})`);
       continue;
     }
+    const resolvedTracks = tracksByDoc.get(d)!;
     const instrumentType = (ins.type ?? 'dia') as typeof instruments.$inferInsert.type;
     const marcoId = marcoPorTipo.get(instrumentType) ?? null;
     if (!marcoId) {
@@ -492,6 +576,7 @@ export async function importInstruments(db: Database): Promise<void> {
           name: ins.name,
           type: instrumentType,
           subjectId: sId,
+          trackId: resolvedTracks.instrumentTrackId,
           gradeId: gId,
           year: ins.year,
           applicationPeriod: toApplicationPeriod(ins.applicationPeriod),
@@ -513,7 +598,7 @@ export async function importInstruments(db: Database): Promise<void> {
 
       // 3) secciones (+ pasaje + adjuntos) e ítems
       let itemCount = 0;
-      for (const s of d.sections) {
+      for (const [sectionIndex, s] of d.sections.entries()) {
         const p = s.passage ?? null;
         const [sec] = await tx
           .insert(instrumentSections)
@@ -528,6 +613,7 @@ export async function importInstruments(db: Database): Promise<void> {
             role: (s.role ?? 'core') as typeof instrumentSections.$inferInsert.role,
             electiveGroup: s.role === 'elective' ? (s.electiveGroup ?? null) : null,
             electiveKey: s.role === 'elective' ? (s.electiveKey ?? null) : null,
+            trackId: resolvedTracks.sectionTrackIds[sectionIndex] ?? null,
             passageTitle: p?.title ?? null,
             passageText: p?.text ?? null,
             passageFormat: p
