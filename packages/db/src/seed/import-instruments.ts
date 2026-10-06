@@ -431,6 +431,11 @@ async function assertSafeToRecreate(
   );
 }
 
+/** Identificador estable de un JSON importado: es la clave de idempotencia del importador. */
+export function instrumentSourceJson(doc: InstrumentJson): string {
+  return doc.pauta?.source?.instrumentJson ?? `imported/${doc.instrument.name}`;
+}
+
 export type ResolvedImportTracks = {
   instrumentTrackId: string | null;
   sectionTrackIds: (string | null)[];
@@ -536,7 +541,7 @@ export async function importInstruments(db: Database): Promise<void> {
 
   for (const d of docs) {
     const ins = d.instrument;
-    const sourceJson = d.pauta?.source?.instrumentJson ?? `imported/${ins.name}`;
+    const sourceJson = instrumentSourceJson(d);
     const sId = subjId.get(ins.subjectCode) ?? null;
     const gId = gradeId.get(ins.gradeCode) ?? null;
     if (!sId || !gId) {
