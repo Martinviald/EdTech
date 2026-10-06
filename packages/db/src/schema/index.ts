@@ -5,6 +5,7 @@ export * from './academic';
 export * from './users';
 export * from './students';
 export * from './taxonomy';
+export * from './test-tracks';
 export * from './instruments';
 export * from './files';
 export * from './items';

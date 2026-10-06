@@ -437,3 +437,23 @@ CREATE POLICY "measurement_processes_tenant_isolation" ON "measurement_processes
   AS PERMISSIVE FOR ALL
   USING (org_id::text = current_setting('app.current_org_id', true))
   WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+
+-- ── Líneas de prueba ─────────────────────────────────────────────────────────
+-- `test_tracks` tiene org_id NULLABLE, como performance_bands: las filas con
+-- org_id IS NULL son el catálogo oficial (M1, M2, BIO…) y las ven todos los
+-- colegios. Una línea privada solo la ve su colegio; si no, el track privado de
+-- un colegio puesto sobre un instrumento oficial cambiaría el encabezado del
+-- tablero de las demás orgs. La escritura (WITH CHECK) exige la org propia: el
+-- catálogo oficial se siembra con el rol admin (db:seed:test-tracks), nunca
+-- desde la API sujeta a RLS.
+ALTER TABLE "test_tracks" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "test_tracks" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "test_tracks_tenant_isolation" ON "test_tracks";
+CREATE POLICY "test_tracks_tenant_isolation" ON "test_tracks"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id::text = current_setting('app.current_org_id', true)
+  )
+  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
