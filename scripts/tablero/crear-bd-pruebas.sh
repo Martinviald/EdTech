@@ -3,11 +3,13 @@
 # rama y solo fuentes locales. Sin AWS: ningún paso sube a S3 ni se conecta a demo.
 #
 # Uso:  scripts/tablero/crear-bd-pruebas.sh [--completo]
-#   Sin flags deja el estado F0 del golden: sin procesos, Ciencias en 9 instrumentos por
-#   mención (modelo legacy) y solo M1/M2 con línea. Es el estado que exige
-#   `pnpm --filter @soe/api golden:master-board:check`.
-#   --completo además crea los procesos (DIA por período, PAES por tanda) y migra Ciencias
-#   a secciones electivas: el estado del tablero por procesos y pruebas.
+#   Sin flags deja el estado F0 del golden: Ciencias en 9 instrumentos por mención (modelo
+#   legacy) y solo M1/M2 con línea. Los cargadores ya vinculan cada evaluación a su proceso
+#   (DIA por período, PAES por tanda); las 26 de Ciencias legacy quedan sin proceso porque
+#   rompen la invariante. `pnpm --filter @soe/api golden:master-board:check` neutraliza
+#   líneas y procesos dentro de su transacción.
+#   --completo además migra Ciencias a secciones electivas (la migración vincula las
+#   fusionadas a su tanda) y corre los backfills de procesos, que deberían quedar en 0.
 # Variables opcionales:
 #   PG_ADMIN_USER  superusuario local (por defecto, el usuario del sistema)
 #   REPOSITORIO    checkout con la nómina y los artefactos DIA (por defecto ../repositorio)

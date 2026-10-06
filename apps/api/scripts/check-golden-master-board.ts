@@ -86,14 +86,21 @@ async function assertF0State(tx: Database): Promise<void> {
 
 async function neutralizeTracksAndProcesses(
   tx: Database,
-): Promise<{ tracks: number; links: number }> {
+): Promise<{ tracks: number; links: number; processes: number }> {
   const tracks = await tx.execute(
     sql`update instruments set track_id = null where track_id is not null`,
   );
   const links = await tx.execute(
     sql`update assessments set process_id = null where process_id is not null`,
   );
-  return { tracks: tracks.count ?? 0, links: links.count ?? 0 };
+  const processes = await tx.execute(
+    sql`update measurement_processes set deleted_at = now() where deleted_at is null`,
+  );
+  return {
+    tracks: tracks.count ?? 0,
+    links: links.count ?? 0,
+    processes: processes.count ?? 0,
+  };
 }
 
 async function loadCodes(tx: Database): Promise<Codes> {
@@ -248,7 +255,7 @@ async function main(): Promise<void> {
       await assertF0State(outer);
       const neutralized = await neutralizeTracksAndProcesses(outer);
       console.log(
-        `[golden] en la transacción: ${neutralized.tracks} instrumento(s) sin línea, ${neutralized.links} evaluación(es) sin proceso (se revierte al final)`,
+        `[golden] en la transacción: ${neutralized.tracks} instrumento(s) sin línea, ${neutralized.links} evaluación(es) sin proceso, ${neutralized.processes} proceso(s) borrado(s) (se revierte al final)`,
       );
 
       const service = new MasterBoardService(outer);
