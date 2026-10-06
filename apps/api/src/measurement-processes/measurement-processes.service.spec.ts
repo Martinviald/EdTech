@@ -27,23 +27,27 @@ function chainResolving(rows: unknown[]): Chain {
 function makeDb(selectResults: unknown[][]) {
   let selectIdx = 0;
   const updates: string[][] = [];
+  const sets: Record<string, unknown>[] = [];
   const db = {
     select: () => chainResolving(selectResults[selectIdx++] ?? []),
     update: () => ({
-      set: () => ({
-        where: () => ({
-          returning: async () => {
-            const ids = ['linked'];
-            updates.push(ids);
-            return ids.map((id) => ({ id }));
-          },
-        }),
-      }),
+      set: (values: Record<string, unknown>) => {
+        sets.push(values);
+        return {
+          where: () => ({
+            returning: async () => {
+              const ids = ['linked'];
+              updates.push(ids);
+              return ids.map((id) => ({ id }));
+            },
+          }),
+        };
+      },
     }),
     execute: async () => [],
     transaction: async (fn: (tx: unknown) => unknown) => fn(db),
   };
-  return { db: db as unknown as Database, updates };
+  return { db: db as unknown as Database, updates, sets };
 }
 
 function processRow() {
@@ -242,5 +246,29 @@ describe('MeasurementProcessesService.linkAssessments', () => {
         action: 'link',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('MeasurementProcessesService.update', () => {
+  const coverageService = {
+    load: async () => new Map(),
+    loadAssessmentStats: async () => new Map(),
+  } as unknown as ProcessCoverageService;
+
+  it('renombrar no regenera el slug: es el identificador estable de los cargadores', async () => {
+    const renamed = processRow();
+    renamed.process.name = 'DIA Monitoreo Intermedio 2026';
+    const { db, sets } = makeDb([[processRow()], [renamed]]);
+
+    const model = await new MeasurementProcessesService(db, coverageService).update(
+      makeUser(),
+      PROCESS_ID,
+      { name: 'DIA Monitoreo Intermedio 2026' },
+    );
+
+    expect(sets).toHaveLength(1);
+    expect(sets[0]).toMatchObject({ name: 'DIA Monitoreo Intermedio 2026' });
+    expect(sets[0]).not.toHaveProperty('slug');
+    expect(model.slug).toBe('dia-intermedio-2026');
   });
 });

@@ -183,13 +183,10 @@ export class MeasurementProcessesService {
     const orgId = this.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const current = await this.requireProcess(tx, orgId, processId);
+      await this.requireProcess(tx, orgId, processId);
 
       const changes: Partial<typeof measurementProcesses.$inferInsert> = { updatedAt: new Date() };
-      if (dto.name !== undefined && dto.name !== current.name) {
-        changes.name = dto.name;
-        changes.slug = await this.buildUniqueSlug(tx, orgId, dto.name, processId);
-      }
+      if (dto.name !== undefined) changes.name = dto.name;
       if (dto.kind !== undefined) changes.kind = dto.kind;
       if (dto.period !== undefined) changes.period = dto.period ?? null;
       if (dto.taxonomyId !== undefined) changes.taxonomyId = dto.taxonomyId ?? null;
@@ -468,24 +465,17 @@ export class MeasurementProcessesService {
     return row;
   }
 
-  private async buildUniqueSlug(
-    tx: Database,
-    orgId: string,
-    name: string,
-    excludeProcessId?: string,
-  ): Promise<string> {
+  private async buildUniqueSlug(tx: Database, orgId: string, name: string): Promise<string> {
     const base = slugify(name);
     if (!base)
       throw new ConflictException('El nombre del proceso no produce un identificador válido.');
 
     const existing = await tx
-      .select({ id: measurementProcesses.id, slug: measurementProcesses.slug })
+      .select({ slug: measurementProcesses.slug })
       .from(measurementProcesses)
       .where(and(eq(measurementProcesses.orgId, orgId), isNull(measurementProcesses.deletedAt)));
 
-    const taken = new Set(
-      existing.filter((row) => row.id !== excludeProcessId).map((row) => row.slug),
-    );
+    const taken = new Set(existing.map((row) => row.slug));
 
     return uniqueSlug(base, taken);
   }
