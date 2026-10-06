@@ -188,6 +188,11 @@ CREATE POLICY "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs
 -- del benchmarking — la única excepción documentada al aislamiento por org. No
 -- contiene PII (solo agregados por org). El acceso se protege por guards de rol y
 -- el servicio aplica k-anonimato. NO habilitar RLS aquí.
+--
+-- ⚠️ benchmark_item_aggregates: MISMA EXCEPCIÓN que benchmark_aggregates (fase 3 de
+-- docs/plan-benchmarking-en-contexto.md). Sólo guarda aciertos/respuestas por
+-- (org × ítem); el servicio expone únicamente el agregado de la muestra con
+-- k-anonimato. NO habilitar RLS aquí.
 
 -- ── E21 — Asistente IA Conversacional (org_id directo) ───────────────────────
 -- Conversaciones y mensajes del asistente. Datos sensibles (consultas de un

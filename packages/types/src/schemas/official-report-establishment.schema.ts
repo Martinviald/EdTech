@@ -37,6 +37,8 @@ export type EstablishmentGradeColumn = {
   gradeId: string;
   gradeName: string;
   gradeOrder: number;
+  /** Instrumento de la columna; `null` si el grado mezcla instrumentos (p. ej. varios momentos). */
+  instrumentId: string | null;
 };
 
 /**

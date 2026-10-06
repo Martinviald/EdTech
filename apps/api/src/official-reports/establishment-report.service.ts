@@ -280,12 +280,16 @@ export class EstablishmentReportService {
         bySubject.set(r.subjectId, acc);
       }
 
-      if (!acc.grades.has(r.gradeId)) {
+      const gradeColumn = acc.grades.get(r.gradeId);
+      if (!gradeColumn) {
         acc.grades.set(r.gradeId, {
           gradeId: r.gradeId,
           gradeName: r.gradeName,
           gradeOrder: r.gradeOrder,
+          instrumentId: r.instrumentId,
         });
+      } else if (gradeColumn.instrumentId !== r.instrumentId) {
+        gradeColumn.instrumentId = null;
       }
 
       // Total del grado (denominador de la tabla de niveles) = estudiantes evaluados.

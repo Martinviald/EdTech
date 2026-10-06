@@ -4,13 +4,13 @@ import {
   BENCHMARKING_VIEWER_ROLES,
   benchmarkAuditListQuerySchema,
   benchmarkComparisonQuerySchema,
+  instrumentSamplesQuerySchema,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { RequireFeature } from '../common/decorators/feature.decorator';
-import { FeatureGuard } from '../common/guards/feature.guard';
+import { BenchmarkSamplesService } from './benchmark-samples.service';
 import { BenchmarkingRefreshService } from './benchmarking-refresh.service';
 import { BenchmarkingService } from './benchmarking.service';
 
@@ -20,13 +20,27 @@ import { BenchmarkingService } from './benchmarking.service';
  * se accede dentro del service con guards de rol + k-anonimato.
  */
 @Controller('benchmarking')
-@UseGuards(RolesGuard, FeatureGuard)
-@RequireFeature('benchmarking')
+@UseGuards(RolesGuard)
 export class BenchmarkingController {
   constructor(
     private readonly service: BenchmarkingService,
     private readonly refreshService: BenchmarkingRefreshService,
+    private readonly samplesService: BenchmarkSamplesService,
   ) {}
+
+  @Get('samples')
+  @Roles(...BENCHMARKING_VIEWER_ROLES)
+  getSamples(@CurrentUser() user: JwtPayload, @Query() query: unknown) {
+    const dto = instrumentSamplesQuerySchema.parse(query ?? {});
+    return this.samplesService.getSamplesForUser(user, dto);
+  }
+
+  @Get('samples/items')
+  @Roles(...BENCHMARKING_VIEWER_ROLES)
+  getItemSamples(@CurrentUser() user: JwtPayload, @Query() query: unknown) {
+    const dto = instrumentSamplesQuerySchema.parse(query ?? {});
+    return this.samplesService.getItemSamplesForUser(user, dto);
+  }
 
   /** GET /api/benchmarking/instruments — instrumentos comparables de la org. */
   @Get('instruments')

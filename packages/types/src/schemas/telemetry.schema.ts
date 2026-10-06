@@ -132,6 +132,20 @@ export const telemetryEventDefinitions = {
       durationMs: z.number().int().nonnegative(),
     }),
   },
+  'benchmark.sample_viewed': {
+    category: 'benchmarking',
+    properties: z.object({
+      surface: z.string().min(1).max(120),
+      instrumentId: z.string().uuid(),
+    }),
+  },
+  'benchmark.sample_detail_opened': {
+    category: 'benchmarking',
+    properties: z.object({
+      surface: z.string().min(1).max(120),
+      instrumentId: z.string().uuid(),
+    }),
+  },
   'mcp.tool_invoked': {
     category: 'mcp',
     properties: z.object({

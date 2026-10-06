@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -8,7 +9,12 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import type { AssessmentReportResponse, SkillAchievementModel } from '@soe/types';
+import {
+  sampleSizeLabel,
+  type AssessmentReportResponse,
+  type InstrumentSampleEntry,
+  type SkillAchievementModel,
+} from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -21,7 +27,7 @@ import {
 import { cn } from '@/lib/utils';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
-import { StatCard } from '@/components/shared';
+import { SampleDeltaChip, StatCard } from '@/components/shared';
 import {
   bandLabel,
   formatAchievement,
@@ -74,6 +80,7 @@ export function ReportBody({
   skillsBreakdown,
   assessmentId,
   classGroupId,
+  samplePromise,
 }: {
   report: AssessmentReportResponse;
   // TKT-11/TKT-10: desglose interactivo por dimensión + drill-down a preguntas,
@@ -81,8 +88,11 @@ export function ReportBody({
   skillsBreakdown?: SkillAchievementModel[];
   assessmentId?: string;
   classGroupId?: string;
+  /** Muestra de benchmarking del instrumento; sólo llega para roles directivos. */
+  samplePromise?: Promise<InstrumentSampleEntry | null>;
 }) {
   const { summary } = report;
+  const sampleSubject = classGroupId ? 'course' : 'school';
   // El DIA es un diagnóstico por niveles de logro (I/II/III), no por notas:
   // ocultamos "Nota promedio" para este tipo de instrumento aunque tenga escala.
   const isDia = report.meta.instrumentType === 'dia';
@@ -109,6 +119,18 @@ export function ReportBody({
           value={formatAchievement(summary.averageAchievement)}
           hint={`Nivel: ${bandLabel(summary.performanceBand, summary.performanceLevel)}`}
           icon={Target}
+          footer={
+            samplePromise ? (
+              <Suspense fallback={null}>
+                <AchievementSampleChip
+                  samplePromise={samplePromise}
+                  value={summary.averageAchievement}
+                  subject={sampleSubject}
+                  instrumentName={report.meta.instrumentName}
+                />
+              </Suspense>
+            ) : undefined
+          }
         />
         {/* TKT-04: notas/escala solo si el instrumento tiene escala configurada.
             Sin escala, se ocultan estas tarjetas (no se muestra el default 4.0). */}
@@ -149,22 +171,51 @@ export function ReportBody({
       <Highlights report={report} />
 
       {/* 2. Distribución por nivel */}
-      <DistributionBar
-        distribution={report.distribution}
-        bands={report.bands}
-        bandDistribution={report.bandDistribution}
-      />
+      {samplePromise ? (
+        <Suspense fallback={<ReportDistribution report={report} />}>
+          <ReportDistributionWithSample report={report} samplePromise={samplePromise} />
+        </Suspense>
+      ) : (
+        <ReportDistribution report={report} />
+      )}
 
       {/* 3. Comparativa por curso */}
-      <CourseComparison report={report} />
+      {samplePromise ? (
+        <Suspense fallback={<CourseComparison report={report} />}>
+          <CourseComparisonWithSample report={report} samplePromise={samplePromise} />
+        </Suspense>
+      ) : (
+        <CourseComparison report={report} />
+      )}
 
       {/* 4. Logro por habilidad (dimensión + drill-down si hay evaluación) */}
-      <SkillsSection
-        report={report}
-        skillsBreakdown={skillsBreakdown}
-        assessmentId={assessmentId}
-        classGroupId={classGroupId}
-      />
+      {samplePromise ? (
+        <Suspense
+          fallback={
+            <SkillsSection
+              report={report}
+              skillsBreakdown={skillsBreakdown}
+              assessmentId={assessmentId}
+              classGroupId={classGroupId}
+            />
+          }
+        >
+          <SkillsSectionWithSample
+            report={report}
+            skillsBreakdown={skillsBreakdown}
+            assessmentId={assessmentId}
+            classGroupId={classGroupId}
+            samplePromise={samplePromise}
+          />
+        </Suspense>
+      ) : (
+        <SkillsSection
+          report={report}
+          skillsBreakdown={skillsBreakdown}
+          assessmentId={assessmentId}
+          classGroupId={classGroupId}
+        />
+      )}
 
       {/* 5. Análisis de preguntas (T2-17: clickeable → panel de detalle) */}
       <ItemsAnalysisTable
@@ -282,9 +333,87 @@ function Highlights({ report }: { report: AssessmentReportResponse }) {
 
 // ── Comparativa por curso ─────────────────────────────────────────────────────
 
-function CourseComparison({ report }: { report: AssessmentReportResponse }) {
+// ── Contraste con la muestra (benchmarking en contexto) ───────────────────────
+
+async function AchievementSampleChip({
+  samplePromise,
+  value,
+  subject,
+  instrumentName,
+}: {
+  samplePromise: Promise<InstrumentSampleEntry | null>;
+  value: number | null;
+  subject: 'school' | 'course';
+  instrumentName: string;
+}) {
+  const entry = await samplePromise;
+  return (
+    <SampleDeltaChip
+      entry={entry}
+      value={value}
+      subject={subject}
+      instrumentName={instrumentName}
+      surface="evaluacion.resultados.logro"
+    />
+  );
+}
+
+function ReportDistribution({
+  report,
+  sample,
+}: {
+  report: AssessmentReportResponse;
+  sample?: InstrumentSampleEntry | null;
+}) {
+  const global = sample?.global;
+  return (
+    <DistributionBar
+      distribution={report.distribution}
+      bands={report.bands}
+      bandDistribution={report.bandDistribution}
+      sample={
+        global
+          ? {
+              label: global.label,
+              sizeLabel: sampleSizeLabel(global),
+              bandCounts: global.bandCounts,
+            }
+          : null
+      }
+    />
+  );
+}
+
+async function ReportDistributionWithSample({
+  report,
+  samplePromise,
+}: {
+  report: AssessmentReportResponse;
+  samplePromise: Promise<InstrumentSampleEntry | null>;
+}) {
+  return <ReportDistribution report={report} sample={await samplePromise} />;
+}
+
+async function CourseComparisonWithSample({
+  report,
+  samplePromise,
+}: {
+  report: AssessmentReportResponse;
+  samplePromise: Promise<InstrumentSampleEntry | null>;
+}) {
+  return <CourseComparison report={report} sample={await samplePromise} />;
+}
+
+function CourseComparison({
+  report,
+  sample,
+}: {
+  report: AssessmentReportResponse;
+  sample?: InstrumentSampleEntry | null;
+}) {
   const rows = report.courseComparison;
   if (rows.length === 0) return null;
+  const showSample = Boolean(sample?.global);
 
   return (
     <Card>
@@ -300,6 +429,7 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
                 <TableHead className="text-right">Evaluados</TableHead>
                 <TableHead className="text-right">% Logro</TableHead>
                 <TableHead className="text-right">Brecha vs prom.</TableHead>
+                {showSample ? <TableHead className="text-right">vs muestra</TableHead> : null}
                 <TableHead className="text-right hidden sm:table-cell">% Aprobación</TableHead>
                 <TableHead className="text-right">En riesgo</TableHead>
               </TableRow>
@@ -324,6 +454,17 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
                   >
                     {fmtSigned(r.gapVsAverage)}
                   </TableCell>
+                  {showSample ? (
+                    <TableCell className="text-right">
+                      <SampleDeltaChip
+                        entry={sample}
+                        value={r.averageAchievement}
+                        subject="course"
+                        instrumentName={report.meta.instrumentName}
+                        surface="evaluacion.resultados.cursos"
+                      />
+                    </TableCell>
+                  ) : null}
                   <TableCell className="text-right hidden sm:table-cell">
                     {r.passingRate === null ? '—' : `${r.passingRate.toFixed(1)}%`}
                   </TableCell>
@@ -340,17 +481,33 @@ function CourseComparison({ report }: { report: AssessmentReportResponse }) {
 
 // ── Habilidades ───────────────────────────────────────────────────────────────
 
-function SkillsSection({
-  report,
-  skillsBreakdown,
-  assessmentId,
-  classGroupId,
+async function SkillsSectionWithSample({
+  samplePromise,
+  ...props
 }: {
   report: AssessmentReportResponse;
   skillsBreakdown?: SkillAchievementModel[];
   assessmentId?: string;
   classGroupId?: string;
+  samplePromise: Promise<InstrumentSampleEntry | null>;
 }) {
+  return <SkillsSection {...props} sample={await samplePromise} />;
+}
+
+function SkillsSection({
+  report,
+  skillsBreakdown,
+  assessmentId,
+  classGroupId,
+  sample,
+}: {
+  report: AssessmentReportResponse;
+  skillsBreakdown?: SkillAchievementModel[];
+  assessmentId?: string;
+  classGroupId?: string;
+  sample?: InstrumentSampleEntry | null;
+}) {
+  const global = sample?.global;
   // TKT-11/TKT-10: con una evaluación en contexto se usa el desglose interactivo
   // por dimensión (dropdown habilidad/contenido/OA/eje) con drill-down: clic en un
   // nodo abre el modal de sus preguntas y clic en una pregunta abre su detalle.
@@ -368,6 +525,15 @@ function SkillsSection({
             skills={skillsBreakdown}
             filters={{ classGroupId }}
             assessmentId={assessmentId}
+            sample={
+              global
+                ? {
+                    label: global.label,
+                    sizeLabel: sampleSizeLabel(global),
+                    skills: global.perSkill,
+                  }
+                : null
+            }
           />
         </CardContent>
       </Card>

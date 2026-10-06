@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,6 +37,8 @@ interface MetricComparisonProps {
   comparisons?: MetricDelta[];
   hint?: string;
   icon?: LucideIcon;
+  /** Contenido extra bajo los deltas (p. ej. el contraste con la muestra de colegios). */
+  footer?: ReactNode;
 }
 
 function defaultFormat(value: number): string {
@@ -83,6 +86,7 @@ export function MetricComparison({
   comparisons = [],
   hint,
   icon: Icon,
+  footer,
 }: MetricComparisonProps): React.JSX.Element {
   return (
     <Card>
@@ -98,6 +102,7 @@ export function MetricComparison({
             </div>
           ) : null}
           {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+          {footer}
         </div>
         {Icon ? (
           <div className="rounded-lg bg-muted p-2">

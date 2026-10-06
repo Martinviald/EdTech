@@ -132,8 +132,50 @@ export const DASHBOARD_ALERT_TYPES = [
   'class_below_org',
   'coverage_gap',
   'stale_assessment',
+  'below_sample',
+  'class_below_sample',
+  'skill_below_sample',
+  'band_concentration_above_sample',
+  'item_below_sample',
 ] as const;
 export type DashboardAlertType = (typeof DASHBOARD_ALERT_TYPES)[number];
+
+/**
+ * Contra qué se compara la alerta: un umbral absoluto, el propio colegio (su unidad,
+ * su año anterior…) o la muestra de colegios que rindieron el mismo instrumento
+ * (docs/diseno-benchmarking-en-contexto.md §9).
+ */
+export const ALERT_BASES = ['absolute', 'internal', 'cohort'] as const;
+export type AlertBasis = (typeof ALERT_BASES)[number];
+
+export const ALERT_BASIS_BY_TYPE: Record<DashboardAlertType, AlertBasis> = {
+  band_concentration: 'absolute',
+  item_gap: 'absolute',
+  skill_gap: 'internal',
+  drop_vs_previous_year: 'internal',
+  drop_vs_previous_period: 'internal',
+  band_regression: 'internal',
+  class_below_org: 'internal',
+  coverage_gap: 'internal',
+  stale_assessment: 'internal',
+  below_sample: 'cohort',
+  class_below_sample: 'cohort',
+  skill_below_sample: 'cohort',
+  band_concentration_above_sample: 'cohort',
+  item_below_sample: 'cohort',
+};
+
+/** La muestra contra la que se leyó la alerta. */
+export type DashboardAlertCohort = {
+  /** % de la muestra en la misma métrica que `value`. */
+  sampleValue: number | null;
+  schoolCount: number;
+  studentCount: number;
+  /** Posición del colegio/curso entre los colegios de la muestra (0..100). */
+  percentile: number | null;
+  /** El resultado fue similar en la muestra (|Δ| bajo el umbral): no cambia la severidad. */
+  similarToSample: boolean;
+};
 
 export const ALERT_SEVERITIES = ['high', 'medium', 'low'] as const;
 export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];
@@ -155,6 +197,9 @@ export type DashboardAlert = {
   unitLabel: string | null;
   /** Cuántos alumnos afecta. Prioriza entre alertas de la misma severidad. */
   studentsAffected: number | null;
+  basis: AlertBasis;
+  /** Sólo cuando la alerta se leyó contra la muestra (relativa, o absoluta enriquecida). */
+  cohort: DashboardAlertCohort | null;
   /**
    * Identidad estable de la alerta. Hoy sirve para no emitir dos veces lo mismo en una
    * corrida; cuando exista la bandeja persistente (#3B) es la clave con la que se

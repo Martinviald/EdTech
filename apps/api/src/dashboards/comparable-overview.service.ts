@@ -11,7 +11,9 @@ import {
   loadBandsForInstruments,
 } from '@soe/db';
 import {
+  BENCHMARKING_VIEWER_ROLES,
   buildComparabilityMeta,
+  canAccess,
   compareSeverity,
   deltaInPoints,
   deriveGenerationalHighlights,
@@ -28,7 +30,12 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { CohortLevelCount } from '../common/helpers/cohort-level-stats.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { ComparableAlertsService } from './comparable-alerts.service';
+import { BenchmarkSamplesService } from '../benchmarking/benchmark-samples.service';
+import {
+  ComparableAlertsService,
+  type InstrumentSampleLookup,
+  type ItemSampleLookup,
+} from './comparable-alerts.service';
 import {
   ComparableUnitAssembler,
   type AchievementByAssessment,
@@ -62,6 +69,7 @@ export class ComparableOverviewService {
     private readonly dashboards: DashboardsService,
     private readonly alerts: ComparableAlertsService,
     private readonly assembler: ComparableUnitAssembler,
+    private readonly benchmarkSamples: BenchmarkSamplesService,
   ) {}
 
   async getComparableOverview(
@@ -110,7 +118,22 @@ export class ComparableOverviewService {
 
       const classifications = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
       const studentsEvaluated = await this.countDistinctStudents(tx, assessmentIds);
-      const alerts = await this.alerts.deriveAlerts(tx, orgId, summaries, classGroupIds);
+      const { samples, itemSamples } = await this.loadSamples(
+        tx,
+        user,
+        orgId,
+        summaries,
+        isTeacherScope,
+        (query.classGroupId?.length ?? 0) > 0,
+      );
+      const alerts = await this.alerts.deriveAlerts(
+        tx,
+        orgId,
+        summaries,
+        classGroupIds,
+        samples,
+        itemSamples,
+      );
 
       return {
         scope: isTeacherScope ? 'teacher' : 'org',
@@ -139,6 +162,35 @@ export class ComparableOverviewService {
   ): Promise<ComparableAlertsResponse> {
     const { alerts, alertsTotal } = await this.getComparableOverview(user, query);
     return { alerts, alertsTotal };
+  }
+
+  private async loadSamples(
+    tx: Database,
+    user: JwtPayload,
+    orgId: string,
+    units: ComparableUnitSummary[],
+    isTeacherScope: boolean,
+    courseFiltered: boolean,
+  ): Promise<{ samples: InstrumentSampleLookup | null; itemSamples: ItemSampleLookup | null }> {
+    if (isTeacherScope || !canAccess(user.roles, BENCHMARKING_VIEWER_ROLES)) {
+      return { samples: null, itemSamples: null };
+    }
+    const instrumentIds = units.map((unit) => unit.instrumentId);
+    const [entries, items] = await Promise.all([
+      this.benchmarkSamples.getSamples(orgId, instrumentIds, tx),
+      this.benchmarkSamples.getItemSamples(instrumentIds, tx),
+    ]);
+    return {
+      samples: new Map(
+        entries.map((entry) => [
+          entry.instrumentId,
+          courseFiltered && entry.you
+            ? { ...entry, you: { ...entry.you, percentile: null, typicalZone: null } }
+            : entry,
+        ]),
+      ),
+      itemSamples: new Map(items.map((item) => [item.instrumentId, item])),
+    };
   }
 
   private async countDistinctStudents(tx: Database, assessmentIds: string[]): Promise<number> {
