@@ -1,6 +1,8 @@
 import {
   boolean,
+  check,
   decimal,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -9,7 +11,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   attachmentKindEnum,
   gradingScaleTypeEnum,
@@ -26,6 +28,7 @@ import { organizations } from './organizations';
 import { grades, subjects } from './academic';
 import { taxonomies } from './taxonomy';
 import { users } from './users';
+import { testTracks } from './test-tracks';
 
 export const gradingScales = pgTable('grading_scales', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -62,6 +65,9 @@ export const instruments = pgTable(
     isOfficial: boolean('is_official').default(false).notNull(),
     status: instrumentStatusEnum('status').default('draft').notNull(),
     gradingScaleId: uuid('grading_scale_id').references(() => gradingScales.id),
+    // Línea de prueba (M1, M2…). Null = la prueba es la asignatura. La FK compuesta
+    // (track_id, subject_id) obliga a que la línea sea de la misma asignatura.
+    trackId: uuid('track_id'),
     config: jsonb('config').$type<Record<string, unknown>>().default({}),
     createdById: uuid('created_by_id').references(() => users.id),
     deletedAt: timestamp('deleted_at'),
@@ -76,6 +82,15 @@ export const instruments = pgTable(
     index('instruments_org_deleted_idx').on(table.orgId, table.deletedAt),
     // FK sin índice, usada en joins contra subjects y en los filtros por asignatura.
     index('instruments_subject_idx').on(table.subjectId),
+    foreignKey({
+      name: 'instruments_track_subject_fk',
+      columns: [table.trackId, table.subjectId],
+      foreignColumns: [testTracks.id, testTracks.subjectId],
+    }),
+    check(
+      'instruments_track_requires_subject',
+      sql`${table.trackId} IS NULL OR ${table.subjectId} IS NOT NULL`,
+    ),
   ],
 );
 
@@ -100,6 +115,9 @@ export const instrumentSections = pgTable(
     role: sectionRoleEnum('role').default('core').notNull(),
     electiveGroup: text('elective_group'),
     electiveKey: text('elective_key'),
+    // Línea de prueba de una rama electiva (BIO, FIS…). Solo las secciones `elective`
+    // la declaran: la sección core hereda la del instrumento (ver los CHECK).
+    trackId: uuid('track_id').references(() => testTracks.id),
     maxPoints: decimal('max_points', { precision: 7, scale: 2 }),
     timeLimitMin: integer('time_limit_min'),
     instructions: text('instructions'),
@@ -113,7 +131,17 @@ export const instrumentSections = pgTable(
     passageFormat: passageFormatEnum('passage_format'), // null si la sección no tiene pasaje
     config: jsonb('config').$type<Record<string, unknown>>().default({}),
   },
-  (table) => [index('instrument_sections_org_kind_idx').on(table.orgId, table.kind)],
+  (table) => [
+    index('instrument_sections_org_kind_idx').on(table.orgId, table.kind),
+    check(
+      'instrument_sections_elective_requires_track',
+      sql`${table.role} <> 'elective' OR ${table.trackId} IS NOT NULL`,
+    ),
+    check(
+      'instrument_sections_track_only_elective',
+      sql`${table.trackId} IS NULL OR ${table.role} = 'elective'`,
+    ),
+  ],
 );
 
 // Adjunto a NIVEL DE INSTRUMENTO (TKT-15). Mismo patrón que `section_attachments`
@@ -173,6 +201,7 @@ export const instrumentsRelations = relations(instruments, ({ one, many }) => ({
     fields: [instruments.gradingScaleId],
     references: [gradingScales.id],
   }),
+  track: one(testTracks, { fields: [instruments.trackId], references: [testTracks.id] }),
   sections: many(instrumentSections),
   attachments: many(instrumentAttachments),
 }));
@@ -193,6 +222,7 @@ export const instrumentSectionsRelations = relations(instrumentSections, ({ one,
     fields: [instrumentSections.orgId],
     references: [organizations.id],
   }),
+  track: one(testTracks, { fields: [instrumentSections.trackId], references: [testTracks.id] }),
   attachments: many(sectionAttachments),
 }));
 

@@ -274,6 +274,13 @@
       "when": 1791256023148,
       "tag": "0038_handy_pretty_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1791258633437,
+      "tag": "0039_soft_speedball",
+      "breakpoints": true
     }
   ]
 }
