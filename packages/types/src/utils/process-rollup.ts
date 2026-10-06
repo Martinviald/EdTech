@@ -168,7 +168,7 @@ export function deriveProcessRollup(
     classifications += unit.studentsAssessed;
 
     for (const band of unit.bands ?? []) {
-      if (band.source === undefined) continue;
+      if (band.source === undefined || band.source === 'unknown') continue;
       anyCutDeclared = true;
       break;
     }
@@ -233,13 +233,14 @@ export function deriveProcessRollup(
     const found = cells.get(key);
     if (found) {
       found.coverage = worseCoverage(found.coverage, cell.status);
+      if (cell.assessmentId) found.assessmentIds.push(cell.assessmentId);
       continue;
     }
     cells.set(key, {
       gradeId: cell.gradeId,
       subjectId: cell.subjectId,
       unitKeys: [],
-      assessmentIds: [],
+      assessmentIds: cell.assessmentId ? [cell.assessmentId] : [],
       severity: null,
       lowestBandShare: null,
       classifications: 0,
@@ -278,7 +279,9 @@ export function deriveProcessRollup(
       cells.set(key, cell);
     }
     cell.unitKeys.push(unit.key);
-    cell.assessmentIds.push(...unit.assessmentIds);
+    for (const id of unit.assessmentIds) {
+      if (!cell.assessmentIds.includes(id)) cell.assessmentIds.push(id);
+    }
     cell.classifications += unit.studentsAssessed;
     cell.coverage = null;
     if (compareSeverity(unit.severity, cell.severity) < 0) cell.severity = unit.severity;

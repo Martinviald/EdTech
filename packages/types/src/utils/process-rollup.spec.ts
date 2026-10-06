@@ -265,6 +265,39 @@ describe('la matriz nivel × asignatura', () => {
   });
 });
 
+describe('regresiones que encontró la auditoría', () => {
+  it('una celda sin unidad conserva el enlace a su evaluación', () => {
+    const r = deriveProcessRollup(
+      [],
+      coverage([coverageCell({ status: 'scheduled', assessmentId: 'a-sin-resultados' })]),
+    );
+    expect(r.matrix.cells[0]!.assessmentIds).toEqual(['a-sin-resultados']);
+    expect(r.matrix.cells[0]!.coverage).toBe('scheduled');
+  });
+
+  it('no duplica el id cuando la unidad trae la misma evaluación que la cobertura', () => {
+    const r = deriveProcessRollup(
+      [diaUnit('u1', [1, 1, 0], { gradeId: 'g1', subjectId: 's1', assessmentIds: ['a1'] })],
+      coverage([coverageCell({ assessmentId: 'a1' })]),
+    );
+    expect(r.matrix.cells[0]!.assessmentIds).toEqual(['a1']);
+  });
+
+  it('`unknown` no cuenta como corte declarado', () => {
+    const u = diaUnit('u1', [1, 1, 1]);
+    u.bands = DIA_LADDER.map((b) => ({ ...b, source: 'unknown' as const }));
+    expect(deriveProcessRollup([u], null).totals.unitsWithMeasuredCut).toBeNull();
+  });
+
+  it('con `unknown` y `measured` mezclados cuenta sólo el declarado', () => {
+    const medido = diaUnit('m', [1, 1, 1]);
+    medido.bands = DIA_LADDER.map((b) => ({ ...b, source: 'measured' as const }));
+    const desconocido = diaUnit('d', [1, 1, 1]);
+    desconocido.bands = DIA_LADDER.map((b) => ({ ...b, source: 'unknown' as const }));
+    expect(deriveProcessRollup([medido, desconocido], null).totals.unitsWithMeasuredCut).toBe(1);
+  });
+});
+
 describe('por asignatura — navegación, no medición', () => {
   it('reporta severidades y la peor celda, sin promediar logro', () => {
     const r = deriveProcessRollup(

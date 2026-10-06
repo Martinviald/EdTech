@@ -20,6 +20,12 @@ const SEVERITY_CELL: Record<UnitSeverity, string> = {
   low: 'bg-success/10 text-success border-transparent',
 };
 
+const NEUTRAL_BAND = '#94a3b8';
+
+// Mismo umbral que la banda generacional del panorama: bajo 2 pp el movimiento
+// no se distingue del ruido.
+const MIN_RELEVANT_DROP_PP = 2;
+
 const COVERAGE_CELL = 'bg-muted/50 text-muted-foreground border-transparent';
 
 const COVERAGE_LABEL: Record<string, string> = {
@@ -60,12 +66,21 @@ export function ProcessResults({
   comparable: ComparableOverviewResponse;
   coverage: ProcessCoverageResponse | null;
 }) {
-  const rollup = deriveProcessRollup(comparable.units, coverage);
+  // `/coverage` no recorta por alcance docente: su denominador es el del colegio
+  // entero. Compararlo contra un numerador ya recortado daría siempre un cociente
+  // bajo el piso, y el profesor no vería nunca el titular. Con alcance docente se
+  // muestra el titular sin denominador, que es lo honesto: su propio denominador
+  // no existe todavía.
+  const orgScoped = comparable.scope === 'org';
+  const rollup = deriveProcessRollup(comparable.units, orgScoped ? coverage : null);
   const trustworthy = isHeadlineTrustworthy(rollup.totals);
   const loadedCells = coverage
     ? coverage.totals.complete
     : rollup.matrix.cells.filter((c) => c.unitKeys.length > 0).length;
   const expectedCells = coverage?.totals.expected ?? rollup.matrix.cells.length;
+  const drops = comparable.generational
+    .filter((cell) => cell.deltaPp != null && cell.deltaPp <= -MIN_RELEVANT_DROP_PP)
+    .slice(0, 5);
 
   if (rollup.totals.classifications === 0) {
     return (
@@ -91,7 +106,7 @@ export function ProcessResults({
             {rollup.totals.expectedClassifications
               ? ` sobre ${rollup.totals.expectedClassifications.toLocaleString('es-CL')} esperadas`
               : ''}{' '}
-            · {loadedCells} de {expectedCells} celdas
+            {orgScoped ? ` · ${loadedCells} de ${expectedCells} celdas` : ' en tus cursos'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -122,7 +137,7 @@ export function ProcessResults({
                       className="flex items-center justify-center text-2xs font-medium text-white"
                       style={{
                         width: `${bucket.percentage}%`,
-                        background: bucket.color ?? undefined,
+                        background: bucket.color ?? NEUTRAL_BAND,
                       }}
                       title={`${bucket.label}: ${bucket.classifications} clasificaciones`}
                     >
@@ -182,7 +197,7 @@ export function ProcessResults({
         </CardContent>
       </Card>
 
-      {comparable.generational.length > 0 && (
+      {drops.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Celdas que más retrocedieron</CardTitle>
@@ -192,7 +207,7 @@ export function ProcessResults({
           </CardHeader>
           <CardContent>
             <ul className="divide-y">
-              {comparable.generational.slice(0, 5).map((item) => (
+              {drops.map((item) => (
                 <li
                   key={`${item.subjectId ?? '-'}-${item.gradeId ?? '-'}`}
                   className="flex flex-wrap items-baseline justify-between gap-2 py-2 text-sm"
@@ -201,7 +216,7 @@ export function ProcessResults({
                     {item.subjectName ?? '—'} · {item.gradeName ?? '—'}
                   </span>
                   <span className="text-destructive font-medium tabular-nums">
-                    {item.deltaPp != null ? `${item.deltaPp.toFixed(1).replace('.', ',')} pp` : '—'}
+                    {(item.deltaPp as number).toFixed(1).replace('.', ',')} pp
                   </span>
                 </li>
               ))}
@@ -325,7 +340,7 @@ function MatrixCell({ cell, processId }: { cell: ProcessMatrixCell; processId: s
     </span>
   );
 
-  if (!hasUnit) return content;
+  if (cell.assessmentIds.length === 0) return content;
   return (
     <Link
       href={cellHref(cell, processId)}

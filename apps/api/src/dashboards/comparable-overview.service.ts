@@ -396,5 +396,11 @@ export class ComparableOverviewService {
 }
 
 function toBandView(band: PerformanceBandInput) {
-  return { key: band.key, label: band.label, order: band.order, color: band.color ?? null };
+  return {
+    key: band.key,
+    label: band.label,
+    order: band.order,
+    color: band.color ?? null,
+    source: band.source,
+  };
 }
