@@ -77,11 +77,11 @@ export function AlertsBanner({ alerts, total }: { alerts: DashboardAlert[]; tota
           />
         ) : (
           <div className="space-y-2">
-            {visible.map((alert, idx) => {
+            {visible.map((alert) => {
               const href = alertHref(alert);
               return (
                 <div
-                  key={`${alert.type}-${alert.contextId ?? idx}`}
+                  key={alert.dedupKey}
                   className={`flex flex-col gap-2 rounded-md border-l-4 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${TONE[alert.severity]}`}
                 >
                   <div className="min-w-0 space-y-0.5">
