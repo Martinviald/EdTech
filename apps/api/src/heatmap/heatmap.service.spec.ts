@@ -363,12 +363,7 @@ describe('HeatmapService.getHeatmap', () => {
       applicationPeriod: null,
       year: 2026,
     };
-    const band = (
-      key: string,
-      order: number,
-      minThreshold: string,
-      maxThreshold: string,
-    ) => ({
+    const band = (key: string, order: number, minThreshold: string, maxThreshold: string) => ({
       id: `b-${key}`,
       orgId: null,
       key,
@@ -527,5 +522,20 @@ describe('HeatmapService.getHeatmap', () => {
 
     expect(db.__selectIdx()).toBe(5);
     expect(res.rows[0].cells[0].performanceLevel).toBe('advanced');
+  });
+
+  // ── Buscador por palabras (docs/diseno-buscador-evaluaciones.md) ───────────
+  // El término es una condición más sobre la consulta que ya existía: no abre
+  // ninguna consulta nueva ni cambia el contexto de org.
+  it('el término de búsqueda no agrega viajes a la base', async () => {
+    const rows = () => [[cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 88, 1)], [scaleRow()]];
+    const sinTermino = makeDb(rows());
+    await makeService(sinTermino).getHeatmap(makeUser(), {});
+
+    const conTermino = makeDb(rows());
+    const res = await makeService(conTermino).getHeatmap(makeUser(), { q: 'matematica' });
+
+    expect(conTermino.__selectIdx()).toBe(sinTermino.__selectIdx());
+    expect(res.rows).toHaveLength(1);
   });
 });

@@ -62,6 +62,8 @@ export type ComparabilityInstrumentRef = {
   gradeId: string | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
   year: number | null;
+  /** Línea de prueba (`instruments.track_id`). Null = la prueba es la asignatura. */
+  trackId: string | null;
 };
 
 export type ComparabilityMeta = {
@@ -77,6 +79,15 @@ export type ComparabilityMeta = {
 const NONE = '-';
 
 /**
+ * Las claves de familia distinguen la línea de prueba (M1 ≠ M2 dentro de MATH). El segmento
+ * solo se agrega cuando hay línea: un instrumento sin línea conserva EXACTAMENTE la clave de
+ * siempre, así que las series y baselines ya calculadas no cambian.
+ */
+function withTrack(key: string, ref: ComparabilityInstrumentRef): string {
+  return ref.trackId ? `${key}|track:${ref.trackId}` : key;
+}
+
+/**
  * Clave de **familia de instrumento estándar** (nivel N2): el mismo instrumento a través
  * de los años. `year` es justamente lo que varía dentro de una familia, así que no entra.
  *
@@ -86,8 +97,9 @@ const NONE = '-';
  * instrumentos, el punto de extensión es el resolver de baselines, no esta clave.
  */
 export function buildInstrumentFamilyKey(ref: ComparabilityInstrumentRef): string {
-  return [ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE, ref.applicationPeriod ?? NONE].join(
-    '|',
+  return withTrack(
+    [ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE, ref.applicationPeriod ?? NONE].join('|'),
+    ref,
   );
 }
 
@@ -97,7 +109,10 @@ export function buildInstrumentFamilyKey(ref: ComparabilityInstrumentRef): strin
  * es `applicationPeriod`, así que no entra.
  */
 export function buildPeriodSeriesKey(ref: ComparabilityInstrumentRef): string {
-  return [ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE, ref.year ?? NONE].join('|');
+  return withTrack(
+    [ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE, ref.year ?? NONE].join('|'),
+    ref,
+  );
 }
 
 /**
@@ -110,7 +125,7 @@ export function buildPeriodSeriesKey(ref: ComparabilityInstrumentRef): string {
  * Es lo que grafica la vista de Trayectoria en su eje "Trayectoria".
  */
 export function buildInstrumentHistoryKey(ref: ComparabilityInstrumentRef): string {
-  return [ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE].join('|');
+  return withTrack([ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE].join('|'), ref);
 }
 
 /** El momento anterior del ciclo, o `null` si es el primero (o no declara momento). */
@@ -298,6 +313,21 @@ export const ALERT_THRESHOLDS = {
   itemCorrectRate: { high: 20, medium: 35 },
   /** Días desde la aplicación sin resultados para considerarla estancada. */
   staleAssessmentDays: 14,
+  /**
+   * Alertas relativas a la muestra de colegios (docs/diseno-benchmarking-en-contexto.md §9.4):
+   * exigen POSICIÓN (bajo el p25 / p10 de los colegios) y MAGNITUD (Δ en pp) a la vez.
+   */
+  cohort: {
+    belowSamplePp: { high: 10, medium: 5 },
+    /** Un eje: bajo el p25/p10 de los colegios en ese nodo y estos pp bajo la muestra. */
+    skillBelowSamplePp: { high: 20, medium: 12 },
+    /** % en la banda inferior que supera al de la muestra en estos pp. */
+    bandConcentrationAbovePp: { high: 20, medium: 10 },
+    /** % de acierto de un ítem bajo el de la muestra en estos pp. */
+    itemBelowSamplePp: { high: 25, medium: 15 },
+    /** Bajo este |Δ| (pp) el resultado se considera similar al de la muestra. */
+    similarPp: 5,
+  },
 } as const;
 
 /**

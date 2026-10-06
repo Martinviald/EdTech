@@ -1,0 +1,159 @@
+import { Suspense } from 'react';
+import Link from 'next/link';
+import { ClipboardList, LayoutGrid, Pencil, Users } from 'lucide-react';
+import { auth } from '@/auth';
+import { canAccess, PROCESS_MANAGEMENT_ROLES } from '@soe/types';
+import { AlertCallout, CardSkeleton, KpiGridSkeleton, StatCard } from '@/components/shared';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ROUTES } from '@/lib/routes';
+import {
+  getProcess,
+  getProcessCandidates,
+  getProcessComparable,
+  getProcessCoverage,
+  getScopeCatalog,
+} from '../data';
+import { CoverageBar } from '../components/coverage-bar';
+import { ProcessFormDialog } from '../components/process-form-dialog';
+import { ScopeDialog } from './components/scope-dialog';
+import { LinkAssessmentsDialog } from './components/link-assessments-dialog';
+import { DeleteProcessDialog } from './components/delete-process-dialog';
+import { ProcessResults } from './components/process-results';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ProcesoResumenPage({
+  params,
+}: {
+  params: Promise<{ processId: string }>;
+}) {
+  const { processId } = await params;
+  const session = await auth();
+  const canManage = canAccess(session?.user?.roles ?? [], PROCESS_MANAGEMENT_ROLES);
+
+  return (
+    <div className="space-y-6">
+      {canManage && (
+        <Suspense fallback={null}>
+          <ManagementToolbar processId={processId} />
+        </Suspense>
+      )}
+      <Suspense fallback={<KpiGridSkeleton count={3} />}>
+        <ResumenSection processId={processId} />
+      </Suspense>
+      <Suspense fallback={<CardSkeleton rows={6} />}>
+        <ResultadosSection processId={processId} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function ManagementToolbar({ processId }: { processId: string }) {
+  const process = await getProcess(processId);
+  const [catalog, candidates] = await Promise.all([
+    getScopeCatalog(process.academicYearId),
+    getProcessCandidates(processId),
+  ]);
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <ProcessFormDialog
+        process={process}
+        academicYears={catalog.periods}
+        trigger={
+          <Button variant="outline" size="sm">
+            <Pencil className="mr-2 size-4" aria-hidden />
+            Editar
+          </Button>
+        }
+      />
+      <ScopeDialog
+        process={process}
+        classGroups={catalog.classGroups}
+        subjects={catalog.subjects}
+      />
+      <LinkAssessmentsDialog processId={processId} candidates={candidates.data} />
+      <DeleteProcessDialog
+        processId={processId}
+        processName={process.name}
+        assessmentCount={process.assessmentCount}
+      />
+    </div>
+  );
+}
+
+async function ResumenSection({ processId }: { processId: string }) {
+  const process = await getProcess(processId);
+  const coverage = process.coverage;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          label="Cobertura"
+          value={coverage ? `${coverage.complete}/${coverage.expected}` : 'Sin alcance'}
+          hint={coverage ? 'celdas completas' : 'declara cursos y asignaturas'}
+          icon={LayoutGrid}
+        />
+        <StatCard
+          label="Evaluaciones"
+          value={String(process.assessmentCount)}
+          hint="asociadas al proceso"
+          icon={ClipboardList}
+        />
+        <StatCard
+          label="Alumnos evaluados"
+          value={String(process.studentsAssessed)}
+          hint="con resultados calculados"
+          icon={Users}
+        />
+      </div>
+
+      {coverage && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Avance de la rendición</CardTitle>
+            <CardDescription>
+              {coverage.missing > 0
+                ? `Faltan ${coverage.missing} de ${coverage.expected} celdas por aplicar.`
+                : 'Todas las celdas esperadas tienen su evaluación.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <CoverageBar totals={coverage} showLegend />
+            <Link
+              href={ROUTES.procesoRendicion(process.id)}
+              className="text-primary text-sm hover:underline"
+            >
+              Ver la matriz completa
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {process.scopeDerived && (
+        <AlertCallout tone="warning" title="Alcance derivado de los datos ya cargados">
+          Este proceso se reconstruyó a partir de las evaluaciones existentes, así que su cobertura
+          siempre da completa. Declara los cursos y asignaturas que corresponden para que el
+          denominador mida algo.
+        </AlertCallout>
+      )}
+
+      {!process.scopeDefined && (
+        <AlertCallout tone="info" title="Sin alcance declarado">
+          Define qué cursos y asignaturas debe cubrir este proceso para poder seguir su rendición.
+        </AlertCallout>
+      )}
+    </div>
+  );
+}
+
+async function ResultadosSection({ processId }: { processId: string }) {
+  const [comparable, coverage] = await Promise.all([
+    getProcessComparable(processId),
+    getProcessCoverage(processId).catch(() => null),
+  ]);
+
+  return <ProcessResults processId={processId} comparable={comparable} coverage={coverage} />;
+}

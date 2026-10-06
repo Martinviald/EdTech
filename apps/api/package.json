@@ -6,10 +6,12 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
-    "lint": "eslint \"src/**/*.ts\" --fix",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "test": "jest",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "retention:sheet-scans": "tsx scripts/retention-sheet-scans.ts",
+    "golden:master-board:check": "tsx scripts/check-golden-master-board.ts",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
@@ -22,6 +24,7 @@
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/throttler": "^6.5.0",
     "@soe/db": "workspace:*",
+    "@soe/decisions": "workspace:*",
     "@soe/types": "workspace:*",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

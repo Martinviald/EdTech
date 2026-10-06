@@ -55,6 +55,7 @@ function familyRow(
     subjectId: string | null;
     gradeId: string | null;
     applicationPeriod: null;
+    trackId: string | null;
   }> = {},
 ) {
   return {
@@ -64,6 +65,7 @@ function familyRow(
     gradeId: 'g-6',
     applicationPeriod: null,
     year,
+    trackId: null,
     ...overrides,
   };
 }
@@ -163,6 +165,24 @@ describe('resolveEffectiveBands', () => {
 
     expect(result.source).toBe('previous_version');
     expect(bandKeys(result.bands)).toEqual(['year-2026']);
+  });
+
+  it('no hereda bandas de la versión anterior de otra línea de prueba', async () => {
+    const db = makeDb([
+      [familyRow('m2-2026', 2026, { trackId: 't-m2' })],
+      [],
+      [
+        familyRow('m2-2026', 2026, { trackId: 't-m2' }),
+        familyRow('m1-2025', 2025, { trackId: 't-m1' }),
+        familyRow('m2-2024', 2024, { trackId: 't-m2' }),
+      ],
+      [bandRow('m1-2025', 'm1-2025', 0), bandRow('m2-2024', 'm2-2024', 0)],
+    ]);
+
+    const result = await resolveEffectiveBands(db, 'm2-2026');
+
+    expect(result.source).toBe('previous_version');
+    expect(bandKeys(result.bands)).toEqual(['m2-2024']);
   });
 
   it('lista vacía → mapa vacío sin tocar la db', async () => {

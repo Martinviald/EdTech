@@ -9,12 +9,11 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  BENCHMARK_BAND_ORDER,
-  BENCHMARK_BAND_LABELS,
-  BENCHMARK_BAND_BAR_CLASS,
-  bandPercentage,
-  bandDistributionTotal,
+  bandBarClass,
+  bandPercentages,
   formatAchievement,
+  unionBands,
+  type BenchmarkBandRef,
 } from './band-presentation';
 import { cn } from '@/lib/utils';
 
@@ -25,27 +24,25 @@ import { cn } from '@/lib/utils';
 // sin rankings públicos 1-N. Server Component.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function MiniBands({ row }: { row: NetworkSchoolRow }) {
-  const total = bandDistributionTotal(row.bandDistribution);
+function MiniBands({ row, bands }: { row: NetworkSchoolRow; bands: readonly BenchmarkBandRef[] }) {
+  const percentages = bandPercentages(row.bandCounts ?? []);
   return (
     <div
       className="flex h-3 w-32 overflow-hidden rounded-full bg-muted"
-      aria-label="Distribución por banda"
+      aria-label="Distribución por nivel"
     >
-      {total === 0
-        ? null
-        : BENCHMARK_BAND_ORDER.map((key) => {
-            const pct = bandPercentage(row.bandDistribution, key);
-            if (pct <= 0) return null;
-            return (
-              <div
-                key={key}
-                className={cn('h-full', BENCHMARK_BAND_BAR_CLASS[key])}
-                style={{ width: `${pct}%` }}
-                title={`${BENCHMARK_BAND_LABELS[key]}: ${pct.toFixed(1)}%`}
-              />
-            );
-          })}
+      {bands.map((band) => {
+        const pct = percentages.get(band.bandKey) ?? 0;
+        if (pct <= 0) return null;
+        return (
+          <div
+            key={band.bandKey}
+            className={cn('h-full', bandBarClass(band, bands))}
+            style={{ width: `${pct}%` }}
+            title={`${band.label}: ${pct.toFixed(1)}%`}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -54,6 +51,7 @@ export function NetworkTable({ schools }: { schools: NetworkSchoolRow[] }) {
   const sorted = [...schools].sort((a, b) =>
     a.orgName.localeCompare(b.orgName, 'es'),
   );
+  const bands = unionBands(schools.map((school) => school.bandCounts ?? []));
 
   return (
     <Card>
@@ -94,7 +92,7 @@ export function NetworkTable({ schools }: { schools: NetworkSchoolRow[] }) {
                     {row.studentCount}
                   </TableCell>
                   <TableCell>
-                    <MiniBands row={row} />
+                    <MiniBands row={row} bands={bands} />
                   </TableCell>
                 </TableRow>
               ))}

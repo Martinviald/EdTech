@@ -1,0 +1,2 @@
+CREATE TYPE "public"."performance_band_source" AS ENUM('measured', 'generic', 'unknown');--> statement-breakpoint
+ALTER TABLE "performance_bands" ADD COLUMN "source" "performance_band_source" DEFAULT 'unknown' NOT NULL;

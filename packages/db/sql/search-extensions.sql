@@ -1,0 +1,22 @@
+-- ============================================================================
+-- Extensiones de Postgres para el buscador por palabras
+-- ============================================================================
+-- FUENTE DE VERDAD de las extensiones que el buscador necesita. NO viven en el
+-- schema Drizzle (drizzle-kit no las genera): se aplican SIEMPRE de forma
+-- idempotente al inicio de `pnpm db:migrate` (ver packages/db/src/migrate.ts),
+-- antes que las políticas RLS, porque son más básicas y no dependen de nada.
+--
+-- ⚠️ NO BORRAR ESTE ARCHIVO. Mismo mecanismo que sql/rls-policies.sql: cualquier
+--    `db:generate` o aplanamiento futuro de migraciones NO afecta esto.
+--
+-- `unaccent` resuelve las tildes en las búsquedas de nombres de evaluación e
+-- instrumento ("matematica" tiene que encontrar "Matemática"). Se instala en el
+-- esquema `public` y se invoca calificada (`public.unaccent(...)`) para no
+-- depender del `search_path` de la conexión. `CREATE EXTENSION` exige un rol
+-- privilegiado; `db:migrate` ya corre con DATABASE_ADMIN_URL. La API sólo
+-- necesita EXECUTE, que PUBLIC tiene por defecto.
+--
+-- Ver docs/diseno-buscador-evaluaciones.md §D4.
+-- ============================================================================
+
+CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;

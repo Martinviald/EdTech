@@ -1,5 +1,11 @@
 # Runbook — Migrar Ciencias a un instrumento por ensayo
 
+> ⚠️ **Superado (2026-10-05).** Este runbook suponía instrumentos sin respuestas y proponía
+> borrarlos y re-importar. Hoy los 9 instrumentos tienen respuestas: la migración se hace con
+> `pnpm --filter @soe/db db:migrate:cie-electivas`, que re-apunta las respuestas en vez de
+> borrarlas y tiene vuelta atrás. Ver `docs/tablero/f3-ciencias-electivas.md`. Lo que sigue se
+> conserva como contexto (divergencias de E1/E4, figuras).
+
 > Operación de datos sobre la BDD demo. El código que la habilita va en la misma PR; **esto
 > no se ejecuta solo**. Léelo entero antes de correr el primer comando.
 

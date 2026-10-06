@@ -8,6 +8,7 @@ import { comparableOverviewQuerySchema } from '@soe/types';
 import type { JwtPayload } from '../src/auth/jwt-payload.types';
 import type { Database } from '../src/database/database.types';
 import { ComparableAlertsService } from '../src/dashboards/comparable-alerts.service';
+import { BenchmarkSamplesService } from '../src/benchmarking/benchmark-samples.service';
 import { ComparableOverviewService } from '../src/dashboards/comparable-overview.service';
 import { ComparableUnitAssembler } from '../src/dashboards/comparable/comparable-unit.assembler';
 import { DashboardsService } from '../src/dashboards/dashboards.service';
@@ -146,7 +147,13 @@ async function captureSnapshots(
   const dashboards = new DashboardsService(db);
   const assembler = new ComparableUnitAssembler();
   const alerts = new ComparableAlertsService();
-  const overview = new ComparableOverviewService(db, dashboards, alerts, assembler);
+  const overview = new ComparableOverviewService(
+    db,
+    dashboards,
+    alerts,
+    assembler,
+    new BenchmarkSamplesService(db),
+  );
 
   mkdirSync(outDir, { recursive: true });
   const metrics: Metrics[] = [];

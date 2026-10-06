@@ -54,6 +54,7 @@ type Anchor = {
   gradeId: string | null;
   year: number | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
+  trackId: string | null;
   achievement: number | null;
   performanceBand: PerformanceBandView | null;
   performanceLevel: StudentPanoramaAssessment['performanceLevel'];
@@ -203,6 +204,7 @@ export class StudentComparisonsService {
       gradeId: chosen.gradeId,
       year: chosen.year,
       applicationPeriod: chosen.applicationPeriod,
+      trackId: chosen.trackId,
       achievement: chosen.achievement,
       performanceBand: chosen.performanceBand,
       performanceLevel: chosen.performanceLevel,
@@ -363,6 +365,7 @@ export class StudentComparisonsService {
         gradeId: instruments.gradeId,
         applicationPeriod: instruments.applicationPeriod,
         year: instruments.year,
+        trackId: instruments.trackId,
       })
       .from(instruments)
       .innerJoin(assessments, eq(assessments.instrumentId, instruments.id))
@@ -387,6 +390,7 @@ export class StudentComparisonsService {
           gradeId: row.gradeId,
           applicationPeriod: row.applicationPeriod,
           year: row.year,
+          trackId: row.trackId,
         },
       });
     }
@@ -486,6 +490,7 @@ function anchorFamilyRef(anchor: Anchor): ComparabilityInstrumentRef {
     gradeId: anchor.gradeId,
     applicationPeriod: anchor.applicationPeriod,
     year: anchor.year,
+    trackId: anchor.trackId,
   };
 }
 
@@ -552,6 +557,7 @@ function uniqueInstrumentRefs(rows: StudentPanoramaAssessment[]): ComparabilityI
       gradeId: row.gradeId,
       applicationPeriod: row.applicationPeriod,
       year: row.year,
+      trackId: row.trackId,
     });
   }
   return [...byId.values()];

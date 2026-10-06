@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
+import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import { ROUTES } from '@/lib/routes';
 import {
   canAccess,
@@ -51,6 +52,11 @@ export default async function EvaluacionResultadosPage({
     ),
   ]);
 
+  const samplePromise =
+    reportResult && canSeeBenchmark(session.user.roles)
+      ? getInstrumentSample(reportResult.meta.instrumentId)
+      : undefined;
+
   return (
     <div className="space-y-6">
       <AssessmentCourseFilter courses={courses} value={classGroupId} basePath={basePath} />
@@ -61,6 +67,7 @@ export default async function EvaluacionResultadosPage({
           skillsBreakdown={skillsResult?.skills}
           assessmentId={assessmentId}
           classGroupId={classGroupId}
+          samplePromise={samplePromise}
         />
       ) : (
         <EmptyState

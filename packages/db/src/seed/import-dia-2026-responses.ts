@@ -61,6 +61,10 @@
  * deriva el año lectivo de esa fecha para bucketizar el read-model cuando el
  * alumno no está matriculado en el curso asignado. Fechar una evaluación de 2025
  * con la fecha de hoy la ancla al año equivocado.
+ *
+ * Proceso de medición: en la misma transacción, cada evaluación nueva se vincula al
+ * proceso de su período ("DIA <momento> <año>", el mismo que crearía
+ * `db:backfill:processes`). Si rompería la invariante del proceso, queda sin él.
  */
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -78,6 +82,10 @@ import { assessments, assessmentCourseAssignments, importJobs } from '../schema/
 import { responses } from '../schema/responses';
 import { assessmentResults, skillResults } from '../schema/results';
 import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
+import {
+  formatLoadProcessLinkReport,
+  linkLoadedAssessmentsToProcesses,
+} from '../queries/process-linking';
 import {
   aggregateStudentResults,
   aggregateSkillResults,
@@ -109,7 +117,18 @@ type CourseArtifact = {
   applicationPeriod: string;
   questionCount: number;
   itemTypes: Record<string, string | null>;
-  rows: Array<{ rut: string; nombre: string; answers: Record<string, string | null> }>;
+  rows: Array<{
+    rut: string;
+    nombre: string;
+    answers: Record<string, string | null>;
+    /**
+     * Puntaje que ya asignó una persona, por posición. Para cuando la planilla no
+     * trae lo que escribió el alumno sino el juicio de quien corrigió (p. ej. un
+     * código de rúbrica en un ítem de completación): se guarda como corrección
+     * humana con su motivo, sin inventar la respuesta ni pasarla por la estrategia.
+     */
+    humanScores?: Record<string, { code: string; score: number; reason: string }>;
+  }>;
 };
 
 const argv = process.argv.slice(2);
@@ -701,6 +720,44 @@ async function main() {
           const rawAnswer = row.answers[String(item.position)] ?? null;
           const nodeIds = tagsByItem.get(item.id) ?? [];
 
+          const human = row.humanScores?.[String(item.position)];
+          if (human) {
+            if (!(human.score >= 0 && human.score <= maxScore)) {
+              throw new Error(
+                `Puntaje humano ${human.score} fuera de [0, ${maxScore}] en ${r.course.sourceFile} P${item.position} (${row.rut})`,
+              );
+            }
+            const isCorrect = human.score >= maxScore;
+            const value = { teacherCode: human.code };
+            autoScorableItems += 1;
+            responseRows.push({
+              assessmentId: '',
+              studentId,
+              itemId: item.id,
+              value,
+              isCorrect,
+              rawScore: null,
+              maxScore: maxScore.toFixed(2),
+              humanScore: { score: human.score, overrideReason: human.reason },
+              finalScore: human.score.toFixed(2),
+              scoredBy: 'human',
+              scoredAt: now,
+            });
+            calc.push({
+              studentId,
+              itemId: item.id,
+              itemPosition: item.position,
+              rawScore: null,
+              maxScore,
+              finalScore: human.score,
+              isCorrect,
+              taxonomyNodeIds: nodeIds,
+              value,
+              hasAlternatives: itemHasAlternatives(item.content),
+            });
+            continue;
+          }
+
           const answer =
             typeof rawAnswer === 'string' && rawAnswer.trim() ? rawAnswer.trim() : null;
           const outcome = scoreWithRegistry(item, maxScore, answer);
@@ -836,6 +893,16 @@ async function main() {
         return { assessmentId, classGroupId: p.classGroupId };
       }),
     );
+
+    // Cada evaluación nueva cae en su proceso de medición, según el período del instrumento: "DIA <momento> <año>".
+    // Si sumarla rompería la invariante (dos instrumentos para el mismo grado y prueba),
+    // queda sin proceso y se reporta: el tablero la muestra en la toma legacy.
+    const processLinks = await linkLoadedAssessmentsToProcesses(tx, {
+      orgId: ORG_ID,
+      assessmentIds: insertedAssessments.map((a) => a.id),
+      source: { by: 'period' },
+    });
+    for (const line of formatLoadProcessLinkReport(processLinks)) console.log(line);
 
     const allResponses: Array<typeof responses.$inferInsert> = [];
     const resultValues: Array<typeof assessmentResults.$inferInsert> = [];

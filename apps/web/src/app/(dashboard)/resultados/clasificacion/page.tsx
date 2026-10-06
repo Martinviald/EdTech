@@ -7,8 +7,12 @@ import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
   PERFORMANCE_LEVELS,
+  sampleSizeLabel,
+  type BenchmarkBandCount,
+  type DashboardPerformanceResponse,
   type PerformanceLevel,
 } from '@soe/types';
+import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import { EmptyState, FilterBarSkeleton, CardSkeleton, TableSkeleton } from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -23,7 +27,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
-  withDefaultAcademicYear,
+  withEntryDefaults,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
 import { ComparabilityNotice } from '../components/comparability-notice';
@@ -90,6 +94,7 @@ export default async function ClasificacionPage({
           page={page}
           limit={limit}
           performanceLevel={performanceLevel}
+          canSeeSample={canSeeBenchmark(session.user.roles)}
         />
       </Suspense>
     </>
@@ -107,7 +112,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={BASE_PATH}
     />
   );
@@ -131,32 +136,44 @@ async function PerformanceSection({
   page,
   limit,
   performanceLevel,
+  canSeeSample,
 }: {
   filters: DashboardFilterValues;
   page: number;
   limit: number;
   performanceLevel: PerformanceLevel | undefined;
+  canSeeSample: boolean;
 }) {
   const options = await getDashboardFilters(buildDashboardQuery(filters));
   const scopedQuery = buildPerformanceQuery(
-    buildDashboardQuery(withDefaultAcademicYear(filters, options.defaultAcademicYearId)),
+    buildDashboardQuery(withEntryDefaults(filters, options)),
     page,
     limit,
     performanceLevel,
   );
   const performance = await getDashboardPerformance(scopedQuery);
   const students = performance.students;
+  const { comparability } = performance;
+  const sampleInstrumentId =
+    canSeeSample && comparability.aggregatable && comparability.instrumentIds.length === 1
+      ? comparability.instrumentIds[0]!
+      : null;
 
   return (
     <>
       <ComparabilityNotice comparability={performance.comparability} />
 
       {performance.distribution ? (
-        <DistributionBar
-          distribution={performance.distribution}
-          bands={performance.bands}
-          bandDistribution={performance.bandDistribution}
-        />
+        sampleInstrumentId ? (
+          <Suspense fallback={<PerformanceDistribution performance={performance} />}>
+            <PerformanceDistributionWithSample
+              performance={performance}
+              instrumentId={sampleInstrumentId}
+            />
+          </Suspense>
+        ) : (
+          <PerformanceDistribution performance={performance} />
+        )
       ) : null}
 
       <Card>
@@ -225,5 +242,47 @@ async function PerformanceSection({
         </CardContent>
       </Card>
     </>
+  );
+}
+
+function PerformanceDistribution({
+  performance,
+  sample,
+}: {
+  performance: DashboardPerformanceResponse;
+  sample?: { label: string; sizeLabel: string; bandCounts: BenchmarkBandCount[] } | null;
+}) {
+  if (!performance.distribution) return null;
+  return (
+    <DistributionBar
+      distribution={performance.distribution}
+      bands={performance.bands}
+      bandDistribution={performance.bandDistribution}
+      sample={sample}
+    />
+  );
+}
+
+async function PerformanceDistributionWithSample({
+  performance,
+  instrumentId,
+}: {
+  performance: DashboardPerformanceResponse;
+  instrumentId: string;
+}) {
+  const global = (await getInstrumentSample(instrumentId))?.global;
+  return (
+    <PerformanceDistribution
+      performance={performance}
+      sample={
+        global
+          ? {
+              label: global.label,
+              sizeLabel: sampleSizeLabel(global),
+              bandCounts: global.bandCounts,
+            }
+          : null
+      }
+    />
   );
 }

@@ -49,9 +49,11 @@ type RunRow = {
   layoutId: string;
   layoutVersion: number;
   instrumentId: string;
+  instrumentName: string | null;
   classGroupId: string | null;
   classGroupName: string | null;
   classGroupGradeName: string | null;
+  hasConfirmedBatch: boolean;
   assessmentId: string | null;
   assessmentFormId: string | null;
   administeredAt: Date | null;
@@ -73,10 +75,12 @@ export class SheetPrintService {
           id: sheetLayouts.id,
           version: sheetLayouts.version,
           instrumentId: sheetLayouts.instrumentId,
+          instrumentName: instruments.name,
           assessmentFormId: sheetLayouts.assessmentFormId,
           spec: sheetLayouts.spec,
         })
         .from(sheetLayouts)
+        .leftJoin(instruments, eq(instruments.id, sheetLayouts.instrumentId))
         .where(and(eq(sheetLayouts.orgId, orgId), eq(sheetLayouts.id, dto.layoutId)))
         .limit(1);
       if (!layout) throw new NotFoundException('Layout de hoja no encontrado');
@@ -198,8 +202,11 @@ export class SheetPrintService {
         layoutId: layout.id,
         layoutVersion: layout.version,
         instrumentId: layout.instrumentId,
+        instrumentName: layout.instrumentName,
         classGroupId: classGroup.id,
         classGroupName: classGroup.name,
+        // Una tirada recién creada no puede tener un lote confirmado.
+        hasConfirmedBatch: false,
         assessmentId: run.assessmentId,
         assessmentFormId: run.assessmentFormId,
         administeredAt: dto.administeredAt ? parseSheetDate(dto.administeredAt) : null,
@@ -641,9 +648,17 @@ export class SheetPrintService {
         layoutId: sheetPrintRuns.layoutId,
         layoutVersion: sheetLayouts.version,
         instrumentId: sheetLayouts.instrumentId,
+        instrumentName: instruments.name,
         classGroupId: sheetPrintRuns.classGroupId,
         classGroupName: classGroups.name,
         classGroupGradeName: classGroupGrades.name,
+        // "Ya corregida" es derivado, no una columna: EXISTS sobre los lotes de
+        // la tirada. Va indexado por (print_run_id, status).
+        hasConfirmedBatch: sql<boolean>`exists (
+          select 1 from ${sheetScanBatches}
+          where ${sheetScanBatches.printRunId} = ${sheetPrintRuns.id}
+            and ${sheetScanBatches.status} = 'confirmed'
+        )`,
         assessmentId: sheetPrintRuns.assessmentId,
         assessmentFormId: sheetPrintRuns.assessmentFormId,
         administeredAt: assessments.administeredAt,
@@ -655,6 +670,7 @@ export class SheetPrintService {
       })
       .from(sheetPrintRuns)
       .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+      .leftJoin(instruments, eq(instruments.id, sheetLayouts.instrumentId))
       .leftJoin(classGroups, eq(classGroups.id, sheetPrintRuns.classGroupId))
       .leftJoin(classGroupGrades, eq(classGroupGrades.id, classGroups.gradeId))
       .leftJoin(assessments, eq(assessments.id, sheetPrintRuns.assessmentId))
@@ -671,8 +687,10 @@ export class SheetPrintService {
       layoutId: row.layoutId,
       layoutVersion: row.layoutVersion,
       instrumentId: row.instrumentId,
+      instrumentName: row.instrumentName,
       classGroupId: row.classGroupId,
       classGroupName: buildClassGroupLabel(row.classGroupGradeName, row.classGroupName),
+      hasConfirmedBatch: row.hasConfirmedBatch,
       assessmentId: row.assessmentId,
       assessmentFormId: row.assessmentFormId,
       administeredAt: row.administeredAt ?? null,

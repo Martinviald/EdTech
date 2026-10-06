@@ -18,7 +18,7 @@ import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
-  withDefaultAcademicYear,
+  withEntryDefaults,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
 import { dashboardFiltersToAssistantRefs } from '../components/assistant-context';
@@ -86,7 +86,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={BASE_PATH}
     />
   );
@@ -109,9 +109,7 @@ async function HeatmapSection({
   isTeacher: boolean;
 }) {
   const options = await getDashboardFilters(query);
-  const scopedQuery = buildDashboardQuery(
-    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
-  );
+  const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
   const heatmap = await getHeatmap(scopedQuery);
 
   const hasData = heatmap.rows.length > 0 && heatmap.subjects.length > 0;

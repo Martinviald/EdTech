@@ -10,8 +10,31 @@
 --    cualquier `db:generate` / squash futuro NO afecta estas políticas.
 --
 -- Notas de diseño:
---  · current_setting('app.current_org_id', true) retorna '' si la variable no está
---    fijada (no lanza error). Sin contexto => condición falsa => 0 filas (safe default).
+--  · FORMA DE LA COMPARACIÓN — `org_id = nullif(current_setting(...), '')::uuid`.
+--    El cast va del lado de la VARIABLE, nunca de la columna. Es deliberado y las tres
+--    piezas importan:
+--
+--      1. `org_id = <expr uuid>` es indexable: un btree sobre org_id (uuid) puede
+--         servir la política. La forma anterior, `org_id::text = current_setting(...)`,
+--         ponía el cast sobre la columna y garantizaba seq scan. Peor aún, al no poder
+--         estimar una expresión el planificador caía en su selectividad por defecto y
+--         creía que la tabla devolvía UNA fila, lo que da vuelta planes enteros (mismo
+--         síndrome que documenta apps/api/src/common/helpers/
+--         assessment-academic-year.helper.ts, medido en 14 s → 0,6 s).
+--
+--      2. `nullif(..., '')` preserva el SAFE DEFAULT y NO es opcional. Sin contexto,
+--         current_setting('...', true) devuelve NULL en una conexión nueva, pero '' en
+--         cuanto la conexión ya corrió una transacción con set_config(..., true) — que
+--         con pooling es el caso normal. `''::uuid` LANZA ERROR; `nullif('','')::uuid`
+--         da NULL. Con NULL la comparación es NULL, el RLS la trata como falsa y la
+--         fila no se ve: 0 filas, sin error, que es de lo que depende todo el diseño.
+--         ⚠️ NO simplificar a `current_setting(...)::uuid`: rompe cualquier camino que
+--         hoy tolera la ausencia de contexto (arranque, seeds, rutas sin org).
+--
+--      3. El valor SIEMPRE es un uuid válido: withOrgContext() es el único que escribe
+--         la variable y recibe el orgId de la sesión autenticada. Un valor que no sea
+--         uuid ni '' haría fallar el cast — fail-closed, nunca una fuga.
+--
 --    El wrapper withOrgContext() (packages/db/src/with-org-context.ts) fija la variable
 --    por transacción vía set_config(..., true).
 --  · FORCE ROW LEVEL SECURITY hace que el RLS aplique TAMBIÉN al dueño de la tabla.
@@ -48,17 +71,17 @@ ALTER TABLE "llm_settings"        FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "students_tenant_isolation" ON "students";
 CREATE POLICY "students_tenant_isolation" ON "students"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "assessments_tenant_isolation" ON "assessments";
 CREATE POLICY "assessments_tenant_isolation" ON "assessments"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "import_jobs_tenant_isolation" ON "import_jobs";
 CREATE POLICY "import_jobs_tenant_isolation" ON "import_jobs"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- performance_bands tiene org_id NULLABLE: las filas con org_id IS NULL son el
 -- catálogo global de plataforma (ej. bandas DIA por defecto) y deben ser visibles
@@ -73,7 +96,7 @@ CREATE POLICY "performance_bands_tenant_isolation" ON "performance_bands"
   AS PERMISSIVE FOR ALL
   USING (
     org_id IS NULL
-    OR org_id::text = current_setting('app.current_org_id', true)
+    OR org_id = nullif(current_setting('app.current_org_id', true), '')::uuid
   );
 
 -- llm_settings: config de modelo de IA por funcionalidad. org_id NULLABLE igual que
@@ -89,7 +112,7 @@ CREATE POLICY "llm_settings_tenant_isolation" ON "llm_settings"
   AS PERMISSIVE FOR ALL
   USING (
     org_id IS NULL
-    OR org_id::text = current_setting('app.current_org_id', true)
+    OR org_id = nullif(current_setting('app.current_org_id', true), '')::uuid
   );
 
 -- ── Políticas sin org_id directo (heredan vía assessments) ──────────────────
@@ -100,7 +123,7 @@ CREATE POLICY "responses_tenant_isolation" ON "responses"
     EXISTS (
       SELECT 1 FROM "assessments"
       WHERE "assessments"."id" = "responses"."assessment_id"
-        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+        AND "assessments"."org_id" = nullif(current_setting('app.current_org_id', true), '')::uuid
     )
   );
 
@@ -111,7 +134,7 @@ CREATE POLICY "assessment_results_tenant_isolation" ON "assessment_results"
     EXISTS (
       SELECT 1 FROM "assessments"
       WHERE "assessments"."id" = "assessment_results"."assessment_id"
-        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+        AND "assessments"."org_id" = nullif(current_setting('app.current_org_id', true), '')::uuid
     )
   );
 
@@ -122,7 +145,7 @@ CREATE POLICY "skill_results_tenant_isolation" ON "skill_results"
     EXISTS (
       SELECT 1 FROM "assessments"
       WHERE "assessments"."id" = "skill_results"."assessment_id"
-        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+        AND "assessments"."org_id" = nullif(current_setting('app.current_org_id', true), '')::uuid
     )
   );
 
@@ -135,12 +158,12 @@ ALTER TABLE "org_benchmark_settings"  FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "ai_analyses_tenant_isolation" ON "ai_analyses";
 CREATE POLICY "ai_analyses_tenant_isolation" ON "ai_analyses"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "org_benchmark_settings_tenant_isolation" ON "org_benchmark_settings";
 CREATE POLICY "org_benchmark_settings_tenant_isolation" ON "org_benchmark_settings"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ── F2 S3 — remedial_materials (org_id directo) ──────────────────────────────
 ALTER TABLE "remedial_materials"      ENABLE ROW LEVEL SECURITY;
@@ -149,7 +172,7 @@ ALTER TABLE "remedial_materials"      FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "remedial_materials_tenant_isolation" ON "remedial_materials";
 CREATE POLICY "remedial_materials_tenant_isolation" ON "remedial_materials"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ── F2 S4 — Benchmarking ─────────────────────────────────────────────────────
 -- benchmark_access_logs: RLS por org_id (cada org ve solo sus propios accesos).
@@ -159,12 +182,17 @@ ALTER TABLE "benchmark_access_logs"   FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs";
 CREATE POLICY "benchmark_access_logs_tenant_isolation" ON "benchmark_access_logs"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ⚠️ benchmark_aggregates: SIN RLS A PROPÓSITO (H7.1). Es el read-model CROSS-TENANT
 -- del benchmarking — la única excepción documentada al aislamiento por org. No
 -- contiene PII (solo agregados por org). El acceso se protege por guards de rol y
 -- el servicio aplica k-anonimato. NO habilitar RLS aquí.
+--
+-- ⚠️ benchmark_item_aggregates: MISMA EXCEPCIÓN que benchmark_aggregates (fase 3 de
+-- docs/plan-benchmarking-en-contexto.md). Sólo guarda aciertos/respuestas por
+-- (org × ítem); el servicio expone únicamente el agregado de la muestra con
+-- k-anonimato. NO habilitar RLS aquí.
 
 -- ── E21 — Asistente IA Conversacional (org_id directo) ───────────────────────
 -- Conversaciones y mensajes del asistente. Datos sensibles (consultas de un
@@ -179,12 +207,12 @@ ALTER TABLE "assistant_messages"       FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "assistant_conversations_tenant_isolation" ON "assistant_conversations";
 CREATE POLICY "assistant_conversations_tenant_isolation" ON "assistant_conversations"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "assistant_messages_tenant_isolation" ON "assistant_messages";
 CREATE POLICY "assistant_messages_tenant_isolation" ON "assistant_messages"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ── TKT-19 — Propuestas de edición de ítems (org_id directo) ─────────────────
 -- Escritura asistida por IA (§8.3: la IA propone, el humano aprueba). Cada org
@@ -195,7 +223,7 @@ ALTER TABLE "item_edit_proposals"      FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "item_edit_proposals_tenant_isolation" ON "item_edit_proposals";
 CREATE POLICY "item_edit_proposals_tenant_isolation" ON "item_edit_proposals"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ── Módulo genérico de almacenamiento de archivos (S3) ───────────────────────
 -- `files` tiene org_id NULLABLE: las filas con org_id IS NULL son archivos GLOBALES
@@ -215,7 +243,7 @@ CREATE POLICY "files_tenant_isolation" ON "files"
   AS PERMISSIVE FOR ALL
   USING (
     org_id IS NULL
-    OR org_id::text = current_setting('app.current_org_id', true)
+    OR org_id = nullif(current_setting('app.current_org_id', true), '')::uuid
   );
 
 -- ── Editor de Materiales — documents + document_item_refs ────────────────────
@@ -237,7 +265,7 @@ CREATE POLICY "documents_tenant_isolation" ON "documents"
   AS PERMISSIVE FOR ALL
   USING (
     org_id IS NULL
-    OR org_id::text = current_setting('app.current_org_id', true)
+    OR org_id = nullif(current_setting('app.current_org_id', true), '')::uuid
   );
 
 DROP POLICY IF EXISTS "document_item_refs_tenant_isolation" ON "document_item_refs";
@@ -245,7 +273,7 @@ CREATE POLICY "document_item_refs_tenant_isolation" ON "document_item_refs"
   AS PERMISSIVE FOR ALL
   USING (
     org_id IS NULL
-    OR org_id::text = current_setting('app.current_org_id', true)
+    OR org_id = nullif(current_setting('app.current_org_id', true), '')::uuid
   );
 
 -- ── Read-model de cohorte (analítica agregada) ──────────────────────────────
@@ -273,7 +301,7 @@ CREATE POLICY "assessment_item_stats_tenant_isolation" ON "assessment_item_stats
     EXISTS (
       SELECT 1 FROM "assessments"
       WHERE "assessments"."id" = "assessment_item_stats"."assessment_id"
-        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+        AND "assessments"."org_id" = nullif(current_setting('app.current_org_id', true), '')::uuid
     )
   );
 
@@ -284,7 +312,7 @@ CREATE POLICY "assessment_skill_stats_tenant_isolation" ON "assessment_skill_sta
     EXISTS (
       SELECT 1 FROM "assessments"
       WHERE "assessments"."id" = "assessment_skill_stats"."assessment_id"
-        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+        AND "assessments"."org_id" = nullif(current_setting('app.current_org_id', true), '')::uuid
     )
   );
 
@@ -295,7 +323,7 @@ CREATE POLICY "assessment_level_stats_tenant_isolation" ON "assessment_level_sta
     EXISTS (
       SELECT 1 FROM "assessments"
       WHERE "assessments"."id" = "assessment_level_stats"."assessment_id"
-        AND "assessments"."org_id"::text = current_setting('app.current_org_id', true)
+        AND "assessments"."org_id" = nullif(current_setting('app.current_org_id', true), '')::uuid
     )
   );
 
@@ -309,7 +337,7 @@ ALTER TABLE "mcp_access_logs" FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "mcp_access_logs_tenant_isolation" ON "mcp_access_logs";
 CREATE POLICY "mcp_access_logs_tenant_isolation" ON "mcp_access_logs"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ── Lector de marcas (E22) — 6 tablas con org_id directo (D16) ────────────────
 -- Las hojas escaneadas contienen el nombre del alumno (Ley 19.628). Toda query
@@ -330,38 +358,38 @@ ALTER TABLE "sheet_scan_marks"   FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "sheet_layouts_tenant_isolation" ON "sheet_layouts";
 CREATE POLICY "sheet_layouts_tenant_isolation" ON "sheet_layouts"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "sheet_print_runs_tenant_isolation" ON "sheet_print_runs";
 CREATE POLICY "sheet_print_runs_tenant_isolation" ON "sheet_print_runs"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "printed_sheets_tenant_isolation" ON "printed_sheets";
 CREATE POLICY "printed_sheets_tenant_isolation" ON "printed_sheets"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "sheet_scan_batches_tenant_isolation" ON "sheet_scan_batches";
 CREATE POLICY "sheet_scan_batches_tenant_isolation" ON "sheet_scan_batches"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "sheet_scans_tenant_isolation" ON "sheet_scans";
 CREATE POLICY "sheet_scans_tenant_isolation" ON "sheet_scans"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "sheet_scan_marks_tenant_isolation" ON "sheet_scan_marks";
 CREATE POLICY "sheet_scan_marks_tenant_isolation" ON "sheet_scan_marks"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ── Telemetría de uso de la plataforma — telemetry_events (org_id directo) ────
 -- Analítica de producto (qué features usa cada colegio). org_id NOT NULL: cada
@@ -375,7 +403,7 @@ ALTER TABLE "telemetry_events" FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "telemetry_events_tenant_isolation" ON "telemetry_events";
 CREATE POLICY "telemetry_events_tenant_isolation" ON "telemetry_events"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 -- ── Feedback in-app ──────────────────────────────────────────────────────────
 ALTER TABLE "feedback" ENABLE ROW LEVEL SECURITY;
@@ -384,8 +412,8 @@ ALTER TABLE "feedback" FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "feedback_tenant_isolation" ON "feedback";
 CREATE POLICY "feedback_tenant_isolation" ON "feedback"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 -- ── Captura remota (E22-R, CD-16) — sesiones de emparejamiento QR ─────────────
 -- El canje del secreto ocurre ANTES de conocer la org (ruta pública, sin
 -- withOrgContext): la segunda política permite leer EXACTAMENTE la fila cuyo id
@@ -398,13 +426,13 @@ ALTER TABLE "capture_sessions" FORCE  ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "capture_sessions_tenant_isolation" ON "capture_sessions";
 CREATE POLICY "capture_sessions_tenant_isolation" ON "capture_sessions"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true))
-  WITH CHECK (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "capture_sessions_redeem_by_id" ON "capture_sessions";
 CREATE POLICY "capture_sessions_redeem_by_id" ON "capture_sessions"
   AS PERMISSIVE FOR SELECT
-  USING (id::text = current_setting('app.capture_session_id', true));
+  USING (id = nullif(current_setting('app.capture_session_id', true), '')::uuid);
 
 
 -- ── Formas de evaluación y su asignación a alumnos ──────────────────────────
@@ -418,9 +446,86 @@ CREATE POLICY "capture_sessions_redeem_by_id" ON "capture_sessions"
 DROP POLICY IF EXISTS "assessment_forms_tenant_isolation" ON "assessment_forms";
 CREATE POLICY "assessment_forms_tenant_isolation" ON "assessment_forms"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "assessment_form_students_tenant_isolation" ON "assessment_form_students";
 CREATE POLICY "assessment_form_students_tenant_isolation" ON "assessment_form_students"
   AS PERMISSIVE FOR ALL
-  USING (org_id::text = current_setting('app.current_org_id', true));
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+
+-- ── Procesos de medición ─────────────────────────────────────────────────────
+-- El proceso agrupa las evaluaciones de una ventana de aplicación (§ docs/
+-- diseno-procesos-de-medicion.md). Lleva `org_id` propio: es dato del colegio.
+ALTER TABLE "measurement_processes" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "measurement_processes" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "measurement_processes_tenant_isolation" ON "measurement_processes";
+CREATE POLICY "measurement_processes_tenant_isolation" ON "measurement_processes"
+  AS PERMISSIVE FOR ALL
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+
+-- ── Motor de decisiones (`@soe/decisions`) — ver docs/plan-integracion-jev.md ──
+-- decision_settings: config del motor por funcionalidad. org_id NULLABLE, mismo
+-- criterio que llm_settings: las filas globales (org_id IS NULL) son config de
+-- plataforma, legibles por todos los tenants. A diferencia de llm_settings, la API NO
+-- puede escribir filas globales: el WITH CHECK exige org_id = contexto, así que un
+-- tenant solo crea o cambia su propio override. Las globales (modo y umbrales que
+-- valen para todos los colegios) se escriben con el rol admin (migrate/seed), que
+-- no pasa por RLS. No contienen PII (motor, modelo, modo y umbrales).
+ALTER TABLE "decision_settings" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "decision_settings" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "decision_settings_tenant_isolation" ON "decision_settings";
+CREATE POLICY "decision_settings_tenant_isolation" ON "decision_settings"
+  AS PERMISSIVE FOR ALL
+  USING (
+    org_id IS NULL
+    OR org_id = nullif(current_setting('app.current_org_id', true), '')::uuid
+  )
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+-- decision_calls: log inmutable de llamadas al motor. org_id NOT NULL directo (como
+-- students): cada colegio ve sólo sus llamadas. Aunque no guarda el estado en claro
+-- (sólo su sha256), `answers`, `baseline` y `correlation_id` describen material del
+-- colegio. Se escribe siempre dentro de withOrgContext(orgId). Inmutable también a
+-- nivel de motor: solo hay políticas de SELECT e INSERT, así que UPDATE y DELETE
+-- no afectan ninguna fila para el rol de la API.
+ALTER TABLE "decision_calls" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "decision_calls" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "decision_calls_tenant_isolation" ON "decision_calls";
+CREATE POLICY "decision_calls_tenant_isolation" ON "decision_calls"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "decision_calls_tenant_insert" ON "decision_calls";
+CREATE POLICY "decision_calls_tenant_insert" ON "decision_calls"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+-- ── Líneas de prueba ─────────────────────────────────────────────────────────
+-- `test_tracks` tiene org_id NULLABLE, como performance_bands: las filas con
+-- org_id IS NULL son el catálogo oficial (M1, M2, BIO…) y las ven todos los
+-- colegios. Una línea privada solo la ve su colegio; si no, el track privado de
+-- un colegio puesto sobre un instrumento oficial cambiaría el encabezado del
+-- tablero de las demás orgs. Son dos políticas permisivas: la de tenant cubre
+-- todo comando sobre las filas propias, y la oficial solo agrega LECTURA de las
+-- filas sin org. Así la API sujeta a RLS no puede crear, editar ni borrar una
+-- línea oficial: el catálogo se siembra con el rol admin (db:seed:test-tracks).
+-- Forma indexable (sin castear la columna), como el resto del archivo.
+ALTER TABLE "test_tracks" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "test_tracks" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "test_tracks_tenant_isolation" ON "test_tracks";
+CREATE POLICY "test_tracks_tenant_isolation" ON "test_tracks"
+  AS PERMISSIVE FOR ALL
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "test_tracks_official_read" ON "test_tracks";
+CREATE POLICY "test_tracks_official_read" ON "test_tracks"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id IS NULL);

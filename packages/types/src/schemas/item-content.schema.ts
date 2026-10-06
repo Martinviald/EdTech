@@ -225,12 +225,14 @@ export const gapFillContentSchema = z.object({
  * `acceptedAnswers` recoge las variantes oficialmente equivalentes (la ficha
  * técnica DIA publica claves del estilo "21/10 o equivalente"). `comparison`
  * omitido se deriva del dato: si TODAS las claves parsean como número o fracción
- * la comparación es numérica, si no es textual.
+ * la comparación es numérica, si no es textual. `sequence` compara la lista
+ * ordenada de números sin importar los separadores: un orden (`3-1-4-2`) o un par
+ * ordenado (`(5,6)`, `(0;4)`) se escriben de muchas formas y todas valen.
  */
 export const shortAnswerContentSchema = z.object({
   prompt: z.string().min(1),
   acceptedAnswers: z.array(z.string().min(1)).min(1),
-  comparison: z.enum(['numeric', 'text']).optional(),
+  comparison: z.enum(['numeric', 'text', 'sequence']).optional(),
   unit: z.string().min(1).optional(),
   caseSensitive: z.boolean().optional(),
   ...baseContent,

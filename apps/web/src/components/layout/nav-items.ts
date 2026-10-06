@@ -2,6 +2,7 @@ import {
   Activity,
   BarChart3,
   BookOpen,
+  CalendarRange,
   ClipboardList,
   Cpu,
   FileText,
@@ -23,6 +24,7 @@ import type { UserRole } from '@soe/types';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
+  PROCESS_VIEWER_ROLES,
   AI_ANALYSIS_GENERATOR_ROLES,
   DOCUMENT_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
@@ -116,6 +118,13 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         icon: ClipboardList,
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
+      },
+      {
+        href: ROUTES.procesos,
+        label: 'Procesos de medición',
+        icon: CalendarRange,
+        status: 'live',
+        roles: PROCESS_VIEWER_ROLES,
       },
       {
         href: ROUTES.resultados,

@@ -92,3 +92,46 @@ describe('matchesAcceptedAnswer — indecidibles', () => {
     expect(matchesAcceptedAnswer('24', [])).toBe('undecidable');
   });
 });
+
+describe('matchesAcceptedAnswer — secuencias (comparison: sequence)', () => {
+  const opts = { comparison: 'sequence' as const };
+
+  it('un orden vale con cualquier separador', () => {
+    for (const given of ['3-1-4-2', '3,1,4,2', '3 1 4 2', '3 – 1 – 4 – 2', '3; 1; 4; 2']) {
+      expect(matchesAcceptedAnswer(given, ['3-1-4-2'], opts)).toBe('match');
+    }
+    expect(matchesAcceptedAnswer('2-4-3-1', ['2 – 4 – 3 – 1'], opts)).toBe('match');
+  });
+
+  it('un par ordenado vale con coma o punto y coma, con o sin paréntesis', () => {
+    for (const given of ['(5,6)', '(5;6)', '5,6', '( 5 , 6 )']) {
+      expect(matchesAcceptedAnswer(given, ['(5,6)'], opts)).toBe('match');
+    }
+    expect(matchesAcceptedAnswer('(0,4)', ['(0;4)'], opts)).toBe('match');
+  });
+
+  it('el orden importa: un par invertido es incorrecto', () => {
+    expect(matchesAcceptedAnswer('(6,5)', ['(5,6)'], opts)).toBe('mismatch');
+    expect(matchesAcceptedAnswer('3,1,2,4', ['3-1-4-2'], opts)).toBe('mismatch');
+  });
+
+  it('sobrar o faltar un número es incorrecto', () => {
+    expect(matchesAcceptedAnswer('3,1,4', ['3-1-4-2'], opts)).toBe('mismatch');
+    expect(matchesAcceptedAnswer('31424', ['3-1-4-2'], opts)).toBe('mismatch');
+  });
+
+  it('acepta las casillas pegadas por el escáner sólo si calzan en cantidad', () => {
+    expect(matchesAcceptedAnswer('3142', ['3-1-4-2'], opts)).toBe('match');
+    expect(matchesAcceptedAnswer('3124', ['3-1-4-2'], opts)).toBe('mismatch');
+    expect(matchesAcceptedAnswer('56', ['(5,6)'], opts)).toBe('mismatch');
+  });
+
+  it('el guion es signo sólo cuando abre el número', () => {
+    expect(matchesAcceptedAnswer('(-3,2)', ['(-3,2)'], opts)).toBe('match');
+    expect(matchesAcceptedAnswer('(3,2)', ['(-3,2)'], opts)).toBe('mismatch');
+  });
+
+  it('sin números es incorrecto', () => {
+    expect(matchesAcceptedAnswer('no sé', ['3-1-4-2'], opts)).toBe('mismatch');
+  });
+});

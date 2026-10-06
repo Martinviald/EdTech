@@ -102,15 +102,16 @@ export class SheetLayoutService {
   async getFrozen(orgId: string, layoutId: string): Promise<SheetLayoutModel> {
     const row = await withOrgContext(this.db, orgId, async (tx) => {
       const [layout] = await tx
-        .select()
+        .select({ layout: sheetLayouts, instrumentName: instruments.name })
         .from(sheetLayouts)
+        .leftJoin(instruments, eq(instruments.id, sheetLayouts.instrumentId))
         .where(and(eq(sheetLayouts.orgId, orgId), eq(sheetLayouts.id, layoutId)))
         .limit(1);
       return layout;
     });
 
     if (!row) throw new NotFoundException('Layout de hoja no encontrado');
-    return { ...this.toSummary(row), spec: row.spec };
+    return { ...this.toSummary(row.layout, row.instrumentName), spec: row.layout.spec };
   }
 
   async list(
@@ -131,16 +132,20 @@ export class SheetLayoutService {
         .from(sheetLayouts)
         .where(where);
 
+      // El nombre del instrumento se resuelve acá y no en el cliente: la web lo
+      // suplía con un mapa de `/instruments?pageSize=100`, y con 128 instrumentos
+      // en la org los nuevos quedaban fuera y se mostraban "sin nombre".
       const rows = await tx
-        .select()
+        .select({ layout: sheetLayouts, instrumentName: instruments.name })
         .from(sheetLayouts)
+        .leftJoin(instruments, eq(instruments.id, sheetLayouts.instrumentId))
         .where(where)
         .orderBy(desc(sheetLayouts.createdAt))
         .limit(query.limit)
         .offset((query.page - 1) * query.limit);
 
       return {
-        data: rows.map((row) => this.toSummary(row)),
+        data: rows.map((row) => this.toSummary(row.layout, row.instrumentName)),
         total: Number(countRow?.total ?? 0),
         page: query.page,
         limit: query.limit,
@@ -148,10 +153,14 @@ export class SheetLayoutService {
     });
   }
 
-  private toSummary(row: SheetLayout): SheetLayoutSummaryModel {
+  private toSummary(
+    row: SheetLayout,
+    instrumentName: string | null = null,
+  ): SheetLayoutSummaryModel {
     return {
       id: row.id,
       instrumentId: row.instrumentId,
+      instrumentName,
       assessmentFormId: row.assessmentFormId ?? null,
       version: row.version,
       specHash: row.specHash,

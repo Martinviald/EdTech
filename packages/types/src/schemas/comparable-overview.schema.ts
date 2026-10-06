@@ -53,6 +53,8 @@ export type ComparableUnitSummary = {
   gradeName: string | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
   year: number | null;
+  /** Línea de prueba del instrumento (M1, M2…). Null = la prueba es la asignatura. */
+  trackId: string | null;
   assessmentIds: string[];
   /** Fecha de aplicación más reciente de la unidad, para ordenar por recencia. */
   lastAdministeredAt: string | Date | null;
@@ -132,7 +134,13 @@ export type ComparableOverviewResponse = {
   generational: GenerationalHighlight[];
   totals: {
     assessments: number;
+    // Alumnos DISTINTOS. Antes era la suma de `studentsAssessed` por unidad, que
+    // cuenta cuatro veces a quien rindió cuatro asignaturas: el mismo proceso
+    // decía 490 en su ficha y 850 acá, bajo la misma etiqueta.
     studentsEvaluated: number;
+    // La suma por unidad, con el nombre que le corresponde. Es la magnitud que
+    // se cuenta por nivel (un alumno × una prueba), no un conteo de personas.
+    classifications: number;
   };
   comparability: ComparabilityMeta;
 };

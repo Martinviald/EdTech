@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { testTrackCodeSchema } from './test-track.schema';
 
 /**
  * Rol de una sección dentro de un instrumento.
@@ -10,15 +11,19 @@ export const sectionRoleSchema = z.enum(['core', 'elective']);
 export type SectionRole = z.infer<typeof sectionRoleSchema>;
 
 /**
- * Rol declarado de una sección. Una electiva SIEMPRE dice a qué grupo pertenece y cuál de
- * las alternativas es; una `core` no lleva ninguno de los dos. La BDD lo impone además con
- * un CHECK (`instrument_sections_elective_ck`): esto es la validación de entrada.
+ * Rol declarado de una sección. Una electiva SIEMPRE dice a qué grupo pertenece, cuál de
+ * las alternativas es y a qué línea de prueba (`track`, código del catálogo `test_tracks`)
+ * corresponde; una `core` no lleva ninguno de los tres (hereda la línea del instrumento).
+ * La BDD lo impone además con CHECK (`instrument_sections_elective_ck`,
+ * `instrument_sections_elective_requires_track`, `instrument_sections_track_only_elective`):
+ * esto es la validación de entrada.
  */
 export const sectionRoleDeclarationSchema = z
   .object({
     role: sectionRoleSchema.default('core'),
     electiveGroup: z.string().min(1).nullable().optional(),
     electiveKey: z.string().min(1).nullable().optional(),
+    track: testTrackCodeSchema.nullable().optional(),
   })
   .superRefine((v, ctx) => {
     if (v.role === 'elective') {
@@ -36,12 +41,26 @@ export const sectionRoleDeclarationSchema = z
           message: 'Una sección electiva debe declarar cuál de las alternativas es',
         });
       }
+      if (!v.track) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['track'],
+          message: 'Una sección electiva debe declarar su línea de prueba (track)',
+        });
+      }
     } else {
       if (v.electiveGroup || v.electiveKey) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['role'],
           message: 'Una sección `core` no puede declarar grupo ni clave electiva',
+        });
+      }
+      if (v.track) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['track'],
+          message: 'Una sección `core` no declara línea: hereda la del instrumento',
         });
       }
     }

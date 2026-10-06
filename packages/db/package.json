@@ -34,10 +34,15 @@
     "db:import:instruments": "tsx src/seed/import-instruments.ts",
     "db:import:item-tags": "tsx src/seed/import-item-tags.ts",
     "db:seed:performance-bands": "tsx src/seed/seed-performance-bands.ts",
+    "db:seed:test-tracks": "tsx src/seed/seed-test-tracks.ts",
     "db:backfill:cohort-stats": "tsx src/scripts/backfill-cohort-stats.ts",
     "db:refresh:benchmark": "tsx src/scripts/refresh-benchmark-aggregates.ts",
     "db:retype:items": "tsx src/scripts/retype-matching-truefalse-items.ts",
     "db:backfill:application-period": "tsx src/scripts/backfill-application-period.ts",
+    "db:backfill:processes": "tsx src/scripts/backfill-measurement-processes.ts",
+    "db:backfill:processes:paes": "tsx src/scripts/backfill-processes-by-config.ts --type paes --key ensayo",
+    "db:backfill:tracks": "tsx src/scripts/backfill-instrument-tracks.ts",
+    "db:migrate:cie-electivas": "tsx src/scripts/migrate-elective-sections.ts --map data/instruments-paes/cie-electivas-mapa.json",
     "db:fix:application-period": "tsx src/scripts/split-instrument-by-application-period.ts",
     "db:seed:dev": "tsx src/seed/index.ts && tsx src/seed/e2e-testing.ts && tsx src/seed/benchmark-demo.ts",
     "db:migrate:dev": "tsx src/migrate.ts && pnpm db:seed:dev",
@@ -47,7 +52,9 @@
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
     "db:import:planta-docente": "tsx src/seed/import-planta-docente.ts",
     "test": "jest",
-    "db:cohort-stamp": "tsx src/scripts/cohort-stats-stamp.ts"
+    "db:cohort-stamp": "tsx src/scripts/cohort-stats-stamp.ts",
+    "golden:master-board": "tsx src/scripts/golden-master-board.ts",
+    "fixture:process-candidates": "tsx src/scripts/export-process-candidates.ts"
   },
   "dependencies": {
     "@soe/types": "workspace:*",

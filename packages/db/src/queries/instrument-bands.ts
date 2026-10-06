@@ -10,7 +10,7 @@
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import type { Database } from '../client';
 import { performanceBands } from '../schema/results';
-import type { PerformanceBandInput } from '@soe/types';
+import type { PerformanceBandInput, PerformanceBandSource } from '@soe/types';
 
 type BandRow = {
   id: string;
@@ -21,6 +21,7 @@ type BandRow = {
   minThreshold: string;
   maxThreshold: string;
   color: string | null;
+  source: PerformanceBandSource;
 };
 
 const BAND_COLUMNS = {
@@ -32,6 +33,7 @@ const BAND_COLUMNS = {
   minThreshold: performanceBands.minThreshold,
   maxThreshold: performanceBands.maxThreshold,
   color: performanceBands.color,
+  source: performanceBands.source,
 };
 
 function toEffectiveBands(rows: BandRow[]): PerformanceBandInput[] {
@@ -46,6 +48,7 @@ function toEffectiveBands(rows: BandRow[]): PerformanceBandInput[] {
     minThreshold: Number(r.minThreshold),
     maxThreshold: Number(r.maxThreshold),
     color: r.color,
+    source: r.source,
   }));
 }
 

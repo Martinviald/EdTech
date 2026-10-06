@@ -11,6 +11,7 @@ import {
   gradingScales,
   grades,
   instruments,
+  measurementProcesses,
   skillResults,
   studentEnrollments,
   students,
@@ -70,11 +71,12 @@ import {
   resolveClassGroupScope,
   type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
+import { assessmentNameMatches } from '../common/helpers/assessment-name-search.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
-  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null, source: b.source };
 }
 
 // Umbrales por defecto (0..1) — alineados al estándar DIA. Se usan cuando la
@@ -275,6 +277,8 @@ export class DashboardsService {
       periods: [],
       instruments: [],
       applicationPeriodsWithData: [],
+      processes: [],
+      defaultProcessId: null,
       defaultAcademicYearId: null,
     };
     if (!orgId) return empty;
@@ -436,6 +440,62 @@ export class DashboardsService {
               );
       const instrumentIdsWithData = new Set(dataInstrumentRows.map((r) => r.instrumentId));
 
+      const processRows =
+        scopedCgIds.length === 0
+          ? []
+          : await tx
+              .selectDistinct({
+                id: measurementProcesses.id,
+                name: measurementProcesses.name,
+                academicYearId: measurementProcesses.academicYearId,
+                status: measurementProcesses.status,
+                startsOn: measurementProcesses.startsOn,
+              })
+              .from(measurementProcesses)
+              .innerJoin(assessments, eq(assessments.processId, measurementProcesses.id))
+              .innerJoin(
+                assessmentCourseAssignments,
+                eq(assessmentCourseAssignments.assessmentId, assessments.id),
+              )
+              .where(
+                and(
+                  eq(measurementProcesses.orgId, orgId),
+                  isNull(measurementProcesses.deletedAt),
+                  inArray(assessmentCourseAssignments.classGroupId, scopedCgIds),
+                ),
+              )
+              .orderBy(
+                sql`${measurementProcesses.startsOn} desc nulls last`,
+                measurementProcesses.name,
+              );
+
+      const processIdsWithResults =
+        processRows.length === 0
+          ? new Set<string>()
+          : new Set(
+              (
+                await tx
+                  .selectDistinct({ processId: assessments.processId })
+                  .from(assessments)
+                  .innerJoin(
+                    assessmentCourseAssignments,
+                    eq(assessmentCourseAssignments.assessmentId, assessments.id),
+                  )
+                  .where(
+                    and(
+                      eq(assessments.orgId, orgId),
+                      inArray(assessmentCourseAssignments.classGroupId, scopedCgIds),
+                      inArray(
+                        assessments.processId,
+                        processRows.map((r) => r.id),
+                      ),
+                      sql`(exists (select 1 from ${assessmentResults} where ${assessmentResults.assessmentId} = ${assessments.id})
+          or exists (select 1 from ${assessmentItemStats} where ${assessmentItemStats.assessmentId} = ${assessments.id}))`,
+                    ),
+                  )
+              ).flatMap((r) => (r.processId ? [r.processId] : [])),
+            );
+
       return {
         applicationPeriodsWithData: periodRows
           .map((r) => r.applicationPeriod)
@@ -449,6 +509,19 @@ export class DashboardsService {
           academicYearId: r.academicYearId,
         })),
         periods,
+        processes: processRows.map((r) => ({
+          id: r.id,
+          label: r.name,
+          academicYearId: r.academicYearId,
+          status: r.status,
+          hasResults: processIdsWithResults.has(r.id),
+        })),
+        defaultProcessId:
+          processRows.find(
+            (r) =>
+              processIdsWithResults.has(r.id) &&
+              (!query.academicYearId || r.academicYearId === query.academicYearId),
+          )?.id ?? null,
         defaultAcademicYearId: academicYearId,
         instruments: instrumentRows
           .filter((r) => instrumentIdsWithData.has(r.id))
@@ -1601,6 +1674,8 @@ export class DashboardsService {
       });
       if (inScope) conditions.push(inScope);
     }
+    if (query.processId) conditions.push(eq(assessments.processId, query.processId));
+    if (query.q) conditions.push(assessmentNameMatches(query.q));
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) conditions.push(eq(assessments.instrumentId, query.instrumentId));
     if (query.instrumentType?.length) {
@@ -1623,6 +1698,7 @@ export class DashboardsService {
         instrumentGradeId: instruments.gradeId,
         instrumentApplicationPeriod: instruments.applicationPeriod,
         instrumentYear: instruments.year,
+        instrumentTrackId: instruments.trackId,
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
@@ -1640,6 +1716,7 @@ export class DashboardsService {
         gradeId: row.instrumentGradeId,
         applicationPeriod: row.instrumentApplicationPeriod,
         year: row.instrumentYear,
+        trackId: row.instrumentTrackId,
       });
     }
     return { ids: Array.from(ids), refs: Array.from(byInstrument.values()) };

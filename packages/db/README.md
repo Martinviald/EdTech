@@ -27,6 +27,14 @@ expresar en los archivos `src/schema/*.ts`. Por eso viven en SQL plano versionad
 3. En la API, toda query a esa tabla debe correr dentro de
    `withOrgContext(db, orgId, tx => ...)`.
 
+## Otro SQL fuera de Drizzle: `sql/search-extensions.sql`
+
+Mismo mecanismo que el RLS, para lo que drizzle-kit tampoco genera: las extensiones
+de PostgreSQL. Hoy contiene `CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public`,
+que el buscador por palabras necesita para que "matematica" encuentre "Matemática"
+(ver `docs/diseno-buscador-evaluaciones.md`). `src/migrate.ts` lo re-aplica **siempre**,
+al inicio de `db:migrate` (antes de las migraciones y del RLS), de forma idempotente.
+
 ## Tablas con RLS activo
 
 `students`, `assessments`, `import_jobs` (org_id directo) y `responses`,
@@ -37,6 +45,26 @@ expresar en los archivos `src/schema/*.ts`. Por eso viven en SQL plano versionad
 tenants y legibles sin contexto de org). En `llm_settings` la config global la
 escribe la API (panel /configuracion/modelos-ia); la autorización es el role guard
 `platform_admin`, no el RLS.
+
+`decision_settings` sigue el mismo patrón que `llm_settings` (org_id NULLABLE) y
+`decision_calls` usa `org_id` directo (log del motor de decisiones).
+
+### Forma de la comparación en una política nueva
+
+Al agregar una tabla sensible, copia **exactamente** esta forma:
+
+```sql
+USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+```
+
+El cast va del lado de la **variable**, nunca de la columna: `org_id::text = ...`
+impide que cualquier índice btree sobre `org_id` sirva la política (seq scan
+garantizado) y además le impide al planificador estimar la selectividad. Y el
+`nullif` no es cosmético: sin contexto, `current_setting(..., true)` devuelve `''`
+en cuanto la conexión ya corrió una transacción con `set_config(..., true)` —con
+pooling, el caso normal—, y `''::uuid` **lanza error** en vez de devolver NULL.
+Con `nullif` la comparación queda NULL, el RLS no muestra la fila y se conserva el
+safe default de 0 filas. Ver las notas de diseño en `sql/rls-policies.sql`.
 
 ## withOrgContext (regla de la capa de aplicación)
 

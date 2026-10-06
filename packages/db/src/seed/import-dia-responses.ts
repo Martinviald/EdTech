@@ -167,7 +167,7 @@ async function main() {
     // Guarda de secciones electivas: este cargador escribe una respuesta por CADA ítem del
     // instrumento, así que con ramas a elección inventaría respuestas incorrectas.
     for (const instId of instIds) {
-      await assertNoElectiveSections(db, instId, 'import-dia-responses');
+      await assertNoElectiveSections(tx, instId, 'import-dia-responses');
     }
     const allTags = await tx
       .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })

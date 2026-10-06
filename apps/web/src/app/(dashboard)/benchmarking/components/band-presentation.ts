@@ -1,59 +1,70 @@
-import type { BenchmarkBandDistribution } from '@soe/types';
+import type { BenchmarkBandCount, PerformanceLevel } from '@soe/types';
+import { bandLegacyLevel } from '@/components/official-reports/band-levels';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Presentación de las bandas de desempeño del benchmarking (H7.5). Las claves
-// coinciden con `BenchmarkBandDistribution` de @soe/types (insufficient /
-// elementary / adequate / advanced). Colores via tokens Tailwind (sin hex inline)
-// y consistentes con la escala de logro usada en el resto de la app.
+// Presentación de las bandas del benchmarking (H7.5) en los niveles PROPIOS del
+// instrumento (`band_counts`, p. ej. DIA Nivel I/II/III), los mismos que muestran las
+// vistas de resultados. El color se hereda de la escala de logro por la posición de
+// la banda dentro del set (`bandLegacyLevel`); la etiqueta es siempre la real.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Clave de banda = clave del objeto `BenchmarkBandDistribution`. */
-export type BenchmarkBandKey = keyof BenchmarkBandDistribution;
-
-/** Orden canónico de menor a mayor logro. */
-export const BENCHMARK_BAND_ORDER: readonly BenchmarkBandKey[] = [
-  'insufficient',
-  'elementary',
-  'adequate',
-  'advanced',
-];
-
-export const BENCHMARK_BAND_LABELS: Record<BenchmarkBandKey, string> = {
-  insufficient: 'Insuficiente',
-  elementary: 'Elemental',
-  adequate: 'Adecuado',
-  advanced: 'Avanzado',
-};
-
-/** Clase de relleno (barra) por banda, con soporte dark mode. */
-export const BENCHMARK_BAND_BAR_CLASS: Record<BenchmarkBandKey, string> = {
+const LEVEL_BAR_CLASS: Record<PerformanceLevel, string> = {
   insufficient: 'bg-level-insufficient',
   elementary: 'bg-level-elementary',
   adequate: 'bg-level-adequate',
   advanced: 'bg-level-advanced',
 };
 
-/** Clase de chip (texto + fondo) por banda, para leyendas. */
-export const BENCHMARK_BAND_BADGE_CLASS: Record<BenchmarkBandKey, string> = {
+const LEVEL_BADGE_CLASS: Record<PerformanceLevel, string> = {
   insufficient: 'border-transparent bg-level-insufficient/15 text-level-insufficient',
   elementary: 'border-transparent bg-level-elementary/15 text-level-elementary',
   adequate: 'border-transparent bg-level-adequate/15 text-level-adequate',
   advanced: 'border-transparent bg-level-advanced/15 text-level-advanced',
 };
 
-/** Total de alumnos sumando todas las bandas de una distribución. */
-export function bandDistributionTotal(dist: BenchmarkBandDistribution): number {
-  return BENCHMARK_BAND_ORDER.reduce((acc, key) => acc + dist[key], 0);
+/** Una banda del set, sin conteo (para leyendas y columnas). */
+export type BenchmarkBandRef = { bandKey: string; label: string; order: number };
+
+/** Unión de las bandas presentes en varias distribuciones, ordenada de menor a mayor. */
+export function unionBands(lists: readonly (readonly BenchmarkBandCount[])[]): BenchmarkBandRef[] {
+  const byKey = new Map<string, BenchmarkBandRef>();
+  for (const list of lists) {
+    for (const band of list) {
+      if (!byKey.has(band.bandKey)) {
+        byKey.set(band.bandKey, { bandKey: band.bandKey, label: band.label, order: band.order });
+      }
+    }
+  }
+  return Array.from(byKey.values()).sort((a, b) => a.order - b.order);
 }
 
-/** Porcentaje (0..100) de una banda dentro de su distribución. */
-export function bandPercentage(
-  dist: BenchmarkBandDistribution,
-  key: BenchmarkBandKey,
-): number {
-  const total = bandDistributionTotal(dist);
-  if (total <= 0) return 0;
-  return (dist[key] / total) * 100;
+/** % (0..100) por clave de banda dentro de una distribución. */
+export function bandPercentages(counts: readonly BenchmarkBandCount[]): Map<string, number> {
+  let total = 0;
+  for (const band of counts) total += band.count;
+  const result = new Map<string, number>();
+  for (const band of counts) {
+    result.set(band.bandKey, total > 0 ? (band.count / total) * 100 : 0);
+  }
+  return result;
+}
+
+export function bandBarClass(band: BenchmarkBandRef, bands: readonly BenchmarkBandRef[]): string {
+  return LEVEL_BAR_CLASS[
+    bandLegacyLevel(
+      band.order,
+      bands.map((b) => b.order),
+    )
+  ];
+}
+
+export function bandBadgeClass(band: BenchmarkBandRef, bands: readonly BenchmarkBandRef[]): string {
+  return LEVEL_BADGE_CLASS[
+    bandLegacyLevel(
+      band.order,
+      bands.map((b) => b.order),
+    )
+  ];
 }
 
 /** Formatea un % de logro 0..100 (o null) con un decimal. */

@@ -1,0 +1,53 @@
+{
+  "tracks": [
+    {
+      "subjectCode": "MATH",
+      "code": "M1",
+      "name": "Competencia Matemática 1",
+      "shortName": "M1",
+      "order": 1
+    },
+    {
+      "subjectCode": "MATH",
+      "code": "M2",
+      "name": "Competencia Matemática 2",
+      "shortName": "M2",
+      "order": 2
+    },
+    {
+      "subjectCode": "SCI",
+      "code": "CIE-COMUN",
+      "name": "Ciencias: módulo común",
+      "shortName": "Común",
+      "order": 1
+    },
+    {
+      "subjectCode": "SCI",
+      "code": "BIO",
+      "name": "Biología",
+      "shortName": "Bio",
+      "order": 2
+    },
+    {
+      "subjectCode": "SCI",
+      "code": "FIS",
+      "name": "Física",
+      "shortName": "Fís",
+      "order": 3
+    },
+    {
+      "subjectCode": "SCI",
+      "code": "QUI",
+      "name": "Química",
+      "shortName": "Quí",
+      "order": 4
+    },
+    {
+      "subjectCode": "ENG",
+      "code": "SPEAKING",
+      "name": "Inglés: expresión oral (Speaking)",
+      "shortName": "Speaking",
+      "order": 1
+    }
+  ]
+}

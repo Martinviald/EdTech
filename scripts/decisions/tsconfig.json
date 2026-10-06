@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmit": true,
+    "incremental": false,
+    "baseUrl": ".",
+    "paths": {
+      "@soe/decisions": ["../../packages/decisions/src/index.ts"]
+    }
+  },
+  "include": ["./*.ts"]
+}

@@ -3,14 +3,20 @@ import { redirect } from 'next/navigation';
 import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import { canAccess, DASHBOARD_VIEWER_ROLES } from '@soe/types';
+import {
+  canAccess,
+  DASHBOARD_VIEWER_ROLES,
+  sampleSizeLabel,
+  type SkillAchievementModel,
+} from '@soe/types';
+import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import { PageActions, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
   buildDashboardQuery,
-  withDefaultAcademicYear,
+  withEntryDefaults,
   toScalarFilters,
   type DashboardFilterValues,
 } from '../components/dashboard-filters';
@@ -70,7 +76,12 @@ export default async function DimensionesPage({
       </Suspense>
 
       <Suspense fallback={<CardSkeleton rows={5} />}>
-        <SkillsSection query={skillsQuery} filters={filters} assessmentId={assessmentId} />
+        <SkillsSection
+          query={skillsQuery}
+          filters={filters}
+          assessmentId={assessmentId}
+          canSeeSample={canSeeBenchmark(session.user.roles)}
+        />
       </Suspense>
     </>
   );
@@ -87,7 +98,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={BASE_PATH}
     />
   );
@@ -101,9 +112,7 @@ async function DimensionesAction({
   filters: DashboardFilterValues;
 }) {
   const options = await getDashboardFilters(query);
-  const scopedQuery = buildDashboardQuery(
-    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
-  );
+  const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
   const skillsResponse = await getDashboardSkills(scopedQuery);
   if (skillsResponse.skills.length === 0) return null;
   return <AskAiButton prompt={ASK_AI_PROMPT} />;
@@ -113,17 +122,29 @@ async function SkillsSection({
   query,
   filters,
   assessmentId,
+  canSeeSample,
 }: {
   query: string;
   filters: DashboardFilterValues;
   assessmentId?: string;
+  canSeeSample: boolean;
 }) {
   const options = await getDashboardFilters(query);
-  const scopedQuery = buildDashboardQuery(
-    withDefaultAcademicYear(filters, options.defaultAcademicYearId),
-  );
+  const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
   const skillsResponse = await getDashboardSkills(scopedQuery);
   const skills = skillsResponse.skills;
+  const comparability = skillsResponse.comparability;
+  const sampleInstrumentId =
+    canSeeSample && comparability.aggregatable && comparability.instrumentIds.length === 1
+      ? comparability.instrumentIds[0]!
+      : null;
+  const breakdown = (
+    <SkillsBreakdown
+      skills={skills}
+      filters={toScalarFilters(filters)}
+      assessmentId={assessmentId}
+    />
+  );
 
   if (skills.length === 0) {
     return (
@@ -138,11 +159,40 @@ async function SkillsSection({
   return (
     <>
       <ComparabilityNotice comparability={skillsResponse.comparability} className="mb-4" />
-      <SkillsBreakdown
-        skills={skills}
-        filters={toScalarFilters(filters)}
-        assessmentId={assessmentId}
-      />
+      {sampleInstrumentId ? (
+        <Suspense fallback={breakdown}>
+          <SkillsBreakdownWithSample
+            instrumentId={sampleInstrumentId}
+            skills={skills}
+            filters={toScalarFilters(filters)}
+            assessmentId={assessmentId}
+          />
+        </Suspense>
+      ) : (
+        breakdown
+      )}
     </>
+  );
+}
+
+async function SkillsBreakdownWithSample({
+  instrumentId,
+  ...props
+}: {
+  instrumentId: string;
+  skills: SkillAchievementModel[];
+  filters: ReturnType<typeof toScalarFilters>;
+  assessmentId?: string;
+}) {
+  const global = (await getInstrumentSample(instrumentId))?.global;
+  return (
+    <SkillsBreakdown
+      {...props}
+      sample={
+        global
+          ? { label: global.label, sizeLabel: sampleSizeLabel(global), skills: global.perSkill }
+          : null
+      }
+    />
   );
 }

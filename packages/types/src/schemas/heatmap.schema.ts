@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { PerformanceLevel } from '../enums';
 import type { ComparabilityMeta } from '../comparability';
-import { csvArraySchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
+import { csvArraySchema, searchTermSchema, stringCsvSchema, uuidCsvSchema } from './common.schema';
 import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,6 +28,11 @@ export const heatmapQuerySchema = z.object({
   // Momento DIA (T2-27): sólo aplica a instrumentos con ciclo (ej. DIA).
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   academicYearId: z.string().uuid().optional(),
+  // Proceso de medición: acota a las evaluaciones de una ventana de aplicación.
+  processId: z.string().uuid().optional(),
+  // Buscador por palabras (docs/diseno-buscador-evaluaciones.md): mismo contrato
+  // que `dashboardFiltersQuerySchema.q`.
+  q: searchTermSchema,
 });
 export type HeatmapQueryDto = z.infer<typeof heatmapQuerySchema>;
 

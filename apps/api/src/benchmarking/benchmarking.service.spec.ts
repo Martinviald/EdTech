@@ -91,7 +91,11 @@ const aggRow = (overrides: Record<string, unknown> = {}) => ({
   networkOrgId: null,
   studentCount: 30,
   avgAchievement: '60.00',
-  bandDistribution: { insufficient: 5, elementary: 10, adequate: 10, advanced: 5 },
+  bandCounts: [
+    { bandKey: 'dia_nivel_1', label: 'Nivel I', order: 1, count: 5 },
+    { bandKey: 'dia_nivel_2', label: 'Nivel II', order: 2, count: 15 },
+    { bandKey: 'dia_nivel_3', label: 'Nivel III', order: 3, count: 10 },
+  ],
   perSkill: [],
   optOutGlobalPool: false,
   refreshedAt: new Date('2026-06-01T00:00:00Z'),
@@ -137,6 +141,12 @@ describe('BenchmarkingService.compare (global)', () => {
     expect(res.cohort!.median).toBe(65); // mediana de [50,60,70,80]
     expect(res.cohort!.p25).toBe(57.5);
     expect(res.cohort!.p75).toBe(72.5);
+    expect(res.cohort!.avgAchievement).toBe(65);
+    expect(res.cohort!.bandCounts).toEqual([
+      { bandKey: 'dia_nivel_1', label: 'Nivel I', order: 1, count: 20 },
+      { bandKey: 'dia_nivel_2', label: 'Nivel II', order: 2, count: 60 },
+      { bandKey: 'dia_nivel_3', label: 'Nivel III', order: 3, count: 40 },
+    ]);
     // 70 es el 3º de 4: below=2, equal=1 → (2 + 0.5)/4 * 100 = 62.5
     expect(res.yourSchool!.percentile).toBe(62.5);
     expect(res.yourSchool!.avgAchievement).toBe(70);

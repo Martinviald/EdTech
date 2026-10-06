@@ -41,6 +41,15 @@ export type FilterField = SelectFilterField | CustomFilterField;
 
 interface FilterBarProps {
   fields: readonly FilterField[];
+  /**
+   * Campo que ocupa una fila propia de ancho completo, debajo de los demás.
+   *
+   * Existe para el buscador por texto: en la fila que envuelve quedaba apretado
+   * entre selects de 180px, que es justo el control que más ancho necesita. No se
+   * resuelve con el orden del arreglo — dónde cae cada campo depende del ancho de
+   * la ventana, no de su posición.
+   */
+  fullWidthField?: FilterField;
   /** Acciones al final de la barra (p. ej. un botón "Limpiar filtros"). */
   actions?: ReactNode;
   /**
@@ -61,6 +70,7 @@ interface FilterBarProps {
  */
 export function FilterBar({
   fields,
+  fullWidthField,
   actions,
   layout = 'row',
   pending = false,
@@ -101,6 +111,11 @@ export function FilterBar({
         )}
         {actions && !isGrid ? <div className="flex flex-none items-end">{actions}</div> : null}
       </div>
+      {fullWidthField && !fullWidthField.hidden ? (
+        <div className="mt-3 w-full">
+          <FilterFieldCell field={fullWidthField} isGrid />
+        </div>
+      ) : null}
       {actions && isGrid && !actionsInLastCell ? (
         <div className="mt-3 flex justify-end">{actions}</div>
       ) : null}

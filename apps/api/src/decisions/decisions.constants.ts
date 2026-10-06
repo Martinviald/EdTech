@@ -1,0 +1,9 @@
+export const DECISION_ENGINES = Symbol('DECISION_ENGINES');
+
+export const DECISION_MAX_CONCURRENCY = 8;
+
+export const DECISION_MAX_SHADOW_BACKLOG = 16;
+
+export const DECISION_SHADOW_TIMEOUT_MS = 5_000;
+
+export const DECISION_CONFIG_CACHE_TTL_MS = 30_000;

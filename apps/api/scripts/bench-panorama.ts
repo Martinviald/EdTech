@@ -13,6 +13,7 @@ import type { JwtPayload } from '../src/auth/jwt-payload.types';
 import type { Database } from '../src/database/database.types';
 import { ComparableTrajectoryService } from '../src/analytics/comparable-trajectory.service';
 import { ComparableAlertsService } from '../src/dashboards/comparable-alerts.service';
+import { BenchmarkSamplesService } from '../src/benchmarking/benchmark-samples.service';
 import { ComparableOverviewService } from '../src/dashboards/comparable-overview.service';
 import { ComparableUnitAssembler } from '../src/dashboards/comparable/comparable-unit.assembler';
 import { DashboardsService } from '../src/dashboards/dashboards.service';
@@ -201,6 +202,7 @@ async function main(): Promise<void> {
       new DashboardsService(db),
       new ComparableAlertsService(),
       assembler,
+      new BenchmarkSamplesService(db),
     ),
     trajectory: new ComparableTrajectoryService(db, assembler),
     comparisons: new StudentComparisonsService(db, assembler),

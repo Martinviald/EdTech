@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
@@ -39,6 +40,7 @@ import {
   type StudentResultDetail,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { BenchmarkingRefreshService } from '../benchmarking/benchmarking-refresh.service';
 import { InjectDb, type Database } from '../database/database.types';
 import { defaultLinearChileanScale } from './lib/result-aggregator';
 import {
@@ -71,7 +73,10 @@ function toBandView(r: {
 
 @Injectable()
 export class AssessmentResultsService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    @Optional() private readonly benchmarkRefresh?: BenchmarkingRefreshService,
+  ) {}
 
   // ───────────────────────────────────────────────────────────────────────────
   // POST /assessments/:id/results/calculate
@@ -87,7 +92,7 @@ export class AssessmentResultsService {
       throw new ForbiddenException('Usuario sin organización activa');
     }
 
-    return withOrgContext(this.db, orgId, async (tx) => {
+    const result = await withOrgContext(this.db, orgId, async (tx) => {
       const assessment = await this.requireAssessmentOwnedByUser(tx, user, assessmentId);
 
       // Un assessment `aggregate_only` no tiene `responses` que recalcular: sus
@@ -125,6 +130,8 @@ export class AssessmentResultsService {
 
       return this.computeAndPersist(tx, assessmentId, assessment.instrumentId, scale);
     });
+    this.benchmarkRefresh?.refreshOrgInBackground(orgId);
+    return result;
   }
 
   /**
@@ -234,6 +241,7 @@ export class AssessmentResultsService {
 
       assessmentsSkipped.push(...summary.skipped);
       if (summary.assessments > 0) {
+        this.benchmarkRefresh?.refreshOrgInBackground(org.id);
         orgsAffected += 1;
         assessmentsRecalculated += summary.assessments;
         studentsProcessed += summary.students;

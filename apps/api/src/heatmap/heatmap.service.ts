@@ -42,6 +42,7 @@ import {
   resolveClassGroupScope,
   type ClassGroupScope,
 } from '../common/helpers/class-group-scope.helper';
+import { assessmentNameMatches } from '../common/helpers/assessment-name-search.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 const EMPTY_HEATMAP: HeatmapResponse = {
@@ -180,6 +181,7 @@ export class HeatmapService {
         gradeId: instruments.gradeId,
         applicationPeriod: instruments.applicationPeriod,
         year: instruments.year,
+        trackId: instruments.trackId,
         createdAt: instruments.createdAt,
         config: gradingScales.config,
       })
@@ -204,6 +206,7 @@ export class HeatmapService {
         gradeId: row.gradeId,
         applicationPeriod: row.applicationPeriod,
         year: row.year,
+        trackId: row.trackId,
       });
     }
 
@@ -266,6 +269,8 @@ export class HeatmapService {
       sql`${instruments.subjectId} is not null`,
     ];
 
+    if (query.processId) conditions.push(eq(assessments.processId, query.processId));
+    if (query.q) conditions.push(assessmentNameMatches(query.q));
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) {
       conditions.push(eq(assessments.instrumentId, query.instrumentId));
