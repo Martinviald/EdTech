@@ -4,8 +4,6 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
-  INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  INSTRUMENT_TYPE_LABELS,
   PROCESS_KIND_BY_INSTRUMENT_TYPE,
   expandExpectedCells,
   expectedCellKey,
@@ -24,6 +22,7 @@ import { classGroups } from '../schema/academic';
 import { instruments } from '../schema/instruments';
 import { assessments, assessmentCourseAssignments } from '../schema/assessments';
 import { measurementProcesses } from '../schema/measurement-processes';
+import { buildPeriodProcessName } from '../lib/config-process-grouping';
 
 type ScriptOptions = {
   dryRun: boolean;
@@ -70,9 +69,7 @@ function parseArgs(argv: readonly string[]): ScriptOptions {
 }
 
 function processName(group: ProcessGroup): string {
-  const typeLabel = INSTRUMENT_TYPE_LABELS[group.instrumentType] ?? group.instrumentType;
-  const periodLabel = group.period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[group.period] : null;
-  return [typeLabel, periodLabel, group.year].filter(Boolean).join(' ');
+  return buildPeriodProcessName(group.instrumentType, group.period, group.year);
 }
 
 function toDateOnly(value: Date | null): string | null {

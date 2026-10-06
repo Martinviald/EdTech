@@ -10,6 +10,7 @@
  * que la viola queda ambiguo y no se asigna.
  */
 import {
+  INSTRUMENT_APPLICATION_PERIOD_LABELS,
   INSTRUMENT_TYPE_LABELS,
   PROCESS_KIND_BY_INSTRUMENT_TYPE,
   expectedCellKey,
@@ -72,37 +73,61 @@ export function buildConfigProcessName(
   return `${typeLabel} ${configValue} ${year}`;
 }
 
+/** Nombre del proceso por período: "<tipo> <momento> <año>", p. ej. "DIA Monitoreo 2026". */
+export function buildPeriodProcessName(
+  instrumentType: string,
+  period: InstrumentApplicationPeriod | null,
+  year: number,
+): string {
+  const typeLabel = INSTRUMENT_TYPE_LABELS[instrumentType as InstrumentType] ?? instrumentType;
+  const periodLabel = period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[period] : null;
+  return [typeLabel, periodLabel, year].filter(Boolean).join(' ');
+}
+
+/**
+ * Alcance esperado derivado de lo que ya está cargado: los cursos y asignaturas observados,
+ * con los pares (curso, asignatura) que nunca se aplicaron en `excludedCells`.
+ */
+export function deriveExpectedScope(
+  cells: readonly { classGroupId: string; subjectId: string | null }[],
+): ExpectedScope {
+  const classGroupIds = new Set<string>();
+  const subjectIds = new Set<string>();
+  const observed = new Set<string>();
+  for (const cell of cells) {
+    classGroupIds.add(cell.classGroupId);
+    if (!cell.subjectId) continue;
+    subjectIds.add(cell.subjectId);
+    observed.add(expectedCellKey({ classGroupId: cell.classGroupId, subjectId: cell.subjectId }));
+  }
+  const excludedCells: ExpectedScopeCell[] = [];
+  for (const classGroupId of classGroupIds) {
+    for (const subjectId of subjectIds) {
+      const cell = { classGroupId, subjectId };
+      if (!observed.has(expectedCellKey(cell))) excludedCells.push(cell);
+    }
+  }
+  return {
+    classGroupIds: Array.from(classGroupIds),
+    subjectIds: Array.from(subjectIds),
+    excludedCells,
+    derived: true,
+  };
+}
+
 function buildPlan(key: string, candidates: readonly ConfigProcessCandidate[]): ConfigProcessPlan {
   const first = candidates[0];
   if (!first) throw new Error(`Grupo vacío: ${key}`);
 
   const assessmentIds = new Set<string>();
-  const classGroupIds = new Set<string>();
-  const subjectIds = new Set<string>();
-  const observedCells = new Set<string>();
   const periods = new Set<InstrumentApplicationPeriod | null>();
   const taxonomyIds = new Set<string>();
   const dates: string[] = [];
   for (const candidate of candidates) {
     assessmentIds.add(candidate.assessmentId);
-    classGroupIds.add(candidate.classGroupId);
     periods.add(candidate.applicationPeriod as InstrumentApplicationPeriod | null);
     if (candidate.taxonomyId) taxonomyIds.add(candidate.taxonomyId);
     if (candidate.administeredOn) dates.push(candidate.administeredOn);
-    if (candidate.subjectId) {
-      subjectIds.add(candidate.subjectId);
-      observedCells.add(
-        expectedCellKey({ classGroupId: candidate.classGroupId, subjectId: candidate.subjectId }),
-      );
-    }
-  }
-
-  const excludedCells: ExpectedScopeCell[] = [];
-  for (const classGroupId of classGroupIds) {
-    for (const subjectId of subjectIds) {
-      const cell = { classGroupId, subjectId };
-      if (!observedCells.has(expectedCellKey(cell))) excludedCells.push(cell);
-    }
   }
   dates.sort();
   const name = buildConfigProcessName(first.instrumentType, first.configValue, first.year);
@@ -121,12 +146,7 @@ function buildPlan(key: string, candidates: readonly ConfigProcessCandidate[]): 
     startsOn: dates[0] ?? null,
     endsOn: dates[dates.length - 1] ?? null,
     assessmentIds: Array.from(assessmentIds).sort(),
-    expectedScope: {
-      classGroupIds: Array.from(classGroupIds),
-      subjectIds: Array.from(subjectIds),
-      excludedCells,
-      derived: true,
-    },
+    expectedScope: deriveExpectedScope(candidates),
     violations: findProcessInvariantViolations(candidates),
   };
 }

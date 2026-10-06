@@ -16,12 +16,12 @@ import { config } from 'dotenv';
 import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
-import { and, eq, inArray, isNull, ne, sql, type SQL } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import { createDbClient, type Database } from '../client';
 import { academicYears } from '../schema/organizations';
-import { classGroups } from '../schema/academic';
 import { instruments } from '../schema/instruments';
-import { assessments, assessmentCourseAssignments } from '../schema/assessments';
+import { assessments } from '../schema/assessments';
+import { loadProcessCandidateRows } from '../queries/process-linking';
 import { measurementProcesses } from '../schema/measurement-processes';
 import {
   groupCandidatesByConfigValue,
@@ -57,43 +57,17 @@ function parseArgs(argv: readonly string[]): Options {
 }
 
 async function loadCandidates(db: Database, options: Options): Promise<ConfigProcessCandidate[]> {
-  const configValue = sql<string>`${assessments.config}->>${options.configKey}`;
   const conditions: SQL[] = [
     eq(assessments.orgId, options.orgId),
     isNull(assessments.processId),
-    ne(assessments.status, 'cancelled'),
-    isNull(instruments.deletedAt),
     sql`${instruments.type}::text = ${options.instrumentType}`,
-    sql`${configValue} is not null`,
+    sql`${assessments.config}->>${options.configKey} is not null`,
   ];
   if (options.year !== null) conditions.push(eq(academicYears.year, options.year));
-
-  return db
-    .select({
-      assessmentId: assessments.id,
-      orgId: assessments.orgId,
-      academicYearId: classGroups.academicYearId,
-      year: academicYears.year,
-      instrumentId: instruments.id,
-      instrumentType: sql<string>`${instruments.type}::text`,
-      applicationPeriod: instruments.applicationPeriod,
-      gradeId: classGroups.gradeId,
-      subjectId: instruments.subjectId,
-      trackId: instruments.trackId,
-      taxonomyId: instruments.taxonomyId,
-      classGroupId: classGroups.id,
-      configValue,
-      administeredOn: sql<string | null>`to_char(${assessments.administeredAt}, 'YYYY-MM-DD')`,
-    })
-    .from(assessments)
-    .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-    .innerJoin(
-      assessmentCourseAssignments,
-      eq(assessmentCourseAssignments.assessmentId, assessments.id),
-    )
-    .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
-    .innerJoin(academicYears, eq(academicYears.id, classGroups.academicYearId))
-    .where(and(...conditions));
+  const rows = await loadProcessCandidateRows(db, conditions, options.configKey);
+  return rows.flatMap((row) =>
+    row.configValue === null ? [] : [{ ...row, configValue: row.configValue }],
+  );
 }
 
 async function applyPlan(
