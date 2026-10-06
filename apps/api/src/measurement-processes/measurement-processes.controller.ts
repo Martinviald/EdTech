@@ -26,6 +26,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 import { MeasurementProcessesService } from './measurement-processes.service';
 
 @Controller('measurement-processes')
@@ -39,13 +40,16 @@ export class MeasurementProcessesController {
     @Query() query: unknown,
     @CurrentUser() user: JwtPayload,
   ): Promise<MeasurementProcessListResponse> {
-    return this.service.list(user, measurementProcessListQuerySchema.parse(query ?? {}));
+    return this.service.list(
+      user,
+      parseDtoOrBadRequest(measurementProcessListQuerySchema, query ?? {}),
+    );
   }
 
   @Post()
   @Roles(...PROCESS_MANAGEMENT_ROLES)
   create(@Body() body: unknown, @CurrentUser() user: JwtPayload): Promise<MeasurementProcessModel> {
-    return this.service.create(user, createMeasurementProcessSchema.parse(body));
+    return this.service.create(user, parseDtoOrBadRequest(createMeasurementProcessSchema, body));
   }
 
   @Get(':processId')
@@ -64,7 +68,11 @@ export class MeasurementProcessesController {
     @Body() body: unknown,
     @CurrentUser() user: JwtPayload,
   ): Promise<MeasurementProcessModel> {
-    return this.service.update(user, processId, updateMeasurementProcessSchema.parse(body));
+    return this.service.update(
+      user,
+      processId,
+      parseDtoOrBadRequest(updateMeasurementProcessSchema, body),
+    );
   }
 
   @Delete(':processId')
@@ -101,6 +109,10 @@ export class MeasurementProcessesController {
     @Body() body: unknown,
     @CurrentUser() user: JwtPayload,
   ): Promise<{ processId: string; linked: number; unlinked: number }> {
-    return this.service.linkAssessments(user, processId, linkProcessAssessmentsSchema.parse(body));
+    return this.service.linkAssessments(
+      user,
+      processId,
+      parseDtoOrBadRequest(linkProcessAssessmentsSchema, body),
+    );
   }
 }
