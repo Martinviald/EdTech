@@ -2,7 +2,7 @@
  * Exporta (SOLO LECTURA) el fixture anonimizado que alimenta los tests del agrupador de
  * procesos de medición: una fila por evaluación × curso asignado de la org, con los datos
  * que el agrupador usa para decidir el proceso (año, tipo, período, grado, asignatura,
- * fecha y `config.ensayo`). No lleva alumnos, nombres de personas ni RUT.
+ * línea de prueba, fecha y `config.ensayo`). No lleva alumnos, nombres de personas ni RUT.
  *
  *   DATABASE_ADMIN_URL=<url> pnpm --filter @soe/db fixture:process-candidates [--org <uuid>] [--out <ruta>]
  */
@@ -19,6 +19,7 @@ import { academicYears } from '../schema/organizations';
 import { assessments, assessmentCourseAssignments } from '../schema/assessments';
 import { instruments } from '../schema/instruments';
 import { classGroups, grades, subjects } from '../schema/academic';
+import { testTracks } from '../schema/test-tracks';
 
 const CSCJ_ORG_ID = 'c5c10000-0000-0000-0000-000000000001';
 const DEFAULT_OUT = resolve(__dirname, '__fixtures__/process-candidates.json');
@@ -46,6 +47,8 @@ async function loadCandidates(db: Database, orgId: string) {
         gradeCode: grades.code,
         subjectId: instruments.subjectId,
         subjectCode: subjects.code,
+        trackId: instruments.trackId,
+        trackCode: testTracks.code,
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
         administeredAt: assessments.administeredAt,
@@ -62,6 +65,7 @@ async function loadCandidates(db: Database, orgId: string) {
       .innerJoin(academicYears, eq(academicYears.id, classGroups.academicYearId))
       .innerJoin(grades, eq(grades.id, classGroups.gradeId))
       .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
+      .leftJoin(testTracks, eq(testTracks.id, instruments.trackId))
       .where(eq(assessments.orgId, orgId));
 
     return rows

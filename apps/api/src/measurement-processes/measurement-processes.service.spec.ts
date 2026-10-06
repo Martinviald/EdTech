@@ -82,6 +82,7 @@ function linkRow(overrides: Record<string, unknown>) {
     applicationPeriod: 'intermedio',
     gradeId: 'g-4b',
     subjectId: 'lang',
+    trackId: null,
     ...overrides,
   };
 }
@@ -178,6 +179,54 @@ describe('MeasurementProcessesService.linkAssessments', () => {
     await expect(
       makeService(db).linkAssessments(makeUser(), PROCESS_ID, {
         assessmentIds: ['a-ensayo-2'],
+        action: 'link',
+      }),
+    ).rejects.toThrow(/dos instrumentos distintos para el mismo nivel y prueba/);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('acepta M1 y M2 de la misma asignatura y nivel: son líneas de prueba distintas', async () => {
+    const paes = {
+      instrumentType: 'paes',
+      applicationPeriod: null,
+      gradeId: 'g-iv',
+      subjectId: 'math',
+    };
+    const { db, updates } = makeDb([
+      [processRow()],
+      [
+        linkRow({ ...paes, assessmentId: 'a-m1', instrumentId: 'i-m1-e3', trackId: 't-m1' }),
+        linkRow({ ...paes, assessmentId: 'a-m2', instrumentId: 'i-m2-e3', trackId: 't-m2' }),
+      ],
+    ]);
+
+    await expect(
+      makeService(db).linkAssessments(makeUser(), PROCESS_ID, {
+        assessmentIds: ['a-m2'],
+        action: 'link',
+      }),
+    ).resolves.toEqual({ processId: PROCESS_ID, linked: 1, unlinked: 0 });
+    expect(updates).toHaveLength(1);
+  });
+
+  it('rechaza dos tandas de la misma línea de prueba en un proceso', async () => {
+    const paes = {
+      instrumentType: 'paes',
+      applicationPeriod: null,
+      gradeId: 'g-iv',
+      subjectId: 'math',
+    };
+    const { db, updates } = makeDb([
+      [processRow()],
+      [
+        linkRow({ ...paes, assessmentId: 'a-m1-e3', instrumentId: 'i-m1-e3', trackId: 't-m1' }),
+        linkRow({ ...paes, assessmentId: 'a-m1-e4', instrumentId: 'i-m1-e4', trackId: 't-m1' }),
+      ],
+    ]);
+
+    await expect(
+      makeService(db).linkAssessments(makeUser(), PROCESS_ID, {
+        assessmentIds: ['a-m1-e4'],
         action: 'link',
       }),
     ).rejects.toThrow(/dos instrumentos distintos para el mismo nivel y prueba/);

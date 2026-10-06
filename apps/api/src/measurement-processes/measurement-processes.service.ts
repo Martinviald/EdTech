@@ -355,6 +355,7 @@ export class MeasurementProcessesService {
         applicationPeriod: instruments.applicationPeriod,
         gradeId: classGroups.gradeId,
         subjectId: instruments.subjectId,
+        trackId: instruments.trackId,
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))

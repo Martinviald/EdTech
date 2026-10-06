@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import {
   findProcessInvariantViolations,
   groupProcessCandidates,
+  subjectTestKey,
   type ProcessCandidate,
 } from './process-grouping';
 
@@ -10,6 +11,7 @@ type FixtureCandidate = ProcessCandidate & {
   ensayo: number | null;
   year: number;
   subjectCode: string | null;
+  trackCode: string | null;
 };
 
 const FIXTURE_PATH = resolve(
@@ -36,6 +38,7 @@ function candidate(overrides: Partial<ProcessCandidate>): ProcessCandidate {
     applicationPeriod: 'intermedio',
     gradeId: 'g-4b',
     subjectId: 'lang',
+    trackId: null,
     ...overrides,
   };
 }
@@ -71,12 +74,31 @@ describe('groupProcessCandidates con el fixture del banco local', () => {
       c.subjectCode && multiTrackSubjects.has(c.subjectCode) ? c.instrumentId : c.subjectId;
     for (const tanda of tandas) {
       const slice = paes.filter((c) => c.ensayo === tanda);
-      const violations = findProcessInvariantViolations(slice);
+      const violations = findProcessInvariantViolations(slice, subjectTestKey);
       for (const violation of violations) {
         expect(multiTrackSubjects.has(subjectCodeById.get(violation.testKey) ?? '')).toBe(true);
       }
       expect(findProcessInvariantViolations(slice, instrumentAsTrack)).toEqual([]);
     }
+  });
+
+  it('por tanda, con la línea como prueba, M1 y M2 ya no chocan; solo Ciencias legacy', () => {
+    const paes = fixture.filter((c) => c.instrumentType === 'paes');
+    const subjectCodeById = new Map(paes.map((c) => [c.subjectId, c.subjectCode]));
+    const tandasConM1yM2 = new Set<number | null>();
+    for (const tanda of new Set(paes.map((c) => c.ensayo))) {
+      const slice = paes.filter((c) => c.ensayo === tanda);
+      const tracks = new Set(slice.map((c) => c.trackCode));
+      if (tracks.has('M1') && tracks.has('M2')) tandasConM1yM2.add(tanda);
+      for (const violation of findProcessInvariantViolations(slice)) {
+        expect(subjectCodeById.get(violation.testKey)).toBe('SCI');
+        expect(violation.instrumentIds).toHaveLength(3);
+      }
+    }
+    expect([...tandasConM1yM2].sort()).toEqual([3, 4, 5]);
+    const tandaE3 = paes.filter((c) => c.ensayo === 3 && c.subjectCode !== 'SCI');
+    expect(new Set(tandaE3.map((c) => c.subjectCode))).toEqual(new Set(['LANG', 'MATH', 'HIST']));
+    expect(findProcessInvariantViolations(tandaE3)).toEqual([]);
   });
 
   it('no deja evaluaciones fuera: asignadas + ambiguas suman el total', () => {
@@ -145,6 +167,25 @@ describe('groupProcessCandidates con casos sintéticos', () => {
     ]);
     expect(result.multiYearAssessmentIds).toEqual(['a-1']);
     expect(result.groups[0]?.assessmentIds).toEqual(['a-2']);
+  });
+
+  it('por defecto la prueba es la línea: M1 y M2 de la misma asignatura conviven', () => {
+    const rows = [
+      candidate({ assessmentId: 'a-1', instrumentId: 'i-1', subjectId: 'math', trackId: 't-m1' }),
+      candidate({ assessmentId: 'a-2', instrumentId: 'i-2', subjectId: 'math', trackId: 't-m2' }),
+    ];
+    const result = groupProcessCandidates(rows);
+    expect(result.ambiguous).toEqual([]);
+    expect(result.groups[0]?.assessmentIds).toEqual(['a-1', 'a-2']);
+    expect(groupProcessCandidates(rows, { testKey: subjectTestKey }).ambiguous).toHaveLength(1);
+  });
+
+  it('dos instrumentos distintos de la MISMA línea siguen violando la invariante', () => {
+    const result = groupProcessCandidates([
+      candidate({ assessmentId: 'a-1', instrumentId: 'i-1', subjectId: 'math', trackId: 't-m1' }),
+      candidate({ assessmentId: 'a-2', instrumentId: 'i-2', subjectId: 'math', trackId: 't-m1' }),
+    ]);
+    expect(result.ambiguous[0]?.violations[0]?.testKey).toBe('track:t-m1');
   });
 
   it('acepta una clave de prueba inyectada', () => {

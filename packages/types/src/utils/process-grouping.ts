@@ -7,6 +7,7 @@ export type ProcessCandidate = {
   applicationPeriod: string | null;
   gradeId: string;
   subjectId: string | null;
+  trackId: string | null;
 };
 
 export type ProcessTestKey<T extends ProcessCandidate = ProcessCandidate> = (
@@ -14,6 +15,9 @@ export type ProcessTestKey<T extends ProcessCandidate = ProcessCandidate> = (
 ) => string | null;
 
 export const subjectTestKey: ProcessTestKey = (candidate) => candidate.subjectId;
+
+export const trackOrSubjectTestKey: ProcessTestKey = (candidate) =>
+  candidate.trackId ? `track:${candidate.trackId}` : candidate.subjectId;
 
 const NO_TEST_KEY = '∅';
 
@@ -54,7 +58,7 @@ export function processGroupKey(candidate: ProcessCandidate): string {
 
 export function findProcessInvariantViolations<T extends ProcessCandidate>(
   candidates: readonly T[],
-  testKey: ProcessTestKey<T> = subjectTestKey as ProcessTestKey<T>,
+  testKey: ProcessTestKey<T> = trackOrSubjectTestKey as ProcessTestKey<T>,
 ): ProcessInvariantViolation[] {
   const cells = new Map<
     string,
@@ -94,7 +98,7 @@ export function groupProcessCandidates<T extends ProcessCandidate>(
   candidates: readonly T[],
   options: { testKey?: ProcessTestKey<T> } = {},
 ): ProcessCandidateGrouping<T> {
-  const testKey = options.testKey ?? (subjectTestKey as ProcessTestKey<T>);
+  const testKey = options.testKey ?? (trackOrSubjectTestKey as ProcessTestKey<T>);
 
   const yearsByAssessment = new Map<string, Set<string>>();
   for (const candidate of candidates) {

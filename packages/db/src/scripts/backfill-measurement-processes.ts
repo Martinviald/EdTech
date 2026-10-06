@@ -39,6 +39,7 @@ type AssessmentRow = {
   applicationPeriod: InstrumentApplicationPeriod | null;
   taxonomyId: string | null;
   subjectId: string | null;
+  trackId: string | null;
   classGroupId: string;
   gradeId: string;
   academicYearId: string;
@@ -287,6 +288,7 @@ async function main(): Promise<void> {
       applicationPeriod: instruments.applicationPeriod,
       taxonomyId: instruments.taxonomyId,
       subjectId: instruments.subjectId,
+      trackId: instruments.trackId,
       classGroupId: classGroups.id,
       gradeId: classGroups.gradeId,
       academicYearId: classGroups.academicYearId,
