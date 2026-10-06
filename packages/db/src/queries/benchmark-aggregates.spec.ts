@@ -18,17 +18,20 @@ import { refreshBenchmarkAggregates } from './benchmark-aggregates';
 //     e. buildOrgRows.perSkill
 //
 // `db.insert().values().onConflictDoUpdate()` registra el upsert.
+// `db.delete().where()` registra la poda de la corrida anterior.
 // withOrgContext usa db.transaction → marca __transactionRan.
 // ──────────────────────────────────────────────────────────────────────────────
 
 type DbMock = Database & {
   __upserts: Array<{ values: unknown }>;
+  __deletes: number;
   __transactionRan: boolean;
 };
 
 function makeDb(selectResults: unknown[][]): DbMock {
   let idx = 0;
   const upserts: Array<{ values: unknown }> = [];
+  let deletes = 0;
 
   function buildSelect(rows: unknown[]): unknown {
     const chain: Record<string, unknown> = {};
@@ -54,12 +57,21 @@ function makeDb(selectResults: unknown[][]): DbMock {
         },
       }),
     }),
+    delete: () => ({
+      where: () => {
+        deletes++;
+        return Promise.resolve([]);
+      },
+    }),
     execute: async () => [],
     transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => {
       db.__transactionRan = true;
       return fn(db);
     },
     __upserts: upserts,
+    get __deletes() {
+      return deletes;
+    },
     __transactionRan: false,
   } as unknown as DbMock;
 
@@ -119,6 +131,25 @@ const THREE_BANDS = [
 ];
 
 describe('refreshBenchmarkAggregates', () => {
+  it('poda la corrida anterior de la org, aunque el instrumento no tenga grado ni asignatura', async () => {
+    const db = makeDb([
+      [{ id: 'org-1', parentId: null, dependence: 'private', region: 'RM', commune: 'Santiago' }],
+      [{ optOut: false }],
+      [resultRow({ gradeId: null, subjectId: null, percentage: '55.00' })],
+      [familyRow('inst-1', 2026)],
+      THREE_BANDS,
+      [],
+    ]);
+
+    const res = await refreshBenchmarkAggregates(db);
+
+    expect(res.refreshedRows).toBe(1);
+    const values = db.__upserts[0]?.values as Record<string, unknown>;
+    expect(values.gradeId).toBeNull();
+    expect(values.subjectId).toBeNull();
+    expect(db.__deletes).toBeGreaterThan(0);
+  });
+
   it('agrega la fuente por org y hace upsert sin PII en el read-model', async () => {
     const db = makeDb([
       // orgs

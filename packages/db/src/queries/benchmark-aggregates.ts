@@ -18,7 +18,7 @@
  * insertan directo en el read-model sin resultados detrás, y un refresh que borrara
  * lo que no recalcula los haría desaparecer.
  */
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, isNull, lt, sql } from 'drizzle-orm';
 import {
   classifyByBands,
   type BenchmarkBandCount,
@@ -168,6 +168,18 @@ export async function refreshBenchmarkAggregates(
         });
     }
 
+    // Poda de la corrida anterior. El UNIQUE de dimensiones no puede atrapar las filas
+    // con `grade_id`/`subject_id` NULL —en Postgres dos NULL no son iguales, y
+    // `NULLS NOT DISTINCT` pide PG15 mientras demo corre PG14—, así que el
+    // `onConflictDoUpdate` no las encuentra y cada corrida insertaría una fila más para
+    // el mismo (org, instrumento) sin asignatura o sin grado. Dos filas de UN colegio
+    // alcanzan para que la muestra lo acepte como cohorte con k=2 y se le devuelvan sus
+    // propios datos como contraste. Borrar lo anterior a esta corrida también descarta
+    // las dimensiones que la org dejó de tener (una evaluación borrada, por ejemplo).
+    await db
+      .delete(benchmarkAggregates)
+      .where(and(eq(benchmarkAggregates.orgId, org.id), lt(benchmarkAggregates.refreshedAt, now)));
+
     refreshedOrgs += 1;
     refreshedRows += rows.length;
   }
@@ -202,9 +214,13 @@ async function refreshOrgItemAggregates(
       .where(eq(assessments.orgId, orgId))
       .groupBy(assessments.instrumentId, assessmentItemStats.itemId),
   );
-  if (rows.length === 0) return 0;
-
   const now = new Date();
+  if (rows.length === 0) {
+    // Sin stats en la fuente, lo que haya quedado del read-model ya no se sostiene.
+    await db.delete(benchmarkItemAggregates).where(eq(benchmarkItemAggregates.orgId, orgId));
+    return 0;
+  }
+
   for (let i = 0; i < rows.length; i += ITEM_UPSERT_CHUNK) {
     const chunk = rows.slice(i, i + ITEM_UPSERT_CHUNK).map((row) => ({
       orgId,
@@ -231,6 +247,13 @@ async function refreshOrgItemAggregates(
         },
       });
   }
+
+  await db
+    .delete(benchmarkItemAggregates)
+    .where(
+      and(eq(benchmarkItemAggregates.orgId, orgId), lt(benchmarkItemAggregates.refreshedAt, now)),
+    );
+
   return rows.length;
 }
 
