@@ -3,6 +3,7 @@ import {
   severityFromLowestBandShare,
   buildComparabilityMeta,
   buildInstrumentFamilyKey,
+  buildInstrumentHistoryKey,
   buildPeriodSeriesKey,
   deltaInPoints,
   isAggregatable,
@@ -18,6 +19,22 @@ const MATE_8_CIERRE_2026: ComparabilityInstrumentRef = {
   gradeId: 'g-8',
   applicationPeriod: 'cierre',
   year: 2026,
+  trackId: null,
+};
+
+const PAES_M1_E3: ComparabilityInstrumentRef = {
+  instrumentId: 'i-m1-e3',
+  type: 'paes',
+  subjectId: 's-mate',
+  gradeId: 'g-iv',
+  applicationPeriod: null,
+  year: 2026,
+  trackId: 't-m1',
+};
+const PAES_M2_E3: ComparabilityInstrumentRef = {
+  ...PAES_M1_E3,
+  instrumentId: 'i-m2-e3',
+  trackId: 't-m2',
 };
 
 function variant(
@@ -114,6 +131,37 @@ describe('claves de comparabilidad', () => {
     expect(buildInstrumentFamilyKey(sinAsignatura)).not.toBe(
       buildInstrumentFamilyKey(MATE_8_CIERRE_2026),
     );
+  });
+});
+
+describe('claves de comparabilidad con línea de prueba', () => {
+  it('sin línea, las tres claves son idénticas a las de siempre', () => {
+    expect(buildInstrumentFamilyKey(MATE_8_CIERRE_2026)).toBe('dia|s-mate|g-8|cierre');
+    expect(buildPeriodSeriesKey(MATE_8_CIERRE_2026)).toBe('dia|s-mate|g-8|2026');
+    expect(buildInstrumentHistoryKey(MATE_8_CIERRE_2026)).toBe('dia|s-mate|g-8');
+  });
+
+  it('M1 y M2 del mismo grado y tanda no comparten ninguna clave', () => {
+    expect(buildInstrumentFamilyKey(PAES_M1_E3)).not.toBe(buildInstrumentFamilyKey(PAES_M2_E3));
+    expect(buildPeriodSeriesKey(PAES_M1_E3)).not.toBe(buildPeriodSeriesKey(PAES_M2_E3));
+    expect(buildInstrumentHistoryKey(PAES_M1_E3)).not.toBe(buildInstrumentHistoryKey(PAES_M2_E3));
+  });
+
+  it('M1 de dos tandas distintas sigue siendo la misma familia', () => {
+    const m1E4 = variant(PAES_M1_E3, { instrumentId: 'i-m1-e4' });
+    expect(buildInstrumentFamilyKey(m1E4)).toBe(buildInstrumentFamilyKey(PAES_M1_E3));
+  });
+
+  it('una línea no colisiona con el mismo instrumento sin línea', () => {
+    const sinLinea = variant(PAES_M1_E3, { trackId: null });
+    expect(buildInstrumentFamilyKey(sinLinea)).not.toBe(buildInstrumentFamilyKey(PAES_M1_E3));
+  });
+
+  it('M1 y M2 juntos no son una familia: el alcance es mixto', () => {
+    expect(resolveComparabilityKind([PAES_M1_E3, PAES_M2_E3], 2)).toBe('mixed');
+    expect(
+      resolveComparabilityKind([PAES_M1_E3, variant(PAES_M1_E3, { instrumentId: 'x' })], 2),
+    ).toBe('instrument_family');
   });
 });
 

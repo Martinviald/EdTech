@@ -52,6 +52,8 @@ export type StudentPanoramaAssessment = {
   gradeId: string | null;
   year: number | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
+  /** Línea de prueba del instrumento (M1, M2…). Null = la prueba es la asignatura. */
+  trackId: string | null;
   /** Clave N2 del instrumento (mismo estándar a través de los años). */
   familyKey: string;
   /** Clave N3 del instrumento (momentos del ciclo dentro de un año). */

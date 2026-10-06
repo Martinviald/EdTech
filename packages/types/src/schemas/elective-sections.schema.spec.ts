@@ -32,6 +32,30 @@ describe('sectionRoleDeclarationSchema', () => {
     expect(r.success).toBe(false);
   });
 
+  it('acepta una electiva completa con su línea', () => {
+    const r = sectionRoleDeclarationSchema.safeParse({
+      role: 'elective',
+      electiveGroup: 'mencion-ciencias',
+      electiveKey: 'BIO',
+      track: 'BIO',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('rechaza una electiva sin línea de prueba', () => {
+    const r = sectionRoleDeclarationSchema.safeParse({
+      role: 'elective',
+      electiveGroup: 'mencion-ciencias',
+      electiveKey: 'BIO',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('rechaza una core que declara línea de prueba', () => {
+    const r = sectionRoleDeclarationSchema.safeParse({ role: 'core', track: 'M1' });
+    expect(r.success).toBe(false);
+  });
+
   it('rechaza una core que declara datos electivos', () => {
     const r = sectionRoleDeclarationSchema.safeParse({ role: 'core', electiveGroup: 'g' });
     expect(r.success).toBe(false);

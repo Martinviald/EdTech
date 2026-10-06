@@ -13,6 +13,7 @@ function makeUnit(overrides: Partial<ComparableUnitSummary> = {}): ComparableUni
     gradeName: '3° Básico',
     applicationPeriod: 'diagnostico',
     year: 2026,
+    trackId: null,
     assessmentIds: ['a1'],
     lastAdministeredAt: null,
     studentsAssessed: 100,
@@ -46,6 +47,16 @@ describe('deriveGenerationalHighlights', () => {
     expect(cell!.deltaPp).toBe(-10);
     expect(cell!.year).toBe(2026);
     expect(cell!.baselineYear).toBe(2025);
+  });
+
+  it('no pondera juntas dos líneas de prueba de la misma asignatura y nivel', () => {
+    const cells = deriveGenerationalHighlights([
+      makeUnit({ key: 'm1', instrumentId: 'm1', trackId: 't-m1', averageAchievement: 60 }),
+      makeUnit({ key: 'm2', instrumentId: 'm2', trackId: 't-m2', averageAchievement: 40 }),
+    ]);
+
+    expect(cells).toHaveLength(2);
+    expect(cells.map((cell) => cell.instrumentIds.join()).sort()).toEqual(['m1', 'm2']);
   });
 
   it('ignora el baseline de momento anterior: eso es progresión del mismo grupo, no generación', () => {

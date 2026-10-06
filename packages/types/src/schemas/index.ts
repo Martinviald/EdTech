@@ -56,3 +56,4 @@ export * from './telemetry.schema';
 export * from './feedback.schema';
 export * from './measurement-process.schema';
 export * from './decisions.schema';
+export * from './test-track.schema';
