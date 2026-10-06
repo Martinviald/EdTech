@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Recrea desde cero la BDD local de pruebas del tablero (soe_tablero) con el código de la
-# rama y solo fuentes locales. Sin AWS: ningún paso sube a S3 ni se conecta a demo.
+# Recrea desde cero la BDD local de pruebas del tablero ($DB_NAME, por defecto soe_tablero)
+# con el código de la rama y solo fuentes locales. Sin AWS: ningún paso sube a S3 ni se conecta a demo.
 #
 # Uso:  scripts/tablero/crear-bd-pruebas.sh [--completo]
 #   Sin flags deja el estado F0 del golden: Ciencias en 9 instrumentos por mención (modelo
@@ -11,6 +11,8 @@
 #   --completo además migra Ciencias a secciones electivas (la migración vincula las
 #   fusionadas a su tanda) y corre los backfills de procesos, que deberían quedar en 0.
 # Variables opcionales:
+#   DB_NAME        BDD local a recrear (por defecto soe_tablero; el backport a dev usa
+#                  soe_tablero_dev para no pisar el banco de main)
 #   PG_ADMIN_USER  superusuario local (por defecto, el usuario del sistema)
 #   REPOSITORIO    checkout con la nómina y los artefactos DIA (por defecto ../repositorio)
 #   TOOLKIT        plataforma-dia-toolkit con los escaneos GradeCam PAES
@@ -22,7 +24,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 EDTECH="$(dirname "$ROOT")"
-DB_NAME="soe_tablero"
+DB_NAME="${DB_NAME:-soe_tablero}"
 PG_ADMIN_USER="${PG_ADMIN_USER:-$(whoami)}"
 REPOSITORIO="${REPOSITORIO:-$EDTECH/repositorio}"
 TOOLKIT="${TOOLKIT:-$EDTECH/plataforma-dia-toolkit}"
