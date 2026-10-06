@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { StatusBadge, TopProgressBar } from '@/components/shared';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { TopProgressBar } from '@/components/shared/TopProgressBar';
 import { ROUTES } from '@/lib/routes';
 import {
   buildMasterBoardQuery,
