@@ -30,11 +30,12 @@ del porqué. El portado se hizo por archivos (`git diff <merge>^1 <merge>` aplic
 - El slug único es un índice parcial `(org_id, slug) WHERE deleted_at IS NULL`. `buildUniqueSlug`
   y el backfill ignoran los procesos borrados (el backfill de `dev` podía reutilizar uno borrado).
 - `groupProcessCandidates` y `findProcessInvariantViolations` en
-  `packages/types/src/utils/process-grouping.ts`: agrupan por (org, año, tipo, período) y dejan
-  ambiguo el grupo con dos instrumentos distintos para el mismo (grado del curso, prueba). La
-  prueba se inyecta con `testKey` (por defecto `subjectTestKey`, la asignatura).
-- El backfill usa esa función, es dry-run por defecto (`--commit` para escribir) y reporta los
-  grupos ambiguos.
+  `packages/types/src/utils/process-grouping.ts`: agrupan por (org, año, tipo, período). Si una
+  celda (grado del curso, prueba) tiene dos instrumentos distintos, solo las evaluaciones de esa
+  celda quedan apartadas (en `ambiguous`, con sus violaciones); el resto del grupo sí se asigna.
+  La prueba se inyecta con `testKey` (por defecto la línea o, sin línea, la asignatura).
+- El backfill usa esa función, es dry-run por defecto (`--commit` para escribir) y reporta las
+  celdas en conflicto.
 - `linkAssessments` valida org (dentro de `withOrgContext`), cursos asignados, año del curso
   igual al del proceso, e invariante sobre el resultado (ya vinculadas + nuevas). Permite la
   vinculación parcial. Errores con `BadRequestException`.
