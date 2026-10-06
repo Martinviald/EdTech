@@ -474,6 +474,28 @@ export function resolveImportTracks(
 }
 
 export async function importInstruments(db: Database): Promise<void> {
+  const files: string[] = [];
+  for (const entry of readdirSync(DATA_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const dir = resolve(DATA_DIR, entry.name);
+    for (const f of readdirSync(dir)) if (f.endsWith('.json')) files.push(resolve(dir, f));
+  }
+  const docs = files
+    .sort()
+    .map((file) => JSON.parse(readFileSync(file, 'utf-8')) as InstrumentJson);
+  await importInstrumentDocuments(db, docs);
+}
+
+/**
+ * Importa una lista de documentos ya leídos. Es el cuerpo de `importInstruments`, separado
+ * para que un script de datos (ej. `db:migrate:cie-electivas`) importe sus propios JSON dentro
+ * de su transacción: cada documento corre en `db.transaction`, que sobre una transacción
+ * abierta es un savepoint.
+ */
+export async function importInstrumentDocuments(
+  db: Database,
+  docs: readonly InstrumentJson[],
+): Promise<void> {
   const subjRows = await db.select({ id: subjects.id, code: subjects.code }).from(subjects);
   const gradeRows = await db.select({ id: grades.id, code: grades.code }).from(grades);
   const subjId = new Map(subjRows.map((s) => [s.code, s.id]));
@@ -493,13 +515,6 @@ export async function importInstruments(db: Database): Promise<void> {
       .map((m) => [m.type as string, m.id]),
   );
 
-  const files: string[] = [];
-  for (const entry of readdirSync(DATA_DIR, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const dir = resolve(DATA_DIR, entry.name);
-    for (const f of readdirSync(dir)) if (f.endsWith('.json')) files.push(resolve(dir, f));
-  }
-
   const tracksByCode = indexTestTracksByCode(
     await db
       .select({
@@ -510,9 +525,6 @@ export async function importInstruments(db: Database): Promise<void> {
       })
       .from(testTracks),
   );
-  const docs = files
-    .sort()
-    .map((file) => JSON.parse(readFileSync(file, 'utf-8')) as InstrumentJson);
   const tracksByDoc = new Map<InstrumentJson, ResolvedImportTracks>();
   const trackErrors: string[] = [];
   for (const d of docs) {
