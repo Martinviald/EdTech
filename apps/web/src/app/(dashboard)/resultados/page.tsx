@@ -147,6 +147,7 @@ async function PanoramaSections({
         <StatCard
           label="Alumnos evaluados"
           value={comparable.totals.studentsEvaluated.toLocaleString('es-CL')}
+          hint={`${comparable.totals.classifications.toLocaleString('es-CL')} clasificaciones`}
           icon={GraduationCap}
         />
         <StatCard
