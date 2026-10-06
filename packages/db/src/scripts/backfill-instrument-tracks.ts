@@ -33,6 +33,7 @@ import {
   type TestTrackRef,
 } from '@soe/types';
 import { createDbClient, type Database } from '../client';
+import { assertAdminConnection } from '../lib/assert-admin-connection';
 import { instruments } from '../schema/instruments';
 import { testTracks } from '../schema/test-tracks';
 import { instrumentSourceJson, type InstrumentSourceDoc } from '../lib/instrument-source';
@@ -251,7 +252,9 @@ if (require.main === module) {
   const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   const args = parseTrackArgs(process.argv.slice(2));
-  backfillInstrumentTracks(createDbClient(url), args)
+  const db = createDbClient(url);
+  assertAdminConnection(db, 'db:backfill:tracks')
+    .then(() => backfillInstrumentTracks(db, args))
     .then((report) => {
       printReport(report, args.commit);
       process.exit(report.errors.length > 0 ? 1 : 0);

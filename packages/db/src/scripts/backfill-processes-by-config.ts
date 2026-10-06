@@ -18,6 +18,7 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { and, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import { createDbClient, type Database } from '../client';
+import { assertAdminConnection } from '../lib/assert-admin-connection';
 import { academicYears } from '../schema/organizations';
 import { instruments } from '../schema/instruments';
 import { assessments } from '../schema/assessments';
@@ -126,6 +127,7 @@ async function main(): Promise<void> {
   const db = createDbClient(databaseUrl, { maxConnections: 1 });
 
   try {
+    await assertAdminConnection(db, 'db:backfill:processes:paes');
     console.log(
       options.commit
         ? 'Modo --commit: se crean procesos y se vinculan evaluaciones.'
