@@ -2,7 +2,12 @@
 # Recrea desde cero la BDD local de pruebas del tablero (soe_tablero) con el código de la
 # rama y solo fuentes locales. Sin AWS: ningún paso sube a S3 ni se conecta a demo.
 #
-# Uso:  scripts/tablero/crear-bd-pruebas.sh
+# Uso:  scripts/tablero/crear-bd-pruebas.sh [--completo]
+#   Sin flags deja el estado F0 del golden: sin procesos, Ciencias en 9 instrumentos por
+#   mención (modelo legacy) y solo M1/M2 con línea. Es el estado que exige
+#   `pnpm --filter @soe/api golden:master-board:check`.
+#   --completo además crea los procesos (DIA por período, PAES por tanda) y migra Ciencias
+#   a secciones electivas: el estado del tablero por procesos y pruebas.
 # Variables opcionales:
 #   PG_ADMIN_USER  superusuario local (por defecto, el usuario del sistema)
 #   REPOSITORIO    checkout con la nómina y los artefactos DIA (por defecto ../repositorio)
@@ -168,6 +173,18 @@ en_db pnpm -s db:backfill:cohort-stats --concurrency 2 > "$OUT/logs/backfill.txt
 grep "listo" "$OUT/logs/backfill.txt"
 
 psql_admin -f "$ROOT/scripts/tablero/grants-soe-app.sql"
+
+if [ "${1:-}" = "--completo" ]; then
+  paso "12. Procesos DIA por período"
+  en_db pnpm -s db:backfill:processes --commit > "$OUT/logs/procesos-dia.txt" 2>&1
+  grep -E "Creados|vinculadas" "$OUT/logs/procesos-dia.txt" || true
+  paso "13. Ciencias a secciones electivas"
+  en_db pnpm -s db:migrate:cie-electivas --org "$CSCJ_ORG_ID" --commit > "$OUT/logs/cie-electivas.txt" 2>&1
+  grep -E "gate|COMMIT" "$OUT/logs/cie-electivas.txt"
+  paso "14. Procesos PAES por tanda (config.ensayo)"
+  en_db pnpm -s db:backfill:processes:paes --org "$CSCJ_ORG_ID" --commit > "$OUT/logs/procesos-paes.txt" 2>&1
+  grep -E "Ensayo|Creados" "$OUT/logs/procesos-paes.txt"
+fi
 
 paso "Banco listo"
 psql "$DATABASE_ADMIN_URL" -c "
