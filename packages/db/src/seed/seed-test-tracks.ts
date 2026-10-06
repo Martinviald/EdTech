@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { testTrackCatalogSchema, type TestTrackCatalogEntryInput } from '@soe/types';
 import { createDbClient, type Database } from '../client';
+import { assertAdminConnection } from '../lib/assert-admin-connection';
 import { subjects } from '../schema/academic';
 import { testTracks } from '../schema/test-tracks';
 
@@ -114,8 +115,10 @@ export async function seedTestTracks(
 if (require.main === module) {
   const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
-  const dryRun = process.argv.includes('--dry-run');
-  seedTestTracks(createDbClient(url), { dryRun })
+  const dryRun = !process.argv.includes('--commit');
+  const db = createDbClient(url);
+  assertAdminConnection(db, 'db:seed:test-tracks')
+    .then(() => seedTestTracks(db, { dryRun }))
     .then((summary) => {
       const mode = dryRun ? ' (dry-run, sin escribir)' : '';
       console.log(`Líneas de prueba oficiales${mode}:`);

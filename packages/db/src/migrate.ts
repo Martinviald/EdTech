@@ -32,6 +32,17 @@ async function main() {
   await sql.unsafe(readFileSync(SEARCH_EXTENSIONS_PATH, 'utf-8'));
   console.log('Search extensions applied.');
 
+  // Drizzle corre TODAS las migraciones pendientes en una sola transacción, así que los
+  // locks de DDL se acumulan y se sostienen hasta el commit final. Si una query viva
+  // sostiene ACCESS SHARE sobre una tabla que el ALTER necesita, el ALTER se encola y
+  // detrás de él se encola todo lo demás: con `assessments` o `instruments` en el medio,
+  // eso es el producto entero detenido, no degradado. Preferimos que el deploy falle
+  // rápido —la transacción revierte completa y la base queda intacta, así que reintentar
+  // es seguro— antes que dejar la app colgada esperando un lock.
+  // Sin `statement_timeout`: una migración puede tardar legítimamente (un índice sobre
+  // una tabla grande) y cortarla a mitad no aporta nada.
+  await sql`SET lock_timeout = '10s'`;
+
   console.log('Running migrations...');
   await migrate(db, { migrationsFolder: './drizzle/migrations' });
   console.log('Migrations completed.');

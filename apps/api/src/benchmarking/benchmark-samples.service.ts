@@ -169,8 +169,12 @@ export class BenchmarkSamplesService {
 
   private satisfiesAnonymity(rows: BenchmarkAggregate[]): boolean {
     let students = 0;
-    for (const row of rows) students += row.studentCount;
-    return rows.length >= BENCHMARK_K_MIN_SCHOOLS && students >= BENCHMARK_N_MIN_STUDENTS;
+    const orgs = new Set<string>();
+    for (const row of rows) {
+      students += row.studentCount;
+      orgs.add(row.orgId);
+    }
+    return orgs.size >= BENCHMARK_K_MIN_SCHOOLS && students >= BENCHMARK_N_MIN_STUDENTS;
   }
 
   private buildSample(

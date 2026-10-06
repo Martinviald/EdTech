@@ -18,6 +18,7 @@ import {
   type ProcessKind,
 } from '@soe/types';
 import { createDbClient } from '../client';
+import { assertAdminConnection } from '../lib/assert-admin-connection';
 import { academicYears } from '../schema/organizations';
 import { classGroups } from '../schema/academic';
 import { instruments } from '../schema/instruments';
@@ -267,6 +268,7 @@ async function main(): Promise<void> {
   const databaseUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   const db = createDbClient(databaseUrl);
+  await assertAdminConnection(db, 'db:backfill:processes');
 
   console.log(
     dryRun

@@ -136,14 +136,11 @@ export class BenchmarkingService {
       commune: query.commune,
     });
 
-    const schoolCount = cohortRows.length;
+    const schoolCount = new Set(cohortRows.map((r) => r.orgId)).size;
     const studentCount = cohortRows.reduce((sum, r) => sum + r.studentCount, 0);
 
     // k-anonimato: < k colegios O < n alumnos → suprimir.
-    if (
-      schoolCount < BENCHMARK_K_MIN_SCHOOLS ||
-      studentCount < BENCHMARK_N_MIN_STUDENTS
-    ) {
+    if (schoolCount < BENCHMARK_K_MIN_SCHOOLS || studentCount < BENCHMARK_N_MIN_STUDENTS) {
       return {
         mode: 'global',
         instrumentId: query.instrumentId,
@@ -286,7 +283,7 @@ export class BenchmarkingService {
     const studentCount = rows.reduce((sum, r) => sum + r.studentCount, 0);
 
     return {
-      schoolCount: rows.length,
+      schoolCount: new Set(rows.map((r) => r.orgId)).size,
       studentCount,
       avgAchievement: weightedAverage(
         rows.map((r) => ({ value: toNum(r.avgAchievement), weight: r.studentCount })),
@@ -392,9 +389,7 @@ export class BenchmarkingService {
       conditions.push(eq(benchmarkAggregates.optOutGlobalPool, false));
     }
     if (opts.dependence) {
-      conditions.push(
-        sql`${benchmarkAggregates.dependence}::text = ${opts.dependence}`,
-      );
+      conditions.push(sql`${benchmarkAggregates.dependence}::text = ${opts.dependence}`);
     }
     if (opts.region) {
       conditions.push(eq(benchmarkAggregates.region, opts.region));

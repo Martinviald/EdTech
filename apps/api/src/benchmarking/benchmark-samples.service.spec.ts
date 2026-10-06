@@ -137,6 +137,20 @@ describe('BenchmarkSamplesService.getSamples', () => {
     expect(entry!.you).toMatchObject({ avgAchievement: 60, percentile: null, typicalZone: null });
   });
 
+  it('no acepta como cohorte dos filas del mismo colegio', async () => {
+    const db = makeDb([
+      [
+        aggRow({ orgId: 'org-you', studentCount: 20 }),
+        aggRow({ orgId: 'org-you', id: 'row-dup', studentCount: 20 }),
+      ],
+      [{ parentId: null }],
+    ]);
+
+    const [entry] = await makeService(db).getSamples('org-you', [INSTRUMENT]);
+
+    expect(entry!.global).toBeNull();
+  });
+
   it('excluye del pool global a los colegios con opt-out, pero no de la red', async () => {
     const db = makeDb([
       [
