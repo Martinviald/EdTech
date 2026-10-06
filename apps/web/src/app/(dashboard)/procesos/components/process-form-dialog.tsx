@@ -95,9 +95,19 @@ export function ProcessFormDialog({
       return;
     }
 
+    const editableFields = {
+      name: parsed.data.name,
+      kind: parsed.data.kind,
+      period: parsed.data.period,
+      status: parsed.data.status,
+      startsOn: parsed.data.startsOn,
+      endsOn: parsed.data.endsOn,
+      notes: parsed.data.notes,
+    };
+
     startTransition(async () => {
       const result = isEdit
-        ? await updateProcess(process.id, parsed.data)
+        ? await updateProcess(process.id, editableFields)
         : await createProcess(parsed.data);
 
       if (!result.ok) {

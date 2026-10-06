@@ -1,13 +1,15 @@
 'use client';
 
-import { Fragment, useState, type JSX } from 'react';
+import { Fragment, useMemo, useState, type JSX, type ReactNode } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Info, Layers } from 'lucide-react';
 import type {
   MasterBoardCell,
   MasterBoardCourseCell,
   MasterBoardMatrix,
+  MasterBoardSubject,
+  MasterBoardTest,
   MetricKey,
   MetricValue,
   PerformanceLevel,
@@ -23,7 +25,13 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
-import { PERFORMANCE_LEVEL_LABELS } from '../components/performance-level';
+
+const LEVEL_ORDER: readonly PerformanceLevel[] = [
+  'insufficient',
+  'elementary',
+  'adequate',
+  'advanced',
+];
 
 const LEVEL_CELL_CLASS: Record<PerformanceLevel, string> = {
   insufficient: 'bg-level-insufficient/15 text-level-insufficient',
@@ -33,13 +41,44 @@ const LEVEL_CELL_CLASS: Record<PerformanceLevel, string> = {
 };
 
 const NO_DATA_CELL_CLASS = 'bg-muted/40 text-muted-foreground';
+const UNLEVELED_CELL_CLASS = 'bg-muted text-foreground';
 
-function cellClass(level: PerformanceLevel | null): string {
-  return level ? LEVEL_CELL_CLASS[level] : NO_DATA_CELL_CLASS;
-}
+const SECTION_WITHOUT_LEVELS = 'Sección de la prueba: sin cortes de nivel propios';
+const INSTRUMENT_WITHOUT_LEVELS = 'Instrumento sin cortes de nivel propios';
+const MIXED_CELL = 'Mezcla instrumentos distintos: no se colorea por nivel';
+
+type CellLike = Pick<MasterBoardCell, 'metrics' | 'mixed' | 'hasLevels'>;
+
+/** Cómo se pinta una celda: por banda, en escala neutra, como mixta o sin datos. */
+export type CellKind = 'level' | 'unleveled' | 'mixed' | 'empty';
+
+type CellAppearance = {
+  kind: CellKind;
+  metric: MetricValue | undefined;
+  className: string;
+};
 
 function primaryMetric(metrics: MetricValue[], key: MetricKey): MetricValue | undefined {
   return metrics.find((metric) => metric.key === key);
+}
+
+export function cellAppearance(cell: CellLike | undefined, metricKey: MetricKey): CellAppearance {
+  const metric = cell ? primaryMetric(cell.metrics, metricKey) : undefined;
+  if (!cell || !metric || metric.value === null) {
+    return { kind: 'empty', metric, className: NO_DATA_CELL_CLASS };
+  }
+  if (cell.mixed) return { kind: 'mixed', metric, className: UNLEVELED_CELL_CLASS };
+  const levelClass = metric.level ? LEVEL_CELL_CLASS[metric.level.color] : undefined;
+  if (cell.hasLevels && levelClass) return { kind: 'level', metric, className: levelClass };
+  return { kind: 'unleveled', metric, className: UNLEVELED_CELL_CLASS };
+}
+
+function unleveledReason(test: MasterBoardTest): string {
+  return test.source === 'section' ? SECTION_WITHOUT_LEVELS : INSTRUMENT_WITHOUT_LEVELS;
+}
+
+function indexByTestKey<T extends { testKey: string }>(cells: T[]): Map<string, T> {
+  return new Map(cells.map((cell) => [cell.testKey, cell]));
 }
 
 function courseCellHref(cell: MasterBoardCourseCell, classGroupId: string): Route | null {
@@ -57,18 +96,21 @@ function studentsLabel(count: number): string {
   return `${count} ${count === 1 ? 'alumno evaluado' : 'alumnos evaluados'}`;
 }
 
-function MetricLines({ metrics }: { metrics: MetricValue[] }) {
-  return (
-    <>
-      {metrics.map((metric) => (
-        <p key={metric.key} className="text-xs">
-          <span className="text-muted-foreground">{metric.label}:</span>{' '}
-          <span className="font-medium">{metric.display}</span>
-          {metric.level ? ` · ${PERFORMANCE_LEVEL_LABELS[metric.level]}` : ''}
-        </p>
-      ))}
-    </>
-  );
+type Column = { subject: MasterBoardSubject; test: MasterBoardTest };
+
+/** Primer motivo de no comparabilidad de cada prueba, mirando sus celdas de nivel y de curso. */
+export function comparabilityNoticesByTest(data: MasterBoardMatrix): Map<string, string> {
+  const notices = new Map<string, string>();
+  const collect = (cell: Pick<MasterBoardCell, 'testKey' | 'comparability'>) => {
+    if (notices.has(cell.testKey)) return;
+    const { aggregatable, reason } = cell.comparability;
+    if (!aggregatable && reason) notices.set(cell.testKey, reason);
+  };
+  for (const grade of data.grades) {
+    grade.cells.forEach(collect);
+    for (const course of grade.courses) course.cells.forEach(collect);
+  }
+  return notices;
 }
 
 export function MasterBoardTable({
@@ -80,6 +122,20 @@ export function MasterBoardTable({
 }) {
   const { subjects, grades, primaryMetricKey } = data;
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+
+  const columns = useMemo<Column[]>(
+    () => subjects.flatMap((subject) => subject.tests.map((test) => ({ subject, test }))),
+    [subjects],
+  );
+  const hasTestRow = useMemo(
+    () => subjects.some((subject) => subject.tests.length > 1),
+    [subjects],
+  );
+  const notices = useMemo(() => comparabilityNoticesByTest(data), [data]);
+  const gradeCells = useMemo(
+    () => new Map(grades.map((grade) => [grade.gradeId, indexByTestKey(grade.cells)])),
+    [grades],
+  );
 
   const toggle = (gradeId: string) => {
     setExpanded((prev) => {
@@ -96,19 +152,60 @@ export function MasterBoardTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="sticky left-0 z-10 min-w-[200px] bg-card">
+              <TableHead
+                rowSpan={hasTestRow ? 2 : undefined}
+                className="sticky left-0 z-20 min-w-[140px] bg-card sm:min-w-[200px]"
+              >
                 Nivel / Curso
               </TableHead>
-              {subjects.map((subject) => (
-                <TableHead key={subject.subjectId} className="min-w-[96px] text-center">
-                  {subject.shortName || subject.name}
-                </TableHead>
-              ))}
+              {subjects.map((subject) => {
+                const label = subject.shortName || subject.name;
+                const onlyTest = subject.tests.length === 1 ? subject.tests[0] : undefined;
+                if (onlyTest) {
+                  return (
+                    <TestHead
+                      key={subject.subjectId}
+                      label={label}
+                      fullName={onlyTest.source === 'subject' ? subject.name : onlyTest.name}
+                      notice={notices.get(onlyTest.testKey)}
+                      rowSpan={hasTestRow ? 2 : undefined}
+                    />
+                  );
+                }
+                return (
+                  <TableHead
+                    key={subject.subjectId}
+                    colSpan={subject.tests.length}
+                    title={subject.name}
+                    className="border-l text-center"
+                  >
+                    {label}
+                  </TableHead>
+                );
+              })}
             </TableRow>
+            {hasTestRow ? (
+              <TableRow>
+                {subjects
+                  .filter((subject) => subject.tests.length > 1)
+                  .flatMap((subject) =>
+                    subject.tests.map((test, index) => (
+                      <TestHead
+                        key={test.testKey}
+                        label={test.shortName || test.name}
+                        fullName={test.name}
+                        notice={notices.get(test.testKey)}
+                        className={cn('h-9 text-xs', index === 0 && 'border-l')}
+                      />
+                    )),
+                  )}
+              </TableRow>
+            ) : null}
           </TableHeader>
           <TableBody>
             {grades.map((grade) => {
               const isOpen = expanded.has(grade.gradeId);
+              const cells = gradeCells.get(grade.gradeId);
               return (
                 <Fragment key={grade.gradeId}>
                   <TableRow className="bg-muted/30">
@@ -128,30 +225,39 @@ export function MasterBoardTable({
                         {grade.name}
                       </button>
                     </TableCell>
-                    {grade.cells.map((cell) => (
-                      <GradeCell key={cell.subjectId} cell={cell} metricKey={primaryMetricKey} />
+                    {columns.map(({ test }) => (
+                      <GradeCell
+                        key={test.testKey}
+                        cell={cells?.get(test.testKey)}
+                        test={test}
+                        metricKey={primaryMetricKey}
+                      />
                     ))}
                   </TableRow>
 
                   {isOpen
-                    ? grade.courses.map((course) => (
-                        <TableRow key={course.classGroupId}>
-                          <TableCell className="sticky left-0 z-10 bg-card">
-                            <span className="block pl-6 text-sm text-muted-foreground">
-                              {course.name}
-                            </span>
-                          </TableCell>
-                          {course.cells.map((cell) => (
-                            <CourseCell
-                              key={cell.subjectId}
-                              cell={cell}
-                              classGroupId={course.classGroupId}
-                              metricKey={primaryMetricKey}
-                              canViewTeacher={canViewTeacher}
-                            />
-                          ))}
-                        </TableRow>
-                      ))
+                    ? grade.courses.map((course) => {
+                        const courseCells = indexByTestKey(course.cells);
+                        return (
+                          <TableRow key={course.classGroupId}>
+                            <TableCell className="sticky left-0 z-10 bg-card">
+                              <span className="block pl-6 text-sm text-muted-foreground">
+                                {course.name}
+                              </span>
+                            </TableCell>
+                            {columns.map(({ test }) => (
+                              <CourseCell
+                                key={test.testKey}
+                                cell={courseCells.get(test.testKey)}
+                                test={test}
+                                classGroupId={course.classGroupId}
+                                metricKey={primaryMetricKey}
+                                canViewTeacher={canViewTeacher}
+                              />
+                            ))}
+                          </TableRow>
+                        );
+                      })
                     : null}
                 </Fragment>
               );
@@ -163,23 +269,130 @@ export function MasterBoardTable({
   );
 }
 
-function GradeCell({ cell, metricKey }: { cell: MasterBoardCell; metricKey: MetricKey }) {
-  const metric = primaryMetric(cell.metrics, metricKey);
+function TestHead({
+  label,
+  fullName,
+  notice,
+  rowSpan,
+  className,
+}: {
+  label: string;
+  fullName: string;
+  notice: string | undefined;
+  rowSpan?: number;
+  className?: string;
+}) {
+  const head = (
+    <TableHead
+      rowSpan={rowSpan}
+      className={cn('min-w-[96px] text-center', className)}
+      data-comparability-notice={notice ? 'true' : undefined}
+    >
+      <span className="inline-flex items-center justify-center gap-1">
+        {label}
+        {notice ? (
+          <>
+            <Info className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+            <span className="sr-only">(resultados no comparables)</span>
+          </>
+        ) : null}
+      </span>
+    </TableHead>
+  );
+  if (!notice && fullName === label) return head;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{head}</TooltipTrigger>
+      <TooltipContent className="max-w-xs">
+        {fullName !== label ? <p className="text-xs font-medium">{fullName}</p> : null}
+        {notice ? <p className="text-xs text-muted-foreground">{notice}</p> : null}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function CellNotes({
+  kind,
+  test,
+  metrics,
+  studentsAssessed,
+}: {
+  kind: CellKind;
+  test: MasterBoardTest;
+  metrics: MetricValue[];
+  studentsAssessed: number;
+}) {
+  return (
+    <>
+      {metrics.map((metric) => (
+        <p key={metric.key} className="text-xs">
+          <span className="text-muted-foreground">{metric.label}:</span>{' '}
+          <span className="font-medium">{metric.display}</span>
+          {kind === 'level' && metric.level ? ` · Nivel del promedio: ${metric.level.label}` : ''}
+        </p>
+      ))}
+      {kind === 'unleveled' ? (
+        <p className="text-xs text-muted-foreground">{unleveledReason(test)}</p>
+      ) : null}
+      {kind === 'mixed' ? <p className="text-xs text-muted-foreground">{MIXED_CELL}</p> : null}
+      <p className="text-xs text-muted-foreground">{studentsLabel(studentsAssessed)}</p>
+    </>
+  );
+}
+
+function CellValue({ display, kind }: { display: string; kind: CellKind }) {
+  return (
+    <span className="inline-flex items-center justify-center gap-1">
+      {display}
+      {kind === 'mixed' ? (
+        <>
+          <Layers className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="sr-only">(mixta)</span>
+        </>
+      ) : null}
+    </span>
+  );
+}
+
+function EmptyCell() {
+  return (
+    <TableCell
+      className={cn('text-center text-sm tabular-nums', NO_DATA_CELL_CLASS)}
+      data-cell-kind="empty"
+    >
+      —
+    </TableCell>
+  );
+}
+
+function GradeCell({
+  cell,
+  test,
+  metricKey,
+}: {
+  cell: MasterBoardCell | undefined;
+  test: MasterBoardTest;
+  metricKey: MetricKey;
+}) {
+  if (!cell) return <EmptyCell />;
+  const { kind, metric, className } = cellAppearance(cell, metricKey);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <TableCell
-          className={cn(
-            'text-center text-sm font-bold tabular-nums',
-            cellClass(metric?.level ?? null),
-          )}
+          className={cn('text-center text-sm font-bold tabular-nums', className)}
+          data-cell-kind={kind}
         >
-          {metric?.display ?? '—'}
+          <CellValue display={metric?.display ?? '—'} kind={kind} />
         </TableCell>
       </TooltipTrigger>
       <TooltipContent>
-        <MetricLines metrics={cell.metrics} />
-        <p className="text-xs text-muted-foreground">{studentsLabel(cell.studentsAssessed)}</p>
+        <CellNotes
+          kind={kind}
+          test={test}
+          metrics={cell.metrics}
+          studentsAssessed={cell.studentsAssessed}
+        />
       </TooltipContent>
     </Tooltip>
   );
@@ -187,18 +400,21 @@ function GradeCell({ cell, metricKey }: { cell: MasterBoardCell; metricKey: Metr
 
 function CourseCell({
   cell,
+  test,
   classGroupId,
   metricKey,
   canViewTeacher,
 }: {
-  cell: MasterBoardCourseCell;
+  cell: MasterBoardCourseCell | undefined;
+  test: MasterBoardTest;
   classGroupId: string;
   metricKey: MetricKey;
   canViewTeacher: boolean;
 }) {
-  const metric = primaryMetric(cell.metrics, metricKey);
+  if (!cell) return <EmptyCell />;
+  const { kind, metric, className } = cellAppearance(cell, metricKey);
   const href = courseCellHref(cell, classGroupId);
-  const display = metric?.display ?? '—';
+  const value = <CellValue display={metric?.display ?? '—'} kind={kind} />;
 
   return (
     <Tooltip>
@@ -206,22 +422,27 @@ function CourseCell({
         <TableCell
           className={cn(
             'text-center text-sm font-semibold tabular-nums',
-            cellClass(metric?.level ?? null),
+            className,
             href && 'transition-opacity hover:opacity-80',
           )}
+          data-cell-kind={kind}
         >
           {href ? (
             <Link href={href} className="block">
-              {display}
+              {value}
             </Link>
           ) : (
-            display
+            value
           )}
         </TableCell>
       </TooltipTrigger>
       <TooltipContent>
-        <MetricLines metrics={cell.metrics} />
-        <p className="text-xs text-muted-foreground">{studentsLabel(cell.studentsAssessed)}</p>
+        <CellNotes
+          kind={kind}
+          test={test}
+          metrics={cell.metrics}
+          studentsAssessed={cell.studentsAssessed}
+        />
         {cell.teacher ? (
           <p className="mt-1 text-xs">
             <span className="text-muted-foreground">Profesor(a): </span>
@@ -242,24 +463,77 @@ function CourseCell({
   );
 }
 
-export function MasterBoardLegend(): JSX.Element {
-  const levels: PerformanceLevel[] = ['insufficient', 'elementary', 'adequate', 'advanced'];
+export type LegendEntry = { key: string; label: string; swatchClass: string; icon?: ReactNode };
+
+/**
+ * Leyenda con lo que efectivamente aparece en la matriz: las bandas presentes (agrupadas por
+ * su color, con sus etiquetas) y, si corresponde, celdas sin niveles, mixtas o sin datos.
+ */
+export function collectLegendEntries(data: MasterBoardMatrix): LegendEntry[] {
+  const labelsByColor = new Map<PerformanceLevel, Set<string>>();
+  const kinds = new Set<CellKind>();
+  const visit = (cell: CellLike) => {
+    const { kind, metric } = cellAppearance(cell, data.primaryMetricKey);
+    kinds.add(kind);
+    if (kind !== 'level' || !metric?.level) return;
+    let labels = labelsByColor.get(metric.level.color);
+    if (!labels) {
+      labels = new Set();
+      labelsByColor.set(metric.level.color, labels);
+    }
+    labels.add(metric.level.label);
+  };
+  const columnCount = data.subjects.reduce((total, subject) => total + subject.tests.length, 0);
+  for (const grade of data.grades) {
+    grade.cells.forEach(visit);
+    if (grade.cells.length < columnCount) kinds.add('empty');
+    for (const course of grade.courses) course.cells.forEach(visit);
+  }
+
+  const entries: LegendEntry[] = [];
+  for (const color of LEVEL_ORDER) {
+    const labels = labelsByColor.get(color);
+    if (!labels) continue;
+    entries.push({
+      key: color,
+      label: [...labels].join(' / '),
+      swatchClass: LEVEL_CELL_CLASS[color],
+    });
+  }
+  if (kinds.has('unleveled')) {
+    entries.push({
+      key: 'unleveled',
+      label: 'Sin cortes de nivel',
+      swatchClass: UNLEVELED_CELL_CLASS,
+    });
+  }
+  if (kinds.has('mixed')) {
+    entries.push({
+      key: 'mixed',
+      label: 'Mixta (varios instrumentos)',
+      swatchClass: UNLEVELED_CELL_CLASS,
+      icon: <Layers className="size-3 text-muted-foreground" aria-hidden />,
+    });
+  }
+  if (kinds.has('empty')) {
+    entries.push({ key: 'empty', label: 'Sin datos', swatchClass: NO_DATA_CELL_CLASS });
+  }
+  return entries;
+}
+
+export function MasterBoardLegend({ data }: { data: MasterBoardMatrix }): JSX.Element | null {
+  const entries = useMemo(() => collectLegendEntries(data), [data]);
+  if (entries.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-      <span className="font-medium">Escala de logro:</span>
-      {levels.map((level) => (
-        <span key={level} className="inline-flex items-center gap-1.5">
-          <span
-            className={cn('inline-block size-3 rounded-sm', LEVEL_CELL_CLASS[level])}
-            aria-hidden
-          />
-          {PERFORMANCE_LEVEL_LABELS[level]}
+      <span className="font-medium">Nivel del promedio:</span>
+      {entries.map((entry) => (
+        <span key={entry.key} className="inline-flex items-center gap-1.5" data-legend={entry.key}>
+          <span className={cn('inline-block size-3 rounded-sm', entry.swatchClass)} aria-hidden />
+          {entry.icon}
+          {entry.label}
         </span>
       ))}
-      <span className="inline-flex items-center gap-1.5">
-        <span className={cn('inline-block size-3 rounded-sm', NO_DATA_CELL_CLASS)} aria-hidden />
-        Sin datos
-      </span>
     </div>
   );
 }

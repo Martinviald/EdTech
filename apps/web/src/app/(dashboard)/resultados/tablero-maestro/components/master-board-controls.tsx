@@ -1,17 +1,24 @@
 'use client';
 
-import { useCallback, useTransition } from 'react';
+import { useCallback, useMemo, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
-import { METRIC_LABELS, type MasterBoardTake, type MetricKey } from '@soe/types';
+import {
+  METRIC_LABELS,
+  type MasterBoardAcademicYear,
+  type MasterBoardTake,
+  type MetricKey,
+} from '@soe/types';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TopProgressBar } from '@/components/shared';
+import { StatusBadge, TopProgressBar } from '@/components/shared';
 import { ROUTES } from '@/lib/routes';
 import {
   buildMasterBoardQuery,
@@ -19,19 +26,25 @@ import {
   takeToFilterValues,
   type MasterBoardFilterValues,
 } from '../master-board-filters';
+import { assessmentCountLabel, formatTakeWindow, groupTakesByYear } from './take-options';
 
 const METRIC_OPTIONS = Object.keys(METRIC_LABELS) as MetricKey[];
 
 export function MasterBoardControls({
   takes,
+  academicYears,
   value,
 }: {
   takes: MasterBoardTake[];
+  academicYears: MasterBoardAcademicYear[];
   value: MasterBoardFilterValues;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const currentTakeKey = takeKeyOf(value);
+  const takesByKey = useMemo(() => new Map(takes.map((take) => [take.key, take])), [takes]);
+  const groups = useMemo(() => groupTakesByYear(takes, academicYears), [takes, academicYears]);
+  const currentTake = currentTakeKey ? takesByKey.get(currentTakeKey) : undefined;
 
   const navigate = useCallback(
     (next: MasterBoardFilterValues) => {
@@ -45,10 +58,10 @@ export function MasterBoardControls({
 
   const onTakeChange = useCallback(
     (key: string) => {
-      const take = takes.find((candidate) => candidate.key === key);
+      const take = takesByKey.get(key);
       if (take) navigate(takeToFilterValues(take, value.metric));
     },
-    [takes, value.metric, navigate],
+    [takesByKey, value.metric, navigate],
   );
 
   const onMetricChange = useCallback(
@@ -59,11 +72,13 @@ export function MasterBoardControls({
   return (
     <div className="relative flex flex-wrap items-end gap-3">
       <TopProgressBar active={isPending} />
-      <div className="flex flex-col gap-1.5">
+      <div className="flex w-full flex-col gap-1.5 sm:w-auto">
         <label className="text-xs font-medium text-muted-foreground">Toma de evaluaciones</label>
         <Select value={currentTakeKey ?? undefined} onValueChange={onTakeChange}>
-          <SelectTrigger className="w-[300px]">
-            <SelectValue placeholder="Selecciona una toma" />
+          <SelectTrigger className="w-full sm:w-[340px]" aria-label="Toma de evaluaciones">
+            <SelectValue placeholder="Selecciona una toma">
+              {currentTake ? <span className="truncate">{currentTake.label}</span> : undefined}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {takes.length === 0 ? (
@@ -71,25 +86,29 @@ export function MasterBoardControls({
                 No hay tomas con datos
               </SelectItem>
             ) : (
-              takes.map((take) => (
-                <SelectItem key={take.key} value={take.key}>
-                  {take.label} · {take.assessmentCount}{' '}
-                  {take.assessmentCount === 1 ? 'evaluación' : 'evaluaciones'}
-                </SelectItem>
+              groups.map((group) => (
+                <SelectGroup key={group.academicYearId}>
+                  <SelectLabel>{group.label}</SelectLabel>
+                  {group.takes.map((take) => (
+                    <SelectItem key={take.key} value={take.key}>
+                      <TakeOption take={take} />
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               ))
             )}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex w-full flex-col gap-1.5 sm:w-auto">
         <label className="text-xs font-medium text-muted-foreground">Métrica</label>
         <Select
           value={value.metric ?? METRIC_OPTIONS[0]}
           onValueChange={onMetricChange}
           disabled={METRIC_OPTIONS.length <= 1}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]" aria-label="Métrica">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -102,5 +121,20 @@ export function MasterBoardControls({
         </Select>
       </div>
     </div>
+  );
+}
+
+function TakeOption({ take }: { take: MasterBoardTake }) {
+  const dateWindow = formatTakeWindow(take);
+  return (
+    <span className="flex flex-col gap-0.5 py-0.5">
+      <span className="font-medium">{take.label}</span>
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+        {dateWindow ? <span>{dateWindow}</span> : null}
+        <span>{assessmentCountLabel(take.assessmentCount)}</span>
+        {!take.hasResults ? <StatusBadge tone="neutral">Sin resultados</StatusBadge> : null}
+        {take.partial ? <StatusBadge tone="warning">Parcial</StatusBadge> : null}
+      </span>
+    </span>
   );
 }

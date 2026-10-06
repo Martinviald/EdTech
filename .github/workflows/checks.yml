@@ -46,6 +46,9 @@ jobs:
       - name: Design System guard
         run: pnpm --filter @soe/web lint:ds
 
+      - name: Tests
+        run: pnpm --filter @soe/web exec jest --ci --runInBand
+
       # Build de producción: detecta errores que typecheck/lint NO ven —sobre todo
       # violaciones de frontera cliente/servidor (RSC). Corre en checkout limpio sin
       # `.env`, igual que el `next build` del deploy (que compila sin esas variables).
