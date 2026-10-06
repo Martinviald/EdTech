@@ -161,6 +161,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/05.png",
      "alternatives": [
       {
        "key": "A",
@@ -192,6 +193,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/06.png",
      "alternatives": [
       {
        "key": "A",
@@ -285,6 +287,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/09.png",
      "alternatives": [
       {
        "key": "A",
@@ -378,6 +381,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/12.png",
      "alternatives": [
       {
        "key": "A",
@@ -440,6 +444,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/14.png",
      "alternatives": [
       {
        "key": "A",
@@ -502,6 +507,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/16.png",
      "alternatives": [
       {
        "key": "A",
@@ -533,6 +539,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/17.png",
      "alternatives": [
       {
        "key": "A",
@@ -564,6 +571,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/18.png",
      "alternatives": [
       {
        "key": "A",
@@ -595,6 +603,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/19.png",
      "alternatives": [
       {
        "key": "A",
@@ -858,6 +867,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/27.png",
      "alternatives": [
       {
        "key": "A",
@@ -920,6 +930,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/29.png",
      "alternatives": [
       {
        "key": "A",
@@ -951,6 +962,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/30.png",
      "alternatives": [
       {
        "key": "A",
@@ -987,6 +999,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/31.png",
      "alternatives": [
       {
        "key": "A",
@@ -1085,6 +1098,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/34.png",
      "alternatives": [
       {
        "key": "A",
@@ -1244,6 +1258,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/39.png",
      "alternatives": [
       {
        "key": "A",
@@ -1275,6 +1290,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/40.png",
      "alternatives": [
       {
        "key": "A",
@@ -1306,6 +1322,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/41.png",
      "alternatives": [
       {
        "key": "A",
@@ -1368,6 +1385,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/43.png",
      "alternatives": [
       {
        "key": "A",
@@ -1417,8 +1435,49 @@
       },
       {
        "key": "D",
-       "text": "A un procedimiento 45. ¿Cuál de las siguientes representaciones corresponde al ciclohexanol?",
+       "text": "A un procedimiento",
        "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 45,
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes representaciones corresponde al ciclohexanol?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas (A-E): modelos moleculares de esferas con leyenda gris = Carbono, negro = Oxígeno, blanco = Hidrógeno",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A: modelo molecular de esferas — carbono gris, oxígeno negro, hidrógeno blanco)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B: modelo molecular de esferas — carbono gris, oxígeno negro, hidrógeno blanco)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C: modelo molecular de esferas — carbono gris, oxígeno negro, hidrógeno blanco)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D: modelo molecular de esferas — carbono gris, oxígeno negro, hidrógeno blanco)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(figura E: modelo molecular de esferas — carbono gris, oxígeno negro, hidrógeno blanco)",
+       "isCorrect": false,
+       "isImage": true
       }
      ]
     },
@@ -1430,6 +1489,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/46.png",
      "alternatives": [
       {
        "key": "A",
@@ -1466,6 +1526,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/47.png",
      "alternatives": [
       {
        "key": "A",
@@ -1564,6 +1625,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/50.png",
      "alternatives": [
       {
        "key": "A",
@@ -1600,6 +1662,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/51.png",
      "alternatives": [
       {
        "key": "A",
@@ -1631,6 +1694,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/52.png",
      "alternatives": [
       {
        "key": "A",
@@ -1703,6 +1767,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/54.png",
      "alternatives": [
       {
        "key": "A",
@@ -1734,6 +1799,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/55.png",
      "alternatives": [
       {
        "key": "A",
@@ -1796,6 +1862,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/57.png",
      "alternatives": [
       {
        "key": "A",
@@ -1814,8 +1881,39 @@
       },
       {
        "key": "D",
-       "text": "Aumenta el flujo de agua al interior del ovocito. 58. Un estudiante realizó el siguiente experimento: 1. Colocó un huevo de gallina en un vaso de precipitados con vinagre, hasta que se disolvió la cáscara. 2. Sacó el huevo, lo masó y lo puso en otro vaso que contenía una solución de mayor concentración de solutos que la del huevo.",
+       "text": "Aumenta el flujo de agua al interior del ovocito.",
        "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 58,
+     "type": "multiple_choice",
+     "stem": "Un estudiante realizó el siguiente experimento: 1. Colocó un huevo de gallina en un vaso de precipitados con vinagre, hasta que se disolvió la cáscara. 2. Sacó el huevo, lo masó y lo puso en otro vaso que contenía una solución de mayor concentración de solutos que la del huevo. 3. Luego de cuatro días en la solución anterior, masó nuevamente el huevo. Al respecto, ¿cuál de las siguientes opciones corresponde a una inferencia, fundamentada correctamente, acerca de lo sucedido con la masa final de este huevo?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Habrá aumentado, debido al movimiento de solutos hacia su interior.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Habrá disminuido, debido al movimiento de agua hacia el medio.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Habrá aumentado, debido al movimiento de agua hacia su interior.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Habrá disminuido, debido al movimiento de solutos hacia el medio.",
+       "isCorrect": false
       }
      ]
     },
@@ -1920,6 +2018,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/62.png",
      "alternatives": [
       {
        "key": "A",
@@ -2048,6 +2147,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/66.png",
      "alternatives": [
       {
        "key": "A",
@@ -2172,6 +2272,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/70.png",
      "alternatives": [
       {
        "key": "A",
@@ -2265,6 +2366,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-bio-e1-2026/item_figure/73.png",
      "alternatives": [
       {
        "key": "A",
@@ -2514,12 +2616,12 @@
   }
  },
  "extraction": {
-  "itemCount": 78,
+  "itemCount": 80,
   "warnings": [
    "1 candidatos duplicados descartados",
-   "posiciones ≠ 1..80 (faltan [45, 58], duplicadas [])"
+   "posiciones [45, 58] completadas a mano desde el PDF (subagente extractor, 2026-10-05)"
   ],
   "needsHumanReview": true,
-  "itemsConClave": 78
+  "itemsConClave": 80
  }
 }
