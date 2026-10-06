@@ -90,7 +90,28 @@ Las siete son aditivas. Con `track_id` y `process_id` en `null`, el tablero mues
 
 Todas con `DATABASE_ADMIN_URL` de demo, desde `origin/main` ya mergeado. Los cuatro scripts **verifican el rol al arrancar y abortan** si la conexión está sujeta a RLS: con `DATABASE_URL` (rol `soe_app`) no veían ni escribían las filas de otras orgs y reportaban éxito sin haber hecho nada.
 
-⚠️ **Los PAES van antes que los DIA.** El orden de la tabla es 1 → 2 → **5** → 3 → 4 → 6. El paso 3 (`db:backfill:processes`) no excluye las evaluaciones con `config.ensayo`, así que una línea o asignatura PAES que tenga un solo instrumento en el año no viola su invariante y se la queda un proceso "PAES 2026" genérico; después el paso 5 ya no la ve, porque filtra por `process_id is null`. Revertirlo pide `UPDATE assessments SET process_id = NULL` a mano más borrar el proceso espurio. Corriendo el 5 primero, el 3 encuentra esas evaluaciones ya vinculadas y no las toca.
+⚠️ **El orden es 1 → 2 → 4 → 5 → 3 → 6** (Ciencias, luego PAES, luego DIA). Ejecutado así contra demo el 2026-10-06; las dos desviaciones respecto del orden de la tabla tienen razones distintas:
+
+**Ciencias (4) antes que los PAES (5).** Mientras las menciones de Ciencias son instrumentos separados (BIO/FIS/QUI), la celda (grado, prueba Ciencias) tiene tres instrumentos y viola la invariante del paso 5: los Ensayos 1, 3 y 4 quedan SIN proceso y sólo se crea el del Ensayo 2. Corriendo `cie-electivas` primero, los tres se fusionan en uno con secciones electivas y el paso 5 crea los 5 procesos sin un solo conflicto.
+
+**PAES (5) antes que los DIA (3).** El paso 3 no excluye las evaluaciones con `config.ensayo`, así que las PAES que el paso 5 no alcanzó a agrupar se las queda un proceso "Ensayo PAES 2026" genérico y sin momento; después el paso 5 ya no las ve, porque filtra por `process_id is null`. Revertirlo pide `UPDATE assessments SET process_id = NULL` a mano más borrar el proceso espurio. **Esto se observó de verdad** en el dry-run del paso 3: proponía ese proceso genérico con las 6 evaluaciones de los Ensayo 5. Corriendo el 5 primero, el 3 las encuentra ya vinculadas y no las toca.
+
+⚠️ **Los Ensayo 5 llegan sin `config.ensayo`.** Se cargaron desde ramas aparte y sus evaluaciones no traen el campo por el que agrupa el paso 5, así que quedan fuera de todo proceso PAES y son justamente las que el paso 3 captura mal. Antes del paso 5, comprobar que ninguna PAES quedó sin él:
+
+```sql
+select i.name, count(*)
+from assessments a join instruments i on i.id = a.instrument_id
+where i.type = 'paes' and a.config->'ensayo' is null and i.deleted_at is null
+group by i.name;
+```
+
+Si aparecen, marcarlas con su tanda (el campo es un **number**, no un string) y recién entonces correr el paso 5:
+
+```sql
+update assessments a set config = coalesce(a.config,'{}'::jsonb) || '{"ensayo": 5}'::jsonb, updated_at = now()
+from instruments i
+where i.id = a.instrument_id and i.name like 'PAES M% — Ensayo 5 (Tanda 5)%' and a.config->'ensayo' is null;
+```
 
 | #   | Comando                                                                                 | Qué debe mostrar el dry-run                                                                                                                                                                                                                                                                                            |
 | --- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
