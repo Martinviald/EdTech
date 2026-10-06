@@ -18,7 +18,7 @@
  * insertan directo en el read-model sin resultados detrás, y un refresh que borrara
  * lo que no recalcula los haría desaparecer.
  */
-import { and, eq, isNull, lt, sql } from 'drizzle-orm';
+import { and, eq, isNull, lt, sql, type SQL } from 'drizzle-orm';
 import {
   classifyByBands,
   type BenchmarkBandCount,
@@ -211,7 +211,7 @@ async function refreshOrgItemAggregates(
       })
       .from(assessmentItemStats)
       .innerJoin(assessments, eq(assessmentItemStats.assessmentId, assessments.id))
-      .where(eq(assessments.orgId, orgId))
+      .where(and(eq(assessments.orgId, orgId), preferComputedOverImported(assessmentItemStats)))
       .groupBy(assessments.instrumentId, assessmentItemStats.itemId),
   );
   const now = new Date();
@@ -255,6 +255,43 @@ async function refreshOrgItemAggregates(
     );
 
   return rows.length;
+}
+
+/**
+ * Descarta la fila importada de una celda (instrumento × curso × nodo) cuando esa celda
+ * también tiene la calculada.
+ *
+ * La importación del informe oficial DIA crea su propia evaluación, así que un instrumento
+ * con respuestas cargadas Y su informe importado tiene las dos: sumar ambas cuenta a cada
+ * alumno dos veces. Medido en demo: `DIA Matemática 6° Básico 2025 — Intermedio` reportaba
+ * 162 alumnos por nodo sobre 81 reales, en 6 celdas (3 instrumentos × 2 cursos).
+ *
+ * No alcanza con quedarse con UNA fila por celda: una celda puede tener dos filas
+ * `computed` de evaluaciones distintas y ser correcto sumarlas, porque son alumnos
+ * disjuntos — en CSCJ hay una evaluación por curso y un alumno que rindió con el otro
+ * curso aparece en la evaluación ajena bajo su curso real. Ahí el total es la suma (42 + 1)
+ * y quedarse con una perdería al alumno cruzado.
+ *
+ * Por eso el criterio es por FUENTE, no por fila: si la celda tiene algo calculado desde
+ * respuestas reales, lo importado no aporta; si no lo tiene (colegio que sólo subió su
+ * informe), lo importado es todo lo que hay y cuenta.
+ */
+export function preferComputedOverImported(stats: typeof assessmentSkillStats): SQL;
+export function preferComputedOverImported(stats: typeof assessmentItemStats): SQL;
+export function preferComputedOverImported(
+  stats: typeof assessmentSkillStats | typeof assessmentItemStats,
+): SQL {
+  const dimension = 'nodeId' in stats ? stats.nodeId : stats.itemId;
+  return sql`not (${stats.source} = 'imported' and exists (
+      select 1
+      from ${stats} dup_stats
+      join ${assessments} dup_assessments on dup_assessments.id = dup_stats.assessment_id
+      where dup_assessments.instrument_id = ${assessments.instrumentId}
+        and dup_assessments.org_id = ${assessments.orgId}
+        and dup_stats.class_group_id = ${stats.classGroupId}
+        and dup_stats.${sql.raw(dimension.name)} = ${dimension}
+        and dup_stats.source = 'computed'
+    ))`;
 }
 
 /**
@@ -338,7 +375,7 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
       .innerJoin(assessments, eq(assessmentSkillStats.assessmentId, assessments.id))
       .innerJoin(instruments, eq(assessments.instrumentId, instruments.id))
       .innerJoin(taxonomyNodes, eq(assessmentSkillStats.nodeId, taxonomyNodes.id))
-      .where(eq(assessments.orgId, orgId))
+      .where(and(eq(assessments.orgId, orgId), preferComputedOverImported(assessmentSkillStats)))
       .groupBy(instruments.id, assessmentSkillStats.nodeId, taxonomyNodes.name);
 
     const perSkillByInstrument = new Map<string, BenchmarkSkillAggregate[]>();
