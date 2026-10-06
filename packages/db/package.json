@@ -40,6 +40,7 @@
     "db:retype:items": "tsx src/scripts/retype-matching-truefalse-items.ts",
     "db:backfill:application-period": "tsx src/scripts/backfill-application-period.ts",
     "db:backfill:processes": "tsx src/scripts/backfill-measurement-processes.ts",
+    "db:backfill:processes:paes": "tsx src/scripts/backfill-processes-by-config.ts --type paes --key ensayo",
     "db:backfill:tracks": "tsx src/scripts/backfill-instrument-tracks.ts",
     "db:migrate:cie-electivas": "tsx src/scripts/migrate-elective-sections.ts --map data/instruments-paes/cie-electivas-mapa.json",
     "db:fix:application-period": "tsx src/scripts/split-instrument-by-application-period.ts",
