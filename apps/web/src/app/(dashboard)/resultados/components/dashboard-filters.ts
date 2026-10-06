@@ -20,10 +20,28 @@ export type DashboardFilterValues = {
   instrumentId?: string;
   studentId?: string;
   academicYearId?: string;
+  // Proceso de medición (docs/diseno-procesos-de-medicion.md): acota el alcance a
+  // las evaluaciones de una ventana de aplicación con una sola clave.
+  processId?: string;
+  /**
+   * "Quiero ver todos los procesos": desactiva la preselección del proceso por
+   * defecto. NO es un filtro — no está en `FILTER_KEYS`, así que nunca viaja a la
+   * API — sino la memoria de que el usuario quitó el default a mano.
+   */
+  processOptOut?: boolean;
 };
 
-/** Claves de filtro que viven en la querystring. */
-export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
+/**
+ * Claves de filtro que viajan en la querystring Y a la API.
+ *
+ * El `Exclude` no es decorativo: `processOptOut` es un booleano de UI, y sin
+ * sacarlo del tipo `buildDashboardQuery` intentaría serializar `true` como valor
+ * de query. Toda clave que se agregue al tipo sin ser un filtro real tiene que
+ * excluirse acá.
+ */
+type QueryFilterKey = Exclude<keyof DashboardFilterValues, 'processOptOut'>;
+
+export const FILTER_KEYS: readonly QueryFilterKey[] = [
   'subjectId',
   'gradeId',
   'classGroupId',
@@ -32,6 +50,7 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
   'instrumentId',
   'studentId',
   'academicYearId',
+  'processId',
 ];
 
 /**
@@ -45,13 +64,69 @@ export const FILTER_KEYS: readonly (keyof DashboardFilterValues)[] = [
  *
  * No es un filtro escondido: se pasa también a la barra, que lo muestra seleccionado
  * y permite cambiarlo o quitarlo para ver toda la historia.
+ *
+ * Excepción: un proceso de medición YA declara su propia ventana, y casi siempre la
+ * de un año que no es el vigente. Inyectarle encima el año por defecto cruzaba dos
+ * filtros incompatibles y dejaba el panorama en blanco — que es lo que pasaba al
+ * entrar por "Ver panorama" desde cualquier proceso de un año anterior.
  */
 export function withDefaultAcademicYear(
   value: DashboardFilterValues,
   defaultAcademicYearId: string | null,
 ): DashboardFilterValues {
+  if (value.processId) return value;
   if (value.academicYearId || !defaultAcademicYearId) return value;
   return { ...value, academicYearId: defaultAcademicYearId };
+}
+
+/**
+ * Clave de URL que marca "quiero ver todos los procesos". NO viaja a la API ni
+ * está en `FILTER_KEYS`: sólo desactiva la preselección.
+ *
+ * Hace falta porque "no hay proceso en la URL" es ambiguo — puede ser que acabas
+ * de entrar, o que quitaste el filtro a mano. Sin distinguirlas, el default se
+ * vuelve a inyectar en el mismo instante en que lo quitas y el filtro es
+ * inescapable. Es el defecto que hoy tiene el año académico por defecto, y que
+ * acá no se repite.
+ */
+export const PROCESS_OPT_OUT_KEY = 'noProcess';
+
+/**
+ * Preselecciona el proceso más reciente con resultados al entrar sin filtros.
+ *
+ * Se aplica ANTES que {@link withDefaultAcademicYear}: un proceso ya declara su
+ * ventana, así que cuando hay proceso no se inyecta año (cruzar ambos vaciaba la
+ * vista para todo proceso de un año que no fuera el vigente).
+ */
+export function withDefaultProcess(
+  value: DashboardFilterValues,
+  defaultProcessId: string | null,
+): DashboardFilterValues {
+  if (value.processOptOut || value.processId || !defaultProcessId) return value;
+  // Guarda simétrica a la de `withDefaultAcademicYear`. Si el usuario eligió un
+  // año a mano, preseleccionarle encima un proceso —que casi siempre es de OTRO
+  // año— cruza dos filtros incompatibles y deja la vista en blanco. Pidió un año:
+  // se le da el año.
+  if (value.academicYearId) return value;
+  return { ...value, processId: defaultProcessId };
+}
+
+/**
+ * Los defaults de entrada, en el orden correcto y en un solo lugar.
+ *
+ * Existe para que las cinco páginas que los aplican no puedan quedar
+ * desincronizadas: el orden importa (proceso antes que año, ver
+ * {@link withDefaultProcess}) y repetirlo en cada `page.tsx` es pedir que una se
+ * quede atrás en el próximo default que se agregue.
+ */
+export function withEntryDefaults(
+  value: DashboardFilterValues,
+  options: { defaultProcessId: string | null; defaultAcademicYearId: string | null },
+): DashboardFilterValues {
+  return withDefaultAcademicYear(
+    withDefaultProcess(value, options.defaultProcessId),
+    options.defaultAcademicYearId,
+  );
 }
 
 /** ¿Hay algún filtro aplicado? Decide si un resultado vacío se explica por los filtros. */
@@ -92,6 +167,8 @@ export function parseDashboardFilters(
     instrumentId: pick('instrumentId'),
     studentId: pick('studentId'),
     academicYearId: pick('academicYearId'),
+    processId: pick('processId'),
+    processOptOut: pick(PROCESS_OPT_OUT_KEY) === '1',
   };
 }
 
@@ -195,6 +272,16 @@ export function toScalarFilters(f: DashboardFilterValues): DashboardScalarFilter
     studentId: f.studentId,
     academicYearId: f.academicYearId,
   };
+}
+
+/**
+ * Querystring que quita el proceso Y deja la marca de que fue a propósito.
+ * Sin `noProcess=1` el default se reinyecta en el mismo render y el enlace no
+ * hace nada visible.
+ */
+export function buildClearProcessQuery(value: DashboardFilterValues): string {
+  const base = buildDashboardQuery({ ...value, processId: undefined });
+  return base ? `${base}&${PROCESS_OPT_OUT_KEY}=1` : `?${PROCESS_OPT_OUT_KEY}=1`;
 }
 
 /** Serializa los filtros a una querystring (orden estable, sin claves vacías). */

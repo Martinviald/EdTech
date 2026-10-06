@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { FilterBar, MultiSelectFilter, type FilterField } from '@/components/shared';
 import {
   FILTER_KEYS,
+  PROCESS_OPT_OUT_KEY,
   classGroupSelectOptionsMulti,
   hasActiveFilters,
   type DashboardFilterValues,
@@ -109,10 +110,32 @@ export function DashboardFilterBar({
     [applyFilters, options.classGroups, value.classGroupId],
   );
 
+  // El proceso por defecto necesita su propia marca de "quitado": borrar la clave
+  // de la URL no alcanza, porque la preselección la volvería a poner en el acto.
+  const updateProcess = useCallback(
+    (next: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (next) {
+        params.set('processId', next);
+        params.delete(PROCESS_OPT_OUT_KEY);
+      } else {
+        params.delete('processId');
+        params.set(PROCESS_OPT_OUT_KEY, '1');
+      }
+      params.delete('page');
+      const qs = params.toString();
+      startTransition(() => {
+        router.push(`${basePath}${qs ? `?${qs}` : ''}` as Route);
+      });
+    },
+    [router, searchParams, basePath],
+  );
+
   const clearAll = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     for (const key of FILTER_KEYS) params.delete(key);
     params.delete('page');
+    params.set(PROCESS_OPT_OUT_KEY, '1');
     const qs = params.toString();
     startTransition(() => {
       router.push(`${basePath}${qs ? `?${qs}` : ''}` as Route);
@@ -156,6 +179,19 @@ export function DashboardFilterBar({
   // dejar al usuario filtrando a ciegas.
   const periodsWithData = new Set(options.applicationPeriodsWithData);
 
+  // El nombre de un proceso no siempre trae el año ("Cierre" vs "DIA Cierre 2026"),
+  // y el desplegable mezcla años: se antepone el período sólo cuando falta, para no
+  // dejar dos entradas homónimas indistinguibles.
+  const periodLabels = new Map(options.periods.map((p) => [p.id, p.label]));
+  const processOptions = options.processes.map((p) => {
+    const periodLabel = p.academicYearId ? periodLabels.get(p.academicYearId) : undefined;
+    const needsPeriod = periodLabel && !p.label.includes(periodLabel);
+    const base = needsPeriod ? `${p.label} · ${periodLabel}` : p.label;
+    // Mismo criterio que los momentos sin evaluaciones: se anota en vez de
+    // ocultarse, para no dejar a nadie filtrando a ciegas hacia una vista vacía.
+    return { id: p.id, label: p.hasResults ? base : `${base} · sin resultados` };
+  });
+
   const fields: FilterField[] = [
     {
       key: 'academicYearId',
@@ -164,6 +200,15 @@ export function DashboardFilterBar({
       value: value.academicYearId,
       options: options.periods.map((p) => ({ id: p.id, label: p.label })),
       onChange: (v) => updateSingle('academicYearId', v),
+    },
+    {
+      key: 'processId',
+      label: 'Proceso de medición',
+      placeholder: 'Todos los procesos',
+      value: value.processId,
+      options: processOptions,
+      onChange: updateProcess,
+      hidden: processOptions.length === 0,
     },
     {
       key: 'subjectId',

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { DashboardFilterBar } from '../resultados/components/dashboard-filter-bar';
 import {
   parseDashboardFilters,
-  withDefaultAcademicYear,
+  withEntryDefaults,
   buildDashboardQuery,
   type DashboardFilterValues,
 } from '../resultados/components/dashboard-filters';
@@ -59,7 +59,7 @@ async function FiltersSection({
   return (
     <DashboardFilterBar
       options={options}
-      value={withDefaultAcademicYear(filters, options.defaultAcademicYearId)}
+      value={withEntryDefaults(filters, options)}
       basePath={BASE_PATH}
     />
   );
@@ -76,7 +76,7 @@ async function AssessmentsSection({
 }) {
   const options = await getEvaluacionesFilters(query);
   const assessmentList = await getEvaluacionesAssessments(
-    buildDashboardQuery(withDefaultAcademicYear(filters, options.defaultAcademicYearId)),
+    buildDashboardQuery(withEntryDefaults(filters, options)),
   );
   const assessments = assessmentList.data;
 

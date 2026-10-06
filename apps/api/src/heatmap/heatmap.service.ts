@@ -266,6 +266,7 @@ export class HeatmapService {
       sql`${instruments.subjectId} is not null`,
     ];
 
+    if (query.processId) conditions.push(eq(assessments.processId, query.processId));
     if (query.assessmentId) conditions.push(eq(assessments.id, query.assessmentId));
     if (query.instrumentId) {
       conditions.push(eq(assessments.instrumentId, query.instrumentId));

@@ -35,6 +35,7 @@ const STATIC_TITLES: Record<string, PageTitle> = {
 
   // Hub de Panorama pedagógico: todas las tabs comparten título (la tab activa
   // ya se identifica en la barra de pestañas del cuerpo).
+  [ROUTES.procesos]: { title: 'Procesos de medición' },
   [ROUTES.resultados]: { title: 'Panorama pedagógico' },
   [ROUTES.resultadosClasificacion]: { title: 'Panorama pedagógico' },
   [ROUTES.resultadosDimensiones]: { title: 'Panorama pedagógico' },

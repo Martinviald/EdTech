@@ -7,6 +7,7 @@ import {
   INSTRUMENT_APPLICATION_PERIODS,
   type InstrumentApplicationPeriod,
 } from './instrument.schema';
+import type { ProcessStatus } from './measurement-process.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint 4 — Dashboards core (H6.1, H6.2, H6.4, H6.5, H6.7, H6.8)
@@ -38,6 +39,7 @@ export const dashboardFiltersQuerySchema = z.object({
   applicationPeriod: csvArraySchema(z.enum(INSTRUMENT_APPLICATION_PERIODS)),
   studentId: z.string().uuid().optional(),
   academicYearId: z.string().uuid().optional(),
+  processId: z.string().uuid().optional(),
 });
 export type DashboardFiltersQueryDto = z.infer<typeof dashboardFiltersQuerySchema>;
 
@@ -218,6 +220,24 @@ export type InstrumentFilterOption = {
   applicationPeriod: InstrumentApplicationPeriod | null;
 };
 
+/**
+ * Proceso de medición ofrecible como filtro. Sólo llegan los que tienen alguna
+ * evaluación dentro del alcance visible: un proceso planificado sin evaluaciones
+ * cargadas dejaría el panorama en blanco al elegirlo.
+ */
+export type ProcessFilterOption = {
+  id: string;
+  label: string;
+  academicYearId: string | null;
+  status: ProcessStatus;
+  /**
+   * El proceso tiene al menos una evaluación con resultados (`assessment_results`
+   * o el read-model de cohorte). Es lo que separa un proceso mirable de uno recién
+   * creado, y lo que decide `defaultProcessId`.
+   */
+  hasResults: boolean;
+};
+
 export type DashboardFilterOptionsResponse = {
   subjects: FilterOption[];
   grades: FilterOption[];
@@ -237,6 +257,15 @@ export type DashboardFilterOptionsResponse = {
    * los elija.
    */
   applicationPeriodsWithData: InstrumentApplicationPeriod[];
+  /** Procesos de medición con evaluaciones en el alcance visible. */
+  processes: ProcessFilterOption[];
+  /**
+   * Proceso preseleccionado al entrar sin filtros en la URL: el más reciente CON
+   * resultados. `null` si no hay ninguno mirable, y entonces no se preselecciona
+   * nada — un default nunca puede ser la causa de una vista vacía
+   * (docs/diseno-entrada-por-proceso.md §D1).
+   */
+  defaultProcessId: string | null;
   /**
    * Año académico al que está acotado el catálogo de cursos: el pedido en la
    * query, o el vigente, o el más reciente con cursos. `null` si el usuario no
