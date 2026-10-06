@@ -250,7 +250,14 @@ export type PerformanceBandInput = {
   minThreshold: number; // 0..1 inclusivo
   maxThreshold: number; // 0..1 exclusivo (salvo la banda superior, ver abajo)
   color?: string | null;
+  // Procedencia del corte. Opcional porque la mayoría de los consumidores no la
+  // necesita; la pide quien afirma algo COMPARANDO instrumentos, que es cuando
+  // importa si el corte se midió para esa prueba o es el genérico por defecto.
+  source?: PerformanceBandSource;
 };
+
+export const PERFORMANCE_BAND_SOURCES = ['measured', 'generic', 'unknown'] as const;
+export type PerformanceBandSource = (typeof PERFORMANCE_BAND_SOURCES)[number];
 
 /**
  * Clasifica un % de logro (0..1) en la banda correspondiente.

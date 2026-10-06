@@ -1,3 +1,4 @@
+import type { PerformanceBandSource } from '../utils/grade-calculator';
 import { z } from 'zod';
 
 // ── Niveles/umbrales de logro por instrumento (performance_bands) ─────────────
@@ -136,4 +137,7 @@ export type PerformanceBandView = {
   // fija de 4 niveles para las zonas.
   minThreshold?: number;
   maxThreshold?: number;
+  // Ver `PerformanceBandSource`: `unknown` y ausente significan lo mismo —no se
+  // declaró—, nunca "es genérico".
+  source?: PerformanceBandSource;
 };

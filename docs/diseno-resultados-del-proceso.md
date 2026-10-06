@@ -505,7 +505,14 @@ string. El dato ya está en la query: `process-coverage.service.ts:105` hace
 - `GET /measurement-processes/:id` y `/:id/coverage` ya existen
   (`measurement-processes.controller.ts:51`, `:79`) y la página ya los pide
   (`apps/web/src/app/(dashboard)/procesos/data.ts:14-20`).
-- Sin migraciones. Sin RLS nuevo.
+- ⟨corregido al implementar⟩ **Sí hay una migración**, y es consecuencia de resolver P3: la
+  columna `source` en `performance_bands` (`0037_gray_kat_farrell.sql`, un `CREATE TYPE` y un
+  `ADD COLUMN`). El diseño decía "sin migraciones" porque escribió P3 como pregunta abierta y la
+  alternativa heurística no tocaba schema. Se eligió la columna. Sin RLS nuevo.
+
+  Default `'unknown'` a propósito: las filas que ya existen no tienen procedencia conocida, y
+  deducirla comparando contra los valores genéricos es exactamente la heurística que P3 descartó.
+  `unitsWithMeasuredCut` cuenta sólo lo declarado; mientras nadie declare, no afirma nada.
 
 ---
 
