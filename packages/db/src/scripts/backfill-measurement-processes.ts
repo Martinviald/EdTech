@@ -14,6 +14,7 @@ import {
   type ExpectedScopeCell,
   type InstrumentApplicationPeriod,
   type InstrumentType,
+  type ProcessInvariantViolation,
   type ProcessKind,
 } from '@soe/types';
 import { createDbClient } from '../client';
@@ -110,13 +111,16 @@ function toProcessGroup(key: string, rows: readonly AssessmentRow[]): ProcessGro
 
 function buildGroups(rows: readonly AssessmentRow[]): {
   groups: ProcessGroup[];
-  ambiguous: ProcessGroup[];
+  ambiguous: (ProcessGroup & { violations: ProcessInvariantViolation[] })[];
   multiYearAssessmentIds: string[];
 } {
   const grouping = groupProcessCandidates(rows);
   return {
     groups: grouping.groups.map((g) => toProcessGroup(g.key, g.candidates)),
-    ambiguous: grouping.ambiguous.map((g) => toProcessGroup(g.key, g.candidates)),
+    ambiguous: grouping.ambiguous.map((g) => ({
+      ...toProcessGroup(g.key, g.candidates),
+      violations: g.violations,
+    })),
     multiYearAssessmentIds: grouping.multiYearAssessmentIds,
   };
 }
@@ -426,13 +430,22 @@ async function main(): Promise<void> {
 
   if (ambiguous.length > 0) {
     console.log(
-      `\n⚠️ ${ambiguousIds.size} evaluación(es) en ${ambiguous.length} grupo(s) ambiguo(s) quedaron SIN proceso:`,
+      `\n⚠️ ${ambiguousIds.size} evaluación(es) en celdas en conflicto quedaron SIN proceso:`,
     );
     console.log(
-      '   el grupo tiene más de un instrumento para el mismo (nivel, prueba): hubo varias aplicaciones.',
+      '   la celda (nivel, prueba) tiene más de un instrumento: hubo varias aplicaciones o falta la línea.',
+    );
+    console.log(
+      '   El resto del período sí se asignó; solo esas celdas quedan como toma "sin proceso".',
     );
     for (const group of ambiguous) {
       console.log(`   · ${processName(group)} — ${group.assessmentIds.size} evaluación(es)`);
+      for (const violation of group.violations) {
+        console.log(
+          `     - nivel ${violation.gradeId}, prueba ${violation.testKey ?? '(sin asignatura)'}: ` +
+            `${violation.instrumentIds.length} instrumentos, ${violation.assessmentIds.length} evaluación(es)`,
+        );
+      }
     }
   }
 

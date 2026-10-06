@@ -146,9 +146,26 @@ export function groupProcessCandidates<T extends ProcessCandidate>(
   const ambiguous: AmbiguousProcessCandidateGroup<T>[] = [];
   for (const { group } of byKey.values()) {
     const violations = findProcessInvariantViolations(group.candidates, testKey);
-    if (violations.length > 0) ambiguous.push({ ...group, violations });
-    else groups.push(group);
+    if (violations.length === 0) {
+      groups.push(group);
+      continue;
+    }
+    const conflicting = new Set(violations.flatMap((violation) => violation.assessmentIds));
+    const assignable = subsetOfGroup(group, (id) => !conflicting.has(id));
+    if (assignable.assessmentIds.length > 0) groups.push(assignable);
+    ambiguous.push({ ...subsetOfGroup(group, (id) => conflicting.has(id)), violations });
   }
 
   return { groups, ambiguous, multiYearAssessmentIds };
+}
+
+function subsetOfGroup<T extends ProcessCandidate>(
+  group: ProcessCandidateGroup<T>,
+  keep: (assessmentId: string) => boolean,
+): ProcessCandidateGroup<T> {
+  return {
+    ...group,
+    candidates: group.candidates.filter((candidate) => keep(candidate.assessmentId)),
+    assessmentIds: group.assessmentIds.filter(keep),
+  };
 }

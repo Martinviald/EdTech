@@ -62,6 +62,8 @@ describe('groupProcessCandidates con el fixture del banco local', () => {
     expect(paesAmbiguous).toHaveLength(1);
     expect(paesAmbiguous[0]?.assessmentIds).toHaveLength(68);
     expect(paesAmbiguous[0]?.violations.length).toBeGreaterThan(0);
+    const inConflict = new Set(paesAmbiguous[0]?.violations.flatMap((v) => v.assessmentIds));
+    expect(inConflict.size).toBe(68);
   });
 
   it('por tanda, con asignatura como prueba, solo chocan las asignaturas con varias líneas (M1/M2 y menciones de Ciencias)', () => {
@@ -121,14 +123,17 @@ describe('groupProcessCandidates con casos sintéticos', () => {
     expect(result.groups[0]?.assessmentIds).toEqual(['a-1', 'a-2']);
   });
 
-  it('dos instrumentos distintos para el mismo nivel y asignatura dejan el grupo ambiguo', () => {
+  it('dos instrumentos distintos para el mismo nivel y asignatura apartan solo esa celda', () => {
     const result = groupProcessCandidates([
       candidate({ assessmentId: 'a-1', instrumentId: 'i-1' }),
       candidate({ assessmentId: 'a-2', instrumentId: 'i-2' }),
       candidate({ assessmentId: 'a-3', instrumentId: 'i-3', subjectId: 'math' }),
     ]);
-    expect(result.groups).toEqual([]);
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0]?.assessmentIds).toEqual(['a-3']);
+    expect(result.groups[0]?.candidates.map((c) => c.assessmentId)).toEqual(['a-3']);
     expect(result.ambiguous).toHaveLength(1);
+    expect(result.ambiguous[0]?.assessmentIds).toEqual(['a-1', 'a-2']);
     expect(result.ambiguous[0]?.violations).toEqual([
       {
         gradeId: 'g-4b',
@@ -137,6 +142,56 @@ describe('groupProcessCandidates con casos sintéticos', () => {
         assessmentIds: ['a-1', 'a-2'],
       },
     ]);
+  });
+
+  it('un período DIA con un par hermano sin línea en un grado crea el proceso con el resto', () => {
+    const result = groupProcessCandidates([
+      candidate({ assessmentId: 'lang-4a', instrumentId: 'i-lang-4' }),
+      candidate({ assessmentId: 'math-4a', instrumentId: 'i-math-4', subjectId: 'math' }),
+      candidate({
+        assessmentId: 'eng-5a',
+        instrumentId: 'i-eng-5',
+        gradeId: 'g-5b',
+        subjectId: 'eng',
+      }),
+      candidate({
+        assessmentId: 'speak-5a',
+        instrumentId: 'i-speak-5',
+        gradeId: 'g-5b',
+        subjectId: 'eng',
+      }),
+      candidate({ assessmentId: 'lang-5a', instrumentId: 'i-lang-5', gradeId: 'g-5b' }),
+    ]);
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0]?.applicationPeriod).toBe('intermedio');
+    expect([...(result.groups[0]?.assessmentIds ?? [])].sort()).toEqual([
+      'lang-4a',
+      'lang-5a',
+      'math-4a',
+    ]);
+    expect(result.ambiguous).toHaveLength(1);
+    expect(result.ambiguous[0]?.key).toBe(result.groups[0]?.key);
+    expect(result.ambiguous[0]?.assessmentIds).toEqual(['eng-5a', 'speak-5a']);
+    expect(result.ambiguous[0]?.violations).toEqual([
+      {
+        gradeId: 'g-5b',
+        testKey: 'eng',
+        instrumentIds: ['i-eng-5', 'i-speak-5'],
+        assessmentIds: ['eng-5a', 'speak-5a'],
+      },
+    ]);
+  });
+
+  it('una evaluación con un curso en una celda en conflicto queda apartada entera', () => {
+    const result = groupProcessCandidates([
+      candidate({ assessmentId: 'a-1', instrumentId: 'i-1' }),
+      candidate({ assessmentId: 'a-1', instrumentId: 'i-1', gradeId: 'g-5b' }),
+      candidate({ assessmentId: 'a-2', instrumentId: 'i-2', gradeId: 'g-5b' }),
+      candidate({ assessmentId: 'a-3', instrumentId: 'i-3', subjectId: 'math' }),
+    ]);
+    expect(result.groups[0]?.assessmentIds).toEqual(['a-3']);
+    expect(result.ambiguous[0]?.assessmentIds).toEqual(['a-1', 'a-2']);
+    expect(result.ambiguous[0]?.candidates).toHaveLength(3);
   });
 
   it('instrumentos distintos en niveles o asignaturas distintos sí conviven', () => {
