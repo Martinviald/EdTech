@@ -53,6 +53,8 @@ export type ComparableUnitSummary = {
   gradeName: string | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
   year: number | null;
+  /** Línea de prueba del instrumento (M1, M2…). Null = la prueba es la asignatura. */
+  trackId: string | null;
   assessmentIds: string[];
   /** Fecha de aplicación más reciente de la unidad, para ordenar por recencia. */
   lastAdministeredAt: string | Date | null;

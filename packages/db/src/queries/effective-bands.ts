@@ -8,7 +8,8 @@
 // Cadena de precedencia:
 //   1. Bandas propias del instrumento.
 //   2. Bandas de la versión anterior: misma familia
-//      (`type|subjectId|gradeId|applicationPeriod`, sin `year` ni `version`) con
+//      (`type|subjectId|gradeId|applicationPeriod` + línea de prueba si la hay,
+//      sin `year` ni `version`) con
 //      el `year` estrictamente menor más reciente que SÍ tenga bandas.
 //   3. Nada → `source: 'none'`, para que el caller caiga al legacy.
 
@@ -35,6 +36,7 @@ type InstrumentFamilyRow = {
   gradeId: string | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
   year: number | null;
+  trackId: string | null;
 };
 
 const INSTRUMENT_FAMILY_COLUMNS = {
@@ -44,6 +46,7 @@ const INSTRUMENT_FAMILY_COLUMNS = {
   gradeId: instruments.gradeId,
   applicationPeriod: instruments.applicationPeriod,
   year: instruments.year,
+  trackId: instruments.trackId,
 };
 
 function toRef(row: InstrumentFamilyRow): ComparabilityInstrumentRef {
@@ -54,6 +57,7 @@ function toRef(row: InstrumentFamilyRow): ComparabilityInstrumentRef {
     gradeId: row.gradeId,
     applicationPeriod: row.applicationPeriod,
     year: row.year,
+    trackId: row.trackId,
   };
 }
 

@@ -296,6 +296,7 @@ export class ComparableOverviewService {
       gradeName: unit.gradeName,
       applicationPeriod: unit.ref.applicationPeriod,
       year: unit.ref.year,
+      trackId: unit.ref.trackId,
       assessmentIds: unit.assessmentIds,
       lastAdministeredAt: unit.lastAdministeredAt,
       studentsAssessed: students,
@@ -376,6 +377,7 @@ export class ComparableOverviewService {
       gradeId: unit.gradeId,
       applicationPeriod: unit.applicationPeriod,
       year: unit.year,
+      trackId: unit.trackId,
     };
   }
 }

@@ -389,6 +389,7 @@ export class MasterBoardService {
         gradeId: instruments.gradeId,
         applicationPeriod: instruments.applicationPeriod,
         year: instruments.year,
+        trackId: instruments.trackId,
       })
       .from(assessmentItemStats)
       .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
@@ -408,6 +409,7 @@ export class MasterBoardService {
           gradeId: row.gradeId,
           applicationPeriod: row.applicationPeriod,
           year: row.year,
+          trackId: row.trackId,
         });
       }
     }

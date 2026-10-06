@@ -68,6 +68,7 @@ function toInstrumentRef(a: StudentPanoramaAssessment): ComparabilityInstrumentR
     gradeId: a.gradeId,
     applicationPeriod: a.applicationPeriod,
     year: a.year,
+    trackId: a.trackId,
   };
 }
 

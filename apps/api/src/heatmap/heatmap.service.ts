@@ -180,6 +180,7 @@ export class HeatmapService {
         gradeId: instruments.gradeId,
         applicationPeriod: instruments.applicationPeriod,
         year: instruments.year,
+        trackId: instruments.trackId,
         createdAt: instruments.createdAt,
         config: gradingScales.config,
       })
@@ -204,6 +205,7 @@ export class HeatmapService {
         gradeId: row.gradeId,
         applicationPeriod: row.applicationPeriod,
         year: row.year,
+        trackId: row.trackId,
       });
     }
 
