@@ -220,7 +220,7 @@ async function runVerify(db: Database): Promise<void> {
     throw new Error(
       `El read-model de cohorte está VACÍO y hay ${withResults} evaluación(es) con resultados ` +
         `por alumno. Los dashboards mostrarían correctRate null, skills [] y heatmap []. ` +
-        `Corré el backfill (workflow_dispatch con force_backfill=true) antes de publicar.`,
+        `Corre el backfill (workflow_dispatch con force_backfill=true) antes de publicar.`,
     );
   }
   if (stamp && stamp.assessmentsCount > 0 && inReadModel === 0) {
@@ -235,7 +235,7 @@ async function runVerify(db: Database): Promise<void> {
   if (withResults > inReadModel) {
     console.warn(
       `[cohort-stamp] ⚠️ ${withResults - inReadModel} evaluación(es) con resultados no aparecen ` +
-        `en el read-model. Puede ser legítimo (alumnos sin matrícula) o una deriva; revisá si crece.`,
+        `en el read-model. Puede ser legítimo (alumnos sin matrícula) o una deriva; revisa si crece.`,
     );
   }
 
