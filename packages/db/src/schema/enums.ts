@@ -216,6 +216,20 @@ export const performanceLevelEnum = pgEnum('performance_level', [
 // `scaled` (PAES 150–1000, IRT, stanine) o `band` (Cambridge CEFR, categóricas).
 export const metricTypeEnum = pgEnum('metric_type', ['percentage', 'scaled', 'band']);
 
+// Procedencia del corte de una banda de desempeño.
+//  · measured — medido sobre los resultados de ESE instrumento.
+//  · generic  — corte por defecto aplicado a falta de uno propio.
+//  · unknown  — no se declaró. Es el default a propósito: las filas que ya
+//    existen no tienen procedencia conocida, y deducirla comparando contra los
+//    valores genéricos es exactamente la heurística que se descartó (P3 de
+//    docs/diseno-resultados-del-proceso.md). Se afirma lo que se sabe, no lo
+//    que se adivina.
+export const performanceBandSourceEnum = pgEnum('performance_band_source', [
+  'measured',
+  'generic',
+  'unknown',
+]);
+
 // Granularidad del dato de una evaluación (ver docs/plan-analitica-agregada-informes-oficiales.md).
 //  · `item_level`     = hay respuestas alumno×pregunta en `responses`. Todo derivable.
 //  · `aggregate_only` = el origen es un informe oficial: solo agregados por curso en

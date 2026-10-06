@@ -8,12 +8,14 @@ const CURSO_A = '11111111-1111-1111-1111-111111111111';
 const CURSO_B = '22222222-2222-2222-2222-222222222222';
 const LENGUAJE = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const MATEMATICA = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+const GRADO_5 = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+const GRADO_6 = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 
 function catalog(overrides: Partial<CoverageCatalog> = {}): CoverageCatalog {
   return {
     classGroups: new Map([
-      [CURSO_A, { name: '5°A', gradeShortName: '5°', gradeOrder: 5 }],
-      [CURSO_B, { name: '6°A', gradeShortName: '6°', gradeOrder: 6 }],
+      [CURSO_A, { name: '5°A', gradeId: GRADO_5, gradeShortName: '5°', gradeOrder: 5 }],
+      [CURSO_B, { name: '6°A', gradeId: GRADO_6, gradeShortName: '6°', gradeOrder: 6 }],
     ]),
     subjects: new Map([
       [LENGUAJE, { name: 'Lenguaje', shortName: 'LEN' }],
@@ -33,6 +35,7 @@ function actualCell(overrides: Partial<Parameters<typeof assembleCoverage>[1][nu
     assessmentName: 'Lenguaje 5°A',
     classGroupId: CURSO_A,
     classGroupName: '5°A',
+    gradeId: GRADO_5,
     gradeShortName: '5°',
     gradeOrder: 5,
     subjectId: LENGUAJE,
@@ -111,7 +114,15 @@ describe('assembleCoverage', () => {
   it('reporta como inesperada la evaluación que cae fuera del alcance declarado', () => {
     const { cells, unexpectedCells } = assembleCoverage(
       { classGroupIds: [CURSO_A], subjectIds: [LENGUAJE] },
-      [actualCell(), actualCell({ classGroupId: CURSO_B, classGroupName: '6°A', gradeOrder: 6 })],
+      [
+        actualCell(),
+        actualCell({
+          classGroupId: CURSO_B,
+          classGroupName: '6°A',
+          gradeId: GRADO_6,
+          gradeOrder: 6,
+        }),
+      ],
       catalog(),
     );
 

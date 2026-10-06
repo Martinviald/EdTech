@@ -1,18 +1,25 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { ClipboardList, LayoutGrid, Pencil, TriangleAlert, Users } from 'lucide-react';
+import { ClipboardList, LayoutGrid, Pencil, Users } from 'lucide-react';
 import { auth } from '@/auth';
 import { canAccess, PROCESS_MANAGEMENT_ROLES } from '@soe/types';
 import { AlertCallout, CardSkeleton, KpiGridSkeleton, StatCard } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ROUTES } from '@/lib/routes';
-import { getProcess, getProcessCandidates, getProcessCoverage, getScopeCatalog } from '../data';
+import {
+  getProcess,
+  getProcessCandidates,
+  getProcessComparable,
+  getProcessCoverage,
+  getScopeCatalog,
+} from '../data';
 import { CoverageBar } from '../components/coverage-bar';
 import { ProcessFormDialog } from '../components/process-form-dialog';
 import { ScopeDialog } from './components/scope-dialog';
 import { LinkAssessmentsDialog } from './components/link-assessments-dialog';
 import { DeleteProcessDialog } from './components/delete-process-dialog';
+import { ProcessResults } from './components/process-results';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,8 +42,8 @@ export default async function ProcesoResumenPage({
       <Suspense fallback={<KpiGridSkeleton count={3} />}>
         <ResumenSection processId={processId} />
       </Suspense>
-      <Suspense fallback={<CardSkeleton rows={4} />}>
-        <AccesosDirectosSection processId={processId} />
+      <Suspense fallback={<CardSkeleton rows={6} />}>
+        <ResultadosSection processId={processId} />
       </Suspense>
     </div>
   );
@@ -142,64 +149,11 @@ async function ResumenSection({ processId }: { processId: string }) {
   );
 }
 
-async function AccesosDirectosSection({ processId }: { processId: string }) {
-  const coverage = await getProcessCoverage(processId);
-  const withAssessment = [...coverage.cells, ...coverage.unexpectedCells].filter(
-    (cell) => cell.assessmentId !== null,
-  );
+async function ResultadosSection({ processId }: { processId: string }) {
+  const [comparable, coverage] = await Promise.all([
+    getProcessComparable(processId),
+    getProcessCoverage(processId).catch(() => null),
+  ]);
 
-  if (withAssessment.length === 0) {
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Accesos directos</CardTitle>
-          <CardDescription>Todavía no hay evaluaciones asociadas a este proceso.</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
-  const seen = new Set<string>();
-  const assessments = withAssessment.filter((cell) => {
-    if (seen.has(cell.assessmentId as string)) return false;
-    seen.add(cell.assessmentId as string);
-    return true;
-  });
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Accesos directos</CardTitle>
-        <CardDescription>Las evaluaciones de este proceso, una por celda aplicada.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {coverage.unexpectedCells.length > 0 && (
-          <AlertCallout tone="warning" title="Evaluaciones fuera del alcance declarado">
-            <span className="flex items-center gap-1.5">
-              <TriangleAlert className="size-4" aria-hidden />
-              {coverage.unexpectedCells.length} celda(s) con datos no figuran en los cursos y
-              asignaturas declarados del proceso.
-            </span>
-          </AlertCallout>
-        )}
-        <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-          {assessments.map((cell) => (
-            <li key={cell.assessmentId}>
-              <Link
-                href={ROUTES.evaluacion(cell.assessmentId as string)}
-                className="hover:border-primary/40 block rounded-md border px-3 py-2 transition-colors"
-              >
-                <span className="block text-sm font-medium">
-                  {cell.assessmentName ?? `${cell.subjectName} ${cell.classGroupName}`}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  {cell.gradeShortName} {cell.classGroupName} · {cell.subjectName}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
-  );
+  return <ProcessResults processId={processId} comparable={comparable} coverage={coverage} />;
 }

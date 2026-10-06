@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
+  assessmentResults,
   assessments,
   grades,
   instruments,
+  students,
   subjects,
   withOrgContext,
   loadBandsForInstruments,
@@ -82,7 +84,7 @@ export class ComparableOverviewService {
         alertsTotal: 0,
         units: [],
         generational: [],
-        totals: { assessments: 0, studentsEvaluated: 0 },
+        totals: { assessments: 0, studentsEvaluated: 0, classifications: 0 },
         comparability: buildComparabilityMeta([]),
       };
     }
@@ -94,7 +96,7 @@ export class ComparableOverviewService {
       alertsTotal: 0,
       units: [],
       generational: [],
-      totals: { assessments: 0, studentsEvaluated: 0 },
+      totals: { assessments: 0, studentsEvaluated: 0, classifications: 0 },
       comparability: buildComparabilityMeta(refs, assessmentIds.length),
     };
     if (assessmentIds.length === 0) return emptyResponse;
@@ -114,7 +116,8 @@ export class ComparableOverviewService {
         return this.recencyRank(b.lastAdministeredAt) - this.recencyRank(a.lastAdministeredAt);
       });
 
-      const studentsEvaluated = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
+      const classifications = summaries.reduce((acc, u) => acc + u.studentsAssessed, 0);
+      const studentsEvaluated = await this.countDistinctStudents(tx, assessmentIds);
       const { samples, itemSamples } = await this.loadSamples(
         tx,
         user,
@@ -138,7 +141,7 @@ export class ComparableOverviewService {
         alertsTotal: alerts.length,
         units: summaries,
         generational: deriveGenerationalHighlights(summaries),
-        totals: { assessments: assessmentIds.length, studentsEvaluated },
+        totals: { assessments: assessmentIds.length, studentsEvaluated, classifications },
         comparability: buildComparabilityMeta(refs, assessmentIds.length),
       };
     });
@@ -188,6 +191,18 @@ export class ComparableOverviewService {
       ),
       itemSamples: new Map(items.map((item) => [item.instrumentId, item])),
     };
+  }
+
+  private async countDistinctStudents(tx: Database, assessmentIds: string[]): Promise<number> {
+    if (assessmentIds.length === 0) return 0;
+    const [row] = await tx
+      .select({ total: sql<number>`count(distinct ${assessmentResults.studentId})::int` })
+      .from(assessmentResults)
+      .innerJoin(students, eq(students.id, assessmentResults.studentId))
+      .where(
+        and(inArray(assessmentResults.assessmentId, assessmentIds), isNull(students.deletedAt)),
+      );
+    return row?.total ?? 0;
   }
 
   private recencyRank(value: Date | string | null): number {
@@ -433,5 +448,11 @@ export class ComparableOverviewService {
 }
 
 function toBandView(band: PerformanceBandInput) {
-  return { key: band.key, label: band.label, order: band.order, color: band.color ?? null };
+  return {
+    key: band.key,
+    label: band.label,
+    order: band.order,
+    color: band.color ?? null,
+    source: band.source,
+  };
 }

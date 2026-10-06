@@ -12,6 +12,7 @@ CREATE TABLE "benchmark_item_aggregates" (
 	CONSTRAINT "benchmark_item_aggregates_org_item_uq" UNIQUE("org_id","item_id")
 );
 --> statement-breakpoint
+ALTER TABLE "benchmark_aggregates" ADD COLUMN "band_counts" jsonb;--> statement-breakpoint
 ALTER TABLE "benchmark_item_aggregates" ADD CONSTRAINT "benchmark_item_aggregates_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "benchmark_item_aggregates" ADD CONSTRAINT "benchmark_item_aggregates_instrument_id_instruments_id_fk" FOREIGN KEY ("instrument_id") REFERENCES "public"."instruments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "benchmark_item_aggregates" ADD CONSTRAINT "benchmark_item_aggregates_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

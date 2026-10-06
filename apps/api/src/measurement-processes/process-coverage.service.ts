@@ -90,6 +90,7 @@ export class ProcessCoverageService {
         assessmentName: assessments.name,
         classGroupId: classGroups.id,
         classGroupName: classGroups.name,
+        gradeId: grades.id,
         gradeShortName: grades.shortName,
         gradeOrder: grades.order,
         subjectId: instruments.subjectId,
@@ -160,6 +161,7 @@ export class ProcessCoverageService {
         assessmentName: row.assessmentName,
         classGroupId: row.classGroupId,
         classGroupName: row.classGroupName,
+        gradeId: row.gradeId,
         gradeShortName: row.gradeShortName,
         gradeOrder: row.gradeOrder,
         subjectId: row.subjectId,
@@ -196,6 +198,7 @@ export class ProcessCoverageService {
         .select({
           id: classGroups.id,
           name: classGroups.name,
+          gradeId: grades.id,
           gradeShortName: grades.shortName,
           gradeOrder: grades.order,
         })
@@ -205,6 +208,7 @@ export class ProcessCoverageService {
       for (const row of rows) {
         catalog.classGroups.set(row.id, {
           name: row.name,
+          gradeId: row.gradeId,
           gradeShortName: row.gradeShortName,
           gradeOrder: row.gradeOrder,
         });

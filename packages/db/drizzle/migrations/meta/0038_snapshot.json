@@ -1,6 +1,6 @@
 {
-  "id": "d9652de5-704c-4f11-8fc3-6899edc2b2bc",
-  "prevId": "f7762985-72f5-4c54-9fbd-cd9c5d7a600e",
+  "id": "3e14396a-fbc3-454f-85ef-139858b2e817",
+  "prevId": "788a5307-2ef3-4874-a713-ad3752bb3b6e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -5067,6 +5067,14 @@
           "primaryKey": false,
           "notNull": false
         },
+        "source": {
+          "name": "source",
+          "type": "performance_band_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unknown'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -9887,6 +9895,15 @@
         "plain",
         "markdown",
         "html"
+      ]
+    },
+    "public.performance_band_source": {
+      "name": "performance_band_source",
+      "schema": "public",
+      "values": [
+        "measured",
+        "generic",
+        "unknown"
       ]
     },
     "public.performance_level": {
