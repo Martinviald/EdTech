@@ -75,7 +75,7 @@ describe('inviteMemberSchema', () => {
     const parsed = bulkInviteMembersSchema.parse({
       members: [
         { email: 'uno@cscj.cl', role: 'teacher' },
-        { email: 'dos@cscj.cl', role: 'coordinator' },
+        { email: 'dos@cscj.cl', role: 'eval_coordinator' },
       ],
     });
     expect(parsed.members).toHaveLength(2);
@@ -88,4 +88,24 @@ describe('inviteMemberSchema', () => {
     });
     expect(parsed.members[0]?.name).toBe('Uno Uno');
   });
+});
+
+describe('roles invitables desde el colegio', () => {
+  it.each(['coordinator', 'dept_head', 'homeroom_teacher'])(
+    'rechaza %s, que la app todavía no soporta como rol propio',
+    (role) => {
+      const result = inviteMemberSchema.safeParse({ email: 'x@cscj.cl', role });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toBe(
+        'Rol no disponible para invitar desde el colegio',
+      );
+    },
+  );
+
+  it.each(['school_admin', 'academic_director', 'cycle_director', 'eval_coordinator', 'teacher'])(
+    'acepta %s',
+    (role) => {
+      expect(inviteMemberSchema.safeParse({ email: 'x@cscj.cl', role }).success).toBe(true);
+    },
+  );
 });

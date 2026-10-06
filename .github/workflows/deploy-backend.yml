@@ -158,6 +158,14 @@ jobs:
       - name: Verify cohort read-model (smoke check)
         run: pnpm --filter @soe/db db:cohort-stamp verify
 
+      # ── Read-model de benchmarking ──
+      # `benchmark_aggregates` sólo se reconstruía por `POST /api/benchmarking/refresh`,
+      # que nadie llamaba: /benchmarking mostraba "Aún no hay instrumentos para
+      # comparar" a colegios con resultados reales. Es upsert idempotente y tarda
+      # segundos; el job diario (refresh-benchmark.yml) cubre lo cargado entre deploys.
+      - name: Benchmark read-model (refresh)
+        run: pnpm --filter @soe/db db:refresh:benchmark
+
   build-and-push:
     needs: migrate # el deploy no publica imagen nueva si la migración falló
     runs-on: ubuntu-latest

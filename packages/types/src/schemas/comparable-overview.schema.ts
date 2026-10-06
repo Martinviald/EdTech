@@ -132,7 +132,13 @@ export type ComparableOverviewResponse = {
   generational: GenerationalHighlight[];
   totals: {
     assessments: number;
+    // Alumnos DISTINTOS. Antes era la suma de `studentsAssessed` por unidad, que
+    // cuenta cuatro veces a quien rindió cuatro asignaturas: el mismo proceso
+    // decía 490 en su ficha y 850 acá, bajo la misma etiqueta.
     studentsEvaluated: number;
+    // La suma por unidad, con el nombre que le corresponde. Es la magnitud que
+    // se cuenta por nivel (un alumno × una prueba), no un conteo de personas.
+    classifications: number;
   };
   comparability: ComparabilityMeta;
 };

@@ -164,6 +164,10 @@ export type MeasurementProcessListResponse = {
 export type ProcessCoverageCell = {
   classGroupId: string;
   classGroupName: string;
+  // El id del grado, no sólo su nombre corto: la matriz de resultados cruza
+  // estas celdas (indexadas por curso) con las unidades comparables (indexadas
+  // por `instruments.gradeId`), y unirlas por nombre es unir por string.
+  gradeId: string;
   gradeShortName: string;
   gradeOrder: number;
   subjectId: string;

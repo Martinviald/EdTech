@@ -8,6 +8,7 @@ import {
   instruments,
   subjects,
   withOrgContext,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   buildComparabilityMeta,
@@ -35,7 +36,6 @@ import {
   type BaselineCandidate,
 } from '../dashboards/comparable/comparable-unit.assembler';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
 const NO_PERIOD_KEY = 'none';
 const NO_PERIOD_LABEL = 'Sin momento';

@@ -1,15 +1,17 @@
 'use client';
 
-import { WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
+import { WifiOff, AlertCircle, LogOut, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ApiErrorProps {
   type: 'connection' | 'generic';
   message?: string;
   onRetry?: () => void;
+  onSignOut?: () => void;
+  referenceCode?: string;
 }
 
-export function ApiError({ type, message, onRetry }: ApiErrorProps) {
+export function ApiError({ type, message, onRetry, onSignOut, referenceCode }: ApiErrorProps) {
   const isConnection = type === 'connection';
 
   return (
@@ -33,11 +35,25 @@ export function ApiError({ type, message, onRetry }: ApiErrorProps) {
         </p>
       </div>
 
-      {onRetry && (
-        <Button variant="outline" onClick={onRetry} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Reintentar
-        </Button>
+      {(onRetry || onSignOut) && (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {onRetry && (
+            <Button variant="outline" onClick={onRetry} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Reintentar
+            </Button>
+          )}
+          {onSignOut && (
+            <Button variant="ghost" onClick={onSignOut} className="gap-2">
+              <LogOut className="h-4 w-4" />
+              Cerrar sesión
+            </Button>
+          )}
+        </div>
+      )}
+
+      {referenceCode && (
+        <p className="text-xs text-muted-foreground">Código de referencia: {referenceCode}</p>
       )}
     </div>
   );

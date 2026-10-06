@@ -9,6 +9,7 @@ import {
   subjects,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBands,
 } from '@soe/db';
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
@@ -43,7 +44,6 @@ import {
 } from '../common/helpers/class-group-scope.helper';
 import { assessmentNameMatches } from '../common/helpers/assessment-name-search.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import { resolveEffectiveBands } from '../performance-bands/lib/resolve-effective-bands';
 
 const EMPTY_HEATMAP: HeatmapResponse = {
   subjects: [],

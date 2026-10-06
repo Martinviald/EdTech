@@ -19,6 +19,9 @@ import {
   subjects,
   taxonomyNodes,
   withOrgContext,
+  resolveEffectiveBands,
+  resolveEffectiveBandsForInstruments,
+  type EffectiveBands,
 } from '@soe/db';
 import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
@@ -70,15 +73,10 @@ import {
 } from '../common/helpers/class-group-scope.helper';
 import { assessmentNameMatches } from '../common/helpers/assessment-name-search.helper';
 import { InjectDb, type Database } from '../database/database.types';
-import {
-  resolveEffectiveBands,
-  resolveEffectiveBandsForInstruments,
-  type EffectiveBands,
-} from '../performance-bands/lib/resolve-effective-bands';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
-  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null, source: b.source };
 }
 
 // Umbrales por defecto (0..1) — alineados al estándar DIA. Se usan cuando la

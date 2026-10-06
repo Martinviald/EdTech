@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { z } from 'zod';
 import { judgeVerdictSchema, type JudgeVerdict, type RemedialStimulus } from '@soe/types';
+import { DecisionsService } from '../decisions/decisions.service';
 import { LlmService } from '../llm/llm.service';
+import { buildJudgeDecision, JUDGE_DECISION_VERSION } from './judge-decision';
 import { parseModelJson } from './prompts/curriculum-context.prompt';
 import { buildJudgePrompt, type JudgePromptItem } from './prompts/judge.prompt';
 import type { RemedialJudgeItem } from './remedial.generator';
@@ -41,7 +43,10 @@ const judgeRawOutputSchema = z.object({
  */
 @Injectable()
 export class RemedialJudgeService {
-  constructor(private readonly llm: LlmService) {}
+  constructor(
+    private readonly llm: LlmService,
+    @Optional() private readonly decisions?: DecisionsService,
+  ) {}
 
   /**
    * Juzga un set de ítems (un veredicto por ítem, en el mismo orden). Cada ítem se
@@ -84,7 +89,9 @@ export class RemedialJudgeService {
     const derivedAnswer = parsed.data.derivedAnswer?.trim() || null;
     const realKey = this.realKey(item.alternatives);
     const answerable =
-      derivedAnswer !== null && realKey !== null && normalizeKey(derivedAnswer) === normalizeKey(realKey);
+      derivedAnswer !== null &&
+      realKey !== null &&
+      normalizeKey(derivedAnswer) === normalizeKey(realKey);
 
     const objections = [...(parsed.data.objections ?? [])];
     // Si el ítem no es respondible, deja SIEMPRE una objeción accionable (aunque el
@@ -93,7 +100,7 @@ export class RemedialJudgeService {
       objections.push(this.solveThenCheckObjection(derivedAnswer, realKey));
     }
 
-    return judgeVerdictSchema.parse({
+    const verdict = judgeVerdictSchema.parse({
       position: item.position,
       answerable,
       derivedAnswer,
@@ -101,6 +108,31 @@ export class RemedialJudgeService {
       factual: parsed.data.factual,
       skillMatch: parsed.data.skillMatch,
       objections,
+    });
+    this.shadowJudge(orgId, stimulus, promptItem, item, verdict, realKey);
+    return verdict;
+  }
+
+  private shadowJudge(
+    orgId: string,
+    stimulus: RemedialStimulus | null,
+    promptItem: JudgePromptItem,
+    item: RemedialJudgeItem,
+    verdict: JudgeVerdict,
+    realKey: string | null,
+  ): void {
+    if (!this.decisions) return;
+    void this.decisions.shadow(orgId, 'remedial_judge', buildJudgeDecision(stimulus, promptItem), {
+      correlationId: item.itemId,
+      baseline: {
+        version: JUDGE_DECISION_VERSION,
+        realKey,
+        llmDerivedAnswer: verdict.derivedAnswer,
+        llmAnswerable: verdict.answerable,
+        llmUniqueCorrect: verdict.uniqueCorrect,
+        llmFactual: verdict.factual,
+        llmSkillMatch: verdict.skillMatch,
+      },
     });
   }
 

@@ -12,10 +12,12 @@ import {
   students,
   subjects,
   withOrgContext,
+  resolveEffectiveBandsForInstruments,
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
   OFFICIAL_REPORT_LEVEL_ORDER,
+  type EstablishmentBandCell,
   type EstablishmentCountRow,
   type EstablishmentGradeColumn,
   type EstablishmentLevelCell,
@@ -24,10 +26,14 @@ import {
   type OfficialEstablishmentReportQueryDto,
   type OfficialEstablishmentReportResponse,
   type InstrumentApplicationPeriod,
+  type MetricType,
+  type PerformanceBandInput,
+  type PerformanceBandView,
   type PerformanceLevel,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
+import { hydrateBandForStudent } from '../performance-bands/lib/hydrate-band-level';
 import { ReportSupportService } from './report-support.service';
 import { compareSexes } from './lib/sex-comparison';
 
@@ -40,6 +46,9 @@ type RawRow = {
   gender: string | null;
   percentage: number | null;
   performanceLevel: PerformanceLevel | null;
+  metricType: MetricType;
+  performanceBandId: string | null;
+  band: PerformanceBandInput | null;
   subjectId: string;
   subjectName: string;
   gradeId: string;
@@ -56,6 +65,9 @@ type SubjectAcc = {
   // (gradeId → level → count) y total por grado.
   levelCounts: Map<string, Map<PerformanceLevel, number>>;
   gradeTotals: Map<string, number>;
+  instrumentIds: Set<string>;
+  bandCounts: Map<string, Map<string, number>>;
+  bandGradeTotals: Map<string, number>;
   // (gradeId → { female %[], male %[], counts }).
   sex: Map<string, { female: number[]; male: number[]; f: number; m: number; other: number }>;
 };
@@ -76,24 +88,21 @@ export class EstablishmentReportService {
     return withOrgContext(this.db, orgId, async (tx) => {
       const academicYear = await this.resolveAcademicYear(tx, orgId, query.academicYearId);
 
-      const rawRows = await this.loadRawRows(
-        tx,
-        orgId,
-        academicYear.id,
-        query.period ?? null,
-      );
+      const rawRows = await this.loadRawRows(tx, orgId, academicYear.id, query.period ?? null);
 
       const [orgMeta, directorName] = await Promise.all([
         this.support.loadOrgMeta(tx, orgId),
         this.support.loadDirectorName(tx, orgId),
       ]);
 
-      const { disclaimers, levelDefinitions } = await this.loadInstrumentMeta(
-        tx,
-        Array.from(new Set(rawRows.map((r) => r.instrumentId))),
-      );
+      const instrumentIds = Array.from(new Set(rawRows.map((r) => r.instrumentId)));
+      const [{ disclaimers, levelDefinitions }, bandsByInstrument] = await Promise.all([
+        this.loadInstrumentMeta(tx, instrumentIds),
+        this.loadBandsByInstrument(tx, instrumentIds),
+      ]);
+      this.hydrateBands(rawRows, bandsByInstrument);
 
-      const subjects = this.aggregate(rawRows);
+      const subjects = this.aggregate(rawRows, bandsByInstrument);
       const sexDataAvailable = rawRows.some((r) => r.gender === 'F' || r.gender === 'M');
 
       return {
@@ -170,6 +179,8 @@ export class EstablishmentReportService {
         gender: sql<string | null>`${students.gender}::text`,
         percentage: assessmentResults.percentage,
         performanceLevel: assessmentResults.performanceLevel,
+        metricType: assessmentResults.metricType,
+        performanceBandId: assessmentResults.performanceBandId,
         subjectId: instruments.subjectId,
         subjectName: subjects.name,
         gradeId: classGroups.gradeId,
@@ -186,10 +197,7 @@ export class EstablishmentReportService {
         assessmentCourseAssignments,
         eq(assessmentCourseAssignments.assessmentId, assessments.id),
       )
-      .innerJoin(
-        classGroups,
-        eq(classGroups.id, assessmentCourseAssignments.classGroupId),
-      )
+      .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
       .innerJoin(
         studentEnrollments,
         and(
@@ -213,6 +221,9 @@ export class EstablishmentReportService {
         gender: r.gender,
         percentage: r.percentage === null ? null : Number(r.percentage),
         performanceLevel: r.performanceLevel,
+        metricType: r.metricType,
+        performanceBandId: r.performanceBandId ?? null,
+        band: null,
         subjectId: r.subjectId,
         subjectName: r.subjectName,
         gradeId: r.gradeId,
@@ -224,7 +235,32 @@ export class EstablishmentReportService {
     return out;
   }
 
-  private aggregate(rawRows: RawRow[]): EstablishmentSubjectSection[] {
+  private async loadBandsByInstrument(
+    tx: Database,
+    instrumentIds: string[],
+  ): Promise<Map<string, PerformanceBandInput[]>> {
+    const effective = await resolveEffectiveBandsForInstruments(tx, instrumentIds);
+    const bandsByInstrument = new Map<string, PerformanceBandInput[]>();
+    for (const [instrumentId, { bands }] of effective) {
+      bandsByInstrument.set(instrumentId, bands);
+    }
+    return bandsByInstrument;
+  }
+
+  private hydrateBands(
+    rawRows: RawRow[],
+    bandsByInstrument: Map<string, PerformanceBandInput[]>,
+  ): void {
+    for (const r of rawRows) {
+      const bands = bandsByInstrument.get(r.instrumentId) ?? [];
+      r.band = hydrateBandForStudent(r, bands).band;
+    }
+  }
+
+  private aggregate(
+    rawRows: RawRow[],
+    bandsByInstrument: Map<string, PerformanceBandInput[]>,
+  ): EstablishmentSubjectSection[] {
     const bySubject = new Map<string, SubjectAcc>();
 
     for (const r of rawRows) {
@@ -236,6 +272,9 @@ export class EstablishmentReportService {
           grades: new Map(),
           levelCounts: new Map(),
           gradeTotals: new Map(),
+          instrumentIds: new Set(),
+          bandCounts: new Map(),
+          bandGradeTotals: new Map(),
           sex: new Map(),
         };
         bySubject.set(r.subjectId, acc);
@@ -262,6 +301,17 @@ export class EstablishmentReportService {
         levelMap.set(r.performanceLevel, (levelMap.get(r.performanceLevel) ?? 0) + 1);
       }
 
+      acc.instrumentIds.add(r.instrumentId);
+      if (r.band) {
+        let bandMap = acc.bandCounts.get(r.gradeId);
+        if (!bandMap) {
+          bandMap = new Map();
+          acc.bandCounts.set(r.gradeId, bandMap);
+        }
+        bandMap.set(r.band.key, (bandMap.get(r.band.key) ?? 0) + 1);
+        acc.bandGradeTotals.set(r.gradeId, (acc.bandGradeTotals.get(r.gradeId) ?? 0) + 1);
+      }
+
       // Datos por sexo.
       let sex = acc.sex.get(r.gradeId);
       if (!sex) {
@@ -281,9 +331,7 @@ export class EstablishmentReportService {
 
     const sections: EstablishmentSubjectSection[] = [];
     for (const acc of bySubject.values()) {
-      const gradeCols = Array.from(acc.grades.values()).sort(
-        (a, b) => a.gradeOrder - b.gradeOrder,
-      );
+      const gradeCols = Array.from(acc.grades.values()).sort((a, b) => a.gradeOrder - b.gradeOrder);
 
       // Niveles presentes (con al menos una fila), en orden canónico.
       const levelsPresent = new Set<PerformanceLevel>();
@@ -346,12 +394,20 @@ export class EstablishmentReportService {
         };
       });
 
+      const sharedBands = this.resolveSharedBands(acc.instrumentIds, bandsByInstrument);
+
       sections.push({
         subjectId: acc.subjectId,
         subjectName: acc.subjectName,
         levels,
         grades: gradeCols,
         levelDistribution,
+        ...(sharedBands
+          ? {
+              bands: sharedBands,
+              bandDistribution: this.buildBandDistribution(acc, gradeCols, sharedBands),
+            }
+          : {}),
         sexComparison,
         counts,
       });
@@ -359,6 +415,60 @@ export class EstablishmentReportService {
 
     // Orden estable por nombre de asignatura.
     return sections.sort((a, b) => a.subjectName.localeCompare(b.subjectName, 'es'));
+  }
+
+  private resolveSharedBands(
+    instrumentIds: Set<string>,
+    bandsByInstrument: Map<string, PerformanceBandInput[]>,
+  ): PerformanceBandView[] | null {
+    let reference: PerformanceBandInput[] | null = null;
+    let referenceSignature: string | null = null;
+    for (const instrumentId of instrumentIds) {
+      const bands = bandsByInstrument.get(instrumentId) ?? [];
+      if (bands.length === 0) return null;
+      const signature = this.bandSetSignature(bands);
+      if (referenceSignature === null) {
+        reference = bands;
+        referenceSignature = signature;
+      } else if (signature !== referenceSignature) {
+        return null;
+      }
+    }
+    if (!reference) return null;
+    return [...reference]
+      .sort((a, b) => a.order - b.order)
+      .map((b) => ({ key: b.key, label: b.label, order: b.order, color: b.color ?? null }));
+  }
+
+  private bandSetSignature(bands: PerformanceBandInput[]): string {
+    return [...bands]
+      .sort((a, b) => a.order - b.order)
+      .map((b) => b.key)
+      .join('|');
+  }
+
+  private buildBandDistribution(
+    acc: SubjectAcc,
+    gradeCols: EstablishmentGradeColumn[],
+    bands: PerformanceBandView[],
+  ): EstablishmentBandCell[] {
+    const cells: EstablishmentBandCell[] = [];
+    for (const grade of gradeCols) {
+      const total = acc.bandGradeTotals.get(grade.gradeId) ?? 0;
+      if (total === 0) continue;
+      const bandMap = acc.bandCounts.get(grade.gradeId);
+      for (const band of bands) {
+        const count = bandMap?.get(band.key) ?? 0;
+        cells.push({
+          gradeId: grade.gradeId,
+          bandKey: band.key,
+          count,
+          total,
+          percentage: (count / total) * 100,
+        });
+      }
+    }
+    return cells;
   }
 
   private async loadInstrumentMeta(

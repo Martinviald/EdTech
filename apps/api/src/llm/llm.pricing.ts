@@ -33,6 +33,7 @@ const MODEL_PRICING_PER_MTOK: ReadonlyArray<{
   { prefix: 'gemini-2.0-flash', inputUsd: 0.1, outputUsd: 0.4 },
   { prefix: 'gemini-1.5-flash', inputUsd: 0.075, outputUsd: 0.3 },
   { prefix: 'gemini-1.5-pro', inputUsd: 1.25, outputUsd: 5 },
+  { prefix: 'jev-', inputUsd: 0.042, outputUsd: 0 },
 ];
 
 /**
@@ -45,6 +46,7 @@ const MODEL_PRICING_PER_MTOK: ReadonlyArray<{
 export function estimateLlmCostUsd(
   model: string | null | undefined,
   usage: LlmUsage | null | undefined,
+  decimals = 6,
 ): string | null {
   if (!model || !usage) return null;
   const tariff = MODEL_PRICING_PER_MTOK.find((t) => model.startsWith(t.prefix));
@@ -54,5 +56,5 @@ export function estimateLlmCostUsd(
     (usage.inputTokens / 1_000_000) * tariff.inputUsd +
     (usage.outputTokens / 1_000_000) * tariff.outputUsd;
 
-  return cost.toFixed(6);
+  return cost.toFixed(decimals);
 }

@@ -1,5 +1,7 @@
 import type { RemedialStimulus } from '@soe/types';
+import type { DecisionsService } from '../decisions/decisions.service';
 import type { LlmService } from '../llm/llm.service';
+import { JUDGE_DECISION_VERSION } from './judge-decision';
 import type { RemedialJudgeItem } from './remedial.generator';
 import { RemedialJudgeService } from './remedial-judge.service';
 
@@ -161,5 +163,55 @@ describe('RemedialJudgeService', () => {
     await expect(service.judge('org-1', stimulus, [makeItem()])).rejects.toThrow(
       /no cumple el schema/,
     );
+  });
+});
+
+describe('RemedialJudgeService en sombra del motor de decisiones', () => {
+  function makeDecisions() {
+    return { shadow: jest.fn(() => Promise.resolve()) } as unknown as DecisionsService & {
+      shadow: jest.Mock;
+    };
+  }
+
+  it('dispara la sombra por ítem con la clave real en el baseline y sin la clave en el estado', async () => {
+    const decisions = makeDecisions();
+    const service = new RemedialJudgeService(makeLlm(rawPass), decisions);
+    const item = makeItem();
+
+    const verdicts = await service.judge('org-1', stimulus, [item]);
+
+    expect(decisions.shadow).toHaveBeenCalledTimes(1);
+    const [orgId, feature, request, options] = decisions.shadow.mock.calls[0] as [
+      string,
+      string,
+      { state: unknown; questions: Record<string, unknown> },
+      { correlationId: string; baseline: Record<string, unknown> },
+    ];
+    expect(orgId).toBe('org-1');
+    expect(feature).toBe('remedial_judge');
+    expect(Object.keys(request.questions).sort()).toEqual([
+      'clave',
+      'factual',
+      'habilidad',
+      'respuesta_unica',
+    ]);
+    expect(JSON.stringify(request.state)).not.toContain('isCorrect');
+    expect(JSON.stringify(request.state)).not.toContain(item.explanation);
+    expect(options.correlationId).toBe(item.itemId);
+    expect(options.baseline).toMatchObject({
+      version: JUDGE_DECISION_VERSION,
+      realKey: 'A',
+      llmDerivedAnswer: verdicts[0].derivedAnswer,
+      llmAnswerable: true,
+    });
+  });
+
+  it('no espera a la sombra: una sombra colgada no bloquea el veredicto', async () => {
+    const decisions = {
+      shadow: jest.fn(() => new Promise<void>(() => undefined)),
+    } as unknown as DecisionsService;
+    const service = new RemedialJudgeService(makeLlm(rawPass), decisions);
+
+    await expect(service.judge('org-1', stimulus, [makeItem()])).resolves.toHaveLength(1);
   });
 });

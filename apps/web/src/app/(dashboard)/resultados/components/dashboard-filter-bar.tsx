@@ -211,21 +211,24 @@ export function DashboardFilterBar({
     return { id: p.id, label: p.hasResults ? base : `${base} · sin resultados` };
   });
 
+  // El buscador va en su propia fila de ancho completo, no entre los selects:
+  // es el control que más ancho necesita y el único donde se escribe.
+  const searchField: FilterField = {
+    key: 'q',
+    label: 'Buscar por nombre de evaluación o instrumento',
+    control: (
+      <AssessmentSearchField
+        term={search.term}
+        onTermChange={search.setTerm}
+        onSubmit={search.submitNow}
+        isDebouncing={search.isDebouncing}
+        isTooShort={search.isTooShort}
+        minLength={MIN_SEARCH_TERM_LENGTH}
+      />
+    ),
+  };
+
   const fields: FilterField[] = [
-    {
-      key: 'q',
-      label: 'Buscar',
-      control: (
-        <AssessmentSearchField
-          term={search.term}
-          onTermChange={search.setTerm}
-          onSubmit={search.submitNow}
-          isDebouncing={search.isDebouncing}
-          isTooShort={search.isTooShort}
-          minLength={MIN_SEARCH_TERM_LENGTH}
-        />
-      ),
-    },
     {
       key: 'academicYearId',
       label: 'Período',
@@ -328,6 +331,7 @@ export function DashboardFilterBar({
   return (
     <FilterBar
       fields={fields}
+      fullWidthField={searchField}
       // El `isPending` de la transición NO se enciende durante la espera del
       // temporizador: sin `isDebouncing` la barra se ve muerta justo en esos
       // segundos (docs/diseno-buscador-evaluaciones.md §D9).

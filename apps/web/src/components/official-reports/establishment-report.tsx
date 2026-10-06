@@ -2,6 +2,8 @@ import type {
   OfficialEstablishmentReportResponse,
   EstablishmentSubjectSection,
   EstablishmentGradeColumn,
+  EstablishmentBandCell,
+  PerformanceBandView,
   SexComparisonResult,
 } from '@soe/types';
 import { cn } from '@/lib/utils';
@@ -16,12 +18,15 @@ import {
 } from './report-primitives';
 import { resolveDisclaimers, resolveLevelDefinitions } from './report-copy';
 import { DIA_LEVEL_ORDER, DIA_LEVEL_OF, DIA_LEVEL_LABELS, diaLevelBadgeClass } from './dia-levels';
+import { bandBadgeClass } from './band-levels';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TKT-25 — Informe de establecimiento (Área Académica). Server Component.
 // Reproduce las Tablas 1.1–1.9: una por asignatura con niveles de logro I/II/III
-// por grado, comparación por sexo, y conteos. El colapso de los 4 niveles de la
-// plataforma a I/II/III lo aplica el frontend (ver `dia-levels.ts`).
+// por grado, comparación por sexo, y conteos. Si la asignatura trae las bandas de
+// sus instrumentos (`bands`/`bandDistribution`), las filas son esas bandas — la
+// misma clasificación del informe por evaluación. Si no, el colapso de los 4
+// niveles de la plataforma a I/II/III lo aplica el frontend (ver `dia-levels.ts`).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Mapea el resultado de comparación por sexo al símbolo oficial. */
@@ -137,6 +142,67 @@ function SubjectBlock({
 }
 
 function LevelDistributionTable({ subject }: { subject: EstablishmentSubjectSection }) {
+  if (subject.bands && subject.bands.length > 0 && subject.bandDistribution) {
+    return (
+      <BandDistributionTable
+        grades={subject.grades}
+        bands={subject.bands}
+        cells={subject.bandDistribution}
+      />
+    );
+  }
+  return <LegacyLevelDistributionTable subject={subject} />;
+}
+
+function BandDistributionTable({
+  grades,
+  bands,
+  cells,
+}: {
+  grades: EstablishmentGradeColumn[];
+  bands: PerformanceBandView[];
+  cells: EstablishmentBandCell[];
+}) {
+  const byCell = new Map(cells.map((c) => [`${c.gradeId}|${c.bandKey}`, c]));
+  const orderedBands = [...bands].sort((a, b) => a.order - b.order);
+  const orders = orderedBands.map((b) => b.order);
+
+  return (
+    <div className="overflow-x-auto rounded-md border">
+      <table className="w-full min-w-[480px] border-collapse text-sm">
+        <thead>
+          <GradeHeader grades={grades} firstCol="Nivel" />
+        </thead>
+        <tbody>
+          {orderedBands.map((band) => (
+            <tr key={band.key} className="border-b last:border-0">
+              <th className="whitespace-nowrap px-3 py-2 text-left font-medium">
+                <span
+                  className={cn(
+                    'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
+                    bandBadgeClass(band.order, orders),
+                  )}
+                >
+                  {band.label}
+                </span>
+              </th>
+              {grades.map((g) => {
+                const cell = byCell.get(`${g.gradeId}|${band.key}`);
+                return (
+                  <td key={g.gradeId} className="px-3 py-2 text-center tabular-nums">
+                    {cell ? fmtPct(cell.percentage, 0) : '—'}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function LegacyLevelDistributionTable({ subject }: { subject: EstablishmentSubjectSection }) {
   const { grades, levelDistribution } = subject;
   // Agrega las celdas (grade, platformLevel) al numeral I/II/III correspondiente.
   // clave: `${gradeId}|${diaLevel}` → { count, total }

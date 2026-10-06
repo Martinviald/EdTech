@@ -57,12 +57,12 @@ export default async function ResultadosOverviewPage({
   // sección. `key={query}` reinicia el skeleton al cambiar los filtros.
   return (
     <>
-      <Suspense fallback={null}>
-        <ProcessPreviewSection query={query} filters={filters} />
-      </Suspense>
-
       <Suspense fallback={<FilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <ProcessPreviewSection query={query} filters={filters} />
       </Suspense>
 
       <Suspense
@@ -147,6 +147,7 @@ async function PanoramaSections({
         <StatCard
           label="Alumnos evaluados"
           value={comparable.totals.studentsEvaluated.toLocaleString('es-CL')}
+          hint={`${comparable.totals.classifications.toLocaleString('es-CL')} clasificaciones`}
           icon={GraduationCap}
         />
         <StatCard
