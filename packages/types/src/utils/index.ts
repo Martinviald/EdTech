@@ -27,6 +27,7 @@ export * from './expected-scope';
 export * from './slug';
 export * from './search-term';
 export * from './assessment-severity';
+export * from './benchmark-sample';
 export * from './process-rollup';
 export * from './process-grouping';
 export * from './test-tracks';

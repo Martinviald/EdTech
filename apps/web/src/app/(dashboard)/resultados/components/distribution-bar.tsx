@@ -1,6 +1,7 @@
 'use client';
 
 import type {
+  BenchmarkBandCount,
   PerformanceBandDistributionBucket,
   PerformanceBandView,
   PerformanceDistributionBucket,
@@ -22,7 +23,35 @@ import { cn } from '@/lib/utils';
 
 const NEUTRAL = '#94a3b8'; // slate-400 (banda sin color propio)
 
-type SegHover = { label: string; count: number; pct: number; color: string };
+type SegHover = { label: string; count: number; pct: number; color: string; footer?: string };
+
+/** Distribución de la muestra de benchmarking en las bandas del instrumento. */
+export type DistributionSample = {
+  label: string;
+  sizeLabel: string;
+  bandCounts: BenchmarkBandCount[];
+};
+
+type SampleShare = { count: number; pct: number };
+
+/**
+ * % de la muestra por clave de banda, sólo si cubre TODAS las bandas de la vista:
+ * con un set de bandas distinto la comparación no es la misma escala y no se dibuja.
+ */
+function sampleSharesFor(
+  sample: DistributionSample | null | undefined,
+  bucketKeys: string[],
+): Map<string, SampleShare> | null {
+  if (!sample || bucketKeys.length === 0) return null;
+  let total = 0;
+  for (const band of sample.bandCounts) total += band.count;
+  if (total === 0) return null;
+  const shares = new Map<string, SampleShare>();
+  for (const band of sample.bandCounts) {
+    shares.set(band.bandKey, { count: band.count, pct: (band.count / total) * 100 });
+  }
+  return bucketKeys.every((key) => shares.has(key)) ? shares : null;
+}
 
 /**
  * Distribución de niveles de desempeño (H6.4): barra apilada + leyenda con
@@ -39,11 +68,13 @@ export function DistributionBar({
   bands,
   bandDistribution,
   title = 'Distribución por nivel de desempeño',
+  sample,
 }: {
   distribution: PerformanceDistributionBucket[];
   bands?: PerformanceBandView[];
   bandDistribution?: PerformanceBandDistributionBucket[];
   title?: string;
+  sample?: DistributionSample | null;
 }) {
   const { tip, bind } = useChartTooltip<SegHover>();
   const bandMode = Boolean(bands && bands.length > 0 && bandDistribution);
@@ -55,6 +86,12 @@ export function DistributionBar({
     : distribution.reduce((acc, b) => acc + b.count, 0);
 
   const byLevel = new Map(distribution.map((b) => [b.level, b]));
+  const sampleShares = bandMode
+    ? sampleSharesFor(
+        sample,
+        buckets!.map((b) => b.key),
+      )
+    : null;
 
   return (
     <Card>
@@ -79,6 +116,35 @@ export function DistributionBar({
               })}
             </div>
 
+            {sampleShares && sample ? (
+              <div className="space-y-1">
+                <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted opacity-80">
+                  {buckets!.map((b) => {
+                    const share = sampleShares.get(b.key);
+                    if (!share || share.pct <= 0) return null;
+                    const color = b.color ?? NEUTRAL;
+                    return (
+                      <div
+                        key={b.key}
+                        className="h-full transition-opacity hover:opacity-80"
+                        style={{ width: `${share.pct}%`, backgroundColor: color }}
+                        {...bind({
+                          label: `${b.label} · ${sample.label}`,
+                          count: share.count,
+                          pct: share.pct,
+                          color,
+                          footer: sample.sizeLabel,
+                        })}
+                      />
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {sample.label} ({sample.sizeLabel})
+                </p>
+              </div>
+            ) : null}
+
             <ul className="flex flex-wrap gap-x-6 gap-y-3">
               {buckets!.map((b) => (
                 <li key={b.key} className="space-y-1">
@@ -93,6 +159,11 @@ export function DistributionBar({
                     {b.count}{' '}
                     <span className="text-muted-foreground">({b.percentage.toFixed(1)}%)</span>
                   </p>
+                  {sampleShares ? (
+                    <p className="text-xs text-muted-foreground">
+                      Muestra: {(sampleShares.get(b.key)?.pct ?? 0).toFixed(1)}%
+                    </p>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -157,7 +228,7 @@ export function DistributionBar({
               { label: 'Estudiantes', value: tip.data.count },
               { label: 'Del total', value: `${tip.data.pct.toFixed(1)}%` },
             ]}
-            footer={total > 0 ? `${total} clasificados` : undefined}
+            footer={tip.data.footer ?? (total > 0 ? `${total} clasificados` : undefined)}
           />
         </ChartTooltipPortal>
       ) : null}

@@ -43,7 +43,7 @@ import {
   benchmarkAccessLogs,
   orgBenchmarkSettings,
 } from '../schema/benchmark';
-import type { BenchmarkBandDistribution, BenchmarkSkillAggregate } from '@soe/types';
+import type { BenchmarkBandCount, BenchmarkSkillAggregate } from '@soe/types';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -174,8 +174,12 @@ const SCHOOLS: SchoolDef[] = [
 
 // ── Helpers de generación de agregados (deterministas, sin PII) ──────────────
 
-/** Reparte `n` alumnos en 4 bandas según el % logro promedio. Suma exacta = n. */
-function bandsFromAvg(n: number, avg: number): BenchmarkBandDistribution {
+/**
+ * Reparte `n` alumnos en 4 bandas según el % logro promedio. Suma exacta = n. Las
+ * claves son las de una escala genérica de 4 niveles: los instrumentos `[DEMO]` no
+ * comparten bandas con ningún instrumento real.
+ */
+function bandsFromAvg(n: number, avg: number): BenchmarkBandCount[] {
   // Proporciones [insufficient, elementary, adequate, advanced].
   let props: readonly [number, number, number, number];
   if (avg >= 75) props = [0.07, 0.18, 0.4, 0.35];
@@ -189,7 +193,7 @@ function bandsFromAvg(n: number, avg: number): BenchmarkBandDistribution {
   const elementary = Math.round(pEle * n);
   const adequate = Math.round(pAdq * n);
   const advanced = Math.round(pAdv * n);
-  const bands: BenchmarkBandDistribution = { insufficient, elementary, adequate, advanced };
+  const bands = { insufficient, elementary, adequate, advanced };
   // Corrige el redondeo cargando la diferencia a la banda de mayor proporción.
   const diff = n - (insufficient + elementary + adequate + advanced);
   const maxProp = Math.max(pIns, pEle, pAdq, pAdv);
@@ -197,7 +201,12 @@ function bandsFromAvg(n: number, avg: number): BenchmarkBandDistribution {
   else if (maxProp === pAdq) bands.adequate += diff;
   else if (maxProp === pEle) bands.elementary += diff;
   else bands.insufficient += diff;
-  return bands;
+  return [
+    { bandKey: 'insufficient', label: 'Insuficiente', order: 1, count: bands.insufficient },
+    { bandKey: 'elementary', label: 'Elemental', order: 2, count: bands.elementary },
+    { bandKey: 'adequate', label: 'Adecuado', order: 3, count: bands.adequate },
+    { bandKey: 'advanced', label: 'Avanzado', order: 4, count: bands.advanced },
+  ];
 }
 
 const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v * 100) / 100));
@@ -394,7 +403,7 @@ async function main() {
     networkOrgId: r.networkOrgId,
     studentCount: r.n,
     avgAchievement: r.avg.toFixed(2),
-    bandDistribution: bandsFromAvg(r.n, r.avg),
+    bandCounts: bandsFromAvg(r.n, r.avg),
     perSkill: buildPerSkill(r.skills, r.avg, r.n),
     optOutGlobalPool: r.s.optOut,
     refreshedAt: now,

@@ -41,11 +41,13 @@ import {
   MetaItem,
   MetricsGroup,
   PageHeader,
+  SampleDeltaChip,
   StatCard,
   StatusBadge,
   StatusDot,
   Stepper,
 } from '@/components/shared';
+import type { InstrumentSampleEntry } from '@soe/types';
 import { FilterBarDemo } from './filter-bar-demo';
 import { BRAND } from '@/lib/brand';
 
@@ -533,7 +535,40 @@ export default function StyleguidePage() {
             }
           />
         </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            SampleDeltaChip (contraste con la muestra; el tono sale de la zona típica)
+          </p>
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border p-4">
+            <SampleDeltaChip entry={STYLEGUIDE_SAMPLE} value={52} surface="styleguide" />
+            <SampleDeltaChip entry={STYLEGUIDE_SAMPLE} value={62.3} surface="styleguide" />
+            <SampleDeltaChip entry={STYLEGUIDE_SAMPLE} value={70} surface="styleguide" />
+            <SampleDeltaChip entry={STYLEGUIDE_SAMPLE} value={78} surface="styleguide" />
+          </div>
+        </div>
       </section>
     </main>
   );
 }
+
+const STYLEGUIDE_SAMPLE: InstrumentSampleEntry = {
+  instrumentId: '00000000-0000-4000-8000-000000000000',
+  global: {
+    instrumentId: '00000000-0000-4000-8000-000000000000',
+    scope: 'global',
+    label: 'Muestra',
+    schoolCount: 12,
+    studentCount: 940,
+    avgAchievement: 62.1,
+    p10: 51.2,
+    p25: 56.4,
+    median: 61.8,
+    p75: 68.9,
+    bandCounts: [],
+    perSkill: [],
+    refreshedAt: '2026-10-05T06:30:00.000Z',
+  },
+  network: null,
+  you: null,
+};

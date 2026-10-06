@@ -1,6 +1,6 @@
 {
-  "id": "3a69cddf-8a4b-46a6-8e7a-20e4f8c32068",
-  "prevId": "375db118-c3c2-4a02-b922-9718efb6c4ef",
+  "id": "789eeec5-6a57-480a-ad91-64846474901f",
+  "prevId": "3a69cddf-8a4b-46a6-8e7a-20e4f8c32068",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1379,6 +1379,164 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.test_tracks": {
+      "name": "test_tracks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subject_id": {
+          "name": "subject_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "short_name": {
+          "name": "short_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "test_tracks_official_subject_code_uniq": {
+          "name": "test_tracks_official_subject_code_uniq",
+          "columns": [
+            {
+              "expression": "subject_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"test_tracks\".\"org_id\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "test_tracks_org_subject_code_uniq": {
+          "name": "test_tracks_org_subject_code_uniq",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "subject_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"test_tracks\".\"org_id\" IS NOT NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "test_tracks_org_id_organizations_id_fk": {
+          "name": "test_tracks_org_id_organizations_id_fk",
+          "tableFrom": "test_tracks",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "test_tracks_subject_id_subjects_id_fk": {
+          "name": "test_tracks_subject_id_subjects_id_fk",
+          "tableFrom": "test_tracks",
+          "tableTo": "subjects",
+          "columnsFrom": [
+            "subject_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "test_tracks_id_subject_uniq": {
+          "name": "test_tracks_id_subject_uniq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "subject_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.grading_scales": {
       "name": "grading_scales",
       "schema": "",
@@ -1648,6 +1806,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "track_id": {
+          "name": "track_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "max_points": {
           "name": "max_points",
           "type": "numeric(7, 2)",
@@ -1758,12 +1922,34 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "instrument_sections_track_id_test_tracks_id_fk": {
+          "name": "instrument_sections_track_id_test_tracks_id_fk",
+          "tableFrom": "instrument_sections",
+          "tableTo": "test_tracks",
+          "columnsFrom": [
+            "track_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "instrument_sections_elective_requires_track": {
+          "name": "instrument_sections_elective_requires_track",
+          "value": "\"instrument_sections\".\"role\" <> 'elective' OR \"instrument_sections\".\"track_id\" IS NOT NULL"
+        },
+        "instrument_sections_track_only_elective": {
+          "name": "instrument_sections_track_only_elective",
+          "value": "\"instrument_sections\".\"track_id\" IS NULL OR \"instrument_sections\".\"role\" = 'elective'"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.instruments": {
@@ -1856,6 +2042,12 @@
         },
         "grading_scale_id": {
           "name": "grading_scale_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "track_id": {
+          "name": "track_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -2010,12 +2202,32 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "instruments_track_subject_fk": {
+          "name": "instruments_track_subject_fk",
+          "tableFrom": "instruments",
+          "tableTo": "test_tracks",
+          "columnsFrom": [
+            "track_id",
+            "subject_id"
+          ],
+          "columnsTo": [
+            "id",
+            "subject_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "instruments_track_requires_subject": {
+          "name": "instruments_track_requires_subject",
+          "value": "\"instruments\".\"track_id\" IS NULL OR \"instruments\".\"subject_id\" IS NOT NULL"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.section_attachments": {
@@ -3500,6 +3712,28 @@
         }
       },
       "indexes": {
+        "measurement_processes_org_slug_active_uniq": {
+          "name": "measurement_processes_org_slug_active_uniq",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"measurement_processes\".\"deleted_at\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "idx_measurement_processes_org_year": {
           "name": "idx_measurement_processes_org_year",
           "columns": [
@@ -3577,16 +3811,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "measurement_processes_org_slug_unique": {
-          "name": "measurement_processes_org_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "org_id",
-            "slug"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

@@ -152,8 +152,8 @@ export function ComparisonView({
       </div>
 
       <BandComparison
-        yourDistribution={yourSchool.bandDistribution}
-        cohortDistribution={cohort.bandDistribution}
+        yourBandCounts={yourSchool.bandCounts ?? []}
+        cohortBandCounts={cohort.bandCounts ?? []}
       />
 
       <Card>

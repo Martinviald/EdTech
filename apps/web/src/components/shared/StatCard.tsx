@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +15,7 @@ export function StatCard({
   hint,
   icon: Icon,
   trend,
+  footer,
 }: {
   label: string;
   /** Valor principal ya formateado (p. ej. "72,4 %"). */
@@ -21,6 +23,8 @@ export function StatCard({
   hint?: string;
   icon?: LucideIcon;
   trend?: MetricTrend;
+  /** Contenido extra bajo el hint (p. ej. el contraste con la muestra). */
+  footer?: ReactNode;
 }) {
   return (
     <Card>
@@ -32,6 +36,7 @@ export function StatCard({
             {trend ? <MetricTrendChip trend={trend} /> : null}
           </div>
           {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+          {footer}
         </div>
         {Icon ? (
           <div className="rounded-lg bg-muted p-2">

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type JSX } from 'react';
 import { ChevronRight } from 'lucide-react';
-import type { SkillAchievementModel } from '@soe/types';
+import type { SampleSkillStat, SkillAchievementModel } from '@soe/types';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
@@ -36,6 +36,13 @@ import {
 /** Sentinela para "todas las dimensiones" (Radix Select no admite value vacío). */
 const ALL = '__all__';
 
+/** Logro de la muestra de colegios por nodo (benchmarking en contexto). */
+export type SkillsSample = {
+  label: string;
+  sizeLabel: string;
+  skills: SampleSkillStat[];
+};
+
 /** Orden de relevancia de las dimensiones en el dropdown. */
 const DIMENSION_ORDER = [
   'skill',
@@ -56,12 +63,18 @@ export function SkillsBreakdown({
   skills,
   filters,
   assessmentId,
+  sample,
 }: {
   skills: SkillAchievementModel[];
   /** Filtros base del dashboard: fijan el peldaño inicial del drill-down. */
   filters?: DrilldownBaseFilters;
   assessmentId?: string;
+  sample?: SkillsSample | null;
 }): JSX.Element {
+  const sampleByNode = useMemo(
+    () => new Map((sample?.skills ?? []).map((skill) => [skill.nodeId, skill])),
+    [sample],
+  );
   // Dimensiones (nodeType) presentes en los datos, ordenadas por relevancia.
   const dimensions = useMemo(() => {
     const set = new Set(skills.map((s) => s.nodeType));
@@ -112,7 +125,13 @@ export function SkillsBreakdown({
 
       <div className="space-y-3">
         {visibleSkills.map((skill) => (
-          <SkillRow key={skill.nodeId} skill={skill} onOpen={() => openDrilldown(skill)} />
+          <SkillRow
+            key={skill.nodeId}
+            skill={skill}
+            sample={sample ? sampleByNode.get(skill.nodeId) : undefined}
+            sampleLabel={sample ? `${sample.label} (${sample.sizeLabel})` : undefined}
+            onOpen={() => openDrilldown(skill)}
+          />
         ))}
       </div>
 
@@ -129,12 +148,17 @@ export function SkillsBreakdown({
 
 function SkillRow({
   skill,
+  sample,
+  sampleLabel,
   onOpen,
 }: {
   skill: SkillAchievementModel;
+  sample?: SampleSkillStat;
+  sampleLabel?: string;
   onOpen: () => void;
 }): JSX.Element {
   const pct = skill.averageAchievement ?? 0;
+  const samplePct = sample?.achievement ?? null;
   const barClass = skill.performanceLevel
     ? PERFORMANCE_LEVEL_BAR_CLASS[skill.performanceLevel]
     : 'bg-muted-foreground/40';
@@ -163,6 +187,11 @@ function SkillRow({
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {samplePct !== null ? (
+                <span className="text-xs text-muted-foreground tabular-nums" title={sampleLabel}>
+                  Muestra {formatAchievement(samplePct)}
+                </span>
+              ) : null}
               <span className="text-sm font-semibold tabular-nums">
                 {formatAchievement(skill.averageAchievement)}
               </span>
@@ -171,7 +200,7 @@ function SkillRow({
           </div>
 
           <div
-            className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
+            className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted"
             role="progressbar"
             aria-valuenow={Math.round(pct)}
             aria-valuemin={0}
@@ -182,6 +211,14 @@ function SkillRow({
               className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
               style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
             />
+            {samplePct !== null ? (
+              <div
+                className="absolute inset-y-0 w-0.5 bg-foreground/70"
+                style={{ left: `${Math.min(100, Math.max(0, samplePct))}%` }}
+                title={sampleLabel}
+                aria-hidden
+              />
+            ) : null}
           </div>
         </button>
       </CardContent>

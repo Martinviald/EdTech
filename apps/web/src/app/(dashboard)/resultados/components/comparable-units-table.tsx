@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowRight, Inbox, SearchX, TrendingDown, TrendingUp } from 'lucide-react';
-import type { ComparableUnitSummary, UnitSeverity } from '@soe/types';
-import { EmptyState } from '@/components/shared';
+import type { ComparableUnitSummary, InstrumentSampleEntry, UnitSeverity } from '@soe/types';
+import { EmptyState, SampleDeltaChip, type SampleSubject } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -80,8 +80,13 @@ function DeltaChip({ unit }: { unit: ComparableUnitSummary }) {
 export function ComparableUnitsTable({
   units,
   search,
+  samples,
+  sampleSubject = 'school',
 }: {
   units: ComparableUnitSummary[];
+  /** Muestra de benchmarking por instrumento; sólo llega para roles directivos. */
+  samples?: ReadonlyMap<string, InstrumentSampleEntry> | null;
+  sampleSubject?: SampleSubject;
   /**
    * Búsqueda vigente y el enlace que la quita. Sin esto, un vacío causado por el
    * buscador se explicaría como "aún no hay evaluaciones con resultados", que es
@@ -89,6 +94,7 @@ export function ComparableUnitsTable({
    */
   search?: { term: string; clearHref: Route };
 }) {
+  const showSample = Boolean(samples && units.some((u) => samples.get(u.instrumentId)?.global));
   return (
     <Card>
       <CardHeader>
@@ -132,6 +138,7 @@ export function ComparableUnitsTable({
                   <TableHead className="text-right">% Logro</TableHead>
                   <TableHead className="text-right hidden sm:table-cell">Nivel más bajo</TableHead>
                   <TableHead className="text-right">vs. comparable</TableHead>
+                  {showSample ? <TableHead className="text-right">vs. muestra</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -181,6 +188,17 @@ export function ComparableUnitsTable({
                     <TableCell className="text-right">
                       <DeltaChip unit={unit} />
                     </TableCell>
+                    {showSample ? (
+                      <TableCell className="text-right">
+                        <SampleDeltaChip
+                          entry={samples?.get(unit.instrumentId)}
+                          value={unit.averageAchievement}
+                          subject={sampleSubject}
+                          instrumentName={unit.instrumentName}
+                          surface="resultados.panorama"
+                        />
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 ))}
               </TableBody>

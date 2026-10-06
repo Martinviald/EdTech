@@ -2,7 +2,12 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { Inbox } from 'lucide-react';
 import { auth } from '@/auth';
-import { canAccess, ESTABLISHMENT_REPORT_ROLES } from '@soe/types';
+import {
+  canAccess,
+  ESTABLISHMENT_REPORT_ROLES,
+  type OfficialEstablishmentReportResponse,
+} from '@soe/types';
+import { canSeeBenchmark, getInstrumentSamples } from '@/lib/benchmark-samples';
 import { ROUTES } from '@/lib/routes';
 import { PageContainer, EmptyState, TableSkeleton } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -58,7 +63,7 @@ export default async function InformeEstablecimientoPage({
       </div>
 
       <Suspense fallback={<ReportSkeleton />}>
-        <ReportBody querySuffix={querySuffix} />
+        <ReportBody querySuffix={querySuffix} canSeeSample={canSeeBenchmark(session.user.roles)} />
       </Suspense>
     </PageContainer>
   );
@@ -87,8 +92,21 @@ async function PrintToolbarSlot({ querySuffix }: { querySuffix: string }) {
   return report ? <PrintToolbar /> : null;
 }
 
-async function ReportBody({ querySuffix }: { querySuffix: string }) {
+async function ReportBody({
+  querySuffix,
+  canSeeSample,
+}: {
+  querySuffix: string;
+  canSeeSample: boolean;
+}) {
   const report = await getEstablishmentReport(querySuffix);
+  if (report && canSeeSample) {
+    return (
+      <Suspense fallback={<EstablishmentReport report={report} />}>
+        <EstablishmentReportWithSamples report={report} />
+      </Suspense>
+    );
+  }
   return report ? (
     <EstablishmentReport report={report} />
   ) : (
@@ -107,4 +125,15 @@ function ReportSkeleton() {
       <TableSkeleton rows={6} />
     </div>
   );
+}
+
+async function EstablishmentReportWithSamples({
+  report,
+}: {
+  report: OfficialEstablishmentReportResponse;
+}) {
+  const samples = await getInstrumentSamples(
+    report.subjects.flatMap((subject) => subject.grades.map((grade) => grade.instrumentId)),
+  );
+  return <EstablishmentReport report={report} samples={samples} />;
 }

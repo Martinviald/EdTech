@@ -4,7 +4,13 @@ import type { Route } from 'next';
 import { GraduationCap, ClipboardList, TriangleAlert } from 'lucide-react';
 import { auth } from '@/auth';
 import { ROUTES } from '@/lib/routes';
-import { canAccess, DASHBOARD_VIEWER_ROLES, type DashboardTeacherKpisResponse } from '@soe/types';
+import {
+  canAccess,
+  DASHBOARD_VIEWER_ROLES,
+  type ComparableUnitSummary,
+  type DashboardTeacherKpisResponse,
+} from '@soe/types';
+import { canSeeBenchmark, getInstrumentSamples } from '@/lib/benchmark-samples';
 import {
   EmptyState,
   StatCard,
@@ -74,7 +80,11 @@ export default async function ResultadosOverviewPage({
           </>
         }
       >
-        <PanoramaSections query={query} filters={filters} />
+        <PanoramaSections
+          query={query}
+          filters={filters}
+          canSeeSample={canSeeBenchmark(session.user.roles)}
+        />
       </Suspense>
     </>
   );
@@ -133,13 +143,22 @@ async function FiltersSection({
 async function PanoramaSections({
   query,
   filters,
+  canSeeSample,
 }: {
   query: string;
   filters: DashboardFilterValues;
+  canSeeSample: boolean;
 }) {
   const options = await getDashboardFilters(query);
   const scopedQuery = buildDashboardQuery(withEntryDefaults(filters, options));
   const comparable = await getComparableOverview(scopedQuery);
+  const search = filters.q
+    ? {
+        term: filters.q,
+        clearHref:
+          `${ROUTES.resultados}${buildDashboardHref({ ...filters, q: undefined })}` as Route,
+      }
+    : undefined;
 
   return (
     <>
@@ -172,18 +191,17 @@ async function PanoramaSections({
 
       <ComparabilityNotice comparability={comparable.comparability} />
 
-      <ComparableUnitsTable
-        units={comparable.units}
-        search={
-          filters.q
-            ? {
-                term: filters.q,
-                clearHref:
-                  `${ROUTES.resultados}${buildDashboardHref({ ...filters, q: undefined })}` as Route,
-              }
-            : undefined
-        }
-      />
+      {canSeeSample && comparable.scope !== 'teacher' && comparable.units.length > 0 ? (
+        <Suspense fallback={<ComparableUnitsTable units={comparable.units} search={search} />}>
+          <UnitsTableWithSamples
+            units={comparable.units}
+            search={search}
+            courseScoped={(filters.classGroupId?.length ?? 0) > 0}
+          />
+        </Suspense>
+      ) : (
+        <ComparableUnitsTable units={comparable.units} search={search} />
+      )}
 
       {comparable.scope === 'teacher' ? (
         <Suspense fallback={<TableSkeleton />}>
@@ -191,6 +209,26 @@ async function PanoramaSections({
         </Suspense>
       ) : null}
     </>
+  );
+}
+
+async function UnitsTableWithSamples({
+  units,
+  search,
+  courseScoped,
+}: {
+  units: ComparableUnitSummary[];
+  search: { term: string; clearHref: Route } | undefined;
+  courseScoped: boolean;
+}) {
+  const samples = await getInstrumentSamples(units.map((u) => u.instrumentId));
+  return (
+    <ComparableUnitsTable
+      units={units}
+      search={search}
+      samples={samples}
+      sampleSubject={courseScoped ? 'course' : 'school'}
+    />
   );
 }
 
