@@ -1,28 +1,31 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { and, asc, desc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import {
   academicYears,
   assessmentItemStats,
   assessments,
   classGroups,
   grades,
-  gradingScales,
   instruments,
+  measurementProcesses,
   orgMemberships,
+  resolveEffectiveBandsForInstruments,
   subjectClasses,
   subjects,
   teacherAssignments,
   users,
   withOrgContext,
+  type EffectiveBands,
 } from '@soe/db';
 import {
-  INSTRUMENT_APPLICATION_PERIODS,
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
   INSTRUMENT_TYPE_LABELS,
   buildComparabilityMeta,
+  trackOrSubjectTestKey,
   type ComparabilityInstrumentRef,
   type InstrumentApplicationPeriod,
   type InstrumentType,
+  type MasterBoardAcademicYear,
   type MasterBoardCell,
   type MasterBoardCourseCell,
   type MasterBoardGrade,
@@ -33,53 +36,69 @@ import {
   type MasterBoardTakesQueryDto,
   type MasterBoardTakesResponse,
   type MasterBoardTeacherRef,
+  type MasterBoardTest,
+  type MasterBoardTestSource,
+  type MetricValue,
+  type ProcessKind,
   type TeacherPerformance,
   type TeacherPerformanceClass,
   type TeacherPerformanceQueryDto,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
+  buildAssessmentScopeCondition,
   resolveClassGroupScope,
   type ClassGroupScope,
-  buildAssessmentScopeCondition,
 } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import {
+  LEGACY_PERFORMANCE_BANDS,
   addToCellAggregate,
   availableMetrics,
   computeMetrics,
   emptyCellAggregate,
   resolvePrimaryMetricKey,
-  resolveThresholds,
   type CellAggregate,
   type MetricContext,
 } from './master-board.metrics';
+import { loadMatrixRows, type MatrixRow } from './queries/matrix-rows.query';
+import {
+  loadLegacyTakeRows,
+  loadProcessLinkSummaries,
+  loadProcessResultCounts,
+  loadProcessSiblingCandidates,
+  loadProcessTakeRows,
+  type LegacyTakeRow,
+  type ProcessLinkSummaryRow,
+  type ProcessSiblingCandidateRow,
+  type ProcessTakeRow,
+} from './queries/takes.query';
+import { loadTomaAssessmentRows, type TomaAssessmentRow } from './queries/toma.query';
 
 type TomaResolution = {
   assessmentIds: string[];
   refs: ComparabilityInstrumentRef[];
+  label: string;
+  academicYearId: string | null;
   instrumentType: InstrumentType | null;
+  applicationPeriod: InstrumentApplicationPeriod | null;
+  processId: string | null;
+  processKind: ProcessKind | null;
+  redirectProcessId: string | null;
 };
 
-type MatrixRow = {
-  gradeId: string;
-  gradeName: string;
-  gradeOrder: number;
-  classGroupId: string;
-  classGroupName: string;
-  subjectId: string;
-  subjectName: string;
-  subjectShortName: string;
-  scoreSum: string | null;
-  maxSum: string | null;
-  studentsAssessed: number;
-  assessmentIds: string[];
+type SortableTake = { sortKey: string; take: MasterBoardTake };
+
+type CellAccumulator = {
+  aggregate: CellAggregate;
+  instrumentIds: Set<string>;
+  assessmentIds: Set<string>;
 };
 
 type CourseAccumulator = {
   classGroupId: string;
   name: string;
-  cells: Map<string, { aggregate: CellAggregate; assessmentIds: string[] }>;
+  cells: Map<string, CellAccumulator>;
 };
 
 type GradeAccumulator = {
@@ -87,8 +106,27 @@ type GradeAccumulator = {
   name: string;
   order: number;
   courses: Map<string, CourseAccumulator>;
-  cellsBySubject: Map<string, CellAggregate>;
+  cells: Map<string, CellAccumulator>;
 };
+
+type SubjectAccumulator = {
+  subjectId: string;
+  name: string;
+  shortName: string;
+  tests: Map<string, MasterBoardTest>;
+};
+
+type CellContext = {
+  refsByInstrument: Map<string, ComparabilityInstrumentRef>;
+  bandsByInstrument: Map<string, EffectiveBands>;
+};
+
+type CellView = Pick<
+  MasterBoardCell,
+  'studentsAssessed' | 'metrics' | 'mixed' | 'hasLevels' | 'comparability'
+>;
+
+const LEGACY_TAKE_SUFFIX = ' · sin proceso';
 
 @Injectable()
 export class MasterBoardService {
@@ -102,153 +140,94 @@ export class MasterBoardService {
     if (!orgId) return { takes: [], academicYears: [] };
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const yearRows = await tx
-        .select({
-          id: academicYears.id,
-          year: academicYears.year,
-          isCurrent: academicYears.isCurrent,
-        })
-        .from(academicYears)
-        .where(eq(academicYears.orgId, orgId))
-        .orderBy(desc(academicYears.year));
-      const academicYearsList = yearRows.map((row) => ({
-        id: row.id,
-        year: row.year,
-        label: String(row.year),
-        isCurrent: row.isCurrent,
-      }));
+      const academicYearsList = await this.loadAcademicYears(tx, orgId);
 
       const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) {
         return { takes: [], academicYears: academicYearsList };
       }
 
-      const conditions: SQL[] = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
-      if (!scope.scopeAll) {
-        // Curso × asignatura: `assessment_item_stats` ya trae el curso y el
-        // instrumento la asignatura. Jefatura → curso completo.
-        const inScope = buildAssessmentScopeCondition(scope, {
-          classGroupId: assessmentItemStats.classGroupId,
-          subjectId: instruments.subjectId,
-        });
-        if (inScope) conditions.push(inScope);
-      }
-      if (query.academicYearId) {
-        conditions.push(eq(classGroups.academicYearId, query.academicYearId));
-      }
+      const processRows = await loadProcessTakeRows(tx, orgId, scope, query.academicYearId);
+      const processIds = processRows.map((row) => row.processId);
+      const summaries = await loadProcessLinkSummaries(tx, orgId, scope, processIds);
+      const resultCounts = await loadProcessResultCounts(tx, orgId, scope, processIds);
+      const siblingCandidates =
+        processIds.length > 0 ? await loadProcessSiblingCandidates(tx, orgId) : [];
+      const legacyRows = await loadLegacyTakeRows(tx, orgId, scope, query.academicYearId);
 
-      const rows = await tx
-        .select({
-          academicYearId: classGroups.academicYearId,
-          year: academicYears.year,
-          instrumentType: instruments.type,
-          applicationPeriod: instruments.applicationPeriod,
-          assessmentCount: sql<number>`count(distinct ${assessments.id})::int`,
-        })
-        .from(assessmentItemStats)
-        .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
-        .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-        .innerJoin(classGroups, eq(classGroups.id, assessmentItemStats.classGroupId))
-        .innerJoin(academicYears, eq(academicYears.id, classGroups.academicYearId))
-        .where(and(...conditions))
-        .groupBy(
-          classGroups.academicYearId,
-          academicYears.year,
-          instruments.type,
-          instruments.applicationPeriod,
+      const summaryByProcess = new Map(summaries.map((row) => [row.processId, row]));
+      const resultCountByProcess = new Map(
+        resultCounts.map((row) => [row.processId, row.assessmentCount]),
+      );
+      const partialProcessIds = this.findPartialProcessIds(orgId, siblingCandidates);
+
+      const sortable: SortableTake[] = [];
+      for (const row of processRows) {
+        sortable.push(
+          this.toProcessTake(
+            row,
+            summaryByProcess.get(row.processId),
+            resultCountByProcess.get(row.processId) ?? 0,
+            partialProcessIds.has(row.processId),
+          ),
         );
+      }
+      for (const row of legacyRows) sortable.push(this.toLegacyTake(row));
 
-      const takes = rows
-        .map((row) => {
-          const instrumentType = row.instrumentType as InstrumentType;
-          const applicationPeriod = row.applicationPeriod;
-          return {
-            year: row.year,
-            take: {
-              key: `${row.academicYearId}:${instrumentType}:${applicationPeriod ?? '_'}`,
-              label: this.buildTakeLabel(instrumentType, applicationPeriod, row.year),
-              academicYearId: row.academicYearId,
-              instrumentType,
-              applicationPeriod,
-              assessmentCount: Number(row.assessmentCount ?? 0),
-            } satisfies MasterBoardTake,
-          };
-        })
-        .sort((a, b) => {
-          if (a.year !== b.year) return b.year - a.year;
-          if (a.take.instrumentType !== b.take.instrumentType) {
-            return a.take.instrumentType.localeCompare(b.take.instrumentType, 'es');
-          }
-          return (
-            this.periodOrder(a.take.applicationPeriod) - this.periodOrder(b.take.applicationPeriod)
-          );
-        })
-        .map((entry) => entry.take);
+      sortable.sort(
+        (a, b) =>
+          b.sortKey.localeCompare(a.sortKey) || a.take.label.localeCompare(b.take.label, 'es'),
+      );
 
-      return { takes, academicYears: academicYearsList };
+      return { takes: sortable.map((entry) => entry.take), academicYears: academicYearsList };
     });
   }
 
   async getMatrix(user: JwtPayload, query: MasterBoardMatrixQueryDto): Promise<MasterBoardMatrix> {
     const primaryMetricKey = resolvePrimaryMetricKey(query.metric);
-    const metrics = availableMetrics();
     const orgId = user.orgId;
-
-    const emptyMatrix = (instrumentType: InstrumentType | null): MasterBoardMatrix => ({
-      take: {
-        label: '',
-        academicYearId: query.academicYearId ?? null,
-        instrumentType,
-        applicationPeriod: query.applicationPeriod ?? null,
-        assessmentIds: [],
-      },
-      primaryMetricKey,
-      availableMetrics: metrics,
-      subjects: [],
-      grades: [],
-      comparability: buildComparabilityMeta([]),
-    });
-
-    if (!orgId) return emptyMatrix(null);
+    if (!orgId) return this.emptyMatrix(this.emptyToma(query), primaryMetricKey);
 
     return withOrgContext(this.db, orgId, async (tx) => {
       const scope = await resolveClassGroupScope(tx, user, orgId);
-      if (!scope.scopeAll && scope.classGroupIds.length === 0) return emptyMatrix(null);
+      if (!scope.scopeAll && scope.classGroupIds.length === 0) {
+        return this.emptyMatrix(this.emptyToma(query), primaryMetricKey);
+      }
 
-      const toma = await this.resolveTomaAssessments(tx, orgId, scope, query);
-      if (toma.assessmentIds.length === 0) return emptyMatrix(toma.instrumentType);
+      const toma = await this.resolveToma(tx, orgId, scope, query);
+      if (toma.assessmentIds.length === 0) return this.emptyMatrix(toma, primaryMetricKey);
 
-      const comparability = buildComparabilityMeta(toma.refs, toma.assessmentIds.length);
-      const thresholds = await this.resolveTomaThresholds(tx, toma.assessmentIds);
-      const context: MetricContext = { thresholds, aggregatable: comparability.aggregatable };
-
-      const scopedClassGroupIds = scope.scopeAll ? null : scope.classGroupIds;
-      const rows = await this.loadMatrixRows(tx, toma.assessmentIds, scopedClassGroupIds, query);
+      const rows = await loadMatrixRows(tx, {
+        assessmentIds: toma.assessmentIds,
+        scopedClassGroupIds: scope.scopeAll ? null : scope.classGroupIds,
+        gradeIds: query.gradeId,
+        subjectIds: query.subjectId,
+      });
+      const instrumentIds = new Set<string>();
+      for (const row of rows) for (const id of row.instrumentIds ?? []) instrumentIds.add(id);
+      const bandsByInstrument = await resolveEffectiveBandsForInstruments(tx, [...instrumentIds]);
       const teacherByCell = await this.loadTeachersByCell(
         tx,
         rows.map((row) => row.classGroupId),
       );
-      const label = await this.resolveTakeLabel(tx, toma, query);
 
       const { subjects: subjectList, grades: gradeList } = this.assembleMatrix(
         rows,
         teacherByCell,
-        context,
+        {
+          refsByInstrument: new Map(toma.refs.map((ref) => [ref.instrumentId, ref])),
+          bandsByInstrument,
+        },
       );
 
       return {
-        take: {
-          label,
-          academicYearId: query.academicYearId ?? null,
-          instrumentType: toma.instrumentType,
-          applicationPeriod: query.applicationPeriod ?? null,
-          assessmentIds: toma.assessmentIds,
-        },
+        take: this.toResolvedTake(toma),
         primaryMetricKey,
-        availableMetrics: metrics,
+        availableMetrics: availableMetrics(),
         subjects: subjectList,
         grades: gradeList,
-        comparability,
+        comparability: buildComparabilityMeta(toma.refs, toma.assessmentIds.length),
+        redirectProcessId: toma.redirectProcessId,
       };
     });
   }
@@ -311,7 +290,7 @@ export class MasterBoardService {
 
       const classGroupIds = Array.from(new Set(assignments.map((row) => row.classGroupId)));
       const statByCell = await this.loadCourseSubjectStats(tx, orgId, classGroupIds);
-      const context: MetricContext = { thresholds: resolveThresholds(null), aggregatable: true };
+      const context: MetricContext = { bands: LEGACY_PERFORMANCE_BANDS };
 
       const classMap = new Map<string, TeacherPerformanceClass>();
       for (const assignment of assignments) {
@@ -349,53 +328,279 @@ export class MasterBoardService {
     });
   }
 
-  private async resolveTomaAssessments(
+  private async loadAcademicYears(tx: Database, orgId: string): Promise<MasterBoardAcademicYear[]> {
+    const yearRows = await tx
+      .select({
+        id: academicYears.id,
+        year: academicYears.year,
+        isCurrent: academicYears.isCurrent,
+      })
+      .from(academicYears)
+      .where(eq(academicYears.orgId, orgId))
+      .orderBy(desc(academicYears.year));
+    return yearRows.map((row) => ({
+      id: row.id,
+      year: row.year,
+      label: String(row.year),
+      isCurrent: row.isCurrent,
+    }));
+  }
+
+  private toProcessTake(
+    row: ProcessTakeRow,
+    summary: ProcessLinkSummaryRow | undefined,
+    assessmentCount: number,
+    partial: boolean,
+  ): SortableTake {
+    const instrumentTypes = summary?.instrumentTypes ?? [];
+    const lastAdministeredAt = summary?.lastAdministeredAt ?? null;
+    const firstAdministeredAt = summary?.firstAdministeredAt ?? null;
+    return {
+      sortKey: lastAdministeredAt ?? (row.startsOn ? `${row.startsOn}T00:00:00` : row.createdAt),
+      take: {
+        key: `process:${row.processId}`,
+        label: row.name,
+        academicYearId: row.academicYearId,
+        processId: row.processId,
+        processKind: row.kind,
+        instrumentType: instrumentTypes.length === 1 ? (instrumentTypes[0] ?? null) : null,
+        applicationPeriod: row.period,
+        administeredFrom: firstAdministeredAt?.slice(0, 10) ?? row.startsOn,
+        administeredTo: lastAdministeredAt?.slice(0, 10) ?? row.endsOn,
+        assessmentCount,
+        linkedAssessmentCount: summary?.linkedAssessmentCount ?? 0,
+        hasResults: assessmentCount > 0,
+        partial,
+      },
+    };
+  }
+
+  private toLegacyTake(row: LegacyTakeRow): SortableTake {
+    const assessmentCount = Number(row.assessmentCount ?? 0);
+    return {
+      sortKey: row.lastAdministeredAt ?? row.firstCreatedAt,
+      take: {
+        key: `legacy:${row.academicYearId}:${row.instrumentType}:${row.applicationPeriod ?? '_'}`,
+        label: `${this.buildTakeLabel(row.instrumentType, row.applicationPeriod, row.year)}${LEGACY_TAKE_SUFFIX}`,
+        academicYearId: row.academicYearId,
+        processId: null,
+        processKind: null,
+        instrumentType: row.instrumentType,
+        applicationPeriod: row.applicationPeriod,
+        administeredFrom: row.firstAdministeredAt?.slice(0, 10) ?? null,
+        administeredTo: row.lastAdministeredAt?.slice(0, 10) ?? null,
+        assessmentCount,
+        linkedAssessmentCount: assessmentCount,
+        hasResults: assessmentCount > 0,
+        partial: false,
+      },
+    };
+  }
+
+  private findPartialProcessIds(
+    orgId: string,
+    candidates: ProcessSiblingCandidateRow[],
+  ): Set<string> {
+    const cellsByProcess = new Map<string, Map<string, Set<string>>>();
+    const processesBySignature = new Map<string, Set<string>>();
+
+    for (const candidate of candidates) {
+      if (!candidate.processId) continue;
+      let cells = cellsByProcess.get(candidate.processId);
+      if (!cells) {
+        cells = new Map();
+        cellsByProcess.set(candidate.processId, cells);
+      }
+      const cellKey = this.siblingCellKey(orgId, candidate);
+      let instrumentsInCell = cells.get(cellKey);
+      if (!instrumentsInCell) {
+        instrumentsInCell = new Set();
+        cells.set(cellKey, instrumentsInCell);
+      }
+      instrumentsInCell.add(candidate.instrumentId);
+
+      const signature = this.siblingSignature(candidate);
+      let processIds = processesBySignature.get(signature);
+      if (!processIds) {
+        processIds = new Set();
+        processesBySignature.set(signature, processIds);
+      }
+      processIds.add(candidate.processId);
+    }
+
+    const partial = new Set<string>();
+    for (const candidate of candidates) {
+      if (candidate.processId) continue;
+      const processIds = processesBySignature.get(this.siblingSignature(candidate));
+      if (!processIds) continue;
+      const cellKey = this.siblingCellKey(orgId, candidate);
+      for (const processId of processIds) {
+        if (partial.has(processId)) continue;
+        const instrumentsInCell = cellsByProcess.get(processId)?.get(cellKey);
+        const fitsInvariant =
+          !instrumentsInCell ||
+          (instrumentsInCell.size === 1 && instrumentsInCell.has(candidate.instrumentId));
+        if (fitsInvariant) partial.add(processId);
+      }
+    }
+    return partial;
+  }
+
+  private siblingSignature(candidate: ProcessSiblingCandidateRow): string {
+    return [
+      candidate.academicYearId,
+      candidate.instrumentType,
+      candidate.applicationPeriod ?? '_',
+    ].join('|');
+  }
+
+  private siblingCellKey(orgId: string, candidate: ProcessSiblingCandidateRow): string {
+    const testKey = trackOrSubjectTestKey({ ...candidate, orgId });
+    return `${candidate.gradeId}|${testKey ?? '_'}`;
+  }
+
+  private async resolveToma(
     tx: Database,
     orgId: string,
     scope: ClassGroupScope,
     query: MasterBoardMatrixQueryDto,
   ): Promise<TomaResolution> {
-    const isFreeSelection = !!query.assessmentId?.length;
-    const conditions: SQL[] = [eq(assessments.orgId, orgId), isNull(instruments.deletedAt)];
-    let instrumentType: InstrumentType | null = null;
-
-    if (isFreeSelection) {
-      conditions.push(inArray(assessments.id, query.assessmentId!));
-    } else {
-      if (!query.academicYearId || !query.instrumentType) {
-        return { assessmentIds: [], refs: [], instrumentType: null };
-      }
-      instrumentType = query.instrumentType as InstrumentType;
-      conditions.push(sql`${instruments.type}::text = ${query.instrumentType}`);
-      if (query.applicationPeriod) {
-        conditions.push(sql`${instruments.applicationPeriod}::text = ${query.applicationPeriod}`);
-      }
-      conditions.push(eq(classGroups.academicYearId, query.academicYearId));
+    if (query.processId) return this.resolveProcessToma(tx, orgId, scope, query.processId);
+    if (query.assessmentId?.length) {
+      return this.resolveFreeSelectionToma(tx, orgId, scope, query.assessmentId);
     }
-    if (!scope.scopeAll) {
-      const inScope = buildAssessmentScopeCondition(scope, {
-        classGroupId: assessmentItemStats.classGroupId,
-        subjectId: instruments.subjectId,
-      });
-      if (inScope) conditions.push(inScope);
-    }
+    if (!query.academicYearId || !query.instrumentType) return this.emptyToma(query);
+    return this.resolveLegacyToma(tx, orgId, scope, {
+      academicYearId: query.academicYearId,
+      instrumentType: query.instrumentType as InstrumentType,
+      applicationPeriod: query.applicationPeriod ?? null,
+    });
+  }
 
-    const rows = await tx
-      .selectDistinct({
-        assessmentId: assessments.id,
-        instrumentId: instruments.id,
-        instrumentType: instruments.type,
-        subjectId: instruments.subjectId,
-        gradeId: instruments.gradeId,
-        applicationPeriod: instruments.applicationPeriod,
-        year: instruments.year,
+  private async resolveProcessToma(
+    tx: Database,
+    orgId: string,
+    scope: ClassGroupScope,
+    processId: string,
+  ): Promise<TomaResolution> {
+    const [process] = await tx
+      .select({
+        id: measurementProcesses.id,
+        name: measurementProcesses.name,
+        kind: measurementProcesses.kind,
+        period: measurementProcesses.period,
+        academicYearId: measurementProcesses.academicYearId,
       })
-      .from(assessmentItemStats)
-      .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .innerJoin(classGroups, eq(classGroups.id, assessmentItemStats.classGroupId))
-      .where(and(...conditions));
+      .from(measurementProcesses)
+      .where(
+        and(
+          eq(measurementProcesses.id, processId),
+          eq(measurementProcesses.orgId, orgId),
+          isNull(measurementProcesses.deletedAt),
+        ),
+      )
+      .limit(1);
+    if (!process) throw new NotFoundException('Proceso de medición no encontrado');
 
+    const conditions: SQL[] = [eq(assessments.processId, process.id)];
+    this.pushScopeCondition(conditions, scope);
+    const rows = await loadTomaAssessmentRows(tx, orgId, conditions);
+    const { assessmentIds, refs } = this.collectToma(rows);
+
+    return {
+      assessmentIds,
+      refs,
+      label: process.name,
+      academicYearId: process.academicYearId,
+      instrumentType: this.uniqueInstrumentType(refs),
+      applicationPeriod: process.period,
+      processId: process.id,
+      processKind: process.kind,
+      redirectProcessId: null,
+    };
+  }
+
+  private async resolveFreeSelectionToma(
+    tx: Database,
+    orgId: string,
+    scope: ClassGroupScope,
+    assessmentIds: string[],
+  ): Promise<TomaResolution> {
+    const conditions: SQL[] = [inArray(assessments.id, assessmentIds)];
+    this.pushScopeCondition(conditions, scope);
+    const rows = await loadTomaAssessmentRows(tx, orgId, conditions);
+    const toma = this.collectToma(rows);
+
+    return {
+      ...toma,
+      label: 'Selección personalizada',
+      academicYearId: null,
+      instrumentType: this.uniqueInstrumentType(toma.refs),
+      applicationPeriod: null,
+      processId: null,
+      processKind: null,
+      redirectProcessId: null,
+    };
+  }
+
+  private async resolveLegacyToma(
+    tx: Database,
+    orgId: string,
+    scope: ClassGroupScope,
+    take: {
+      academicYearId: string;
+      instrumentType: InstrumentType;
+      applicationPeriod: InstrumentApplicationPeriod | null;
+    },
+  ): Promise<TomaResolution> {
+    const conditions: SQL[] = [
+      sql`${instruments.type}::text = ${take.instrumentType}`,
+      eq(classGroups.academicYearId, take.academicYearId),
+    ];
+    if (take.applicationPeriod) {
+      conditions.push(sql`${instruments.applicationPeriod}::text = ${take.applicationPeriod}`);
+    }
+    this.pushScopeCondition(conditions, scope);
+    const rows = await loadTomaAssessmentRows(tx, orgId, conditions);
+
+    const residualRows: TomaAssessmentRow[] = [];
+    const linkedProcessIds = new Set<string>();
+    for (const row of rows) {
+      if (row.activeProcessId) linkedProcessIds.add(row.activeProcessId);
+      else residualRows.push(row);
+    }
+    const { assessmentIds, refs } = this.collectToma(residualRows);
+    const redirectProcessId =
+      rows.length > 0 && residualRows.length === 0 && linkedProcessIds.size === 1
+        ? (Array.from(linkedProcessIds)[0] ?? null)
+        : null;
+    const year = await this.loadYear(tx, take.academicYearId);
+
+    return {
+      assessmentIds,
+      refs,
+      label: `${this.buildTakeLabel(take.instrumentType, take.applicationPeriod, year)}${LEGACY_TAKE_SUFFIX}`,
+      academicYearId: take.academicYearId,
+      instrumentType: take.instrumentType,
+      applicationPeriod: take.applicationPeriod,
+      processId: null,
+      processKind: null,
+      redirectProcessId,
+    };
+  }
+
+  private pushScopeCondition(conditions: SQL[], scope: ClassGroupScope): void {
+    const inScope = buildAssessmentScopeCondition(scope, {
+      classGroupId: assessmentItemStats.classGroupId,
+      subjectId: instruments.subjectId,
+    });
+    if (inScope) conditions.push(inScope);
+  }
+
+  private collectToma(rows: TomaAssessmentRow[]): {
+    assessmentIds: string[];
+    refs: ComparabilityInstrumentRef[];
+  } {
     const ids = new Set<string>();
     const byInstrument = new Map<string, ComparabilityInstrumentRef>();
     for (const row of rows) {
@@ -408,83 +613,66 @@ export class MasterBoardService {
           gradeId: row.gradeId,
           applicationPeriod: row.applicationPeriod,
           year: row.year,
+          trackId: row.trackId,
         });
       }
     }
+    return { assessmentIds: Array.from(ids), refs: Array.from(byInstrument.values()) };
+  }
 
-    if (isFreeSelection && byInstrument.size > 0) {
-      const distinctTypes = new Set(Array.from(byInstrument.values()).map((ref) => ref.type));
-      instrumentType =
-        distinctTypes.size === 1 ? (Array.from(distinctTypes)[0] as InstrumentType) : null;
-    }
+  private uniqueInstrumentType(refs: ComparabilityInstrumentRef[]): InstrumentType | null {
+    const types = new Set(refs.map((ref) => ref.type));
+    return types.size === 1 ? (Array.from(types)[0] as InstrumentType) : null;
+  }
 
+  private async loadYear(tx: Database, academicYearId: string): Promise<number | null> {
+    const [row] = await tx
+      .select({ year: academicYears.year })
+      .from(academicYears)
+      .where(eq(academicYears.id, academicYearId))
+      .limit(1);
+    return row?.year ?? null;
+  }
+
+  private emptyToma(query: MasterBoardMatrixQueryDto): TomaResolution {
     return {
-      assessmentIds: Array.from(ids),
-      refs: Array.from(byInstrument.values()),
-      instrumentType,
+      assessmentIds: [],
+      refs: [],
+      label: '',
+      academicYearId: query.academicYearId ?? null,
+      instrumentType: null,
+      applicationPeriod: query.applicationPeriod ?? null,
+      processId: query.processId ?? null,
+      processKind: null,
+      redirectProcessId: null,
     };
   }
 
-  private async resolveTomaThresholds(tx: Database, assessmentIds: string[]) {
-    const [row] = await tx
-      .select({ config: gradingScales.config })
-      .from(assessments)
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .innerJoin(gradingScales, eq(gradingScales.id, instruments.gradingScaleId))
-      .where(inArray(assessments.id, assessmentIds))
-      .orderBy(asc(instruments.createdAt))
-      .limit(1);
-    return resolveThresholds(row?.config ?? null);
+  private toResolvedTake(toma: TomaResolution): MasterBoardMatrix['take'] {
+    return {
+      label: toma.label,
+      processId: toma.processId,
+      processKind: toma.processKind,
+      academicYearId: toma.academicYearId,
+      instrumentType: toma.instrumentType,
+      applicationPeriod: toma.applicationPeriod,
+      assessmentIds: toma.assessmentIds,
+    };
   }
 
-  private async loadMatrixRows(
-    tx: Database,
-    assessmentIds: string[],
-    scopedClassGroupIds: string[] | null,
-    query: MasterBoardMatrixQueryDto,
-  ): Promise<MatrixRow[]> {
-    const conditions: SQL[] = [
-      inArray(assessments.id, assessmentIds),
-      sql`${instruments.subjectId} is not null`,
-    ];
-    if (scopedClassGroupIds !== null) {
-      conditions.push(inArray(assessmentItemStats.classGroupId, scopedClassGroupIds));
-    }
-    if (query.gradeId?.length) conditions.push(inArray(classGroups.gradeId, query.gradeId));
-    if (query.subjectId?.length) conditions.push(inArray(instruments.subjectId, query.subjectId));
-
-    return tx
-      .select({
-        gradeId: classGroups.gradeId,
-        gradeName: grades.name,
-        gradeOrder: grades.order,
-        classGroupId: assessmentItemStats.classGroupId,
-        classGroupName: classGroups.name,
-        subjectId: subjects.id,
-        subjectName: subjects.name,
-        subjectShortName: subjects.shortName,
-        scoreSum: sql<string | null>`sum(${assessmentItemStats.scoreSum}::numeric)`,
-        maxSum: sql<string | null>`sum(${assessmentItemStats.maxSum}::numeric)`,
-        studentsAssessed: sql<number>`max(${assessmentItemStats.studentCount})::int`,
-        assessmentIds: sql<string[]>`array_agg(distinct ${assessments.id})`,
-      })
-      .from(assessmentItemStats)
-      .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
-      .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .innerJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .innerJoin(classGroups, eq(classGroups.id, assessmentItemStats.classGroupId))
-      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(and(...conditions))
-      .groupBy(
-        classGroups.gradeId,
-        grades.name,
-        grades.order,
-        assessmentItemStats.classGroupId,
-        classGroups.name,
-        subjects.id,
-        subjects.name,
-        subjects.shortName,
-      );
+  private emptyMatrix(
+    toma: TomaResolution,
+    primaryMetricKey: MasterBoardMatrix['primaryMetricKey'],
+  ): MasterBoardMatrix {
+    return {
+      take: this.toResolvedTake(toma),
+      primaryMetricKey,
+      availableMetrics: availableMetrics(),
+      subjects: [],
+      grades: [],
+      comparability: buildComparabilityMeta([]),
+      redirectProcessId: toma.redirectProcessId,
+    };
   }
 
   private async loadCourseSubjectStats(tx: Database, orgId: string, classGroupIds: string[]) {
@@ -562,19 +750,14 @@ export class MasterBoardService {
   private assembleMatrix(
     rows: MatrixRow[],
     teacherByCell: Map<string, MasterBoardTeacherRef>,
-    context: MetricContext,
+    context: CellContext,
   ): { subjects: MasterBoardSubject[]; grades: MasterBoardGrade[] } {
-    const subjectMap = new Map<string, MasterBoardSubject>();
+    const subjectMap = new Map<string, SubjectAccumulator>();
     const gradeMap = new Map<string, GradeAccumulator>();
 
     for (const row of rows) {
-      if (!subjectMap.has(row.subjectId)) {
-        subjectMap.set(row.subjectId, {
-          subjectId: row.subjectId,
-          name: row.subjectName,
-          shortName: row.subjectShortName,
-        });
-      }
+      const testKey = row.trackId ? `track:${row.trackId}` : `subject:${row.subjectId}`;
+      this.registerTest(subjectMap, row, testKey);
 
       const aggregate: CellAggregate = {
         scoreSum: row.scoreSum === null ? 0 : Number(row.scoreSum),
@@ -589,7 +772,7 @@ export class MasterBoardService {
           name: row.gradeName,
           order: row.gradeOrder,
           courses: new Map(),
-          cellsBySubject: new Map(),
+          cells: new Map(),
         };
         gradeMap.set(row.gradeId, grade);
       }
@@ -599,22 +782,21 @@ export class MasterBoardService {
         course = { classGroupId: row.classGroupId, name: row.classGroupName, cells: new Map() };
         grade.courses.set(row.classGroupId, course);
       }
-      course.cells.set(row.subjectId, {
-        aggregate,
-        assessmentIds: row.assessmentIds ?? [],
-      });
 
-      let gradeCell = grade.cellsBySubject.get(row.subjectId);
-      if (!gradeCell) {
-        gradeCell = emptyCellAggregate();
-        grade.cellsBySubject.set(row.subjectId, gradeCell);
-      }
-      addToCellAggregate(gradeCell, aggregate);
+      this.accumulateCell(course.cells, testKey, aggregate, row);
+      this.accumulateCell(grade.cells, testKey, aggregate, row);
     }
 
-    const subjectList = Array.from(subjectMap.values()).sort((a, b) =>
-      a.name.localeCompare(b.name, 'es'),
-    );
+    const subjectList: MasterBoardSubject[] = Array.from(subjectMap.values())
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+      .map((subject) => ({
+        subjectId: subject.subjectId,
+        name: subject.name,
+        shortName: subject.shortName,
+        tests: Array.from(subject.tests.values()).sort(
+          (a, b) => a.order - b.order || a.name.localeCompare(b.name, 'es'),
+        ),
+      }));
 
     const gradeList = Array.from(gradeMap.values())
       .sort((a, b) => a.order - b.order)
@@ -623,65 +805,129 @@ export class MasterBoardService {
     return { subjects: subjectList, grades: gradeList };
   }
 
+  private registerTest(
+    subjectMap: Map<string, SubjectAccumulator>,
+    row: MatrixRow,
+    testKey: string,
+  ): void {
+    let subject = subjectMap.get(row.subjectId);
+    if (!subject) {
+      subject = {
+        subjectId: row.subjectId,
+        name: row.subjectName,
+        shortName: row.subjectShortName,
+        tests: new Map(),
+      };
+      subjectMap.set(row.subjectId, subject);
+    }
+
+    const source: MasterBoardTestSource = row.fromElectiveInstrument
+      ? 'section'
+      : row.trackId
+        ? 'instrument'
+        : 'subject';
+    const existing = subject.tests.get(testKey);
+    if (existing) {
+      if (source === 'section') existing.source = 'section';
+      return;
+    }
+    subject.tests.set(testKey, {
+      testKey,
+      trackId: row.trackId,
+      source,
+      name: row.trackId ? (row.trackName ?? row.subjectName) : row.subjectName,
+      shortName: row.trackId ? (row.trackShortName ?? row.subjectShortName) : row.subjectShortName,
+      order: row.trackId ? (row.trackOrder ?? 0) : 0,
+      hasLevels: false,
+      mixed: false,
+    });
+  }
+
+  private accumulateCell(
+    cells: Map<string, CellAccumulator>,
+    testKey: string,
+    aggregate: CellAggregate,
+    row: MatrixRow,
+  ): void {
+    let cell = cells.get(testKey);
+    if (!cell) {
+      cell = {
+        aggregate: emptyCellAggregate(),
+        instrumentIds: new Set(),
+        assessmentIds: new Set(),
+      };
+      cells.set(testKey, cell);
+    }
+    addToCellAggregate(cell.aggregate, aggregate);
+    for (const id of row.instrumentIds ?? []) cell.instrumentIds.add(id);
+    for (const id of row.assessmentIds ?? []) cell.assessmentIds.add(id);
+  }
+
   private toGrade(
     grade: GradeAccumulator,
     subjectList: MasterBoardSubject[],
     teacherByCell: Map<string, MasterBoardTeacherRef>,
-    context: MetricContext,
+    context: CellContext,
   ): MasterBoardGrade {
-    const cells: MasterBoardCell[] = subjectList.map((subject) => {
-      const aggregate = grade.cellsBySubject.get(subject.subjectId) ?? emptyCellAggregate();
-      return {
-        subjectId: subject.subjectId,
-        studentsAssessed: aggregate.studentsAssessed,
-        metrics: computeMetrics(aggregate, context),
-      };
-    });
+    const cells: MasterBoardCell[] = [];
+    for (const subject of subjectList) {
+      for (const test of subject.tests) {
+        const view = this.buildCellView(grade.cells.get(test.testKey), test, context);
+        if (view.hasLevels) test.hasLevels = true;
+        if (view.mixed) test.mixed = true;
+        cells.push({ subjectId: subject.subjectId, testKey: test.testKey, ...view });
+      }
+    }
 
     const courses = Array.from(grade.courses.values())
       .sort((a, b) => a.name.localeCompare(b.name, 'es'))
-      .map((course) => ({
-        classGroupId: course.classGroupId,
-        name: course.name,
-        cells: subjectList.map((subject): MasterBoardCourseCell => {
-          const cell = course.cells.get(subject.subjectId);
-          const aggregate = cell?.aggregate ?? emptyCellAggregate();
-          return {
-            subjectId: subject.subjectId,
-            studentsAssessed: aggregate.studentsAssessed,
-            metrics: computeMetrics(aggregate, context),
-            teacher: teacherByCell.get(`${course.classGroupId}:${subject.subjectId}`) ?? null,
-            assessmentIds: cell?.assessmentIds ?? [],
-          };
-        }),
-      }));
+      .map((course) => {
+        const courseCells: MasterBoardCourseCell[] = [];
+        for (const subject of subjectList) {
+          for (const test of subject.tests) {
+            const cell = course.cells.get(test.testKey);
+            courseCells.push({
+              subjectId: subject.subjectId,
+              testKey: test.testKey,
+              ...this.buildCellView(cell, test, context),
+              teacher: teacherByCell.get(`${course.classGroupId}:${subject.subjectId}`) ?? null,
+              assessmentIds: cell ? Array.from(cell.assessmentIds) : [],
+            });
+          }
+        }
+        return { classGroupId: course.classGroupId, name: course.name, cells: courseCells };
+      });
 
-    return {
-      gradeId: grade.gradeId,
-      name: grade.name,
-      order: grade.order,
-      cells,
-      courses,
-    };
+    return { gradeId: grade.gradeId, name: grade.name, order: grade.order, cells, courses };
   }
 
-  private async resolveTakeLabel(
-    tx: Database,
-    toma: TomaResolution,
-    query: MasterBoardMatrixQueryDto,
-  ): Promise<string> {
-    if (query.assessmentId?.length) return 'Selección personalizada';
-    if (!query.academicYearId || !toma.instrumentType) return '';
-    const [row] = await tx
-      .select({ year: academicYears.year })
-      .from(academicYears)
-      .where(eq(academicYears.id, query.academicYearId))
-      .limit(1);
-    return this.buildTakeLabel(
-      toma.instrumentType,
-      query.applicationPeriod ?? null,
-      row?.year ?? null,
-    );
+  private buildCellView(
+    cell: CellAccumulator | undefined,
+    test: MasterBoardTest,
+    context: CellContext,
+  ): CellView {
+    const aggregate = cell?.aggregate ?? emptyCellAggregate();
+    const instrumentIds = cell ? Array.from(cell.instrumentIds) : [];
+    const refs: ComparabilityInstrumentRef[] = [];
+    for (const id of instrumentIds) {
+      const ref = context.refsByInstrument.get(id);
+      if (ref) refs.push(ref);
+    }
+    const singleInstrumentId = instrumentIds.length === 1 ? instrumentIds[0] : undefined;
+    const bands =
+      test.source !== 'section' && singleInstrumentId
+        ? (context.bandsByInstrument.get(singleInstrumentId)?.bands ?? [])
+        : [];
+    const hasLevels = bands.length > 0;
+    const metrics: MetricValue[] = computeMetrics(aggregate, { bands: hasLevels ? bands : null });
+
+    return {
+      studentsAssessed: aggregate.studentsAssessed,
+      metrics,
+      mixed: test.source === 'subject' && instrumentIds.length > 1,
+      hasLevels,
+      comparability: buildComparabilityMeta(refs, cell?.assessmentIds.size),
+    };
   }
 
   private buildTakeLabel(
@@ -693,10 +939,5 @@ export class MasterBoardService {
     if (applicationPeriod) parts.push(INSTRUMENT_APPLICATION_PERIOD_LABELS[applicationPeriod]);
     if (year !== null) parts.push(String(year));
     return parts.join(' ');
-  }
-
-  private periodOrder(period: InstrumentApplicationPeriod | null): number {
-    if (period === null) return INSTRUMENT_APPLICATION_PERIODS.length;
-    return INSTRUMENT_APPLICATION_PERIODS.indexOf(period);
   }
 }

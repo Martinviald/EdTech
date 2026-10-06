@@ -46,6 +46,7 @@ type FamilyRow = {
   instrumentName: string;
   year: number | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
+  trackId: string | null;
   administeredAt: Date | null;
 };
 
@@ -54,6 +55,7 @@ type RawPoint = {
   label: string;
   year: number | null;
   applicationPeriod: InstrumentApplicationPeriod | null;
+  trackId: string | null;
   instrumentId: string;
   instrumentName: string;
   assessmentIds: string[];
@@ -259,6 +261,7 @@ export class ComparableTrajectoryService {
         instrumentName: instruments.name,
         year: instruments.year,
         applicationPeriod: instruments.applicationPeriod,
+        trackId: instruments.trackId,
         administeredAt: assessments.administeredAt,
       })
       .from(assessments)
@@ -385,6 +388,7 @@ export class ComparableTrajectoryService {
       label: this.periodLabelOf(first.applicationPeriod),
       year: first.year,
       applicationPeriod: first.applicationPeriod,
+      trackId: first.trackId,
       instrumentId: first.instrumentId,
       instrumentName: first.instrumentName,
       assessmentIds,
@@ -476,6 +480,7 @@ export class ComparableTrajectoryService {
       gradeId: query.gradeId,
       applicationPeriod: point.applicationPeriod,
       year: point.year,
+      trackId: point.trackId,
     };
   }
 

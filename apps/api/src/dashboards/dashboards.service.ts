@@ -1698,6 +1698,7 @@ export class DashboardsService {
         instrumentGradeId: instruments.gradeId,
         instrumentApplicationPeriod: instruments.applicationPeriod,
         instrumentYear: instruments.year,
+        instrumentTrackId: instruments.trackId,
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
@@ -1715,6 +1716,7 @@ export class DashboardsService {
         gradeId: row.instrumentGradeId,
         applicationPeriod: row.instrumentApplicationPeriod,
         year: row.instrumentYear,
+        trackId: row.instrumentTrackId,
       });
     }
     return { ids: Array.from(ids), refs: Array.from(byInstrument.values()) };

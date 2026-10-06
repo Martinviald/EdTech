@@ -11,6 +11,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 import { MasterBoardService } from './master-board.service';
 
 const teacherIdSchema = z.string().uuid();
@@ -23,13 +24,19 @@ export class MasterBoardController {
   @Get('takes')
   @Roles(...MASTER_BOARD_VIEWER_ROLES)
   getTakes(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
-    return this.service.getTakes(user, masterBoardTakesQuerySchema.parse(query ?? {}));
+    return this.service.getTakes(
+      user,
+      parseDtoOrBadRequest(masterBoardTakesQuerySchema, query ?? {}),
+    );
   }
 
   @Get('matrix')
   @Roles(...MASTER_BOARD_VIEWER_ROLES)
   getMatrix(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
-    return this.service.getMatrix(user, masterBoardMatrixQuerySchema.parse(query ?? {}));
+    return this.service.getMatrix(
+      user,
+      parseDtoOrBadRequest(masterBoardMatrixQuerySchema, query ?? {}),
+    );
   }
 
   @Get('teachers/:userId/performance')
@@ -41,8 +48,8 @@ export class MasterBoardController {
   ) {
     return this.service.getTeacherPerformance(
       user,
-      teacherIdSchema.parse(userId),
-      teacherPerformanceQuerySchema.parse(query ?? {}),
+      parseDtoOrBadRequest(teacherIdSchema, userId),
+      parseDtoOrBadRequest(teacherPerformanceQuerySchema, query ?? {}),
     );
   }
 }
