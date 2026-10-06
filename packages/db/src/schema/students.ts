@@ -1,4 +1,14 @@
-import { boolean, date, jsonb, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  date,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { enrollmentStatusEnum, genderEnum } from './enums';
 import { organizations, academicYears } from './organizations';
@@ -49,7 +59,13 @@ export const studentEnrollments = pgTable(
     enrolledAt: date('enrolled_at').defaultNow().notNull(),
     withdrawnAt: date('withdrawn_at'),
   },
-  (table) => [unique().on(table.studentId, table.academicYearId)],
+  (table) => [
+    unique().on(table.studentId, table.academicYearId),
+    // FK sin índice: el único índice que la cubría empieza por `student_id`, así que
+    // "las matrículas de este curso" —el acceso más frecuente sobre esta tabla— hacía
+    // seq scan. También encarece los chequeos de FK contra class_groups.
+    index('idx_student_enrollments_class_group').on(table.classGroupId),
+  ],
 );
 
 export const studentsRelations = relations(students, ({ one, many }) => ({

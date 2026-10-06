@@ -42,30 +42,42 @@ export const gradingScales = pgTable('grading_scales', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-export const instruments = pgTable('instruments', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orgId: uuid('org_id').references(() => organizations.id),
-  taxonomyId: uuid('taxonomy_id').references(() => taxonomies.id),
-  name: text('name').notNull(),
-  shortName: text('short_name'),
-  type: instrumentTypeEnum('type').notNull(),
-  subjectId: uuid('subject_id').references(() => subjects.id),
-  gradeId: uuid('grade_id').references(() => grades.id),
-  year: integer('year'),
-  // Momento de aplicación dentro del año (DIA: diagnóstico/intermedio/cierre). Es
-  // columna tipada y no JSONB porque se filtra en SQL (ver CLAUDE.md §5.4). Null =
-  // el instrumento no declara un momento de aplicación.
-  applicationPeriod: instrumentApplicationPeriodEnum('application_period'),
-  version: text('version'),
-  isOfficial: boolean('is_official').default(false).notNull(),
-  status: instrumentStatusEnum('status').default('draft').notNull(),
-  gradingScaleId: uuid('grading_scale_id').references(() => gradingScales.id),
-  config: jsonb('config').$type<Record<string, unknown>>().default({}),
-  createdById: uuid('created_by_id').references(() => users.id),
-  deletedAt: timestamp('deleted_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const instruments = pgTable(
+  'instruments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id').references(() => organizations.id),
+    taxonomyId: uuid('taxonomy_id').references(() => taxonomies.id),
+    name: text('name').notNull(),
+    shortName: text('short_name'),
+    type: instrumentTypeEnum('type').notNull(),
+    subjectId: uuid('subject_id').references(() => subjects.id),
+    gradeId: uuid('grade_id').references(() => grades.id),
+    year: integer('year'),
+    // Momento de aplicación dentro del año (DIA: diagnóstico/intermedio/cierre). Es
+    // columna tipada y no JSONB porque se filtra en SQL (ver CLAUDE.md §5.4). Null =
+    // el instrumento no declara un momento de aplicación.
+    applicationPeriod: instrumentApplicationPeriodEnum('application_period'),
+    version: text('version'),
+    isOfficial: boolean('is_official').default(false).notNull(),
+    status: instrumentStatusEnum('status').default('draft').notNull(),
+    gradingScaleId: uuid('grading_scale_id').references(() => gradingScales.id),
+    config: jsonb('config').$type<Record<string, unknown>>().default({}),
+    createdById: uuid('created_by_id').references(() => users.id),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    // Casi toda query de instrumentos filtra por el par (pertenencia, no borrado):
+    // `deleted_at IS NULL AND (org_id IS NULL OR org_id = :orgId)`, donde org_id NULL es
+    // el catálogo oficial compartido. El btree indexa los NULL, así que sirve las dos
+    // ramas del OR.
+    index('instruments_org_deleted_idx').on(table.orgId, table.deletedAt),
+    // FK sin índice, usada en joins contra subjects y en los filtros por asignatura.
+    index('instruments_subject_idx').on(table.subjectId),
+  ],
+);
 
 export const instrumentSections = pgTable(
   'instrument_sections',

@@ -271,8 +271,15 @@
     {
       "idx": 38,
       "version": "7",
-      "when": 1791252616526,
-      "tag": "0038_certain_valkyrie",
+      "when": 1791256023148,
+      "tag": "0038_handy_pretty_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1791258426057,
+      "tag": "0039_green_king_cobra",
       "breakpoints": true
     }
   ]
