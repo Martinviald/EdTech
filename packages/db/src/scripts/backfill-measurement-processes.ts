@@ -4,17 +4,17 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
-  INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  INSTRUMENT_TYPE_LABELS,
   PROCESS_KIND_BY_INSTRUMENT_TYPE,
   expandExpectedCells,
   expectedCellKey,
+  groupProcessCandidates,
   slugify,
   uniqueSlug,
   type ExpectedScope,
   type ExpectedScopeCell,
   type InstrumentApplicationPeriod,
   type InstrumentType,
+  type ProcessInvariantViolation,
   type ProcessKind,
 } from '@soe/types';
 import { createDbClient } from '../client';
@@ -23,6 +23,7 @@ import { classGroups } from '../schema/academic';
 import { instruments } from '../schema/instruments';
 import { assessments, assessmentCourseAssignments } from '../schema/assessments';
 import { measurementProcesses } from '../schema/measurement-processes';
+import { buildPeriodProcessName } from '../lib/config-process-grouping';
 
 type ScriptOptions = {
   dryRun: boolean;
@@ -33,11 +34,14 @@ type AssessmentRow = {
   assessmentId: string;
   orgId: string;
   administeredAt: Date | null;
+  instrumentId: string;
   instrumentType: InstrumentType;
   applicationPeriod: InstrumentApplicationPeriod | null;
   taxonomyId: string | null;
   subjectId: string | null;
+  trackId: string | null;
   classGroupId: string;
+  gradeId: string;
   academicYearId: string;
   year: number;
 };
@@ -60,72 +64,37 @@ type ProcessGroup = {
 function parseArgs(argv: readonly string[]): ScriptOptions {
   const orgFlagIndex = argv.indexOf('--org');
   return {
-    dryRun: argv.includes('--dry-run'),
+    dryRun: !argv.includes('--commit'),
     orgId: orgFlagIndex >= 0 ? (argv[orgFlagIndex + 1] ?? null) : null,
   };
 }
 
-function groupKey(row: AssessmentRow): string {
-  return [
-    row.orgId,
-    row.academicYearId,
-    row.instrumentType,
-    row.applicationPeriod ?? 'sin-momento',
-  ].join('|');
-}
-
 function processName(group: ProcessGroup): string {
-  const typeLabel = INSTRUMENT_TYPE_LABELS[group.instrumentType] ?? group.instrumentType;
-  const periodLabel = group.period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[group.period] : null;
-  return [typeLabel, periodLabel, group.year].filter(Boolean).join(' ');
+  return buildPeriodProcessName(group.instrumentType, group.period, group.year);
 }
 
 function toDateOnly(value: Date | null): string | null {
   return value ? value.toISOString().slice(0, 10) : null;
 }
 
-function buildGroups(rows: readonly AssessmentRow[]): {
-  groups: ProcessGroup[];
-  multiYearAssessmentIds: string[];
-} {
-  const yearsByAssessment = new Map<string, Set<string>>();
+function toProcessGroup(key: string, rows: readonly AssessmentRow[]): ProcessGroup {
+  const first = rows[0];
+  if (!first) throw new Error(`Grupo de proceso vacío: ${key}`);
+  const group: ProcessGroup = {
+    key,
+    orgId: first.orgId,
+    academicYearId: first.academicYearId,
+    year: first.year,
+    instrumentType: first.instrumentType,
+    period: first.applicationPeriod,
+    assessmentIds: new Set(),
+    classGroupIds: new Set(),
+    subjectIds: new Set(),
+    observedCellKeys: new Set(),
+    taxonomyIds: new Set(),
+    administeredDates: [],
+  };
   for (const row of rows) {
-    let years = yearsByAssessment.get(row.assessmentId);
-    if (!years) {
-      years = new Set<string>();
-      yearsByAssessment.set(row.assessmentId, years);
-    }
-    years.add(row.academicYearId);
-  }
-
-  const multiYearAssessmentIds: string[] = [];
-  for (const [assessmentId, years] of yearsByAssessment) {
-    if (years.size > 1) multiYearAssessmentIds.push(assessmentId);
-  }
-  const excluded = new Set(multiYearAssessmentIds);
-
-  const groups = new Map<string, ProcessGroup>();
-  for (const row of rows) {
-    if (excluded.has(row.assessmentId)) continue;
-    const key = groupKey(row);
-    let group = groups.get(key);
-    if (!group) {
-      group = {
-        key,
-        orgId: row.orgId,
-        academicYearId: row.academicYearId,
-        year: row.year,
-        instrumentType: row.instrumentType,
-        period: row.applicationPeriod,
-        assessmentIds: new Set(),
-        classGroupIds: new Set(),
-        subjectIds: new Set(),
-        observedCellKeys: new Set(),
-        taxonomyIds: new Set(),
-        administeredDates: [],
-      };
-      groups.set(key, group);
-    }
     group.assessmentIds.add(row.assessmentId);
     group.classGroupIds.add(row.classGroupId);
     if (row.subjectId) {
@@ -137,8 +106,23 @@ function buildGroups(rows: readonly AssessmentRow[]): {
     if (row.taxonomyId) group.taxonomyIds.add(row.taxonomyId);
     if (row.administeredAt) group.administeredDates.push(row.administeredAt);
   }
+  return group;
+}
 
-  return { groups: Array.from(groups.values()), multiYearAssessmentIds };
+function buildGroups(rows: readonly AssessmentRow[]): {
+  groups: ProcessGroup[];
+  ambiguous: (ProcessGroup & { violations: ProcessInvariantViolation[] })[];
+  multiYearAssessmentIds: string[];
+} {
+  const grouping = groupProcessCandidates(rows);
+  return {
+    groups: grouping.groups.map((g) => toProcessGroup(g.key, g.candidates)),
+    ambiguous: grouping.ambiguous.map((g) => ({
+      ...toProcessGroup(g.key, g.candidates),
+      violations: g.violations,
+    })),
+    multiYearAssessmentIds: grouping.multiYearAssessmentIds,
+  };
 }
 
 function buildExcludedCells(group: ProcessGroup): ExpectedScopeCell[] {
@@ -284,6 +268,12 @@ async function main(): Promise<void> {
   if (!databaseUrl) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
   const db = createDbClient(databaseUrl);
 
+  console.log(
+    dryRun
+      ? 'Modo dry-run: no se escribe nada. Usa --commit para crear y vincular procesos.'
+      : 'Modo --commit: se crean procesos y se vinculan evaluaciones.',
+  );
+
   await repairDerivedScopes(db, orgId, dryRun);
 
   const baseConditions = [isNull(assessments.processId), isNull(instruments.deletedAt)];
@@ -294,11 +284,14 @@ async function main(): Promise<void> {
       assessmentId: assessments.id,
       orgId: assessments.orgId,
       administeredAt: assessments.administeredAt,
+      instrumentId: instruments.id,
       instrumentType: instruments.type,
       applicationPeriod: instruments.applicationPeriod,
       taxonomyId: instruments.taxonomyId,
       subjectId: instruments.subjectId,
+      trackId: instruments.trackId,
       classGroupId: classGroups.id,
+      gradeId: classGroups.gradeId,
       academicYearId: classGroups.academicYearId,
       year: academicYears.year,
     })
@@ -324,10 +317,12 @@ async function main(): Promise<void> {
     process.exit(0);
   }
 
-  const { groups, multiYearAssessmentIds } = buildGroups(rows);
+  const { groups, ambiguous, multiYearAssessmentIds } = buildGroups(rows);
   const assignable = new Set(groups.flatMap((g) => Array.from(g.assessmentIds)));
+  const ambiguousIds = new Set(ambiguous.flatMap((g) => Array.from(g.assessmentIds)));
+  const multiYear = new Set(multiYearAssessmentIds);
   const withoutCourse = allPending.filter(
-    (a) => !assignable.has(a.id) && !multiYearAssessmentIds.includes(a.id),
+    (a) => !assignable.has(a.id) && !ambiguousIds.has(a.id) && !multiYear.has(a.id),
   );
 
   const existing = await db
@@ -336,7 +331,8 @@ async function main(): Promise<void> {
       orgId: measurementProcesses.orgId,
       slug: measurementProcesses.slug,
     })
-    .from(measurementProcesses);
+    .from(measurementProcesses)
+    .where(isNull(measurementProcesses.deletedAt));
   const existingBySlug = new Map(existing.map((p) => [`${p.orgId}|${p.slug}`, p.id]));
   const takenSlugs = new Set(existingBySlug.keys());
 
@@ -431,6 +427,27 @@ async function main(): Promise<void> {
       (reusedCount > 0 ? `, ${reusedCount} reutilizado(s) por slug existente` : '') +
       `; ${dryRun ? 'se vincularían' : 'vinculadas'} ${linkedCount} evaluación(es).`,
   );
+
+  if (ambiguous.length > 0) {
+    console.log(
+      `\n⚠️ ${ambiguousIds.size} evaluación(es) en celdas en conflicto quedaron SIN proceso:`,
+    );
+    console.log(
+      '   la celda (nivel, prueba) tiene más de un instrumento: hubo varias aplicaciones o falta la línea.',
+    );
+    console.log(
+      '   El resto del período sí se asignó; solo esas celdas quedan como toma "sin proceso".',
+    );
+    for (const group of ambiguous) {
+      console.log(`   · ${processName(group)} — ${group.assessmentIds.size} evaluación(es)`);
+      for (const violation of group.violations) {
+        console.log(
+          `     - nivel ${violation.gradeId}, prueba ${violation.testKey ?? '(sin asignatura)'}: ` +
+            `${violation.instrumentIds.length} instrumentos, ${violation.assessmentIds.length} evaluación(es)`,
+        );
+      }
+    }
+  }
 
   if (multiYearAssessmentIds.length > 0) {
     console.log(

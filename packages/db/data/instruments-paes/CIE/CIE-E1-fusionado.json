@@ -1,7 +1,7 @@
 {
  "instrument": {
-  "name": "PAES CIE mención Biología — Ensayo 1 (Tanda 1) · IV° Medio 2026",
-  "subject": "Ciencias — mención Biología",
+  "name": "PAES CIE — Ensayo 1 (Tanda 1) · IV° Medio 2026",
+  "subject": "Ciencias",
   "subjectCode": "SCI",
   "grade": "IV° Medio",
   "gradeCode": "4TH_MEDIO",
@@ -9,10 +9,11 @@
   "applicationPeriod": null,
   "type": "paes",
   "isOfficial": false,
+  "track": "CIE-COMUN",
   "paes": {
    "prueba": "CIE",
    "tanda": "Tanda 1",
-   "mencion": "Biología",
+   "mencion": null,
    "appliedOn": "2026-03-25",
    "basadoEn": "DEMRE PAES Invierno ADM 2025"
   }
@@ -20,8 +21,9 @@
  "sections": [
   {
    "order": 1,
-   "name": "Prueba completa",
+   "name": "Módulo común",
    "type": "multiple_choice",
+   "role": "core",
    "instructions": null,
    "passage": null,
    "items": [
@@ -95,6 +97,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas gráficas en grilla; las figuras no están en la capa de texto",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/21.png",
      "alternatives": [
       {
        "key": "A",
@@ -1448,6 +1451,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Alternativas solo gráficas (A-E): modelos moleculares de esferas con leyenda gris = Carbono, negro = Oxígeno, blanco = Hidrógeno",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/45.png",
      "alternatives": [
       {
        "key": "A",
@@ -1790,7 +1794,20 @@
        "isCorrect": true
       }
      ]
-    },
+    }
+   ]
+  },
+  {
+   "order": 2,
+   "name": "Mención Biología",
+   "type": "multiple_choice",
+   "role": "elective",
+   "electiveGroup": "mencion-ciencias",
+   "electiveKey": "BIO",
+   "track": "BIO",
+   "instructions": null,
+   "passage": null,
+   "items": [
     {
      "position": 55,
      "type": "multiple_choice",
@@ -2608,20 +2625,1803 @@
      ]
     }
    ]
+  },
+  {
+   "order": 3,
+   "name": "Mención Física",
+   "type": "multiple_choice",
+   "role": "elective",
+   "electiveGroup": "mencion-ciencias",
+   "electiveKey": "FIS",
+   "track": "FIS",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 81,
+     "printedNumber": "55",
+     "type": "multiple_choice",
+     "stem": "Una persona lleva a cabo un procedimiento en el que dispone dos espejos planos, M y N, de manera perpendicular entre sí. Luego, sobre el espejo M hace incidir dos rayos del mismo color, P y S. El primero formando un ángulo de 30° con respecto al espejo M y el segundo formando un ángulo de 20° con respecto al rayo P, tal como se representa en la siguiente figura: Estos rayos se reflejan y posteriormente inciden en el espejo N. Al respecto, ¿cuál de las siguientes opciones es una predicción adecuada al procedimiento llevado a cabo por la persona?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/55.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Para ambos rayos, el punto de incidencia en N será el mismo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El rayo P recorrerá una distancia menor que el rayo S en su camino a N.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "El rayo P tendrá una frecuencia menor que el rayo S al momento de incidir en N.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Para cada rayo, el ángulo de incidencia en N será igual al ángulo de incidencia en M.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 82,
+     "printedNumber": "56",
+     "type": "multiple_choice",
+     "stem": "Una persona lee en un libro que el índice de refracción de un material no es constante, sino que depende de la frecuencia del rayo de luz incidente. ¿Cuál de las siguientes acciones experimentales provee evidencia de este hecho?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Dirigir el haz de un puntero láser desde el agua hacia el aire.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Dirigir un haz de luz blanca hacia un prisma.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Observar espejismos en la calle en un día caluroso.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Corroborar que distintas lentes tengan distintas distancias focales.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 83,
+     "printedNumber": "57",
+     "type": "multiple_choice",
+     "stem": "Una onda electromagnética de frecuencia f y energía E que se transmite por el aire, incide sobre un cubo de material traslúcido, de manera que la onda se refleja y refracta. Al respecto, ¿cuál de las siguientes tablas contiene datos coherentes con la situación presentada?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Frecuencia (Hz) Energía (J) Rayo reflejado f E Rayo refractado f E",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Frecuencia (Hz) Energía (J) 1 1 Rayo reflejado f E 2 4 1 3 Rayo refractado f E 2 4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Frecuencia (Hz) Energía (J) 1 Rayo reflejado f E 4 3 Rayo refractado f E 4",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Frecuencia (Hz) Energía (J) 1 Rayo reflejado f E 2 1 Rayo refractado f E 2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 84,
+     "printedNumber": "58",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes, mientras juega en el patio de su escuela, trata de hacer la burbuja más grande posible usando una mezcla de agua y lavalozas que tienen en un recipiente. Al hacer esto, les llama la atención las diferencias en los patrones de colores de las distintas burbujas realizadas. ¿De qué depende la diferencia en los patrones de los colores de las burbujas observada por el grupo de estudiantes?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "De la cantidad de jabón que tenga la mezcla utilizada para hacerlas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "De la cantidad de agua que tenga la mezcla utilizada para hacerlas.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "De la temperatura ambiental en el patio de la escuela.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Del espesor de las burbujas.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 85,
+     "printedNumber": "59",
+     "type": "multiple_choice",
+     "stem": "Al encender un televisor antiguo que se encuentra dentro de una jaula metálica, una persona observa que no se puede sintonizar señal alguna. La persona investiga y deduce que la jaula metálica bloquea tanto la entrada como la salida de señales electromagnéticas desde y hacia su interior, siempre y cuando los espacios entre sus barrotes sean más pequeños que la longitud de onda de tales señales. Si la persona quisiera utilizar la misma jaula para bloquear las señales emitidas o recibidas por otro aparato de uso cotidiano, ¿con cuál de los siguientes aparatos lograría su objetivo?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un puntero láser",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un radio receptor",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un control remoto",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una estufa infrarroja",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 86,
+     "printedNumber": "60",
+     "type": "multiple_choice",
+     "stem": "Una persona observa cómo un haz de láser viajando por el agua se refleja en la superficie de separación con el aire en lugar de refractarse, por lo que se pregunta si esto sucede para cualquier otra dirección del haz de luz incidente. Al respecto, ¿qué debería realizar esta persona para investigar este fenómeno?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cambiar el agua por aceite conservando el ángulo de incidencia.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Verificar si el fenómeno ocurre modificando el ángulo de incidencia.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Verificar si este fenómeno se observa cuando el haz de luz viaja del aire al agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cambiar el punto de incidencia en la superficie de separación conservando el ángulo de incidencia.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 87,
+     "printedNumber": "61",
+     "type": "multiple_choice",
+     "stem": "Un vendedor coloca un espejo en su tienda de manera que, sin moverse de su silla, puede observar la tienda completamente en él. A partir de lo descrito, ¿cuál de las siguientes opciones señala las características de la imagen que el vendedor observa en el espejo?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La imagen es invertida, real y de menor tamaño.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La imagen es invertida, real y de mayor tamaño.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La imagen es derecha, virtual y de menor tamaño.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La imagen es derecha, virtual y de igual tamaño.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 88,
+     "printedNumber": "62",
+     "type": "multiple_choice",
+     "stem": "En las figuras se muestran dos espejos esféricos, en los cuales se señalan los vértices V, los focos F y los centros de curvatura C respectivos. Espejo cóncavo Espejo convexo V F C C F V Un objeto es visto por medio de uno de estos espejos. La imagen que se observa resulta ser virtual y de mayor tamaño que el objeto. Al respecto, es correcto afirmar que",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/62.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "el espejo es convexo y el objeto está entre el foco y el vértice.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "el espejo es convexo y el objeto está más alejado que el foco.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "el espejo es cóncavo y el objeto está entre el foco y el vértice.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "el espejo es cóncavo y el objeto está entre el foco y el centro de curvatura.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "el espejo es cóncavo y el objeto está más alejado del centro de curvatura. ",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 89,
+     "printedNumber": "63",
+     "type": "multiple_choice",
+     "stem": "Sobre un bloque actúa una fuerza horizontal F de magnitud F paralela a la superficie y una fuerza de roce de magnitud FR , cuando se encuentra unido a una esfera mediante una cuerda, como se representa en la siguiente figura: Considerando que g corresponde a la magnitud de la aceleración de gravedad y  que el peso de la esfera es mayor que F , ¿cuál de las siguientes expresiones corresponde a la máxima masa que puede tener la esfera para que el bloque esté en reposo? g",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/63.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "F FR",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "F FR g g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "F FR F FR",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "g",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 90,
+     "printedNumber": "64",
+     "type": "multiple_choice",
+     "stem": "En algunas situaciones físicas se considera que el roce con el aire es despreciable. ¿A qué componente de una investigación científica corresponde esta consideración?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A un problema",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A una teoría",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A una ley",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "A un modelo",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 91,
+     "printedNumber": "65",
+     "type": "multiple_choice",
+     "stem": "Cada una de las siguientes opciones representa a un bloque de masa M en reposo, en contacto con una superficie rugosa con coeficiente de roce estático menor que 1. La magnitud de la fuerza normal sobre el bloque es mayor que la magnitud de su peso en",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(figura E)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 92,
+     "printedNumber": "66",
+     "type": "multiple_choice",
+     "stem": "Un niño juega con un resorte y su automóvil de juguete favorito. Su juego consiste en comprimir horizontalmente el resorte, apoyado en una pared, con su automóvil, para luego liberarlo. Si la constante elástica del resorte es k y logra una compresión de 2L, ¿cuál es la magnitud de la fuerza que ejerce el resorte sobre el automóvil de juguete justo cuando este es liberado? L",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2k",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2kL Lk",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "k  2L",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 93,
+     "printedNumber": "67",
+     "type": "multiple_choice",
+     "stem": "Se diseña un experimento para investigar la flotabilidad de objetos con forma de cubo sumergidos en un fluido. Para ello, se sumergen tres objetos de igual volumen en un recipiente que contiene un líquido, quedando dos de ellos en el fondo del recipiente y otro flotando, tal como se representa en la siguiente figura: Respecto de los resultados de este experimento, ¿qué se puede concluir acerca de la presión que el agua ejerce sobre los objetos sumergidos?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/67.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La presión que ejerce el agua sobre cada uno de los objetos es la misma porque tienen igual volumen.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La presión que ejerce el agua sobre M1 es menor que la que ejerce sobre M2 y M3 porque se encuentra a menor profundidad.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La presión que ejerce el agua sobre cada uno de los objetos es la misma porque están sumergidos en un mismo líquido.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La presión que ejerce el agua sobre M1 es mayor que la que ejerce sobre M2 y M3 porque tiene todos sus lados en contacto con el agua.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 94,
+     "printedNumber": "68",
+     "type": "multiple_choice",
+     "stem": "Un cuerpo se suelta desde la superficie de un fluido, hundiéndose en él. Si la presión del aire sobre el fluido es P0 y los gráficos representan la presión en función de la profundidad h desde la superficie del fluido, ¿cuál de los siguientes gráficos representa mejor la presión que actúa sobre el cuerpo a medida que desciende por el fluido?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/68.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "E",
+       "text": "(figura E)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 95,
+     "printedNumber": "69",
+     "type": "multiple_choice",
+     "stem": "Un sistema aislado térmicamente está conformado por dos cuerpos R y S, de temperaturas iniciales –20 °C y 15 °C, respectivamente. Si los cuerpos alcanzan el equilibrio térmico intercambiando solamente calor entre ellos, ¿cuál de las siguientes afirmaciones es siempre correcta respecto de este proceso, basándose solamente en la información proporcionada?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El cuerpo S en algún momento tiene una temperatura de 0 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El cuerpo R en ningún momento tiene una temperatura de 0 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La temperatura de los cuerpos es negativa cuando alcanzan el equilibrio térmico.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El calor que ha cedido el cuerpo S es igual al calor absorbido por el cuerpo R cuando alcanzan el equilibrio térmico.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 96,
+     "printedNumber": "70",
+     "type": "multiple_choice",
+     "stem": "Se tiene agua en un recipiente aislado térmicamente (calorímetro), con aspas en su interior, las cuales se hacen girar muy rápido desde afuera y luego se detienen. ¿Qué ocurre con la temperatura del agua?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La temperatura aumenta y luego vuelve a su valor inicial.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La temperatura disminuye y luego vuelve a su valor inicial.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La temperatura aumenta y luego se mantiene constante.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La temperatura disminuye y luego se mantiene constante.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "La temperatura se mantiene constante durante todo el proceso.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 97,
+     "printedNumber": "71",
+     "type": "multiple_choice",
+     "stem": "Se tiene 1 kg de una sustancia que puede estar en fase sólida, líquida y gaseosa, a la que se le transfiere calor. El siguiente gráfico muestra la temperatura T de la sustancia en función del calor absorbido Q. T (°C) 200 100 0 –100 –200 0 100 200 300 400 500 600 700 Q (kcal) De acuerdo con la información del gráfico se concluye correctamente que",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/71.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "la sustancia se funde a –200 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "mientras la sustancia esté a –100 °C, la cantidad de sólido es la misma.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "la sustancia ebulle a 250 °C.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "la sustancia puede coexistir como líquido y sólido a –100 °C.",
+       "isCorrect": true
+      },
+      {
+       "key": "E",
+       "text": "la sustancia puede coexistir en estado sólido, líquido y gaseoso en todo el intervalo de –100 °C a 50 °C.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 98,
+     "printedNumber": "72",
+     "type": "multiple_choice",
+     "stem": "A la pregunta “¿por qué, en invierno, las superficies de asfalto en suspensión en los puentes tienden a tener más hielo que las superficies de asfalto sobre el terreno firme en ambos extremos del puente?”, se le da la siguiente respuesta: “la energía irradiada por el asfalto en tierra firme se renueva en parte por el calor conducido desde el terreno bajo el pavimento, que está más caliente. Pero en las superficies en suspensión de los puentes, no hay contacto térmico entre las superficies del asfalto y el suelo. Esta es la razón por la que en las superficies en suspensión de los puentes, el asfalto se enfría más que en tierra firme, y eso aumenta la probabilidad de formación de hielo”. Al respecto, ¿cuál de las siguientes opciones es una componente de la investigación que corresponde a la respuesta de la pregunta formulada?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Generalización de un resultado científico",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Predicción en base a un modelo teórico",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Verificación de una teoría científica",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Explicación con sustento teórico",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 99,
+     "printedNumber": "73",
+     "type": "multiple_choice",
+     "stem": "Cuando un objeto transfiere 6000 calorías al aire, disminuye su temperatura en 3 °C. Si el mismo objeto se vuelve a poner en contacto con el aire, y su temperatura es 15 °C, ¿qué temperatura alcanza después de transferir 4000 calorías?",
+     "correctKey": "E",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "2,0 °C",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "5,0 °C",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "10,5 °C",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "12,0 °C",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "13,0 °C",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 100,
+     "printedNumber": "74",
+     "type": "multiple_choice",
+     "stem": "Una científica se encuentra estudiando los climas de la Tierra en distintos periodos geológicos y para ello decide investigar los cambios en el clima de la Antártica. En una salida a terreno recolecta evidencias de la presencia de fósiles de plantas de clima cálido de la Era Mesozoica. ¿Cuál de las siguientes opciones es una explicación correcta para la presencia de estos fósiles?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El ser humano ha generado un cambio climático extremo, al punto de congelar terrenos que hace millones de años eran de clima cálido.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Los terrenos que ahora se encuentran a la latitud de la Antártica, hace millones de años se encontraban a latitudes de clima cálido.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Los dinosaurios vivieron en un clima cálido, y probablemente se extinguieron debido al congelamiento de sus terrenos.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las plantas de la Antártica han evolucionado con el cambio climático, pues hace millones de años eran aptas a climas cálidos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 101,
+     "printedNumber": "75",
+     "type": "multiple_choice",
+     "stem": "La resistencia eléctrica de un alambre metálico recto de sección transversal circular y uniforme, es directamente proporcional a la longitud del alambre e inversamente proporcional al área de su sección transversal. Si una persona necesita un alambre de cobre con la mayor resistencia eléctrica que este pueda disponer y para ello debe elegir entre alambres de dos longitudes diferentes y de dos diferentes radios de sección transversal, ¿cuál alambre debe elegir la persona para tener la mayor resistencia eléctrica posible?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El de mayor longitud con radio de sección transversal mayor",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El de menor longitud con radio de sección transversal mayor",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El de mayor longitud con radio de sección transversal menor",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El de menor longitud con radio de sección transversal menor",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 102,
+     "printedNumber": "76",
+     "type": "multiple_choice",
+     "stem": "En la figura siguiente se representan dos esferas metálicas en contacto, a las cuales se acercan dos barras cargadas eléctricamente, una con carga positiva y la otra con carga negativa, de forma que la esfera de la derecha adquiere una carga negativa y la esfera de la izquierda adquiere una carga positiva. Considerando la situación descrita, ¿cuál de las siguientes conclusiones es la que mejor se ajusta a lo observado?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e1-2026/item_figure/76.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La barra de la derecha debe tener carga positiva.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La barra de la izquierda debe tener carga positiva.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Las magnitudes de las cargas de ambas barras deben ser iguales.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las esferas se encuentran eléctricamente cargadas antes de acercar las barras.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 103,
+     "printedNumber": "77",
+     "type": "multiple_choice",
+     "stem": "Se tienen tres partículas cuyas cargas eléctricas tienen magnitudes q , q y 1 2 q3 , distintas de cero. Al respecto, ¿cuál de las siguientes opciones entrega información suficiente para determinar el signo de la carga eléctrica de cada partícula?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La fuerza eléctrica sobre q1 debido a q 2 , la separación entre las cargas q1 y q3 y la separación entre q1 y q 2 .",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La fuerza eléctrica sobre q1 debido a q 2 y la fuerza eléctrica sobre q1 debido a q3 .",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El signo de la carga de q1 , la fuerza eléctrica entre q1 y q3 y la separación entre ellas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El signo de la carga de q1 , la fuerza eléctrica sobre q1 debido a q 2 y la fuerza eléctrica sobre q1 debido a q3 .",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 104,
+     "printedNumber": "78",
+     "type": "multiple_choice",
+     "stem": "Una persona recoge los datos de algunas estufas eléctricas con el objetivo de ordenarlas de menor a mayor respecto del consumo de energía, considerando un uso promedio de 4 horas diarias. ¿Cuál de las siguientes tablas contiene la información que la persona debe utilizar para lograr su propósito?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tipo Dimensiones Estufa 1 Infrarroja 70 cm, 30 cm, 20 cm Estufa 2 Termoventilador 30 cm, 20 cm, 10 cm Estufa 3 Oleoeléctrica 50 cm, 40 cm, 20 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Potencia Voltaje Estufa 1 1800 W 220 V Estufa 2 2000 W 220 V Estufa 3 1200 W 220 V",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Voltaje Dimensiones Estufa 1 220 V 70 cm, 30 cm, 20 cm Estufa 2 220 V 30 cm, 20 cm, 10 cm Estufa 3 220 V 50 cm, 40 cm, 20 cm",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Tipo Voltaje Estufa 1 Infrarroja 220 V Estufa 2 Termoventilador 220 V Estufa 3 Oleoeléctrica 220 V",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 105,
+     "printedNumber": "79",
+     "type": "multiple_choice",
+     "stem": "A través de una resistencia R conectada a una diferencia de voltaje V circula una corriente de intensidad I. ¿Cuál de las siguientes expresiones corresponde a la potencia disipada por la resistencia?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "I·R",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "I2·R",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "I·R2",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "V2·R",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "V·R2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 106,
+     "printedNumber": "80",
+     "type": "multiple_choice",
+     "stem": "El motor eléctrico es un artefacto que está diseñado para transformar",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "energía eléctrica en energía mecánica.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "energía mecánica en energía eléctrica.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "energía eléctrica en calor.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "calor en energía eléctrica.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "energía cinética en energía eléctrica. IMPORTANTE ■ Este folleto está protegido bajo Registro de Propiedad Intelectual de la Universidad de Chile. ■ Está prohibida la reproducción, transmisión total o parcial de este folleto, por cualquier medio o método. ■ Es obligatorio devolver íntegramente este folleto antes de abandonar la sala. ■ Es obligatorio devolver la hoja de respuestas antes de abandonar la sala. Proceso de Admisión 2 0 2 5",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 4,
+   "name": "Mención Química",
+   "type": "multiple_choice",
+   "role": "elective",
+   "electiveGroup": "mencion-ciencias",
+   "electiveKey": "QUI",
+   "track": "QUI",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 107,
+     "printedNumber": "55",
+     "type": "multiple_choice",
+     "stem": "Al realizar un experimento simple, Antonia se percata que una de las sustancias con las que está trabajando corresponde a una sustancia pura, mientras que el resto de ellas son mezclas. Frente a esto, decide comunicar el resultado de su investigación a través de representaciones. ¿Cuál de las siguientes opciones corresponde a la representación de la sustancia pura que identificó Antonia?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/55.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 108,
+     "printedNumber": "56",
+     "type": "multiple_choice",
+     "stem": "Una persona necesita separar una mezcla, para ello cuenta con varios métodos, dentro de ellos decide usar la destilación simple. Al respecto, ¿cuál de las siguientes opciones presenta el fundamento químico correcto de la destilación simple?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Consiste en separar dos líquidos basándose en la diferencia de sus temperaturas de ebullición.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Consiste en separar un sólido de un líquido basándose en la absorción de calor.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Consiste en separar un sólido de un líquido basándose en sus temperaturas de ebullición.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Consiste en pasar del estado sólido al gaseoso sin pasar por el estado líquido a igual presión y temperatura.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 109,
+     "printedNumber": "57",
+     "type": "multiple_choice",
+     "stem": "Un químico realiza un procedimiento experimental que consiste en medir la temperatura de fusión de la misma cantidad de muestra de seis compuestos con diferentes tipos de enlaces, en diferentes tubos de vidrio. ¿Cuál de las siguientes preguntas de investigación intenta responder el químico a través de este experimento?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿Cómo se relaciona la temperatura de fusión de los compuestos con los enlaces que ellos poseen?",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "¿Qué relación existe entre la cantidad de compuesto utilizado y la temperatura de fusión?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Cómo se relaciona la temperatura de fusión del compuesto con el tipo de material del tubo utilizado?",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¿Qué relación existe entre la cantidad de compuesto utilizado y el tipo de enlace?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 110,
+     "printedNumber": "58",
+     "type": "multiple_choice",
+     "stem": "¿Cuál de las siguientes opciones clasifica, correctamente, las acciones descritas como cambios físico y químico? Cambio físico Cambio químico",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Doblar un papel Cortar papel con tijeras",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Fundir un trozo de metal Tostar un pan",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Disolver jugo en polvo en agua Congelar carne",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Encender un fósforo Disolver una pastilla efervescente en agua",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 111,
+     "printedNumber": "59",
+     "type": "multiple_choice",
+     "stem": "El potasio, K, participa en los impulsos nerviosos, ayuda a la contracción de los músculos y a mantener el ritmo cardíaco. En algunas condiciones, forma el ion + + potasio, K . Respecto de la formación del ion K a partir del átomo neutro K, ¿cuál de las siguientes opciones es correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El potasio cede un protón.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El potasio capta un protón.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El potasio cede un electrón.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El potasio capta un electrón.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 112,
+     "printedNumber": "60",
+     "type": "multiple_choice",
+     "stem": "Un estudiante debe comparar las siguientes especies representadas por su profesor, con el fin de evaluar similitudes o diferencias entre átomos del mismo elemento. Al respecto, ¿cuál de las siguientes opciones es una correcta comparación entre ambas representaciones?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/60.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Presentan el mismo número de neutrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Se diferencian en el número de electrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Presentan igual número de protones.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Tienen la misma masa atómica.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 113,
+     "printedNumber": "61",
+     "type": "multiple_choice",
+     "stem": "Una profesora presenta al curso los siguientes esquemas de dos átomos neutros X e Y. Luego, pregunta a uno de sus estudiantes, por el tipo de enlace que se formará entre ellos. Al respecto, ¿cuál de las siguientes opciones presenta la respuesta correcta que debe entregar el estudiante?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/61.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Covalente polar",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Covalente apolar",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Iónico",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Metálico",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 114,
+     "printedNumber": "62",
+     "type": "multiple_choice",
+     "stem": "En una clase se presenta el siguiente esquema que muestra la ubicación de tres elementos en la tabla periódica, Li, K y F. Li F K Luego, se pide a los estudiantes que presenten una ordenación de estos elementos, a partir de la estimación de sus radios atómicos, de mayor a menor, tomando en cuenta la ubicación de estos en la tabla periódica. ¿Cuál de las siguientes ordenaciones, presentadas por los estudiantes, es correcta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/62.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "K > Li > F",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "F > K > Li",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Li > F > K",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Li > K > F",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 115,
+     "printedNumber": "63",
+     "type": "multiple_choice",
+     "stem": "Al modelar algunas moléculas orgánicas, Juan se da cuenta de que en estas moléculas existen diferentes enlaces que se relacionan con la hibridación que presentan los átomos de carbono. Al respecto, ¿cuál de las siguientes moléculas presenta solo hibridación sp3?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/63.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 116,
+     "printedNumber": "64",
+     "type": "multiple_choice",
+     "stem": "Un estudiante se encuentra investigando sobre la longitud de enlace entre átomos de carbono, y para ello cuenta con la siguiente estructura de un hidrocarburo que tiene en su estructura enlaces simples, dobles y triples: 1 2 3 4 5 Considerando la numeración de los átomos de carbono en la estructura, al finalizar su investigación, ¿cuál de los enlaces carbono-carbono debería establecer el estudiante que presenta la menor longitud?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/64.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El enlace entre el C1 y el C2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El enlace entre el C2 y el C3",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El enlace entre el C3 y el C4",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El enlace entre el C4 y el C5",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 117,
+     "printedNumber": "65",
+     "type": "multiple_choice",
+     "stem": "La valina es un compuesto orgánico que participa en el metabolismo de la glucosa y en el mantenimiento de una adecuada función cerebral. Su estructura es la siguiente: En relación a la estructura presentada, ¿cuál es la fórmula molecular de la valina?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/65.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "C2H9NO2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "C2H11NO2",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "C5H11NO2",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "C5H9NO2",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 118,
+     "printedNumber": "66",
+     "type": "multiple_choice",
+     "stem": "Las moléculas se pueden representar de diferentes formas. A continuación se presenta un modelo tridimensional de una de ellas, en donde el negro representa átomos de carbono, el blanco átomos de hidrógeno y el gris átomos de oxígeno. Para la molécula anterior, ¿cuál de las siguientes representaciones es correcta para un modelo en dos dimensiones?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/66.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 119,
+     "printedNumber": "67",
+     "type": "multiple_choice",
+     "stem": "Una profesora escribe la siguiente fórmula general para un hidrocarburo: CnH2n+2. Luego, pide a sus estudiantes que nombren ejemplos de compuestos que respondan a dicha fórmula. ¿Cuál de los siguientes compuestos, propuesto por los estudiantes, corresponde a la fórmula dada?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Cicloproprano",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Ciclohexeno",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Propeno",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Propano",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 120,
+     "printedNumber": "68",
+     "type": "multiple_choice",
+     "stem": "En la clase de ciencias, una docente presenta a sus estudiantes el siguiente compuesto orgánico: En referencia a este compuesto y considerando las normas para nombrar alcanos, ¿cuáles son los nombres de las ramificaciones presentes?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/68.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Metil y etil",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Butil y propil",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Metil, etil y propil",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Etil, isopropil y terbutil",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 121,
+     "printedNumber": "69",
+     "type": "multiple_choice",
+     "stem": "En una clase de Química se está estudiando la estructura de algunas moléculas. El profesor propone el siguiente nombre: “propilciclohexano” y solicita a sus estudiantes que representen su estructura. Con respecto a lo anterior, ¿a cuál de las siguientes representaciones deben llegar los estudiantes?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 122,
+     "printedNumber": "70",
+     "type": "multiple_choice",
+     "stem": "En una sala de clases, una docente dibuja la siguiente estructura de un compuesto orgánico en la pizarra, y luego, pide a sus estudiantes que la analicen desde el punto de vista de los grupos funcionales. O H3C H3C O O En base al compuesto mostrado, ¿qué grupos funcionales tiene la estructura?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/70.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Éter y éster",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Cetona y éster",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Éter y alcohol",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Cetona y alcohol",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 123,
+     "printedNumber": "71",
+     "type": "multiple_choice",
+     "stem": "En un recipiente adecuado se calientan 249 g de sulfato de cobre hidratado (CuSO4•nH2O) hasta que el color azul inicial de la sustancia se torna blanco grisáceo, color característico del sulfato de cobre anhidro (CuSO4). Una vez que el recipiente y su contenido se enfrían, se masa obteniendo 159 g de sulfato de cobre anhidro. En base a lo anterior, el procedimiento experimental permite",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "calcular la masa de azufre (S) y oxígeno (O) en el sulfato de cobre hidratado.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "establecer si el calentamiento modifica el color del sulfato de cobre anhidro.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "determinar la masa de agua en el sulfato de cobre hidratado.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "evaluar si el sulfato de cobre anhidro es estable luego de la pérdida de agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "E",
+       "text": "determinar la temperatura de fusión del sulfato de cobre hidratado.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 124,
+     "printedNumber": "72",
+     "type": "multiple_choice",
+     "stem": "En un laboratorio, un grupo de estudiantes expone una cinta de magnesio a la llama de un mechero, observando la emisión de luz y la formación de cenizas blancas. De acuerdo a lo anterior, ¿cuál de las siguientes opciones presenta la ecuación equilibrada correcta, del proceso descrito? ",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Mg (s) + O2 (g) MgO (s) ",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2 Mg (s) + 2 O (g) 2 MgO (s) ",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2 Mg (s) + O2 (g) 2 MgO (s) ",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Mg (s) + O (g) MgO (s)",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 125,
+     "printedNumber": "73",
+     "type": "multiple_choice",
+     "stem": "Florencia se encuentra resolviendo la guía de repaso sobre el número de Avogadro. En uno de los ejercicios, se le solicita calcular el número total de átomos de oxígeno que contiene un mol de Ca(ClO4)2×6H2O, para lo cual debe calcular primero la cantidad en mol presente. ¿Cuál es la cantidad total, en mol, de átomos de oxígeno en el compuesto?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "4",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "9",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "14",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 126,
+     "printedNumber": "74",
+     "type": "multiple_choice",
+     "stem": "Una docente presenta la siguiente información a sus estudiantes: X + Y Q + Z 78 g 51 g 37 g Sabiendo que la masa de X reacciona completamente con la masa de Y, y que la masa molar de Z es 92 g/mol, ¿qué cantidad máxima de Z se forma?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,50 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,75 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1,00 mol",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "1,25 mol",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 127,
+     "printedNumber": "75",
+     "type": "multiple_choice",
+     "stem": "Un grupo de artesanos recibe como regalo una sal de plata (AgNO3), y desean saber cómo obtener el metal. Para ello, acuden a un químico para que les apoye en la obtención de este metal. El químico sugiere la siguiente reacción química: Cu (s) + 2 AgNO3 (ac) 2 Ag (s) + Cu(NO3)2 (ac) Basándose en la reacción anterior, si los artesanos cuentan con 640 g de cobre (masa molar = 64 g/mol) y con 1690 g de AgNO3 (masa molar = 169 g/mol). ¿Qué masa de Ag (masa molar = 107 g/mol), obtendrán a partir de las masas de reactantes con las que cuentan?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/75.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "640 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "1070 g",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "1690 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "2140 g",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 128,
+     "printedNumber": "76",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes se plantea encontrar una fórmula general que relacione la fórmula molecular presente en la siguiente serie de alcoholes: Compuesto Estructura Metanol CH3OH Etanol CH3CH2OH Propanol CH3CH2CH2OH Butanol CH3CH2CH2CH2OH ¿Cuál de las siguientes opciones corresponde a la fórmula general correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/76.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "CnH2+nO",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "CnH2n+1O",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "CnH2n+2O",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "CnH3+nO",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 129,
+     "printedNumber": "77",
+     "type": "multiple_choice",
+     "stem": "En una clase de química los y las estudiantes de un curso deben preparar una solución 2 mol/L de NaOH (masa molar = 40 g/mol) para utilizarla en un experimento. ¿Cuál de las siguientes preparaciones les asegura obtener lo solicitado?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Disolver 40 g de NaOH y agregar 1000 mL de agua",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Disolver 80 g de NaOH y agregar 500 mL de agua",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Disolver 40 g de NaOH en agua, hasta alcanzar 1 L de solución",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Disolver 80 g de NaOH en agua, hasta alcanzar 1000 mL de solución",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 130,
+     "printedNumber": "78",
+     "type": "multiple_choice",
+     "stem": "En la etiqueta de un frasco que contiene una solución acuosa formada por un ácido inorgánico de uso industrial, usado para limpiar sanitarios, aparece la siguiente descripción: Considerando la información contenida en la etiqueta, en un frasco de 200 g de esta solución, ¿cuál es la masa total del solvente presente en el frasco?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/78.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "37 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "63 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "74 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "126 g",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 131,
+     "printedNumber": "79",
+     "type": "multiple_choice",
+     "stem": "En un laboratorio, se realiza el siguiente experimento: desde una solución acuosa de concentración 2 mol/L, contenida en un matraz de aforo de 2 L, se trasladan 20 mL, 50 mL y 100 mL de la solución a tres matraces de aforo de 100 mL, 150 mL y 200 mL, marcados con las letras X, Y y Z, respectivamente. Luego, a cada uno de los matraces se le agrega agua destilada hasta completar su aforo y se determina la concentración en cada uno de ellos, lo que se resume en la siguiente tabla: Matraz X Matraz Y Matraz Z Concentración (mol/L) 0,4 0,7 1,0 Al analizar las concentraciones presentadas en la tabla, con respecto a la concentración de la solución inicial, ¿cuál de las siguientes conclusiones es correcta?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/79.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La concentración de la solución contenida en el matraz X aumentó al agregarle agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La concentración de la solución contenida en el matraz Y aumentó al agregarle agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La concentración de la solución del matraz Y disminuyó más que en la solución del matraz X, al agregarle agua.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La concentración de la solución contenida en el matraz Z disminuyó al agregarle agua.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 132,
+     "printedNumber": "80",
+     "type": "multiple_choice",
+     "stem": "Un estudiante mide la solubilidad del KCl en función de la temperatura. Para ello, determina la masa máxima de KCl disuelto en 100 mL de agua, a diferentes temperaturas. Los resultados obtenidos se resumen en el siguiente gráfico: Solubilidad (g de soluto/100 g de H2O) Temperatura (°C) De acuerdo a los resultados presentados en el gráfico, ¿qué volumen de agua, aproximada, se requiere para disolver 60 g de KCl a 40 °C?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e1-2026/item_figure/80.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "67 mL",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "75 mL",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "100 mL",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "150 mL IMPORTANTE ■ Este folleto está protegido bajo Registro de Propiedad Intelectual de la Universidad de Chile. ■ Está prohibida la reproducción, transmisión total o parcial de este folleto, por cualquier medio o método. ■ Es obligatorio devolver íntegramente este folleto antes de abandonar la sala. ■ Es obligatorio devolver la hoja de respuestas antes de abandonar la sala. Proceso de Admisión 2 0 2 5",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
   }
  ],
  "pauta": {
   "source": {
-   "instrumentJson": "CIE-E1-BIO-con-pauta.json"
+   "instrumentJson": "CIE-E1-fusionado.json"
   }
  },
  "extraction": {
-  "itemCount": 80,
-  "warnings": [
-   "1 candidatos duplicados descartados",
-   "posiciones [45, 58] completadas a mano desde el PDF (subagente extractor, 2026-10-05)"
+  "itemCount": 132,
+  "fusedFrom": [
+   "CIE-E1-BIO-con-pauta.json",
+   "CIE-E1-FIS-con-pauta.json",
+   "CIE-E1-QUI-con-pauta.json"
   ],
-  "needsHumanReview": true,
-  "itemsConClave": 80
+  "generator": "scripts/paes-2026/fusionar_cie_electivas.py"
  }
 }

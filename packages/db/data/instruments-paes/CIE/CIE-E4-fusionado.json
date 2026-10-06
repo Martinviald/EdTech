@@ -1,7 +1,7 @@
 {
  "instrument": {
-  "name": "PAES CIE mención Biología — Ensayo 4 (Tanda 4) · IV° Medio 2026",
-  "subject": "Ciencias — mención Biología",
+  "name": "PAES CIE — Ensayo 4 (Tanda 4) · IV° Medio 2026",
+  "subject": "Ciencias",
   "subjectCode": "SCI",
   "grade": "IV° Medio",
   "gradeCode": "4TH_MEDIO",
@@ -9,10 +9,11 @@
   "applicationPeriod": null,
   "type": "paes",
   "isOfficial": false,
+  "track": "CIE-COMUN",
   "paes": {
    "prueba": "CIE",
    "tanda": "Tanda 4",
-   "mencion": "Biología",
+   "mencion": null,
    "appliedOn": "2026-08-07",
    "basadoEn": "Selección DEMRE ADM REG 2026 + Complemento DEPTO CIE"
   }
@@ -20,8 +21,9 @@
  "sections": [
   {
    "order": 1,
-   "name": "Prueba completa",
+   "name": "Módulo común",
    "type": "multiple_choice",
+   "role": "core",
    "instructions": null,
    "passage": null,
    "items": [
@@ -898,6 +900,7 @@
      "responseFormat": "choice",
      "hasFigure": true,
      "figureNote": "Figura: carro sobre una mesa, atado a una cuerda que pasa por una polea en el borde y sostiene una masa colgante (P); alternativas A-D son vectores dibujados",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/28.png",
      "alternatives": [
       {
        "key": "A",
@@ -1758,7 +1761,20 @@
        "isCorrect": false
       }
      ]
-    },
+    }
+   ]
+  },
+  {
+   "order": 2,
+   "name": "Mención Biología",
+   "type": "multiple_choice",
+   "role": "elective",
+   "electiveGroup": "mencion-ciencias",
+   "electiveKey": "BIO",
+   "track": "BIO",
+   "instructions": null,
+   "passage": null,
+   "items": [
     {
      "position": 55,
      "type": "multiple_choice",
@@ -2604,21 +2620,1753 @@
      ]
     }
    ]
+  },
+  {
+   "order": 3,
+   "name": "Mención Física",
+   "type": "multiple_choice",
+   "role": "elective",
+   "electiveGroup": "mencion-ciencias",
+   "electiveKey": "FIS",
+   "track": "FIS",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 81,
+     "printedNumber": "55",
+     "type": "multiple_choice",
+     "stem": "Un lápiz de 17 cm de altura se coloca a 50 cm de un espejo plano de 100 cm de altura y 60 cm de ancho, que se ubica sobre una pared, registrándose la altura de la imagen formada. Luego, el lápiz se acerca 5 cm hacia el espejo y se repite la medición. El procedimiento se repite 8 veces, acercando el lápiz al espejo 5 cm en cada oportunidad. De acuerdo con la información dada, ¿cuál de las siguientes opciones presenta correctamente las variables del experimento?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/55.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 82,
+     "printedNumber": "56",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes tiene como proyecto escolar demostrar que las lentes convergentes son capaces de generar imágenes reales, si el objeto se ubica en alguna posición determinada. Para llevar a cabo el proyecto, ¿cuál de las siguientes opciones considera el mejor montaje experimental?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Elegir distintos tipos de lentes divergentes y convergentes para ver qué tipo de imagen forma un objeto puesto a iguales distancias de ellas.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "En alguna lente divergente colocar un objeto a diferentes distancias de ella para ver qué tipo de imagen forma.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "En una lente convergente colocar un objeto a diferentes distancias de ella, para ver qué tipo de imagen forma.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "En lentes divergentes de distintas distancias focales, colocar un objeto a una misma distancia de cada una, para ver qué imagen forma.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 83,
+     "printedNumber": "57",
+     "type": "multiple_choice",
+     "stem": "En verano, se recomienda utilizar protector solar incluso si se va a estar bajo el agua, como ocurre al bañarse en una piscina o en el mar. ¿Cuál es la fundamentación de la recomendación anterior?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El agua refleja luz solar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El agua transmite parte de la luz solar.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "En el agua, la luz solar cambia su rapidez.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una parte de la luz solar es absorbida por el agua.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 84,
+     "printedNumber": "58",
+     "type": "multiple_choice",
+     "stem": "Tres estaciones espaciales 𝑃, 𝑄 y 𝑅 están constantemente comunicadas mediante ondas de radio emitidas con una misma frecuencia 𝑓. En cierto momento, las tres estaciones se desplazan con la misma rapidez 𝑣, pero en los sentidos indicados en la siguiente figura: 𝑣 𝑣 𝑣 𝑃 𝑄 𝑅 ¿Cuál de las siguientes opciones corresponde a una predicción que debiese cumplirse para la frecuencia de la onda de radio captada en las estaciones espaciales?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/58.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "𝑃 capta de 𝑄 una señal de frecuencia mayor que 𝑓.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "𝑅 capta de 𝑃 una señal de frecuencia menor que 𝑓.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "𝑄 capta de 𝑅 una señal de frecuencia mayor que 𝑓.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "𝑄 capta de 𝑃 una señal de frecuencia menor que 𝑓.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 85,
+     "printedNumber": "59",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes desea observar los patrones de interferencia generados al ubicar una fuente puntual de luz láser frente a un papel con dos rendijas muy finas y muy juntas entre sí. Si luego desean modificar el experimento e igualmente observar un patrón de interferencia, ¿de qué es indispensable que se aseguren?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "De que la distancia entre las rendijas sea similar.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "De utilizar una fuente de luz láser de la misma intensidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "De utilizar una fuente de luz láser del mismo color original.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "De ubicar el láser a la misma distancia del papel con las rendijas.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 86,
+     "printedNumber": "60",
+     "type": "multiple_choice",
+     "stem": "En un laboratorio se comparan cuatro fuentes luminosas que emiten radiación electromagnética. Se sabe que, en todas ellas, solo el 6% de la potencia total se transforma en luz visible, mientras que el resto se emite como radiación no visible. Para cada fuente se registró la potencia total y el radio de la superficie emisora, como se muestra en la siguiente tabla: Potencia Radio de la superficie Fuente total (W) emisora (cm) M 80 2 N 180 3 P 200 4 Q 120 2 Considerando que la intensidad de luz visible sobre la superficie emisora depende de la potencia visible emitida y del área de dicha superficie, se puede afirmar que la intensidad de luz visible es:",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "mayor en la fuente P, porque corresponde a la fuente que presenta la mayor potencia total registrada.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "menor en la fuente M, porque corresponde a la fuente que presenta la menor potencia total registrada.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "igual en las fuentes M y Q, porque ambas presentan el mismo radio de superficie emisora.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "mayor en la fuente Q, porque presenta una mayor razón entre potencia visible y superficie emisora.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 87,
+     "printedNumber": "61",
+     "type": "multiple_choice",
+     "stem": "Una guitarra se encuentra a 2 m de una lente divergente y sobre la línea del eje óptico. Al respecto, ¿cuál de los siguientes pares de características posee la imagen de la guitarra formada por la lente?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Es real y más pequeña que la guitarra.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Es virtual y más pequeña que la guitarra.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Es real y de igual tamaño que la guitarra.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Es virtual y de igual tamaño que la guitarra. 62. Un objeto se coloca frente a un espejo cóncavo de foco F y vértice V, como se representa en la siguiente figura: ¿En cuál de las siguientes opciones se presenta correctamente un par de rayos incidentes y sus respectivos rayos reflejados?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 88,
+     "printedNumber": "62",
+     "type": "multiple_choice",
+     "stem": "Un objeto se coloca frente a un espejo cóncavo de foco F y vértice V, como se representa en la siguiente figura: ¿En cuál de las siguientes opciones se presenta correctamente un par de rayos incidentes y sus respectivos rayos reflejados?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas solo gráficas: no hay rótulos en la capa de texto · alternativas reconstruidas como figuras sin transcribir",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/62.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(alternativa A: figura no extraída del cuadernillo)",
+       "isCorrect": true,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(alternativa B: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(alternativa C: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(alternativa D: figura no extraída del cuadernillo)",
+       "isCorrect": false,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 89,
+     "printedNumber": "63",
+     "type": "multiple_choice",
+     "stem": "Un grupo de personas realiza una investigación para verificar si se cumple la ley de la reflexión de la luz en el agua. Para esto, utilizarán un puntero láser y un espejo plano que ubican dentro de un recipiente transparente lleno de agua. Al respecto, ¿cuál de los siguientes elementos es más adecuado que el grupo incluya en el montaje para cumplir con su objetivo de investigación?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un segundo espejo plano.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un transportador.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un cronómetro.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Una regla.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 90,
+     "printedNumber": "64",
+     "type": "multiple_choice",
+     "stem": "Una caja se coloca sobre una cinta transportadora de goma que la traslada con rapidez constante, como se representa en la siguiente figura. Al respecto, ¿cuál de las siguientes fuerzas es la principal causante de que la caja se mueva con la misma rapidez que la cinta transportadora?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/64.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La fuerza de roce estático",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La fuerza de tensión",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La fuerza elástica",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La fuerza normal",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 91,
+     "printedNumber": "65",
+     "type": "multiple_choice",
+     "stem": "Una persona toma dos cuerpos de distinta masa, material y dimensiones, pone uno sobre el otro y los empuja sobre una superficie horizontal. Luego, los intercambia de posición y vuelve a empujar el conjunto de cuerpos sobre la misma superficie asegurándose de que la velocidad inicial sea la misma en ambos casos. La persona observa que en las dos situaciones recorren distintas distancias antes de detenerse. En relación con lo anterior, ¿cuál de las siguientes opciones señala la variable responsable de lo observado por la persona?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las dimensiones de los cuerpos.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las masas de los cuerpos.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Los materiales de los cuerpos.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La superficie en la que se mueven los cuerpos.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 92,
+     "printedNumber": "66",
+     "type": "multiple_choice",
+     "stem": "Una persona mueve un mueble de su hogar mediante una fuerza 𝐹⃗ horizontal constante, desde un punto P hacia un punto Q, sobre una superficie de roce despreciable, excepto cuando pasa sobre una alfombra, sobre la cual la fuerza de roce 𝐹⃗𝑅 es de igual magnitud que la fuerza 𝐹⃗ . Esta situación se representa en la siguiente figura: 𝐹⃗ 𝐹⃗𝑅 𝐹⃗ 𝐹⃗ P Alfombra Q ሬሬሬ ሬሬሬ Al respecto, ¿cómo es la aceleración del mueble durante el trayecto descrito?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/66.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "De igual valor antes y después de pasar por la alfombra.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "De menor valor después de pasar por la alfombra que antes de pasar por ella.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Creciente durante todo el trayecto, excepto en su paso por la alfombra, donde es constante.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Creciente durante todo el trayecto, excepto en su paso por la alfombra, donde es decreciente.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 93,
+     "printedNumber": "67",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes desea estudiar las fuerzas que están actuando sobre una persona mientras se desliza por un tobogán, tal como se representa en la siguiente figura: Si durante la caída la persona se desliza con aceleración constante y su ropa en contacto con el tobogán experimenta un aumento en la temperatura, ¿cuál de los siguientes diagramas indica la dirección de la fuerza directamente responsable del aumento de temperatura de su ropa?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/67.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": true,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 94,
+     "printedNumber": "68",
+     "type": "multiple_choice",
+     "stem": "Un equipo realiza una investigación sobre la fuerza de roce entre un bloque y una superficie horizontal y rugosa. Durante el experimento, el bloque es desplazado aplicándole una fuerza horizontal, cuya magnitud se representa en el siguiente gráfico. Magnitud de la 20 fuerza (N) 0 5 7 8 Tiempo (s) Considerando que a los 5 s el bloque comienza a moverse y a los 8 s se detiene, ¿qué instrumentos de medición son suficientes para obtener los datos graficados?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/68.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Una balanza y un dinamómetro.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un dinamómetro y un cronómetro.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Un sensor de movimiento y una balanza.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Un cronómetro y un sensor de movimiento.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 95,
+     "printedNumber": "69",
+     "type": "multiple_choice",
+     "stem": "La unidad de ingeniería de una empresa constructora realiza pruebas de los cables de acero que utilizan en sus grúas. Para ello, cuelgan verticalmente objetos de distinta masa al cable y miden su elongación en cada caso. Luego, con los datos obtenidos, la unidad de ingeniería realiza el siguiente gráfico entre el peso de los objetos colgados y la elongación experimentada por el cable: 6 5 4 Elongación (cm) 3 2 1 0 0 500 1000 1500 2000 2500 3000 3500 4000 4500 Peso (N) A partir de los resultados que obtuvo la unidad de ingeniería, ¿cuál de las siguientes conclusiones es correcta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/69.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El límite elástico del cable es desconocido.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "La constante de elasticidad del cable es desconocida.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El cable se romperá cuando la fuerza sea mayor que 4000 N.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La constante de elasticidad para elongaciones mayores que 5 cm es nula.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 96,
+     "printedNumber": "70",
+     "type": "multiple_choice",
+     "stem": "Un resorte ideal en su estado natural mide 15 cm de longitud. Este resorte se cuelga verticalmente de uno de sus extremos y se suspende de él un bloque de 3 kg, alcanzando una longitud de 20 cm. Si la magnitud de la aceleración de m gravedad del lugar es 10 2 , ¿cuál es la constante elástica del resorte? s N",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1,50 cm N",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,00 cm N",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2,25 cm N",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "6,00 cm",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 97,
+     "printedNumber": "71",
+     "type": "multiple_choice",
+     "stem": "La actividad de un volcán está provocando una preocupación creciente en la población de una pequeña comunidad, la cual nunca ha presenciado una erupción volcánica. Debido a esto, la autoridad local quiere crear un afiche informativo sobre el tema para educar a la población local. ¿Cuál de las siguientes opciones presenta un tema adecuado para incluir en el afiche?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tipos de erupciones volcánicas",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Ranking de erupciones volcánicas con más víctimas",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Mecanismos de formación de volcanes",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Recomendaciones ante una erupción volcánica",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 98,
+     "printedNumber": "72",
+     "type": "multiple_choice",
+     "stem": "A un grupo de geólogas les llama la atención que la cordillera de los Andes en el norte chico de Chile es notoriamente más alta que en la zona sur del país, por lo que quieren enfocarse en el estudio de las razones de esta característica. A partir de lo anterior, ¿cuál de las siguientes opciones es una hipótesis que podría explicar adecuadamente la diferencia mencionada?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Existen lagunas sísmicas en el norte chico de Chile.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Existe una mayor cantidad de volcanes activos en la zona sur de Chile.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El ángulo de subducción de la placa de Nazca es menor en el norte chico de Chile.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "La divergencia entre la placa de Nazca y la placa del Pacífico es mayor en la zona sur de Chile.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 99,
+     "printedNumber": "73",
+     "type": "multiple_choice",
+     "stem": "La figura representa seis placas tectónicas, P, Q, R, S, T y U, cuyos bordes se mueven en las direcciones indicadas mediante flechas. En base a la teoría de la tectónica de placas, ¿cuál de las siguientes opciones presenta pares de placas asociadas correctamente al tipo de borde que existe entre ellas? Límite Límite Límite divergente convergente transformante",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/73.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "P-S S-U S-T",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "R-U S-T P-S",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "S-T P-S S-U",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "S-U P-S Q-R",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 100,
+     "printedNumber": "74",
+     "type": "multiple_choice",
+     "stem": "Se han extraído rocas del suelo oceánico, en las posiciones representadas en la imagen, a distancias similares de una dorsal. Así, las rocas extraídas del sector 3 están a igual distancia de la dorsal que las rocas sacadas del sector 4, pero al doble de distancia que las extraídas de los sectores 1 y 2. A partir de los procesos que ocurren en una dorsal, ¿cuál de las siguientes afirmaciones es correcta con respecto a las rocas de los distintos sectores?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/74.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las rocas de los sectores 2 y 5 tienen temperatura similar.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Las rocas de los sectores 1 y 6 tienen igual densidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Las rocas de los sectores 3 y 4 están a igual profundidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Las rocas de los sectores 5 y 6 tienen edad similar.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 101,
+     "printedNumber": "75",
+     "type": "multiple_choice",
+     "stem": "Se dispone de una fuente de poder conectada a un circuito eléctrico con una única resistencia eléctrica. Al ir variando de forma manual el voltaje de la fuente se obtienen los siguientes datos: Respecto de los datos anteriores ¿Cuáles son las variables dependiente e independiente en la experiencia? Variable independiente Variable dependiente",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-fis-e4-2026/item_figure/75.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Voltaje Resistencia eléctrica",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Resistencia eléctrica Intensidad de corriente",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Voltaje Intensidad de corriente",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Intensidad de corriente Resistencia eléctrica",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 102,
+     "printedNumber": "76",
+     "type": "multiple_choice",
+     "stem": "En una actividad experimental, en cierto circuito eléctrico compuesto por varias pilas conectadas en serie, dos interruptores y un resistor, circula un determinado flujo de cargas en un tiempo conocido. Si se requiere que el flujo de cargas por unidad de tiempo en el circuito aumente, ¿cuál de las siguientes acciones es la que lo permite?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Aumentar la diferencia de potencial del circuito.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Aumentar la resistencia del circuito.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Disminuir el número de pilas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Disminuir el número de interruptores.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 103,
+     "printedNumber": "77",
+     "type": "multiple_choice",
+     "stem": "Un electricista quiere instalar el circuito eléctrico en una casa, para lo que necesita la información suministrada por la ingeniera a cargo. ¿Cuál de los siguientes recursos contiene la información necesaria para realizar la instalación?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Un inventario con los artefactos eléctricos que se utilizarán en la casa.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Un cuadro con la cantidad de luminarias requeridas para cada habitación.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Un plano de la casa indicando los tipos de conexiones requeridas para cada habitación.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "Un folleto que describa las características de los enchufes requeridos para cada habitación de la casa.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 104,
+     "printedNumber": "78",
+     "type": "multiple_choice",
+     "stem": "Una estudiante quiere comprobar que la red domiciliaria efectivamente corresponde a un circuito en paralelo. ¿Cuál de las siguientes mediciones permite a la estudiante lograr su objetivo?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "La lectura que marca el medidor de la casa.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "La diferencia de potencial en cada enchufe de la casa.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "La intensidad de corriente que circula por los artefactos de la casa.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La resistencia eléctrica de los cables que forman el circuito de la casa.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 105,
+     "printedNumber": "79",
+     "type": "multiple_choice",
+     "stem": "El equipo técnico de una empresa de tecnología que construye aparatos eléctricos se encuentra en la fase de diseño e investigación para el desarrollo del primer modelo de televisor de la empresa. Para ello, se les ha encargado asegurarse de que el modelo que diseñarán cumpla con estándares de eficiencia energética, pero además desean que el modelo desarrollado se posicione como líder en eficiencia en relación con los modelos de otras marcas. ¿Cuál de las siguientes preguntas de investigación podría guiar la fase de diseño considerando los requerimientos de la empresa?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¿De qué depende la eficiencia energética de un televisor?",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¿En qué consiste la eficiencia energética en el caso de un televisor?",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "¿Qué características tienen los televisores más eficientes del mercado?",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "¿Qué componentes de un televisor influyen en su eficiencia energética?",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 106,
+     "printedNumber": "80",
+     "type": "multiple_choice",
+     "stem": "Una persona investiga acerca de la eficiencia energética de algunos tipos de ampolletas. Lee que, a diferencia de una ampolleta incandescente, la cual transforma alrededor de un 5 % de su consumo eléctrico en luz, una ampolleta LED emite cerca del 50 % de la energía consumida en forma de radiación electromagnética visible. En relación con lo anterior, ¿cuál de las siguientes opciones es una conclusión coherente con la información recopilada?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El uso de ampolletas LED permite una mayor iluminación en un hogar que el uso de ampolletas incandescentes.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El consumo eléctrico de una ampolleta LED es mayor que el consumo de una ampolleta incandescente de similar luminosidad.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El cambio de las ampolletas incandescentes de similar luminosidad a LED significa un ahorro en el consumo eléctrico destinado a iluminación.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "El cambiar las ampolletas incandescentes de una casa por ampolletas LED de similar potencia, resulta en un ahorro del consumo eléctrico en el corto plazo.",
+       "isCorrect": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "order": 4,
+   "name": "Mención Química",
+   "type": "multiple_choice",
+   "role": "elective",
+   "electiveGroup": "mencion-ciencias",
+   "electiveKey": "QUI",
+   "track": "QUI",
+   "instructions": null,
+   "passage": null,
+   "items": [
+    {
+     "position": 107,
+     "printedNumber": "55",
+     "type": "multiple_choice",
+     "stem": "En una práctica de laboratorio, los estudiantes realizan un experimento en el cual calientan bolitas de iodo de color gris contenidas en un vaso de precipitados, observando el desprendimiento de un gas de color violeta intenso. Sobre la tapa del vaso colocan un vidrio de reloj con hielo y observan que, al entrar en contacto el gas con la superficie del vidrio, se forman cristales brillantes y, además, queda un residuo café en el fondo del vaso. Luego, los estudiantes mencionan que “estos cristales corresponden a iodo que ha sido purificado mediante el procedimiento realizado”. ¿A qué componente de la investigación corresponde el texto entre comillas mencionado por los estudiantes?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "A un procedimiento experimental.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "A un marco conceptual.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "A una conclusión.",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "A una teoría.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 108,
+     "printedNumber": "56",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes necesita separar una mezcla que contiene tres componentes: dos líquidos miscibles X e Y, cuyas temperaturas de ebullición son 80 °C y 110 °C, respectivamente, y un sólido insoluble en ambos líquidos. Para separar estos tres componentes, ¿cuál de las siguientes opciones presenta de manera consecutiva los métodos de separación correctos que se deben usar?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Tamizado y decantación.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Filtración y destilación.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Decantación y filtración.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Destilación y tamizado.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 109,
+     "printedNumber": "57",
+     "type": "multiple_choice",
+     "stem": "Una docente presenta las siguientes afirmaciones sobre la materia: 1. La materia está constituida por átomos. 2. Los átomos de un mismo elemento presentan las mismas propiedades. 3. Los compuestos se forman por la combinación de átomos en proporciones definidas. 4. Los electrones se encuentran incrustados en una esfera de carga positiva. ¿Cuáles de las afirmaciones anteriores corresponden al modelo atómico propuesto por Dalton?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1 y 2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "3 y 4",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "1, 2 y 3",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "2, 3 y 4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 110,
+     "printedNumber": "58",
+     "type": "multiple_choice",
+     "stem": "Un modelo atómico representa al átomo como una esfera de carga positiva distribuida uniformemente, en cuyo interior se encuentran partículas con carga negativa. De acuerdo con este modelo, la carga total del átomo es neutra. ¿Cuál de las siguientes opciones identifica correctamente el modelo descrito y una de sus principales contribuciones?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Modelo de Dalton, porque propuso que los átomos poseen un núcleo positivo.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Modelo de Thomson, porque incorporó la existencia de partículas subatómicas con carga negativa.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Modelo de Rutherford, porque estableció que la carga positiva se distribuye por todo el átomo.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Modelo de Bohr, porque propuso que los electrones se encuentran incrustados en una esfera positiva.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 111,
+     "printedNumber": "59",
+     "type": "multiple_choice",
+     "stem": "La siguiente tabla presenta temperaturas de fusión y ebullición de tres elementos: Elemento Temperatura de fusión Temperatura de ebullición X -7 °C 59 °C Y 98 °C 883 °C Z -189 °C -186 °C Considerando que los tres elementos se encuentran a una temperatura de 25 °C, ¿en qué estado físico se encuentra cada uno? X Y Z",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/59.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Sólido Líquido Gas",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Líquido Sólido Gas",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Gas Sólido Líquido",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Líquido Gas Sólido",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 112,
+     "printedNumber": "60",
+     "type": "multiple_choice",
+     "stem": "En una clase, un docente presenta a sus estudiantes el siguiente modelo atómico correspondiente a una especie X. A partir de la representación, ¿cuál de las siguientes opciones corresponde a la simbología correcta de la especie X?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Modelo atómico: núcleo con 9 p y 10 n, dos órbitas con 2 y 8 electrones; simbología p = protones, n = neutrones, ● = electrones",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "¹⁰₉X",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "¹⁹₉X⁻",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "⁹₁₀X",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "¹⁹₁₀X⁻",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 113,
+     "printedNumber": "61",
+     "type": "multiple_choice",
+     "stem": "El nihonio (Nh) es un elemento químico, altamente inestable, que ha sido sintetizado por un equipo de investigadores japoneses. Este tiene dos posibles representaciones: 286 285 113Nh y 113Nh ¿Cuál es la diferencia entre estas representaciones?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/61.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "El número de electrones.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "El número atómico.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "El número de protones.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "El número másico.",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 114,
+     "printedNumber": "62",
+     "type": "multiple_choice",
+     "stem": "En una clase se muestra la siguiente representación del modelo atómico de Bohr 2– para el ion S , con el último nivel incompleto (línea punteada): 16 p 16 n Con respecto a la información y al modelo atómico anterior, ¿cuántos electrones debe 2– tener en el último nivel (línea punteada) para representar correctamente al ion S ?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/62.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "16",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "10",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "8",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "4",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 115,
+     "printedNumber": "63",
+     "type": "multiple_choice",
+     "stem": "Una docente escribe en la pizarra la siguiente estructura de un compuesto que es utilizado como materia prima en la fabricación de varios compuestos cíclicos y poliméricos. Luego, la docente pregunta por el número total de enlaces sigma del compuesto. Al respecto, ¿cuál de las siguientes opciones es correcta?",
+     "correctKey": "C",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/63.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "3",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "5",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "13",
+       "isCorrect": true
+      },
+      {
+       "key": "D",
+       "text": "16",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 116,
+     "printedNumber": "64",
+     "type": "multiple_choice",
+     "stem": "Una docente de química presenta a sus estudiantes la siguiente estructura de una molécula orgánica, numerando los átomos de carbono presentes de izquierda a derecha, de acuerdo a la prioridad del grupo funcional: O 3 HO 1 OH 4 2 Al respecto, ¿cuál de las siguientes opciones indica la relación correcta del átomo de carbono con su respectiva hibridación? 1 2 3 4",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/64.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "sp2 sp2 sp2 sp2",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "sp2 sp3 sp3 sp",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "sp3 sp2 sp2 sp",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "sp2 sp3 sp3 sp3",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 117,
+     "printedNumber": "65",
+     "type": "multiple_choice",
+     "stem": "Un docente dibuja en la pizarra las siguientes representaciones de diferentes compuestos orgánicos: Luego, solicita a sus estudiantes que analicen estos compuestos según su masa molar. En referencia a la solicitud del docente, ¿cuál de las siguientes opciones presenta los compuestos ordenados de menor a mayor masa molar?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/65.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "< < <",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "< < <",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "< < <",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "< < <",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 118,
+     "printedNumber": "66",
+     "type": "multiple_choice",
+     "stem": "Se presentan las siguientes descripciones de tres hidrocarburos: 1. Hidrocarburo 1: posee cuatro átomos de carbono dispuestos en una cadena abierta, unidos únicamente mediante enlaces simples. 2. Hidrocarburo 2: posee cinco átomos de carbono unidos formando un anillo, con enlaces simples entre ellos. 3. Hidrocarburo 3: posee cuatro átomos de carbono dispuestos en una cadena abierta que contiene un doble enlace carbono-carbono. ¿Cuál de las siguientes opciones clasifica correctamente los tres hidrocarburos? Hidrocarburo 1 Hidrocarburo 2 Hidrocarburo 3",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Alifático saturado / Alicíclico saturado / Alifático insaturado",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Alifático insaturado / Alicíclico saturado / Alifático saturado",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Alicíclico saturado / Alifático insaturado / Alicíclico insaturado",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Alicíclico insaturado / Alicíclico insaturado / Alifático saturado",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 119,
+     "printedNumber": "67",
+     "type": "multiple_choice",
+     "stem": "Una docente de química, presenta a los estudiantes la siguiente fórmula molecular: C4H8O2, y les pregunta por alguna representación estructural del compuesto al que está asociada. ¿Cuál de las siguientes opciones es una representación correcta dada como respuesta por los estudiantes?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Alternativas gráficas; el recorte de cada una está en S3 (altImageRefs)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/67.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "(figura A)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "B",
+       "text": "(figura B)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "C",
+       "text": "(figura C)",
+       "isCorrect": false,
+       "isImage": true
+      },
+      {
+       "key": "D",
+       "text": "(figura D)",
+       "isCorrect": true,
+       "isImage": true
+      }
+     ]
+    },
+    {
+     "position": 120,
+     "printedNumber": "68",
+     "type": "multiple_choice",
+     "stem": "Una docente de química presenta a los estudiantes la siguiente estructura de un compuesto orgánico: Luego, les solicita escribir en sus cuadernos el nombre del compuesto. ¿Cuál de los nombres entregados por los estudiantes es correcto?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/68.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Butanal",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Butan-2-ona",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Butan-1,2-diol",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Ácido butanoico",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 121,
+     "printedNumber": "69",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes debe presentar una molécula orgánica a sus compañeros. Para ello necesitan utilizar: ● una representación que muestre explícitamente cómo se encuentran enlazados los diferentes grupos de átomos, sin escribir todos los enlaces C–H; y ● otra representación que permita apreciar aproximadamente la disposición espacial y los ángulos entre sus enlaces. ¿Cuál de las siguientes combinaciones de representaciones es la más adecuada para comunicar ambas características?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/69.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Fórmula empírica y fórmula molecular.",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Fórmula semidesarrollada y modelo de esferas y varillas.",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "Fórmula molecular y fórmula condensada.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Fórmula empírica y modelo compacto.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 122,
+     "printedNumber": "70",
+     "type": "multiple_choice",
+     "stem": "La siguiente fórmula representa un compuesto orgánico presente en el formol o formalina. Dentro de sus usos se encuentra la preservación de tejidos biológicos en laboratorios. O C H H Al respecto y dada su fórmula, ¿cómo se clasifica este compuesto?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/70.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Como éter",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "Como cetona",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Como alcohol",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Como aldehído",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 123,
+     "printedNumber": "71",
+     "type": "multiple_choice",
+     "stem": "Durante una clase en la que se estudia acerca de la proporción en la que se combinan los reactantes para formar productos, se analiza la reacción entre el hidróxido de sodio (NaOH) y el ácido sulfúrico (H2SO4). La ecuación balanceada de la reacción es la siguiente: 2 NaOH (ac) + H2SO4 (ac) Na2SO4 (ac) + 2 H2O () De acuerdo con esta información, ¿qué cantidad de H2SO4 se debe utilizar para obtener 2 mol de Na2SO4?",
+     "correctKey": "B",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/71.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "98 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "196 g",
+       "isCorrect": true
+      },
+      {
+       "key": "C",
+       "text": "0,5 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1,0 mol",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 124,
+     "printedNumber": "72",
+     "type": "multiple_choice",
+     "stem": "Sebastián realiza la siguiente reacción química en el laboratorio de su colegio: Fe + S FeS Para ello, mezcla y calienta en un crisol de porcelana 112 g de Fe (masa molar = 56 g/mol) con un exceso de S (masa molar = 32 g/mol), para asegurar la reacción completa del hierro. A partir del procedimiento realizado, ¿cuál es la masa máxima de FeS que se formará?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/72.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "176 g",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "168 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "144 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "88 g",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 125,
+     "printedNumber": "73",
+     "type": "multiple_choice",
+     "stem": "En el contexto de una clase de laboratorio, se estudian las relaciones de masa en el proceso de combustión de la glucosa, basándose en la siguiente ecuación no balanceada: C6H12O6 + O2 CO2 + H2O Si se desea obtener un total de 372 g de productos, ¿cuál de las siguientes afirmaciones respecto a las cantidades de las sustancias involucradas es correcta?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/73.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Debería reaccionar, completamente, 1 mol de C6H12O6 con 6 mol de O2.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Debería reaccionar, completamente, 1 mol de C6H12O6 con 1 mol de O2.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Se debería formar, luego de la reacción, 6 mol de CO2 y 1 mol de H2O.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Se debería formar, luego de la reacción, 1 mol de CO2 y 1 mol de H2O.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 126,
+     "printedNumber": "74",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes hace reaccionar completamente una muestra de 8 g de hidrógeno con 96 g de oxígeno en un recipiente cerrado, verificándose la siguiente reacción: 2 H2 (g) + O2 (g) 2 H2O (g) Considerando la estequiometría de la reacción, ¿cuál es la cantidad máxima de H 2O que se ha producido una vez finalizada la reacción?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/74.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "8 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "6 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "4 mol",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 127,
+     "printedNumber": "75",
+     "type": "multiple_choice",
+     "stem": "Una profesora escribe la siguiente ecuación balanceada que representa la reacción entre Mg (masa molar = 24,0 g/mol) y HCl (masa molar = 36,5 g/mol) para formar MgCl2: Mg + 2 HCl MgCl2 + H2 De acuerdo con la ecuación anterior, ¿cuál es la máxima cantidad de MgCl 2 que se forma a partir de 48 g de Mg y 73 g de HCl?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/75.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "5,0 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "2,5 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "2,0 mol",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "1,0 mol",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 128,
+     "printedNumber": "76",
+     "type": "multiple_choice",
+     "stem": "Dos compuestos, X e Y, están formados únicamente por carbono y oxígeno. El análisis de muestras de ambos compuestos entrega los siguientes resultados: Compuesto Masa de carbono Masa de oxígeno X 12 g 16 g Y 12 g 32 g ¿Qué conclusión se obtiene al comparar las masas de oxígeno que se combinan con una misma masa de carbono?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": true,
+     "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+     "imageRef": "item/global/paes-cie-qui-e4-2026/item_figure/76.png",
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Las masas de oxígeno se encuentran en una relación 1:2, de acuerdo con la ley de las proporciones múltiples.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Las masas de oxígeno deben ser iguales, de acuerdo con la ley de conservación de la materia.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "La proporción entre carbono y oxígeno es idéntica en los dos compuestos, de acuerdo con la ley de las proporciones definidas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "La masa del compuesto Y debe ser el doble de la masa del compuesto X, independientemente de la cantidad de carbono.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 129,
+     "printedNumber": "77",
+     "type": "multiple_choice",
+     "stem": "El ácido fosfórico, H3PO4, es un líquido incoloro utilizado como saborizante, en detergentes y en la elaboración de bebidas gaseosas. Se realiza el análisis de dos muestras de H3PO4, ¿cuál de las siguientes tablas representa correctamente la composición porcentual de cada átomo presente en la molécula de H 3PO4?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Masa de la muestra Muestra %H %P %O (g) 1 5,25 3,1 31,6 65,3 2 25,45 3,1 31,6 65,3",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Masa de la muestra Muestra %H %P %O (g) 1 10 1,5 15 83,5 2 20 3 30 41,75",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Masa de la muestra Muestra %H %P %O (g) 1 10 1,5 15 83,5 2 20 0,75 7,5 41,75",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Masa de la muestra Muestra %H %P %O (g) 1 5,25 3,1 31,6 65,3 2 25,45 6,2 63,2 30,6",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 130,
+     "printedNumber": "78",
+     "type": "multiple_choice",
+     "stem": "En un laboratorio, un grupo de estudiantes debe realizar la hidrólisis de una muestra que contiene almidón. Para ello, deben preparar 0,350 L de una solución acuosa de concentración 2 mol/L de HCl (masa molar = 36 g/mol). ¿Qué masa total de HCl debe contener la solución requerida?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "0,7 g",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "5,7 g",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "12,6 g",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "25,2 g",
+       "isCorrect": true
+      }
+     ]
+    },
+    {
+     "position": 131,
+     "printedNumber": "79",
+     "type": "multiple_choice",
+     "stem": "Un grupo de estudiantes desea determinar cómo influye la temperatura en la solubilidad del nitrato de potasio en agua. ¿Cuál de los siguientes procedimientos permite cumplir adecuadamente este objetivo?",
+     "correctKey": "A",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "Utilizar la misma masa de agua a diferentes temperaturas y agregar nitrato de potasio hasta obtener una solución saturada en cada caso.",
+       "isCorrect": true
+      },
+      {
+       "key": "B",
+       "text": "Utilizar diferentes masas de agua a la misma temperatura y agregar en cada caso la misma masa de nitrato de potasio.",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "Utilizar la misma masa de agua y la misma temperatura, pero agregar distintos solutos hasta formar soluciones saturadas.",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "Utilizar diferentes masas de agua y diferentes temperaturas, agregando nitrato de potasio durante distintos periodos de tiempo.",
+       "isCorrect": false
+      }
+     ]
+    },
+    {
+     "position": 132,
+     "printedNumber": "80",
+     "type": "multiple_choice",
+     "stem": "Un estudiante tiene un recipiente con 500 mL de una solución acuosa de sal común (NaCl) de concentración 1,5 mol/L, a la cual le agrega 1 L de agua formando una nueva solución que denomina X. Luego, toma un volumen de 10 mL de la solución X y los lleva a otro recipiente, agregando agua destilada hasta completar un volumen de 50 mL, formando una solución que denominó Y. ¿Cuál es la concentración de la solución Y?",
+     "correctKey": "D",
+     "responseFormat": "choice",
+     "hasFigure": false,
+     "figureNote": null,
+     "alternatives": [
+      {
+       "key": "A",
+       "text": "1,50 mol/L",
+       "isCorrect": false
+      },
+      {
+       "key": "B",
+       "text": "0,50 mol/L",
+       "isCorrect": false
+      },
+      {
+       "key": "C",
+       "text": "0,30 mol/L",
+       "isCorrect": false
+      },
+      {
+       "key": "D",
+       "text": "0,10 mol/L",
+       "isCorrect": true
+      }
+     ]
+    }
+   ]
   }
  ],
  "pauta": {
   "source": {
-   "instrumentJson": "CIE-E4-BIO-con-pauta.json"
+   "instrumentJson": "CIE-E4-fusionado.json"
   }
  },
  "extraction": {
-  "itemCount": 80,
-  "warnings": [
-   "2 candidatos duplicados descartados",
-   "#65: clave E fuera de ['A', 'B', 'C', 'D']",
-   "posiciones [28, 58] completadas a mano desde el PDF (subagente extractor, 2026-10-05)"
+  "itemCount": 132,
+  "fusedFrom": [
+   "CIE-E4-BIO-con-pauta.json",
+   "CIE-E4-FIS-con-pauta.json",
+   "CIE-E4-QUI-con-pauta.json"
   ],
-  "needsHumanReview": true,
-  "itemsConClave": 80
+  "generator": "scripts/paes-2026/fusionar_cie_electivas.py"
  }
 }

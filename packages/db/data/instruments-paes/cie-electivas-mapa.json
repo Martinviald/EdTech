@@ -1,0 +1,4393 @@
+{
+ "schemaVersion": 1,
+ "description": "Ciencias PAES 2026: 9 instrumentos por mención -> 3 instrumentos con secciones electivas. Generado por scripts/paes-2026/fusionar_cie_electivas.py; lo consume db:migrate:cie-electivas.",
+ "loadKey": "paes-2026-cie",
+ "instruments": [
+  {
+   "fused": {
+    "sourceJson": "CIE-E1-fusionado.json",
+    "file": "CIE/CIE-E1-fusionado.json"
+   },
+   "legacy": [
+    {
+     "sourceJson": "CIE-E1-BIO-con-pauta.json",
+     "electiveKey": "BIO"
+    },
+    {
+     "sourceJson": "CIE-E1-FIS-con-pauta.json",
+     "electiveKey": "FIS"
+    },
+    {
+     "sourceJson": "CIE-E1-QUI-con-pauta.json",
+     "electiveKey": "QUI"
+    }
+   ],
+   "items": [
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "80"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "80"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "80"
+    }
+   ]
+  },
+  {
+   "fused": {
+    "sourceJson": "CIE-E3-fusionado.json",
+    "file": "CIE/CIE-E3-fusionado.json"
+   },
+   "legacy": [
+    {
+     "sourceJson": "CIE-E3-BIO-con-pauta.json",
+     "electiveKey": "BIO"
+    },
+    {
+     "sourceJson": "CIE-E3-FIS-con-pauta.json",
+     "electiveKey": "FIS"
+    },
+    {
+     "sourceJson": "CIE-E3-QUI-con-pauta.json",
+     "electiveKey": "QUI"
+    }
+   ],
+   "items": [
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "80"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "80"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "80"
+    }
+   ]
+  },
+  {
+   "fused": {
+    "sourceJson": "CIE-E4-fusionado.json",
+    "file": "CIE/CIE-E4-fusionado.json"
+   },
+   "legacy": [
+    {
+     "sourceJson": "CIE-E4-BIO-con-pauta.json",
+     "electiveKey": "BIO"
+    },
+    {
+     "sourceJson": "CIE-E4-FIS-con-pauta.json",
+     "electiveKey": "FIS"
+    },
+    {
+     "sourceJson": "CIE-E4-QUI-con-pauta.json",
+     "electiveKey": "QUI"
+    }
+   ],
+   "items": [
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "1",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "1"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "2",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "2"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "3",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "3"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "4",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "4"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "5",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "5"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "6",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "6"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "7",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "7"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "8",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "8"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "9",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "9"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "10",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "10"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "11",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "11"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "12",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "12"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "13",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "13"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "14",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "14"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "15",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "15"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "16",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "16"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "17",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "17"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "18",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "18"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "19",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "19"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "20",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "20"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "21",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "21"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "22",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "22"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "23",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "23"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "24",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "24"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "25",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "25"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "26",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "26"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "27",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "27"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "28",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "28"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "29",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "29"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "30",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "30"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "31",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "31"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "32",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "32"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "33",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "33"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "34",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "34"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "35",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "35"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "36",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "36"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "37",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "37"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "38",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "38"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "39",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "39"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "40",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "40"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "41",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "41"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "42",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "42"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "43",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "43"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "44",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "44"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "45",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "45"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "46",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "46"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "47",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "47"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "48",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "48"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "49",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "49"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "50",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "50"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "51",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "51"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "52",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "52"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "53",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "53"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "54",
+     "fusedElectiveKey": null,
+     "fusedPrintedNumber": "54"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "BIO",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "BIO",
+     "fusedPrintedNumber": "80"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "FIS",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "FIS",
+     "fusedPrintedNumber": "80"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "55",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "55"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "56",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "56"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "57",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "57"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "58",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "58"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "59",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "59"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "60",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "60"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "61",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "61"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "62",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "62"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "63",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "63"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "64",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "64"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "65",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "65"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "66",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "66"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "67",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "67"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "68",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "68"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "69",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "69"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "70",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "70"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "71",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "71"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "72",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "72"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "73",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "73"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "74",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "74"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "75",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "75"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "76",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "76"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "77",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "77"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "78",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "78"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "79",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "79"
+    },
+    {
+     "electiveKey": "QUI",
+     "legacyPrintedNumber": "80",
+     "fusedElectiveKey": "QUI",
+     "fusedPrintedNumber": "80"
+    }
+   ]
+  }
+ ]
+}
