@@ -1,6 +1,7 @@
 import type { MasterBoardTake } from '@soe/types';
 import {
   buildMasterBoardQuery,
+  defaultTake,
   hasSelectedTake,
   parseMasterBoardFilters,
   takeKeyOf,
@@ -117,5 +118,23 @@ describe('takeToFilterValues', () => {
       metric: undefined,
     });
     expect(takeKeyOf(takeToFilterValues(legacy, undefined))).toBe(legacy.key);
+  });
+});
+
+describe('defaultTake', () => {
+  it('elige la primera toma con resultados aunque haya una más reciente sin ellos', () => {
+    const sinResultados = take({ key: 'process:nuevo', hasResults: false });
+    const conResultados = take({ key: 'process:anterior', hasResults: true });
+    expect(defaultTake([sinResultados, conResultados])).toBe(conResultados);
+  });
+
+  it('si ninguna tiene resultados, cae en la primera', () => {
+    const primera = take({ key: 'process:a', hasResults: false });
+    const segunda = take({ key: 'process:b', hasResults: false });
+    expect(defaultTake([primera, segunda])).toBe(primera);
+  });
+
+  it('sin tomas no hay toma por defecto', () => {
+    expect(defaultTake([])).toBeUndefined();
   });
 });

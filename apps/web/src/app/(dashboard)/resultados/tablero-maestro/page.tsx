@@ -11,6 +11,7 @@ import { MasterBoardLegend, MasterBoardTable } from './master-board-table';
 import { getMasterBoardMatrix, getMasterBoardTakes } from './data';
 import {
   buildMasterBoardQuery,
+  defaultTake,
   hasSelectedTake,
   parseMasterBoardFilters,
   takeKeyOf,
@@ -61,7 +62,8 @@ async function MatrixSection({
 }) {
   if (!hasSelectedTake(filters)) {
     const takes = await getMasterBoardTakes('');
-    if (takes.takes.length === 0) {
+    const initialTake = defaultTake(takes.takes);
+    if (!initialTake) {
       return (
         <EmptyState
           icon={Table2}
@@ -70,7 +72,7 @@ async function MatrixSection({
         />
       );
     }
-    const query = buildMasterBoardQuery(takeToFilterValues(takes.takes[0]!, filters.metric));
+    const query = buildMasterBoardQuery(takeToFilterValues(initialTake, filters.metric));
     redirect(`${ROUTES.resultadosTableroMaestro}${query}`);
   }
 

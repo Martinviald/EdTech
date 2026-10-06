@@ -111,3 +111,7 @@ export function takeToFilterValues(
     metric,
   };
 }
+
+export function defaultTake(takes: readonly MasterBoardTake[]): MasterBoardTake | undefined {
+  return takes.find((take) => take.hasResults) ?? takes[0];
+}
