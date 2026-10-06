@@ -23,47 +23,47 @@
       "assessmentCount": 41,
       "resolvedAssessmentCount": 41,
       "assessmentIds": [
-        "0024610e-7f89-4ea5-a6fe-b9e0471732b6",
-        "003e9db5-f269-48ea-a735-5052e514bc0d",
-        "0cd9e0c0-911c-4838-a1a7-03baed860ce7",
-        "12216a15-1c9e-400c-9b27-14b2c14a530f",
-        "15ddb417-3de3-4da6-9613-62355d657b36",
-        "1622afbf-6f59-4af6-adf8-a45be55e2426",
-        "198d06c3-b2c5-448c-b269-4ae2aedfeb3f",
-        "1a517d86-42cd-44f0-8fe6-edb9e6313542",
-        "2838b409-066e-41f6-9ae2-e8b31e81b446",
-        "390a0404-5597-4151-803c-441aeca2bd48",
-        "3b363f70-8083-4e87-b995-da2e0094ee27",
-        "4569891a-187f-4eee-90a3-35fb45e41574",
-        "45dbcd37-c10d-40f7-a630-d04c204ce9d0",
-        "475f26d3-a34e-4dfa-b0b5-e14fefb9e3df",
-        "48614300-c686-4db2-968c-6b0a10b788c6",
-        "515d2625-c894-4343-8c4a-bfe1863c0efe",
-        "5634d82b-eb8a-4849-b721-67e7baa9598b",
-        "5e6ba22a-7139-427d-a8f5-0f21600f4756",
-        "61c1b967-32c1-4708-b87a-5731aef46370",
-        "6f012464-493f-4cf1-8ed4-7eadec002f32",
-        "7039f2d5-b3c2-41b8-84ae-ed5da486b26f",
-        "7cc92c70-9d24-4a8a-b4e3-03b6488ca35f",
-        "7dfecc8c-be22-4e11-b9c3-bf047db5c3f0",
-        "7f13591c-4406-4630-a6c2-f484a052c291",
-        "86e78fd9-3bf0-4f0a-bded-35d0424c9941",
-        "8b01a30e-692f-49f9-88ce-5a1fd601bb7d",
-        "8d78bf5b-e0f0-4a89-8df6-29e36eb1585a",
-        "93c2b706-8827-4eda-85a3-db0a8e84b4a2",
-        "975fb20d-3df2-4f15-b15c-bec8f9af2dbc",
-        "9bd0ef7c-34a7-4806-ba2d-095ddea1b8b1",
-        "9f18ba56-440e-4644-9224-4aa03310abb9",
-        "acde9046-a740-4403-80ce-d562b5e4488e",
-        "b1797bae-d163-4419-bdc1-a23d38d87df4",
-        "ce9ab452-589d-4112-a817-59f784c9920e",
-        "d856adbe-8449-4067-8361-d396a3d4524e",
-        "f3b77d44-863c-42d5-bfa8-2dcab0bc8d09",
-        "f69b342c-d8ac-42a6-ab1f-a80f5edf944c",
-        "f784ae7e-ccf8-41f2-95f4-b5b7f0e14178",
-        "f7a74972-97a6-4f0f-b2d6-d1eedc864585",
-        "fb23e4a1-4c70-4708-b752-9f805bee5cf1",
-        "fd895f43-67f7-40f9-9aec-2bcf405dd652"
+        "02f204d7-a914-4ea6-9169-cbaa525e1333",
+        "15e0ab44-080d-4dec-9dfc-1c18073fbecc",
+        "189d3253-3bd3-4276-8b86-fbc6bd1c66ec",
+        "1f87feb4-402e-4471-b216-b17657e71bb2",
+        "20d80799-99e7-4ad5-9578-61962c7532ed",
+        "218d0562-cc2c-4e74-9830-f7b7c1a5eb23",
+        "22f13ee3-7602-4f6d-a86f-f913e32b00c5",
+        "2345c053-df1a-44b3-b5f1-a59de7df08fe",
+        "2a555fd5-974d-4bf0-8124-566ebc729ce9",
+        "2ab25709-0d07-4fe8-b0b0-b827d81fdb65",
+        "2e749017-39a4-405e-acd1-a91661eadcb8",
+        "38c7d2ef-139e-4731-bbd5-e8c5f101e645",
+        "3c32164d-5941-485a-98ac-3530f432d98f",
+        "42584232-f231-471e-a0ea-3e6270c4b274",
+        "42b8f8b5-4e11-4858-bfa0-13228262bdb9",
+        "495302c5-953b-47ac-bf1b-7f385da6a689",
+        "4a58704e-64f4-4812-a838-021768b4d24d",
+        "4aa7276c-6c82-4682-b1d1-e49a8e081bf9",
+        "5250b200-3255-4aec-ae55-4d6c978e57bb",
+        "5517b436-ed0e-4645-95cc-a70db310d07b",
+        "5c0d81e1-c580-423a-9a1c-4d2e9fd7dfec",
+        "6197bd50-23cb-4d60-889d-526ef93d1d6b",
+        "6a551fae-60c9-4b05-8c1e-aa27a094801b",
+        "6acea2b3-6e85-4fa9-bd92-d71199d6c93e",
+        "748bb346-a4a3-44b8-9942-9e2c7c73d511",
+        "78eba862-ad6d-4c6d-90b1-e70f6edc51b7",
+        "8c72b9ac-f429-406d-acc1-46870b6b10ea",
+        "906706d0-cd2c-4300-96da-b4e8ef4847b4",
+        "92c4af00-acc7-4410-8955-63f6c738727f",
+        "9daee198-7f52-4e81-a0f2-09257760dbc3",
+        "b3149b90-7afb-4d54-b9b1-a9807c4df5a5",
+        "bcd96ef4-6d3f-4961-b7cf-000933af0da3",
+        "be01a64b-3c51-422d-9339-15e3729b1251",
+        "c32920a9-75fd-403e-a199-95ef1f0c7f85",
+        "c6ff988a-8c77-4562-923d-1c8159265ada",
+        "c9bbacd0-7859-428e-9384-b02f6ecef0b1",
+        "ca340dbd-a5ab-43cb-ba5b-a84abf972463",
+        "d866136f-cd95-4703-8014-17c861fd8e5e",
+        "da2f4c69-7a25-4623-9218-dd03ff72bf45",
+        "df5e8ad5-7b51-48cb-ae3f-5dc4cafad326",
+        "f98d3120-00bb-422d-b795-0a235dd0133d"
       ],
       "cellCount": 45,
       "cells": [
@@ -73,14 +73,14 @@
           "gradeOrder": 2,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "67b3f6f5-1ab2-4f27-b8cc-bdfe006709c2",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "bb19780d-a508-45eb-b893-8bec837b2933",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "522.00",
           "maxSum": "630.00",
           "studentsAssessed": 41,
           "assessmentIds": [
-            "45dbcd37-c10d-40f7-a630-d04c204ce9d0",
-            "7f13591c-4406-4630-a6c2-f484a052c291"
+            "2345c053-df1a-44b3-b5f1-a59de7df08fe",
+            "bcd96ef4-6d3f-4961-b7cf-000933af0da3"
           ],
           "instruments": [
             "DIA Lectura 2° Básico 2026 — Intermedio"
@@ -92,14 +92,14 @@
           "gradeOrder": 2,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "5d65b5e0-73a3-4d1d-9de0-e5baf588953d",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "787f5b7f-be32-4051-add8-c4394cb5c05d",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "462.00",
           "maxSum": "570.00",
           "studentsAssessed": 37,
           "assessmentIds": [
-            "45dbcd37-c10d-40f7-a630-d04c204ce9d0",
-            "7f13591c-4406-4630-a6c2-f484a052c291"
+            "2345c053-df1a-44b3-b5f1-a59de7df08fe",
+            "bcd96ef4-6d3f-4961-b7cf-000933af0da3"
           ],
           "instruments": [
             "DIA Lectura 2° Básico 2026 — Intermedio"
@@ -111,13 +111,13 @@
           "gradeOrder": 3,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "302fb076-7e28-4c9d-86bb-201d0c5bf9ca",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "db0bf74d-892b-4ab5-b3c1-0cf17ac63c96",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "617.00",
           "maxSum": "760.00",
           "studentsAssessed": 38,
           "assessmentIds": [
-            "7dfecc8c-be22-4e11-b9c3-bf047db5c3f0"
+            "1f87feb4-402e-4471-b216-b17657e71bb2"
           ],
           "instruments": [
             "DIA Lectura 3° Básico 2026 — Intermedio"
@@ -129,13 +129,13 @@
           "gradeOrder": 3,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "88766246-80d2-445c-895d-bcbf21ec2a01",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "bc9aed67-7643-478a-9583-a67e2ba0a653",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "541.00",
           "maxSum": "720.00",
           "studentsAssessed": 36,
           "assessmentIds": [
-            "515d2625-c894-4343-8c4a-bfe1863c0efe"
+            "6197bd50-23cb-4d60-889d-526ef93d1d6b"
           ],
           "instruments": [
             "DIA Lectura 3° Básico 2026 — Intermedio"
@@ -147,13 +147,13 @@
           "gradeOrder": 3,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "88766246-80d2-445c-895d-bcbf21ec2a01",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "bc9aed67-7643-478a-9583-a67e2ba0a653",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "689.00",
           "maxSum": "1118.00",
           "studentsAssessed": 43,
           "assessmentIds": [
-            "9bd0ef7c-34a7-4806-ba2d-095ddea1b8b1"
+            "748bb346-a4a3-44b8-9942-9e2c7c73d511"
           ],
           "instruments": [
             "DIA Matemática 3° Básico 2026 — Intermedio"
@@ -165,13 +165,13 @@
           "gradeOrder": 4,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "cb9a7555-5673-4265-97f1-37b531a57e33",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "c5a2c328-c0f0-4ef3-a209-4276ad3f2014",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "325.00",
           "maxSum": "420.00",
           "studentsAssessed": 20,
           "assessmentIds": [
-            "0cd9e0c0-911c-4838-a1a7-03baed860ce7"
+            "9daee198-7f52-4e81-a0f2-09257760dbc3"
           ],
           "instruments": [
             "DIA Lectura 4° Básico 2026 — Intermedio"
@@ -183,13 +183,13 @@
           "gradeOrder": 4,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "cb9a7555-5673-4265-97f1-37b531a57e33",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "c5a2c328-c0f0-4ef3-a209-4276ad3f2014",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "232.00",
           "maxSum": "416.00",
           "studentsAssessed": 16,
           "assessmentIds": [
-            "390a0404-5597-4151-803c-441aeca2bd48"
+            "b3149b90-7afb-4d54-b9b1-a9807c4df5a5"
           ],
           "instruments": [
             "DIA Matemática 4° Básico 2026 — Intermedio"
@@ -201,13 +201,13 @@
           "gradeOrder": 4,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "80a342d7-96a7-433e-ad20-5dde03f4f201",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "bcb42d1d-2961-4878-bec6-59baa42c1038",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "329.00",
           "maxSum": "462.00",
           "studentsAssessed": 22,
           "assessmentIds": [
-            "0cd9e0c0-911c-4838-a1a7-03baed860ce7"
+            "9daee198-7f52-4e81-a0f2-09257760dbc3"
           ],
           "instruments": [
             "DIA Lectura 4° Básico 2026 — Intermedio"
@@ -219,13 +219,13 @@
           "gradeOrder": 4,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "80a342d7-96a7-433e-ad20-5dde03f4f201",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "bcb42d1d-2961-4878-bec6-59baa42c1038",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "271.00",
           "maxSum": "494.00",
           "studentsAssessed": 19,
           "assessmentIds": [
-            "390a0404-5597-4151-803c-441aeca2bd48"
+            "b3149b90-7afb-4d54-b9b1-a9807c4df5a5"
           ],
           "instruments": [
             "DIA Matemática 4° Básico 2026 — Intermedio"
@@ -237,13 +237,13 @@
           "gradeOrder": 5,
           "classGroupName": "A",
           "subjectCode": "HIST",
-          "classGroupId": "598a7bb8-53ae-4c1f-952b-8bc7690fa58d",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "2a68d918-0642-46fd-a67e-cb8f14217f89",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "360.00",
           "maxSum": "891.00",
           "studentsAssessed": 33,
           "assessmentIds": [
-            "975fb20d-3df2-4f15-b15c-bec8f9af2dbc"
+            "78eba862-ad6d-4c6d-90b1-e70f6edc51b7"
           ],
           "instruments": [
             "DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio"
@@ -255,13 +255,13 @@
           "gradeOrder": 5,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "598a7bb8-53ae-4c1f-952b-8bc7690fa58d",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "2a68d918-0642-46fd-a67e-cb8f14217f89",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "628.00",
           "maxSum": "900.00",
           "studentsAssessed": 36,
           "assessmentIds": [
-            "7039f2d5-b3c2-41b8-84ae-ed5da486b26f"
+            "22f13ee3-7602-4f6d-a86f-f913e32b00c5"
           ],
           "instruments": [
             "DIA Lectura 5° Básico 2026 — Intermedio"
@@ -273,13 +273,13 @@
           "gradeOrder": 5,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "598a7bb8-53ae-4c1f-952b-8bc7690fa58d",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "2a68d918-0642-46fd-a67e-cb8f14217f89",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "617.00",
           "maxSum": "1140.00",
           "studentsAssessed": 38,
           "assessmentIds": [
-            "8d78bf5b-e0f0-4a89-8df6-29e36eb1585a"
+            "42b8f8b5-4e11-4858-bfa0-13228262bdb9"
           ],
           "instruments": [
             "DIA Matemática 5° Básico 2026 — Intermedio"
@@ -291,13 +291,13 @@
           "gradeOrder": 5,
           "classGroupName": "B",
           "subjectCode": "HIST",
-          "classGroupId": "626402bf-df50-4d52-b55a-208994f78fd9",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "61abe5e4-fc15-449e-a83d-005886b0345d",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "262.00",
           "maxSum": "621.00",
           "studentsAssessed": 23,
           "assessmentIds": [
-            "93c2b706-8827-4eda-85a3-db0a8e84b4a2"
+            "6a551fae-60c9-4b05-8c1e-aa27a094801b"
           ],
           "instruments": [
             "DIA Historia, Geografía y Ciencias Sociales 5° Básico 2026 — Monitoreo Intermedio"
@@ -309,13 +309,13 @@
           "gradeOrder": 5,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "626402bf-df50-4d52-b55a-208994f78fd9",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "61abe5e4-fc15-449e-a83d-005886b0345d",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "771.00",
           "maxSum": "1075.00",
           "studentsAssessed": 43,
           "assessmentIds": [
-            "86e78fd9-3bf0-4f0a-bded-35d0424c9941"
+            "02f204d7-a914-4ea6-9169-cbaa525e1333"
           ],
           "instruments": [
             "DIA Lectura 5° Básico 2026 — Intermedio"
@@ -327,13 +327,13 @@
           "gradeOrder": 5,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "626402bf-df50-4d52-b55a-208994f78fd9",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "61abe5e4-fc15-449e-a83d-005886b0345d",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "688.00",
           "maxSum": "1230.00",
           "studentsAssessed": 41,
           "assessmentIds": [
-            "0024610e-7f89-4ea5-a6fe-b9e0471732b6"
+            "92c4af00-acc7-4410-8955-63f6c738727f"
           ],
           "instruments": [
             "DIA Matemática 5° Básico 2026 — Intermedio"
@@ -345,13 +345,13 @@
           "gradeOrder": 6,
           "classGroupName": "A",
           "subjectCode": "ENG",
-          "classGroupId": "71bfd7c3-2806-48a9-bffe-a654e56566e0",
-          "subjectId": "6f4e3d4a-c454-4800-a742-7c452eaaeda9",
+          "classGroupId": "fa189007-f6eb-4bb2-a07a-ec4d51aed85b",
+          "subjectId": "52370bd8-9f8e-4b80-af27-9d5da6ca2677",
           "scoreSum": "730.00",
           "maxSum": "960.00",
           "studentsAssessed": 40,
           "assessmentIds": [
-            "1a517d86-42cd-44f0-8fe6-edb9e6313542"
+            "da2f4c69-7a25-4623-9218-dd03ff72bf45"
           ],
           "instruments": [
             "DIA Inglés 6° Básico 2026 — Monitoreo Intermedio"
@@ -363,13 +363,13 @@
           "gradeOrder": 6,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "71bfd7c3-2806-48a9-bffe-a654e56566e0",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "fa189007-f6eb-4bb2-a07a-ec4d51aed85b",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "215.00",
           "maxSum": "364.00",
           "studentsAssessed": 14,
           "assessmentIds": [
-            "8b01a30e-692f-49f9-88ce-5a1fd601bb7d"
+            "2ab25709-0d07-4fe8-b0b0-b827d81fdb65"
           ],
           "instruments": [
             "DIA Lectura 6° Básico 2026 — Intermedio"
@@ -381,13 +381,13 @@
           "gradeOrder": 6,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "71bfd7c3-2806-48a9-bffe-a654e56566e0",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "fa189007-f6eb-4bb2-a07a-ec4d51aed85b",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "668.00",
           "maxSum": "1248.00",
           "studentsAssessed": 39,
           "assessmentIds": [
-            "f3b77d44-863c-42d5-bfa8-2dcab0bc8d09"
+            "5250b200-3255-4aec-ae55-4d6c978e57bb"
           ],
           "instruments": [
             "DIA Matemática 6° Básico 2026 — Intermedio"
@@ -399,13 +399,13 @@
           "gradeOrder": 6,
           "classGroupName": "B",
           "subjectCode": "ENG",
-          "classGroupId": "deec1e72-53c5-4b05-8225-f63b2a2374d0",
-          "subjectId": "6f4e3d4a-c454-4800-a742-7c452eaaeda9",
+          "classGroupId": "69b31787-01e3-48f2-b17e-11be57765539",
+          "subjectId": "52370bd8-9f8e-4b80-af27-9d5da6ca2677",
           "scoreSum": "747.00",
           "maxSum": "984.00",
           "studentsAssessed": 41,
           "assessmentIds": [
-            "3b363f70-8083-4e87-b995-da2e0094ee27"
+            "4a58704e-64f4-4812-a838-021768b4d24d"
           ],
           "instruments": [
             "DIA Inglés 6° Básico 2026 — Monitoreo Intermedio"
@@ -417,13 +417,13 @@
           "gradeOrder": 6,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "deec1e72-53c5-4b05-8225-f63b2a2374d0",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "69b31787-01e3-48f2-b17e-11be57765539",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "783.00",
           "maxSum": "1092.00",
           "studentsAssessed": 42,
           "assessmentIds": [
-            "1622afbf-6f59-4af6-adf8-a45be55e2426"
+            "2a555fd5-974d-4bf0-8124-566ebc729ce9"
           ],
           "instruments": [
             "DIA Lectura 6° Básico 2026 — Intermedio"
@@ -435,13 +435,13 @@
           "gradeOrder": 6,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "deec1e72-53c5-4b05-8225-f63b2a2374d0",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "69b31787-01e3-48f2-b17e-11be57765539",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "775.00",
           "maxSum": "1376.00",
           "studentsAssessed": 43,
           "assessmentIds": [
-            "6f012464-493f-4cf1-8ed4-7eadec002f32"
+            "5517b436-ed0e-4645-95cc-a70db310d07b"
           ],
           "instruments": [
             "DIA Matemática 6° Básico 2026 — Intermedio"
@@ -453,13 +453,13 @@
           "gradeOrder": 7,
           "classGroupName": "A",
           "subjectCode": "HIST",
-          "classGroupId": "33eafaa8-bcdb-4c02-b80c-b8703309a393",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "c5b0ea04-6cef-446f-a5ce-ae377684b57d",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "503.00",
           "maxSum": "1044.00",
           "studentsAssessed": 36,
           "assessmentIds": [
-            "d856adbe-8449-4067-8361-d396a3d4524e"
+            "d866136f-cd95-4703-8014-17c861fd8e5e"
           ],
           "instruments": [
             "DIA Historia, Geografía y Ciencias Sociales 7° Básico 2026 — Monitoreo Intermedio"
@@ -471,13 +471,13 @@
           "gradeOrder": 7,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "33eafaa8-bcdb-4c02-b80c-b8703309a393",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "c5b0ea04-6cef-446f-a5ce-ae377684b57d",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "732.00",
           "maxSum": "1247.00",
           "studentsAssessed": 43,
           "assessmentIds": [
-            "ce9ab452-589d-4112-a817-59f784c9920e"
+            "495302c5-953b-47ac-bf1b-7f385da6a689"
           ],
           "instruments": [
             "DIA Lectura 7° Básico 2026 — Intermedio"
@@ -489,13 +489,13 @@
           "gradeOrder": 7,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "33eafaa8-bcdb-4c02-b80c-b8703309a393",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "c5b0ea04-6cef-446f-a5ce-ae377684b57d",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "558.00",
           "maxSum": "1170.00",
           "studentsAssessed": 39,
           "assessmentIds": [
-            "61c1b967-32c1-4708-b87a-5731aef46370"
+            "df5e8ad5-7b51-48cb-ae3f-5dc4cafad326"
           ],
           "instruments": [
             "DIA Matemática 7° Básico 2026 — Intermedio"
@@ -507,13 +507,13 @@
           "gradeOrder": 7,
           "classGroupName": "A",
           "subjectCode": "SCI",
-          "classGroupId": "33eafaa8-bcdb-4c02-b80c-b8703309a393",
-          "subjectId": "17932745-9762-4a56-8dcc-7927e4d69a7c",
+          "classGroupId": "c5b0ea04-6cef-446f-a5ce-ae377684b57d",
+          "subjectId": "e01bd312-52ca-46d2-9a3f-a8e5edd75150",
           "scoreSum": "521.00",
           "maxSum": "1596.00",
           "studentsAssessed": 42,
           "assessmentIds": [
-            "acde9046-a740-4403-80ce-d562b5e4488e"
+            "2e749017-39a4-405e-acd1-a91661eadcb8"
           ],
           "instruments": [
             "DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio"
@@ -525,13 +525,13 @@
           "gradeOrder": 7,
           "classGroupName": "B",
           "subjectCode": "HIST",
-          "classGroupId": "1e509119-c8ae-4c32-8872-54a3ecf048aa",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "a9baac50-97f3-4ed0-9f11-d357458e6f06",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "679.00",
           "maxSum": "1276.00",
           "studentsAssessed": 44,
           "assessmentIds": [
-            "fd895f43-67f7-40f9-9aec-2bcf405dd652"
+            "906706d0-cd2c-4300-96da-b4e8ef4847b4"
           ],
           "instruments": [
             "DIA Historia, Geografía y Ciencias Sociales 7° Básico 2026 — Monitoreo Intermedio"
@@ -543,13 +543,13 @@
           "gradeOrder": 7,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "1e509119-c8ae-4c32-8872-54a3ecf048aa",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "a9baac50-97f3-4ed0-9f11-d357458e6f06",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "805.00",
           "maxSum": "1305.00",
           "studentsAssessed": 45,
           "assessmentIds": [
-            "475f26d3-a34e-4dfa-b0b5-e14fefb9e3df"
+            "c32920a9-75fd-403e-a199-95ef1f0c7f85"
           ],
           "instruments": [
             "DIA Lectura 7° Básico 2026 — Intermedio"
@@ -561,13 +561,13 @@
           "gradeOrder": 7,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "1e509119-c8ae-4c32-8872-54a3ecf048aa",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "a9baac50-97f3-4ed0-9f11-d357458e6f06",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "585.00",
           "maxSum": "1110.00",
           "studentsAssessed": 37,
           "assessmentIds": [
-            "5e6ba22a-7139-427d-a8f5-0f21600f4756"
+            "6acea2b3-6e85-4fa9-bd92-d71199d6c93e"
           ],
           "instruments": [
             "DIA Matemática 7° Básico 2026 — Intermedio"
@@ -579,13 +579,13 @@
           "gradeOrder": 7,
           "classGroupName": "B",
           "subjectCode": "SCI",
-          "classGroupId": "1e509119-c8ae-4c32-8872-54a3ecf048aa",
-          "subjectId": "17932745-9762-4a56-8dcc-7927e4d69a7c",
+          "classGroupId": "a9baac50-97f3-4ed0-9f11-d357458e6f06",
+          "subjectId": "e01bd312-52ca-46d2-9a3f-a8e5edd75150",
           "scoreSum": "686.00",
           "maxSum": "1634.00",
           "studentsAssessed": 43,
           "assessmentIds": [
-            "9f18ba56-440e-4644-9224-4aa03310abb9"
+            "be01a64b-3c51-422d-9339-15e3729b1251"
           ],
           "instruments": [
             "DIA Ciencias Naturales 7° Básico 2026 — Monitoreo Intermedio"
@@ -597,13 +597,13 @@
           "gradeOrder": 8,
           "classGroupName": "A",
           "subjectCode": "HIST",
-          "classGroupId": "6517d4dc-32ec-41c7-9d76-ea6eea4e71f0",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "ba9a74d9-a36e-4e04-8dc2-1781757a69fb",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "610.00",
           "maxSum": "1131.00",
           "studentsAssessed": 39,
           "assessmentIds": [
-            "5634d82b-eb8a-4849-b721-67e7baa9598b"
+            "218d0562-cc2c-4e74-9830-f7b7c1a5eb23"
           ],
           "instruments": [
             "DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio"
@@ -615,13 +615,13 @@
           "gradeOrder": 8,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "6517d4dc-32ec-41c7-9d76-ea6eea4e71f0",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "ba9a74d9-a36e-4e04-8dc2-1781757a69fb",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "830.00",
           "maxSum": "1230.00",
           "studentsAssessed": 41,
           "assessmentIds": [
-            "f69b342c-d8ac-42a6-ab1f-a80f5edf944c"
+            "3c32164d-5941-485a-98ac-3530f432d98f"
           ],
           "instruments": [
             "DIA Lectura 8° Básico 2026 — Intermedio"
@@ -633,13 +633,13 @@
           "gradeOrder": 8,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "6517d4dc-32ec-41c7-9d76-ea6eea4e71f0",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "ba9a74d9-a36e-4e04-8dc2-1781757a69fb",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "561.00",
           "maxSum": "1462.00",
           "studentsAssessed": 43,
           "assessmentIds": [
-            "b1797bae-d163-4419-bdc1-a23d38d87df4"
+            "38c7d2ef-139e-4731-bbd5-e8c5f101e645"
           ],
           "instruments": [
             "DIA Matemática 8° Básico 2026 — Intermedio"
@@ -651,13 +651,13 @@
           "gradeOrder": 8,
           "classGroupName": "B",
           "subjectCode": "HIST",
-          "classGroupId": "b32c2fbb-970e-4c4c-97b5-8d268027e9f9",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "b8e2cf5b-52c3-4c47-8548-3972a38f2819",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "487.00",
           "maxSum": "1305.00",
           "studentsAssessed": 45,
           "assessmentIds": [
-            "f784ae7e-ccf8-41f2-95f4-b5b7f0e14178"
+            "ca340dbd-a5ab-43cb-ba5b-a84abf972463"
           ],
           "instruments": [
             "DIA Historia, Geografía y Ciencias Sociales 8° Básico 2026 — Monitoreo Intermedio"
@@ -669,13 +669,13 @@
           "gradeOrder": 8,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "b32c2fbb-970e-4c4c-97b5-8d268027e9f9",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "b8e2cf5b-52c3-4c47-8548-3972a38f2819",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "746.00",
           "maxSum": "1230.00",
           "studentsAssessed": 41,
           "assessmentIds": [
-            "7cc92c70-9d24-4a8a-b4e3-03b6488ca35f"
+            "42584232-f231-471e-a0ea-3e6270c4b274"
           ],
           "instruments": [
             "DIA Lectura 8° Básico 2026 — Intermedio"
@@ -687,13 +687,13 @@
           "gradeOrder": 8,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "b32c2fbb-970e-4c4c-97b5-8d268027e9f9",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "b8e2cf5b-52c3-4c47-8548-3972a38f2819",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "523.00",
           "maxSum": "1428.00",
           "studentsAssessed": 42,
           "assessmentIds": [
-            "15ddb417-3de3-4da6-9613-62355d657b36"
+            "c6ff988a-8c77-4562-923d-1c8159265ada"
           ],
           "instruments": [
             "DIA Matemática 8° Básico 2026 — Intermedio"
@@ -705,13 +705,13 @@
           "gradeOrder": 9,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "f976c0f7-69e8-4924-a4d9-69a0436063f8",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "b1d72b18-77b5-4b47-801d-905465901095",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "874.00",
           "maxSum": "1394.00",
           "studentsAssessed": 41,
           "assessmentIds": [
-            "48614300-c686-4db2-968c-6b0a10b788c6"
+            "f98d3120-00bb-422d-b795-0a235dd0133d"
           ],
           "instruments": [
             "DIA Lectura I° Medio 2026 — Intermedio"
@@ -723,13 +723,13 @@
           "gradeOrder": 9,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "f976c0f7-69e8-4924-a4d9-69a0436063f8",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "b1d72b18-77b5-4b47-801d-905465901095",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "553.00",
           "maxSum": "1470.00",
           "studentsAssessed": 42,
           "assessmentIds": [
-            "12216a15-1c9e-400c-9b27-14b2c14a530f"
+            "189d3253-3bd3-4276-8b86-fbc6bd1c66ec"
           ],
           "instruments": [
             "DIA Matemática I° Medio 2026 — Intermedio"
@@ -741,13 +741,13 @@
           "gradeOrder": 9,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "a9333813-6e77-40b0-b469-c63307254c88",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "c6d6b1ba-02a9-43f8-ac06-5f841bbfcf0c",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "944.00",
           "maxSum": "1462.00",
           "studentsAssessed": 43,
           "assessmentIds": [
-            "f7a74972-97a6-4f0f-b2d6-d1eedc864585"
+            "15e0ab44-080d-4dec-9dfc-1c18073fbecc"
           ],
           "instruments": [
             "DIA Lectura I° Medio 2026 — Intermedio"
@@ -759,13 +759,13 @@
           "gradeOrder": 9,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "a9333813-6e77-40b0-b469-c63307254c88",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "c6d6b1ba-02a9-43f8-ac06-5f841bbfcf0c",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "597.00",
           "maxSum": "1575.00",
           "studentsAssessed": 45,
           "assessmentIds": [
-            "2838b409-066e-41f6-9ae2-e8b31e81b446"
+            "5c0d81e1-c580-423a-9a1c-4d2e9fd7dfec"
           ],
           "instruments": [
             "DIA Matemática I° Medio 2026 — Intermedio"
@@ -777,13 +777,13 @@
           "gradeOrder": 10,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "b1028ea5-6fd3-45de-afb8-efb41911198e",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "50cde5a5-f384-41ab-9ee9-44eb80eeae2a",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "1130.00",
           "maxSum": "1480.00",
           "studentsAssessed": 40,
           "assessmentIds": [
-            "198d06c3-b2c5-448c-b269-4ae2aedfeb3f"
+            "8c72b9ac-f429-406d-acc1-46870b6b10ea"
           ],
           "instruments": [
             "DIA Lectura II° Medio 2026 — Intermedio"
@@ -795,13 +795,13 @@
           "gradeOrder": 10,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "b1028ea5-6fd3-45de-afb8-efb41911198e",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "50cde5a5-f384-41ab-9ee9-44eb80eeae2a",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "522.00",
           "maxSum": "1332.00",
           "studentsAssessed": 37,
           "assessmentIds": [
-            "4569891a-187f-4eee-90a3-35fb45e41574"
+            "20d80799-99e7-4ad5-9578-61962c7532ed"
           ],
           "instruments": [
             "DIA Matemática II° Medio 2026 — Intermedio"
@@ -813,14 +813,14 @@
           "gradeOrder": 10,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "62dff777-9115-48db-9a60-4b5ca6e8a9c6",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "8127faf8-80ff-4988-acc4-deb0d8a5d783",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "1335.00",
           "maxSum": "1665.00",
           "studentsAssessed": 44,
           "assessmentIds": [
-            "198d06c3-b2c5-448c-b269-4ae2aedfeb3f",
-            "fb23e4a1-4c70-4708-b752-9f805bee5cf1"
+            "8c72b9ac-f429-406d-acc1-46870b6b10ea",
+            "c9bbacd0-7859-428e-9384-b02f6ecef0b1"
           ],
           "instruments": [
             "DIA Lectura II° Medio 2026 — Intermedio"
@@ -832,14 +832,14 @@
           "gradeOrder": 10,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "62dff777-9115-48db-9a60-4b5ca6e8a9c6",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "8127faf8-80ff-4988-acc4-deb0d8a5d783",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "649.00",
           "maxSum": "1548.00",
           "studentsAssessed": 42,
           "assessmentIds": [
-            "003e9db5-f269-48ea-a735-5052e514bc0d",
-            "4569891a-187f-4eee-90a3-35fb45e41574"
+            "20d80799-99e7-4ad5-9578-61962c7532ed",
+            "4aa7276c-6c82-4682-b1d1-e49a8e081bf9"
           ],
           "instruments": [
             "DIA Matemática II° Medio 2026 — Intermedio"
@@ -851,13 +851,13 @@
           "gradeOrder": 11,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "6572feca-0832-4dfa-89da-f30fae093f35",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "dcb1aec9-bcee-458a-a043-88be4edae8d8",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "28.00",
           "maxSum": "37.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "198d06c3-b2c5-448c-b269-4ae2aedfeb3f"
+            "8c72b9ac-f429-406d-acc1-46870b6b10ea"
           ],
           "instruments": [
             "DIA Lectura II° Medio 2026 — Intermedio"
@@ -869,13 +869,13 @@
           "gradeOrder": 11,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "6572feca-0832-4dfa-89da-f30fae093f35",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "dcb1aec9-bcee-458a-a043-88be4edae8d8",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "10.00",
           "maxSum": "36.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "4569891a-187f-4eee-90a3-35fb45e41574"
+            "20d80799-99e7-4ad5-9578-61962c7532ed"
           ],
           "instruments": [
             "DIA Matemática II° Medio 2026 — Intermedio"
@@ -893,74 +893,74 @@
       "assessmentCount": 68,
       "resolvedAssessmentCount": 68,
       "assessmentIds": [
-        "007ddb04-1bdb-4da5-bc40-33cf250c240f",
-        "01d915a5-fbef-4721-8f8b-9ba516a0e7bb",
-        "0e1087be-10ff-4893-b757-c429abc5adfb",
-        "109c0f50-0213-4633-9080-53f68da068b9",
-        "112b8393-4c00-480b-98b0-293fd672d7a4",
-        "13a5a267-c6ab-4408-b330-ff1dbc5820a0",
-        "165b8b4b-f5b7-4bc2-a7a9-dcce61d2b836",
-        "18e5dda2-c85e-41d9-84a4-e284eb7e7a12",
-        "1953efba-b3a5-42f3-8edf-c93f256c2025",
-        "1b3c6606-c001-40b8-8f2b-2be6cb25312f",
-        "1dc4f637-b81b-4081-8f55-4acc982977f2",
-        "20f92245-32e5-4391-ba73-a7588e302cf5",
-        "21705256-16ce-4d4c-b277-4af881ab2869",
-        "21e08e2b-dd5e-4ff4-86da-ffd953f17886",
-        "269872b5-b15b-4edc-a2ed-57af5ebf8780",
-        "2a5bab31-f6a0-4e06-8a26-1f50e65e868b",
-        "2c598485-49cb-4463-ae52-cf784b3184da",
-        "301071d7-ff5a-410a-8878-0a6930faa164",
-        "358f1c3b-038f-4ee1-9db8-993b7a71f471",
-        "3ab646b3-e436-40d0-9552-1920b7ea6c30",
-        "3fb81ab0-d854-4b9f-b91e-3706fb73a55d",
-        "402ae16b-015a-42c4-8bf4-3dbdc14f216f",
-        "46e640c4-84d0-467b-8085-79beba2c9fcf",
-        "4d6bc3ac-7e66-4a07-9191-b2294e71ae2d",
-        "554b03ab-5557-4cf9-ba72-e5e349248c71",
-        "58b91e0f-e432-4843-98e7-28934c887b7a",
-        "5df2a6c3-37d7-4c03-a6e7-66d91df277e5",
-        "69f0d5d3-ce74-489a-85e3-51eef44d87b2",
-        "7590db7f-fc69-490a-a42a-8931156cb88d",
-        "79c45ad4-03d9-4657-8ac0-15d64924daca",
-        "7bbed887-7dd1-4265-a282-ab956a375799",
-        "7d13bc89-bac8-437d-b2e7-0dbdccddc57d",
-        "7df4dfe0-7f49-48fe-acaa-77b3cf34a32d",
-        "81e0b539-c34f-4cba-9645-2561718f335e",
-        "82a9a748-06c7-45bf-865f-7b15ca8f0ba3",
-        "85ab4e31-8d56-4b63-83b8-5a7b0383ddbe",
-        "86f47f98-b002-412f-b8ee-98b5c1c98161",
-        "882e125d-431d-46b4-a210-d23ca9bbaa7b",
-        "8fd53466-e428-4d0a-8dcf-b368abfe270c",
-        "9266aee5-bb58-4590-af65-81cd662bb472",
-        "98dffe3c-85a2-4d64-8108-19b74c53aeb2",
-        "9ae6f607-f705-4fb6-ac82-dd76c1e4edc1",
-        "9d9f445d-5b27-495e-840e-f555a251b5a1",
-        "9f08c0b6-48fd-4e70-b3cc-c51c9d83a0ee",
-        "a0072b39-aa24-4efb-9865-c7df12956337",
-        "a1418b61-e882-4b13-8ae4-2b4e17bf5613",
-        "a1834b49-993b-4d81-9cba-79847f9de74b",
-        "a36571d6-b128-4826-86df-1b3d30b1730d",
-        "a42cc9b5-c488-4712-930b-d6b6a7a4b2ab",
-        "a54a500d-0e29-49fb-b711-127e2d42db01",
-        "a94fbf41-684f-4a99-beb6-5ef2148f67f3",
-        "ac1edba4-659c-4786-b42a-673467b856a5",
-        "b13494dd-3e7c-4141-b17b-9689f97976ba",
-        "b9762bdd-4263-4df4-9ec2-33716287094f",
-        "c88c77f2-ede9-47b4-813e-dffdeef1fd24",
-        "c99570ad-fbec-4ad7-b289-e5844e598c92",
-        "cde1c53f-e9ac-41ea-a019-ddccb185adf3",
-        "d2534f6d-173d-4d8e-aab8-5fd12ae31aa2",
-        "d449f911-a04e-41fc-900f-63fce45d3c3f",
-        "da819e60-dc66-4489-a547-6f47f27d04c9",
-        "db0c8e23-359e-4643-9fa9-ae4aec02e13a",
-        "df13656d-c608-4295-978a-c9708a8a3850",
-        "e22bcf55-3d10-4d14-a765-33103622116a",
-        "e326b613-28d2-4d80-840f-890b471254af",
-        "e84fd7de-200f-4c97-97d7-1d99435ad65b",
-        "f46920ae-0c65-4439-a9ce-097a3cac5721",
-        "fc3caf11-2adc-4526-8a9a-6298571d0466",
-        "fc80d8bc-50ff-4025-9ed1-480c641da6dd"
+        "01f4fe18-3aaa-4a59-b263-9e19985d8ccd",
+        "055766cd-166e-4197-91d8-aa397676a007",
+        "06ccd6c1-1754-402a-ae7b-bd84e81c395a",
+        "09d655c5-fcdf-4d67-82b1-990faca9bd62",
+        "0b57f5a9-f9f4-4503-bf2a-e251d0af15d6",
+        "0c6086e5-76d1-406e-8e9e-126caeda3f44",
+        "0ccd0217-11e1-4069-b6c6-977049a9bcb3",
+        "0d2d0bf5-55b2-4e10-80f7-8046343a30fa",
+        "0ece7597-0f88-4885-bf3c-826416c8d19b",
+        "12664523-1391-4a85-b9ae-8b564795895c",
+        "16bcfba8-473a-4eb7-b428-ef5c0a0c82f8",
+        "1d43d8ae-bc00-4af0-9640-dbc5c5bc8574",
+        "2819baa9-a16e-4d5a-8bfb-fb124aa813ce",
+        "2dc0e65e-73e0-46e2-8e1e-8f5d8a8bf0ef",
+        "2e0ed2fe-ac22-4316-a146-6cdcef8a1bc6",
+        "35d38f48-93f9-4352-bd0e-de1ae47df6c9",
+        "3a0364be-7a4f-4f4d-a30d-b64376ea90a5",
+        "4090c7b8-4058-4a28-8df9-db6123e812fe",
+        "41b060a9-135f-4e84-aef6-65582c56bc32",
+        "42a6a4b8-83cc-4b84-b1a6-065f450e9202",
+        "44fe34df-e233-4d30-9b41-043678408e6f",
+        "482ae5b1-af02-41b7-8d38-d1d5c08158d8",
+        "4bb654e4-39b6-4b92-b479-cc06824c23c0",
+        "4d9a5fe2-4bd7-4ec6-921b-133c6b153850",
+        "4fd27037-412b-4ddf-852e-04d33399a952",
+        "56a24fd5-2b66-451c-9883-f54556bdeb7f",
+        "58f64a4f-f890-49f7-85a9-2eab25eb3e31",
+        "5a89a9ad-3577-4c14-a3c2-88b159c5e7a4",
+        "5d897c6d-d504-4bac-9f56-2aaa406acbe7",
+        "65d49301-dd92-4f26-b055-e77dc975f30d",
+        "67addb66-3269-4f8c-8a78-33e599051c4a",
+        "6f509561-de14-4dee-b06b-2176e54cf601",
+        "7848f8a2-8b19-418c-b04c-9f31383f34a1",
+        "78afde09-c69e-49cf-b20f-af35e3770c2c",
+        "7bc19bba-99f3-4586-a83a-11887bbef99b",
+        "7f16d513-2f1d-4842-a68b-c47d2fdef56f",
+        "7fafead7-9ee9-48e2-8ee1-850cece8c089",
+        "87f47405-66bf-47f3-9c04-a4706b77e331",
+        "8a852a00-222f-4131-a0c7-d2c497d457d7",
+        "8b88afbe-7307-47e1-ae2d-1551bb2dfe19",
+        "8c14ea23-307a-4b9c-bfd8-730ce60d1399",
+        "8e5f628f-97ab-4e9c-ad1b-56b3b328594f",
+        "8f766fe2-0ed5-4816-9598-4926eaaec62a",
+        "90126c84-75f7-416a-8d20-572efac9d917",
+        "9184a32c-4ac7-4dad-9471-8af05a93eaa0",
+        "937f2838-f555-4535-9adf-b74b3b0136e8",
+        "942c1b9a-0bf0-4fc9-ba11-5f724a1a5f83",
+        "97f5d0fb-d76a-48a9-92f3-3e6d75951c5f",
+        "a067854b-cb78-46b7-952c-27c8f81b1071",
+        "b2ae55fc-18ca-48e2-bbc3-80bd62f129ac",
+        "b509f794-2a5e-43e2-858f-848c206cc516",
+        "bcbcd9ca-8a3c-474b-b229-06c0310cc9b2",
+        "c65cb9fc-6592-401b-9cf6-23a0d20a2311",
+        "c828628c-6ccc-40ad-b1b4-e05d5e7207fd",
+        "cfc5ffff-e6ad-42f0-91f9-8dfa6d50cda9",
+        "d09ace6b-bd58-417f-b9b9-5de4cd67e97b",
+        "d24a224b-eeff-4fd1-ab7e-dfd170ac2011",
+        "d3e8c1d1-97c1-4cd2-8dcc-edc2b9ebe1ce",
+        "d751b768-751d-4c88-b94f-22f6a05b741e",
+        "d9571f9d-433d-46c9-a460-30765475c6d4",
+        "dc084d5b-15af-4886-8e97-d8bdb344dc72",
+        "e418df9a-187c-46c0-8524-4982b6d3d3b2",
+        "f5095817-167b-47ac-b36c-9ca80b880174",
+        "f9b47e98-6f29-45fc-8285-786462ce20ba",
+        "fb20a8c3-2900-4bc3-97d4-094b58f1ffd4",
+        "fbf00bee-db72-428f-af40-2b36c98fcdad",
+        "fcdbc874-33a2-42a2-8a53-765bf3783374",
+        "fd796e3a-d173-4ee5-9bf6-003c400ddce6"
       ],
       "cellCount": 15,
       "cells": [
@@ -970,13 +970,13 @@
           "gradeOrder": 11,
           "classGroupName": "C",
           "subjectCode": "HIST",
-          "classGroupId": "e4db2aad-7d0e-4d0b-b24d-220fb3de8b8e",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "778dc5fa-f2f7-4dc1-bf38-ce41116160cf",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "7.00",
           "maxSum": "65.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "a94fbf41-684f-4a99-beb6-5ef2148f67f3"
+            "fd796e3a-d173-4ee5-9bf6-003c400ddce6"
           ],
           "instruments": [
             "PAES HIS — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -988,13 +988,13 @@
           "gradeOrder": 11,
           "classGroupName": "C",
           "subjectCode": "LANG",
-          "classGroupId": "e4db2aad-7d0e-4d0b-b24d-220fb3de8b8e",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "778dc5fa-f2f7-4dc1-bf38-ce41116160cf",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "0.00",
           "maxSum": "65.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "2c598485-49cb-4463-ae52-cf784b3184da"
+            "8f766fe2-0ed5-4816-9598-4926eaaec62a"
           ],
           "instruments": [
             "PAES CL — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -1006,13 +1006,13 @@
           "gradeOrder": 11,
           "classGroupName": "C",
           "subjectCode": "MATH",
-          "classGroupId": "e4db2aad-7d0e-4d0b-b24d-220fb3de8b8e",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "778dc5fa-f2f7-4dc1-bf38-ce41116160cf",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "16.00",
           "maxSum": "65.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "b9762bdd-4263-4df4-9ec2-33716287094f"
+            "7fafead7-9ee9-48e2-8ee1-850cece8c089"
           ],
           "instruments": [
             "PAES M1 — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -1024,14 +1024,14 @@
           "gradeOrder": 12,
           "classGroupName": "A",
           "subjectCode": "HIST",
-          "classGroupId": "66801c72-227b-4995-b41b-3bad156efd18",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "b86a6e60-243d-4ff0-a311-cbcbbfd92016",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "1146.00",
           "maxSum": "2015.00",
           "studentsAssessed": 17,
           "assessmentIds": [
-            "82a9a748-06c7-45bf-865f-7b15ca8f0ba3",
-            "c99570ad-fbec-4ad7-b289-e5844e598c92"
+            "12664523-1391-4a85-b9ae-8b564795895c",
+            "87f47405-66bf-47f3-9c04-a4706b77e331"
           ],
           "instruments": [
             "PAES HIS — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1044,16 +1044,16 @@
           "gradeOrder": 12,
           "classGroupName": "A",
           "subjectCode": "LANG",
-          "classGroupId": "66801c72-227b-4995-b41b-3bad156efd18",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "b86a6e60-243d-4ff0-a311-cbcbbfd92016",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "6098.00",
           "maxSum": "10660.00",
           "studentsAssessed": 42,
           "assessmentIds": [
-            "a1834b49-993b-4d81-9cba-79847f9de74b",
-            "a36571d6-b128-4826-86df-1b3d30b1730d",
-            "ac1edba4-659c-4786-b42a-673467b856a5",
-            "da819e60-dc66-4489-a547-6f47f27d04c9"
+            "2e0ed2fe-ac22-4316-a146-6cdcef8a1bc6",
+            "4bb654e4-39b6-4b92-b479-cc06824c23c0",
+            "6f509561-de14-4dee-b06b-2176e54cf601",
+            "e418df9a-187c-46c0-8524-4982b6d3d3b2"
           ],
           "instruments": [
             "PAES CL — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1068,20 +1068,20 @@
           "gradeOrder": 12,
           "classGroupName": "A",
           "subjectCode": "MATH",
-          "classGroupId": "66801c72-227b-4995-b41b-3bad156efd18",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "b86a6e60-243d-4ff0-a311-cbcbbfd92016",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "6863.00",
           "maxSum": "13537.00",
           "studentsAssessed": 44,
           "assessmentIds": [
-            "358f1c3b-038f-4ee1-9db8-993b7a71f471",
-            "81e0b539-c34f-4cba-9645-2561718f335e",
-            "85ab4e31-8d56-4b63-83b8-5a7b0383ddbe",
-            "86f47f98-b002-412f-b8ee-98b5c1c98161",
-            "882e125d-431d-46b4-a210-d23ca9bbaa7b",
-            "9f08c0b6-48fd-4e70-b3cc-c51c9d83a0ee",
-            "e326b613-28d2-4d80-840f-890b471254af",
-            "fc80d8bc-50ff-4025-9ed1-480c641da6dd"
+            "1d43d8ae-bc00-4af0-9640-dbc5c5bc8574",
+            "35d38f48-93f9-4352-bd0e-de1ae47df6c9",
+            "56a24fd5-2b66-451c-9883-f54556bdeb7f",
+            "5d897c6d-d504-4bac-9f56-2aaa406acbe7",
+            "78afde09-c69e-49cf-b20f-af35e3770c2c",
+            "9184a32c-4ac7-4dad-9471-8af05a93eaa0",
+            "937f2838-f555-4535-9adf-b74b3b0136e8",
+            "97f5d0fb-d76a-48a9-92f3-3e6d75951c5f"
           ],
           "instruments": [
             "PAES M1 — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1100,21 +1100,21 @@
           "gradeOrder": 12,
           "classGroupName": "A",
           "subjectCode": "SCI",
-          "classGroupId": "66801c72-227b-4995-b41b-3bad156efd18",
-          "subjectId": "17932745-9762-4a56-8dcc-7927e4d69a7c",
+          "classGroupId": "b86a6e60-243d-4ff0-a311-cbcbbfd92016",
+          "subjectId": "e01bd312-52ca-46d2-9a3f-a8e5edd75150",
           "scoreSum": "2201.00",
           "maxSum": "4560.00",
           "studentsAssessed": 13,
           "assessmentIds": [
-            "109c0f50-0213-4633-9080-53f68da068b9",
-            "3fb81ab0-d854-4b9f-b91e-3706fb73a55d",
-            "46e640c4-84d0-467b-8085-79beba2c9fcf",
-            "9266aee5-bb58-4590-af65-81cd662bb472",
-            "a1418b61-e882-4b13-8ae4-2b4e17bf5613",
-            "d2534f6d-173d-4d8e-aab8-5fd12ae31aa2",
-            "df13656d-c608-4295-978a-c9708a8a3850",
-            "e22bcf55-3d10-4d14-a765-33103622116a",
-            "fc3caf11-2adc-4526-8a9a-6298571d0466"
+            "01f4fe18-3aaa-4a59-b263-9e19985d8ccd",
+            "0ece7597-0f88-4885-bf3c-826416c8d19b",
+            "42a6a4b8-83cc-4b84-b1a6-065f450e9202",
+            "482ae5b1-af02-41b7-8d38-d1d5c08158d8",
+            "4fd27037-412b-4ddf-852e-04d33399a952",
+            "67addb66-3269-4f8c-8a78-33e599051c4a",
+            "8a852a00-222f-4131-a0c7-d2c497d457d7",
+            "b2ae55fc-18ca-48e2-bbc3-80bd62f129ac",
+            "dc084d5b-15af-4886-8e97-d8bdb344dc72"
           ],
           "instruments": [
             "PAES CIE mención Biología — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1134,14 +1134,14 @@
           "gradeOrder": 12,
           "classGroupName": "B",
           "subjectCode": "HIST",
-          "classGroupId": "f1c9f0c4-cd2d-497a-9f49-816fbbe1a9b3",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "c0d0f552-f145-42d4-8f75-2f43b039b896",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "1011.00",
           "maxSum": "1885.00",
           "studentsAssessed": 15,
           "assessmentIds": [
-            "79c45ad4-03d9-4657-8ac0-15d64924daca",
-            "db0c8e23-359e-4643-9fa9-ae4aec02e13a"
+            "09d655c5-fcdf-4d67-82b1-990faca9bd62",
+            "5a89a9ad-3577-4c14-a3c2-88b159c5e7a4"
           ],
           "instruments": [
             "PAES HIS — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1154,16 +1154,16 @@
           "gradeOrder": 12,
           "classGroupName": "B",
           "subjectCode": "LANG",
-          "classGroupId": "f1c9f0c4-cd2d-497a-9f49-816fbbe1a9b3",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "c0d0f552-f145-42d4-8f75-2f43b039b896",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "6910.00",
           "maxSum": "11635.00",
           "studentsAssessed": 45,
           "assessmentIds": [
-            "007ddb04-1bdb-4da5-bc40-33cf250c240f",
-            "112b8393-4c00-480b-98b0-293fd672d7a4",
-            "5df2a6c3-37d7-4c03-a6e7-66d91df277e5",
-            "c88c77f2-ede9-47b4-813e-dffdeef1fd24"
+            "8e5f628f-97ab-4e9c-ad1b-56b3b328594f",
+            "b509f794-2a5e-43e2-858f-848c206cc516",
+            "f5095817-167b-47ac-b36c-9ca80b880174",
+            "f9b47e98-6f29-45fc-8285-786462ce20ba"
           ],
           "instruments": [
             "PAES CL — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1178,20 +1178,20 @@
           "gradeOrder": 12,
           "classGroupName": "B",
           "subjectCode": "MATH",
-          "classGroupId": "f1c9f0c4-cd2d-497a-9f49-816fbbe1a9b3",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "c0d0f552-f145-42d4-8f75-2f43b039b896",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "6909.00",
           "maxSum": "12983.00",
           "studentsAssessed": 44,
           "assessmentIds": [
-            "1953efba-b3a5-42f3-8edf-c93f256c2025",
-            "20f92245-32e5-4391-ba73-a7588e302cf5",
-            "2a5bab31-f6a0-4e06-8a26-1f50e65e868b",
-            "4d6bc3ac-7e66-4a07-9191-b2294e71ae2d",
-            "7df4dfe0-7f49-48fe-acaa-77b3cf34a32d",
-            "a42cc9b5-c488-4712-930b-d6b6a7a4b2ab",
-            "d449f911-a04e-41fc-900f-63fce45d3c3f",
-            "f46920ae-0c65-4439-a9ce-097a3cac5721"
+            "0b57f5a9-f9f4-4503-bf2a-e251d0af15d6",
+            "0d2d0bf5-55b2-4e10-80f7-8046343a30fa",
+            "4090c7b8-4058-4a28-8df9-db6123e812fe",
+            "41b060a9-135f-4e84-aef6-65582c56bc32",
+            "7bc19bba-99f3-4586-a83a-11887bbef99b",
+            "cfc5ffff-e6ad-42f0-91f9-8dfa6d50cda9",
+            "d09ace6b-bd58-417f-b9b9-5de4cd67e97b",
+            "d751b768-751d-4c88-b94f-22f6a05b741e"
           ],
           "instruments": [
             "PAES M1 — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1210,20 +1210,20 @@
           "gradeOrder": 12,
           "classGroupName": "B",
           "subjectCode": "SCI",
-          "classGroupId": "f1c9f0c4-cd2d-497a-9f49-816fbbe1a9b3",
-          "subjectId": "17932745-9762-4a56-8dcc-7927e4d69a7c",
+          "classGroupId": "c0d0f552-f145-42d4-8f75-2f43b039b896",
+          "subjectId": "e01bd312-52ca-46d2-9a3f-a8e5edd75150",
           "scoreSum": "2807.00",
           "maxSum": "6240.00",
           "studentsAssessed": 14,
           "assessmentIds": [
-            "0e1087be-10ff-4893-b757-c429abc5adfb",
-            "1dc4f637-b81b-4081-8f55-4acc982977f2",
-            "269872b5-b15b-4edc-a2ed-57af5ebf8780",
-            "301071d7-ff5a-410a-8878-0a6930faa164",
-            "58b91e0f-e432-4843-98e7-28934c887b7a",
-            "69f0d5d3-ce74-489a-85e3-51eef44d87b2",
-            "8fd53466-e428-4d0a-8dcf-b368abfe270c",
-            "e84fd7de-200f-4c97-97d7-1d99435ad65b"
+            "06ccd6c1-1754-402a-ae7b-bd84e81c395a",
+            "16bcfba8-473a-4eb7-b428-ef5c0a0c82f8",
+            "7f16d513-2f1d-4842-a68b-c47d2fdef56f",
+            "bcbcd9ca-8a3c-474b-b229-06c0310cc9b2",
+            "c828628c-6ccc-40ad-b1b4-e05d5e7207fd",
+            "d24a224b-eeff-4fd1-ab7e-dfd170ac2011",
+            "d3e8c1d1-97c1-4cd2-8dcc-edc2b9ebe1ce",
+            "fcdbc874-33a2-42a2-8a53-765bf3783374"
           ],
           "instruments": [
             "PAES CIE mención Biología — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1242,14 +1242,14 @@
           "gradeOrder": 12,
           "classGroupName": "C",
           "subjectCode": "HIST",
-          "classGroupId": "030929d4-766f-4adf-8205-171ae1100e4b",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "7485addd-d23a-4a8c-861a-90b7426be599",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "639.00",
           "maxSum": "1040.00",
           "studentsAssessed": 8,
           "assessmentIds": [
-            "98dffe3c-85a2-4d64-8108-19b74c53aeb2",
-            "a94fbf41-684f-4a99-beb6-5ef2148f67f3"
+            "2dc0e65e-73e0-46e2-8e1e-8f5d8a8bf0ef",
+            "fd796e3a-d173-4ee5-9bf6-003c400ddce6"
           ],
           "instruments": [
             "PAES HIS — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1262,16 +1262,16 @@
           "gradeOrder": 12,
           "classGroupName": "C",
           "subjectCode": "LANG",
-          "classGroupId": "030929d4-766f-4adf-8205-171ae1100e4b",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "7485addd-d23a-4a8c-861a-90b7426be599",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "6136.00",
           "maxSum": "10140.00",
           "studentsAssessed": 42,
           "assessmentIds": [
-            "2c598485-49cb-4463-ae52-cf784b3184da",
-            "402ae16b-015a-42c4-8bf4-3dbdc14f216f",
-            "7bbed887-7dd1-4265-a282-ab956a375799",
-            "7d13bc89-bac8-437d-b2e7-0dbdccddc57d"
+            "8c14ea23-307a-4b9c-bfd8-730ce60d1399",
+            "8f766fe2-0ed5-4816-9598-4926eaaec62a",
+            "90126c84-75f7-416a-8d20-572efac9d917",
+            "d9571f9d-433d-46c9-a460-30765475c6d4"
           ],
           "instruments": [
             "PAES CL — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1286,20 +1286,20 @@
           "gradeOrder": 12,
           "classGroupName": "C",
           "subjectCode": "MATH",
-          "classGroupId": "030929d4-766f-4adf-8205-171ae1100e4b",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "7485addd-d23a-4a8c-861a-90b7426be599",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "6349.00",
           "maxSum": "11759.00",
           "studentsAssessed": 39,
           "assessmentIds": [
-            "165b8b4b-f5b7-4bc2-a7a9-dcce61d2b836",
-            "18e5dda2-c85e-41d9-84a4-e284eb7e7a12",
-            "1b3c6606-c001-40b8-8f2b-2be6cb25312f",
-            "554b03ab-5557-4cf9-ba72-e5e349248c71",
-            "9ae6f607-f705-4fb6-ac82-dd76c1e4edc1",
-            "a54a500d-0e29-49fb-b711-127e2d42db01",
-            "b13494dd-3e7c-4141-b17b-9689f97976ba",
-            "b9762bdd-4263-4df4-9ec2-33716287094f"
+            "3a0364be-7a4f-4f4d-a30d-b64376ea90a5",
+            "4d9a5fe2-4bd7-4ec6-921b-133c6b153850",
+            "58f64a4f-f890-49f7-85a9-2eab25eb3e31",
+            "65d49301-dd92-4f26-b055-e77dc975f30d",
+            "7848f8a2-8b19-418c-b04c-9f31383f34a1",
+            "7fafead7-9ee9-48e2-8ee1-850cece8c089",
+            "942c1b9a-0bf0-4fc9-ba11-5f724a1a5f83",
+            "fb20a8c3-2900-4bc3-97d4-094b58f1ffd4"
           ],
           "instruments": [
             "PAES M1 — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1318,21 +1318,21 @@
           "gradeOrder": 12,
           "classGroupName": "C",
           "subjectCode": "SCI",
-          "classGroupId": "030929d4-766f-4adf-8205-171ae1100e4b",
-          "subjectId": "17932745-9762-4a56-8dcc-7927e4d69a7c",
+          "classGroupId": "7485addd-d23a-4a8c-861a-90b7426be599",
+          "subjectId": "e01bd312-52ca-46d2-9a3f-a8e5edd75150",
           "scoreSum": "2975.00",
           "maxSum": "6400.00",
           "studentsAssessed": 14,
           "assessmentIds": [
-            "01d915a5-fbef-4721-8f8b-9ba516a0e7bb",
-            "13a5a267-c6ab-4408-b330-ff1dbc5820a0",
-            "21705256-16ce-4d4c-b277-4af881ab2869",
-            "21e08e2b-dd5e-4ff4-86da-ffd953f17886",
-            "3ab646b3-e436-40d0-9552-1920b7ea6c30",
-            "7590db7f-fc69-490a-a42a-8931156cb88d",
-            "9d9f445d-5b27-495e-840e-f555a251b5a1",
-            "a0072b39-aa24-4efb-9865-c7df12956337",
-            "cde1c53f-e9ac-41ea-a019-ddccb185adf3"
+            "055766cd-166e-4197-91d8-aa397676a007",
+            "0c6086e5-76d1-406e-8e9e-126caeda3f44",
+            "0ccd0217-11e1-4069-b6c6-977049a9bcb3",
+            "2819baa9-a16e-4d5a-8bfb-fb124aa813ce",
+            "44fe34df-e233-4d30-9b41-043678408e6f",
+            "8b88afbe-7307-47e1-ae2d-1551bb2dfe19",
+            "a067854b-cb78-46b7-952c-27c8f81b1071",
+            "c65cb9fc-6592-401b-9cf6-23a0d20a2311",
+            "fbf00bee-db72-428f-af40-2b36c98fcdad"
           ],
           "instruments": [
             "PAES CIE mención Biología — Ensayo 1 (Tanda 1) · IV° Medio 2026",
@@ -1358,9 +1358,9 @@
       "assessmentCount": 3,
       "resolvedAssessmentCount": 3,
       "assessmentIds": [
-        "2c598485-49cb-4463-ae52-cf784b3184da",
-        "a94fbf41-684f-4a99-beb6-5ef2148f67f3",
-        "b9762bdd-4263-4df4-9ec2-33716287094f"
+        "7fafead7-9ee9-48e2-8ee1-850cece8c089",
+        "8f766fe2-0ed5-4816-9598-4926eaaec62a",
+        "fd796e3a-d173-4ee5-9bf6-003c400ddce6"
       ],
       "cellCount": 6,
       "cells": [
@@ -1370,13 +1370,13 @@
           "gradeOrder": 11,
           "classGroupName": "C",
           "subjectCode": "HIST",
-          "classGroupId": "e4db2aad-7d0e-4d0b-b24d-220fb3de8b8e",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "778dc5fa-f2f7-4dc1-bf38-ce41116160cf",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "7.00",
           "maxSum": "65.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "a94fbf41-684f-4a99-beb6-5ef2148f67f3"
+            "fd796e3a-d173-4ee5-9bf6-003c400ddce6"
           ],
           "instruments": [
             "PAES HIS — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -1388,13 +1388,13 @@
           "gradeOrder": 11,
           "classGroupName": "C",
           "subjectCode": "LANG",
-          "classGroupId": "e4db2aad-7d0e-4d0b-b24d-220fb3de8b8e",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "778dc5fa-f2f7-4dc1-bf38-ce41116160cf",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "0.00",
           "maxSum": "65.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "2c598485-49cb-4463-ae52-cf784b3184da"
+            "8f766fe2-0ed5-4816-9598-4926eaaec62a"
           ],
           "instruments": [
             "PAES CL — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -1406,13 +1406,13 @@
           "gradeOrder": 11,
           "classGroupName": "C",
           "subjectCode": "MATH",
-          "classGroupId": "e4db2aad-7d0e-4d0b-b24d-220fb3de8b8e",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "778dc5fa-f2f7-4dc1-bf38-ce41116160cf",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "16.00",
           "maxSum": "65.00",
           "studentsAssessed": 1,
           "assessmentIds": [
-            "b9762bdd-4263-4df4-9ec2-33716287094f"
+            "7fafead7-9ee9-48e2-8ee1-850cece8c089"
           ],
           "instruments": [
             "PAES M1 — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -1424,13 +1424,13 @@
           "gradeOrder": 12,
           "classGroupName": "C",
           "subjectCode": "HIST",
-          "classGroupId": "030929d4-766f-4adf-8205-171ae1100e4b",
-          "subjectId": "39d688ba-2f3b-4a49-81fe-19a7c7377c40",
+          "classGroupId": "7485addd-d23a-4a8c-861a-90b7426be599",
+          "subjectId": "0f68e7b0-7b40-4c40-baa3-10c8403cbb91",
           "scoreSum": "339.00",
           "maxSum": "520.00",
           "studentsAssessed": 8,
           "assessmentIds": [
-            "a94fbf41-684f-4a99-beb6-5ef2148f67f3"
+            "fd796e3a-d173-4ee5-9bf6-003c400ddce6"
           ],
           "instruments": [
             "PAES HIS — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -1442,13 +1442,13 @@
           "gradeOrder": 12,
           "classGroupName": "C",
           "subjectCode": "LANG",
-          "classGroupId": "030929d4-766f-4adf-8205-171ae1100e4b",
-          "subjectId": "0b49f395-034d-40ce-bc86-445de893fc44",
+          "classGroupId": "7485addd-d23a-4a8c-861a-90b7426be599",
+          "subjectId": "88a301ba-fa18-4342-9467-7f3e5c8b154a",
           "scoreSum": "1277.00",
           "maxSum": "2275.00",
           "studentsAssessed": 35,
           "assessmentIds": [
-            "2c598485-49cb-4463-ae52-cf784b3184da"
+            "8f766fe2-0ed5-4816-9598-4926eaaec62a"
           ],
           "instruments": [
             "PAES CL — Ensayo 1 (Tanda 1) · IV° Medio 2026"
@@ -1460,13 +1460,13 @@
           "gradeOrder": 12,
           "classGroupName": "C",
           "subjectCode": "MATH",
-          "classGroupId": "030929d4-766f-4adf-8205-171ae1100e4b",
-          "subjectId": "c4e34c00-9c57-46db-862d-e79565ee8a5b",
+          "classGroupId": "7485addd-d23a-4a8c-861a-90b7426be599",
+          "subjectId": "c9c752d0-565b-4911-b887-fdcd2b096713",
           "scoreSum": "1199.00",
           "maxSum": "2275.00",
           "studentsAssessed": 35,
           "assessmentIds": [
-            "b9762bdd-4263-4df4-9ec2-33716287094f"
+            "7fafead7-9ee9-48e2-8ee1-850cece8c089"
           ],
           "instruments": [
             "PAES M1 — Ensayo 1 (Tanda 1) · IV° Medio 2026"
