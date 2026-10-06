@@ -1,5 +1,6 @@
 import { apiGet } from '@/lib/api';
 import type {
+  ComparableOverviewResponse,
   DashboardFilterOptionsResponse,
   MeasurementProcessListResponse,
   MeasurementProcessModel,
@@ -28,4 +29,10 @@ export function getScopeCatalog(
 ): Promise<DashboardFilterOptionsResponse> {
   const query = academicYearId ? `?academicYearId=${academicYearId}` : '';
   return apiGet<DashboardFilterOptionsResponse>(`/dashboards/filters${query}`);
+}
+
+export function getProcessComparable(processId: string): Promise<ComparableOverviewResponse> {
+  return apiGet<ComparableOverviewResponse>(
+    `/dashboards/comparable-overview?processId=${processId}`,
+  );
 }

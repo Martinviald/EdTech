@@ -19,6 +19,7 @@ export type CoverageAssessmentCell = {
   assessmentName: string | null;
   classGroupId: string;
   classGroupName: string;
+  gradeId: string;
   gradeShortName: string;
   gradeOrder: number;
   subjectId: string | null;
@@ -28,7 +29,10 @@ export type CoverageAssessmentCell = {
 };
 
 export type CoverageCatalog = {
-  classGroups: Map<string, { name: string; gradeShortName: string; gradeOrder: number }>;
+  classGroups: Map<
+    string,
+    { name: string; gradeId: string; gradeShortName: string; gradeOrder: number }
+  >;
   subjects: Map<string, { name: string; shortName: string }>;
   studentsByClassGroup: Map<string, number>;
 };
@@ -86,6 +90,7 @@ export function assembleCoverage(
     cells.push({
       classGroupId: expected.classGroupId,
       classGroupName: actual?.classGroupName ?? classGroup?.name ?? '—',
+      gradeId: actual?.gradeId ?? classGroup?.gradeId ?? '',
       gradeShortName: actual?.gradeShortName ?? classGroup?.gradeShortName ?? '',
       gradeOrder: actual?.gradeOrder ?? classGroup?.gradeOrder ?? 0,
       subjectId: expected.subjectId,
@@ -106,6 +111,7 @@ export function assembleCoverage(
     unexpectedCells.push({
       classGroupId: actual.classGroupId,
       classGroupName: actual.classGroupName,
+      gradeId: actual.gradeId,
       gradeShortName: actual.gradeShortName,
       gradeOrder: actual.gradeOrder,
       subjectId: actual.subjectId ?? UNKNOWN_SUBJECT_ID,

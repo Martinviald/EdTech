@@ -12,7 +12,12 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import type { AnswerCount } from '@soe/types';
-import { metricTypeEnum, performanceLevelEnum, statsSourceEnum } from './enums';
+import {
+  metricTypeEnum,
+  performanceBandSourceEnum,
+  performanceLevelEnum,
+  statsSourceEnum,
+} from './enums';
 import { classGroups } from './academic';
 import { assessments } from './assessments';
 import { gradingScales, instruments } from './instruments';
@@ -54,6 +59,10 @@ export const performanceBands = pgTable(
     maxThreshold: decimal('max_threshold', { precision: 5, scale: 4 }).notNull(),
     // Color de presentación (token o hex). Nullable.
     color: text('color'),
+    // Procedencia del corte. Lo que permite decir sobre cuántas unidades una
+    // vista afirma con un corte medido y no heredado; sin esto, "Nivel 1" no se
+    // puede defender como comparable entre instrumentos.
+    source: performanceBandSourceEnum('source').default('unknown').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
     // Soft delete (§5.1): las bandas son configuración editable por tenant; al

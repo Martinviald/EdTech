@@ -76,7 +76,7 @@ import { InjectDb, type Database } from '../database/database.types';
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
-  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null, source: b.source };
 }
 
 // Umbrales por defecto (0..1) — alineados al estándar DIA. Se usan cuando la
