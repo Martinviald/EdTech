@@ -49,6 +49,23 @@ escribe la API (panel /configuracion/modelos-ia); la autorización es el role gu
 `decision_settings` sigue el mismo patrón que `llm_settings` (org_id NULLABLE) y
 `decision_calls` usa `org_id` directo (log del motor de decisiones).
 
+### Forma de la comparación en una política nueva
+
+Al agregar una tabla sensible, copia **exactamente** esta forma:
+
+```sql
+USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+```
+
+El cast va del lado de la **variable**, nunca de la columna: `org_id::text = ...`
+impide que cualquier índice btree sobre `org_id` sirva la política (seq scan
+garantizado) y además le impide al planificador estimar la selectividad. Y el
+`nullif` no es cosmético: sin contexto, `current_setting(..., true)` devuelve `''`
+en cuanto la conexión ya corrió una transacción con `set_config(..., true)` —con
+pooling, el caso normal—, y `''::uuid` **lanza error** en vez de devolver NULL.
+Con `nullif` la comparación queda NULL, el RLS no muestra la fila y se conserva el
+safe default de 0 filas. Ver las notas de diseño en `sql/rls-policies.sql`.
+
 ## withOrgContext (regla de la capa de aplicación)
 
 `set_config('app.current_org_id', orgId, true)` se fija por transacción mediante

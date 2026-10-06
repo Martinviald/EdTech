@@ -426,6 +426,12 @@ Faltan además índices en `assessments(org_id)`, `student_enrollments(class_gro
 arreglo de paso dentro de una feature de UI: mercece su propia revisión, y el archivo se
 re-aplica en cada `db:migrate`.
 
+> **RESUELTO** en la rama `fix/rls-indexable`. Las 44 expresiones del archivo pasaron a
+> `org_id = nullif(current_setting('app.current_org_id', true), '')::uuid` — el cast del lado de
+> la variable, con `nullif` para conservar el safe default de 0 filas cuando no hay contexto. Se
+> agregaron además `assessments(org_id)`, `student_enrollments(class_group_id)`,
+> `instruments(org_id, deleted_at)` e `instruments(subject_id)` en la migración 0036.
+
 ### R2 — El default que vacía la vista
 
 Mitigado por D1 (sólo procesos con resultados) y por la guarda de D3. El caso de prueba obligatorio:
