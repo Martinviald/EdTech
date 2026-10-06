@@ -12,7 +12,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
 import { CaptureSessionService } from './capture-session.service';
-import { parseDtoOrBadRequest } from './parse-dto.helper';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 
 @Controller('sheet-capture-sessions')
 @UseGuards(RolesGuard)

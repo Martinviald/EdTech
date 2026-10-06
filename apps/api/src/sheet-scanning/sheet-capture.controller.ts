@@ -14,7 +14,7 @@ import { Public } from '../common/decorators/public.decorator';
 import { CaptureSessionGuard, CurrentCaptureSession } from './capture-session.guard';
 import { CaptureSessionService } from './capture-session.service';
 import type { ActiveCaptureSession } from './capture-token.helpers';
-import { parseDtoOrBadRequest } from './parse-dto.helper';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 
 @Controller('sheet-capture')
 @Public()

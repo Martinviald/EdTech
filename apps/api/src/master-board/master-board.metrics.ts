@@ -2,11 +2,13 @@ import {
   DEFAULT_PERFORMANCE_THRESHOLDS,
   METRIC_LABELS,
   METRIC_KEYS,
-  percentageToPerformanceLevel,
+  bandToLegacyLevel,
+  classifyByBands,
+  type MasterBoardLevel,
   type MetricKey,
   type MetricValue,
+  type PerformanceBandInput,
   type PerformanceLevel,
-  type PerformanceThresholds,
 } from '@soe/types';
 
 export type CellAggregate = {
@@ -16,14 +18,13 @@ export type CellAggregate = {
 };
 
 export type MetricContext = {
-  thresholds: PerformanceThresholds;
-  aggregatable: boolean;
+  bands: readonly PerformanceBandInput[] | null;
 };
 
 type MetricComputation = {
   value: number | null;
   display: string;
-  level: PerformanceLevel | null;
+  level: MasterBoardLevel | null;
 };
 
 type MetricDescriptor = {
@@ -31,6 +32,48 @@ type MetricDescriptor = {
   label: string;
   compute: (aggregate: CellAggregate, context: MetricContext) => MetricComputation;
 };
+
+const LEGACY_LEVEL_LABELS: Record<PerformanceLevel, string> = {
+  insufficient: 'Insuficiente',
+  elementary: 'Elemental',
+  adequate: 'Adecuado',
+  advanced: 'Avanzado',
+};
+
+export const LEGACY_PERFORMANCE_BANDS: readonly PerformanceBandInput[] = [
+  {
+    id: 'insufficient',
+    key: 'insufficient',
+    label: LEGACY_LEVEL_LABELS.insufficient,
+    order: 0,
+    minThreshold: 0,
+    maxThreshold: DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
+  },
+  {
+    id: 'elementary',
+    key: 'elementary',
+    label: LEGACY_LEVEL_LABELS.elementary,
+    order: 1,
+    minThreshold: DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
+    maxThreshold: DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
+  },
+  {
+    id: 'adequate',
+    key: 'adequate',
+    label: LEGACY_LEVEL_LABELS.adequate,
+    order: 2,
+    minThreshold: DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
+    maxThreshold: DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
+  },
+  {
+    id: 'advanced',
+    key: 'advanced',
+    label: LEGACY_LEVEL_LABELS.advanced,
+    order: 3,
+    minThreshold: DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
+    maxThreshold: 1,
+  },
+];
 
 export function emptyCellAggregate(): CellAggregate {
   return { scoreSum: 0, maxSum: 0, studentsAssessed: 0 };
@@ -42,6 +85,21 @@ export function addToCellAggregate(target: CellAggregate, source: CellAggregate)
   target.studentsAssessed += source.studentsAssessed;
 }
 
+export function levelForPercentage(
+  percentage: number,
+  bands: readonly PerformanceBandInput[] | null,
+): MasterBoardLevel | null {
+  if (!bands || bands.length === 0) return null;
+  const band = classifyByBands(percentage, bands);
+  if (!band) return null;
+  return {
+    key: band.key,
+    label: band.label,
+    order: band.order,
+    color: bandToLegacyLevel(band, bands),
+  };
+}
+
 function formatPercentage(value: number | null): string {
   return value === null || Number.isNaN(value) ? '—' : `${value.toFixed(1)}%`;
 }
@@ -51,10 +109,7 @@ const achievementDescriptor: MetricDescriptor = {
   label: METRIC_LABELS.achievement,
   compute: (aggregate, context) => {
     const value = aggregate.maxSum > 0 ? (aggregate.scoreSum / aggregate.maxSum) * 100 : null;
-    const level =
-      value === null || !context.aggregatable
-        ? null
-        : percentageToPerformanceLevel(value / 100, { performanceThresholds: context.thresholds });
+    const level = value === null ? null : levelForPercentage(value / 100, context.bands);
     return { value, display: formatPercentage(value), level };
   },
 };
@@ -79,17 +134,6 @@ export function computeMetrics(aggregate: CellAggregate, context: MetricContext)
     const { value, display, level } = descriptor.compute(aggregate, context);
     return { key: descriptor.key, label: descriptor.label, value, display, level };
   });
-}
-
-export function resolveThresholds(config: unknown): PerformanceThresholds {
-  const performanceThresholds = (
-    config as { performanceThresholds?: Partial<PerformanceThresholds> } | null | undefined
-  )?.performanceThresholds;
-  return {
-    elementary: performanceThresholds?.elementary ?? DEFAULT_PERFORMANCE_THRESHOLDS.elementary,
-    adequate: performanceThresholds?.adequate ?? DEFAULT_PERFORMANCE_THRESHOLDS.adequate,
-    advanced: performanceThresholds?.advanced ?? DEFAULT_PERFORMANCE_THRESHOLDS.advanced,
-  };
 }
 
 export const METRIC_KEY_VALUES = METRIC_KEYS;

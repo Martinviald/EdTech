@@ -1,5 +1,14 @@
-import { date, index, jsonb, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import {
+  date,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
 import type { ExpectedScope } from '@soe/types';
 import { instrumentApplicationPeriodEnum, processKindEnum, processStatusEnum } from './enums';
 import { academicYears, organizations } from './organizations';
@@ -32,7 +41,9 @@ export const measurementProcesses = pgTable(
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => [
-    unique('measurement_processes_org_slug_unique').on(table.orgId, table.slug),
+    uniqueIndex('measurement_processes_org_slug_active_uniq')
+      .on(table.orgId, table.slug)
+      .where(sql`${table.deletedAt} IS NULL`),
     index('idx_measurement_processes_org_year').on(table.orgId, table.academicYearId),
   ],
 );

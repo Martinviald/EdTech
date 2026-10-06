@@ -36,6 +36,7 @@ function makeUnit(overrides: Partial<ComparableUnitSummary> = {}): ComparableUni
     gradeName: '8° Básico',
     applicationPeriod: 'cierre',
     year: 2026,
+    trackId: null,
     assessmentIds: ['a1'],
     lastAdministeredAt: null,
     studentsAssessed: 100,

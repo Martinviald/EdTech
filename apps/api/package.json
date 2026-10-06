@@ -10,6 +10,7 @@
     "test": "jest",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "retention:sheet-scans": "tsx scripts/retention-sheet-scans.ts",
+    "golden:master-board:check": "tsx scripts/check-golden-master-board.ts",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {

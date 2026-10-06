@@ -24,7 +24,7 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
-import { parseDtoOrBadRequest } from './parse-dto.helper';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 import { SheetLayoutService } from './sheet-layout.service';
 
 @Controller('sheet-layouts')

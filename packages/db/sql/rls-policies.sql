@@ -505,3 +505,27 @@ DROP POLICY IF EXISTS "decision_calls_tenant_insert" ON "decision_calls";
 CREATE POLICY "decision_calls_tenant_insert" ON "decision_calls"
   AS PERMISSIVE FOR INSERT
   WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+-- ── Líneas de prueba ─────────────────────────────────────────────────────────
+-- `test_tracks` tiene org_id NULLABLE, como performance_bands: las filas con
+-- org_id IS NULL son el catálogo oficial (M1, M2, BIO…) y las ven todos los
+-- colegios. Una línea privada solo la ve su colegio; si no, el track privado de
+-- un colegio puesto sobre un instrumento oficial cambiaría el encabezado del
+-- tablero de las demás orgs. Son dos políticas permisivas: la de tenant cubre
+-- todo comando sobre las filas propias, y la oficial solo agrega LECTURA de las
+-- filas sin org. Así la API sujeta a RLS no puede crear, editar ni borrar una
+-- línea oficial: el catálogo se siembra con el rol admin (db:seed:test-tracks).
+-- Forma indexable (sin castear la columna), como el resto del archivo.
+ALTER TABLE "test_tracks" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "test_tracks" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "test_tracks_tenant_isolation" ON "test_tracks";
+CREATE POLICY "test_tracks_tenant_isolation" ON "test_tracks"
+  AS PERMISSIVE FOR ALL
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "test_tracks_official_read" ON "test_tracks";
+CREATE POLICY "test_tracks_official_read" ON "test_tracks"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id IS NULL);

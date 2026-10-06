@@ -12,13 +12,7 @@
 
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import {
-  assessmentResults,
-  assessments,
-  instruments,
-  performanceBands,
-  subjects,
-} from '@soe/db';
+import { assessmentResults, assessments, instruments, performanceBands, subjects } from '@soe/db';
 import {
   buildInstrumentFamilyKey,
   buildPeriodSeriesKey,
@@ -58,6 +52,7 @@ export async function loadStudentAssessments(
       gradeId: instruments.gradeId,
       year: instruments.year,
       applicationPeriod: instruments.applicationPeriod,
+      trackId: instruments.trackId,
       administeredAt: assessments.administeredAt,
       dataGranularity: assessments.dataGranularity,
       achievement: assessmentResults.percentage,
@@ -95,6 +90,7 @@ export async function loadStudentAssessments(
       gradeId: r.gradeId,
       applicationPeriod: r.applicationPeriod,
       year: r.year,
+      trackId: r.trackId,
     };
     return {
       assessmentId: r.assessmentId,
@@ -107,6 +103,7 @@ export async function loadStudentAssessments(
       gradeId: r.gradeId,
       year: r.year,
       applicationPeriod: r.applicationPeriod,
+      trackId: r.trackId,
       familyKey: buildInstrumentFamilyKey(ref),
       periodSeriesKey: buildPeriodSeriesKey(ref),
       administeredAt: r.administeredAt,

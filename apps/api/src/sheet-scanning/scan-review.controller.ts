@@ -25,7 +25,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { SensitiveDataGuard } from '../common/guards/sensitive-data.guard';
 import { getEffectiveOrgId } from '../common/helpers/org-context.helper';
-import { parseDtoOrBadRequest } from './parse-dto.helper';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 import { ScanReviewService } from './scan-review.service';
 
 @Controller('sheet-scan-batches')

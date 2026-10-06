@@ -61,6 +61,10 @@
  * deriva el año lectivo de esa fecha para bucketizar el read-model cuando el
  * alumno no está matriculado en el curso asignado. Fechar una evaluación de 2025
  * con la fecha de hoy la ancla al año equivocado.
+ *
+ * Proceso de medición: en la misma transacción, cada evaluación nueva se vincula al
+ * proceso de su período ("DIA <momento> <año>", el mismo que crearía
+ * `db:backfill:processes`). Si rompería la invariante del proceso, queda sin él.
  */
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -78,6 +82,10 @@ import { assessments, assessmentCourseAssignments, importJobs } from '../schema/
 import { responses } from '../schema/responses';
 import { assessmentResults, skillResults } from '../schema/results';
 import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
+import {
+  formatLoadProcessLinkReport,
+  linkLoadedAssessmentsToProcesses,
+} from '../queries/process-linking';
 import {
   aggregateStudentResults,
   aggregateSkillResults,
@@ -885,6 +893,16 @@ async function main() {
         return { assessmentId, classGroupId: p.classGroupId };
       }),
     );
+
+    // Cada evaluación nueva cae en su proceso de medición, según el período del instrumento: "DIA <momento> <año>".
+    // Si sumarla rompería la invariante (dos instrumentos para el mismo grado y prueba),
+    // queda sin proceso y se reporta: el tablero la muestra en la toma legacy.
+    const processLinks = await linkLoadedAssessmentsToProcesses(tx, {
+      orgId: ORG_ID,
+      assessmentIds: insertedAssessments.map((a) => a.id),
+      source: { by: 'period' },
+    });
+    for (const line of formatLoadProcessLinkReport(processLinks)) console.log(line);
 
     const allResponses: Array<typeof responses.$inferInsert> = [];
     const resultValues: Array<typeof assessmentResults.$inferInsert> = [];

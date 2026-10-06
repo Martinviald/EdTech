@@ -9,5 +9,10 @@
     "types": ["node"]
   },
   "include": ["src/**/*"],
-  "exclude": ["src/migrate.ts", "src/seed/**/*", "src/**/*.spec.ts"]
+  "exclude": [
+    "src/migrate.ts",
+    "src/seed/**/*",
+    "src/scripts/migrate-elective-sections.ts",
+    "src/**/*.spec.ts"
+  ]
 }

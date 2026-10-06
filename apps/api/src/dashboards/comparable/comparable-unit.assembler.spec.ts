@@ -179,3 +179,70 @@ describe('ComparableUnitAssembler.loadClassGroupBreakdown', () => {
     ).resolves.toEqual(breakdown());
   });
 });
+
+describe('ComparableUnitAssembler baselines con línea de prueba', () => {
+  const assembler = new ComparableUnitAssembler();
+
+  function candidateRow(instrumentId: string, trackId: string | null, year: number) {
+    return {
+      assessmentId: `a-${instrumentId}`,
+      instrumentId,
+      instrumentName: instrumentId,
+      type: 'paes',
+      subjectId: 's-math',
+      gradeId: 'g-iv',
+      applicationPeriod: null,
+      year,
+      trackId,
+    };
+  }
+
+  function dbReturning(rows: unknown[]): Database {
+    const chain = {
+      from: () => chain,
+      innerJoin: () => chain,
+      where: () => Promise.resolve(rows),
+    };
+    return { select: () => chain } as unknown as Database;
+  }
+
+  it('M2 toma como año anterior a M2, nunca a M1 del mismo grado', async () => {
+    const db = dbReturning([
+      candidateRow('m1-2025', 't-m1', 2025),
+      candidateRow('m2-2025', 't-m2', 2025),
+    ]);
+    const ref = {
+      instrumentId: 'm2-2026',
+      type: 'paes',
+      subjectId: 's-math',
+      gradeId: 'g-iv',
+      applicationPeriod: null,
+      year: 2026,
+      trackId: 't-m2',
+    };
+
+    const candidates = await assembler.loadBaselineCandidates(db, 'org-1', [ref]);
+    const choices = assembler.resolveBaselineChoices(ref, candidates);
+
+    expect(choices.previousYear?.instrumentId).toBe('m2-2025');
+  });
+
+  it('sin línea, el año anterior se resuelve igual que antes', async () => {
+    const db = dbReturning([candidateRow('dia-2025', null, 2025)]);
+    const ref = {
+      instrumentId: 'dia-2026',
+      type: 'paes',
+      subjectId: 's-math',
+      gradeId: 'g-iv',
+      applicationPeriod: null,
+      year: 2026,
+      trackId: null,
+    };
+
+    const candidates = await assembler.loadBaselineCandidates(db, 'org-1', [ref]);
+
+    expect(assembler.resolveBaselineChoices(ref, candidates).previousYear?.instrumentId).toBe(
+      'dia-2025',
+    );
+  });
+});

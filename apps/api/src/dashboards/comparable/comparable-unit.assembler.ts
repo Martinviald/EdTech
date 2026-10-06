@@ -469,6 +469,7 @@ export class ComparableUnitAssembler {
         gradeId: instruments.gradeId,
         applicationPeriod: instruments.applicationPeriod,
         year: instruments.year,
+        trackId: instruments.trackId,
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
@@ -489,6 +490,7 @@ export class ComparableUnitAssembler {
         gradeId: row.gradeId,
         applicationPeriod: row.applicationPeriod,
         year: row.year,
+        trackId: row.trackId,
       };
       const familyKey = `${buildInstrumentFamilyKey(ref)}::${row.year ?? 0}`;
       const seriesKey = `${buildPeriodSeriesKey(ref)}::${row.applicationPeriod ?? '-'}`;

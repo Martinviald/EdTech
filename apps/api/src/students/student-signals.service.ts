@@ -47,6 +47,7 @@ type ResultRow = {
   gradeId: string | null;
   year: number | null;
   applicationPeriod: 'diagnostico' | 'intermedio' | 'cierre' | null;
+  trackId: string | null;
   administeredAt: Date | null;
   achievement: number | null;
   band: PerformanceBandView | null;
@@ -225,6 +226,7 @@ export class StudentSignalsService {
         gradeId: instruments.gradeId,
         year: instruments.year,
         applicationPeriod: instruments.applicationPeriod,
+        trackId: instruments.trackId,
         administeredAt: assessments.administeredAt,
         achievement: assessmentResults.percentage,
         bandKey: performanceBands.key,
@@ -262,6 +264,7 @@ export class StudentSignalsService {
       gradeId: r.gradeId,
       year: r.year,
       applicationPeriod: r.applicationPeriod,
+      trackId: r.trackId,
       administeredAt: r.administeredAt,
       achievement: r.achievement === null ? null : Number(r.achievement),
       band: toBandView(r.bandKey, r.bandLabel, r.bandOrder, r.bandColor),
@@ -321,6 +324,7 @@ export class StudentSignalsService {
         gradeId: row.gradeId,
         applicationPeriod: row.applicationPeriod,
         year: row.year,
+        trackId: row.trackId,
       };
       for (const key of [buildInstrumentFamilyKey(ref), buildPeriodSeriesKey(ref)]) {
         const bucket = byKey.get(key);

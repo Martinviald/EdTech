@@ -5,8 +5,9 @@ import type {
 
 /**
  * Deriva el movimiento por generación a partir de las unidades comparables ya
- * resueltas: agrupa por (asignatura × nivel) las que tienen baseline `previous_year` y
- * pondera por alumnos.
+ * resueltas: agrupa por (asignatura × nivel × línea de prueba) las que tienen baseline
+ * `previous_year` y pondera por alumnos. La línea separa M1 de M2: promediarlas no es una
+ * generación, es mezclar dos pruebas.
  *
  * Es una función PURA y vive en `packages/types` a propósito: no necesita tocar la base
  * —toda la información ya viaja en `units`— y así la misma regla se puede probar sola y
@@ -42,7 +43,7 @@ export function deriveGenerationalHighlights(
     if (unit.averageAchievement == null || unit.baseline.achievement == null) continue;
     if (unit.studentsAssessed === 0) continue;
 
-    const key = `${unit.gradeId ?? '-'}|${unit.subjectId ?? '-'}`;
+    const key = `${unit.gradeId ?? '-'}|${unit.subjectId ?? '-'}|${unit.trackId ?? '-'}`;
     let acc = byCell.get(key);
     if (!acc) {
       acc = {
