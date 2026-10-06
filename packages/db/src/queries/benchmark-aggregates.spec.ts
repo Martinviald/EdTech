@@ -1,3 +1,4 @@
+import type { SQL } from 'drizzle-orm';
 import { PgDialect } from 'drizzle-orm/pg-core';
 import type { Database } from '../client';
 import { assessmentItemStats, assessmentSkillStats } from '../schema/results';
@@ -410,15 +411,10 @@ describe('refreshBenchmarkAggregates', () => {
 });
 
 describe('preferComputedOverImported', () => {
-  const render = (stats: Parameters<typeof preferComputedOverImported>[0]): string =>
-    new PgDialect().sqlToQuery(
-      stats === assessmentSkillStats
-        ? preferComputedOverImported(assessmentSkillStats)
-        : preferComputedOverImported(assessmentItemStats),
-    ).sql;
+  const render = (predicate: SQL): string => new PgDialect().sqlToQuery(predicate).sql;
 
   it('descarta la fila importada sólo cuando la misma celda tiene la calculada', () => {
-    const query = render(assessmentSkillStats);
+    const query = render(preferComputedOverImported(assessmentSkillStats));
 
     expect(query).toContain("= 'imported'");
     expect(query).toContain("= 'computed'");
@@ -429,7 +425,7 @@ describe('preferComputedOverImported', () => {
   });
 
   it('usa item_id como dimensión para los agregados por ítem', () => {
-    const query = render(assessmentItemStats);
+    const query = render(preferComputedOverImported(assessmentItemStats));
 
     expect(query).toContain('item_id');
     expect(query).not.toContain('node_id');
