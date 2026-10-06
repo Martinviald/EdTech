@@ -20,7 +20,10 @@
  *  4. copia a los ítems fusionados los tags de sus ítems legacy (los legacy no se tocan);
  *  5. recalcula assessment_results, skill_results y el read-model de cohorte;
  *  6. marca las evaluaciones legacy como `cancelled` (con la fusionada que las reemplaza)
- *     y hace soft delete de los instrumentos legacy.
+ *     y hace soft delete de los instrumentos legacy;
+ *  7. vincula cada fusionada sin proceso al de su tanda (`config.ensayo`), como el cargador
+ *     PAES. Las legacy por mención no pudieron vincularse al cargar: tres instrumentos SCI
+ *     sin línea para el mismo grado rompen la invariante; la fusionada (`CIE-COMUN`) no.
  * Si algo no calza (alumno en dos ramas, respuesta sin ítem destino, resultado distinto al
  * legacy) aborta sin escribir.
  */
@@ -33,6 +36,10 @@ import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { createDbClient, type Database } from '../client';
 import { withOrgContext } from '../with-org-context';
 import { recomputeCohortStatsFromResponses, replaceCohortStats } from '../queries/cohort-stats';
+import {
+  formatLoadProcessLinkReport,
+  linkLoadedAssessmentsToProcesses,
+} from '../queries/process-linking';
 import { instruments, instrumentSections } from '../schema/instruments';
 import { items, itemTaxonomyTags } from '../schema/items';
 import {
@@ -1013,6 +1020,12 @@ async function migrate(tx: Database, args: Args, map: ElectiveMigrationMap): Pro
   }
   failIf(gateErrors, 'Gate posterior');
 
+  const processLinks = await linkLoadedAssessmentsToProcesses(tx, {
+    orgId: ctx.orgId,
+    assessmentIds: fusedIds,
+    source: { by: 'config', key: 'ensayo' },
+  });
+
   console.log(
     `  evaluaciones legacy: ${legacyAssessments.length} (${legacyWithResponses.length} con respuestas) · ` +
       `grupos: ${grouping.groups.length}`,
@@ -1032,6 +1045,7 @@ async function migrate(tx: Database, args: Args, map: ElectiveMigrationMap): Pro
   console.log(
     `  gate: ${before.size} alumnos con el mismo % de logro, nota y completitud que el legacy`,
   );
+  for (const line of formatLoadProcessLinkReport(processLinks)) console.log(line);
 }
 
 async function rollback(tx: Database, args: Args, map: ElectiveMigrationMap): Promise<void> {

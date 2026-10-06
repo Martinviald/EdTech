@@ -49,6 +49,10 @@
  *
  * La fecha de aplicación de cada celda viene del propio artefacto
  * (`administeredAt` por curso), que la toma del assignment de GradeCam.
+ *
+ * Proceso de medición: en la misma transacción, cada evaluación nueva se vincula al
+ * proceso "Ensayo PAES <tanda> <año>" (lo crea o lo reusa por slug, igual que
+ * `db:backfill:processes:paes`). Si rompería la invariante del proceso, queda sin él.
  */
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -67,6 +71,10 @@ import { assessments, assessmentCourseAssignments, importJobs } from '../schema/
 import { responses } from '../schema/responses';
 import { assessmentResults, skillResults } from '../schema/results';
 import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
+import {
+  formatLoadProcessLinkReport,
+  linkLoadedAssessmentsToProcesses,
+} from '../queries/process-linking';
 import {
   aggregateStudentResults,
   aggregateSkillResults,
@@ -795,6 +803,16 @@ async function main() {
         return { assessmentId, classGroupId: p.classGroupId };
       }),
     );
+
+    // Cada evaluación nueva cae en su proceso de medición, según la tanda (`config.ensayo`): "Ensayo PAES <n> <año>".
+    // Si sumarla rompería la invariante (dos instrumentos para el mismo grado y prueba),
+    // queda sin proceso y se reporta: el tablero la muestra en la toma legacy.
+    const processLinks = await linkLoadedAssessmentsToProcesses(tx, {
+      orgId: ORG_ID,
+      assessmentIds: insertedAssessments.map((a) => a.id),
+      source: { by: 'config', key: 'ensayo' },
+    });
+    for (const line of formatLoadProcessLinkReport(processLinks)) console.log(line);
 
     const allResponses: Array<typeof responses.$inferInsert> = [];
     const resultValues: Array<typeof assessmentResults.$inferInsert> = [];
