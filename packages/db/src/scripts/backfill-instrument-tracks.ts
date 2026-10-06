@@ -9,6 +9,11 @@
  * `packages/db/data/instruments*`; `--dir` (repetible) reemplaza esa lista, por ejemplo para
  * incluir JSON que todavía viven fuera del repo.
  *
+ * `--set <instrumentId>=<CODE>` (repetible) asigna la línea a un instrumento que no tiene JSON
+ * en el repo (p. ej. DIA Speaking en demo), con las mismas validaciones: la línea tiene que
+ * ser de la asignatura del instrumento y un instrumento oficial solo usa líneas oficiales.
+ * Si el JSON del instrumento declara otra línea, es un error.
+ *
  * Idempotente: solo escribe donde el `track_id` actual difiere del declarado. Nunca limpia
  * una línea: si la BDD tiene una que el JSON no declara, lo reporta y no la toca. Las líneas
  * de sección (electivas) no se rellenan acá: esas secciones se crean con el importador.
@@ -21,7 +26,12 @@ config({ path: resolve(__dirname, '../../../../.env') });
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { and, eq, isNull, sql } from 'drizzle-orm';
-import { indexTestTracksByCode, resolveTestTrack } from '@soe/types';
+import {
+  indexTestTracksByCode,
+  resolveTestTrack,
+  type TestTrackOwner,
+  type TestTrackRef,
+} from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { instruments } from '../schema/instruments';
 import { testTracks } from '../schema/test-tracks';
@@ -31,6 +41,17 @@ const DATA_ROOT = resolve(__dirname, '../../data');
 
 type DeclaredTrack = { file: string; sourceJson: string; code: string | null };
 
+export type ExplicitTrackAssignment = { instrumentId: string; code: string };
+
+export type TrackTarget = TestTrackOwner & { id: string; trackId: string | null };
+
+export type TrackAssignmentPlan = {
+  assigned: string[];
+  alreadySet: string[];
+  errors: string[];
+  updates: { instrumentId: string; trackId: string }[];
+};
+
 export type TrackBackfillReport = {
   assigned: string[];
   alreadySet: string[];
@@ -39,12 +60,56 @@ export type TrackBackfillReport = {
   errors: string[];
 };
 
-function parseArgs(argv: readonly string[]): { commit: boolean; dirs: string[] } {
+export function parseTrackArgs(argv: readonly string[]): {
+  commit: boolean;
+  dirs: string[];
+  explicit: ExplicitTrackAssignment[];
+} {
   const dirs: string[] = [];
+  const explicit: ExplicitTrackAssignment[] = [];
   argv.forEach((arg, index) => {
-    if (arg === '--dir' && argv[index + 1]) dirs.push(resolve(argv[index + 1]!));
+    const value = argv[index + 1];
+    if (arg === '--dir' && value) dirs.push(resolve(value));
+    if (arg !== '--set') return;
+    const match = /^([^=\s]+)=([^=\s]+)$/.exec(value ?? '');
+    if (!match) {
+      throw new Error(`--set espera <instrumentId>=<CODE>; recibió "${value ?? ''}".`);
+    }
+    explicit.push({ instrumentId: match[1]!, code: match[2]! });
   });
-  return { commit: argv.includes('--commit'), dirs };
+  return { commit: argv.includes('--commit'), dirs, explicit };
+}
+
+export function planTrackAssignments(
+  targets: readonly { target: TrackTarget; code: string }[],
+  tracksByCode: ReadonlyMap<string, readonly TestTrackRef[]>,
+): TrackAssignmentPlan {
+  const plan: TrackAssignmentPlan = { assigned: [], alreadySet: [], errors: [], updates: [] };
+  const codeByInstrument = new Map<string, string>();
+  for (const { target, code } of targets) {
+    const previous = codeByInstrument.get(target.id);
+    if (previous !== undefined) {
+      if (previous !== code) {
+        plan.errors.push(
+          `${target.label}: se le piden dos líneas distintas ("${previous}" y "${code}").`,
+        );
+      }
+      continue;
+    }
+    codeByInstrument.set(target.id, code);
+    try {
+      const track = resolveTestTrack(code, target, tracksByCode);
+      if (target.trackId === track.id) {
+        plan.alreadySet.push(`${target.label} → ${code}`);
+      } else {
+        plan.assigned.push(`${target.label} → ${code}`);
+        plan.updates.push({ instrumentId: target.id, trackId: track.id });
+      }
+    } catch (e) {
+      plan.errors.push(e instanceof Error ? e.message : String(e));
+    }
+  }
+  return plan;
 }
 
 function defaultDirs(): string[] {
@@ -79,7 +144,7 @@ function readDeclaredTracks(dirs: readonly string[]): DeclaredTrack[] {
 
 export async function backfillInstrumentTracks(
   db: Database,
-  options: { commit: boolean; dirs?: string[] },
+  options: { commit: boolean; dirs?: string[]; explicit?: ExplicitTrackAssignment[] },
 ): Promise<TrackBackfillReport> {
   const declared = readDeclaredTracks(options.dirs?.length ? options.dirs : defaultDirs());
   const report: TrackBackfillReport = {
@@ -119,7 +184,14 @@ export async function backfillInstrumentTracks(
     else loadedBySource.set(row.sourceJson, [row]);
   }
 
-  const updates: { instrumentId: string; trackId: string }[] = [];
+  const toTarget = (row: (typeof loaded)[number]): TrackTarget => ({
+    id: row.id,
+    label: row.name,
+    subjectId: row.subjectId,
+    orgId: row.orgId,
+    trackId: row.trackId,
+  });
+  const targets: { target: TrackTarget; code: string }[] = [];
   for (const { sourceJson, code } of declared) {
     const rows = loadedBySource.get(sourceJson) ?? [];
     if (rows.length === 0) {
@@ -127,27 +199,22 @@ export async function backfillInstrumentTracks(
       continue;
     }
     for (const row of rows) {
-      if (!code) {
-        if (row.trackId) report.keptWithoutDeclaration.push(row.name);
-        continue;
-      }
-      try {
-        const track = resolveTestTrack(
-          code,
-          { label: row.name, subjectId: row.subjectId, orgId: row.orgId },
-          tracksByCode,
-        );
-        if (row.trackId === track.id) {
-          report.alreadySet.push(`${row.name} → ${code}`);
-        } else {
-          report.assigned.push(`${row.name} → ${code}`);
-          updates.push({ instrumentId: row.id, trackId: track.id });
-        }
-      } catch (e) {
-        report.errors.push(e instanceof Error ? e.message : String(e));
-      }
+      if (code) targets.push({ target: toTarget(row), code });
+      else if (row.trackId) report.keptWithoutDeclaration.push(row.name);
     }
   }
+  const loadedById = new Map(loaded.map((row) => [row.id, row]));
+  for (const { instrumentId, code } of options.explicit ?? []) {
+    const row = loadedById.get(instrumentId);
+    if (row) targets.push({ target: toTarget(row), code });
+    else report.errors.push(`--set ${instrumentId}: el instrumento no existe o está borrado.`);
+  }
+
+  const plan = planTrackAssignments(targets, tracksByCode);
+  report.assigned.push(...plan.assigned);
+  report.alreadySet.push(...plan.alreadySet);
+  report.errors.push(...plan.errors);
+  const updates = plan.updates;
 
   if (options.commit && report.errors.length === 0 && updates.length > 0) {
     await db.transaction(async (tx) => {
@@ -183,7 +250,7 @@ function printReport(report: TrackBackfillReport, commit: boolean): void {
 if (require.main === module) {
   const url = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_ADMIN_URL o DATABASE_URL es requerido');
-  const args = parseArgs(process.argv.slice(2));
+  const args = parseTrackArgs(process.argv.slice(2));
   backfillInstrumentTracks(createDbClient(url), args)
     .then((report) => {
       printReport(report, args.commit);
