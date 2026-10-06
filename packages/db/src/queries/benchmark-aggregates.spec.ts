@@ -1,5 +1,7 @@
+import { PgDialect } from 'drizzle-orm/pg-core';
 import type { Database } from '../client';
-import { refreshBenchmarkAggregates } from './benchmark-aggregates';
+import { assessmentItemStats, assessmentSkillStats } from '../schema/results';
+import { preferComputedOverImported, refreshBenchmarkAggregates } from './benchmark-aggregates';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Mock de Database para el refresh.
@@ -404,5 +406,32 @@ describe('refreshBenchmarkAggregates', () => {
     expect(res.refreshedOrgs).toBe(1); // solo org-1 produjo filas
     expect(res.refreshedRows).toBe(1);
     expect(db.__upserts).toHaveLength(1);
+  });
+});
+
+describe('preferComputedOverImported', () => {
+  const render = (stats: Parameters<typeof preferComputedOverImported>[0]): string =>
+    new PgDialect().sqlToQuery(
+      stats === assessmentSkillStats
+        ? preferComputedOverImported(assessmentSkillStats)
+        : preferComputedOverImported(assessmentItemStats),
+    ).sql;
+
+  it('descarta la fila importada sólo cuando la misma celda tiene la calculada', () => {
+    const query = render(assessmentSkillStats);
+
+    expect(query).toContain("= 'imported'");
+    expect(query).toContain("= 'computed'");
+    expect(query).toContain('exists');
+    expect(query).toContain('class_group_id');
+    expect(query).toContain('node_id');
+    expect(query).toContain('instrument_id');
+  });
+
+  it('usa item_id como dimensión para los agregados por ítem', () => {
+    const query = render(assessmentItemStats);
+
+    expect(query).toContain('item_id');
+    expect(query).not.toContain('node_id');
   });
 });
