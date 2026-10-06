@@ -33,6 +33,7 @@ import { subjects, grades } from '../schema/academic';
 import { taxonomies } from '../schema/taxonomy';
 import { responses } from '../schema/responses';
 import { testTracks } from '../schema/test-tracks';
+import { instrumentSourceJson } from '../lib/instrument-source';
 
 // Override opcional (INSTRUMENTS_DATA_DIR) para cargar un set aislado sin re-importar el resto
 // (ej. la tanda DIA 2026 en su propio dir, sin tocar los instrumentos 2025 ya cargados).
@@ -429,11 +430,6 @@ async function assertSafeToRecreate(
       'cargados usá UPDATE in-place (pnpm --filter @soe/db db:retype:items), no re-import.\n' +
       'Si de verdad querés recrear el instrumento desde cero, re-corré con --force.',
   );
-}
-
-/** Identificador estable de un JSON importado: es la clave de idempotencia del importador. */
-export function instrumentSourceJson(doc: InstrumentJson): string {
-  return doc.pauta?.source?.instrumentJson ?? `imported/${doc.instrument.name}`;
 }
 
 export type ResolvedImportTracks = {

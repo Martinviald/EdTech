@@ -25,7 +25,7 @@ import { indexTestTracksByCode, resolveTestTrack } from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { instruments } from '../schema/instruments';
 import { testTracks } from '../schema/test-tracks';
-import { instrumentSourceJson, type InstrumentJson } from '../seed/import-instruments';
+import { instrumentSourceJson, type InstrumentSourceDoc } from '../lib/instrument-source';
 
 const DATA_ROOT = resolve(__dirname, '../../data');
 
@@ -66,11 +66,11 @@ function listJsonFiles(dir: string): string[] {
 function readDeclaredTracks(dirs: readonly string[]): DeclaredTrack[] {
   const declared: DeclaredTrack[] = [];
   for (const file of dirs.flatMap(listJsonFiles).sort()) {
-    const doc = JSON.parse(readFileSync(file, 'utf-8')) as Partial<InstrumentJson>;
+    const doc = JSON.parse(readFileSync(file, 'utf-8')) as Partial<InstrumentSourceDoc>;
     if (!doc.instrument?.name) continue;
     declared.push({
       file,
-      sourceJson: instrumentSourceJson(doc as InstrumentJson),
+      sourceJson: instrumentSourceJson(doc as InstrumentSourceDoc),
       code: doc.instrument.track ?? null,
     });
   }
