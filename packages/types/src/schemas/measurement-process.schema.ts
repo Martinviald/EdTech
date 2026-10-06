@@ -85,18 +85,20 @@ export const expectedScopeSchema: z.ZodType<ExpectedScope> = z.object({
   derived: z.boolean().optional(),
 });
 
-export const createMeasurementProcessSchema = z.object({
-  name: z.string().trim().min(3).max(160),
-  academicYearId: z.string().uuid(),
-  kind: processKindSchema,
-  period: processPeriodSchema.nullish(),
-  taxonomyId: z.string().uuid().nullish(),
-  status: processStatusSchema.optional(),
-  startsOn: isoDateOnlySchema.nullish(),
-  endsOn: isoDateOnlySchema.nullish(),
-  expectedScope: expectedScopeSchema.optional(),
-  notes: z.string().trim().max(2000).nullish(),
-});
+export const createMeasurementProcessSchema = z
+  .object({
+    name: z.string().trim().min(3).max(160),
+    academicYearId: z.string().uuid(),
+    kind: processKindSchema,
+    period: processPeriodSchema.nullish(),
+    taxonomyId: z.string().uuid().nullish(),
+    status: processStatusSchema.optional(),
+    startsOn: isoDateOnlySchema.nullish(),
+    endsOn: isoDateOnlySchema.nullish(),
+    expectedScope: expectedScopeSchema.optional(),
+    notes: z.string().trim().max(2000).nullish(),
+  })
+  .strict();
 export type CreateMeasurementProcessDto = z.infer<typeof createMeasurementProcessSchema>;
 
 export const updateMeasurementProcessSchema = createMeasurementProcessSchema
@@ -107,19 +109,23 @@ export const updateMeasurementProcessSchema = createMeasurementProcessSchema
   });
 export type UpdateMeasurementProcessDto = z.infer<typeof updateMeasurementProcessSchema>;
 
-export const measurementProcessListQuerySchema = z.object({
-  academicYearId: z.string().uuid().optional(),
-  kind: processKindSchema.optional(),
-  status: processStatusSchema.optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
-});
+export const measurementProcessListQuerySchema = z
+  .object({
+    academicYearId: z.string().uuid().optional(),
+    kind: processKindSchema.optional(),
+    status: processStatusSchema.optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+  })
+  .strict();
 export type MeasurementProcessListQuery = z.infer<typeof measurementProcessListQuerySchema>;
 
-export const linkProcessAssessmentsSchema = z.object({
-  assessmentIds: z.array(z.string().uuid()).min(1).max(500),
-  action: z.enum(['link', 'unlink']).default('link'),
-});
+export const linkProcessAssessmentsSchema = z
+  .object({
+    assessmentIds: z.array(z.string().uuid()).min(1).max(500),
+    action: z.enum(['link', 'unlink']).default('link'),
+  })
+  .strict();
 export type LinkProcessAssessmentsDto = z.infer<typeof linkProcessAssessmentsSchema>;
 
 export type ProcessCoverageTotals = {
