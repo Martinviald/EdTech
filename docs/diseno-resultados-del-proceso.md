@@ -8,6 +8,16 @@
 > **Rama/worktree:** `fix/alertas-key` en `wt-procesos-medicion`.
 > **Relacionado:** `docs/diseno-procesos-de-medicion.md`, `docs/diseno-entrada-por-proceso.md`,
 > `docs/diseno-panorama-comparable.md` (el que fija la restricción #1C que gobierna todo esto).
+>
+> **⚠️ Actualización 2026-10-06 — cambió la regla de severidad.** La severidad de una unidad (y de
+> cada evaluación) ya no sale del % de alumnos en la banda inferior (40 % / 25 %), sino de **la banda
+> de SU instrumento en la que cae el promedio de logro** (`severityFromAverageBand` en
+> `packages/types/src/comparability.ts`): banda inferior → alta, superior → baja, intermedias →
+> media. Motivo: en instrumentos binarios con corte alto (DIA Diagnóstico, ~79 %) la banda inferior
+> es tan ancha que casi todo curso salía "Grave", y la regla vieja no coincidía con la que pinta
+> habilidades y nodos. La concentración en la banda inferior sigue como dato (`lowestBandShare`) y
+> como alerta. Donde este documento cita `SEVERITY_LOWEST_BAND_THRESHOLDS` o
+> `severityFromLowestBandShare`, describe la regla anterior.
 
 ---
 

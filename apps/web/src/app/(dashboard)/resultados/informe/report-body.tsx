@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react';
 import {
+  explainAssessmentSeverity,
   sampleSizeLabel,
   type AssessmentReportResponse,
   type InstrumentSampleEntry,
@@ -28,6 +29,7 @@ import { cn } from '@/lib/utils';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
 import { SampleDeltaChip, StatCard } from '@/components/shared';
+import { SeverityBadge } from '@/components/shared/severity-badge';
 import {
   bandLabel,
   formatAchievement,
@@ -168,6 +170,8 @@ export function ReportBody({
         />
       </section>
 
+      <SeverityExplanation report={report} />
+
       <Highlights report={report} />
 
       {/* 2. Distribución por nivel */}
@@ -230,6 +234,35 @@ export function ReportBody({
       {/* 7. Recomendaciones */}
       <Recommendations report={report} />
     </div>
+  );
+}
+
+// ── Gravedad ──────────────────────────────────────────────────────────────────
+
+// Por qué la evaluación sale con su gravedad en la lista: en qué banda del
+// instrumento cae el promedio y cuál es el corte. Sin esta frase, un 71% junto a
+// "Grave" se lee como una contradicción. Usa la misma regla que la lista
+// (`explainAssessmentSeverity`), así que respeta el filtro de curso del informe.
+function SeverityExplanation({ report }: { report: AssessmentReportResponse }) {
+  const distribution = report.bandDistribution ?? [];
+  const lowest =
+    distribution.length > 0
+      ? distribution.reduce((min, bucket) => (bucket.order < min.order ? bucket : min))
+      : null;
+  const classified = distribution.reduce((sum, bucket) => sum + bucket.count, 0);
+  const explanation = explainAssessmentSeverity({
+    averageAchievement: report.summary.averageAchievement,
+    bands: report.bands ?? null,
+    studentsAssessed: classified > 0 ? classified : report.summary.studentsEvaluated,
+    lowestBandCount: lowest?.count ?? null,
+  });
+  if (!explanation) return null;
+
+  return (
+    <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+      <SeverityBadge severity={explanation.severity} reason={null} />
+      <span>{explanation.reason}</span>
+    </p>
   );
 }
 
