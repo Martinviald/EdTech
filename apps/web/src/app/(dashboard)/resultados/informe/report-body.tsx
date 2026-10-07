@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 import { StudentLink } from '@/components/students/student-link';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
-import { SampleDeltaChip, StatCard } from '@/components/shared';
+import { PendingCorrectionNotice, SampleDeltaChip, StatCard } from '@/components/shared';
 import { SeverityBadge } from '@/components/shared/severity-badge';
 import {
   bandLabel,
@@ -118,6 +118,8 @@ export function ReportBody({
   return (
     <div className="space-y-6">
       <FichaTecnica report={report} />
+
+      <PendingCorrectionNotice studentCount={report.meta.pendingStudentCount} />
 
       {/* 1. Síntesis ejecutiva */}
       <section className={`grid grid-cols-1 gap-4 ${summaryGridCols}`}>

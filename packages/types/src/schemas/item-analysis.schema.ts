@@ -131,14 +131,24 @@ export type ItemTaxonomyRef = {
  * el frontend pueda agregar con el mismo criterio.
  */
 export type ReferenceRate = {
-  rate: number | null; // 0..100 — ponderado: correctCount / responseCount
+  rate: number | null; // 0..100 — Σ puntaje ÷ Σ máximo de la población
   responseCount: number; // respuestas de TODOS los alumnos de la población
   correctCount: number; // aciertos de TODOS los alumnos de la población
+  scoreSum: number; // Σ puntaje corregido de la población (tally)
+  maxSum: number; // Σ puntaje máximo corregido de la población (tally)
 };
 
 export type QuestionReferences = {
   grade: ReferenceRate; // % logro del nivel (mismo grado + instrumento + año)
-  sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
+  sample: SampleReferenceRate | null; // muestra de colegios (§5.3 del diseño)
+};
+
+/** Referencia de la muestra de colegios en una pregunta. */
+export type SampleReferenceRate = {
+  rate: number | null; // 0..100 — Σ puntaje ÷ Σ máximo de los colegios de la muestra
+  scoreSum: number;
+  maxSum: number;
+  schoolCount: number;
 };
 
 /**
@@ -207,6 +217,11 @@ export type ItemMatrixResponse = {
   questions: MatrixQuestionColumn[];
   /** Resumen de la línea de referencia (nivel) del tablero maestro. */
   references: MatrixReferenceScopes;
+  /**
+   * Alumnos de la población visible con alguna pregunta todavía sin corregir. Su % considera
+   * sólo lo corregido (docs/diseno-logro-unificado-y-cohorte.md §3.1, D6).
+   */
+  pendingStudentCount: number;
   students: {
     data: MatrixStudentRow[];
     total: number;

@@ -294,8 +294,6 @@ describe('ItemAnalysisService.getMatrix', () => {
     // P1 = (1+2)/(2+2) = 75%, P2 = (2+0)/(2+2) = 50%.
     expect(res.questions[0].references.grade.rate).toBe(75);
     expect(res.questions[1].references.grade.rate).toBe(50);
-    // Ponderado por respuestas, nunca promedio de los % por curso: los conteos
-    // crudos quedan expuestos para que el frontend agregue con el mismo criterio.
     expect(res.questions[0].references.grade.responseCount).toBe(4);
     expect(res.questions[0].references.grade.correctCount).toBe(3);
     // Resumen del nivel: % ponderado (1+2+2+0)/(2+2+2+2), y su población. El
@@ -304,7 +302,8 @@ describe('ItemAnalysisService.getMatrix', () => {
     expect(res.references.grade.gradeName).toBe('3° Básico');
     expect(res.references.grade.classGroupCount).toBe(2);
     expect(res.references.grade.studentCount).toBe(4);
-    expect(res.questions[0].references.sample).toBeUndefined();
+    expect(res.questions[0].references.sample).toBeNull();
+    expect(res.pendingStudentCount).toBe(0);
 
     // Paginación.
     expect(res.students.total).toBe(2);

@@ -56,6 +56,11 @@ export type AssessmentReportMeta = {
   administeredAt: string | Date | null;
   classGroups: { id: string; name: string }[];
   itemsCount: number;
+  /**
+   * Alumnos de la población del informe con alguna pregunta todavía sin corregir. Su % considera
+   * sólo lo corregido (docs/diseno-logro-unificado-y-cohorte.md §3.1, D6).
+   */
+  pendingStudentCount: number;
   // Granularidad del dato + capacidades derivadas. Mismo patrón que `hasGradingScale`
   // de abajo: un flag de disponibilidad en el payload para que la UI colapse secciones
   // en vez de renderizar ceros que parecen datos.

@@ -61,6 +61,7 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
+import { countStudentsWithPendingResponses } from '../common/helpers/pending-responses.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import {
   buildAssessmentScopeCondition,
@@ -333,10 +334,6 @@ export class ItemAnalysisService {
         classGroupFilter,
       );
 
-      // TKT-22 — línea de referencia "% de logro del colegio" por pregunta: el
-      // promedio de TODA la org, con independencia del scope del usuario. La línea
-      // de "muestra de colegios" (benchmark inter-colegio) queda DIFERIDA hasta
-      // existir un pool multi-colegio (references.sample; ver QuestionReferences).
       const references = await this.attachLevelReferences(
         tx,
         orgId,
@@ -405,12 +402,19 @@ export class ItemAnalysisService {
         };
       });
 
+      const pendingStudentCount = await countStudentsWithPendingResponses(
+        tx,
+        query.assessmentId,
+        studentFilter,
+      );
+
       return {
         assessmentId: query.assessmentId,
         assessmentName: assessment.name,
         instrumentName: assessment.instrumentName,
         questions: references.questions,
         references: references.scopes,
+        pendingStudentCount,
         students: {
           data: students,
           total: pagination.total,
@@ -675,8 +679,7 @@ export class ItemAnalysisService {
         skill: refs.skill,
         content: refs.contentRef,
         correctRate: null,
-        // sample queda en undefined → línea de "muestra de colegios" DIFERIDA (TKT-20).
-        references: { grade: { rate: null, responseCount: 0, correctCount: 0 } },
+        references: { grade: this.emptyReference(), sample: null },
       };
     });
 
@@ -754,10 +757,6 @@ export class ItemAnalysisService {
    * explícitamente: nunca cruza datos de otra org (RLS + filtro manual, §5.2). Es
    * independiente del scope del usuario, que es el punto de una referencia: un
    * profesor ve su curso en `correctRate` y el nivel completo acá.
-   *
-   * `references.sample` (muestra de colegios / benchmark inter-colegio) queda
-   * DIFERIDO: requiere pool multi-colegio (TKT-20). Se deja el hueco en el
-   * contrato (`QuestionReferences.sample`) sin poblarlo.
    */
   private async attachLevelReferences(
     tx: Database,
@@ -767,7 +766,7 @@ export class ItemAnalysisService {
     questions: MatrixQuestionColumn[],
     itemIds: string[],
   ): Promise<{ questions: MatrixQuestionColumn[]; scopes: MatrixReferenceScopes }> {
-    const noData: ReferenceRate = { rate: null, responseCount: 0, correctCount: 0 };
+    const noData: ReferenceRate = this.emptyReference();
     const emptyScopes: MatrixReferenceScopes = {
       grade: { rate: null, gradeName: null, classGroupCount: 0, studentCount: 0 },
     };
@@ -870,6 +869,10 @@ export class ItemAnalysisService {
       );
   }
 
+  private emptyReference(): ReferenceRate {
+    return { rate: null, responseCount: 0, correctCount: 0, scoreSum: 0, maxSum: 0 };
+  }
+
   private aggregateReference(
     rows: Array<{
       itemId: string;
@@ -891,7 +894,7 @@ export class ItemAnalysisService {
 
     for (const r of rows) {
       const rowTally = tallyOf([r]);
-      const acc = byItem.get(r.itemId) ?? { rate: null, responseCount: 0, correctCount: 0 };
+      const acc = byItem.get(r.itemId) ?? this.emptyReference();
       acc.responseCount += Number(r.responseCount);
       acc.correctCount += Number(r.correctCount);
       byItem.set(r.itemId, acc);
@@ -907,8 +910,10 @@ export class ItemAnalysisService {
     }
 
     for (const [itemId, acc] of byItem) {
-      const itemTally = tallyByItem.get(itemId);
-      acc.rate = itemTally ? achievementPct(itemTally) : null;
+      const itemTally = tallyByItem.get(itemId) ?? emptyTally();
+      acc.rate = achievementPct(itemTally);
+      acc.scoreSum = itemTally.scoreSum;
+      acc.maxSum = itemTally.maxSum;
     }
 
     let studentCount = 0;
@@ -956,11 +961,11 @@ export class ItemAnalysisService {
     itemId: string,
     classGroupId: string | undefined,
   ): Promise<QuestionReferences> {
-    const empty: ReferenceRate = { rate: null, responseCount: 0, correctCount: 0 };
-    if (!assessmentId || !instrumentId) return { grade: empty };
+    const empty: ReferenceRate = this.emptyReference();
+    if (!assessmentId || !instrumentId) return { grade: empty, sample: null };
 
     const cohort = await this.resolveReferenceCohort(tx, assessmentId);
-    if (cohort === null) return { grade: empty };
+    if (cohort === null) return { grade: empty, sample: null };
 
     // Grado en contexto: el del curso filtrado (si viene); si no, los de la
     // evaluación. Un curso ajeno a la cohorte no acota nada (set vacío → sin datos).
@@ -975,13 +980,13 @@ export class ItemAnalysisService {
     } else {
       gradeIds = cohort.gradeIds;
     }
-    if (gradeIds.length === 0) return { grade: empty };
+    if (gradeIds.length === 0) return { grade: empty, sample: null };
 
     const rows = await this.loadReferenceRows(tx, orgId, instrumentId, gradeIds, cohort.yearIds, [
       itemId,
     ]);
 
-    return { grade: this.aggregateReference(rows).byItem.get(itemId) ?? empty };
+    return { grade: this.aggregateReference(rows).byItem.get(itemId) ?? empty, sample: null };
   }
 
   /** Alumnos con respuestas en la evaluación dentro del scope, paginados. */

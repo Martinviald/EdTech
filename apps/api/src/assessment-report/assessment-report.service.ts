@@ -56,6 +56,7 @@ import {
   cohortAverage,
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
+import { countStudentsWithPendingResponses } from '../common/helpers/pending-responses.helper';
 import {
   loadCohortOverallAchievement,
   type CohortOverallAchievement,
@@ -232,6 +233,7 @@ export class AssessmentReportService {
         administeredAt: assessment.administeredAt,
         classGroups: reportClassGroups.map((c) => ({ id: c.id, name: c.name })),
         itemsCount: itemColumns.length,
+        pendingStudentCount: 0,
         dataGranularity: assessment.dataGranularity,
         capabilities: [...capabilitiesFor(assessment.dataGranularity)],
         hasItemLevelData: assessment.dataGranularity === 'item_level',
@@ -324,11 +326,7 @@ export class AssessmentReportService {
       }
 
       // ── Síntesis ejecutiva ──────────────────────────────────────────────────
-      const courseTallies = await this.loadCourseTallies(
-        tx,
-        query.assessmentId,
-        classGroupFilter,
-      );
+      const courseTallies = await this.loadCourseTallies(tx, query.assessmentId, classGroupFilter);
       const summary = this.buildSummary(
         evaluated,
         courseTallies,
@@ -360,6 +358,12 @@ export class AssessmentReportService {
 
       // ── Recomendaciones (reglas) ────────────────────────────────────────────
       const recommendations = this.buildRecommendations(summary, skills, items, studentsAtRisk);
+
+      meta.pendingStudentCount = await countStudentsWithPendingResponses(
+        tx,
+        query.assessmentId,
+        studentFilter,
+      );
 
       return {
         meta,

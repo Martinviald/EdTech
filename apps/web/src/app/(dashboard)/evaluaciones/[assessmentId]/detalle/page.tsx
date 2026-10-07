@@ -11,7 +11,7 @@ import {
   ITEM_ANALYSIS_VIEWER_ROLES,
   type ItemMatrixResponse,
 } from '@soe/types';
-import { EmptyState } from '@/components/shared';
+import { EmptyState, PendingCorrectionNotice } from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
 import { CrossTable } from '../../../resultados/detalle/cross-table';
 import { AssessmentCourseFilter } from '../components/course-filter';
@@ -123,6 +123,7 @@ export default async function EvaluacionDetallePage({
                 {matrix.students.total} alumnos
               </p>
             </div>
+            <PendingCorrectionNotice studentCount={matrix.pendingStudentCount} />
             <CrossTable matrix={matrix} assessmentId={assessmentId} classGroupId={classGroupId} />
           </CardContent>
         </Card>

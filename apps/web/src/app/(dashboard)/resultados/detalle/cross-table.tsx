@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { JSX } from 'react';
-import { responseOutcome, type ResponseOutcome } from '@soe/types';
+import {
+  achievementPct,
+  addTally,
+  emptyTally,
+  responseOutcome,
+  type ResponseOutcome,
+} from '@soe/types';
 import type {
   ItemMatrixResponse,
   ItemTaxonomyRef,
@@ -569,9 +575,8 @@ function describeScope(name: string, classGroupCount: number, studentCount: numb
  * evaluación. Cuando exista el pool multi-colegio (TKT-20), la "muestra de
  * colegios" (`q.references.sample`) se agrega como una segunda fila análoga.
  *
- * ⚠️ La columna "% Logro" es el % ponderado sobre TODAS las respuestas de TODOS
- * los alumnos del nivel (`sum(correctCount)/sum(responseCount)` de las columnas
- * visibles), NUNCA el promedio de los % por pregunta ni por curso. El subtítulo
+ * ⚠️ La columna "% Logro" es Σ puntaje ÷ Σ máximo de TODOS los alumnos del nivel sobre
+ * las columnas visibles, NUNCA el promedio de los % por pregunta ni por curso. El subtítulo
  * dice sobre cuántos cursos y alumnos agrega: sin eso, un nivel de un solo curso
  * se lee como un duplicado de la fila del alumno.
  */
@@ -582,14 +587,13 @@ function LevelReferenceRow({
   questions: MatrixQuestionColumn[];
   sublabel: string;
 }): JSX.Element {
-  // Agregado ponderado sobre las columnas VISIBLES (respeta el filtro por tags).
-  let totalResponses = 0;
-  let totalCorrect = 0;
+  // Σ puntaje ÷ Σ máximo sobre las columnas VISIBLES (respeta el filtro por tags): la
+  // misma regla que el % de cada pregunta (docs/diseno-logro-unificado-y-cohorte.md §3.1).
+  const total = emptyTally();
   for (const q of questions) {
-    totalResponses += q.references.grade.responseCount;
-    totalCorrect += q.references.grade.correctCount;
+    addTally(total, { scoreSum: q.references.grade.scoreSum, maxSum: q.references.grade.maxSum });
   }
-  const levelOverall = totalResponses > 0 ? (totalCorrect / totalResponses) * 100 : null;
+  const levelOverall = achievementPct(total);
 
   return (
     <TableRow className="border-b-2 bg-muted/30">

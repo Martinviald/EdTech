@@ -18,6 +18,7 @@ export { MetaItem } from './MetaItem';
 export { StatusDot } from './StatusDot';
 export { StatusBadge, type StatusTone } from './StatusBadge';
 export { AlertCallout, type CalloutTone } from './AlertCallout';
+export { PendingCorrectionNotice } from './pending-correction-notice';
 export { Field } from './Field';
 export { Stepper, type Step } from './Stepper';
 export { EmptyState } from './EmptyState';
