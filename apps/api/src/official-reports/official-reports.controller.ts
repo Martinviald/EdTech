@@ -9,6 +9,7 @@ import {
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { Roles } from '../common/decorators/roles.decorator';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CourseReportService } from './course-report.service';
 import { EstablishmentReportService } from './establishment-report.service';
@@ -42,15 +43,10 @@ export class OfficialReportsController {
     return this.courseReport.getCourseReport(user, dto);
   }
 
-  /**
-   * GET /api/reports/establishment  (TKT-25)
-   * Informe de establecimiento (Área Académica): niveles de logro por grado ×
-   * asignatura (Tablas 1.1–1.4), comparación por sexo (1.5–1.8) y conteos (1.9).
-   */
   @Get('establishment')
   @Roles(...ESTABLISHMENT_REPORT_ROLES)
   getEstablishmentReport(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
-    const dto = officialEstablishmentReportQuerySchema.parse(query ?? {});
+    const dto = parseDtoOrBadRequest(officialEstablishmentReportQuerySchema, query ?? {});
     return this.establishmentReport.getEstablishmentReport(user, dto);
   }
 

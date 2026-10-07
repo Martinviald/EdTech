@@ -35,6 +35,12 @@ export type EstablishmentCoverage = {
   expected: number | null;
 };
 
+/** Evaluación del proceso que alimenta una columna (para listarlas cuando hay más de una). */
+export type EstablishmentColumnAssessment = {
+  id: string;
+  name: string | null;
+};
+
 /**
  * Un grado presente como columna de las tablas de una asignatura. Cada columna sale de
  * UNA evaluación del proceso: si el grado × asignatura tiene más de una, la columna
@@ -48,6 +54,8 @@ export type EstablishmentGradeColumn = {
   instrumentId: string | null;
   /** Evaluaciones del proceso en este grado × asignatura (más de una ⇒ `multipleAssessments`). */
   assessmentIds: string[];
+  /** Las mismas evaluaciones de `assessmentIds`, con su nombre, en el mismo orden. */
+  assessments: EstablishmentColumnAssessment[];
   multipleAssessments: boolean;
   /** El instrumento no tiene bandas: la columna no clasifica por nivel (nunca cortes heredados). */
   bandsMissing: boolean;
