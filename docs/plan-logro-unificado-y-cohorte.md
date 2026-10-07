@@ -5,64 +5,59 @@
 > fase, archivos que toca cada uno, criterios de aceptación, cómo se verifica y en qué orden se
 > entrega. Las referencias `§N` apuntan al documento de diseño.
 >
-> **Fecha:** 2026-10-06 · **Estado:** 📋 plan propuesto, sin código.
+> **Fecha:** 2026-10-06 · **Estado:** ✅ listo para ejecución autónoma (§7), sin código.
 
 ---
 
 ## 1. Cómo se entrega
 
-### 1.1 Dos PRs, en orden
+### 1.1 Una PR, dos partes, un commit por fase
 
-| PR    | Rama                                | Contenido                                     | Depende de          |
-| ----- | ----------------------------------- | --------------------------------------------- | ------------------- |
-| **A** | `feat/logro-unificado`              | Definición única del % de logro (fases A0–A5) | —                   |
-| **B** | `feat/cohorte-en-tablero-y-detalle` | Contraste con la cohorte (fases B0–B4)        | A mergeada en `dev` |
-
-- Ambas van contra `dev`, con **un commit por fase**. El CI valida cada fase antes de empezar la
-  siguiente.
-- Van separadas porque la A cambia números en toda la app y se valida con el informe de diferencias
-  (A5). Mezclarla con la UI nueva de la B haría imposible separar "cambió la fórmula" de "cambió la
-  vista".
-- La promoción `dev → main` (que despliega a demo) es aparte. §1.3 dice qué tiene que cuidar.
+- **Rama:** `feat/logro-unificado-cohorte`, en el worktree `wt-logro-cohorte`, que ya sale de
+  `origin/dev` y tiene los commits de documentación.
+- **Una sola PR contra `dev`** al final. Contiene la parte A (fases A1–A5) y la B (fases B0–B4), con
+  **un commit por fase**, en ese orden.
+- La A va antes que la B dentro de la misma rama. Cada fase se sube y el CI la valida antes de empezar
+  la siguiente. Así, aunque vayan juntas, el historial separa "cambió la fórmula" (A) de "cambió la
+  vista" (B).
+- **La PR se abre al terminar A1** (como borrador) para tener CI en cada push, y se marca lista al
+  cerrar B4.
+- **Nada se mergea ni se despliega en la ejecución autónoma.** El merge a `dev`, la promoción a `main`
+  y todo lo que toque demo quedan en el runbook de §8, para hacerlo con el usuario.
 
 ### 1.2 Verificación
 
-- **En la PR:** CI de GitHub (typecheck, lint y tests de los jobs API, DB, Types y Web). En local sólo
-  corren specs de un archivo; la máquina no aguanta las suites completas. Un proceso pesado a la vez.
-- **Sin AWS ni demo en modo autónomo.** Las comprobaciones contra la base de demo de A0, A5 y B4 se
-  hacen **con el usuario**. Durante el desarrollo, las comprobaciones de datos se hacen en una base
-  local nueva.
-- **Specs con números reales:** los casos de prueba usan cifras de evaluaciones reales de CSCJ y San
-  Agustín (anonimizadas en el spec), igual que en la PR #273.
+- **CI de GitHub en cada fase** (jobs API, DB, Types, Web, Decisions, OMR): typecheck, lint y tests.
+  En local sólo corren specs de un archivo; la máquina no aguanta las suites completas.
+- **Base local nueva para los gates de datos** (§7.3): migración, backfills, refresh y el informe de
+  diferencias corren contra ella. Nunca contra `soe_dev` ni contra demo.
+- **Specs con números reales sin leer demo:** se usan las cifras ya capturadas en §8 del diseño y en
+  los specs de la PR #273 (Lectura 6°: muestra 71,91 % sobre 103 alumnos). No se hacen lecturas nuevas
+  de demo.
 
-### 1.3 Lo que la promoción `dev → main` tiene que cuidar
+### 1.3 Subagentes
 
-- **Migraciones:** hoy `main` y `dev` comparten la cadena (0040). Si alguna de las dos avanza antes de
-  promover, se regenera la migración de A2 sobre la cadena de `main`
-  (`feedback-sync-dev-main-migraciones`).
-- **Orden en el deploy de backend:** migración → `db:backfill:student-scores` (nuevo) →
-  `db:backfill:cohort-stats` → `db:refresh:benchmark` → imagen nueva. El workflow ya corre los dos
-  últimos; A2 agrega el primero con su sello y el chequeo que falla si quedan sumas sin calcular.
-- **Aviso a los colegios** antes del deploy de la PR A, con el informe de diferencias en mano.
+Sólo donde suma: A3 (unos 20 servicios con el mismo cambio mecánico) se reparte por dominio, y las
+auditorías de A5-2 y B4-4. Antes de lanzar agentes se commitean los contratos y el helper de A1. A cada
+agente se le pasan:
 
-### 1.4 Subagentes
+- las reglas de `.claude/rules/backend` (cero comentarios en `apps/api`, `reportServerError` en los
+  catch, helpers de un uso como método privado);
+- la regla del diseño §3.1 y la tabla de su dominio del inventario §9;
+- la instrucción de commitear en su worktree antes de terminar.
 
-Sólo donde suma: la fase A3 (unos 20 servicios con el mismo cambio mecánico) se puede repartir por
-dominio. Los contratos de A0 y el helper de A1 se commitean **antes** de lanzar agentes, y a cada
-agente se le pasan las reglas de `.claude/rules/backend` (cero comentarios en `apps/api`,
-`reportServerError` en los catch). La integración y la revisión final las hago yo.
+La integración y la revisión final no se delegan.
 
 ---
 
 ## 2. Decisiones
 
-Tomadas (§2 del diseño). A0 ya se hizo (§8 del diseño): no hay evaluaciones sin puntaje y DIA no tiene
-secciones electivas. Los pendientes de CSCJ se resolvieron con D9: la muestra se calcula sobre las preguntas
-que el grupo comparado tiene corregidas, sin excluir evaluaciones.
+Todas tomadas (§2 del diseño, D1–D9). A0 ya se hizo (§8 del diseño). Para lo que pueda surgir durante
+el desarrollo, §7.2 fija los criterios por defecto, para no detenerse a preguntar.
 
 ---
 
-## 3. PR A — % de logro unificado
+## 3. Parte A — % de logro unificado
 
 ### A0 · Verificación de datos en demo ✅ (2026-10-06)
 
@@ -129,15 +124,15 @@ actualiza **con el número nuevo justificado en el caso**, no copiando la salida
 
 ### A5 · Informe de diferencias y cierre
 
-| #    | Ticket                                                                                                                                                                                        | Aceptación                                                            |
-| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| A5-1 | Script `apps/api/scripts/diff-achievement.ts`: para cada evaluación, curso y nodo, % antes (fórmula vieja, recalculada en el script) y después; conteo de alertas antes y después; salida CSV | Corre en local; en demo se corre **con el usuario** antes de promover |
-| A5-2 | Auditoría de regresiones con un subagente (vistas, permisos, rendimiento de las consultas cambiadas)                                                                                          | Hallazgos corregidos en un commit aparte                              |
-| A5-3 | Actualizar `docs/Diseño bdd.md` (columnas nuevas, significado único de `percentage`) y el diseño                                                                                              | —                                                                     |
+| #    | Ticket                                                                                                                                                                                        | Aceptación                                                                                          |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| A5-1 | Script `apps/api/scripts/diff-achievement.ts`: para cada evaluación, curso y nodo, % antes (fórmula vieja, recalculada en el script) y después; conteo de alertas antes y después; salida CSV | Corre en la base local de §7.3 y su salida se resume en la PR; en demo se corre con el usuario (§8) |
+| A5-2 | Auditoría de regresiones con un subagente (vistas, permisos, rendimiento de las consultas cambiadas)                                                                                          | Hallazgos corregidos en un commit aparte                                                            |
+| A5-3 | Actualizar `docs/Diseño bdd.md` (columnas nuevas, significado único de `percentage`) y el diseño                                                                                              | —                                                                                                   |
 
 ---
 
-## 4. PR B — Contraste con la cohorte
+## 4. Parte B — Contraste con la cohorte
 
 ### B0 · Contratos
 
@@ -175,28 +170,26 @@ actualiza **con el número nuevo justificado en el caso**, no copiando la salida
 
 ### B4 · `/resultados` de una evaluación y cierre
 
-| #    | Ticket                                                                                                                                                       | Archivos                                                                                     | Aceptación                                                       |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| B4-0 | Muestra por nodo desde `benchmark_item_aggregates` + tags, acotada a las preguntas corregidas del grupo (D9); `per_skill` deja de leerse                     | `benchmark-samples.service.ts`, `report-body.tsx`                                            | Mismo valor que `per_skill` cuando el grupo tiene todo corregido |
-| B4-1 | `/dashboards/skills?assessmentId&reference=level` con B1-2                                                                                                   | `dashboards.service.ts`, controller, DTO                                                     | Mismo resultado que pedir los cursos del nivel a mano            |
-| B4-2 | `SkillsBreakdown`: marcas de nivel y muestra, tooltip con `SampleTooltipBody`, nivel omitido sin filtro de curso                                             | `skills-breakdown.tsx`, `report-body.tsx`, `evaluaciones/[assessmentId]/resultados/page.tsx` | En todas las dimensiones del selector; RTL                       |
-| B4-3 | Telemetría en las tres superficies                                                                                                                           | componentes de B2–B4                                                                         | —                                                                |
-| B4-4 | Auditoría de regresiones con subagente y actualización del diseño                                                                                            | —                                                                                            | Hallazgos corregidos                                             |
-| B4-5 | **En demo, con el usuario, tras promover:** tablero, `/detalle` y `/resultados` con un directivo de CSCJ y otro de San Agustín; un profesor no ve nada nuevo | —                                                                                            | Checklist firmada                                                |
+| #    | Ticket                                                                                                                                   | Archivos                                                                                     | Aceptación                                                       |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| B4-0 | Muestra por nodo desde `benchmark_item_aggregates` + tags, acotada a las preguntas corregidas del grupo (D9); `per_skill` deja de leerse | `benchmark-samples.service.ts`, `report-body.tsx`                                            | Mismo valor que `per_skill` cuando el grupo tiene todo corregido |
+| B4-1 | `/dashboards/skills?assessmentId&reference=level` con B1-2                                                                               | `dashboards.service.ts`, controller, DTO                                                     | Mismo resultado que pedir los cursos del nivel a mano            |
+| B4-2 | `SkillsBreakdown`: marcas de nivel y muestra, tooltip con `SampleTooltipBody`, nivel omitido sin filtro de curso                         | `skills-breakdown.tsx`, `report-body.tsx`, `evaluaciones/[assessmentId]/resultados/page.tsx` | En todas las dimensiones del selector; RTL                       |
+| B4-3 | Telemetría en las tres superficies                                                                                                       | componentes de B2–B4                                                                         | —                                                                |
+| B4-4 | Auditoría de regresiones con subagente y actualización del diseño; PR marcada como lista con el cuerpo de §7.5                           | —                                                                                            | Hallazgos corregidos                                             |
 
 ---
 
 ## 5. Orden y dependencias
 
 ```
-A0 (datos) ─┐
-A1 ─ A2 ─ A3 ─ A4 ─ A5 ──▶ merge A ─▶ B0 ─ B1 ─┬─ B2 ─┐
-                                              ├─ B3 ─┼─ B4 ─▶ merge B
-                                              └──────┘
+A1 ─ A2 ─┬─ A3 (agentes por dominio) ─ A4 ─ A5 ─ B0 ─ B1 ─┬─ B2 ─┐
+         │                                               ├─ B3 ─┼─ B4 ─▶ PR lista
+         └─ PR en borrador (CI desde aquí)               └──────┘
 ```
 
-- A3 se puede repartir entre agentes por dominio una vez que A1 y A2 estén commiteadas.
-- En la B, B2 y B3 son independientes entre sí una vez que existen B0 y B1.
+- A3 se reparte entre agentes una vez que A1 y A2 están commiteadas y en verde.
+- B2 y B3 son independientes entre sí una vez que existen B0 y B1.
 
 ## 6. Fuera de alcance (registrado)
 
@@ -206,3 +199,93 @@ A1 ─ A2 ─ A3 ─ A4 ─ A5 ──▶ merge A ─▶ B0 ─ B1 ─┬─ B2 �
 - Contract: borrar `band_distribution` y cualquier `percentage` o conteo que quede sin lectores, en una
   entrega posterior.
 - k vuelve a 3 cuando entre un tercer colegio (decisión anterior).
+
+---
+
+## 7. Ejecución autónoma
+
+### 7.1 Reglas que no se rompen
+
+| Regla                      | Detalle                                                                                                                                       |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sin AWS                    | Cero `aws`, `sst`, túnel, S3 o lectura de demo. Push y PR a GitHub sí: el CI de PR no toca AWS.                                               |
+| Un proceso pesado a la vez | Antes de un build, typecheck o test: `pgrep -fl "tsc --build\|vitest\|jest\|next build"`. Si hay uno, esperar.                                |
+| Tests en el CI             | En local sólo specs de un archivo (`pnpm --filter @soe/api test <archivo>`).                                                                  |
+| Formato                    | `npx prettier --write <archivos propios>`. Nunca `pnpm format` global.                                                                        |
+| Push                       | Antes de cada push, en un paso aparte: `gh pr list --head feat/logro-unificado-cohorte --state all`. Si está `MERGED` o `CLOSED`, rama nueva. |
+| CI                         | Exigir número de checks y `mergeStateStatus`. "No checks" = conflicto, no espera. Leer el log, no el exit code.                               |
+| `apps/api`                 | Sin comentarios. `reportServerError` en los catch.                                                                                            |
+| Español                    | Tuteo neutro en UI, docs y commits.                                                                                                           |
+| Datos                      | No se tocan respuestas ni puntajes de alumnos. Los scripts de backfill tienen `--dry-run` y son idempotentes.                                 |
+
+### 7.2 Criterios por defecto (para no detenerse)
+
+| Si pasa esto                                                      | Se hace esto                                                                                                                                                  |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Un spec existente cambia de número                                | Se recalcula a mano con la regla §3.1 y el número nuevo se justifica en el caso. Nunca se copia la salida.                                                    |
+| Un lugar del inventario no encaja en la regla                     | Se aplica la regla. Si no es un % de grupo (§3.2), se deja como está y se anota en la PR.                                                                     |
+| Aparece otro lugar con la fórmula vieja fuera del inventario      | Se corrige igual y se agrega al inventario §9.                                                                                                                |
+| Un umbral de alerta cambia mucho el conteo en la base local       | No se toca el umbral. Se reporta en la PR para decidir con datos de demo (§8).                                                                                |
+| Hace falta un texto de UI nuevo                                   | Tuteo neutro, corto, consistente con los textos vecinos y con `SampleTooltipBody`.                                                                            |
+| Hace falta un color nuevo                                         | Tokens existentes (`--level-*`, `success`, `warning`, `destructive`, `muted`). Nada hardcodeado.                                                              |
+| La escala divergente del tablero                                  | Bajo la muestra < −`similarPp` ≤ similar ≤ `similarPp` < sobre la muestra (`ALERT_THRESHOLDS.cohort.similarPp` = 5).                                          |
+| La migración choca con otra de `dev`                              | Rebase sobre `origin/dev`, borrar la propia y regenerar (`feedback-conflicto-migraciones-drizzle`).                                                           |
+| El CI falla                                                       | Se corrige en un commit nuevo de la misma fase o con `--amend` + `--force-with-lease` si la fase aún no tiene revisión.                                       |
+| Algo del diseño resulta imposible o contradictorio                | Se elige la opción que respeta §3.1 y D1–D9, se implementa y se explica en la sección "Decisiones tomadas en el camino" de la PR. No se detiene la ejecución. |
+| Un bloqueo real (credencial, servicio externo, dato sólo en demo) | Se deja el ticket hecho hasta donde se pueda, se marca en la PR como pendiente con el motivo y se sigue con el resto.                                         |
+
+### 7.3 Base local para los gates
+
+1. `createdb soe_logro` en el Postgres local (PG 14: nada de `NULLS NOT DISTINCT`).
+2. `DATABASE_URL` y `DATABASE_ADMIN_URL` apuntando a `soe_logro` sólo para esos comandos.
+3. `pnpm --filter @soe/db db:migrate` y `db:seed:dev` (seed base, e2e y fixtures de benchmark).
+4. Para que haya al menos dos colegios con el mismo instrumento, crédito parcial y preguntas
+   pendientes, se agrega un seed local de prueba (`packages/db/src/seed/logro-fixtures.ts`), sólo con
+   datos sintéticos y sin RUT reales.
+5. Gates por fase:
+   - A2: migración sin diff pendiente; `db:backfill:student-scores --dry-run` con 0 discrepancias salvo
+     las de A1-2; el chequeo de A2-6 pasa; `db:backfill:cohort-stats` y `db:refresh:benchmark` sin
+     errores.
+   - A5: `diff-achievement` produce el CSV; su resumen va a la PR.
+   - B: el tablero, `/detalle` y `/resultados` cargan contra esta base con un usuario directivo y uno
+     profesor (sesión forjada, `NODE_ENV=development`; ver `feedback-e2e-local-sin-demo`).
+
+### 7.4 Definición de terminado
+
+- Fases A1–A5 y B0–B4 commiteadas, un commit por fase, más los commits de corrección de las
+  auditorías.
+- CI en verde en todos los jobs y PR `MERGEABLE`, con el número de checks verificado.
+- Inventario §9 completo: ningún `avg(` sobre `percentage` ni `pctSum` en `apps/api` (guardián A3-11).
+- Auditorías A5-2 y B4-4 hechas y sus hallazgos corregidos.
+- Diseño, plan y `docs/Diseño bdd.md` actualizados.
+
+### 7.5 Cuerpo de la PR
+
+1. Resumen de A y de B.
+2. Tabla de commits por fase.
+3. Resumen del informe de diferencias en la base local (A5-1).
+4. Decisiones tomadas en el camino (§7.2).
+5. Pendientes y bloqueos, si hubo.
+6. El runbook de §8, copiado tal cual.
+7. Firma de Claude Code.
+
+---
+
+## 8. Runbook con el usuario (después de la PR)
+
+Nada de esto se hace en la ejecución autónoma.
+
+1. **Revisión y merge** de la PR a `dev`.
+2. **Informe de diferencias en demo:** túnel, `diff-achievement` en solo lectura, revisión del CSV
+   (cambios por evaluación, curso y nodo; conteo de alertas antes y después).
+3. **Aviso a CSCJ y San Agustín** de los números que cambian, con el CSV en mano.
+4. **Promoción `dev → main`.** Si `main` avanzó su cadena de migraciones, regenerar la de A2 sobre la
+   de `main` (`feedback-sync-dev-main-migraciones`).
+5. **Deploy de backend.** Orden: migración → `db:backfill:student-scores` → `db:backfill:cohort-stats`
+   → `db:refresh:benchmark` → imagen. Confirmar que el chequeo de A2-6 pasó y que las 2 evaluaciones
+   de A-7 quedaron en escala 0..100.
+6. **Recorrido en demo:** tablero, `/detalle` y `/resultados` con un directivo de CSCJ y otro de San
+   Agustín. Un profesor no ve nada nuevo. La métrica "diferencia vs muestra" aparece sólo para
+   directivos.
+7. **Recapturar** los baselines de `snapshot-panorama`.
+8. **Ajuste de umbrales de alertas** si el conteo cambió mucho (decisión con datos).

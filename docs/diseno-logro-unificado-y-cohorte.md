@@ -1,6 +1,6 @@
 # Diseño — % de logro unificado y contraste con la cohorte
 
-> **Qué es esto:** el diseño de dos entregas encadenadas.
+> **Qué es esto:** el diseño de dos partes que se entregan en una sola PR, la A antes que la B.
 >
 > - **Parte A — % de logro unificado.** Una sola definición del % de logro de cualquier grupo
 >   (curso, nivel, colegio, muestra; prueba, sección, nodo, pregunta), calculada en un solo lugar y
