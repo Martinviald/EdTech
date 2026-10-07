@@ -75,6 +75,7 @@ export default async function EvaluacionResultadosPage({
           classGroupId={classGroupId}
           samplePromise={samplePromise}
           skillReferencesPromise={skillReferencesPromise}
+          roles={session.user.roles}
         />
       ) : (
         <EmptyState

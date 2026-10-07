@@ -124,7 +124,12 @@ export default async function EvaluacionDetallePage({
               </p>
             </div>
             <PendingCorrectionNotice studentCount={matrix.pendingStudentCount} />
-            <CrossTable matrix={matrix} assessmentId={assessmentId} classGroupId={classGroupId} />
+            <CrossTable
+              matrix={matrix}
+              assessmentId={assessmentId}
+              classGroupId={classGroupId}
+              roles={session.user.roles}
+            />
           </CardContent>
         </Card>
       )}
