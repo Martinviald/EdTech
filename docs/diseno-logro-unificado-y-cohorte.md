@@ -99,7 +99,10 @@ Tomadas el 2026-10-06.
   partes.
 - **La distribución por niveles** cuenta alumnos por banda según el % de cada uno.
 - **Las pruebas estadísticas** (comparación por sexo del informe del establecimiento) usan como
-  observaciones el % de cada alumno. El % del grupo que se _muestra_ al lado sí sigue la regla.
+  observaciones el % de cada alumno. **Excepción explícita:** las medias por sexo que muestra ese
+  informe (`femaleAvg`, `maleAvg`) son el estadístico del t de Welch y siguen siendo medias de los %
+  individuales. Mostrar ahí la regla §3.1 podría contradecir al test. Ese informe es de la sesión de
+  rediseño de la navegación (`coordinacion/acuerdos.md`, #1).
 - **La distribución de alternativas** de una pregunta es una proporción de respuestas, no un logro.
 - **Entre instrumentos no comparables no hay % de grupo.** Se mantiene la regla D8 del panorama
   comparable.

@@ -11,6 +11,20 @@
 
 ## 1. Cómo se entrega
 
+### 1.0 Coordinación con las otras sesiones
+
+Hay otras dos sesiones desarrollando en paralelo. Lo acordado está en `EdTech/coordinacion/acuerdos.md`
+y manda sobre este plan si se contradicen. En resumen:
+
+- **PR 0 primero:** `packages/types/src/utils/achievement.ts` + spec, sola y aditiva, contra `dev`.
+  Firma congelada en `acuerdos.md` §2. Es A1-1, adelantado.
+- **Esta PR se mergea última**, después de `procesos-medicion` y `edtech-3c`. Antes de entregarla se
+  rebasa sobre las dos y se convierte cualquier % de grupo nuevo que hayan agregado.
+- **No se toca:** el informe del establecimiento (`establishment-report.service.ts` y su schema),
+  `nav-items.ts`, la página `/benchmarking`, `resultados/page.tsx`, `access-policies/results-dashboards.ts`.
+- **Contrato congelado:** la forma de `ComparableUnitSummary`.
+- **Un proceso pesado a la vez en toda la máquina**, contando las otras sesiones.
+
 ### 1.1 Una PR, dos partes, un commit por fase
 
 - **Desarrollo autónomo completo en worktrees aislados.** Nada se hace en el checkout principal ni en
@@ -118,19 +132,19 @@ Resultados en §8 del diseño:
 Un ticket por dominio. Todos siguen el mismo patrón: sumar tallies (`COHORT_SCORE_SUM` /
 `COHORT_MAX_SUM` en SQL, `addTally` en TS) y llamar a `achievementPct`.
 
-| #     | Dominio                           | Funciones                                                                                                                                                                                  |
-| ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A3-1  | Helpers comunes                   | Reemplazar `COHORT_PCT_SUM / COHORT_PCT_WEIGHT` y su acumulador por tallies (`common/helpers/cohort-skill-stats.helper.ts`); `cohort-item-stats.helper.ts` usa `achievementPct`            |
-| A3-2  | Informe de evaluación             | `buildSummary`, `buildCourseComparison`, `buildSkills`                                                                                                                                     |
-| A3-3  | Informes oficiales                | curso (`buildGeneralResult`, `buildSkillAxes*`, `buildSpecTable` → B), alumno (`loadClassAverage`), establecimiento (% mostrado; la prueba estadística sigue con observaciones por alumno) |
-| A3-4  | Dashboards                        | `loadRecentAssessments`, `loadSkillsFrom*`, `loadBreakdownFrom*`, `getTeacherKpis`, `getPerformance`                                                                                       |
-| A3-5  | Panorama comparable y trayectoria | `comparable-unit.assembler.ts` (todas), `comparable-trajectory.service.ts`                                                                                                                 |
-| A3-6  | Alertas                           | `loadNodeAchievements` y `loadItemRates` pasan de C a B                                                                                                                                    |
-| A3-7  | Mapa de calor                     | `loadCellRows`, `cohortAverage`                                                                                                                                                            |
-| A3-8  | Alumno, remedial, IA              | `student-panorama` (`loadBySkill`), `student-comparisons` (`foldCourses`), `group-plan.generator`, `instrument-comparison.snapshot`                                                        |
-| A3-9  | Muestra                           | `benchmark-sample.ts` (`aggregateSample`, `aggregateSampleSkills`, `aggregateItemSample` sobre tallies), `benchmarking.service.ts`                                                         |
-| A3-10 | Detalle                           | `aggregateReference` devuelve `null` sin corregidas (A-4)                                                                                                                                  |
-| A3-11 | Guardián                          | Spec que recorre `apps/api/src` y falla si aparece `avg(` sobre una columna `percentage` o un `pctSum`                                                                                     |
+| #     | Dominio                           | Funciones                                                                                                                                                                                     |
+| ----- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A3-1  | Helpers comunes                   | Reemplazar `COHORT_PCT_SUM / COHORT_PCT_WEIGHT` y su acumulador por tallies (`common/helpers/cohort-skill-stats.helper.ts`); `cohort-item-stats.helper.ts` usa `achievementPct`               |
+| A3-2  | Informe de evaluación             | `buildSummary`, `buildCourseComparison`, `buildSkills`                                                                                                                                        |
+| A3-3  | Informes oficiales                | curso (`buildGeneralResult`, `buildSkillAxes*`, `buildSpecTable` → B), alumno (`loadClassAverage`), establecimiento: **no se toca**, su dueño es otra sesión (`coordinacion/acuerdos.md`, #1) |
+| A3-4  | Dashboards                        | `loadRecentAssessments`, `loadSkillsFrom*`, `loadBreakdownFrom*`, `getTeacherKpis`, `getPerformance`                                                                                          |
+| A3-5  | Panorama comparable y trayectoria | `comparable-unit.assembler.ts` (todas), `comparable-trajectory.service.ts`                                                                                                                    |
+| A3-6  | Alertas                           | `loadNodeAchievements` y `loadItemRates` pasan de C a B                                                                                                                                       |
+| A3-7  | Mapa de calor                     | `loadCellRows`, `cohortAverage`                                                                                                                                                               |
+| A3-8  | Alumno, remedial, IA              | `student-panorama` (`loadBySkill`), `student-comparisons` (`foldCourses`), `group-plan.generator`, `instrument-comparison.snapshot`                                                           |
+| A3-9  | Muestra                           | `benchmark-sample.ts` (`aggregateSample`, `aggregateSampleSkills`, `aggregateItemSample` sobre tallies), `benchmarking.service.ts`                                                            |
+| A3-10 | Detalle                           | `aggregateReference` devuelve `null` sin corregidas (A-4)                                                                                                                                     |
+| A3-11 | Guardián                          | Spec que recorre `apps/api/src` y falla si aparece `avg(` sobre una columna `percentage` o un `pctSum`. Lista de excepciones con su motivo: `sex-comparison.ts` (estadístico de Welch)        |
 
 **Aceptación de A3:** cada spec existente que fija un % se recalcula a mano con la regla y se
 actualiza **con el número nuevo justificado en el caso**, no copiando la salida.
