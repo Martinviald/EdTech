@@ -13,15 +13,23 @@
 
 ### 1.1 Una PR, dos partes, un commit por fase
 
-- **Rama:** `feat/logro-unificado-cohorte`, en el worktree `wt-logro-cohorte`, que ya sale de
-  `origin/dev` y tiene los commits de documentación.
+- **Desarrollo autónomo completo en worktrees aislados.** Nada se hace en el checkout principal ni en
+  `dev`.
+  - El trabajo de integración vive en el worktree `wt-logro-cohorte`, rama
+    `feat/logro-unificado-cohorte`, que ya sale de `origin/dev` y tiene los commits de documentación.
+  - Cada subagente que escribe código trabaja en **su propio worktree aislado**, en una rama que sale
+    de la de integración. Commitea antes de terminar; si no, pierde su trabajo. Sus commits se
+    integran en la rama de la PR y se aplastan en el commit de su fase.
+  - Al terminar se borran los worktrees de los subagentes. El de integración queda hasta el merge.
 - **Una sola PR contra `dev`** al final. Contiene la parte A (fases A1–A5) y la B (fases B0–B4), con
   **un commit por fase**, en ese orden.
 - La A va antes que la B dentro de la misma rama. Cada fase se sube y el CI la valida antes de empezar
   la siguiente. Así, aunque vayan juntas, el historial separa "cambió la fórmula" (A) de "cambió la
   vista" (B).
-- **La PR se abre al terminar A1** (como borrador) para tener CI en cada push, y se marca lista al
-  cerrar B4.
+- **La PR se abre al terminar A1** (como borrador) para tener CI en cada push.
+- **Al final del plan, la PR pasa por una auditoría** (§7.6). Se corrige lo que aparezca y la PR se
+  entrega a `dev` **mergeable y auditada**: CI en verde, sin conflictos y con el informe de la
+  auditoría en su cuerpo.
 - **Nada se mergea ni se despliega en la ejecución autónoma.** El merge a `dev`, la promoción a `main`
   y todo lo que toque demo quedan en el runbook de §8, para hacerlo con el usuario.
 
@@ -37,16 +45,29 @@
 
 ### 1.3 Subagentes
 
-Sólo donde suma: A3 (unos 20 servicios con el mismo cambio mecánico) se reparte por dominio, y las
-auditorías de A5-2 y B4-4. Antes de lanzar agentes se commitean los contratos y el helper de A1. A cada
-agente se le pasan:
+Se usan para mejorar o acelerar el trabajo, **sin abusar por los costos**: sólo cuando el trabajo se
+reparte en partes independientes o cuando una mirada aparte encuentra lo que el autor no ve.
+
+| Dónde                  | Para qué                                                                    | Cuántos                                |
+| ---------------------- | --------------------------------------------------------------------------- | -------------------------------------- |
+| A3                     | ~20 servicios con el mismo cambio mecánico, repartidos por dominio          | 3–4 en paralelo, en worktrees aislados |
+| B2 / B3                | Tablero maestro y `/detalle` son independientes una vez que existen B0 y B1 | 2 en paralelo, en worktrees aislados   |
+| Exploración puntual    | Ubicar código en muchos archivos cuando sólo hace falta la conclusión       | Agente `Explore`, sólo lectura         |
+| Auditoría final (§7.6) | Regresiones y accesos sobre la PR completa                                  | 1, sólo lectura                        |
+
+Lo que **no** se delega: los contratos de `@soe/types`, el helper de A1, la migración de A2, la
+integración de los commits de los agentes, la revisión de lo que entregan y la corrección de los
+hallazgos de la auditoría. Tampoco se lanzan agentes para tareas de un solo archivo.
+
+Antes de lanzar agentes se commitean los contratos y el helper de A1, y se fijan las semánticas que
+comparten (`feedback-agentes-decisiones-compartidas`). A cada agente se le pasan:
 
 - las reglas de `.claude/rules/backend` (cero comentarios en `apps/api`, `reportServerError` en los
-  catch, helpers de un uso como método privado);
+  catch, helpers de un uso como método privado) y, si toca la web, las de `.claude/rules/frontend`;
 - la regla del diseño §3.1 y la tabla de su dominio del inventario §9;
+- las reglas de §7.1 (un proceso pesado a la vez: los agentes **no** corren suites completas ni
+  builds; los tests se ven en el CI);
 - la instrucción de commitear en su worktree antes de terminar.
-
-La integración y la revisión final no se delegan.
 
 ---
 
@@ -127,7 +148,7 @@ actualiza **con el número nuevo justificado en el caso**, no copiando la salida
 | #    | Ticket                                                                                                                                                                                        | Aceptación                                                                                          |
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | A5-1 | Script `apps/api/scripts/diff-achievement.ts`: para cada evaluación, curso y nodo, % antes (fórmula vieja, recalculada en el script) y después; conteo de alertas antes y después; salida CSV | Corre en la base local de §7.3 y su salida se resume en la PR; en demo se corre con el usuario (§8) |
-| A5-2 | Auditoría de regresiones con un subagente (vistas, permisos, rendimiento de las consultas cambiadas)                                                                                          | Hallazgos corregidos en un commit aparte                                                            |
+| A5-2 | Revisión intermedia de la parte A con un subagente (números, vistas, rendimiento de las consultas cambiadas), antes de empezar la B                                                           | Hallazgos corregidos en un commit aparte                                                            |
 | A5-3 | Actualizar `docs/Diseño bdd.md` (columnas nuevas, significado único de `percentage`) y el diseño                                                                                              | —                                                                                                   |
 
 ---
@@ -176,16 +197,16 @@ actualiza **con el número nuevo justificado en el caso**, no copiando la salida
 | B4-1 | `/dashboards/skills?assessmentId&reference=level` con B1-2                                                                               | `dashboards.service.ts`, controller, DTO                                                     | Mismo resultado que pedir los cursos del nivel a mano            |
 | B4-2 | `SkillsBreakdown`: marcas de nivel y muestra, tooltip con `SampleTooltipBody`, nivel omitido sin filtro de curso                         | `skills-breakdown.tsx`, `report-body.tsx`, `evaluaciones/[assessmentId]/resultados/page.tsx` | En todas las dimensiones del selector; RTL                       |
 | B4-3 | Telemetría en las tres superficies                                                                                                       | componentes de B2–B4                                                                         | —                                                                |
-| B4-4 | Auditoría de regresiones con subagente y actualización del diseño; PR marcada como lista con el cuerpo de §7.5                           | —                                                                                            | Hallazgos corregidos                                             |
+| B4-4 | Actualización del diseño y paso a la auditoría final (§7.6)                                                                              | —                                                                                            | Hallazgos corregidos                                             |
 
 ---
 
 ## 5. Orden y dependencias
 
 ```
-A1 ─ A2 ─┬─ A3 (agentes por dominio) ─ A4 ─ A5 ─ B0 ─ B1 ─┬─ B2 ─┐
-         │                                               ├─ B3 ─┼─ B4 ─▶ PR lista
-         └─ PR en borrador (CI desde aquí)               └──────┘
+A1 ─ A2 ─┬─ A3 (agentes por dominio) ─ A4 ─ A5 ─ B0 ─ B1 ─┬─ B2 (agente) ─┐
+         │                                               └─ B3 (agente) ─┴─ B4 ─ auditoría §7.6 ─ correcciones ─▶ PR mergeable
+         └─ PR en borrador (CI desde aquí)
 ```
 
 - A3 se reparte entre agentes una vez que A1 y A2 están commiteadas y en verde.
@@ -256,7 +277,11 @@ A1 ─ A2 ─┬─ A3 (agentes por dominio) ─ A4 ─ A5 ─ B0 ─ B1 ─┬�
   auditorías.
 - CI en verde en todos los jobs y PR `MERGEABLE`, con el número de checks verificado.
 - Inventario §9 completo: ningún `avg(` sobre `percentage` ni `pctSum` en `apps/api` (guardián A3-11).
-- Auditorías A5-2 y B4-4 hechas y sus hallazgos corregidos.
+- Revisión intermedia A5-2 hecha y sus hallazgos corregidos.
+- **Auditoría final §7.6 hecha sobre la PR completa, hallazgos corregidos y re-verificados**, con el CI
+  en verde después de las correcciones.
+- PR contra `dev` **lista para revisión** (no borrador), mergeable y con el cuerpo de §7.5.
+- Worktrees de los subagentes borrados.
 - Diseño, plan y `docs/Diseño bdd.md` actualizados.
 
 ### 7.5 Cuerpo de la PR
@@ -266,8 +291,40 @@ A1 ─ A2 ─┬─ A3 (agentes por dominio) ─ A4 ─ A5 ─ B0 ─ B1 ─┬�
 3. Resumen del informe de diferencias en la base local (A5-1).
 4. Decisiones tomadas en el camino (§7.2).
 5. Pendientes y bloqueos, si hubo.
-6. El runbook de §8, copiado tal cual.
-7. Firma de Claude Code.
+6. Informe de la auditoría final: qué se revisó, qué encontró, cómo se corrigió y qué quedó como nota.
+7. El runbook de §8, copiado tal cual.
+8. Firma de Claude Code.
+
+### 7.6 Auditoría final de la PR
+
+Cuando están todas las fases (A1–A5, B0–B4) en la PR y el CI está en verde, un subagente de **sólo
+lectura** audita la PR completa contra `origin/dev`. Su encargo:
+
+1. **Regresiones de comportamiento.** Para quien no ve la muestra (profesores, jefes de departamento,
+   coordinadores, colegios sin muestra), las vistas muestran lo mismo salvo el cambio de fórmula
+   documentado. Ninguna vista se rompe con datos vacíos, `null` o una API anterior (el front y el back
+   se despliegan por separado).
+2. **Accesos que no se pierden ni se abren.**
+   - Cada endpoint tocado mantiene sus `@Roles` y sus guards.
+   - Cada página mantiene su gate con `canAccess` y la misma constante de `access-policies`.
+   - Las consultas a tablas con RLS siguen dentro de `withOrgContext` usando `tx`.
+   - La muestra sólo llega a `BENCHMARKING_VIEWER_ROLES` y nunca en la vista de profesor.
+   - Ninguna respuesta expone `org_id` ni datos por alumno de otro colegio; el k-anonimato se exige por
+     instrumento y por pregunta.
+3. **Datos y deploy.** La migración sólo agrega columnas y es segura con la imagen anterior. Los
+   backfills son idempotentes y tienen `--dry-run`. El paso del workflow falla si quedan sumas sin
+   calcular.
+4. **Fórmula.** No queda ningún % de grupo fuera de la regla §3.1 (inventario §9 y guardián A3-11).
+   Los números nuevos de los specs están justificados.
+5. **Rendimiento.** Ninguna consulta nueva hace N+1 ni abre conexiones fuera de la transacción.
+
+**Cierre:**
+
+- Cada hallazgo se verifica antes de corregirlo; los falsos positivos se descartan con el motivo.
+- Los confirmados se corrigen en un commit `fix: hallazgos de la auditoría`.
+- Si las correcciones tocan accesos o consultas, se pide al mismo agente una segunda pasada sólo sobre
+  ese commit.
+- Con el CI en verde y la PR `MERGEABLE`, se marca lista para revisión.
 
 ---
 
