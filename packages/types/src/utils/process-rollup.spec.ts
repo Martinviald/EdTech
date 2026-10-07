@@ -319,6 +319,34 @@ describe('la matriz nivel × asignatura', () => {
     expect(cell.lowestBand!.share).toBeCloseTo(cell.lowestBandShare as number, 10);
   });
 
+  it('ordena las filas por grado y no por el orden en que vienen las unidades', () => {
+    // Las unidades llegan ordenadas por severidad, así que sin orden explícito
+    // 8° aparecería antes que 1°.
+    const r = deriveProcessRollup(
+      [
+        diaUnit('u8', [9, 1, 0], { gradeId: 'g8', gradeName: '8B', subjectId: 's1' }),
+        diaUnit('u1', [1, 9, 0], { gradeId: 'g1', gradeName: '1B', subjectId: 's1' }),
+      ],
+      null,
+      new Map([
+        ['g1', 0],
+        ['g8', 7],
+      ]),
+    );
+    expect(r.matrix.grades.map((g) => g.name)).toEqual(['1B', '8B']);
+  });
+
+  it('sin orden de grados conserva el comportamiento previo', () => {
+    const r = deriveProcessRollup(
+      [
+        diaUnit('u8', [9, 1, 0], { gradeId: 'g8', gradeName: '8B', subjectId: 's1' }),
+        diaUnit('u1', [1, 9, 0], { gradeId: 'g1', gradeName: '1B', subjectId: 's1' }),
+      ],
+      null,
+    );
+    expect(r.matrix.grades.map((g) => g.name)).toEqual(['8B', '1B']);
+  });
+
   it('un alumno sin banda no entra en el denominador de la celda', () => {
     // El alumno con TODAS sus preguntas pendientes queda sin banda: aporta a
     // `studentsAssessed` de la unidad pero no a su `bandDistribution`. El

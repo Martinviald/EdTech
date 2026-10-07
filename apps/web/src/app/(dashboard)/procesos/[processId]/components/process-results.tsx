@@ -176,10 +176,10 @@ export function ProcessResults({
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Nivel × asignatura</CardTitle>
+          <CardTitle className="text-base">Dónde se concentra el nivel más bajo</CardTitle>
           <CardDescription>
-            Cada celda es una unidad comparable: el % de alumnos en el nivel más bajo de esa prueba.
-            Los colores comparan concentración, nunca puntajes.
+            Cada celda es un cruce de curso y asignatura: la distribución de sus clasificaciones por
+            nivel, con los mismos colores de la barra de arriba. No es % de logro.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -215,7 +215,9 @@ function ResultsMatrix({
     rollup.matrix.cells.map((c) => [`${c.gradeId ?? '-'}::${c.subjectId ?? '-'}`, c]),
   );
 
-  if (rollup.matrix.grades.length === 0 || rollup.matrix.subjects.length === 0) return null;
+  // Con una sola fila o una sola columna la matriz es una lista disfrazada, y la
+  // tabla de unidades del panorama ya ordena mejor que esto.
+  if (rollup.matrix.grades.length < 2 || rollup.matrix.subjects.length < 2) return null;
 
   return (
     <div className="overflow-x-auto">
@@ -223,7 +225,7 @@ function ResultsMatrix({
         <thead>
           <tr>
             <th scope="col" className="text-muted-foreground px-2 text-left text-xs font-medium">
-              Nivel
+              Curso
             </th>
             {rollup.matrix.subjects.map((subject) => (
               <th
@@ -263,18 +265,44 @@ function MatrixCell({ cell, processId }: { cell: ProcessMatrixCell; processId: s
   const hasUnit = cell.unitKeys.length > 0;
   const tone = hasUnit && cell.severity ? SEVERITY_CELL[cell.severity] : COVERAGE_CELL;
 
+  const ladder = cell.ladders.length === 1 ? cell.ladders[0] : null;
+  const detail = ladder
+    ? ladder.buckets.map((b) => `${b.label}: ${b.classifications}`).join(' · ')
+    : undefined;
+
   const content = (
     <span
       className={cn(
-        'flex min-h-11 flex-col justify-center rounded-md border px-2 py-1.5 text-center',
+        'flex min-h-11 flex-col justify-center gap-1 rounded-md border px-2 py-1.5 text-center',
         tone,
       )}
+      title={detail}
     >
-      {hasUnit && cell.lowestBandShare != null ? (
+      {ladder && cell.lowestBand ? (
         <>
-          <span className="text-sm font-semibold tabular-nums">{pct(cell.lowestBandShare)}</span>
-          <span className="text-2xs opacity-80">n={cell.classifications}</span>
+          {/* La distribución, con los mismos colores de la barra del titular. Un
+              número suelto acá se lee como % de logro —donde más es mejor— y la
+              lectura es la inversa: el verde bajo sería una catástrofe. */}
+          <span className="flex h-1.5 overflow-hidden rounded-full">
+            {ladder.buckets.map((bucket) => (
+              <span
+                key={bucket.key}
+                style={{
+                  width: `${bucket.percentage}%`,
+                  background: bucket.color ?? NEUTRAL_BAND,
+                }}
+              />
+            ))}
+          </span>
+          {/* Una fracción de alumnos no se confunde con un porcentaje de logro. */}
+          <span className="text-2xs tabular-nums">
+            {cell.lowestBand.classifications} de {cell.lowestBand.of}
+          </span>
         </>
+      ) : cell.ladders.length > 1 ? (
+        // Escaleras distintas en la misma celda: sumar sus ordinales es lo que D2
+        // prohíbe, así que no hay un número que mostrar.
+        <span className="text-2xs">{cell.unitKeys.length} instrumentos</span>
       ) : (
         <span className="text-2xs">
           {hasUnit ? 'sin niveles' : COVERAGE_LABEL[cell.coverage ?? 'missing']}

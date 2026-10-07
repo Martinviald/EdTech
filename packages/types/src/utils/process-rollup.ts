@@ -184,6 +184,19 @@ function foldBuckets(
 export function deriveProcessRollup(
   units: readonly ComparableUnitSummary[],
   coverage: ProcessCoverageResponse | null,
+  /**
+   * Orden de los grados para las filas de la matriz, por `gradeId`.
+   *
+   * Sin esto, los grados que sólo aparecen en las unidades (sin cobertura
+   * declarada) comparten `order` y las filas quedan en el orden de severidad en
+   * que vienen las unidades, no en orden pedagógico. `ComparableUnitSummary` no
+   * trae el orden del grado; el índice de `options.grades` de
+   * `/dashboards/filters` sí lo es, porque esa query ordena por `grades.order`.
+   *
+   * Si se entrega, gobierna TODAS las filas: mezclar el orden de la BD con el
+   * índice del desplegable son dos espacios distintos y se interleavean mal.
+   */
+  gradeOrder?: ReadonlyMap<string, number>,
 ): ProcessResultsRollup {
   const ladders = new Map<
     string,
@@ -257,7 +270,7 @@ export function deriveProcessRollup(
       gradeAxis.set(cell.gradeId, {
         id: cell.gradeId,
         name: cell.gradeShortName,
-        order: cell.gradeOrder,
+        order: gradeOrder?.get(cell.gradeId) ?? cell.gradeOrder,
       });
     }
     if (!subjectAxis.has(cell.subjectId)) {
@@ -289,7 +302,7 @@ export function deriveProcessRollup(
       gradeAxis.set(unit.gradeId, {
         id: unit.gradeId,
         name: unit.gradeName ?? '—',
-        order: Number.MAX_SAFE_INTEGER,
+        order: gradeOrder?.get(unit.gradeId) ?? Number.MAX_SAFE_INTEGER,
       });
     }
     if (unit.subjectId && !subjectAxis.has(unit.subjectId)) {
