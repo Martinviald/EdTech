@@ -221,6 +221,7 @@ export function ReportBody({
             assessmentId={assessmentId}
             classGroupId={classGroupId}
             referencesPromise={skillReferencesPromise}
+            samplePromise={samplePromise}
           />
         </Suspense>
       ) : samplePromise ? (
@@ -559,6 +560,7 @@ async function SkillsSectionWithSample({
 
 async function SkillsSectionWithReferences({
   referencesPromise,
+  samplePromise,
   ...props
 }: {
   report: AssessmentReportResponse;
@@ -566,11 +568,13 @@ async function SkillsSectionWithReferences({
   assessmentId?: string;
   classGroupId?: string;
   referencesPromise: Promise<SkillReferencesResponse | null>;
+  samplePromise?: Promise<InstrumentSampleEntry | null>;
 }) {
   const references = await referencesPromise;
-  return (
-    <SkillsSection {...props} comparison={toSkillComparison(references, props.classGroupId)} />
-  );
+  const comparison = toSkillComparison(references, props.classGroupId);
+  // Sin muestra por nodo (API anterior o sin muestra válida) se conserva la del instrumento.
+  const sample = !comparison?.sampleByNode && samplePromise ? await samplePromise : null;
+  return <SkillsSection {...props} comparison={comparison} sample={sample} />;
 }
 
 /**

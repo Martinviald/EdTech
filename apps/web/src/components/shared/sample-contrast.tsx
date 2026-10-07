@@ -192,8 +192,11 @@ export function SampleDeltaChip({
   );
 }
 
-/** Una línea de la comparación: "Curso 58,1%", "Nivel 64,2%". */
-export type ComparisonLine = { label: string; value: number | null };
+/**
+ * Una línea de la comparación: "Curso 58,1%", "Nivel 64,2%". `withDelta: false` muestra el valor
+ * sin diferencia, cuando no está calculado sobre las mismas preguntas que la muestra.
+ */
+export type ComparisonLine = { label: string; value: number | null; withDelta?: boolean };
 
 /** La muestra contra la que se compara, ya calculada para el grupo y sus preguntas (D9). */
 export type ComparisonSample = {
@@ -234,7 +237,7 @@ export function SampleComparisonLines({
     <div className="space-y-1.5 text-xs">
       <dl className="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-0.5 tabular-nums">
         {lines.map((line) => {
-          const delta = sampleDeltaPp(line.value, sample.value);
+          const delta = line.withDelta === false ? null : sampleDeltaPp(line.value, sample.value);
           return (
             <div key={line.label} className="contents">
               <dt className="text-muted-foreground">{line.label}</dt>

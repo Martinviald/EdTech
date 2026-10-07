@@ -1,6 +1,7 @@
 import {
   aggregateItemSample,
   aggregateItemSetSample,
+  indexItemSetRows,
   aggregateSample,
   classifyTypicalZone,
   percentileOf,
@@ -214,12 +215,12 @@ describe('aggregateItemSetSample', () => {
 
   it('suma los tallies de los colegios sobre las preguntas pedidas', () => {
     const sample = aggregateItemSetSample(
-      [
+      indexItemSetRows([
         row('a', 'i1', 15, 20),
         row('a', 'i2', 10, 20),
         row('b', 'i1', 5, 20),
         row('b', 'i2', 10, 20),
-      ],
+      ]),
       ['i1', 'i2'],
       2,
       20,
@@ -233,12 +234,12 @@ describe('aggregateItemSetSample', () => {
 
   it('sólo compara las preguntas que pidió el grupo (las que tiene corregidas)', () => {
     const sample = aggregateItemSetSample(
-      [
+      indexItemSetRows([
         row('a', 'i1', 15, 20),
         row('a', 'dev', 0, 40),
         row('b', 'i1', 5, 20),
         row('b', 'dev', 40, 40),
-      ],
+      ]),
       ['i1'],
       2,
       20,
@@ -249,12 +250,12 @@ describe('aggregateItemSetSample', () => {
 
   it('deja fuera la pregunta que no alcanza k colegios corregidos, sin descartar el conjunto', () => {
     const sample = aggregateItemSetSample(
-      [
+      indexItemSetRows([
         row('a', 'i1', 15, 20),
         row('b', 'i1', 5, 20),
         row('a', 'dev', 10, 40),
         row('b', 'dev', 0, 0),
-      ],
+      ]),
       ['i1', 'dev'],
       2,
       20,
@@ -264,9 +265,16 @@ describe('aggregateItemSetSample', () => {
   });
 
   it('es null si la muestra no cumple k colegios o el mínimo de alumnos', () => {
-    expect(aggregateItemSetSample([row('a', 'i1', 15, 20)], ['i1'], 2, 1)).toBeNull();
     expect(
-      aggregateItemSetSample([row('a', 'i1', 15, 20, 5), row('b', 'i1', 5, 20, 5)], ['i1'], 2, 20),
+      aggregateItemSetSample(indexItemSetRows([row('a', 'i1', 15, 20)]), ['i1'], 2, 1),
+    ).toBeNull();
+    expect(
+      aggregateItemSetSample(
+        indexItemSetRows([row('a', 'i1', 15, 20, 5), row('b', 'i1', 5, 20, 5)]),
+        ['i1'],
+        2,
+        20,
+      ),
     ).toBeNull();
   });
 });

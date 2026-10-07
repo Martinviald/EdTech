@@ -91,6 +91,7 @@ export function SkillsBreakdown({
   /** Con una evaluación en contexto: nivel y muestra sobre las mismas preguntas. Tiene precedencia sobre `sample`. */
   comparison?: SkillComparison | null;
 }): JSX.Element {
+  const useInstrumentSample = Boolean(sample) && !comparison?.sampleByNode;
   const sampleByNode = useMemo(
     () => new Map((sample?.skills ?? []).map((skill) => [skill.nodeId, skill])),
     [sample],
@@ -149,9 +150,9 @@ export function SkillsBreakdown({
             <SkillRow
               key={skill.nodeId}
               skill={skill}
-              sample={!comparison && sample ? sampleByNode.get(skill.nodeId) : undefined}
+              sample={useInstrumentSample ? sampleByNode.get(skill.nodeId) : undefined}
               sampleLabel={
-                !comparison && sample ? `${sample.label} (${sample.sizeLabel})` : undefined
+                useInstrumentSample && sample ? `${sample.label} (${sample.sizeLabel})` : undefined
               }
               comparison={comparison ?? null}
               onOpen={() => openDrilldown(skill)}
@@ -237,8 +238,10 @@ function SkillRow({
                   <TooltipContent side="bottom" align="end" className="max-w-xs">
                     <SampleComparisonLines
                       lines={[
-                        { label: comparison.groupLabel, value: skill.averageAchievement },
-                        ...(comparison.levelByNode ? [{ label: 'Nivel', value: levelPct }] : []),
+                        { label: comparison.groupLabel, value: nodeSample.groupValue },
+                        ...(comparison.levelByNode
+                          ? [{ label: 'Nivel', value: nodeSample.levelValue }]
+                          : []),
                       ]}
                       sample={{ ...nodeSample, refreshedAt: comparison.sampleMeta.refreshedAt }}
                       instrumentId={comparison.sampleMeta.instrumentId}

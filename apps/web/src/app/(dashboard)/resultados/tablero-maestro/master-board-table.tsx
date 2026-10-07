@@ -16,6 +16,7 @@ import type {
   MetricValue,
   PerformanceLevel,
 } from '@soe/types';
+import { ALERT_THRESHOLDS } from '@soe/types';
 import { SampleComparisonLines, type ComparisonLine } from '@/components/shared/sample-contrast';
 import { useTelemetry } from '@/lib/telemetry';
 import {
@@ -57,7 +58,7 @@ const TONE_CELL_CLASS: Record<MetricTone, string> = {
 
 const TONE_LABEL: Record<MetricTone, string> = {
   below: 'Bajo la muestra',
-  similar: 'Similar a la muestra (±5 pp)',
+  similar: `Similar a la muestra (±${ALERT_THRESHOLDS.cohort.similarPp} pp)`,
   above: 'Sobre la muestra',
 };
 
@@ -527,7 +528,11 @@ function CourseCell({
             sample={cell.sample}
             lines={[
               { label: 'Curso', value: cell.sample.cellValue },
-              { label: 'Nivel', value: gradeCell?.sample?.cellValue ?? gradeAchievement },
+              {
+                label: 'Nivel',
+                value: gradeCell?.sample?.cellValue ?? gradeAchievement,
+                withDelta: false,
+              },
             ]}
           />
         ) : null}

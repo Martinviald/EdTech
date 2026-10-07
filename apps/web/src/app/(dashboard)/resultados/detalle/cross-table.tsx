@@ -636,7 +636,10 @@ function LevelReferenceRow({
   // misma regla que el % de cada pregunta (docs/diseno-logro-unificado-y-cohorte.md §3.1).
   const total = emptyTally();
   for (const q of questions) {
-    addTally(total, { scoreSum: q.references.grade.scoreSum, maxSum: q.references.grade.maxSum });
+    addTally(total, {
+      scoreSum: q.references.grade.scoreSum ?? 0,
+      maxSum: q.references.grade.maxSum ?? 0,
+    });
   }
   const levelOverall = achievementPct(total);
 
@@ -682,19 +685,28 @@ function SampleReferenceRow({
   sublabel: string;
 }): JSX.Element {
   const total = emptyTally();
+  let compared = 0;
   for (const q of questions) {
     const sample = q.references.sample;
     if (!sample || !(q.references.grade.maxSum > 0)) continue;
     addTally(total, { scoreSum: sample.scoreSum, maxSum: sample.maxSum });
+    compared += 1;
   }
   const sampleOverall = achievementPct(total);
+  const coverage =
+    compared < questions.length
+      ? ` · total sobre ${compared} de ${questions.length} preguntas`
+      : '';
 
   return (
     <TableRow className="border-b-2 bg-muted/20">
       <TableCell className="sticky left-0 z-10 w-[150px] bg-muted/40 px-2 align-top">
         <div className="w-[134px]">
           <span className="block text-sm font-semibold">% Logro muestra</span>
-          <span className="block text-xs font-normal text-muted-foreground">{sublabel}</span>
+          <span className="block text-xs font-normal text-muted-foreground">
+            {sublabel}
+            {coverage}
+          </span>
         </div>
       </TableCell>
       <TableCell className="w-[68px] px-2 text-right font-semibold tabular-nums">

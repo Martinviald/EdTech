@@ -1642,7 +1642,7 @@ describe('ItemAnalysisService.getSkillReferences', () => {
           maxSum: '4',
         },
       ],
-      [{ itemId: ITEM_A }],
+      [{ itemId: ITEM_A, scoreSum: '2', maxSum: '2' }],
     ]);
   }
 
@@ -1657,7 +1657,7 @@ describe('ItemAnalysisService.getSkillReferences', () => {
     expect(res.sample).toBeNull();
   });
 
-  it('pide la muestra de cada nodo sólo sobre las preguntas que el grupo tiene corregidas', async () => {
+  it('pide la muestra de cada nodo sólo sobre las preguntas corregidas del grupo y compara ambos lados sobre ellas', async () => {
     const asked: Array<{ key: string; itemIds: readonly string[] }> = [];
     const samples = {
       canSeeSample: () => true,
@@ -1696,6 +1696,8 @@ describe('ItemAnalysisService.getSkillReferences', () => {
         {
           nodeId: NODE_INFERIR,
           value: 75,
+          groupValue: 100,
+          levelValue: 75,
           schoolCount: 2,
           studentCount: 40,
           comparedItems: 1,

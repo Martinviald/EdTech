@@ -366,7 +366,12 @@ export type SkillLevelReference = {
  */
 export type SkillSampleReference = {
   nodeId: string;
+  /** % de la muestra sobre las preguntas comparadas. */
   value: number | null;
+  /** % del grupo consultado sobre esas mismas preguntas (D9). */
+  groupValue: number | null;
+  /** % del nivel completo sobre esas mismas preguntas (D9). */
+  levelValue: number | null;
   schoolCount: number;
   studentCount: number;
   comparedItems: number;

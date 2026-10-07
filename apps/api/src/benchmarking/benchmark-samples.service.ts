@@ -15,6 +15,7 @@ import {
   aggregateItemSample,
   aggregateItemSetSample,
   aggregateSample,
+  indexItemSetRows,
   canAccess,
   classifyTypicalZone,
   percentileRank,
@@ -26,6 +27,7 @@ import {
   type InstrumentSamplesQueryDto,
   type InstrumentSamplesResponse,
   type ItemSetSample,
+  type ItemSetSourceRow,
   type YourSamplePosition,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -171,10 +173,7 @@ export class BenchmarkSamplesService {
         ),
       );
 
-    const byInstrument = new Map<
-      string,
-      { rows: Parameters<typeof aggregateItemSetSample>[0][number][]; refreshedAt: Date }
-    >();
+    const byInstrument = new Map<string, { rows: ItemSetSourceRow[]; refreshedAt: Date }>();
     for (const row of rows) {
       let bucket = byInstrument.get(row.instrumentId);
       if (!bucket) {
@@ -191,11 +190,18 @@ export class BenchmarkSamplesService {
       if (row.refreshedAt > bucket.refreshedAt) bucket.refreshedAt = row.refreshedAt;
     }
 
+    const indexed = new Map(
+      Array.from(byInstrument, ([instrumentId, bucket]) => [
+        instrumentId,
+        { rowsByItem: indexItemSetRows(bucket.rows), refreshedAt: bucket.refreshedAt },
+      ]),
+    );
+
     for (const request of requests) {
-      const bucket = byInstrument.get(request.instrumentId);
+      const bucket = indexed.get(request.instrumentId);
       if (!bucket) continue;
       const sample = aggregateItemSetSample(
-        bucket.rows,
+        bucket.rowsByItem,
         request.itemIds,
         BENCHMARK_K_MIN_SCHOOLS,
         BENCHMARK_N_MIN_STUDENTS,

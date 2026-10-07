@@ -284,26 +284,31 @@ export type ItemSetSample = {
  * colegio aporta su tally sobre ellas. Devuelve `null` si la muestra resultante no cumple k
  * colegios y `nMinStudents` alumnos.
  */
-export function aggregateItemSetSample(
+/** Agrupa las filas por pregunta una sola vez, para pedir muchos conjuntos sin re-escanear. */
+export function indexItemSetRows(
   rows: readonly ItemSetSourceRow[],
+): Map<string, ItemSetSourceRow[]> {
+  const byItem = new Map<string, ItemSetSourceRow[]>();
+  for (const row of rows) {
+    const list = byItem.get(row.itemId);
+    if (list) list.push(row);
+    else byItem.set(row.itemId, [row]);
+  }
+  return byItem;
+}
+
+export function aggregateItemSetSample(
+  rowsByItem: ReadonlyMap<string, readonly ItemSetSourceRow[]>,
   itemIds: readonly string[],
   kMinSchools: number,
   nMinStudents: number,
 ): ItemSetSample | null {
-  const wanted = new Set(itemIds);
-  const schoolsByItem = new Map<string, Set<string>>();
-  for (const row of rows) {
-    if (!wanted.has(row.itemId) || !(row.maxSum > 0)) continue;
-    let schools = schoolsByItem.get(row.itemId);
-    if (!schools) {
-      schools = new Set();
-      schoolsByItem.set(row.itemId, schools);
-    }
-    schools.add(row.orgId);
-  }
-
   const compared = new Set<string>();
-  for (const [itemId, schools] of schoolsByItem) {
+  for (const itemId of new Set(itemIds)) {
+    const schools = new Set<string>();
+    for (const row of rowsByItem.get(itemId) ?? []) {
+      if (row.maxSum > 0) schools.add(row.orgId);
+    }
     if (schools.size >= kMinSchools) compared.add(itemId);
   }
   if (compared.size === 0) return null;
@@ -311,8 +316,8 @@ export function aggregateItemSetSample(
   const tally = emptyTally();
   const tallyByOrg = new Map<string, AchievementTally>();
   const maxResponsesByOrg = new Map<string, number>();
-  for (const row of rows) {
-    if (!compared.has(row.itemId) || !(row.maxSum > 0)) continue;
+  for (const row of [...compared].flatMap((itemId) => rowsByItem.get(itemId) ?? [])) {
+    if (!(row.maxSum > 0)) continue;
     const source = { scoreSum: row.scoreSum, maxSum: row.maxSum };
     addTally(tally, source);
     let orgTally = tallyByOrg.get(row.orgId);

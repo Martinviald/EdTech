@@ -481,7 +481,7 @@ export class ItemAnalysisService {
       const itemIds = Array.from(new Set([...itemsByNode.values()].flat()));
       if (itemIds.length === 0) return { level: null, sample: null };
 
-      const level = await this.loadSkillLevelReference(
+      const levelReference = await this.loadSkillLevelReference(
         tx,
         orgId,
         query.assessmentId,
@@ -498,9 +498,10 @@ export class ItemAnalysisService {
             assessment.instrumentId,
             this.resolveAccessibleClassGroupIds(scope, query.classGroupId),
             itemsByNode,
+            levelReference?.tallyByItem ?? new Map<string, AchievementTally>(),
           )
         : null;
-      return { level, sample };
+      return { level: levelReference?.level ?? null, sample };
     });
   }
 
@@ -980,7 +981,10 @@ export class ItemAnalysisService {
     instrumentId: string,
     itemIds: string[],
     itemsByNode: Map<string, string[]>,
-  ): Promise<SkillReferencesResponse['level']> {
+  ): Promise<{
+    level: SkillReferencesResponse['level'];
+    tallyByItem: Map<string, AchievementTally>;
+  } | null> {
     const cohort = await this.resolveReferenceCohort(tx, assessmentId);
     if (cohort === null) return null;
     const rows = await this.loadReferenceRows(
@@ -992,20 +996,35 @@ export class ItemAnalysisService {
       itemIds,
     );
     const agg = this.aggregateReference(rows);
-    const skills = Array.from(itemsByNode, ([nodeId, nodeItems]) => {
-      const tally = emptyTally();
-      for (const itemId of nodeItems) {
-        const reference = agg.byItem.get(itemId);
-        if (reference) addTally(tally, { scoreSum: reference.scoreSum, maxSum: reference.maxSum });
-      }
-      return { nodeId, achievement: achievementPct(tally) };
-    });
+    const tallyByItem = new Map<string, AchievementTally>();
+    for (const [itemId, reference] of agg.byItem) {
+      tallyByItem.set(itemId, { scoreSum: reference.scoreSum, maxSum: reference.maxSum });
+    }
+    const skills = Array.from(itemsByNode, ([nodeId, nodeItems]) => ({
+      nodeId,
+      achievement: achievementPct(this.sumTallies(tallyByItem, nodeItems)),
+    }));
     return {
-      gradeName: cohort.gradeName,
-      classGroupCount: agg.summary.classGroupCount,
-      studentCount: agg.summary.studentCount,
-      skills,
+      level: {
+        gradeName: cohort.gradeName,
+        classGroupCount: agg.summary.classGroupCount,
+        studentCount: agg.summary.studentCount,
+        skills,
+      },
+      tallyByItem,
     };
+  }
+
+  private sumTallies(
+    tallyByItem: ReadonlyMap<string, AchievementTally>,
+    itemIds: readonly string[],
+  ): AchievementTally {
+    const tally = emptyTally();
+    for (const itemId of itemIds) {
+      const itemTally = tallyByItem.get(itemId);
+      if (itemTally) addTally(tally, itemTally);
+    }
+    return tally;
   }
 
   private async loadSkillSampleReference(
@@ -1016,6 +1035,7 @@ export class ItemAnalysisService {
     instrumentId: string,
     classGroupFilter: string[] | null,
     itemsByNode: Map<string, string[]>,
+    levelTallyByItem: ReadonlyMap<string, AchievementTally>,
   ): Promise<SkillReferencesResponse['sample']> {
     if (classGroupFilter !== null && classGroupFilter.length === 0) return null;
     const conditions = [eq(assessmentItemStats.assessmentId, assessmentId)];
@@ -1023,12 +1043,17 @@ export class ItemAnalysisService {
       conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
     }
     const corrected = await tx
-      .select({ itemId: assessmentItemStats.itemId })
+      .select({
+        itemId: assessmentItemStats.itemId,
+        scoreSum: sql<string>`sum(${assessmentItemStats.scoreSum})`,
+        maxSum: sql<string>`sum(${assessmentItemStats.maxSum})`,
+      })
       .from(assessmentItemStats)
       .where(and(...conditions))
       .groupBy(assessmentItemStats.itemId)
       .having(sql`sum(${assessmentItemStats.maxSum}) > 0`);
-    const correctedIds = new Set(corrected.map((row) => row.itemId));
+    const groupTallyByItem = new Map(corrected.map((row) => [row.itemId, tallyOf([row])]));
+    const correctedIds = new Set(groupTallyByItem.keys());
 
     const totals = new Map<string, number>();
     const requests: ItemSetRequest[] = [];
@@ -1050,6 +1075,8 @@ export class ItemAnalysisService {
       return {
         nodeId,
         value: result.value,
+        groupValue: this.roundedPct(this.sumTallies(groupTallyByItem, result.comparedItemIds)),
+        levelValue: this.roundedPct(this.sumTallies(levelTallyByItem, result.comparedItemIds)),
         schoolCount: result.schoolCount,
         studentCount: result.studentCount,
         comparedItems: result.comparedItemIds.length,
@@ -1057,6 +1084,11 @@ export class ItemAnalysisService {
       };
     });
     return { instrumentId, label, refreshedAt, skills };
+  }
+
+  private roundedPct(tally: AchievementTally): number | null {
+    const pct = achievementPct(tally);
+    return pct === null ? null : Math.round(pct * 100) / 100;
   }
 
   private async attachSampleReferences(
