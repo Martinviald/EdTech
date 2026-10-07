@@ -9,6 +9,7 @@ export default function MaterialesLoading() {
         <Skeleton className="h-4 w-96" />
       </div>
       <div className="flex flex-wrap items-center gap-3">
+        <Skeleton className="h-10 w-[220px]" />
         <Skeleton className="h-10 w-[190px]" />
         <Skeleton className="h-10 w-[150px]" />
         <Skeleton className="h-10 w-[180px]" />

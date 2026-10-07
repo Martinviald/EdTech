@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
@@ -140,7 +141,10 @@ async function MaterialRemedialContent({
           Análisis IA
         </Link>
         . ¿Buscas el banco completo?{' '}
-        <Link href={ROUTES.materialRemedial} className="font-medium underline">
+        <Link
+          href={`${ROUTES.materiales}?origin=remedial` as Route}
+          className="font-medium underline"
+        >
           Ver todo el banco
         </Link>
         .
