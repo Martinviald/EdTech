@@ -71,7 +71,14 @@ import {
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
-  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+  return {
+    key: b.key,
+    label: b.label,
+    order: b.order,
+    color: b.color ?? null,
+    minThreshold: b.minThreshold,
+    maxThreshold: b.maxThreshold,
+  };
 }
 
 // Roles administrativos: ven toda la org. Idéntico a los demás services de

@@ -46,6 +46,7 @@ function makeUnit(overrides: Partial<ComparableUnitSummary> = {}): ComparableUni
     levelDistribution: null,
     lowestBandShare: null,
     byClassGroup: [],
+    byAssessment: [],
     baseline: null,
     severity: null,
     ...overrides,
