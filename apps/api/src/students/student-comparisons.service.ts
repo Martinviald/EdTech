@@ -1,10 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   academicYears,
+  assessmentItemStats,
   assessments,
   classGroups,
   instruments,
+  preferComputedOverImported,
   studentEnrollments,
   withOrgContext,
   resolveEffectiveBands,
@@ -12,11 +14,16 @@ import {
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
   INSTRUMENT_APPLICATION_PERIODS,
+  achievementPct,
+  addTally,
   bandToLegacyLevel,
   buildComparabilityMeta,
   buildInstrumentFamilyKey,
   classifyByBands,
   deltaInPoints,
+  emptyTally,
+  tallyOf,
+  type AchievementTally,
   type CohortStat,
   type ComparabilityInstrumentRef,
   type ComparableUnitClassGroup,
@@ -61,6 +68,11 @@ type Anchor = {
   ref: StudentComparisonAnchor;
 };
 
+type GradeCourses = {
+  courses: ComparableUnitClassGroup[];
+  tallies: Map<string, AchievementTally>;
+};
+
 type FamilyInstrument = {
   instrumentId: string;
   year: number;
@@ -75,9 +87,8 @@ type FamilyInstrument = {
  * completo) y las generaciones anteriores (mismo grado + familia, años previos). Todo en
  * % de logro comparable, sin promediar escalas incomparables.
  *
- * Reutiliza `ComparableUnitAssembler` para el logro de cohorte (ponderado por alumnos,
- * desglose por curso) — la misma maquinaria que el Panorama y la Trayectoria, sin
- * re-derivar promedios. Las cohortes son promedios + conteos, nunca per-alumno → sin
+ * Reutiliza `ComparableUnitAssembler` para el desglose por curso — la misma maquinaria
+ * que el Panorama y la Trayectoria. Las cohortes son conteos, nunca per-alumno → sin
  * fuga de PII. Un profesor sólo ve sus cursos: las cohortes se acotan a su alcance
  * (`resolveClassGroupScope`) vía `loadByClassGroup`.
  */
@@ -171,7 +182,7 @@ export class StudentComparisonsService {
       anchor.year,
     );
 
-    const course = this.courseCohort(anchorCourses, studentCourseId, student.achievement);
+    const course = this.courseCohort(anchorCourses.courses, studentCourseId, student.achievement);
     const grade = this.gradeCohort(anchorCourses, student.achievement);
     const generations = await this.generationCohorts(
       tx,
@@ -262,13 +273,13 @@ export class StudentComparisonsService {
   }
 
   private gradeCohort(
-    courses: ComparableUnitClassGroup[],
+    gradeCourses: GradeCourses,
     studentAchievement: number | null,
   ): CohortStat | null {
-    if (courses.length === 0) return null;
-    const folded = foldCourses(courses);
+    if (gradeCourses.courses.length === 0) return null;
+    const folded = foldCourses(gradeCourses);
     return {
-      label: gradeLabelOf(courses),
+      label: gradeLabelOf(gradeCourses.courses),
       achievement: folded.achievement,
       studentsAssessed: folded.students,
       deltaPp: deltaInPoints(studentAchievement, folded.achievement),
@@ -300,7 +311,8 @@ export class StudentComparisonsService {
     const years = [...previousByYear.keys()].sort((a, b) => b - a);
     const generations: CohortStat[] = [];
     for (const year of years) {
-      const cohortAcc = { weighted: 0, weight: 0, students: 0 };
+      const cohortTally = emptyTally();
+      let cohortStudents = 0;
       for (const instrument of previousByYear.get(year)!) {
         const bands = await this.bandsFor(tx, instrument.instrumentId, bandsByInstrument);
         const courses = await this.loadGradeCourses(
@@ -311,17 +323,14 @@ export class StudentComparisonsService {
           bands,
         );
         const folded = foldCourses(courses);
-        cohortAcc.students += folded.students;
-        if (folded.achievement !== null && folded.students > 0) {
-          cohortAcc.weighted += folded.achievement * folded.students;
-          cohortAcc.weight += folded.students;
-        }
+        cohortStudents += folded.students;
+        addTally(cohortTally, folded.tally);
       }
-      const achievement = cohortAcc.weight > 0 ? cohortAcc.weighted / cohortAcc.weight : null;
+      const achievement = achievementPct(cohortTally);
       generations.push({
         label: String(year),
         achievement,
-        studentsAssessed: cohortAcc.students,
+        studentsAssessed: cohortStudents,
         deltaPp: deltaInPoints(studentAchievement, achievement),
       });
     }
@@ -334,10 +343,49 @@ export class StudentComparisonsService {
     instrumentId: string,
     cohortClassGroupIds: string[] | null,
     bands: PerformanceBandInput[],
-  ): Promise<ComparableUnitClassGroup[]> {
+  ): Promise<GradeCourses> {
     const assessmentIds = await this.loadAssessmentIds(tx, orgId, instrumentId);
-    if (assessmentIds.length === 0) return [];
-    return this.assembler.loadByClassGroup(tx, orgId, assessmentIds, cohortClassGroupIds, bands);
+    if (assessmentIds.length === 0) return { courses: [], tallies: new Map() };
+    const courses = await this.assembler.loadByClassGroup(
+      tx,
+      orgId,
+      assessmentIds,
+      cohortClassGroupIds,
+      bands,
+    );
+    const tallies = await this.loadCourseTallies(
+      tx,
+      assessmentIds,
+      courses.map((c) => c.classGroupId),
+    );
+    return { courses, tallies };
+  }
+
+  private async loadCourseTallies(
+    tx: Database,
+    assessmentIds: string[],
+    classGroupIds: string[],
+  ): Promise<Map<string, AchievementTally>> {
+    const tallies = new Map<string, AchievementTally>();
+    if (classGroupIds.length === 0) return tallies;
+    const rows = await tx
+      .select({
+        classGroupId: assessmentItemStats.classGroupId,
+        scoreSum: sql<string>`coalesce(sum(${assessmentItemStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
+      })
+      .from(assessmentItemStats)
+      .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
+      .where(
+        and(
+          inArray(assessmentItemStats.assessmentId, assessmentIds),
+          inArray(assessmentItemStats.classGroupId, classGroupIds),
+          preferComputedOverImported(assessmentItemStats),
+        ),
+      )
+      .groupBy(assessmentItemStats.classGroupId);
+    for (const row of rows) tallies.set(row.classGroupId, tallyOf([row]));
+    return tallies;
   }
 
   private async loadAssessmentIds(
@@ -523,20 +571,19 @@ function anchorLabel(year: number | null, period: InstrumentApplicationPeriod | 
   return periodLabel ? `${periodLabel} ${year}` : String(year);
 }
 
-function foldCourses(courses: ComparableUnitClassGroup[]): {
+function foldCourses({ courses, tallies }: GradeCourses): {
   achievement: number | null;
+  tally: AchievementTally;
   students: number;
 } {
-  let weighted = 0;
-  let weight = 0;
+  const tally = emptyTally();
   let students = 0;
   for (const course of courses) {
     students += course.studentsAssessed;
-    if (course.averageAchievement === null || course.studentsAssessed === 0) continue;
-    weighted += course.averageAchievement * course.studentsAssessed;
-    weight += course.studentsAssessed;
+    const courseTally = tallies.get(course.classGroupId);
+    if (courseTally) addTally(tally, courseTally);
   }
-  return { achievement: weight > 0 ? weighted / weight : null, students };
+  return { achievement: achievementPct(tally), tally, students };
 }
 
 function gradeLabelOf(courses: ComparableUnitClassGroup[]): string {

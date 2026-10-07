@@ -127,6 +127,10 @@ export const skillResults = pgTable(
       .references(() => taxonomyNodes.id, { onDelete: 'cascade' }),
     correctCount: integer('correct_count').default(0).notNull(),
     totalCount: integer('total_count').default(0).notNull(),
+    // Tally del alumno en el nodo (docs/diseno-logro-unificado-y-cohorte.md §3.1): Σ puntaje y
+    // Σ máximo de sus preguntas corregidas. `percentage` = score_sum / max_sum.
+    scoreSum: decimal('score_sum', { precision: 9, scale: 2 }).default('0').notNull(),
+    maxSum: decimal('max_sum', { precision: 9, scale: 2 }).default('0').notNull(),
     percentage: decimal('percentage', { precision: 5, scale: 2 }),
     // Nivel de desempeño como dato (#2). FK nullable a performance_bands.
     performanceBandId: uuid('performance_band_id').references(() => performanceBands.id),
@@ -217,6 +221,10 @@ export const assessmentSkillStats = pgTable(
     studentCount: integer('student_count').notNull(),
     correctCount: integer('correct_count').notNull(),
     totalCount: integer('total_count').notNull(),
+    // Tally del curso en el nodo. `percentage` (0..100) = score_sum / max_sum para AMBOS
+    // orígenes (docs/diseno-logro-unificado-y-cohorte.md §3.1). max_sum = 0 sin puntaje.
+    scoreSum: decimal('score_sum', { precision: 9, scale: 2 }).default('0').notNull(),
+    maxSum: decimal('max_sum', { precision: 9, scale: 2 }).default('0').notNull(),
     percentage: decimal('percentage', { precision: 5, scale: 2 }), // 0..100
     source: statsSourceEnum('source').notNull(),
     computedAt: timestamp('computed_at').defaultNow().notNull(),

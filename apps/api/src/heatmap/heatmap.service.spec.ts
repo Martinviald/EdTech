@@ -127,19 +127,13 @@ function makeService(db: Database): HeatmapService {
   return new (HeatmapService as new (db: Database) => HeatmapService)(db);
 }
 
-/**
- * Fila cruda del read-model agregada a (node, subject, class_group).
- *
- * `pct` es el % del curso y `n` su cantidad de alumnos; el helper arma el
- * numerador/denominador que el servicio recombina. `pct: null` = curso sin
- * porcentajes (peso 0), que es como el `avg()` viejo devolvía NULL.
- */
 function cell(
   nodeId: string,
   nodeName: string,
   subjectId: string,
   subjectName: string,
-  pct: number | null,
+  scoreSum: number | null,
+  maxSum: number,
   n: number,
 ) {
   return {
@@ -149,8 +143,8 @@ function cell(
     nodeCode: null,
     subjectId,
     subjectName,
-    pctSum: pct == null ? null : (pct * n).toFixed(2),
-    pctWeight: pct == null ? 0 : n,
+    scoreSum: scoreSum == null ? null : scoreSum.toFixed(2),
+    maxSum: maxSum.toFixed(2),
     studentsAssessed: n,
   };
 }
@@ -161,9 +155,9 @@ describe('HeatmapService.getHeatmap', () => {
     const db = makeDb([
       // 1. cells (group by node, subject, class_group)
       [
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 10),
-        cell('n1', 'Comprensión', 's-mat', 'Matemática', 60, 8),
-        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 100, 10),
+        cell('n1', 'Comprensión', 's-mat', 'Matemática', 48, 80, 8),
+        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 100, 10),
       ],
       [scaleRow()],
     ]);
@@ -183,19 +177,12 @@ describe('HeatmapService.getHeatmap', () => {
     expect(n1.cells[1].averageAchievement).toBe(60);
   });
 
-  // ── Ponderación por studentCount: el invariante de la Fase 5 ───────────────
-  // El read-model tiene grano curso. Recombinar varios cursos DEBE ponderar por
-  // `studentCount` para reproducir el `avg()` sobre filas por alumno que este
-  // endpoint hacía antes. Un promedio simple de los % de cada curso da otro número
-  // en cuanto los cursos tienen N distinto — que es el caso normal.
-  it('celda con varios cursos: pondera por studentCount (no promedia los % de cada curso)', async () => {
+  it('celda con varios cursos: suma los tallies (Σ puntaje ÷ Σ máximo = 170/300), no pondera por alumnos (52,5) ni promedia los % de cada curso (65)', async () => {
     const db = makeDb([
       [
-        // Mismo (nodo, asignatura), dos cursos de N muy distinto.
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 90, 10),
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 40, 30),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 90, 100, 10),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 200, 30),
       ],
-      // escala+comparabilidad: 1 instrumento, sin grading_scale → defaults DIA
       [scaleRow()],
     ]);
     const service = makeService(db);
@@ -204,22 +191,18 @@ describe('HeatmapService.getHeatmap', () => {
 
     expect(res.rows).toHaveLength(1);
     const n1 = res.rows[0];
-    // Ponderado: (90×10 + 40×30) / 40 = 52.5. Promedio simple sería 65.
-    expect(n1.cells[0].averageAchievement).toBeCloseTo(52.5, 6);
-    expect(n1.cells[0].averageAchievement).not.toBeCloseTo(65, 6);
-    // 0.525 ∈ [0.40, 0.70) → elementary (con 65 saldría elementary también, pero el
-    // punto es el número; ver el caso de abajo para el salto de nivel).
+    expect(n1.cells[0].averageAchievement).toBeCloseTo(56.667, 3);
+    expect(n1.cells[0].averageAchievement).not.toBeCloseTo(52.5, 3);
+    expect(n1.cells[0].averageAchievement).not.toBeCloseTo(65, 3);
     expect(n1.cells[0].performanceLevel).toBe('elementary');
-    // Alumnos evaluados de la celda = suma de los N de cada curso.
     expect(n1.cells[0].studentsAssessed).toBe(40);
   });
 
-  it('el overall del nodo pondera todas sus celdas, no promedia las celdas', async () => {
+  it('el overall del nodo suma los tallies de todas sus celdas (210/500 = 42), no promedia las celdas (60)', async () => {
     const db = makeDb([
       [
-        // Lenguaje: 1 curso grande y flojo. Matemática: 1 curso chico y bueno.
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 30, 40),
-        cell('n1', 'Comprensión', 's-mat', 'Matemática', 90, 10),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 120, 400, 40),
+        cell('n1', 'Comprensión', 's-mat', 'Matemática', 90, 100, 10),
       ],
       [scaleRow()],
     ]);
@@ -228,18 +211,17 @@ describe('HeatmapService.getHeatmap', () => {
     const res = await service.getHeatmap(makeUser(), {});
 
     const n1 = res.rows[0];
-    // Student-weighted: (30×40 + 90×10) / 50 = 42. Promedio de celdas sería 60.
     expect(n1.overallAchievement).toBeCloseTo(42, 6);
-    expect(n1.overallPerformanceLevel).toBe('elementary'); // 0.42 ∈ [0.40, 0.70)
+    expect(n1.overallPerformanceLevel).toBe('elementary');
   });
 
   // ── Celda sin datos rellenada con null/0 ───────────────────────────────────
   it('rellena con null/0 las celdas de una habilidad sin datos en una asignatura', async () => {
     const db = makeDb([
       [
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 10),
-        cell('n1', 'Comprensión', 's-mat', 'Matemática', 60, 8),
-        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 100, 10),
+        cell('n1', 'Comprensión', 's-mat', 'Matemática', 48, 80, 8),
+        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 100, 10),
       ],
       [scaleRow()],
     ]);
@@ -264,8 +246,8 @@ describe('HeatmapService.getHeatmap', () => {
   it('con instrumentos no comparables conserva la estructura pero no clasifica', async () => {
     const db = makeDb([
       [
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 10),
-        cell('n1', 'Comprensión', 's-mat', 'Matemática', 30, 10),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 100, 10),
+        cell('n1', 'Comprensión', 's-mat', 'Matemática', 30, 100, 10),
       ],
       // dos instrumentos de asignaturas distintas → mixed
       [
@@ -294,9 +276,9 @@ describe('HeatmapService.getHeatmap', () => {
   it('ordena las filas por overallAchievement ascendente (críticas primero)', async () => {
     const db = makeDb([
       [
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 10),
-        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
-        cell('n3', 'Inferir', 's-leng', 'Lenguaje', 30, 10),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 100, 10),
+        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 100, 10),
+        cell('n3', 'Inferir', 's-leng', 'Lenguaje', 30, 100, 10),
       ],
       [scaleRow()],
     ]);
@@ -311,8 +293,8 @@ describe('HeatmapService.getHeatmap', () => {
   it('coloca los nodos sin overall (null) al final del orden', async () => {
     const db = makeDb([
       [
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 50, 10),
-        cell('n2', 'Localizar', 's-leng', 'Lenguaje', null, 0),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 50, 100, 10),
+        cell('n2', 'Localizar', 's-leng', 'Lenguaje', null, 0, 0),
       ],
       [scaleRow()],
     ]);
@@ -329,10 +311,10 @@ describe('HeatmapService.getHeatmap', () => {
   it('deriva el performanceLevel correcto desde el % logro (umbrales DIA)', async () => {
     const db = makeDb([
       [
-        cell('n1', 'Adv', 's-leng', 'Lenguaje', 90, 10), // >=85 advanced
-        cell('n2', 'Adq', 's-leng', 'Lenguaje', 75, 10), // 70-84 adequate
-        cell('n3', 'Ele', 's-leng', 'Lenguaje', 50, 10), // 40-69 elementary
-        cell('n4', 'Ins', 's-leng', 'Lenguaje', 30, 10), // <40 insufficient
+        cell('n1', 'Adv', 's-leng', 'Lenguaje', 90, 100, 10), // >=85 advanced
+        cell('n2', 'Adq', 's-leng', 'Lenguaje', 75, 100, 10), // 70-84 adequate
+        cell('n3', 'Ele', 's-leng', 'Lenguaje', 50, 100, 10), // 40-69 elementary
+        cell('n4', 'Ins', 's-leng', 'Lenguaje', 30, 100, 10), // <40 insufficient
       ],
       [scaleRow()],
     ]);
@@ -376,7 +358,7 @@ describe('HeatmapService.getHeatmap', () => {
     });
     const db = makeDb([
       // 1. cells
-      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 60, 10)],
+      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 60, 100, 10)],
       // 2. scale+comparabilidad: 1 instrumento
       [scaleRow()],
       // 3. resolveEffectiveBands → loadFamilyRows
@@ -397,7 +379,7 @@ describe('HeatmapService.getHeatmap', () => {
   // saliendo del corte legacy: es el último recurso, no la fuente primaria.
   it('sin bandas del instrumento cae al corte legacy DIA', async () => {
     const db = makeDb([
-      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 60, 10)],
+      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 60, 100, 10)],
       [scaleRow()],
       // familyRows y bands faltantes → [] → source:'none' → legacy
     ]);
@@ -413,8 +395,8 @@ describe('HeatmapService.getHeatmap', () => {
   it('con subjectId devuelve una sola columna (la asignatura filtrada)', async () => {
     const db = makeDb([
       [
-        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 10),
-        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 10),
+        cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 80, 100, 10),
+        cell('n2', 'Localizar', 's-leng', 'Lenguaje', 45, 100, 10),
       ],
       [scaleRow()],
     ]);
@@ -465,7 +447,7 @@ describe('HeatmapService.getHeatmap', () => {
       // 2. resolveScopedClassGroupIds → cursos del profesor
       [{ id: 'cg-1' }],
       // 3. cells
-      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 65, 2)],
+      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 13, 20, 2)],
       // 4. escala+comparabilidad: 1 instrumento sin grading_scale → defaults DIA
       [scaleRow()],
     ]);
@@ -512,7 +494,7 @@ describe('HeatmapService.getHeatmap', () => {
       // 1. resolveScopedClassGroupIds (scopeAll + filtro de curso)
       [{ id: 'cg-1' }],
       // 2. cells
-      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 88, 1)],
+      [cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 8.8, 10, 1)],
       // 3. escala+comparabilidad: 1 instrumento sin grading_scale → defaults DIA
       [scaleRow()],
     ]);
@@ -528,7 +510,7 @@ describe('HeatmapService.getHeatmap', () => {
   // El término es una condición más sobre la consulta que ya existía: no abre
   // ninguna consulta nueva ni cambia el contexto de org.
   it('el término de búsqueda no agrega viajes a la base', async () => {
-    const rows = () => [[cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 88, 1)], [scaleRow()]];
+    const rows = () => [[cell('n1', 'Comprensión', 's-leng', 'Lenguaje', 8.8, 10, 1)], [scaleRow()]];
     const sinTermino = makeDb(rows());
     await makeService(sinTermino).getHeatmap(makeUser(), {});
 

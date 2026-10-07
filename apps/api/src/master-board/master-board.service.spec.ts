@@ -4,7 +4,11 @@ import { masterBoardMatrixQuerySchema, type PerformanceBandInput, type UserRole 
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 import { MasterBoardService } from './master-board.service';
-import { loadMatrixRows, type MatrixRow } from './queries/matrix-rows.query';
+import type {
+  BenchmarkSamplesService,
+  ItemSetSampleResult,
+} from '../benchmarking/benchmark-samples.service';
+import { loadMatrixItemTallies, loadMatrixRows, type MatrixRow } from './queries/matrix-rows.query';
 import {
   loadLegacyTakeRows,
   loadProcessLinkSummaries,
@@ -25,6 +29,7 @@ jest.mock('@soe/db', () => ({
 
 const mocked = {
   loadMatrixRows: jest.mocked(loadMatrixRows),
+  loadMatrixItemTallies: jest.mocked(loadMatrixItemTallies),
   loadLegacyTakeRows: jest.mocked(loadLegacyTakeRows),
   loadProcessLinkSummaries: jest.mocked(loadProcessLinkSummaries),
   loadProcessResultCounts: jest.mocked(loadProcessResultCounts),
@@ -172,8 +177,15 @@ function bandsFor(entries: Record<string, PerformanceBandInput[]>): Map<string, 
 
 const YEARS_ROW = [{ id: YEAR, year: 2026, isCurrent: true }];
 
+const noSamples = {
+  canSeeSample: () => true,
+  getItemSetSamples: async () => new Map<string, ItemSetSampleResult>(),
+  logSampleAccess: async () => undefined,
+} as unknown as BenchmarkSamplesService;
+
 beforeEach(() => {
   jest.resetAllMocks();
+  mocked.loadMatrixItemTallies.mockResolvedValue([]);
   mocked.loadProcessTakeRows.mockResolvedValue([]);
   mocked.loadProcessLinkSummaries.mockResolvedValue([]);
   mocked.loadProcessResultCounts.mockResolvedValue([]);
@@ -238,7 +250,7 @@ describe('MasterBoardService.getTakes', () => {
       },
     ]);
 
-    const service = new MasterBoardService(makeDb([YEARS_ROW]));
+    const service = new MasterBoardService(makeDb([YEARS_ROW]), noSamples);
     const result = await service.getTakes(makeUser(), {});
 
     expect(result.takes.map((take) => take.key)).toEqual([
@@ -286,7 +298,7 @@ describe('MasterBoardService.getTakes', () => {
       sibling({ assessmentId: 'e5-m1', processId: 'p-e5', instrumentId: 'm1-e5' }),
     ]);
 
-    const service = new MasterBoardService(makeDb([YEARS_ROW]));
+    const service = new MasterBoardService(makeDb([YEARS_ROW]), noSamples);
     const result = await service.getTakes(makeUser(), {});
     const byKey = new Map(result.takes.map((take) => [take.key, take]));
 
@@ -302,7 +314,7 @@ describe('MasterBoardService.getTakes', () => {
       sibling({ assessmentId: 'dia-x', instrumentType: 'dia', instrumentId: 'dia-1' }),
     ]);
 
-    const service = new MasterBoardService(makeDb([YEARS_ROW]));
+    const service = new MasterBoardService(makeDb([YEARS_ROW]), noSamples);
     const result = await service.getTakes(makeUser(), {});
 
     expect(result.takes[0]?.partial).toBe(false);
@@ -329,7 +341,7 @@ describe('MasterBoardService.getMatrix — resolución de la toma', () => {
       [],
     ]);
 
-    const matrix = await new MasterBoardService(db).getMatrix(makeUser(), {
+    const matrix = await new MasterBoardService(db, noSamples).getMatrix(makeUser(), {
       processId: PROCESS_E3,
     });
 
@@ -351,7 +363,7 @@ describe('MasterBoardService.getMatrix — resolución de la toma', () => {
   it('rejects an unknown or deleted process with 404', async () => {
     const db = makeDb([[]]);
     await expect(
-      new MasterBoardService(db).getMatrix(makeUser(), { processId: PROCESS_E3 }),
+      new MasterBoardService(db, noSamples).getMatrix(makeUser(), { processId: PROCESS_E3 }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
@@ -363,7 +375,7 @@ describe('MasterBoardService.getMatrix — resolución de la toma', () => {
     mocked.loadMatrixRows.mockResolvedValue([matrixRow({ assessmentIds: ['residual'] })]);
     const db = makeDb([[{ year: 2026 }], []]);
 
-    const matrix = await new MasterBoardService(db).getMatrix(makeUser(), {
+    const matrix = await new MasterBoardService(db, noSamples).getMatrix(makeUser(), {
       academicYearId: YEAR,
       instrumentType: 'paes',
     });
@@ -384,7 +396,7 @@ describe('MasterBoardService.getMatrix — resolución de la toma', () => {
     ]);
     const db = makeDb([[{ year: 2026 }]]);
 
-    const matrix = await new MasterBoardService(db).getMatrix(makeUser(), {
+    const matrix = await new MasterBoardService(db, noSamples).getMatrix(makeUser(), {
       academicYearId: YEAR,
       instrumentType: 'dia',
       applicationPeriod: 'intermedio',
@@ -403,7 +415,7 @@ describe('MasterBoardService.getMatrix — resolución de la toma', () => {
     ]);
     const db = makeDb([[{ year: 2026 }]]);
 
-    const matrix = await new MasterBoardService(db).getMatrix(makeUser(), {
+    const matrix = await new MasterBoardService(db, noSamples).getMatrix(makeUser(), {
       academicYearId: YEAR,
       instrumentType: 'dia',
     });
@@ -470,7 +482,7 @@ describe('MasterBoardService.getMatrix — columnas y celdas', () => {
       ],
       [],
     ]);
-    return new MasterBoardService(db).getMatrix(makeUser(), { processId: PROCESS_E3 });
+    return new MasterBoardService(db, noSamples).getMatrix(makeUser(), { processId: PROCESS_E3 });
   }
 
   it('puts M1 and M2 in separate columns under Matemática', async () => {
@@ -582,5 +594,125 @@ describe('MasterBoardService.getMatrix — columnas y celdas', () => {
     expect(fifth?.cells[0]).toMatchObject({ hasLevels: false });
     expect(fifth?.cells[0]?.metrics[0]?.level).toBeNull();
     expect(matrix.subjects[0]?.tests[0]?.hasLevels).toBe(true);
+  });
+});
+
+describe('MasterBoardService.getMatrix — contraste con la muestra', () => {
+  const GRADE_KEY = 'grade:g4:subject:s-math';
+  const COURSE_KEY = 'course:cg-a:subject:s-math';
+
+  function sampleResult(): ItemSetSampleResult {
+    return {
+      instrumentId: 'i1',
+      label: 'Muestra',
+      refreshedAt: '2026-10-07T06:30:00.000Z',
+      comparedItemIds: ['it1'],
+      tally: { scoreSum: 120, maxSum: 200 },
+      value: 60,
+      schoolCount: 2,
+      studentCount: 40,
+      schoolValues: [60, 75],
+    };
+  }
+
+  async function matrixWithSample() {
+    mocked.loadTomaAssessmentRows.mockResolvedValue([
+      tomaRow({ assessmentId: 'a1', instrumentId: 'i1', activeProcessId: PROCESS_E3 }),
+    ]);
+    mocked.loadMatrixRows.mockResolvedValue([matrixRow()]);
+    mocked.resolveEffectiveBandsForInstruments.mockResolvedValue(bandsFor({}));
+    mocked.loadMatrixItemTallies.mockResolvedValue([
+      {
+        gradeId: 'g4',
+        classGroupId: 'cg-a',
+        subjectId: 's-math',
+        trackId: null,
+        instrumentId: 'i1',
+        itemId: 'it1',
+        scoreSum: '30',
+        maxSum: '40',
+      },
+      {
+        gradeId: 'g4',
+        classGroupId: 'cg-a',
+        subjectId: 's-math',
+        trackId: null,
+        instrumentId: 'i1',
+        itemId: 'it2',
+        scoreSum: '10',
+        maxSum: '20',
+      },
+    ]);
+    const requests: string[][] = [];
+    const logged: string[][] = [];
+    const samples = {
+      canSeeSample: () => true,
+      getItemSetSamples: async (reqs: { key: string; itemIds: readonly string[] }[]) => {
+        for (const r of reqs) requests.push([r.key, ...r.itemIds]);
+        return new Map([
+          [GRADE_KEY, sampleResult()],
+          [COURSE_KEY, sampleResult()],
+        ]);
+      },
+      logSampleAccess: async (_tx: unknown, _org: string, _user: string, ids: string[]) => {
+        logged.push(ids);
+      },
+    } as unknown as BenchmarkSamplesService;
+    const db = makeDb([
+      [
+        {
+          id: PROCESS_E3,
+          name: 'DIA Intermedio 2026',
+          kind: 'dia',
+          period: null,
+          academicYearId: YEAR,
+        },
+      ],
+      [],
+    ]);
+    const matrix = await new MasterBoardService(db, samples).getMatrix(makeUser(), {
+      processId: PROCESS_E3,
+    });
+    return { matrix, requests, logged };
+  }
+
+  it('pide la muestra sólo sobre las preguntas corregidas de cada celda', async () => {
+    const { requests } = await matrixWithSample();
+    expect(requests).toEqual(
+      expect.arrayContaining([
+        [GRADE_KEY, 'it1', 'it2'],
+        [COURSE_KEY, 'it1', 'it2'],
+      ]),
+    );
+  });
+
+  it('compara la celda sobre las mismas preguntas que la muestra (30/40 → 75 vs 60 = +15 pp)', async () => {
+    const { matrix, logged } = await matrixWithSample();
+    const gradeCell = matrix.grades[0]!.cells[0]!;
+    expect(gradeCell.sample).toMatchObject({
+      label: 'Muestra',
+      value: 60,
+      cellValue: 75,
+      deltaPp: 15,
+      schoolCount: 2,
+      comparedItems: 1,
+      totalItems: 2,
+      percentile: 75,
+      typicalZone: 'above',
+    });
+    expect(logged).toEqual([['i1']]);
+  });
+
+  it('en la celda de curso no da percentil ni zona típica', async () => {
+    const { matrix } = await matrixWithSample();
+    const courseCell = matrix.grades[0]!.courses[0]!.cells[0]!;
+    expect(courseCell.sample).toMatchObject({ deltaPp: 15, percentile: null, typicalZone: null });
+  });
+
+  it('ofrece la métrica de diferencia vs muestra con su tono', async () => {
+    const { matrix } = await matrixWithSample();
+    expect(matrix.availableMetrics.map((m) => m.key)).toEqual(['achievement', 'sample_delta']);
+    const delta = matrix.grades[0]!.cells[0]!.metrics.find((m) => m.key === 'sample_delta');
+    expect(delta).toMatchObject({ value: 15, display: '+15.0', tone: 'above' });
   });
 });

@@ -46,8 +46,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
     for (const m of ['from', 'innerJoin', 'leftJoin', 'where', 'orderBy', 'limit', 'offset']) {
       chain[m] = passthrough;
     }
-    chain.then = (resolve: (rows: unknown[]) => unknown) =>
-      Promise.resolve(rows).then(resolve);
+    chain.then = (resolve: (rows: unknown[]) => unknown) => Promise.resolve(rows).then(resolve);
     return chain;
   }
 
@@ -79,30 +78,46 @@ function makeService(db: Database): BenchmarkingService {
   return new (BenchmarkingService as new (db: Database) => BenchmarkingService)(db);
 }
 
-const aggRow = (overrides: Record<string, unknown> = {}) => ({
-  id: 'agg-1',
-  orgId: 'org-x',
-  instrumentId: 'inst-1',
-  gradeId: null,
-  subjectId: null,
-  dependence: null,
-  region: null,
-  commune: null,
-  networkOrgId: null,
-  studentCount: 30,
-  avgAchievement: '60.00',
-  bandCounts: [
-    { bandKey: 'dia_nivel_1', label: 'Nivel I', order: 1, count: 5 },
-    { bandKey: 'dia_nivel_2', label: 'Nivel II', order: 2, count: 15 },
-    { bandKey: 'dia_nivel_3', label: 'Nivel III', order: 3, count: 10 },
-  ],
-  perSkill: [],
-  optOutGlobalPool: false,
-  refreshedAt: new Date('2026-06-01T00:00:00Z'),
-  createdAt: new Date('2026-06-01T00:00:00Z'),
-  updatedAt: new Date('2026-06-01T00:00:00Z'),
-  ...overrides,
-});
+const POINTS_PER_STUDENT = 30;
+
+function tallyFor(studentCount: number, avgAchievement: string | null) {
+  if (avgAchievement === null) return { scoreSum: '0', maxSum: '0' };
+  const maxSum = studentCount * POINTS_PER_STUDENT;
+  return {
+    scoreSum: ((maxSum * Number(avgAchievement)) / 100).toFixed(2),
+    maxSum: maxSum.toFixed(2),
+  };
+}
+
+const aggRow = (overrides: Record<string, unknown> = {}) =>
+  withTally({
+    id: 'agg-1',
+    orgId: 'org-x',
+    instrumentId: 'inst-1',
+    gradeId: null,
+    subjectId: null,
+    dependence: null,
+    region: null,
+    commune: null,
+    networkOrgId: null,
+    studentCount: 30,
+    avgAchievement: '60.00',
+    bandCounts: [
+      { bandKey: 'dia_nivel_1', label: 'Nivel I', order: 1, count: 5 },
+      { bandKey: 'dia_nivel_2', label: 'Nivel II', order: 2, count: 15 },
+      { bandKey: 'dia_nivel_3', label: 'Nivel III', order: 3, count: 10 },
+    ],
+    perSkill: [],
+    optOutGlobalPool: false,
+    refreshedAt: new Date('2026-06-01T00:00:00Z'),
+    createdAt: new Date('2026-06-01T00:00:00Z'),
+    updatedAt: new Date('2026-06-01T00:00:00Z'),
+    ...overrides,
+  });
+
+function withTally<T extends { studentCount: number; avgAchievement: string | null }>(row: T) {
+  return { ...tallyFor(row.studentCount, row.avgAchievement), ...row };
+}
 
 const baseQuery: BenchmarkComparisonQueryDto = {
   instrumentId: '11111111-1111-1111-1111-111111111111',
@@ -248,7 +263,12 @@ describe('BenchmarkingService.compare (network)', () => {
     // 5 fetchCohortRows (network)
     // 6 resolveOrgNames
     const networkRows = [
-      aggRow({ orgId: 'org-you', networkOrgId: 'found-1', avgAchievement: '70.00', studentCount: 4 }),
+      aggRow({
+        orgId: 'org-you',
+        networkOrgId: 'found-1',
+        avgAchievement: '70.00',
+        studentCount: 4,
+      }),
       aggRow({ orgId: 'sib-1', networkOrgId: 'found-1', avgAchievement: '40.00', studentCount: 3 }),
     ];
     const db = makeDb([

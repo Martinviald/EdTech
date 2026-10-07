@@ -320,13 +320,18 @@ export type ResponseForCalculation = {
   taxonomyNodeIds: string[];
 };
 
+/**
+ * Resultado de un alumno. Sin preguntas corregidas (`maxScore = 0`) no hay logro: `percentage`,
+ * `grade` y el nivel quedan en `null` en vez de caer en 0 y en la banda más baja
+ * (docs/diseno-logro-unificado-y-cohorte.md §3.1).
+ */
 export type StudentAggregateResult = {
   studentId: string;
   totalScore: number;
   maxScore: number;
-  percentage: number; // 0..1
-  grade: number;
-  performanceLevel: PerformanceLevel;
+  percentage: number | null; // 0..1
+  grade: number | null;
+  performanceLevel: PerformanceLevel | null;
   isComplete: boolean;
   // Métrica raíz extendida (#3). Opcionales para no romper consumidores DIA:
   // un instrumento `percentage`/`linear_chilean` los deja en null/undefined.
@@ -342,8 +347,11 @@ export type SkillAggregateResult = {
   nodeId: string;
   correctCount: number;
   totalCount: number;
-  percentage: number; // 0..1
-  performanceLevel: PerformanceLevel;
+  /** Tally del alumno en el nodo: Σ puntaje y Σ máximo de sus preguntas corregidas. */
+  scoreSum: number;
+  maxSum: number;
+  percentage: number | null; // 0..1
+  performanceLevel: PerformanceLevel | null;
   performanceBandId?: string | null;
 };
 
@@ -385,9 +393,26 @@ export function aggregateStudentResults(
     const scored = rows.filter((r) => r.isCorrect !== null);
     const totalScore = scored.reduce((acc, r) => acc + effectiveScore(r), 0);
     const maxScore = scored.reduce((acc, r) => acc + r.maxScore, 0);
-    const percentage = maxScore > 0 ? totalScore / maxScore : 0;
-    const grade = percentageToGrade(percentage, scale);
     const isComplete = rows.every((r) => r.isCorrect !== null);
+
+    if (!(maxScore > 0)) {
+      results.push({
+        studentId,
+        totalScore,
+        maxScore,
+        percentage: null,
+        grade: null,
+        performanceLevel: null,
+        isComplete,
+        scaledScore: null,
+        bandLabel: null,
+        performanceBandId: null,
+      });
+      continue;
+    }
+
+    const percentage = totalScore / maxScore;
+    const grade = percentageToGrade(percentage, scale);
 
     // Nivel de logro: si el instrumento tiene bandas configuradas, éstas son la
     // fuente de verdad (performance_band_id) y el enum legacy se deriva de la
@@ -486,20 +511,25 @@ export function aggregateSkillResults(
 
   const results: SkillAggregateResult[] = [];
   for (const v of byKey.values()) {
-    // % ponderado por maxScore por ítem (respeta finalScore). Si no hay ítems
-    // corregidos con maxScore (todo pendiente / maxScore 0), cae a 0.
-    const percentage = v.maxSum > 0 ? v.scoreSum / v.maxSum : 0;
+    // % ponderado por maxScore por ítem (respeta finalScore). Sin ítems corregidos con
+    // maxScore (todo pendiente / maxScore 0) no hay logro: null, no 0.
+    const percentage = v.maxSum > 0 ? v.scoreSum / v.maxSum : null;
     // Mismas bandas del instrumento aplicadas al % del nodo de habilidad.
-    const band = classifyByBands(percentage, bands);
+    const band = percentage === null ? null : classifyByBands(percentage, bands);
     results.push({
       studentId: v.studentId,
       nodeId: v.nodeId,
       correctCount: v.correctCount,
       totalCount: v.totalCount,
+      scoreSum: v.scoreSum,
+      maxSum: v.maxSum,
       percentage,
-      performanceLevel: band
-        ? bandToLegacyLevel(band, bands!)
-        : percentageToPerformanceLevel(percentage, scale),
+      performanceLevel:
+        percentage === null
+          ? null
+          : band
+            ? bandToLegacyLevel(band, bands!)
+            : percentageToPerformanceLevel(percentage, scale),
       performanceBandId: band?.id ?? null,
     });
   }

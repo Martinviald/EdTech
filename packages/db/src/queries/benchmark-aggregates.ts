@@ -20,7 +20,12 @@
  */
 import { and, eq, isNull, lt, sql, type SQL } from 'drizzle-orm';
 import {
+  achievementPct,
   classifyByBands,
+  emptyTally,
+  round2,
+  tallyOf,
+  type AchievementTally,
   type BenchmarkBandCount,
   type BenchmarkSkillAggregate,
   type PerformanceBandInput,
@@ -59,7 +64,7 @@ type OrgAggregateRow = {
   gradeId: string | null;
   subjectId: string | null;
   studentCount: number;
-  avgAchievement: string | null;
+  tally: AchievementTally;
   bandCounts: BenchmarkBandCount[];
   perSkill: BenchmarkSkillAggregate[];
 };
@@ -69,8 +74,6 @@ type InstrumentAccumulator = {
   gradeId: string | null;
   subjectId: string | null;
   students: Set<string>;
-  pctSum: number;
-  pctCount: number;
   bandCounts: Map<string, BenchmarkBandCount>;
 };
 
@@ -134,7 +137,9 @@ export async function refreshBenchmarkAggregates(
         commune: org.commune,
         networkOrgId,
         studentCount: row.studentCount,
-        avgAchievement: row.avgAchievement,
+        scoreSum: row.tally.scoreSum.toFixed(2),
+        maxSum: row.tally.maxSum.toFixed(2),
+        avgAchievement: toAchievementColumn(row.tally),
         bandCounts: row.bandCounts,
         perSkill: row.perSkill,
         optOutGlobalPool,
@@ -158,6 +163,8 @@ export async function refreshBenchmarkAggregates(
             commune: value.commune,
             networkOrgId: value.networkOrgId,
             studentCount: value.studentCount,
+            scoreSum: value.scoreSum,
+            maxSum: value.maxSum,
             avgAchievement: value.avgAchievement,
             bandCounts: value.bandCounts,
             perSkill: value.perSkill,
@@ -208,6 +215,8 @@ async function refreshOrgItemAggregates(
         itemId: assessmentItemStats.itemId,
         correctCount: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
         responseCount: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
+        scoreSum: sql<string>`coalesce(sum(${assessmentItemStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
       })
       .from(assessmentItemStats)
       .innerJoin(assessments, eq(assessmentItemStats.assessmentId, assessments.id))
@@ -228,6 +237,8 @@ async function refreshOrgItemAggregates(
       itemId: row.itemId,
       correctCount: Number(row.correctCount),
       responseCount: Number(row.responseCount),
+      scoreSum: Number(row.scoreSum).toFixed(2),
+      maxSum: Number(row.maxSum).toFixed(2),
       optOutGlobalPool,
       refreshedAt: now,
       updatedAt: now,
@@ -241,6 +252,8 @@ async function refreshOrgItemAggregates(
           instrumentId: sql`excluded.instrument_id`,
           correctCount: sql`excluded.correct_count`,
           responseCount: sql`excluded.response_count`,
+          scoreSum: sql`excluded.score_sum`,
+          maxSum: sql`excluded.max_sum`,
           optOutGlobalPool: sql`excluded.opt_out_global_pool`,
           refreshedAt: sql`excluded.refreshed_at`,
           updatedAt: sql`excluded.updated_at`,
@@ -295,8 +308,13 @@ export function preferComputedOverImported(
 }
 
 /**
- * Agrega `assessment_results` + `assessment_skill_stats` de la org bajo `withOrgContext`.
- * Agrupa por instrumento; gradeId/subjectId vienen del instrumento.
+ * Agrega la fuente de la org bajo `withOrgContext`, agrupada por instrumento (gradeId/subjectId
+ * vienen del instrumento):
+ *  · alumnos y bandas desde `assessment_results`;
+ *  · el tally del colegio (`score_sum` / `max_sum`) desde `assessment_item_stats`, y el logro por
+ *    nodo desde los tallies de `assessment_skill_stats`. Es la misma regla que usan las vistas
+ *    del colegio (docs/diseno-logro-unificado-y-cohorte.md §3.1), incluido el colegio que sólo
+ *    subió su informe oficial.
  *
  * `bandCounts` cuenta por la banda PROPIA del instrumento (clave/etiqueta/orden): se
  * clasifica el `percentage` de cada resultado con las bandas EFECTIVAS del instrumento
@@ -338,18 +356,12 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
           gradeId: row.gradeId,
           subjectId: row.subjectId,
           students: new Set<string>(),
-          pctSum: 0,
-          pctCount: 0,
           bandCounts: new Map<string, BenchmarkBandCount>(),
         };
         accByInstrument.set(row.instrumentId, acc);
       }
       acc.students.add(row.studentId);
       const pct = row.percentage === null ? null : Number(row.percentage);
-      if (pct !== null) {
-        acc.pctSum += pct;
-        acc.pctCount += 1;
-      }
       const band = classifyResultBand(
         pct,
         row.performanceBandId ?? null,
@@ -358,17 +370,13 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
       if (band) countBand(acc.bandCounts, band);
     }
 
-    // Mismo cálculo que el logro por nodo de las vistas y alertas del colegio
-    // (aciertos / total desde el read-model de cohorte): así el Δ contra la muestra
-    // compara la misma métrica, e incluye a los colegios importados sólo por informe.
     const perSkillRows = await tx
       .select({
         instrumentId: instruments.id,
         nodeId: assessmentSkillStats.nodeId,
         nodeName: taxonomyNodes.name,
-        achievement: sql<
-          string | null
-        >`round(sum(${assessmentSkillStats.correctCount})::numeric * 100 / nullif(sum(${assessmentSkillStats.totalCount}), 0), 2)`,
+        scoreSum: sql<string>`coalesce(sum(${assessmentSkillStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentSkillStats.maxSum}), 0)`,
         studentCount: sql<number>`sum(${assessmentSkillStats.studentCount})::int`,
       })
       .from(assessmentSkillStats)
@@ -378,14 +386,32 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
       .where(and(eq(assessments.orgId, orgId), preferComputedOverImported(assessmentSkillStats)))
       .groupBy(instruments.id, assessmentSkillStats.nodeId, taxonomyNodes.name);
 
+    const tallyRows = await tx
+      .select({
+        instrumentId: assessments.instrumentId,
+        scoreSum: sql<string>`coalesce(sum(${assessmentItemStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
+      })
+      .from(assessmentItemStats)
+      .innerJoin(assessments, eq(assessmentItemStats.assessmentId, assessments.id))
+      .where(and(eq(assessments.orgId, orgId), preferComputedOverImported(assessmentItemStats)))
+      .groupBy(assessments.instrumentId);
+    const tallyByInstrument = new Map(
+      tallyRows.map((r) => [r.instrumentId, tallyOf([{ scoreSum: r.scoreSum, maxSum: r.maxSum }])]),
+    );
+
     const perSkillByInstrument = new Map<string, BenchmarkSkillAggregate[]>();
     for (const row of perSkillRows) {
       const list = perSkillByInstrument.get(row.instrumentId) ?? [];
+      const tally = tallyOf([{ scoreSum: row.scoreSum, maxSum: row.maxSum }]);
+      const pct = achievementPct(tally);
       list.push({
         nodeId: row.nodeId,
         nodeName: row.nodeName,
-        achievement: row.achievement === null ? null : Number(row.achievement),
+        achievement: pct === null ? null : round2(pct),
         studentCount: row.studentCount,
+        scoreSum: round2(tally.scoreSum),
+        maxSum: round2(tally.maxSum),
       });
       perSkillByInstrument.set(row.instrumentId, list);
     }
@@ -397,7 +423,7 @@ async function buildOrgRows(db: Database, orgId: string): Promise<OrgAggregateRo
         gradeId: acc.gradeId,
         subjectId: acc.subjectId,
         studentCount: acc.students.size,
-        avgAchievement: acc.pctCount === 0 ? null : (acc.pctSum / acc.pctCount).toFixed(2),
+        tally: tallyByInstrument.get(instrumentId) ?? emptyTally(),
         bandCounts: Array.from(acc.bandCounts.values()).sort((a, b) => a.order - b.order),
         perSkill: perSkillByInstrument.get(instrumentId) ?? [],
       });
@@ -450,6 +476,11 @@ function classifyResultBand(
     return persistedBandId ? (classifier.bandById.get(persistedBandId) ?? null) : null;
   }
   return classifyByBands(percentage / 100, classifier.bands) ?? null;
+}
+
+function toAchievementColumn(tally: AchievementTally): string | null {
+  const pct = achievementPct(tally);
+  return pct === null ? null : pct.toFixed(2);
 }
 
 function countBand(counts: Map<string, BenchmarkBandCount>, band: PerformanceBandInput): void {

@@ -112,6 +112,7 @@ describe('GetAssessmentReportTool', () => {
         administeredAt: null,
         classGroups: [],
         itemsCount: 0,
+        pendingStudentCount: 0,
         dataGranularity: 'item_level',
         capabilities: [...capabilitiesFor('item_level')],
         hasItemLevelData: true,

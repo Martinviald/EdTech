@@ -32,6 +32,11 @@ import {
   parseSelectedKeys,
   mergeAnswerCounts,
   trueFalseKeyOf,
+  achievementPct,
+  addTally,
+  emptyTally,
+  tallyOf,
+  type AchievementTally,
   type AlternativeDistribution,
   type ScoreCategoryDistribution,
   type RawAnswerCount,
@@ -46,6 +51,8 @@ import {
   type MatrixReferenceScopes,
   type MatrixStudentRow,
   type QuestionAnalysisQueryDto,
+  type SkillReferencesQueryDto,
+  type SkillReferencesResponse,
   type QuestionReferences,
   type ReferenceRate,
   type QuestionAnalysisResponse,
@@ -55,7 +62,13 @@ import {
   extractItemStem,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import {
+  BenchmarkSamplesService,
+  type ItemSetRequest,
+  type ItemSetSampleResult,
+} from '../benchmarking/benchmark-samples.service';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
+import { countStudentsWithPendingResponses } from '../common/helpers/pending-responses.helper';
 import { InjectDb, type Database } from '../database/database.types';
 import {
   buildAssessmentScopeCondition,
@@ -90,7 +103,10 @@ interface ItemContent {
 
 @Injectable()
 export class ItemAnalysisService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly samples: BenchmarkSamplesService,
+  ) {}
 
   // ───────────────────────────────────────────────────────────────────────────
   // GET /api/item-analysis/assessments  (selector de la tabla cruzada)
@@ -328,11 +344,7 @@ export class ItemAnalysisService {
         classGroupFilter,
       );
 
-      // TKT-22 — línea de referencia "% de logro del colegio" por pregunta: el
-      // promedio de TODA la org, con independencia del scope del usuario. La línea
-      // de "muestra de colegios" (benchmark inter-colegio) queda DIFERIDA hasta
-      // existir un pool multi-colegio (references.sample; ver QuestionReferences).
-      const references = await this.attachLevelReferences(
+      const levelReferences = await this.attachLevelReferences(
         tx,
         orgId,
         query.assessmentId,
@@ -340,6 +352,15 @@ export class ItemAnalysisService {
         questionsWithRate,
         itemIds,
       );
+      const references = this.samples.canSeeSample(user)
+        ? await this.attachSampleReferences(
+            tx,
+            orgId,
+            user.userId,
+            assessment.instrumentId,
+            levelReferences,
+          )
+        : levelReferences;
 
       // ── Alumnos visibles con respuestas en la evaluación ──────────────────────
       // TKT-09 — con `all=true` se devuelve el curso COMPLETO (sin paginar) para
@@ -400,12 +421,19 @@ export class ItemAnalysisService {
         };
       });
 
+      const pendingStudentCount = await countStudentsWithPendingResponses(
+        tx,
+        query.assessmentId,
+        studentFilter,
+      );
+
       return {
         assessmentId: query.assessmentId,
         assessmentName: assessment.name,
         instrumentName: assessment.instrumentName,
         questions: references.questions,
         references: references.scopes,
+        pendingStudentCount,
         students: {
           data: students,
           total: pagination.total,
@@ -420,6 +448,62 @@ export class ItemAnalysisService {
   // ───────────────────────────────────────────────────────────────────────────
   // H6.12 — GET /api/item-analysis/questions/:itemId
   // ───────────────────────────────────────────────────────────────────────────
+
+  async getSkillReferences(
+    user: JwtPayload,
+    query: SkillReferencesQueryDto,
+  ): Promise<SkillReferencesResponse> {
+    const orgId = this.requireOrgId(user);
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessmentOwnedByUser(
+        tx,
+        user,
+        orgId,
+        query.assessmentId,
+      );
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll) {
+        const hasScope = await this.assessmentTouchesScope(
+          tx,
+          query.assessmentId,
+          scope.classGroupIds,
+        );
+        if (!hasScope) {
+          throw new ForbiddenException('No tiene acceso a los resultados de esta evaluación');
+        }
+      }
+      if (query.classGroupId) {
+        const ok = await this.classGroupInScope(tx, orgId, scope, query.classGroupId);
+        if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
+      }
+
+      const itemsByNode = await this.loadItemsByNode(tx, assessment.instrumentId);
+      const itemIds = Array.from(new Set([...itemsByNode.values()].flat()));
+      if (itemIds.length === 0) return { level: null, sample: null };
+
+      const levelReference = await this.loadSkillLevelReference(
+        tx,
+        orgId,
+        query.assessmentId,
+        assessment.instrumentId,
+        itemIds,
+        itemsByNode,
+      );
+      const sample = this.samples.canSeeSample(user)
+        ? await this.loadSkillSampleReference(
+            tx,
+            orgId,
+            user.userId,
+            query.assessmentId,
+            assessment.instrumentId,
+            this.resolveAccessibleClassGroupIds(scope, query.classGroupId),
+            itemsByNode,
+            levelReference?.tallyByItem ?? new Map<string, AchievementTally>(),
+          )
+        : null;
+      return { level: levelReference?.level ?? null, sample };
+    });
+  }
 
   async getQuestionAnalysis(
     user: JwtPayload,
@@ -526,7 +610,7 @@ export class ItemAnalysisService {
       // T2-17 — referencias comparativas: % de logro de la MISMA pregunta en el
       // colegio (toda la org) y en el nivel/grado. Independientes del scope del
       // usuario (líneas de referencia), acotadas a la org por `assessmentId`.
-      const references = await this.loadQuestionReferences(
+      const levelReferences = await this.loadQuestionReferences(
         tx,
         orgId,
         item.instrumentId,
@@ -534,6 +618,17 @@ export class ItemAnalysisService {
         itemId,
         query.classGroupId,
       );
+      const references =
+        item.instrumentId && this.samples.canSeeSample(user)
+          ? await this.attachQuestionSample(
+              tx,
+              orgId,
+              user.userId,
+              item.instrumentId,
+              itemId,
+              levelReferences,
+            )
+          : levelReferences;
 
       // Recortes por alternativa (ítems con opciones-imagen). Se expone solo el flag; la
       // imagen se sirve firmada por `/items/{id}/alternativa/{key}/figura`.
@@ -670,8 +765,7 @@ export class ItemAnalysisService {
         skill: refs.skill,
         content: refs.contentRef,
         correctRate: null,
-        // sample queda en undefined → línea de "muestra de colegios" DIFERIDA (TKT-20).
-        references: { grade: { rate: null, responseCount: 0, correctCount: 0 } },
+        references: { grade: this.emptyReference(), sample: null },
       };
     });
 
@@ -745,18 +839,10 @@ export class ItemAnalysisService {
    * — que es exactamente el bug que esto corrige. La población es
    * (org, instrumento, grade_id, año académico).
    *
-   * Ponderada por alumno: `sum(correctCount)/sum(responseCount)` sobre las cohortes
-   * del nivel. NUNCA el promedio de los % de cada curso — cursos de distinto N
-   * pesarían igual y el número sería falso.
-   *
    * La query corre dentro de `withOrgContext` y filtra `assessments.orgId`
    * explícitamente: nunca cruza datos de otra org (RLS + filtro manual, §5.2). Es
    * independiente del scope del usuario, que es el punto de una referencia: un
    * profesor ve su curso en `correctRate` y el nivel completo acá.
-   *
-   * `references.sample` (muestra de colegios / benchmark inter-colegio) queda
-   * DIFERIDO: requiere pool multi-colegio (TKT-20). Se deja el hueco en el
-   * contrato (`QuestionReferences.sample`) sin poblarlo.
    */
   private async attachLevelReferences(
     tx: Database,
@@ -766,9 +852,10 @@ export class ItemAnalysisService {
     questions: MatrixQuestionColumn[],
     itemIds: string[],
   ): Promise<{ questions: MatrixQuestionColumn[]; scopes: MatrixReferenceScopes }> {
-    const noData: ReferenceRate = { rate: null, responseCount: 0, correctCount: 0 };
+    const noData: ReferenceRate = this.emptyReference();
     const emptyScopes: MatrixReferenceScopes = {
       grade: { rate: null, gradeName: null, classGroupCount: 0, studentCount: 0 },
+      sample: null,
     };
     if (itemIds.length === 0) return { questions, scopes: emptyScopes };
 
@@ -790,7 +877,7 @@ export class ItemAnalysisService {
         ...q,
         references: { ...q.references, grade: agg.byItem.get(q.itemId) ?? noData },
       })),
-      scopes: { grade: { ...agg.summary, gradeName: cohort.gradeName } },
+      scopes: { grade: { ...agg.summary, gradeName: cohort.gradeName }, sample: null },
     };
   }
 
@@ -869,24 +956,209 @@ export class ItemAnalysisService {
       );
   }
 
-  /**
-   * Agrega las filas del read-model en (a) conteos por ítem — las celdas de la
-   * fila de referencia — y (b) el resumen de toda la población, que es
-   * `sum(scoreSum) / sum(maxSum)` sobre TODAS las respuestas de TODOS sus alumnos.
-   * Nunca un promedio de los % por curso: los cursos tienen N distinto y promediar
-   * sus % los ponderaría igual (mismo criterio que `attachCorrectRates`).
-   *
-   * Los conteos `responseCount`/`correctCount` se siguen reportando tal cual —son
-   * "cuántos respondieron" y "cuántos lo lograron entero"—, pero la TASA se pondera
-   * por puntaje para no dar 0% en los ítems de crédito parcial.
-   *
-   * `studentCount` viene por (assessment, curso, ítem): son los alumnos que
-   * respondieron ESE ítem → se toma el `max` por curso y recién ahí se suma; si no,
-   * se contaría cada alumno tantas veces como preguntas tiene la prueba. El `max`
-   * sigue dando el N del curso cuando hay secciones electivas, porque los ítems
-   * comunes los responde el curso entero; y para un instrumento que todos rinden
-   * entero todas las filas traen el mismo número, igual que antes.
-   */
+  private async loadItemsByNode(
+    tx: Database,
+    instrumentId: string,
+  ): Promise<Map<string, string[]>> {
+    const rows = await tx
+      .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
+      .from(itemTaxonomyTags)
+      .innerJoin(items, eq(items.id, itemTaxonomyTags.itemId))
+      .where(and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)));
+    const byNode = new Map<string, Set<string>>();
+    for (const row of rows) {
+      const set = byNode.get(row.nodeId);
+      if (set) set.add(row.itemId);
+      else byNode.set(row.nodeId, new Set([row.itemId]));
+    }
+    return new Map(Array.from(byNode, ([nodeId, set]) => [nodeId, Array.from(set)]));
+  }
+
+  private async loadSkillLevelReference(
+    tx: Database,
+    orgId: string,
+    assessmentId: string,
+    instrumentId: string,
+    itemIds: string[],
+    itemsByNode: Map<string, string[]>,
+  ): Promise<{
+    level: SkillReferencesResponse['level'];
+    tallyByItem: Map<string, AchievementTally>;
+  } | null> {
+    const cohort = await this.resolveReferenceCohort(tx, assessmentId);
+    if (cohort === null) return null;
+    const rows = await this.loadReferenceRows(
+      tx,
+      orgId,
+      instrumentId,
+      cohort.gradeIds,
+      cohort.yearIds,
+      itemIds,
+    );
+    const agg = this.aggregateReference(rows);
+    const tallyByItem = new Map<string, AchievementTally>();
+    for (const [itemId, reference] of agg.byItem) {
+      tallyByItem.set(itemId, { scoreSum: reference.scoreSum, maxSum: reference.maxSum });
+    }
+    const skills = Array.from(itemsByNode, ([nodeId, nodeItems]) => ({
+      nodeId,
+      achievement: achievementPct(this.sumTallies(tallyByItem, nodeItems)),
+    }));
+    return {
+      level: {
+        gradeName: cohort.gradeName,
+        classGroupCount: agg.summary.classGroupCount,
+        studentCount: agg.summary.studentCount,
+        skills,
+      },
+      tallyByItem,
+    };
+  }
+
+  private sumTallies(
+    tallyByItem: ReadonlyMap<string, AchievementTally>,
+    itemIds: readonly string[],
+  ): AchievementTally {
+    const tally = emptyTally();
+    for (const itemId of itemIds) {
+      const itemTally = tallyByItem.get(itemId);
+      if (itemTally) addTally(tally, itemTally);
+    }
+    return tally;
+  }
+
+  private async loadSkillSampleReference(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    assessmentId: string,
+    instrumentId: string,
+    classGroupFilter: string[] | null,
+    itemsByNode: Map<string, string[]>,
+    levelTallyByItem: ReadonlyMap<string, AchievementTally>,
+  ): Promise<SkillReferencesResponse['sample']> {
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return null;
+    const conditions = [eq(assessmentItemStats.assessmentId, assessmentId)];
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
+    }
+    const corrected = await tx
+      .select({
+        itemId: assessmentItemStats.itemId,
+        scoreSum: sql<string>`sum(${assessmentItemStats.scoreSum})`,
+        maxSum: sql<string>`sum(${assessmentItemStats.maxSum})`,
+      })
+      .from(assessmentItemStats)
+      .where(and(...conditions))
+      .groupBy(assessmentItemStats.itemId)
+      .having(sql`sum(${assessmentItemStats.maxSum}) > 0`);
+    const groupTallyByItem = new Map(corrected.map((row) => [row.itemId, tallyOf([row])]));
+    const correctedIds = new Set(groupTallyByItem.keys());
+
+    const totals = new Map<string, number>();
+    const requests: ItemSetRequest[] = [];
+    for (const [nodeId, nodeItems] of itemsByNode) {
+      const groupItems = nodeItems.filter((itemId) => correctedIds.has(itemId));
+      if (groupItems.length === 0) continue;
+      totals.set(nodeId, groupItems.length);
+      requests.push({ key: nodeId, instrumentId, itemIds: groupItems });
+    }
+    const results = await this.samples.getItemSetSamples(requests, tx);
+    if (results.size === 0) return null;
+    await this.samples.logSampleAccess(tx, orgId, userId, [instrumentId]);
+
+    let refreshedAt = '';
+    let label = '';
+    const skills = Array.from(results, ([nodeId, result]) => {
+      if (result.refreshedAt > refreshedAt) refreshedAt = result.refreshedAt;
+      label = result.label;
+      return {
+        nodeId,
+        value: result.value,
+        groupValue: this.roundedPct(this.sumTallies(groupTallyByItem, result.comparedItemIds)),
+        levelValue: this.roundedPct(this.sumTallies(levelTallyByItem, result.comparedItemIds)),
+        schoolCount: result.schoolCount,
+        studentCount: result.studentCount,
+        comparedItems: result.comparedItemIds.length,
+        totalItems: totals.get(nodeId) ?? result.comparedItemIds.length,
+      };
+    });
+    return { instrumentId, label, refreshedAt, skills };
+  }
+
+  private roundedPct(tally: AchievementTally): number | null {
+    const pct = achievementPct(tally);
+    return pct === null ? null : Math.round(pct * 100) / 100;
+  }
+
+  private async attachSampleReferences(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    instrumentId: string,
+    references: { questions: MatrixQuestionColumn[]; scopes: MatrixReferenceScopes },
+  ): Promise<{ questions: MatrixQuestionColumn[]; scopes: MatrixReferenceScopes }> {
+    const results = await this.samples.getItemSetSamples(
+      references.questions.map((q) => ({ key: q.itemId, instrumentId, itemIds: [q.itemId] })),
+      tx,
+    );
+    if (results.size === 0) return references;
+    await this.samples.logSampleAccess(tx, orgId, userId, [instrumentId]);
+
+    let schoolCount = 0;
+    let studentCount = 0;
+    let refreshedAt = '';
+    let label = '';
+    for (const result of results.values()) {
+      schoolCount = Math.max(schoolCount, result.schoolCount);
+      studentCount = Math.max(studentCount, result.studentCount);
+      if (result.refreshedAt > refreshedAt) refreshedAt = result.refreshedAt;
+      label = result.label;
+    }
+
+    return {
+      questions: references.questions.map((q) => ({
+        ...q,
+        references: { ...q.references, sample: this.toSampleReference(results.get(q.itemId)) },
+      })),
+      scopes: {
+        ...references.scopes,
+        sample: { instrumentId, label, schoolCount, studentCount, refreshedAt },
+      },
+    };
+  }
+
+  private async attachQuestionSample(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    instrumentId: string,
+    itemId: string,
+    references: QuestionReferences,
+  ): Promise<QuestionReferences> {
+    const results = await this.samples.getItemSetSamples(
+      [{ key: itemId, instrumentId, itemIds: [itemId] }],
+      tx,
+    );
+    const sample = this.toSampleReference(results.get(itemId));
+    if (sample) await this.samples.logSampleAccess(tx, orgId, userId, [instrumentId]);
+    return { ...references, sample };
+  }
+
+  private toSampleReference(result: ItemSetSampleResult | undefined): QuestionReferences['sample'] {
+    if (!result) return null;
+    return {
+      rate: result.value,
+      scoreSum: result.tally.scoreSum,
+      maxSum: result.tally.maxSum,
+      schoolCount: result.schoolCount,
+    };
+  }
+
+  private emptyReference(): ReferenceRate {
+    return { rate: null, responseCount: 0, correctCount: 0, scoreSum: 0, maxSum: 0 };
+  }
+
   private aggregateReference(
     rows: Array<{
       itemId: string;
@@ -903,35 +1175,31 @@ export class ItemAnalysisService {
   } {
     const byItem = new Map<string, ReferenceRate>();
     const studentsByGroup = new Map<string, number>();
-    let totalScore = 0;
-    let totalMax = 0;
-    const weightByItem = new Map<string, { scoreSum: number; maxSum: number }>();
+    const total = emptyTally();
+    const tallyByItem = new Map<string, AchievementTally>();
 
     for (const r of rows) {
-      const responseCount = Number(r.responseCount);
-      const correctCount = Number(r.correctCount);
-      const scoreSum = Number(r.scoreSum ?? 0);
-      const maxSum = Number(r.maxSum ?? 0);
-      const acc = byItem.get(r.itemId) ?? { rate: null, responseCount: 0, correctCount: 0 };
-      acc.responseCount += responseCount;
-      acc.correctCount += correctCount;
+      const rowTally = tallyOf([r]);
+      const acc = byItem.get(r.itemId) ?? this.emptyReference();
+      acc.responseCount += Number(r.responseCount);
+      acc.correctCount += Number(r.correctCount);
       byItem.set(r.itemId, acc);
 
-      const weight = weightByItem.get(r.itemId) ?? { scoreSum: 0, maxSum: 0 };
-      weight.scoreSum += scoreSum;
-      weight.maxSum += maxSum;
-      weightByItem.set(r.itemId, weight);
+      const itemTally = tallyByItem.get(r.itemId) ?? emptyTally();
+      addTally(itemTally, rowTally);
+      tallyByItem.set(r.itemId, itemTally);
 
-      totalScore += scoreSum;
-      totalMax += maxSum;
+      addTally(total, rowTally);
 
       const prev = studentsByGroup.get(r.classGroupId) ?? 0;
       studentsByGroup.set(r.classGroupId, Math.max(prev, Number(r.studentCount)));
     }
 
     for (const [itemId, acc] of byItem) {
-      const weight = weightByItem.get(itemId);
-      acc.rate = weight && weight.maxSum > 0 ? (weight.scoreSum / weight.maxSum) * 100 : 0;
+      const itemTally = tallyByItem.get(itemId) ?? emptyTally();
+      acc.rate = achievementPct(itemTally);
+      acc.scoreSum = itemTally.scoreSum;
+      acc.maxSum = itemTally.maxSum;
     }
 
     let studentCount = 0;
@@ -940,7 +1208,7 @@ export class ItemAnalysisService {
     return {
       byItem,
       summary: {
-        rate: totalMax > 0 ? (totalScore / totalMax) * 100 : null,
+        rate: achievementPct(total),
         classGroupCount: studentsByGroup.size,
         studentCount,
       },
@@ -979,11 +1247,11 @@ export class ItemAnalysisService {
     itemId: string,
     classGroupId: string | undefined,
   ): Promise<QuestionReferences> {
-    const empty: ReferenceRate = { rate: null, responseCount: 0, correctCount: 0 };
-    if (!assessmentId || !instrumentId) return { grade: empty };
+    const empty: ReferenceRate = this.emptyReference();
+    if (!assessmentId || !instrumentId) return { grade: empty, sample: null };
 
     const cohort = await this.resolveReferenceCohort(tx, assessmentId);
-    if (cohort === null) return { grade: empty };
+    if (cohort === null) return { grade: empty, sample: null };
 
     // Grado en contexto: el del curso filtrado (si viene); si no, los de la
     // evaluación. Un curso ajeno a la cohorte no acota nada (set vacío → sin datos).
@@ -998,13 +1266,13 @@ export class ItemAnalysisService {
     } else {
       gradeIds = cohort.gradeIds;
     }
-    if (gradeIds.length === 0) return { grade: empty };
+    if (gradeIds.length === 0) return { grade: empty, sample: null };
 
     const rows = await this.loadReferenceRows(tx, orgId, instrumentId, gradeIds, cohort.yearIds, [
       itemId,
     ]);
 
-    return { grade: this.aggregateReference(rows).byItem.get(itemId) ?? empty };
+    return { grade: this.aggregateReference(rows).byItem.get(itemId) ?? empty, sample: null };
   }
 
   /** Alumnos con respuestas en la evaluación dentro del scope, paginados. */

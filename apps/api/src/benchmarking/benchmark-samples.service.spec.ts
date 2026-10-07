@@ -47,8 +47,19 @@ const DIA_BANDS = (i: number, ii: number, iii: number) => [
   { bandKey: 'dia_nivel_3', label: 'Nivel III', order: 3, count: iii },
 ];
 
-function aggRow(overrides: Record<string, unknown> = {}) {
+const POINTS_PER_STUDENT = 30;
+
+function tallyFor(studentCount: number, avgAchievement: string | null) {
+  if (avgAchievement === null) return { scoreSum: '0', maxSum: '0' };
+  const maxSum = studentCount * POINTS_PER_STUDENT;
   return {
+    scoreSum: ((maxSum * Number(avgAchievement)) / 100).toFixed(2),
+    maxSum: maxSum.toFixed(2),
+  };
+}
+
+function aggRow(overrides: Record<string, unknown> = {}) {
+  const row = {
     id: 'row',
     orgId: 'org-you',
     instrumentId: INSTRUMENT,
@@ -68,6 +79,7 @@ function aggRow(overrides: Record<string, unknown> = {}) {
     updatedAt: new Date(),
     ...overrides,
   };
+  return { ...tallyFor(row.studentCount as number, row.avgAchievement as string | null), ...row };
 }
 
 function makeUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
@@ -250,7 +262,7 @@ const ITEM_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const ITEM_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
 function itemRow(overrides: Record<string, unknown> = {}) {
-  return {
+  const row = {
     orgId: 'org-a',
     instrumentId: INSTRUMENT,
     itemId: ITEM_A,
@@ -258,6 +270,11 @@ function itemRow(overrides: Record<string, unknown> = {}) {
     responseCount: 80,
     refreshedAt: new Date('2026-10-05T06:30:00Z'),
     ...overrides,
+  };
+  return {
+    scoreSum: String(row.correctCount),
+    maxSum: String(row.responseCount),
+    ...row,
   };
 }
 

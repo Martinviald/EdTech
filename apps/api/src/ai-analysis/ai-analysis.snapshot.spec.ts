@@ -55,6 +55,7 @@ function makeReport(overrides: Partial<AssessmentReportResponse> = {}): Assessme
       administeredAt: null,
       classGroups: [],
       itemsCount: 2,
+      pendingStudentCount: 0,
       dataGranularity: 'item_level',
       capabilities: [...capabilitiesFor('item_level')],
       hasItemLevelData: true,

@@ -14,6 +14,8 @@ import {
 } from '@soe/db';
 import {
   REQUIRES_SUPPORT_LEVEL,
+  achievementPct,
+  tallyOf,
   type OfficialStudentItemRow,
   type OfficialStudentOverallResult,
   type OfficialStudentReportQueryDto,
@@ -24,6 +26,11 @@ import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
 import { ReportSupportService } from './report-support.service';
 import { loadItemColumns } from './lib/item-report-data';
+
+const CLASS_TALLY_COLUMNS = {
+  scoreSum: sql<string>`coalesce(sum(${assessmentResults.totalScore}), 0)`,
+  maxSum: sql<string>`coalesce(sum(${assessmentResults.maxScore}), 0)`,
+};
 
 @Injectable()
 export class StudentReportService {
@@ -244,7 +251,6 @@ export class StudentReportService {
     orgId: string,
     scopeClassGroupIds: string[] | null,
   ): Promise<number | null> {
-    // Promedio del curso: assessment_results de la evaluación, acotado al scope.
     const conditions = [
       eq(assessmentResults.assessmentId, assessmentId),
       eq(students.orgId, orgId),
@@ -254,9 +260,7 @@ export class StudentReportService {
     if (scopeClassGroupIds !== null) {
       if (scopeClassGroupIds.length === 0) return null;
       const [row] = await tx
-        .select({
-          avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
-        })
+        .select(CLASS_TALLY_COLUMNS)
         .from(assessmentResults)
         .innerJoin(students, eq(students.id, assessmentResults.studentId))
         .innerJoin(
@@ -264,15 +268,15 @@ export class StudentReportService {
           eq(studentEnrollments.studentId, assessmentResults.studentId),
         )
         .where(and(...conditions, inArray(studentEnrollments.classGroupId, scopeClassGroupIds)));
-      return row?.avgPct == null ? null : Number(row.avgPct);
+      return row ? achievementPct(tallyOf([row])) : null;
     }
 
     const [row] = await tx
-      .select({ avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)` })
+      .select(CLASS_TALLY_COLUMNS)
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
       .where(and(...conditions));
-    return row?.avgPct == null ? null : Number(row.avgPct);
+    return row ? achievementPct(tallyOf([row])) : null;
   }
 
   private async loadSkills(

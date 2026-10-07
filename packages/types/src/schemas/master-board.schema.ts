@@ -3,6 +3,7 @@ import type { InstrumentType, PerformanceLevel } from '../enums';
 import type { ComparabilityMeta } from '../comparability';
 import type { ProcessKind } from './measurement-process.schema';
 import { uuidCsvSchema } from './common.schema';
+import type { TypicalZone } from './benchmark.schema';
 import {
   INSTRUMENT_APPLICATION_PERIODS,
   type InstrumentApplicationPeriod,
@@ -21,14 +22,27 @@ import {
 // una métrica = un valor más acá + su descriptor en `master-board.metrics.ts`; ni el
 // pipeline de agregación ni la tabla del frontend cambian.
 
-/** Métricas disponibles para colorear/ordenar la matriz. 1ª entrega: solo `achievement`. */
-export const METRIC_KEYS = ['achievement'] as const;
+/**
+ * Métricas disponibles para colorear/ordenar la matriz.
+ *  · `achievement`: % de logro (Σ puntaje ÷ Σ máximo), coloreado por la banda del instrumento.
+ *  · `sample_delta`: diferencia en pp contra la muestra de colegios, coloreada por su `tone`.
+ *    Sólo se ofrece a quien puede ver la muestra (docs/diseno-logro-unificado-y-cohorte.md §5.2).
+ */
+export const METRIC_KEYS = ['achievement', 'sample_delta'] as const;
 export type MetricKey = (typeof METRIC_KEYS)[number];
 
 /** Etiqueta de cada métrica para el selector y los tooltips. */
 export const METRIC_LABELS: Record<MetricKey, string> = {
   achievement: '% de logro',
+  sample_delta: 'Diferencia vs muestra',
 };
+
+/**
+ * Lectura de una diferencia contra la muestra: bajo, similar o sobre. "Similar" es
+ * |Δ| ≤ `ALERT_THRESHOLDS.cohort.similarPp`.
+ */
+export const METRIC_TONES = ['below', 'similar', 'above'] as const;
+export type MetricTone = (typeof METRIC_TONES)[number];
 
 /**
  * Nivel de desempeño genérico de una celda: la banda (`performance_bands`) del instrumento
@@ -52,6 +66,36 @@ export type MetricValue = {
   display: string;
   /** Banda de desempeño para el color de la celda, o `null` si la celda no colorea por nivel. */
   level: MasterBoardLevel | null;
+  /** Tono de una métrica de diferencia (`sample_delta`); `null` en las demás o sin dato. */
+  tone: MetricTone | null;
+};
+
+/**
+ * Contraste de una celda contra la muestra de colegios
+ * (docs/diseno-logro-unificado-y-cohorte.md §5.1–5.2).
+ *
+ * La muestra se calcula SÓLO sobre las preguntas que la celda tiene corregidas (D9):
+ * `comparedItems` de `totalItems`. `percentile` y `typicalZone` van sólo en celdas de nivel
+ * de un usuario con alcance completo; en celdas de curso son `null` (D2).
+ */
+export type CellSample = {
+  /** Instrumento de la celda (para enlazar a la comparación completa). */
+  instrumentId: string;
+  /** "Muestra" (pool global). */
+  label: string;
+  /** % de logro de la muestra sobre las preguntas comparadas. */
+  value: number | null;
+  /** % de la celda sobre esas mismas preguntas. */
+  cellValue: number | null;
+  /** cellValue − value, en pp. */
+  deltaPp: number | null;
+  schoolCount: number;
+  studentCount: number;
+  comparedItems: number;
+  totalItems: number;
+  percentile: number | null;
+  typicalZone: TypicalZone | null;
+  refreshedAt: string;
 };
 
 // ── Query DTOs ───────────────────────────────────────────────────────────────
@@ -215,6 +259,8 @@ export type MasterBoardCell = {
   /** La celda se colorea con las bandas de su único instrumento. */
   hasLevels: boolean;
   comparability: ComparabilityMeta;
+  /** Contraste con la muestra; `null` si no aplica (rol, vista docente, mixta, bajo k). */
+  sample: CellSample | null;
 };
 
 /** Celda a nivel de CURSO × prueba (destino de click + tooltip de profesor). */
@@ -226,6 +272,7 @@ export type MasterBoardCourseCell = {
   mixed: boolean;
   hasLevels: boolean;
   comparability: ComparabilityMeta;
+  sample: CellSample | null;
   /** Profesor `primary` de esa asignatura en ese curso, o `null` si no hay asignación. */
   teacher: MasterBoardTeacherRef | null;
   /**

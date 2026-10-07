@@ -5,15 +5,20 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { ChevronDown, ChevronRight, Info, Layers } from 'lucide-react';
 import type {
+  CellSample,
   MasterBoardCell,
   MasterBoardCourseCell,
   MasterBoardMatrix,
   MasterBoardSubject,
   MasterBoardTest,
   MetricKey,
+  MetricTone,
   MetricValue,
   PerformanceLevel,
 } from '@soe/types';
+import { ALERT_THRESHOLDS } from '@soe/types';
+import { SampleComparisonLines, type ComparisonLine } from '@/components/shared/sample-contrast';
+import { useTelemetry } from '@/lib/telemetry';
 import {
   Table,
   TableBody,
@@ -43,14 +48,33 @@ const LEVEL_CELL_CLASS: Record<PerformanceLevel, string> = {
 const NO_DATA_CELL_CLASS = 'bg-muted/40 text-muted-foreground';
 const UNLEVELED_CELL_CLASS = 'bg-muted text-foreground';
 
+const TONE_ORDER: readonly MetricTone[] = ['below', 'similar', 'above'];
+
+const TONE_CELL_CLASS: Record<MetricTone, string> = {
+  below: 'bg-destructive/10 text-destructive',
+  similar: 'bg-muted text-foreground',
+  above: 'bg-success/10 text-success',
+};
+
+const TONE_LABEL: Record<MetricTone, string> = {
+  below: 'Bajo la muestra',
+  similar: `Similar a la muestra (±${ALERT_THRESHOLDS.cohort.similarPp} pp)`,
+  above: 'Sobre la muestra',
+};
+
+const SAMPLE_SURFACE = 'master_board';
+
 const SECTION_WITHOUT_LEVELS = 'Sección de la prueba: sin cortes de nivel propios';
 const INSTRUMENT_WITHOUT_LEVELS = 'Instrumento sin cortes de nivel propios';
 const MIXED_CELL = 'Mezcla instrumentos distintos: no se colorea por nivel';
 
 type CellLike = Pick<MasterBoardCell, 'metrics' | 'mixed' | 'hasLevels'>;
 
-/** Cómo se pinta una celda: por banda, en escala neutra, como mixta o sin datos. */
-export type CellKind = 'level' | 'unleveled' | 'mixed' | 'empty';
+/**
+ * Cómo se pinta una celda: por banda, en escala neutra, como mixta o sin datos; con la métrica
+ * de diferencia contra la muestra, por su tono (bajo / similar / sobre).
+ */
+export type CellKind = 'level' | 'unleveled' | 'mixed' | 'empty' | 'tone';
 
 type CellAppearance = {
   kind: CellKind;
@@ -67,6 +91,7 @@ export function cellAppearance(cell: CellLike | undefined, metricKey: MetricKey)
   if (!cell || !metric || metric.value === null) {
     return { kind: 'empty', metric, className: NO_DATA_CELL_CLASS };
   }
+  if (metric.tone) return { kind: 'tone', metric, className: TONE_CELL_CLASS[metric.tone] };
   if (cell.mixed) return { kind: 'mixed', metric, className: UNLEVELED_CELL_CLASS };
   const levelClass = metric.level ? LEVEL_CELL_CLASS[metric.level.color] : undefined;
   if (cell.hasLevels && levelClass) return { kind: 'level', metric, className: levelClass };
@@ -249,6 +274,7 @@ export function MasterBoardTable({
                               <CourseCell
                                 key={test.testKey}
                                 cell={courseCells.get(test.testKey)}
+                                gradeCell={cells?.get(test.testKey)}
                                 test={test}
                                 classGroupId={course.classGroupId}
                                 metricKey={primaryMetricKey}
@@ -365,6 +391,32 @@ function EmptyCell() {
   );
 }
 
+function useSampleTracking(sample: CellSample | null) {
+  const { track } = useTelemetry();
+  return (open: boolean) => {
+    if (open && sample) {
+      track('benchmark.sample_viewed', {
+        surface: SAMPLE_SURFACE,
+        instrumentId: sample.instrumentId,
+      });
+    }
+  };
+}
+
+function CellSampleNotes({ sample, lines }: { sample: CellSample; lines: ComparisonLine[] }) {
+  return (
+    <div className="mt-2 space-y-1 border-t pt-2">
+      <p className="text-xs font-semibold">Contra la {sample.label.toLowerCase()}</p>
+      <SampleComparisonLines
+        lines={lines}
+        sample={sample}
+        instrumentId={sample.instrumentId}
+        surface={SAMPLE_SURFACE}
+      />
+    </div>
+  );
+}
+
 function GradeCell({
   cell,
   test,
@@ -374,10 +426,11 @@ function GradeCell({
   test: MasterBoardTest;
   metricKey: MetricKey;
 }) {
+  const onOpenChange = useSampleTracking(cell?.sample ?? null);
   if (!cell) return <EmptyCell />;
   const { kind, metric, className } = cellAppearance(cell, metricKey);
   return (
-    <Tooltip>
+    <Tooltip onOpenChange={onOpenChange}>
       <TooltipTrigger asChild>
         <TableCell
           className={cn('text-center text-sm font-bold tabular-nums', className)}
@@ -393,6 +446,12 @@ function GradeCell({
           metrics={cell.metrics}
           studentsAssessed={cell.studentsAssessed}
         />
+        {cell.sample ? (
+          <CellSampleNotes
+            sample={cell.sample}
+            lines={[{ label: 'Nivel', value: cell.sample.cellValue }]}
+          />
+        ) : null}
       </TooltipContent>
     </Tooltip>
   );
@@ -400,24 +459,30 @@ function GradeCell({
 
 function CourseCell({
   cell,
+  gradeCell,
   test,
   classGroupId,
   metricKey,
   canViewTeacher,
 }: {
   cell: MasterBoardCourseCell | undefined;
+  gradeCell: MasterBoardCell | undefined;
   test: MasterBoardTest;
   classGroupId: string;
   metricKey: MetricKey;
   canViewTeacher: boolean;
 }) {
+  const onOpenChange = useSampleTracking(cell?.sample ?? null);
   if (!cell) return <EmptyCell />;
   const { kind, metric, className } = cellAppearance(cell, metricKey);
   const href = courseCellHref(cell, classGroupId);
+  const gradeAchievement = gradeCell
+    ? (primaryMetric(gradeCell.metrics, 'achievement')?.value ?? null)
+    : null;
   const value = <CellValue display={metric?.display ?? '—'} kind={kind} />;
 
   return (
-    <Tooltip>
+    <Tooltip onOpenChange={onOpenChange}>
       <TooltipTrigger asChild>
         <TableCell
           className={cn(
@@ -458,6 +523,19 @@ function CourseCell({
             )}
           </p>
         ) : null}
+        {cell.sample ? (
+          <CellSampleNotes
+            sample={cell.sample}
+            lines={[
+              { label: 'Curso', value: cell.sample.cellValue },
+              {
+                label: 'Nivel',
+                value: gradeCell?.sample?.cellValue ?? gradeAchievement,
+                withDelta: false,
+              },
+            ]}
+          />
+        ) : null}
       </TooltipContent>
     </Tooltip>
   );
@@ -472,9 +550,11 @@ export type LegendEntry = { key: string; label: string; swatchClass: string; ico
 export function collectLegendEntries(data: MasterBoardMatrix): LegendEntry[] {
   const labelsByColor = new Map<PerformanceLevel, Set<string>>();
   const kinds = new Set<CellKind>();
+  const tones = new Set<MetricTone>();
   const visit = (cell: CellLike) => {
     const { kind, metric } = cellAppearance(cell, data.primaryMetricKey);
     kinds.add(kind);
+    if (kind === 'tone' && metric?.tone) tones.add(metric.tone);
     if (kind !== 'level' || !metric?.level) return;
     let labels = labelsByColor.get(metric.level.color);
     if (!labels) {
@@ -491,6 +571,16 @@ export function collectLegendEntries(data: MasterBoardMatrix): LegendEntry[] {
   }
 
   const entries: LegendEntry[] = [];
+  if (data.primaryMetricKey === 'sample_delta') {
+    for (const tone of TONE_ORDER) {
+      if (!tones.has(tone)) continue;
+      entries.push({ key: tone, label: TONE_LABEL[tone], swatchClass: TONE_CELL_CLASS[tone] });
+    }
+    if (kinds.has('empty')) {
+      entries.push({ key: 'empty', label: 'Sin muestra', swatchClass: NO_DATA_CELL_CLASS });
+    }
+    return entries;
+  }
   for (const color of LEVEL_ORDER) {
     const labels = labelsByColor.get(color);
     if (!labels) continue;
@@ -526,7 +616,9 @@ export function MasterBoardLegend({ data }: { data: MasterBoardMatrix }): JSX.El
   if (entries.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-      <span className="font-medium">Nivel del promedio:</span>
+      <span className="font-medium">
+        {data.primaryMetricKey === 'sample_delta' ? 'Frente a la muestra:' : 'Nivel del promedio:'}
+      </span>
       {entries.map((entry) => (
         <span key={entry.key} className="inline-flex items-center gap-1.5" data-legend={entry.key}>
           <span className={cn('inline-block size-3 rounded-sm', entry.swatchClass)} aria-hidden />

@@ -137,6 +137,8 @@ function skillRow(overrides: Record<string, unknown> = {}) {
     nodeOrder: 0,
     correctCount: 5,
     totalCount: 10,
+    scoreSum: '5.00',
+    maxSum: '10.00',
     assessmentsCount: 1,
     ...overrides,
   };
@@ -492,7 +494,7 @@ describe('StudentPanoramaService — alcance comparable', () => {
 });
 
 describe('StudentPanoramaService — logro por habilidad', () => {
-  it('deriva el logro del nodo desde los conteos de ítems, no de un promedio de porcentajes', async () => {
+  it('deriva el logro del nodo de Σ puntaje ÷ Σ máximo (7 ÷ 10 = 70: crédito parcial y sin pendientes), no de aciertos ÷ respuestas (6 ÷ 12 = 50)', async () => {
     const db = makeDb([
       [STUDENT],
       [STUDENT],
@@ -500,7 +502,16 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [assessmentRow()],
       [familyRow('inst-1')],
       DIA_BANDS('inst-1'),
-      [skillRow({ nodeCode: 'LOC', correctCount: 6, totalCount: 12, assessmentsCount: 2 })],
+      [
+        skillRow({
+          nodeCode: 'LOC',
+          correctCount: 6,
+          totalCount: 12,
+          scoreSum: '7.00',
+          maxSum: '10.00',
+          assessmentsCount: 2,
+        }),
+      ],
     ]);
 
     const result = await makeService(db).getPanorama(makeUser(), 'stu-1');
@@ -509,7 +520,7 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       nodeId: 'node-1',
       correctCount: 6,
       totalCount: 12,
-      achievement: 50,
+      achievement: 70,
       assessmentsCount: 2,
     });
   });
@@ -582,7 +593,7 @@ describe('StudentPanoramaService — logro por habilidad', () => {
     expect(result.bySkillTree.map((n) => n.nodeId).sort()).toEqual(['huerfano', 'raiz']);
   });
 
-  it('ordena las habilidades por logro ascendente y deja al final las sin medir', async () => {
+  it('ordena las habilidades por logro ascendente y deja al final las sin puntaje corregido (Σ máximo = 0)', async () => {
     const db = makeDb([
       [STUDENT],
       [STUDENT],
@@ -591,9 +602,9 @@ describe('StudentPanoramaService — logro por habilidad', () => {
       [familyRow('inst-1')],
       DIA_BANDS('inst-1'),
       [
-        skillRow({ nodeId: 'n-alto', nodeName: 'Alto', correctCount: 9, totalCount: 10 }),
-        skillRow({ nodeId: 'n-sin', nodeName: 'Sin medir', correctCount: 0, totalCount: 0 }),
-        skillRow({ nodeId: 'n-bajo', nodeName: 'Bajo', correctCount: 2, totalCount: 10 }),
+        skillRow({ nodeId: 'n-alto', nodeName: 'Alto', scoreSum: '9.00', maxSum: '10.00' }),
+        skillRow({ nodeId: 'n-sin', nodeName: 'Sin medir', scoreSum: '0', maxSum: '0' }),
+        skillRow({ nodeId: 'n-bajo', nodeName: 'Bajo', scoreSum: '2.00', maxSum: '10.00' }),
       ],
     ]);
 
@@ -635,7 +646,16 @@ describe('StudentPanoramaService — serie temporal por nodo de habilidad', () =
         familyRow('inst-cierre', { applicationPeriod: 'cierre', year: 2025 }),
       ],
       [...DIA_BANDS('inst-dg'), ...DIA_BANDS('inst-cierre')],
-      [skillRow({ nodeId: 'node-1', correctCount: 11, totalCount: 20, assessmentsCount: 2 })],
+      [
+        skillRow({
+          nodeId: 'node-1',
+          correctCount: 11,
+          totalCount: 20,
+          scoreSum: '11.00',
+          maxSum: '20.00',
+          assessmentsCount: 2,
+        }),
+      ],
       [
         seriesRow({ assessmentId: 'a-cierre', nodeId: 'node-1', percentage: '80.00' }),
         seriesRow({ assessmentId: 'a-dg', nodeId: 'node-1', percentage: '40.00' }),

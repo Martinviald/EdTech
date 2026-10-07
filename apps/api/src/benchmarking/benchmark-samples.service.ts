@@ -9,10 +9,14 @@ import {
   type BenchmarkAggregate,
 } from '@soe/db';
 import {
+  BENCHMARKING_VIEWER_ROLES,
   BENCHMARK_K_MIN_SCHOOLS,
   BENCHMARK_N_MIN_STUDENTS,
   aggregateItemSample,
+  aggregateItemSetSample,
   aggregateSample,
+  indexItemSetRows,
+  canAccess,
   classifyTypicalZone,
   percentileRank,
   type BenchmarkSampleScope,
@@ -22,14 +26,29 @@ import {
   type InstrumentSampleEntry,
   type InstrumentSamplesQueryDto,
   type InstrumentSamplesResponse,
+  type ItemSetSample,
+  type ItemSetSourceRow,
   type YourSamplePosition,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { isTeacherScope } from '../common/helpers/class-group-scope.helper';
 import { InjectDb, type Database } from '../database/database.types';
 
 const GLOBAL_SAMPLE_LABEL = 'Muestra';
 
 type NetworkRef = { id: string; name: string };
+
+export type ItemSetRequest = {
+  key: string;
+  instrumentId: string;
+  itemIds: readonly string[];
+};
+
+export type ItemSetSampleResult = ItemSetSample & {
+  instrumentId: string;
+  label: string;
+  refreshedAt: string;
+};
 
 @Injectable()
 export class BenchmarkSamplesService {
@@ -73,6 +92,8 @@ export class BenchmarkSamplesService {
         itemId: benchmarkItemAggregates.itemId,
         correctCount: benchmarkItemAggregates.correctCount,
         responseCount: benchmarkItemAggregates.responseCount,
+        scoreSum: benchmarkItemAggregates.scoreSum,
+        maxSum: benchmarkItemAggregates.maxSum,
         refreshedAt: benchmarkItemAggregates.refreshedAt,
       })
       .from(benchmarkItemAggregates)
@@ -92,7 +113,16 @@ export class BenchmarkSamplesService {
 
     const samples: InstrumentItemSamples[] = [];
     for (const [instrumentId, instrumentRows] of rowsByInstrument) {
-      const aggregate = aggregateItemSample(instrumentRows);
+      const aggregate = aggregateItemSample(
+        instrumentRows.map((row) => ({
+          orgId: row.orgId,
+          itemId: row.itemId,
+          correctCount: row.correctCount,
+          responseCount: row.responseCount,
+          scoreSum: Number(row.scoreSum),
+          maxSum: Number(row.maxSum),
+        })),
+      );
       if (
         aggregate.schoolCount < BENCHMARK_K_MIN_SCHOOLS ||
         aggregate.studentCount < BENCHMARK_N_MIN_STUDENTS
@@ -111,6 +141,89 @@ export class BenchmarkSamplesService {
       });
     }
     return samples;
+  }
+
+  canSeeSample(user: JwtPayload): boolean {
+    return !isTeacherScope(user) && canAccess(user.roles, BENCHMARKING_VIEWER_ROLES);
+  }
+
+  async getItemSetSamples(
+    requests: readonly ItemSetRequest[],
+    db: Database,
+  ): Promise<Map<string, ItemSetSampleResult>> {
+    const results = new Map<string, ItemSetSampleResult>();
+    const instrumentIds = Array.from(new Set(requests.map((r) => r.instrumentId)));
+    if (instrumentIds.length === 0) return results;
+
+    const rows = await db
+      .select({
+        orgId: benchmarkItemAggregates.orgId,
+        instrumentId: benchmarkItemAggregates.instrumentId,
+        itemId: benchmarkItemAggregates.itemId,
+        responseCount: benchmarkItemAggregates.responseCount,
+        scoreSum: benchmarkItemAggregates.scoreSum,
+        maxSum: benchmarkItemAggregates.maxSum,
+        refreshedAt: benchmarkItemAggregates.refreshedAt,
+      })
+      .from(benchmarkItemAggregates)
+      .where(
+        and(
+          inArray(benchmarkItemAggregates.instrumentId, instrumentIds),
+          eq(benchmarkItemAggregates.optOutGlobalPool, false),
+        ),
+      );
+
+    const byInstrument = new Map<string, { rows: ItemSetSourceRow[]; refreshedAt: Date }>();
+    for (const row of rows) {
+      let bucket = byInstrument.get(row.instrumentId);
+      if (!bucket) {
+        bucket = { rows: [], refreshedAt: row.refreshedAt };
+        byInstrument.set(row.instrumentId, bucket);
+      }
+      bucket.rows.push({
+        orgId: row.orgId,
+        itemId: row.itemId,
+        scoreSum: Number(row.scoreSum),
+        maxSum: Number(row.maxSum),
+        responseCount: row.responseCount,
+      });
+      if (row.refreshedAt > bucket.refreshedAt) bucket.refreshedAt = row.refreshedAt;
+    }
+
+    const indexed = new Map(
+      Array.from(byInstrument, ([instrumentId, bucket]) => [
+        instrumentId,
+        { rowsByItem: indexItemSetRows(bucket.rows), refreshedAt: bucket.refreshedAt },
+      ]),
+    );
+
+    for (const request of requests) {
+      const bucket = indexed.get(request.instrumentId);
+      if (!bucket) continue;
+      const sample = aggregateItemSetSample(
+        bucket.rowsByItem,
+        request.itemIds,
+        BENCHMARK_K_MIN_SCHOOLS,
+        BENCHMARK_N_MIN_STUDENTS,
+      );
+      if (!sample) continue;
+      results.set(request.key, {
+        ...sample,
+        instrumentId: request.instrumentId,
+        label: GLOBAL_SAMPLE_LABEL,
+        refreshedAt: bucket.refreshedAt.toISOString(),
+      });
+    }
+    return results;
+  }
+
+  async logSampleAccess(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    instrumentIds: readonly string[],
+  ): Promise<void> {
+    await tx.insert(benchmarkAccessLogs).values(this.accessLogRow(orgId, userId, instrumentIds));
   }
 
   async getSamples(
@@ -186,6 +299,8 @@ export class BenchmarkSamplesService {
     const aggregate = aggregateSample(
       rows.map((row) => ({
         studentCount: row.studentCount,
+        scoreSum: Number(row.scoreSum),
+        maxSum: Number(row.maxSum),
         avgAchievement: this.toNumber(row.avgAchievement),
         bandCounts: row.bandCounts,
         perSkill: row.perSkill,
@@ -242,16 +357,20 @@ export class BenchmarkSamplesService {
     instrumentIds: readonly string[],
   ): Promise<void> {
     await withOrgContext(this.db, orgId, async (tx) => {
-      await tx.insert(benchmarkAccessLogs).values({
-        orgId,
-        userId,
-        mode: 'global',
-        instrumentId: null,
-        filters: { instrumentIds: [...instrumentIds] },
-        cohortSchoolCount: null,
-        cohortStudentCount: null,
-        suppressed: false,
-      });
+      await tx.insert(benchmarkAccessLogs).values(this.accessLogRow(orgId, userId, instrumentIds));
     });
+  }
+
+  private accessLogRow(orgId: string, userId: string, instrumentIds: readonly string[]) {
+    return {
+      orgId,
+      userId,
+      mode: 'global' as const,
+      instrumentId: null,
+      filters: { instrumentIds: [...instrumentIds] },
+      cohortSchoolCount: null,
+      cohortStudentCount: null,
+      suppressed: false,
+    };
   }
 }

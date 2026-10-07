@@ -47,9 +47,19 @@ export default async function TableroMaestroPage({
 }
 
 async function ControlsSection({ filters }: { filters: MasterBoardFilterValues }) {
-  const takes = await getMasterBoardTakes('');
+  const [takes, matrix] = await Promise.all([
+    getMasterBoardTakes(''),
+    hasSelectedTake(filters)
+      ? getMasterBoardMatrix(buildMasterBoardQuery(filters)).catch(() => null)
+      : Promise.resolve(null),
+  ]);
   return (
-    <MasterBoardControls takes={takes.takes} academicYears={takes.academicYears} value={filters} />
+    <MasterBoardControls
+      takes={takes.takes}
+      academicYears={takes.academicYears}
+      value={filters}
+      metricOptions={matrix?.availableMetrics.map((metric) => metric.key) ?? ['achievement']}
+    />
   );
 }
 

@@ -18,7 +18,8 @@ import { preferComputedOverImported, refreshBenchmarkAggregates } from './benchm
 //        · loadBandsForInstruments → bandas propias de los objetivos
 //        · loadFamilyCandidates    → todos los instrumentos vivos (solo si falta alguna banda propia)
 //        · loadBandsForInstruments → bandas de los candidatos con year no nulo
-//     e. buildOrgRows.perSkill
+//     e. buildOrgRows.perSkill (tallies de assessment_skill_stats por nodo)
+//     f. buildOrgRows.tally del colegio por instrumento (assessment_item_stats)
 //
 // `db.insert().values().onConflictDoUpdate()` registra el upsert.
 // `db.delete().where()` registra la poda de la corrida anterior.
@@ -174,16 +175,19 @@ describe('refreshBenchmarkAggregates', () => {
       // resolveEffectiveBands: familia + bandas propias del instrumento.
       [familyRow('inst-1', 2026)],
       THREE_BANDS,
-      // perSkill(org-1)
+      // perSkill(org-1): 30 alumnos, 4 puntos cada uno en el nodo.
       [
         {
           instrumentId: 'inst-1',
           nodeId: 'node-1',
           nodeName: 'Comprensión',
-          achievement: '55.00',
+          scoreSum: '66.00',
+          maxSum: '120.00',
           studentCount: 30,
         },
       ],
+      // tally(org-1): Σ puntaje ÷ Σ máximo de assessment_item_stats.
+      [{ instrumentId: 'inst-1', scoreSum: '36.00', maxSum: '60.00' }],
     ]);
     const res = await refreshBenchmarkAggregates(db);
 
@@ -197,16 +201,26 @@ describe('refreshBenchmarkAggregates', () => {
     expect(values.instrumentId).toBe('inst-1');
     expect(values.optOutGlobalPool).toBe(false);
     expect(values.dependence).toBe('private');
-    // Conteo de alumnos distintos y % promedio en memoria.
+    // Alumnos distintos desde los resultados; el % del colegio es su tally, no el promedio
+    // de los % por alumno (que daría 55 con 30 y 80).
     expect(values.studentCount).toBe(2);
-    expect(values.avgAchievement).toBe('55.00');
+    expect(values.scoreSum).toBe('36.00');
+    expect(values.maxSum).toBe('60.00');
+    expect(values.avgAchievement).toBe('60.00');
     expect(values.bandCounts).toEqual([
       { bandKey: 'nivel-1', label: 'nivel-1', order: 0, count: 1 },
       { bandKey: 'nivel-3', label: 'nivel-3', order: 2, count: 1 },
     ]);
     expect(Object.keys(values)).not.toContain('bandDistribution');
     expect(values.perSkill).toEqual([
-      { nodeId: 'node-1', nodeName: 'Comprensión', achievement: 55, studentCount: 30 },
+      {
+        nodeId: 'node-1',
+        nodeName: 'Comprensión',
+        achievement: 55,
+        studentCount: 30,
+        scoreSum: 66,
+        maxSum: 120,
+      },
     ]);
     expect(Object.keys(values)).not.toContain('studentId');
     expect(Object.keys(values)).not.toContain('studentName');
@@ -333,8 +347,22 @@ describe('refreshBenchmarkAggregates', () => {
       [{ optOut: true }],
       [],
       [
-        { instrumentId: 'inst-1', itemId: 'item-1', correctCount: 30, responseCount: 80 },
-        { instrumentId: 'inst-1', itemId: 'item-2', correctCount: '70', responseCount: '85' },
+        {
+          instrumentId: 'inst-1',
+          itemId: 'item-1',
+          correctCount: 30,
+          responseCount: 80,
+          scoreSum: '30.00',
+          maxSum: '80.00',
+        },
+        {
+          instrumentId: 'inst-1',
+          itemId: 'item-2',
+          correctCount: '70',
+          responseCount: '85',
+          scoreSum: '77.50',
+          maxSum: '85.00',
+        },
       ],
     ]);
 
@@ -348,9 +376,17 @@ describe('refreshBenchmarkAggregates', () => {
         itemId: 'item-1',
         correctCount: 30,
         responseCount: 80,
+        scoreSum: '30.00',
+        maxSum: '80.00',
         optOutGlobalPool: true,
       }),
-      expect.objectContaining({ itemId: 'item-2', correctCount: 70, responseCount: 85 }),
+      expect.objectContaining({
+        itemId: 'item-2',
+        correctCount: 70,
+        responseCount: 85,
+        scoreSum: '77.50',
+        maxSum: '85.00',
+      }),
     ]);
   });
 

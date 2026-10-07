@@ -81,7 +81,14 @@ import { students, studentEnrollments } from '../schema/students';
 import { assessments, assessmentCourseAssignments, importJobs } from '../schema/assessments';
 import { responses } from '../schema/responses';
 import { assessmentResults, skillResults } from '../schema/results';
+import type { SkillResultForCohort } from '@soe/types';
+import { assertNoElectiveSections } from '../queries/elective-guard';
 import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
+import {
+  toAssessmentResultRow,
+  toSkillResultForCohort,
+  toSkillResultRow,
+} from '../queries/result-rows';
 import {
   formatLoadProcessLinkReport,
   linkLoadedAssessmentsToProcesses,
@@ -515,6 +522,11 @@ async function main() {
     }
 
     const instrumentIds = [...new Set(resolved.map((r) => r.instrumentId))];
+    // Guarda de secciones electivas (ver assertNoElectiveSections): con ramas a elección este
+    // cargador le fabricaría a cada alumno respuestas por las que no rindió.
+    for (const instId of instrumentIds) {
+      await assertNoElectiveSections(tx, instId, 'import-dia-2026-responses');
+    }
     const allItems = await tx
       .select({
         id: items.id,
@@ -525,7 +537,7 @@ async function main() {
         scoringConfig: items.scoringConfig,
       })
       .from(items)
-      .where(inArray(items.instrumentId, instrumentIds));
+      .where(and(inArray(items.instrumentId, instrumentIds), dsql`${items.deletedAt} is null`));
     const allTags = await tx
       .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
       .from(itemTaxonomyTags)
@@ -910,13 +922,7 @@ async function main() {
     const cohortInput: Array<{
       assessmentId: string;
       calc: CalcRow[];
-      skills: Array<{
-        studentId: string;
-        nodeId: string;
-        correctCount: number;
-        totalCount: number;
-        percentage: number | null;
-      }>;
+      skills: SkillResultForCohort[];
     }> = [];
 
     for (let i = 0; i < pending.length; i++) {
@@ -934,39 +940,19 @@ async function main() {
       const skillAgg = aggregateSkillResults(p.calc, scale);
 
       for (const a of studentAgg) {
-        resultValues.push({
-          assessmentId,
-          studentId: a.studentId,
-          totalScore: a.totalScore.toFixed(2),
-          maxScore: a.maxScore.toFixed(2),
-          percentage: (a.percentage * 100).toFixed(2),
-          grade: a.grade.toFixed(2),
-          performanceLevel: a.performanceLevel,
-          isComplete: a.isComplete && !withPending.has(a.studentId),
-          completedAt: administeredAt,
-        });
+        resultValues.push(
+          toAssessmentResultRow(
+            assessmentId,
+            { ...a, isComplete: a.isComplete && !withPending.has(a.studentId) },
+            administeredAt,
+          ),
+        );
       }
-      for (const a of skillAgg) {
-        skillValues.push({
-          assessmentId,
-          studentId: a.studentId,
-          nodeId: a.nodeId,
-          correctCount: a.correctCount,
-          totalCount: a.totalCount,
-          percentage: (a.percentage * 100).toFixed(2),
-          performanceLevel: a.performanceLevel,
-        });
-      }
+      for (const a of skillAgg) skillValues.push(toSkillResultRow(assessmentId, a));
       cohortInput.push({
         assessmentId,
         calc: p.calc,
-        skills: skillAgg.map((a) => ({
-          studentId: a.studentId,
-          nodeId: a.nodeId,
-          correctCount: a.correctCount,
-          totalCount: a.totalCount,
-          percentage: a.percentage,
-        })),
+        skills: skillAgg.map(toSkillResultForCohort),
       });
     }
 

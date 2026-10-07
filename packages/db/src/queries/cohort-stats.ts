@@ -18,6 +18,7 @@ import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   aggregateCohortSkillStats,
   aggregateItemStats,
+  deriveSkillStatsFromItemStats,
   type ItemCohortStats,
   type ResponseForItemStats,
   type SkillCohortStats,
@@ -28,6 +29,7 @@ import { classGroups } from '../schema/academic';
 import { assessmentCourseAssignments, assessments } from '../schema/assessments';
 import type { statsSourceEnum } from '../schema/enums';
 import { academicYears } from '../schema/organizations';
+import { itemTaxonomyTags } from '../schema/items';
 import { assessmentItemStats, assessmentSkillStats } from '../schema/results';
 import { studentEnrollments, students } from '../schema/students';
 
@@ -200,6 +202,8 @@ export async function replaceCohortStats(
     studentCount: s.studentCount,
     correctCount: s.correctCount,
     totalCount: s.totalCount,
+    scoreSum: s.scoreSum.toFixed(2),
+    maxSum: s.maxSum.toFixed(2),
     // El calculador puro trabaja en 0..1; la columna es 0..100, como el resto de los
     // `percentage` del esquema (assessment_results, skill_results).
     percentage: s.percentage === null ? null : (s.percentage * 100).toFixed(2),
@@ -217,7 +221,7 @@ export type RecomputeCohortStatsInput = {
   assessmentId: string;
   /** TODAS las respuestas del assessment, con el JSONB `value` crudo. */
   responses: readonly ResponseForItemStats[];
-  /** `skill_results` por alumno recién calculados. `percentage` en 0..1. */
+  /** `skill_results` por alumno recién calculados, con su tally (Σ puntaje, Σ máximo). */
   skillResults: readonly SkillResultForCohort[];
 };
 
@@ -261,6 +265,107 @@ export async function recomputeCohortStatsFromResponses(
   );
 
   return { ...written, orphanResponses };
+}
+
+/**
+ * Re-deriva el read-model por habilidad de una evaluación importada desde un informe oficial
+ * (`source='imported'`) a partir de sus estadísticas por ítem, que son el dato del informe.
+ *
+ * Existe para que las filas importadas tengan su tally (`score_sum` / `max_sum`) y un
+ * `percentage` en la misma escala que el resto (docs/diseno-logro-unificado-y-cohorte.md §3.1
+ * y A-7: dos evaluaciones importadas con una versión anterior quedaron en escala 0..1).
+ *
+ * Actualiza EN SU LUGAR (upsert por curso × nodo) y nunca borra: las estadísticas por ítem del
+ * informe no se tocan, y una fila por nodo que hoy no se puede re-derivar (sus preguntas ya no
+ * tienen el nodo etiquetado) se conserva tal cual en vez de perder el dato del informe.
+ */
+export async function rederiveImportedSkillStats(
+  tx: Database,
+  assessmentId: string,
+): Promise<{ itemRows: number; skillRows: number }> {
+  const rows = await tx
+    .select({
+      classGroupId: assessmentItemStats.classGroupId,
+      itemId: assessmentItemStats.itemId,
+      studentCount: assessmentItemStats.studentCount,
+      responseCount: assessmentItemStats.responseCount,
+      correctCount: assessmentItemStats.correctCount,
+      answerCounts: assessmentItemStats.answerCounts,
+      scoreSum: assessmentItemStats.scoreSum,
+      maxSum: assessmentItemStats.maxSum,
+    })
+    .from(assessmentItemStats)
+    .where(
+      and(
+        eq(assessmentItemStats.assessmentId, assessmentId),
+        eq(assessmentItemStats.source, 'imported'),
+      ),
+    );
+  if (rows.length === 0) return { itemRows: 0, skillRows: 0 };
+
+  const itemStats: ItemCohortStats[] = rows.map((r) => ({
+    classGroupId: r.classGroupId,
+    itemId: r.itemId,
+    studentCount: r.studentCount,
+    responseCount: r.responseCount,
+    correctCount: r.correctCount,
+    answerCounts: r.answerCounts,
+    scoreSum: Number(r.scoreSum),
+    maxSum: Number(r.maxSum),
+  }));
+
+  const itemIds = [...new Set(itemStats.map((s) => s.itemId))];
+  const tags = await tx
+    .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
+    .from(itemTaxonomyTags)
+    .where(inArray(itemTaxonomyTags.itemId, itemIds));
+  const tagsByItem = new Map<string, string[]>();
+  for (const t of tags) {
+    const list = tagsByItem.get(t.itemId);
+    if (list) list.push(t.nodeId);
+    else tagsByItem.set(t.itemId, [t.nodeId]);
+  }
+
+  const derived = deriveSkillStatsFromItemStats(itemStats, tagsByItem);
+  const now = new Date();
+  const values = derived.map((s) => ({
+    assessmentId,
+    classGroupId: s.classGroupId,
+    nodeId: s.nodeId,
+    studentCount: s.studentCount,
+    correctCount: s.correctCount,
+    totalCount: s.totalCount,
+    scoreSum: s.scoreSum.toFixed(2),
+    maxSum: s.maxSum.toFixed(2),
+    percentage: s.percentage === null ? null : (s.percentage * 100).toFixed(2),
+    source: 'imported' as const,
+    computedAt: now,
+  }));
+  for (const chunk of chunked(values)) {
+    await tx
+      .insert(assessmentSkillStats)
+      .values(chunk)
+      .onConflictDoUpdate({
+        target: [
+          assessmentSkillStats.assessmentId,
+          assessmentSkillStats.classGroupId,
+          assessmentSkillStats.nodeId,
+        ],
+        set: {
+          studentCount: sql`excluded.student_count`,
+          correctCount: sql`excluded.correct_count`,
+          totalCount: sql`excluded.total_count`,
+          scoreSum: sql`excluded.score_sum`,
+          maxSum: sql`excluded.max_sum`,
+          percentage: sql`excluded.percentage`,
+          source: sql`excluded.source`,
+          computedAt: sql`excluded.computed_at`,
+          updatedAt: sql`now()`,
+        },
+      });
+  }
+
+  return { itemRows: 0, skillRows: values.length };
 }
 
 function chunked<T>(rows: readonly T[]): T[][] {

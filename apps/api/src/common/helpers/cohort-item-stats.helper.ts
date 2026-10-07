@@ -91,6 +91,8 @@ export async function loadCohortOverallAchievement(
 /** Logro global de cohorte de UN assessment dentro de un scope de cursos. */
 export type CohortAssessmentAchievement = {
   assessmentId: string;
+  scoreSum: number;
+  maxSum: number;
 } & CohortOverallAchievement;
 
 /**
@@ -147,6 +149,8 @@ export async function loadCohortAchievementByAssessment(
 
   return [...acc.entries()].map(([assessmentId, a]) => ({
     assessmentId,
+    scoreSum: a.score,
+    maxSum: a.max,
     averageAchievement: a.max > 0 ? (a.score / a.max) * 100 : null,
     studentsAssessed: a.students,
   }));

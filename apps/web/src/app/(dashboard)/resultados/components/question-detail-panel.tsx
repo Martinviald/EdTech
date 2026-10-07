@@ -140,6 +140,7 @@ function QuestionDetailContent({
 }): JSX.Element {
   const distractor = topDistractorKey(data.alternatives);
   const levelReference = data.references.grade.rate;
+  const sampleReference = data.references.sample ?? null;
   // En selección múltiple la clave ya va resaltada en la distribución; para el
   // resto de tipos (V/F, desarrollo, pauta…) la mostramos aparte.
   const showAnswerKey =
@@ -195,14 +196,24 @@ function QuestionDetailContent({
       {/* T2-17 — Comparativa: % de logro de la MISMA pregunta en el nivel/grado,
           junto al % del scope en contexto (arriba). El nivel trasciende el scope del
           usuario: un profesor ve su curso arriba y esta referencia más amplia aquí. */}
-      {levelReference !== null ? (
+      {levelReference !== null || sampleReference?.rate != null ? (
         <div className="grid grid-cols-2 gap-3">
-          <MetricCard
-            label="% de logro · nivel"
-            value={formatPct(levelReference)}
-            tone={achievementTone(levelReference)}
-            hint={`${data.references.grade.responseCount} respuestas`}
-          />
+          {levelReference !== null ? (
+            <MetricCard
+              label="% de logro · nivel"
+              value={formatPct(levelReference)}
+              tone={achievementTone(levelReference)}
+              hint={`${data.references.grade.responseCount} respuestas`}
+            />
+          ) : null}
+          {sampleReference?.rate != null ? (
+            <MetricCard
+              label="% de logro · muestra"
+              value={formatPct(sampleReference.rate)}
+              tone={achievementTone(sampleReference.rate)}
+              hint={`${sampleReference.schoolCount} colegios`}
+            />
+          ) : null}
         </div>
       ) : null}
 

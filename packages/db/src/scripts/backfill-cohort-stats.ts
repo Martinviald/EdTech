@@ -39,25 +39,39 @@
  * del mismo túnel que la migración y antes de publicar la imagen nueva
  * (.github/workflows/deploy-backend.yml).
  *
- * Dos cosas que no hace, a propósito:
- *  · No recalcula `assessment_results` / `skill_results`. Lee los que ya están y los
- *    agrega por curso. El backfill no debe mover números publicados.
- *  · No toca los assessments `aggregate_only`: su read-model es `imported` y no se
- *    deriva de `responses`. En Fase 1 no existe ninguno, pero el filtro va igual.
+ * Lo que hace con los resultados por alumno (docs/diseno-logro-unificado-y-cohorte.md §4.4):
+ *  · No reescribe `assessment_results` ni el % o el nivel de `skill_results`: el backfill no
+ *    mueve números por alumno ya publicados.
+ *  · SÍ rellena el tally de `skill_results` (`score_sum` / `max_sum`) recalculándolo desde
+ *    `responses` con el mismo calculador que la ingesta, y con ese tally arma el read-model
+ *    por habilidad (Σ puntaje ÷ Σ máximo del curso). Reporta los alumnos×nodo cuyo % guardado
+ *    no coincide con el recalculado, para verlos sin corregirlos en silencio.
+ *  · Las evaluaciones `aggregate_only` no tienen `responses`: su read-model es el del informe
+ *    oficial. Para ellas sólo re-deriva el read-model por habilidad desde sus estadísticas por
+ *    ítem (`rederiveImportedSkillStats`), sin tocar los números del informe.
  */
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
-import { and, eq, ne } from 'drizzle-orm';
-import type { SkillResultForCohort } from '@soe/types';
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
+import {
+  aggregateSkillResults,
+  type ResponseForCalculation,
+  type ResponseForItemStats,
+  type SkillAggregateResult,
+} from '@soe/types';
 import { createDbClient, type Database } from '../client';
 import { runPooled, resolveConcurrency } from '../lib/concurrency';
 import { createConnectionHolder, type ConnectionHolder } from '../lib/connection-holder';
 import { withOrgContext } from '../with-org-context';
-import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
+import {
+  recomputeCohortStatsFromResponses,
+  rederiveImportedSkillStats,
+} from '../queries/cohort-stats';
+import { toSkillResultForCohort } from '../queries/result-rows';
 import { assessments } from '../schema/assessments';
-import { items } from '../schema/items';
+import { items, itemTaxonomyTags } from '../schema/items';
 import { organizations } from '../schema/organizations';
 import { responses } from '../schema/responses';
 import { skillResults } from '../schema/results';
@@ -149,16 +163,98 @@ function hasAlternatives(content: Record<string, unknown> | null): boolean {
   return Array.isArray(alternatives) && alternatives.length > 0;
 }
 
-async function backfillAssessment(
+type BackfillOutcome = {
+  itemRows: number;
+  skillRows: number;
+  orphanResponses: number;
+  skillPctMismatches: number;
+  deletedItemResponses: number;
+};
+
+const TALLY_UPDATE_CHUNK = 1000;
+
+async function loadTagsByItem(
+  tx: Database,
+  itemIds: readonly string[],
+): Promise<Map<string, string[]>> {
+  const tagsByItem = new Map<string, string[]>();
+  if (itemIds.length === 0) return tagsByItem;
+  const rows = await tx
+    .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
+    .from(itemTaxonomyTags)
+    .where(inArray(itemTaxonomyTags.itemId, [...itemIds]));
+  for (const r of rows) {
+    const list = tagsByItem.get(r.itemId);
+    if (list) list.push(r.nodeId);
+    else tagsByItem.set(r.itemId, [r.nodeId]);
+  }
+  return tagsByItem;
+}
+
+/**
+ * Escribe el tally recalculado en `skill_results` (sólo `score_sum` / `max_sum`) y cuenta los
+ * alumnos×nodo cuyo `percentage` guardado difiere del recalculado en más de 0,01 pp.
+ */
+async function writeSkillTallies(
   tx: Database,
   assessmentId: string,
-): Promise<{ itemRows: number; skillRows: number; orphanResponses: number }> {
+  skills: readonly SkillAggregateResult[],
+): Promise<number> {
+  const stored = await tx
+    .select({
+      studentId: skillResults.studentId,
+      nodeId: skillResults.nodeId,
+      percentage: skillResults.percentage,
+    })
+    .from(skillResults)
+    .where(eq(skillResults.assessmentId, assessmentId));
+  const storedPct = new Map(
+    stored.map((r) => [
+      `${r.studentId}__${r.nodeId}`,
+      r.percentage === null ? null : Number(r.percentage),
+    ]),
+  );
+
+  let mismatches = 0;
+  for (const s of skills) {
+    const key = `${s.studentId}__${s.nodeId}`;
+    if (!storedPct.has(key)) continue;
+    const before = storedPct.get(key) ?? null;
+    const after = s.percentage === null ? null : Math.round(s.percentage * 10000) / 100;
+    const differs =
+      before === null || after === null ? before !== after : Math.abs(before - after) > 0.01;
+    if (differs) mismatches += 1;
+  }
+
+  for (let i = 0; i < skills.length; i += TALLY_UPDATE_CHUNK) {
+    const chunk = skills.slice(i, i + TALLY_UPDATE_CHUNK);
+    const values = sql.join(
+      chunk.map(
+        (s) =>
+          sql`(${s.studentId}::uuid, ${s.nodeId}::uuid, ${s.scoreSum.toFixed(2)}::numeric, ${s.maxSum.toFixed(2)}::numeric)`,
+      ),
+      sql`, `,
+    );
+    await tx.execute(sql`
+      update ${skillResults} as sr
+      set score_sum = v.score_sum, max_sum = v.max_sum
+      from (values ${values}) as v(student_id, node_id, score_sum, max_sum)
+      where sr.assessment_id = ${assessmentId}::uuid
+        and sr.student_id = v.student_id
+        and sr.node_id = v.node_id
+    `);
+  }
+  return mismatches;
+}
+
+async function backfillAssessment(tx: Database, assessmentId: string): Promise<BackfillOutcome> {
   const responseRows = await tx
     .select({
       studentId: responses.studentId,
       itemId: responses.itemId,
       value: responses.value,
       itemContent: items.content,
+      itemPosition: items.position,
       isCorrect: responses.isCorrect,
       rawScore: responses.rawScore,
       finalScore: responses.finalScore,
@@ -166,45 +262,50 @@ async function backfillAssessment(
     })
     .from(responses)
     .innerJoin(items, eq(items.id, responses.itemId))
-    .where(eq(responses.assessmentId, assessmentId));
+    .where(and(eq(responses.assessmentId, assessmentId), isNull(items.deletedAt)));
 
-  const skillRows = await tx
-    .select({
-      studentId: skillResults.studentId,
-      nodeId: skillResults.nodeId,
-      correctCount: skillResults.correctCount,
-      totalCount: skillResults.totalCount,
-      percentage: skillResults.percentage,
-    })
-    .from(skillResults)
-    .where(eq(skillResults.assessmentId, assessmentId));
+  const [deleted] = await tx
+    .select({ n: sql<number>`count(*)::int` })
+    .from(responses)
+    .innerJoin(items, eq(items.id, responses.itemId))
+    .where(and(eq(responses.assessmentId, assessmentId), isNotNull(items.deletedAt)));
+  const deletedItemResponses = Number(deleted?.n ?? 0);
 
-  // La columna guarda 0..100; el calculador puro trabaja en 0..1.
-  const skills: SkillResultForCohort[] = skillRows.map((r) => ({
+  const tagsByItem = await loadTagsByItem(tx, [...new Set(responseRows.map((r) => r.itemId))]);
+
+  const calc: Array<ResponseForCalculation & ResponseForItemStats> = responseRows.map((r) => ({
     studentId: r.studentId,
-    nodeId: r.nodeId,
-    correctCount: r.correctCount,
-    totalCount: r.totalCount,
-    percentage: r.percentage === null ? null : Number(r.percentage) / 100,
+    itemId: r.itemId,
+    value: r.value,
+    hasAlternatives: hasAlternatives(r.itemContent),
+    isCorrect: r.isCorrect,
+    rawScore: r.rawScore === null ? null : Number(r.rawScore),
+    finalScore: r.finalScore === null ? null : Number(r.finalScore),
+    maxScore: Number(r.maxScore),
+    itemPosition: r.itemPosition,
+    taxonomyNodeIds: tagsByItem.get(r.itemId) ?? [],
   }));
 
-  return recomputeCohortStatsFromResponses(tx, {
+  const skills = aggregateSkillResults(calc);
+  const skillPctMismatches = await writeSkillTallies(tx, assessmentId, skills);
+
+  const written = await recomputeCohortStatsFromResponses(tx, {
     assessmentId,
-    responses: responseRows.map((r) => ({
-      studentId: r.studentId,
-      itemId: r.itemId,
-      value: r.value,
-      hasAlternatives: hasAlternatives(r.itemContent),
-      isCorrect: r.isCorrect,
-      rawScore: r.rawScore === null ? null : Number(r.rawScore),
-      finalScore: r.finalScore === null ? null : Number(r.finalScore),
-      maxScore: Number(r.maxScore),
-    })),
-    skillResults: skills,
+    responses: calc,
+    skillResults: skills.map(toSkillResultForCohort),
   });
+  return { ...written, skillPctMismatches, deletedItemResponses };
 }
 
-type Task = { orgId: string; assessmentId: string; name: string | null };
+async function backfillImportedAssessment(
+  tx: Database,
+  assessmentId: string,
+): Promise<BackfillOutcome> {
+  const written = await rederiveImportedSkillStats(tx, assessmentId);
+  return { ...written, orphanResponses: 0, skillPctMismatches: 0, deletedItemResponses: 0 };
+}
+
+type Task = { orgId: string; assessmentId: string; name: string | null; imported: boolean };
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
@@ -240,13 +341,14 @@ async function main(): Promise<void> {
       holder,
       (db) =>
         withOrgContext(db, org.id, async (tx) => {
-          const conditions = [
-            eq(assessments.orgId, org.id),
-            ne(assessments.dataGranularity, 'aggregate_only'),
-          ];
+          const conditions = [eq(assessments.orgId, org.id)];
           if (args.assessmentId) conditions.push(eq(assessments.id, args.assessmentId));
           return tx
-            .select({ id: assessments.id, name: assessments.name })
+            .select({
+              id: assessments.id,
+              name: assessments.name,
+              imported: sql<boolean>`${assessments.dataGranularity} = 'aggregate_only'`,
+            })
             .from(assessments)
             .where(and(...conditions));
         }),
@@ -255,7 +357,9 @@ async function main(): Promise<void> {
 
     if (rows.length === 0) continue;
     orgsWithWork.add(org.id);
-    for (const a of rows) queue.push({ orgId: org.id, assessmentId: a.id, name: a.name });
+    for (const a of rows) {
+      queue.push({ orgId: org.id, assessmentId: a.id, name: a.name, imported: a.imported });
+    }
   }
 
   console.log(
@@ -280,17 +384,28 @@ async function main(): Promise<void> {
   // Cada tarea es idéntica a la del loop en serie: una transacción corta, idempotente,
   // reintentable, dentro del contexto de org de SU evaluación.
   let completed = 0;
+  const withDeletedItems: Task[] = [];
   const outcome = await runPooled(queue, args.concurrency, async (task) => {
     const res = await withDbRetry(
       holder,
-      (db) => withOrgContext(db, task.orgId, (tx) => backfillAssessment(tx, task.assessmentId)),
+      (db) =>
+        withOrgContext(db, task.orgId, (tx) =>
+          task.imported
+            ? backfillImportedAssessment(tx, task.assessmentId)
+            : backfillAssessment(tx, task.assessmentId),
+        ),
       `evaluación ${task.assessmentId}`,
     );
 
+    if (res.deletedItemResponses > 0) withDeletedItems.push(task);
     completed += 1;
     console.log(
       `  [${completed}/${queue.length}] ${task.assessmentId} (${task.name ?? 'sin nombre'}) → ` +
         `${res.itemRows} item stats, ${res.skillRows} skill stats` +
+        (task.imported ? ' (informe oficial)' : '') +
+        (res.skillPctMismatches > 0
+          ? ` — ${res.skillPctMismatches} alumno(s)×nodo con % guardado distinto del recalculado`
+          : '') +
         (res.orphanResponses > 0
           ? ` — ⚠️ ${res.orphanResponses} respuesta(s) de alumnos sin curso, fuera del read-model`
           : ''),
@@ -301,6 +416,7 @@ async function main(): Promise<void> {
   const itemRowsTotal = outcome.results.reduce((n, r) => n + r.itemRows, 0);
   const skillRowsTotal = outcome.results.reduce((n, r) => n + r.skillRows, 0);
   const orphanTotal = outcome.results.reduce((n, r) => n + r.orphanResponses, 0);
+  const mismatchTotal = outcome.results.reduce((n, r) => n + r.skillPctMismatches, 0);
 
   // ── Fallo: reportar TODO lo que quedó sin procesar y salir != 0. ──
   // Un backfill parcial que sale 0 haría que el deploy estampe como bueno un read-model
@@ -330,6 +446,19 @@ async function main(): Promise<void> {
     `[backfill-cohort-stats] listo — ${outcome.results.length} evaluación(es) en ${orgsWithWork.size} org(s); ` +
       `${itemRowsTotal} filas en assessment_item_stats, ${skillRowsTotal} en assessment_skill_stats`,
   );
+  if (withDeletedItems.length > 0) {
+    console.warn(
+      `[backfill-cohort-stats] ⚠️ ${withDeletedItems.length} evaluación(es) tienen respuestas en ` +
+        `preguntas borradas. El read-model ya no las cuenta, pero assessment_results sí hasta ` +
+        `re-puntuar: ${withDeletedItems.map((t) => `${t.assessmentId} (${t.name ?? 'sin nombre'})`).join(', ')}`,
+    );
+  }
+  if (mismatchTotal > 0) {
+    console.warn(
+      `[backfill-cohort-stats] ⚠️ ${mismatchTotal} alumno(s)×nodo tienen en skill_results un % ` +
+        `distinto del recalculado desde responses. No se corrigen acá: se re-puntúa la evaluación.`,
+    );
+  }
   // Toda respuesta huérfana es una diferencia org-wide contra el `GROUP BY` actual
   // (`attachCorrectRates` sin filtro de curso SÍ las cuenta). Con 0, la paridad de la
   // Fase 2 es exacta; con >0 hay que decidir qué hacer ANTES de mover los lectores.

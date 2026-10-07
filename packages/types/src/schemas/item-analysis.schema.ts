@@ -121,24 +121,33 @@ export type ItemTaxonomyRef = {
  *   del colegio para esa evaluación. Trasciende el scope del usuario (un profesor
  *   ve su curso en `correctRate` y el nivel aquí). Sale del token; nunca expone
  *   datos de otra org (RLS + withOrgContext).
- * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
- *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
- *   campo se deja opcional para poblarlo después sin cambiar el contrato.
+ * - `sample`: % de logro de la MUESTRA de colegios en la pregunta (pool global, k-anónimo
+ *   por pregunta). Sólo para roles que ven la muestra y fuera de la vista docente; si no,
+ *   `null` (docs/diseno-logro-unificado-y-cohorte.md §5.3).
  *
- * ⚠️ La tasa es SIEMPRE ponderada por alumno: `sum(correctCount)/sum(responseCount)`
- * sobre las cohortes involucradas, NUNCA el promedio de los % de cada curso (cursos
- * de distinto N pesarían igual). Los conteos crudos viajan en el contrato para que
- * el frontend pueda agregar con el mismo criterio.
+ * ⚠️ La tasa es SIEMPRE Σ puntaje ÷ Σ máximo sobre las cohortes involucradas, NUNCA el
+ * promedio de los % de cada curso (cursos de distinto N pesarían igual). El tally viaja en el
+ * contrato para que el frontend agregue con el mismo criterio.
  */
 export type ReferenceRate = {
-  rate: number | null; // 0..100 — ponderado: correctCount / responseCount
+  rate: number | null; // 0..100 — Σ puntaje ÷ Σ máximo de la población
   responseCount: number; // respuestas de TODOS los alumnos de la población
   correctCount: number; // aciertos de TODOS los alumnos de la población
+  scoreSum: number; // Σ puntaje corregido de la población (tally)
+  maxSum: number; // Σ puntaje máximo corregido de la población (tally)
 };
 
 export type QuestionReferences = {
   grade: ReferenceRate; // % logro del nivel (mismo grado + instrumento + año)
-  sample?: number | null; // 0..100 — muestra de colegios (DIFERIDO, TKT-20)
+  sample: SampleReferenceRate | null; // muestra de colegios (§5.3 del diseño)
+};
+
+/** Referencia de la muestra de colegios en una pregunta. */
+export type SampleReferenceRate = {
+  rate: number | null; // 0..100 — Σ puntaje ÷ Σ máximo de los colegios de la muestra
+  scoreSum: number;
+  maxSum: number;
+  schoolCount: number;
 };
 
 /**
@@ -155,6 +164,14 @@ export type MatrixReferenceScopes = {
     classGroupCount: number;
     studentCount: number;
   };
+  /** Resumen de la muestra de colegios del instrumento; `null` si no aplica. */
+  sample: {
+    instrumentId: string;
+    label: string;
+    schoolCount: number;
+    studentCount: number;
+    refreshedAt: string;
+  } | null;
 };
 
 /** Una columna de la matriz = una pregunta (ítem) de la evaluación. */
@@ -207,6 +224,11 @@ export type ItemMatrixResponse = {
   questions: MatrixQuestionColumn[];
   /** Resumen de la línea de referencia (nivel) del tablero maestro. */
   references: MatrixReferenceScopes;
+  /**
+   * Alumnos de la población visible con alguna pregunta todavía sin corregir. Su % considera
+   * sólo lo corregido (docs/diseno-logro-unificado-y-cohorte.md §3.1, D6).
+   */
+  pendingStudentCount: number;
   students: {
     data: MatrixStudentRow[];
     total: number;
@@ -316,4 +338,58 @@ export type QuestionAnalysisResponse = {
   // anónima (valor → conteo). `null` si el tipo no aplica o no hay `assessmentId`
   // en contexto (solo se calcula acotado a la cohorte de una evaluación).
   rawAnswerDistribution: RawAnswerCount[] | null;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Referencias por nodo de una evaluación: nivel y muestra de colegios
+// GET /api/item-analysis/skill-references?assessmentId=...&classGroupId=...
+// docs/diseno-logro-unificado-y-cohorte.md §5.4
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const skillReferencesQuerySchema = z
+  .object({
+    assessmentId: z.string().uuid(),
+    classGroupId: z.string().uuid().optional(),
+  })
+  .strict();
+export type SkillReferencesQueryDto = z.infer<typeof skillReferencesQuerySchema>;
+
+/** % de logro del NIVEL en un nodo: mismo instrumento, nivel y año (misma población que `/detalle`). */
+export type SkillLevelReference = {
+  nodeId: string;
+  achievement: number | null;
+};
+
+/**
+ * Muestra de colegios en un nodo, calculada sólo sobre las preguntas del nodo que el grupo
+ * consultado (curso o evaluación en su alcance) tiene corregidas (D9).
+ */
+export type SkillSampleReference = {
+  nodeId: string;
+  /** % de la muestra sobre las preguntas comparadas. */
+  value: number | null;
+  /** % del grupo consultado sobre esas mismas preguntas (D9). */
+  groupValue: number | null;
+  /** % del nivel completo sobre esas mismas preguntas (D9). */
+  levelValue: number | null;
+  schoolCount: number;
+  studentCount: number;
+  comparedItems: number;
+  totalItems: number;
+};
+
+export type SkillReferencesResponse = {
+  level: {
+    gradeName: string | null;
+    classGroupCount: number;
+    studentCount: number;
+    skills: SkillLevelReference[];
+  } | null;
+  /** `null` si el usuario no puede ver la muestra o no hay muestra válida. */
+  sample: {
+    instrumentId: string;
+    label: string;
+    refreshedAt: string;
+    skills: SkillSampleReference[];
+  } | null;
 };

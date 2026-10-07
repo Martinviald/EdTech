@@ -19,7 +19,7 @@ const repoRoot = findRepoRoot(__dirname);
 describe('cierre de imports del read-model de cohorte', () => {
   const closure = computeImportClosure(repoRoot);
 
-  it('incluye los tres archivos que determinan los números', () => {
+  it('incluye los archivos de entrada que determinan los números', () => {
     for (const entry of FINGERPRINT_ENTRIES) {
       expect(closure.files).toContain(entry);
     }
@@ -91,5 +91,12 @@ describe('computeFingerprint', () => {
     expect(() => computeFingerprint(repoRoot, ['packages/db/src/no-existe.ts'])).toThrow(
       /archivo inexistente/,
     );
+  });
+});
+
+describe('huella del tally por alumno', () => {
+  it('cubre aggregateSkillResults: el backfill rellena el tally de skill_results con él', () => {
+    const closure = computeImportClosure(repoRoot);
+    expect(closure.files).toContain('packages/types/src/utils/grade-calculator.ts');
   });
 });
