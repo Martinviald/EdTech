@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { documentSourceSchema, type DocumentListItem } from './document.schema';
+import {
+  documentListQuerySchema,
+  documentSourceSchema,
+  type DocumentListItem,
+} from './document.schema';
 import type { RemedialMaterialType, RemedialStatus } from './remedial.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -22,6 +26,22 @@ export const MATERIAL_REVIEW_FILTERS = ['pending_review'] as const;
 export const materialReviewFilterSchema = z.enum(MATERIAL_REVIEW_FILTERS);
 export type MaterialReviewFilter = z.infer<typeof materialReviewFilterSchema>;
 
+/**
+ * Estados de remedial que la biblioteca lista. `failed` y `discarded` quedan fuera:
+ * no hay material utilizable que abrir ni revisar.
+ */
+export const LIBRARY_REMEDIAL_STATUSES = [
+  'pending',
+  'processing',
+  'ready',
+  'approved',
+] as const satisfies readonly RemedialStatus[];
+
+/**
+ * `type`/`status` son atributos de documento: si vienen, la biblioteca lista sólo
+ * documentos. `subjectId`/`gradeId` filtran remediales por el nodo de taxonomía y
+ * `mine` por quién los generó. Se conservan los filtros que ya tenía /materiales.
+ */
 export const materialLibraryQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).default(1),
@@ -29,6 +49,14 @@ export const materialLibraryQuerySchema = z
     origin: materialOriginSchema.optional(),
     review: materialReviewFilterSchema.optional(),
     q: z.string().max(200).optional(),
+    type: documentListQuerySchema.shape.type,
+    status: documentListQuerySchema.shape.status,
+    subjectId: documentListQuerySchema.shape.subjectId,
+    gradeId: documentListQuerySchema.shape.gradeId,
+    mine: z
+      .enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional(),
   })
   .strict();
 export type MaterialLibraryQueryDto = z.infer<typeof materialLibraryQuerySchema>;
