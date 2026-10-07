@@ -927,7 +927,10 @@ export class ItemAnalysisService {
         ...q,
         references: { ...q.references, sample: this.toSampleReference(results.get(q.itemId)) },
       })),
-      scopes: { ...references.scopes, sample: { label, schoolCount, studentCount, refreshedAt } },
+      scopes: {
+        ...references.scopes,
+        sample: { instrumentId, label, schoolCount, studentCount, refreshedAt },
+      },
     };
   }
 

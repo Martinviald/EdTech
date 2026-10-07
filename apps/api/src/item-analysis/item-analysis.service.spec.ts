@@ -1575,6 +1575,7 @@ describe('ItemAnalysisService.getMatrix — muestra de colegios', () => {
     });
     expect(res.questions[1]!.references.sample).toBeNull();
     expect(res.references.sample).toEqual({
+      instrumentId: INSTRUMENT_ID,
       label: 'Muestra',
       schoolCount: 2,
       studentCount: 60,

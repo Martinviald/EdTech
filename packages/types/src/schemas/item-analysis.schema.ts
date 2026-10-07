@@ -166,6 +166,7 @@ export type MatrixReferenceScopes = {
   };
   /** Resumen de la muestra de colegios del instrumento; `null` si no aplica. */
   sample: {
+    instrumentId: string;
     label: string;
     schoolCount: number;
     studentCount: number;
