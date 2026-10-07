@@ -98,8 +98,9 @@ Si la cohorte pareada queda vacía, la vista lo dice y compara las cohortes comp
 
 - **Alcance:** solo las evaluaciones con `assessments.process_id = processId`, de un proceso de la
   org que no esté borrado.
-- **Una evaluación por grado × asignatura.** Si hay más de una, la celda va sin números, con la
-  marca `multipleAssessments` y la lista de evaluaciones.
+- **Un instrumento por grado × asignatura.** Las evaluaciones de ese instrumento (normalmente una por curso) se
+  agregan en una columna. Si la celda mezcla instrumentos distintos, va sin números, con la marca
+  `multipleInstruments` y la lista de evaluaciones.
 - **Niveles:** solo las bandas de cada instrumento. Si un instrumento no tiene bandas, la celda
   lleva `bandsMissing`. Nunca se usan los cortes heredados.
 - **Cobertura:** evaluados / esperados por grado. El denominador sale de `expected_scope` o, si
@@ -155,6 +156,13 @@ Son los únicos cambios de acceso permitidos; el auditor no los reporta como hal
    `AI_ANALYSIS_GENERATOR_ROLES` + flag `ai_analysis`). La parte IA conserva su guard.
 5. `foundation_director` ve "Administración" con solo Telemetría.
 6. El informe del establecimiento cambia su query de año/momento a `processId`.
+7. Mis cursos queda sin entrada visible para quienes no tienen rol activo de profesor: la tarjeta de
+   Inicio solo aparece en la vista de profesor. La ruta sigue existiendo.
+8. La comparación con IA usa la misma regla que la comparación sin IA (`areInstrumentsComparable`),
+   que además distingue la rama electiva: ya no compara, por ejemplo, M1 con M2.
+9. El diagnóstico IA se lanza desde la comparación, que respeta el alcance del rol activo. Un usuario
+   profesor + coordinador con rol activo de profesor lo lanza sobre sus cursos; cambia de rol para
+   verlo sobre toda la organización.
 
 ## 9. Fuera de alcance
 
