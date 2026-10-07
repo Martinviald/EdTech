@@ -34,6 +34,7 @@ import { DashboardsModule } from './dashboards/dashboards.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HeatmapModule } from './heatmap/heatmap.module';
 import { MasterBoardModule } from './master-board/master-board.module';
+import { AssessmentComparisonsModule } from './assessment-comparisons/assessment-comparisons.module';
 import { ItemAnalysisModule } from './item-analysis/item-analysis.module';
 import { AssessmentReportModule } from './assessment-report/assessment-report.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -96,6 +97,7 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
     // ── Sprint 5: dashboards avanzados (heatmap, tabla cruzada, distractores) ──
     HeatmapModule,
     MasterBoardModule,
+    AssessmentComparisonsModule,
     ItemAnalysisModule,
     // ── Informe consolidado por evaluación (directivos / UTP) ──
     AssessmentReportModule,
