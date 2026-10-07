@@ -12,6 +12,7 @@ export {
 export { PageTabs, type PageTab } from './PageTabs';
 export { FilterBar, type FilterField, type FilterOption } from './FilterBar';
 export { MultiSelectFilter, type MultiSelectOption } from './MultiSelectFilter';
+export { ActiveFilterChips, FilterMenu, type FilterDimension } from './FilterMenu';
 export { TopProgressBar } from './TopProgressBar';
 export { useOptimisticRoute } from './use-optimistic-route';
 export { MetaItem } from './MetaItem';
@@ -24,7 +25,13 @@ export { Stepper, type Step } from './Stepper';
 export { EmptyState } from './EmptyState';
 export { MetricComparison, type MetricDelta } from './MetricComparison';
 export { MetricsGroup, type Metric } from './MetricsGroup';
-export { FilterBarSkeleton, KpiGridSkeleton, CardSkeleton, TableSkeleton } from './skeletons';
+export {
+  CompactFilterBarSkeleton,
+  FilterBarSkeleton,
+  KpiGridSkeleton,
+  CardSkeleton,
+  TableSkeleton,
+} from './skeletons';
 export { StatCard } from './StatCard';
 export { MetricTrendChip, type MetricTrend } from './metric-trend';
 export { PaginationControls } from './PaginationControls';
