@@ -1387,7 +1387,7 @@ export class DashboardsService {
             scoreSum: sql<string>`coalesce(sum(${assessmentResults.totalScore}), 0)`,
             maxSum: sql<string>`coalesce(sum(${assessmentResults.maxScore}), 0)`,
             assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
-            totalResults: sql<number>`count(*)::int`,
+            totalResults: sql<number>`count(*) filter (where ${assessmentResults.grade} is not null)::int`,
             passingResults: sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${passingGrade})::int`,
             criticalStudents: sql<number>`count(distinct ${assessmentResults.studentId}) filter (where ${assessmentResults.performanceLevel} = 'insufficient')::int`,
           })

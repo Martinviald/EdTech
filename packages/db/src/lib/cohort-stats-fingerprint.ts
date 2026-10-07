@@ -29,15 +29,18 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
 /**
- * Puntos de entrada del cierre. Son los tres archivos que, entre los tres, determinan
- * cada número que termina en `assessment_item_stats` / `assessment_skill_stats`:
- *  · el calculador puro (la agregación en sí),
+ * Puntos de entrada del cierre. Son los archivos que, entre todos, determinan cada número
+ * que termina en `assessment_item_stats` / `assessment_skill_stats` y en el tally de
+ * `skill_results`:
+ *  · los calculadores puros (la agregación de cohorte y `aggregateSkillResults`, que el
+ *    backfill usa para el tally por alumno y nodo),
  *  · la capa de persistencia (bucketización por curso, delete+reinsert, escalas), y
  *  · el script del backfill (qué filas se leen y cómo se adaptan antes de agregar:
  *    `hasAlternatives`, el /100 de `percentage`).
  */
 export const FINGERPRINT_ENTRIES: readonly string[] = [
   'packages/types/src/utils/item-stats-calculator.ts',
+  'packages/types/src/utils/grade-calculator.ts',
   'packages/db/src/queries/cohort-stats.ts',
   'packages/db/src/scripts/backfill-cohort-stats.ts',
 ];

@@ -54,7 +54,7 @@ import { config } from 'dotenv';
 import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import {
   aggregateSkillResults,
   type ResponseForCalculation,
@@ -168,6 +168,7 @@ type BackfillOutcome = {
   skillRows: number;
   orphanResponses: number;
   skillPctMismatches: number;
+  deletedItemResponses: number;
 };
 
 const TALLY_UPDATE_CHUNK = 1000;
@@ -263,6 +264,13 @@ async function backfillAssessment(tx: Database, assessmentId: string): Promise<B
     .innerJoin(items, eq(items.id, responses.itemId))
     .where(and(eq(responses.assessmentId, assessmentId), isNull(items.deletedAt)));
 
+  const [deleted] = await tx
+    .select({ n: sql<number>`count(*)::int` })
+    .from(responses)
+    .innerJoin(items, eq(items.id, responses.itemId))
+    .where(and(eq(responses.assessmentId, assessmentId), isNotNull(items.deletedAt)));
+  const deletedItemResponses = Number(deleted?.n ?? 0);
+
   const tagsByItem = await loadTagsByItem(tx, [...new Set(responseRows.map((r) => r.itemId))]);
 
   const calc: Array<ResponseForCalculation & ResponseForItemStats> = responseRows.map((r) => ({
@@ -286,7 +294,7 @@ async function backfillAssessment(tx: Database, assessmentId: string): Promise<B
     responses: calc,
     skillResults: skills.map(toSkillResultForCohort),
   });
-  return { ...written, skillPctMismatches };
+  return { ...written, skillPctMismatches, deletedItemResponses };
 }
 
 async function backfillImportedAssessment(
@@ -294,7 +302,7 @@ async function backfillImportedAssessment(
   assessmentId: string,
 ): Promise<BackfillOutcome> {
   const written = await rederiveImportedSkillStats(tx, assessmentId);
-  return { ...written, orphanResponses: 0, skillPctMismatches: 0 };
+  return { ...written, orphanResponses: 0, skillPctMismatches: 0, deletedItemResponses: 0 };
 }
 
 type Task = { orgId: string; assessmentId: string; name: string | null; imported: boolean };
@@ -376,6 +384,7 @@ async function main(): Promise<void> {
   // Cada tarea es idéntica a la del loop en serie: una transacción corta, idempotente,
   // reintentable, dentro del contexto de org de SU evaluación.
   let completed = 0;
+  const withDeletedItems: Task[] = [];
   const outcome = await runPooled(queue, args.concurrency, async (task) => {
     const res = await withDbRetry(
       holder,
@@ -388,6 +397,7 @@ async function main(): Promise<void> {
       `evaluación ${task.assessmentId}`,
     );
 
+    if (res.deletedItemResponses > 0) withDeletedItems.push(task);
     completed += 1;
     console.log(
       `  [${completed}/${queue.length}] ${task.assessmentId} (${task.name ?? 'sin nombre'}) → ` +
@@ -436,6 +446,13 @@ async function main(): Promise<void> {
     `[backfill-cohort-stats] listo — ${outcome.results.length} evaluación(es) en ${orgsWithWork.size} org(s); ` +
       `${itemRowsTotal} filas en assessment_item_stats, ${skillRowsTotal} en assessment_skill_stats`,
   );
+  if (withDeletedItems.length > 0) {
+    console.warn(
+      `[backfill-cohort-stats] ⚠️ ${withDeletedItems.length} evaluación(es) tienen respuestas en ` +
+        `preguntas borradas. El read-model ya no las cuenta, pero assessment_results sí hasta ` +
+        `re-puntuar: ${withDeletedItems.map((t) => `${t.assessmentId} (${t.name ?? 'sin nombre'})`).join(', ')}`,
+    );
+  }
   if (mismatchTotal > 0) {
     console.warn(
       `[backfill-cohort-stats] ⚠️ ${mismatchTotal} alumno(s)×nodo tienen en skill_results un % ` +

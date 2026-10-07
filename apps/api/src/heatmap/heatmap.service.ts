@@ -88,10 +88,6 @@ export class HeatmapService {
   // `skill_results` (grano alumno): así una evaluación cargada desde un informe
   // oficial DIA —sin respuestas por alumno— entra por el mismo camino que una
   // calculada desde `responses` (plan §5 y Fase 5).
-  //
-  // Los números NO se mueven: el `percentage` de `source='computed'` es la media de
-  // los porcentajes por alumno del curso (decisión §9.2), y acá se recombina
-  // ponderado por `studentCount`, que es exactamente el `avg()` por alumno de antes.
   // ───────────────────────────────────────────────────────────────────────────
 
   async getHeatmap(user: JwtPayload, query: HeatmapQueryDto): Promise<HeatmapResponse> {

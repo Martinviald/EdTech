@@ -273,8 +273,11 @@ export async function recomputeCohortStatsFromResponses(
  *
  * Existe para que las filas importadas tengan su tally (`score_sum` / `max_sum`) y un
  * `percentage` en la misma escala que el resto (docs/diseno-logro-unificado-y-cohorte.md §3.1
- * y A-7: dos evaluaciones importadas con una versión anterior quedaron en escala 0..1). No toca
- * los números del informe: las estadísticas por ítem se reescriben idénticas.
+ * y A-7: dos evaluaciones importadas con una versión anterior quedaron en escala 0..1).
+ *
+ * Actualiza EN SU LUGAR (upsert por curso × nodo) y nunca borra: las estadísticas por ítem del
+ * informe no se tocan, y una fila por nodo que hoy no se puede re-derivar (sus preguntas ya no
+ * tienen el nodo etiquetado) se conserva tal cual en vez de perder el dato del informe.
  */
 export async function rederiveImportedSkillStats(
   tx: Database,
@@ -323,13 +326,46 @@ export async function rederiveImportedSkillStats(
     else tagsByItem.set(t.itemId, [t.nodeId]);
   }
 
-  return replaceCohortStats(
-    tx,
+  const derived = deriveSkillStatsFromItemStats(itemStats, tagsByItem);
+  const now = new Date();
+  const values = derived.map((s) => ({
     assessmentId,
-    'imported',
-    itemStats,
-    deriveSkillStatsFromItemStats(itemStats, tagsByItem),
-  );
+    classGroupId: s.classGroupId,
+    nodeId: s.nodeId,
+    studentCount: s.studentCount,
+    correctCount: s.correctCount,
+    totalCount: s.totalCount,
+    scoreSum: s.scoreSum.toFixed(2),
+    maxSum: s.maxSum.toFixed(2),
+    percentage: s.percentage === null ? null : (s.percentage * 100).toFixed(2),
+    source: 'imported' as const,
+    computedAt: now,
+  }));
+  for (const chunk of chunked(values)) {
+    await tx
+      .insert(assessmentSkillStats)
+      .values(chunk)
+      .onConflictDoUpdate({
+        target: [
+          assessmentSkillStats.assessmentId,
+          assessmentSkillStats.classGroupId,
+          assessmentSkillStats.nodeId,
+        ],
+        set: {
+          studentCount: sql`excluded.student_count`,
+          correctCount: sql`excluded.correct_count`,
+          totalCount: sql`excluded.total_count`,
+          scoreSum: sql`excluded.score_sum`,
+          maxSum: sql`excluded.max_sum`,
+          percentage: sql`excluded.percentage`,
+          source: sql`excluded.source`,
+          computedAt: sql`excluded.computed_at`,
+          updatedAt: sql`now()`,
+        },
+      });
+  }
+
+  return { itemRows: 0, skillRows: values.length };
 }
 
 function chunked<T>(rows: readonly T[]): T[][] {

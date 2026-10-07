@@ -6,6 +6,7 @@ import {
   assessments,
   classGroups,
   instruments,
+  preferComputedOverImported,
   studentEnrollments,
   withOrgContext,
   resolveEffectiveBands,
@@ -374,10 +375,12 @@ export class StudentComparisonsService {
         maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
       })
       .from(assessmentItemStats)
+      .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
       .where(
         and(
           inArray(assessmentItemStats.assessmentId, assessmentIds),
           inArray(assessmentItemStats.classGroupId, classGroupIds),
+          preferComputedOverImported(assessmentItemStats),
         ),
       )
       .groupBy(assessmentItemStats.classGroupId);
