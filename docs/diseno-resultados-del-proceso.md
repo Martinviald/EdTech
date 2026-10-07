@@ -80,6 +80,8 @@ contrato, no puede producir**.
 
 ### 2.1 Por qué el enlace a `/resultados?processId=X` no alcanza
 
+> ⚠️ **Enmendada el 2026-10-07 — ver §14.** El hecho que sostenía esta sección cambió.
+
 Es la pregunta que hay que contestar antes de escribir una línea, porque si la respuesta honesta
 es "nada justifica una vista propia", eso es una conclusión válida. No lo es, y la razón es
 precisa.
@@ -312,6 +314,8 @@ La misma lógica aplica a "por nivel/grado", que cruza asignaturas.
 
 ### D6 — La vista principal es una matriz nivel × asignatura pintada por presencia y severidad
 
+> ⚠️ **Enmendada el 2026-10-07 — ver §14.** El encoding de la celda cambió.
+
 Filas = grados, columnas = asignaturas, una celda por unidad comparable. En la org sintética eso es
 una grilla de 8 × 4 = 32 celdas, que es exactamente el conjunto de unidades: la grilla no agrega
 nada, **sólo cambia el orden de la lista por una posición que codifica identidad**.
@@ -351,6 +355,8 @@ nueva que la §5 de `diseno-procesos-de-medicion.md` decidió no construir. Desd
 a esa lista.
 
 ### D7 — Sección dentro de la pestaña Resumen; no una pestaña nueva, no un reemplazo
+
+> ⚠️ **Enmendada el 2026-10-07 — ver §14.** La síntesis y la matriz se mudaron al panorama.
 
 `/procesos/[processId]` sigue teniendo dos pestañas. El Resumen queda así, de arriba abajo:
 
@@ -527,6 +533,13 @@ string. El dato ya está en la query: `process-coverage.service.ts:105` hace
 ---
 
 ## 6. Cambios por paquete, archivo por archivo
+
+> ⚠️ **Esta sección quedó desactualizada por la enmienda de §14.** Describe los
+> archivos como se planearon bajo `…/[processId]/components/`; la implementación
+> los puso en `apps/web/src/components/procesos/` (`process-level-headline.tsx`,
+> `process-results-matrix.tsx`, `band-view.ts`), compartidos entre la ficha del
+> proceso y el panorama, y no creó `subject-rollup-list.tsx` ni
+> `level-tally-bar.tsx`. Se conserva como registro de lo que se diseñó.
 
 ### `packages/types`
 
@@ -775,8 +788,12 @@ y con 32 instrumentos entrega 32 filas. La síntesis por conteo llega al panoram
 leerla en otra vista.
 
 **D7 se enmienda.** `/procesos/[id]` conserva la rendición (KPIs, avance, alcance, vincular
-evaluaciones, celdas fuera de alcance) y el titular compacto, que es la cifra que se lee en tres
-segundos junto a la cobertura. La matriz y el resto del análisis se leen en
+evaluaciones) y el titular compacto, que es la cifra que se lee en tres segundos junto a la
+cobertura. El aviso de **celdas fuera del alcance declarado** se va con la matriz al panorama; en la
+ficha se sigue llegando a él por la pestaña Rendición, a la que el resumen ya enlaza ("Ver la matriz
+completa"). Deja de ser proactivo en el resumen, y eso es una pérdida chica pero real.
+Contrapartida: un profesor ya no lo ve por ningún camino, porque depende de `/coverage` y con
+alcance docente no se pide — correcto, porque su denominador no es el suyo. La matriz y el resto del análisis se leen en
 `/resultados?processId=X`, donde conviven con la banda generacional, el aviso de comparabilidad, la
 tabla de unidades y las cinco pestañas de análisis que el proceso no heredaba.
 

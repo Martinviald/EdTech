@@ -57,7 +57,7 @@ export function ProcessResults({
     <div className="space-y-4">
       <ProcessLevelHeadline
         rollup={rollup}
-        coverageSummary={coverageSummaryOf(rollup, scopedCoverage, orgScoped)}
+        coverageSummary={coverageSummaryOf(scopedCoverage, orgScoped)}
         compact
       />
 

@@ -71,7 +71,7 @@ describe('ProcessResultsMatrix', () => {
       null,
     );
     const { container } = render(
-      <ProcessResultsMatrix rollup={r} coverage={null} processId="p1" />,
+      <ProcessResultsMatrix rollup={r} coverage={null} processId="p1" baseQuery="?processId=p1" />,
     );
 
     expect(screen.getByText('7 de 20')).toBeTruthy();
@@ -80,14 +80,44 @@ describe('ProcessResultsMatrix', () => {
     expect(container.querySelector('table')?.textContent).not.toContain('%');
   });
 
-  it('con una sola asignatura no se dibuja', () => {
+  it('con una sola asignatura no se dibuja NI queda la tarjeta vacía', () => {
+    // Un título con el cuerpo vacío es peor que no estar, y le pasa a cualquier
+    // profesor de una sola asignatura.
     const r = deriveProcessRollup(
       [unit('a', DIA, [1, 9, 0]), unit('b', DIA, [2, 8, 0], { gradeId: 'g2', gradeName: '2B' })],
       null,
     );
-    render(<ProcessResultsMatrix rollup={r} coverage={null} processId="p1" />);
+    const { container } = render(
+      <ProcessResultsMatrix rollup={r} coverage={null} processId="p1" baseQuery="?processId=p1" />,
+    );
 
     expect(screen.queryByText('Curso')).toBeNull();
+    expect(screen.queryByText('Dónde se concentra el nivel más bajo')).toBeNull();
+    expect(container.innerHTML).toBe('');
+  });
+
+  it('el enlace de una celda con varias evaluaciones conserva los filtros activos', () => {
+    const r = deriveProcessRollup(
+      [
+        unit('a', DIA, [1, 9, 0], { assessmentIds: ['e1', 'e2'] }),
+        unit('c', DIA, [2, 8, 0], { gradeId: 'g2', gradeName: '2B', subjectId: 's2' }),
+      ],
+      null,
+    );
+    render(
+      <ProcessResultsMatrix
+        rollup={r}
+        coverage={null}
+        processId="p1"
+        baseQuery="?processId=p1&instrumentType=dia&q=ensayo"
+      />,
+    );
+
+    const href = screen.getAllByRole('link')[0]?.getAttribute('href') ?? '';
+    expect(href).toContain('instrumentType=dia');
+    expect(href).toContain('q=ensayo');
+    expect(href).toContain('gradeId=g1');
+    expect(href).toContain('subjectId=s1');
   });
 
   it('con dos escaleras en la celda dice cuántos instrumentos, sin número', () => {
@@ -99,7 +129,9 @@ describe('ProcessResultsMatrix', () => {
       ],
       null,
     );
-    render(<ProcessResultsMatrix rollup={r} coverage={null} processId="p1" />);
+    render(
+      <ProcessResultsMatrix rollup={r} coverage={null} processId="p1" baseQuery="?processId=p1" />,
+    );
 
     expect(screen.getByText('2 instrumentos')).toBeTruthy();
   });
@@ -117,7 +149,9 @@ describe('ProcessResultsMatrix', () => {
         ['g8', 7],
       ]),
     );
-    render(<ProcessResultsMatrix rollup={r} coverage={null} processId="p1" />);
+    render(
+      <ProcessResultsMatrix rollup={r} coverage={null} processId="p1" baseQuery="?processId=p1" />,
+    );
 
     const filas = screen.getAllByRole('rowheader').map((th) => th.textContent);
     expect(filas).toEqual(['1B', '8B']);

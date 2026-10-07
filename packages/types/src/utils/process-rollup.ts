@@ -193,8 +193,11 @@ export function deriveProcessRollup(
    * trae el orden del grado; el índice de `options.grades` de
    * `/dashboards/filters` sí lo es, porque esa query ordena por `grades.order`.
    *
-   * Si se entrega, gobierna TODAS las filas: mezclar el orden de la BD con el
-   * índice del desplegable son dos espacios distintos y se interleavean mal.
+   * Si se entrega con al menos una entrada gobierna TODAS las filas, y los grados
+   * que no estén en él van al final: mezclar el orden de la BD (1..12, con PK=-1
+   * y K=0) con el índice del desplegable (0..N-1) son dos espacios distintos que
+   * se interleavean mal. El catálogo de `/dashboards/filters` está acotado a un
+   * año y al alcance del usuario, así que un grado ausente es alcanzable.
    */
   gradeOrder?: ReadonlyMap<string, number>,
 ): ProcessResultsRollup {
@@ -255,6 +258,14 @@ export function deriveProcessRollup(
     })
     .sort((a, b) => b.classifications - a.classifications);
 
+  // Con el mapa presente, el `??` nunca cae al orden de la BD: un grado ausente
+  // del catálogo va al final, que es predecible, en vez de empatar con el índice
+  // de otro grado.
+  const orderOfGrade = (gradeId: string, fallback: number): number =>
+    gradeOrder && gradeOrder.size > 0
+      ? (gradeOrder.get(gradeId) ?? Number.MAX_SAFE_INTEGER)
+      : fallback;
+
   const gradeAxis = new Map<string, ProcessMatrixAxis>();
   const subjectAxis = new Map<string, ProcessMatrixAxis>();
   const cells = new Map<string, ProcessMatrixCell>();
@@ -270,7 +281,7 @@ export function deriveProcessRollup(
       gradeAxis.set(cell.gradeId, {
         id: cell.gradeId,
         name: cell.gradeShortName,
-        order: gradeOrder?.get(cell.gradeId) ?? cell.gradeOrder,
+        order: orderOfGrade(cell.gradeId, cell.gradeOrder),
       });
     }
     if (!subjectAxis.has(cell.subjectId)) {
@@ -302,7 +313,7 @@ export function deriveProcessRollup(
       gradeAxis.set(unit.gradeId, {
         id: unit.gradeId,
         name: unit.gradeName ?? '—',
-        order: gradeOrder?.get(unit.gradeId) ?? Number.MAX_SAFE_INTEGER,
+        order: orderOfGrade(unit.gradeId, Number.MAX_SAFE_INTEGER),
       });
     }
     if (unit.subjectId && !subjectAxis.has(unit.subjectId)) {

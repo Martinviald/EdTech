@@ -37,6 +37,7 @@ import {
   buildDashboardQuery,
   buildDashboardHref,
   buildClearProcessQuery,
+  hasNarrowingFilters,
   withEntryDefaults,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
@@ -73,8 +74,10 @@ export default async function ResultadosOverviewPage({
       </Suspense>
 
       {/* La síntesis por conteo y la matriz del proceso activo. Streamean aparte:
-          piden `/coverage`, y el panorama no tiene que esperarlas. */}
-      <Suspense fallback={<CardSkeleton />}>
+          piden `/coverage`, y el panorama no tiene que esperarlas. El fallback es
+          nulo porque la sección no pinta nada sin proceso activo, y un skeleton
+          fantasma deja un salto de layout. */}
+      <Suspense fallback={null}>
         <ProcessResultsBlock query={query} filters={filters} />
       </Suspense>
 
@@ -139,7 +142,12 @@ async function ProcessResultsBlock({
   if (!scoped.processId) return null;
 
   return (
-    <ProcessResultsSection processId={scoped.processId} scopedQuery={buildDashboardQuery(scoped)} />
+    <ProcessResultsSection
+      processId={scoped.processId}
+      scopedQuery={buildDashboardQuery(scoped)}
+      grades={options.grades}
+      narrowedByFilters={hasNarrowingFilters(scoped)}
+    />
   );
 }
 

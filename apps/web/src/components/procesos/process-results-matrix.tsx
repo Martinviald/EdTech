@@ -28,13 +28,24 @@ const COVERAGE_LABEL: Record<string, string> = {
   complete: 'sin niveles',
 };
 
-function cellHref(cell: ProcessMatrixCell, processId: string): Route {
+/**
+ * El destino de una celda. Con una sola evaluación, su ficha; con varias, el
+ * panorama acotado a esa celda.
+ *
+ * `baseQuery` conserva los filtros activos: la matriz vive dentro del panorama
+ * filtrado, así que descartarlos haría que el clic amplíe el alcance en vez de
+ * acotarlo. `gradeId` y `subjectId` se sobreescriben, porque son la celda.
+ */
+function cellHref(cell: ProcessMatrixCell, processId: string, baseQuery: string): Route {
   if (cell.assessmentIds.length === 1) {
     return ROUTES.evaluacion(cell.assessmentIds[0] as string) as Route;
   }
-  const params = new URLSearchParams({ processId });
+  const params = new URLSearchParams(baseQuery.startsWith('?') ? baseQuery.slice(1) : baseQuery);
+  params.set('processId', processId);
   if (cell.gradeId) params.set('gradeId', cell.gradeId);
+  else params.delete('gradeId');
   if (cell.subjectId) params.set('subjectId', cell.subjectId);
+  else params.delete('subjectId');
   return `${ROUTES.resultados}?${params.toString()}` as Route;
 }
 
@@ -50,36 +61,46 @@ export function ProcessResultsMatrix({
   rollup,
   coverage,
   processId,
+  baseQuery,
 }: {
   rollup: ProcessResultsRollup;
   coverage: ProcessCoverageResponse | null;
   processId: string;
+  baseQuery: string;
 }) {
+  // Con una sola fila o una sola columna la matriz es una lista disfrazada, y la
+  // tabla de unidades del panorama ya ordena mejor que esto.
+  const drawable = rollup.matrix.grades.length >= 2 && rollup.matrix.subjects.length >= 2;
+  const unexpected = coverage && coverage.unexpectedCells.length > 0 ? coverage : null;
+  // Sin nada que pintar tampoco va la tarjeta: un título con el cuerpo vacío es
+  // peor que no estar, y pasa seguido (un profesor de una sola asignatura).
+  if (!drawable && !unexpected) return null;
+
   return (
-  <Card>
-    <CardHeader className="pb-3">
-      <CardTitle className="text-base">Dónde se concentra el nivel más bajo</CardTitle>
-      <CardDescription>
-        Cada celda es un cruce de curso y asignatura: la distribución de sus clasificaciones por
-        nivel, con los mismos colores de la barra de arriba. No es % de logro.
-      </CardDescription>
-    </CardHeader>
-    <CardContent className="space-y-3">
-      <ResultsMatrix rollup={rollup} processId={processId} />
-      {coverage && coverage.unexpectedCells.length > 0 && (
-        <UnexpectedCells coverage={coverage} />
-      )}
-    </CardContent>
-  </Card>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Dónde se concentra el nivel más bajo</CardTitle>
+        <CardDescription>
+          Cada celda es un cruce de curso y asignatura: la distribución de sus clasificaciones por
+          nivel, con los mismos colores de la barra de arriba. No es % de logro.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {drawable && <ResultsMatrix rollup={rollup} processId={processId} baseQuery={baseQuery} />}
+        {unexpected && <UnexpectedCells coverage={unexpected} />}
+      </CardContent>
+    </Card>
   );
 }
 
 function ResultsMatrix({
   rollup,
   processId,
+  baseQuery,
 }: {
   rollup: ProcessResultsRollup;
   processId: string;
+  baseQuery: string;
 }) {
   const byKey = new Map(
     rollup.matrix.cells.map((c) => [`${c.gradeId ?? '-'}::${c.subjectId ?? '-'}`, c]),
@@ -87,8 +108,6 @@ function ResultsMatrix({
 
   // Con una sola fila o una sola columna la matriz es una lista disfrazada, y la
   // tabla de unidades del panorama ya ordena mejor que esto.
-  if (rollup.matrix.grades.length < 2 || rollup.matrix.subjects.length < 2) return null;
-
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[32rem] border-separate border-spacing-1 text-sm">
@@ -119,7 +138,7 @@ function ResultsMatrix({
                 if (!cell) return <td key={subject.id} className="p-0" />;
                 return (
                   <td key={subject.id} className="p-0">
-                    <MatrixCell cell={cell} processId={processId} />
+                    <MatrixCell cell={cell} processId={processId} baseQuery={baseQuery} />
                   </td>
                 );
               })}
@@ -131,7 +150,15 @@ function ResultsMatrix({
   );
 }
 
-function MatrixCell({ cell, processId }: { cell: ProcessMatrixCell; processId: string }) {
+function MatrixCell({
+  cell,
+  processId,
+  baseQuery,
+}: {
+  cell: ProcessMatrixCell;
+  processId: string;
+  baseQuery: string;
+}) {
   const hasUnit = cell.unitKeys.length > 0;
   const tone = hasUnit && cell.severity ? SEVERITY_CELL[cell.severity] : COVERAGE_CELL;
 
@@ -184,7 +211,7 @@ function MatrixCell({ cell, processId }: { cell: ProcessMatrixCell; processId: s
   if (cell.assessmentIds.length === 0) return content;
   return (
     <Link
-      href={cellHref(cell, processId)}
+      href={cellHref(cell, processId, baseQuery)}
       className="focus-visible:ring-ring block rounded-md focus-visible:ring-2 focus-visible:outline-none"
     >
       {content}

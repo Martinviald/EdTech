@@ -336,6 +336,26 @@ describe('la matriz nivel × asignatura', () => {
     expect(r.matrix.grades.map((g) => g.name)).toEqual(['1B', '8B']);
   });
 
+  it('un grado ausente del catálogo va al final, no al orden de la BD', () => {
+    // El catálogo de /dashboards/filters está acotado a un año y al alcance del
+    // usuario: un grado del proceso puede no estar. Con el mapa presente manda el
+    // mapa, y el ausente va último — mezclar índice con grades.order los empata.
+    const r = deriveProcessRollup(
+      [
+        diaUnit('u8', [9, 1, 0], { gradeId: 'g8', gradeName: '8B', subjectId: 's1' }),
+        diaUnit('u1', [1, 9, 0], { gradeId: 'g1', gradeName: '1B', subjectId: 's1' }),
+      ],
+      coverage([
+        coverageCell({ gradeId: 'gx', gradeShortName: 'PK', gradeOrder: -1, assessmentId: null }),
+      ]),
+      new Map([
+        ['g1', 0],
+        ['g8', 7],
+      ]),
+    );
+    expect(r.matrix.grades.map((g) => g.name)).toEqual(['1B', '8B', 'PK']);
+  });
+
   it('sin orden de grados conserva el comportamiento previo', () => {
     const r = deriveProcessRollup(
       [
