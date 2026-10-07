@@ -73,6 +73,8 @@ export class BenchmarkSamplesService {
         itemId: benchmarkItemAggregates.itemId,
         correctCount: benchmarkItemAggregates.correctCount,
         responseCount: benchmarkItemAggregates.responseCount,
+        scoreSum: benchmarkItemAggregates.scoreSum,
+        maxSum: benchmarkItemAggregates.maxSum,
         refreshedAt: benchmarkItemAggregates.refreshedAt,
       })
       .from(benchmarkItemAggregates)
@@ -92,7 +94,16 @@ export class BenchmarkSamplesService {
 
     const samples: InstrumentItemSamples[] = [];
     for (const [instrumentId, instrumentRows] of rowsByInstrument) {
-      const aggregate = aggregateItemSample(instrumentRows);
+      const aggregate = aggregateItemSample(
+        instrumentRows.map((row) => ({
+          orgId: row.orgId,
+          itemId: row.itemId,
+          correctCount: row.correctCount,
+          responseCount: row.responseCount,
+          scoreSum: Number(row.scoreSum),
+          maxSum: Number(row.maxSum),
+        })),
+      );
       if (
         aggregate.schoolCount < BENCHMARK_K_MIN_SCHOOLS ||
         aggregate.studentCount < BENCHMARK_N_MIN_STUDENTS
@@ -186,6 +197,8 @@ export class BenchmarkSamplesService {
     const aggregate = aggregateSample(
       rows.map((row) => ({
         studentCount: row.studentCount,
+        scoreSum: Number(row.scoreSum),
+        maxSum: Number(row.maxSum),
         avgAchievement: this.toNumber(row.avgAchievement),
         bandCounts: row.bandCounts,
         perSkill: row.perSkill,

@@ -46,6 +46,11 @@ import {
 import { createDbClient } from '../client';
 import { withOrgContext } from '../with-org-context';
 import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
+import {
+  toAssessmentResultRow,
+  toSkillResultForCohort,
+  toSkillResultRow,
+} from '../queries/result-rows';
 import { classGroups, grades, subjectClasses, subjects } from '../schema/academic';
 import { taxonomies, taxonomyNodes } from '../schema/taxonomy';
 import { academicYears } from '../schema/organizations';
@@ -613,21 +618,9 @@ async function main() {
     const studentAgg = aggregateStudentResults(calcRows, SCALE);
     const skillAgg = aggregateSkillResults(calcRows, SCALE);
     await db.insert(assessmentResults).values(
-      studentAgg.map((s) => ({
-        assessmentId: a.id, studentId: s.studentId,
-        totalScore: s.totalScore.toFixed(2), maxScore: s.maxScore.toFixed(2),
-        percentage: (s.percentage * 100).toFixed(2), grade: s.grade.toFixed(2),
-        performanceLevel: s.performanceLevel, isComplete: s.isComplete,
-        completedAt: new Date(`${a.date}T12:00:00Z`),
-      })),
+      studentAgg.map((s) => toAssessmentResultRow(a.id, s, new Date(`${a.date}T12:00:00Z`))),
     );
-    await db.insert(skillResults).values(
-      skillAgg.map((s) => ({
-        assessmentId: a.id, studentId: s.studentId, nodeId: s.nodeId,
-        correctCount: s.correctCount, totalCount: s.totalCount,
-        percentage: (s.percentage * 100).toFixed(2), performanceLevel: s.performanceLevel,
-      })),
-    );
+    await db.insert(skillResults).values(skillAgg.map((s) => toSkillResultRow(a.id, s)));
 
     // Read-model de cohorte. NO es opcional: los dashboards de habilidades, el heatmap
     // y la matriz alumno×pregunta LEEN de acá, no de `responses`. Un seed que escribe
@@ -638,12 +631,7 @@ async function main() {
       recomputeCohortStatsFromResponses(tx, {
         assessmentId: a.id,
         responses: calcRows,
-        skillResults: skillAgg.map((s) => ({
-          studentId: s.studentId, nodeId: s.nodeId,
-          correctCount: s.correctCount, totalCount: s.totalCount,
-          // El escritor trabaja en 0..1; la columna es 0..100.
-          percentage: s.percentage,
-        })),
+        skillResults: skillAgg.map(toSkillResultForCohort),
       }),
     );
     if (cohortStats.orphanResponses > 0) {

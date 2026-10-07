@@ -20,6 +20,7 @@
  *    no el de la definición de la alternativa. La UI decide el `isCorrect` presentable
  *    aparte, con `correctKey ?? alt.isCorrect`.
  */
+import { achievementPct } from './achievement';
 
 /**
  * Un bucket de la distribución de respuestas de un ítem. `key: null` = blanco/nulo
@@ -74,14 +75,20 @@ export type ItemCohortStats = {
   maxSum: number;
 };
 
-/** Una fila del read-model por (curso × habilidad). */
+/**
+ * Una fila del read-model por (curso × habilidad). `scoreSum / maxSum` es el tally del curso en
+ * el nodo y `percentage` (0..1) se deriva SIEMPRE de él, venga de respuestas o de un informe
+ * oficial (docs/diseno-logro-unificado-y-cohorte.md §3.1).
+ */
 export type SkillCohortStats = {
   classGroupId: string;
   nodeId: string;
   studentCount: number;
   correctCount: number;
   totalCount: number;
-  /** 0..1. Ojo: la definición depende del origen — ver `aggregateCohortSkillStats`. */
+  scoreSum: number;
+  maxSum: number;
+  /** 0..1 = scoreSum / maxSum; null sin puntaje corregido. */
   percentage: number | null;
 };
 
@@ -91,8 +98,8 @@ export type SkillResultForCohort = {
   nodeId: string;
   correctCount: number;
   totalCount: number;
-  /** 0..1 */
-  percentage: number | null;
+  scoreSum: number;
+  maxSum: number;
 };
 
 /**
@@ -274,13 +281,9 @@ export function aggregateItemStats(
 }
 
 /**
- * Agrega `skill_results` por alumno al read-model por (curso × habilidad).
- *
- * ⚠️ `percentage` = **media de los porcentajes por alumno** (`source='computed'`).
- * Se conserva esta definición deliberadamente (decisión §9.2 del plan) para que los
- * números que los dashboards y el heatmap ya muestran NO cambien con el refactor.
- * Es distinta de la tasa agrupada que usa `deriveSkillStatsFromItemStats` para los
- * informes importados; coinciden cuando todos los alumnos responden todos los ítems.
+ * Agrega `skill_results` por alumno al read-model por (curso × habilidad) sumando los tallies de
+ * los alumnos: el % del curso en el nodo es Σ puntaje ÷ Σ máximo, la misma definición que
+ * `deriveSkillStatsFromItemStats` usa para los informes importados.
  */
 export function aggregateCohortSkillStats(
   skillResults: readonly SkillResultForCohort[],
@@ -294,8 +297,8 @@ export function aggregateCohortSkillStats(
       students: Set<string>;
       correctCount: number;
       totalCount: number;
-      pctSum: number;
-      pctCount: number;
+      scoreSum: number;
+      maxSum: number;
     }
   >();
 
@@ -312,28 +315,44 @@ export function aggregateCohortSkillStats(
         students: new Set(),
         correctCount: 0,
         totalCount: 0,
-        pctSum: 0,
-        pctCount: 0,
+        scoreSum: 0,
+        maxSum: 0,
       };
       acc.set(key, cell);
     }
     cell.students.add(sr.studentId);
     cell.correctCount += sr.correctCount;
     cell.totalCount += sr.totalCount;
-    if (sr.percentage != null) {
-      cell.pctSum += sr.percentage;
-      cell.pctCount += 1;
-    }
+    cell.scoreSum += sr.scoreSum;
+    cell.maxSum += sr.maxSum;
   }
 
-  return [...acc.values()].map((cell) => ({
+  return [...acc.values()].map((cell) => toSkillCohortStats(cell, cell.students.size));
+}
+
+function toSkillCohortStats(
+  cell: {
+    classGroupId: string;
+    nodeId: string;
+    correctCount: number;
+    totalCount: number;
+    scoreSum: number;
+    maxSum: number;
+  },
+  studentCount: number,
+): SkillCohortStats {
+  const tally = { scoreSum: round2(cell.scoreSum), maxSum: round2(cell.maxSum) };
+  const pct = achievementPct(tally);
+  return {
     classGroupId: cell.classGroupId,
     nodeId: cell.nodeId,
-    studentCount: cell.students.size,
+    studentCount,
     correctCount: cell.correctCount,
     totalCount: cell.totalCount,
-    percentage: cell.pctCount > 0 ? cell.pctSum / cell.pctCount : null,
-  }));
+    scoreSum: tally.scoreSum,
+    maxSum: tally.maxSum,
+    percentage: pct === null ? null : pct / 100,
+  };
 }
 
 /**
@@ -394,14 +413,7 @@ export function deriveSkillStatsFromItemStats(
     }
   }
 
-  return [...acc.values()].map((cell) => ({
-    classGroupId: cell.classGroupId,
-    nodeId: cell.nodeId,
-    studentCount: cell.studentCount,
-    correctCount: cell.correctCount,
-    totalCount: cell.totalCount,
-    percentage: cell.maxSum > 0 ? cell.scoreSum / cell.maxSum : null,
-  }));
+  return [...acc.values()].map((cell) => toSkillCohortStats(cell, cell.studentCount));
 }
 
 /**

@@ -5,6 +5,7 @@ export * from './queries/memberships';
 export * from './queries/platform-admins';
 export * from './queries/auth-context';
 export * from './queries/cohort-stats';
+export * from './queries/result-rows';
 export * from './queries/instrument-bands';
 export * from './queries/effective-bands';
 export * from './queries/benchmark-aggregates';

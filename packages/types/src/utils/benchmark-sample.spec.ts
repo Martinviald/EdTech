@@ -7,7 +7,6 @@ import {
   sampleDeltaPp,
   sampleSizeLabel,
   sumBandCounts,
-  weightedAverage,
   type SampleSourceRow,
 } from './benchmark-sample';
 
@@ -17,33 +16,42 @@ const DIA_BANDS = (i: number, ii: number, iii: number) => [
   { bandKey: 'dia_nivel_3', label: 'Nivel III', order: 3, count: iii },
 ];
 
+const POINTS_PER_STUDENT = 30;
+
+/** Colegio con `studentCount` alumnos que rindieron todo y sacaron `pct` en promedio. */
+function school(
+  studentCount: number,
+  pct: number | null,
+): Pick<SampleSourceRow, 'studentCount' | 'scoreSum' | 'maxSum' | 'avgAchievement'> {
+  const maxSum = pct === null ? 0 : studentCount * POINTS_PER_STUDENT;
+  return {
+    studentCount,
+    scoreSum: pct === null ? 0 : (maxSum * pct) / 100,
+    maxSum,
+    avgAchievement: pct,
+  };
+}
+
 function row(overrides: Partial<SampleSourceRow> = {}): SampleSourceRow {
   return {
-    studentCount: 10,
-    avgAchievement: 60,
+    ...school(10, 60),
     bandCounts: DIA_BANDS(2, 5, 3),
     perSkill: [],
     ...overrides,
   };
 }
 
-describe('weightedAverage', () => {
-  it('pondera por peso e ignora nulos y pesos no positivos', () => {
-    expect(
-      weightedAverage([
-        { value: 80, weight: 1 },
-        { value: 60, weight: 3 },
-        { value: null, weight: 5 },
-        { value: 10, weight: 0 },
-      ]),
-    ).toBe(65);
-  });
-
-  it('devuelve null sin datos válidos', () => {
-    expect(weightedAverage([])).toBeNull();
-    expect(weightedAverage([{ value: null, weight: 3 }])).toBeNull();
-  });
-});
+function skill(nodeId: string, nodeName: string, studentCount: number, pct: number | null) {
+  const maxSum = pct === null ? 0 : studentCount * 4;
+  return {
+    nodeId,
+    nodeName,
+    achievement: pct,
+    studentCount,
+    scoreSum: pct === null ? 0 : (maxSum * pct) / 100,
+    maxSum,
+  };
+}
 
 describe('percentileOf / percentileRank', () => {
   it('interpola linealmente', () => {
@@ -100,9 +108,11 @@ describe('sumBandCounts', () => {
 describe('aggregateSample', () => {
   it('reproduce Lectura 6° Intermedio 2026 con los dos colegios reales', () => {
     const sample = aggregateSample([
-      row({ studentCount: 85, avgAchievement: 71.53, bandCounts: DIA_BANDS(10, 35, 40) }),
-      row({ studentCount: 18, avgAchievement: 73.7, bandCounts: DIA_BANDS(0, 9, 9) }),
+      row({ ...school(85, 71.53), bandCounts: DIA_BANDS(10, 35, 40) }),
+      row({ ...school(18, 73.7), bandCounts: DIA_BANDS(0, 9, 9) }),
     ]);
+    // Con todos los alumnos sobre el mismo máximo, Σ puntaje ÷ Σ máximo coincide con el
+    // promedio ponderado por alumnos: (85·71,53 + 18·73,7) / 103 = 71,91.
     expect(sample.schoolCount).toBe(2);
     expect(sample.studentCount).toBe(103);
     expect(sample.avgAchievement).toBe(71.91);
@@ -112,20 +122,18 @@ describe('aggregateSample', () => {
     expect(sample.bandCounts).toEqual(DIA_BANDS(10, 44, 49));
   });
 
-  it('ignora colegios sin % en promedio y percentiles pero suma sus alumnos', () => {
-    const sample = aggregateSample([row({ avgAchievement: null, studentCount: 5 }), row()]);
+  it('ignora colegios sin puntaje corregido en el % y los percentiles, pero suma sus alumnos', () => {
+    const sample = aggregateSample([row(school(5, null)), row()]);
     expect(sample.studentCount).toBe(15);
     expect(sample.avgAchievement).toBe(60);
     expect(sample.p25).toBe(60);
   });
 
-  it('agrega habilidades por nodo con percentiles entre colegios', () => {
+  it('agrega habilidades por nodo sumando tallies, con percentiles entre colegios', () => {
     const sample = aggregateSample([
-      row({ perSkill: [{ nodeId: 'n1', nodeName: 'Inferir', achievement: 50, studentCount: 10 }] }),
-      row({ perSkill: [{ nodeId: 'n1', nodeName: 'Inferir', achievement: 70, studentCount: 30 }] }),
-      row({
-        perSkill: [{ nodeId: 'n2', nodeName: 'Localizar', achievement: null, studentCount: 4 }],
-      }),
+      row({ perSkill: [skill('n1', 'Inferir', 10, 50)] }),
+      row({ perSkill: [skill('n1', 'Inferir', 30, 70)] }),
+      row({ perSkill: [skill('n2', 'Localizar', 4, null)] }),
     ]);
     const inferir = sample.perSkill.find((s) => s.nodeId === 'n1')!;
     expect(inferir).toMatchObject({
@@ -136,6 +144,7 @@ describe('aggregateSample', () => {
       p25: 55,
     });
     const localizar = sample.perSkill.find((s) => s.nodeId === 'n2')!;
+    expect(localizar.studentCount).toBe(4);
     expect(localizar).toMatchObject({ achievement: null, p10: null, schoolCount: 1 });
   });
 
@@ -152,11 +161,11 @@ describe('aggregateSample', () => {
 });
 
 describe('aggregateItemSample', () => {
-  it('suma aciertos y respuestas de todos los colegios por ítem', () => {
+  it('suma los tallies de todos los colegios por ítem', () => {
     const sample = aggregateItemSample([
-      { orgId: 'a', itemId: 'i1', correctCount: 30, responseCount: 80 },
-      { orgId: 'a', itemId: 'i2', correctCount: 70, responseCount: 85 },
-      { orgId: 'b', itemId: 'i1', correctCount: 6, responseCount: 18 },
+      { orgId: 'a', itemId: 'i1', correctCount: 30, responseCount: 80, scoreSum: 30, maxSum: 80 },
+      { orgId: 'a', itemId: 'i2', correctCount: 70, responseCount: 85, scoreSum: 70, maxSum: 85 },
+      { orgId: 'b', itemId: 'i1', correctCount: 6, responseCount: 18, scoreSum: 6, maxSum: 18 },
     ]);
 
     expect(sample.schoolCount).toBe(2);
@@ -171,9 +180,17 @@ describe('aggregateItemSample', () => {
     expect(byItem.get('i2')).toMatchObject({ correctRate: 82.35, schoolCount: 1 });
   });
 
-  it('un ítem sin respuestas queda sin tasa', () => {
+  it('cuenta el crédito parcial y las preguntas de 2 puntos, que los aciertos ignoran', () => {
     const sample = aggregateItemSample([
-      { orgId: 'a', itemId: 'i1', correctCount: 0, responseCount: 0 },
+      { orgId: 'a', itemId: 'dev', correctCount: 10, responseCount: 40, scoreSum: 50, maxSum: 80 },
+      { orgId: 'b', itemId: 'dev', correctCount: 2, responseCount: 10, scoreSum: 12, maxSum: 20 },
+    ]);
+    expect(sample.items[0]!.correctRate).toBe(62);
+  });
+
+  it('un ítem sin puntaje corregido queda sin tasa', () => {
+    const sample = aggregateItemSample([
+      { orgId: 'a', itemId: 'i1', correctCount: 0, responseCount: 12, scoreSum: 0, maxSum: 0 },
     ]);
     expect(sample.items[0]!.correctRate).toBeNull();
   });

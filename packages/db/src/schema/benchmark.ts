@@ -86,6 +86,10 @@ export const benchmarkAggregates = pgTable(
     networkOrgId: uuid('network_org_id'), // = organizations.parent_id (sostenedor/red)
     // Métricas agregadas (sin PII).
     studentCount: integer('student_count').notNull().default(0),
+    // Tally del colegio en el instrumento (Σ puntaje y Σ máximo de sus respuestas corregidas).
+    // `avg_achievement` = score_sum / max_sum (docs/diseno-logro-unificado-y-cohorte.md §3.1).
+    scoreSum: decimal('score_sum', { precision: 12, scale: 2 }).default('0').notNull(),
+    maxSum: decimal('max_sum', { precision: 12, scale: 2 }).default('0').notNull(),
     avgAchievement: decimal('avg_achievement', { precision: 5, scale: 2 }),
     // ⚠️ OBSOLETA: proyección legacy de 4 niveles que ya no se escribe ni se lee. Se
     // mantiene sólo para que el backend anterior siga funcionando durante el deploy
@@ -108,11 +112,7 @@ export const benchmarkAggregates = pgTable(
       table.gradeId,
       table.subjectId,
     ),
-    index('benchmark_aggregates_cohort_idx').on(
-      table.instrumentId,
-      table.gradeId,
-      table.subjectId,
-    ),
+    index('benchmark_aggregates_cohort_idx').on(table.instrumentId, table.gradeId, table.subjectId),
     index('benchmark_aggregates_network_idx').on(table.networkOrgId),
   ],
 );
@@ -143,6 +143,10 @@ export const benchmarkItemAggregates = pgTable(
       .references(() => items.id, { onDelete: 'cascade' }),
     correctCount: integer('correct_count').notNull().default(0),
     responseCount: integer('response_count').notNull().default(0),
+    // Tally del colegio en el ítem: lo que se compara contra la muestra (crédito parcial
+    // incluido). Las preguntas pendientes no entran a max_sum.
+    scoreSum: decimal('score_sum', { precision: 12, scale: 2 }).default('0').notNull(),
+    maxSum: decimal('max_sum', { precision: 12, scale: 2 }).default('0').notNull(),
     optOutGlobalPool: boolean('opt_out_global_pool').notNull().default(false),
     refreshedAt: timestamp('refreshed_at').defaultNow().notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),

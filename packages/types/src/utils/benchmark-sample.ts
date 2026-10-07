@@ -5,15 +5,22 @@ import type {
   SampleSkillStat,
   TypicalZone,
 } from '../schemas/benchmark.schema';
+import { achievementPct, addTally, emptyTally, type AchievementTally } from './achievement';
 
 /**
  * Cálculos puros de la muestra de benchmarking (docs/diseno-benchmarking-en-contexto.md §5).
  * Sin DB: los usa la API para armar la muestra y las alertas relativas, y se testean solos.
  */
 
-/** Fila de un colegio en la muestra de un instrumento (lo que aporta `benchmark_aggregates`). */
+/**
+ * Fila de un colegio en la muestra de un instrumento (lo que aporta `benchmark_aggregates`).
+ * `scoreSum` / `maxSum` es su tally; `avgAchievement` es el % del colegio (= tally) y sólo se
+ * usa para los percentiles, que se calculan sobre el % de cada colegio.
+ */
 export type SampleSourceRow = {
   studentCount: number;
+  scoreSum: number;
+  maxSum: number;
   avgAchievement: number | null;
   bandCounts: BenchmarkBandCount[] | null;
   perSkill: BenchmarkSkillAggregate[] | null;
@@ -41,28 +48,6 @@ export function sampleSizeLabel(sample: { schoolCount: number; studentCount: num
 
 export function round2(n: number): number {
   return Math.round(n * 100) / 100;
-}
-
-/** Promedio simple; `null` si no hay valores. */
-export function meanOf(values: readonly number[]): number | null {
-  if (values.length === 0) return null;
-  let sum = 0;
-  for (const v of values) sum += v;
-  return round2(sum / values.length);
-}
-
-/** Promedio ponderado; ignora valores nulos y pesos no positivos. */
-export function weightedAverage(
-  entries: readonly { value: number | null; weight: number }[],
-): number | null {
-  let sum = 0;
-  let weight = 0;
-  for (const entry of entries) {
-    if (entry.value === null || entry.weight <= 0) continue;
-    sum += entry.value * entry.weight;
-    weight += entry.weight;
-  }
-  return weight === 0 ? null : round2(sum / weight);
 }
 
 /** Percentil `p` (0..100) con interpolación lineal sobre un array ordenado ascendente. */
@@ -129,13 +114,21 @@ function sortedAscending(values: number[]): number[] {
   return values.sort((a, b) => a - b);
 }
 
-/** Por nodo: % ponderado por alumnos y p10/p25 sobre el % de cada colegio. */
+function pctOfTally(tally: AchievementTally): number | null {
+  const pct = achievementPct(tally);
+  return pct === null ? null : round2(pct);
+}
+
+/**
+ * Por nodo: % de la muestra = Σ puntaje ÷ Σ máximo de los colegios (docs/diseno-logro-unificado-
+ * y-cohorte.md §3.1) y p10/p25 sobre el % de cada colegio.
+ */
 export function aggregateSampleSkills(rows: readonly SampleSourceRow[]): SampleSkillStat[] {
   const byNode = new Map<
     string,
     {
       nodeName: string;
-      weighted: { value: number | null; weight: number }[];
+      tally: AchievementTally;
       schoolValues: number[];
       students: number;
       schools: number;
@@ -145,10 +138,16 @@ export function aggregateSampleSkills(rows: readonly SampleSourceRow[]): SampleS
     for (const skill of row.perSkill ?? []) {
       let acc = byNode.get(skill.nodeId);
       if (!acc) {
-        acc = { nodeName: skill.nodeName, weighted: [], schoolValues: [], students: 0, schools: 0 };
+        acc = {
+          nodeName: skill.nodeName,
+          tally: emptyTally(),
+          schoolValues: [],
+          students: 0,
+          schools: 0,
+        };
         byNode.set(skill.nodeId, acc);
       }
-      acc.weighted.push({ value: skill.achievement, weight: skill.studentCount });
+      addTally(acc.tally, { scoreSum: skill.scoreSum, maxSum: skill.maxSum });
       if (skill.achievement !== null) acc.schoolValues.push(skill.achievement);
       acc.students += skill.studentCount;
       acc.schools += 1;
@@ -161,7 +160,7 @@ export function aggregateSampleSkills(rows: readonly SampleSourceRow[]): SampleS
     result.push({
       nodeId,
       nodeName: acc.nodeName,
-      achievement: weightedAverage(acc.weighted),
+      achievement: pctOfTally(acc.tally),
       studentCount: acc.students,
       schoolCount: acc.schools,
       p10: percentileOf(sorted, 10),
@@ -177,14 +176,16 @@ export function aggregateSample(rows: readonly SampleSourceRow[]): SampleAggrega
     rows.map((r) => r.avgAchievement).filter((v): v is number => v !== null),
   );
   let studentCount = 0;
-  for (const row of rows) studentCount += row.studentCount;
+  const tally = emptyTally();
+  for (const row of rows) {
+    studentCount += row.studentCount;
+    addTally(tally, { scoreSum: row.scoreSum, maxSum: row.maxSum });
+  }
 
   return {
     schoolCount: rows.length,
     studentCount,
-    avgAchievement: weightedAverage(
-      rows.map((r) => ({ value: r.avgAchievement, weight: r.studentCount })),
-    ),
+    avgAchievement: pctOfTally(tally),
     p10: percentileOf(schoolAchievements, 10),
     p25: percentileOf(schoolAchievements, 25),
     median: percentileOf(schoolAchievements, 50),
@@ -200,6 +201,8 @@ export type ItemSampleSourceRow = {
   itemId: string;
   correctCount: number;
   responseCount: number;
+  scoreSum: number;
+  maxSum: number;
 };
 
 export type ItemSampleAggregate = {
@@ -209,20 +212,23 @@ export type ItemSampleAggregate = {
 };
 
 /**
- * % de acierto de la muestra por ítem: suma de aciertos sobre suma de respuestas de
- * todos los colegios. `studentCount` aproxima a los alumnos con el máximo de
- * respuestas que tuvo cada colegio en algún ítem del instrumento.
+ * % de logro de la muestra por ítem: Σ puntaje ÷ Σ máximo de todos los colegios, con el crédito
+ * parcial incluido (`correctRate` conserva su nombre en el contrato). `studentCount` aproxima a
+ * los alumnos con el máximo de respuestas que tuvo cada colegio en algún ítem del instrumento.
  */
 export function aggregateItemSample(rows: readonly ItemSampleSourceRow[]): ItemSampleAggregate {
-  const byItem = new Map<string, { correct: number; responses: number; orgs: Set<string> }>();
+  const byItem = new Map<
+    string,
+    { tally: AchievementTally; responses: number; orgs: Set<string> }
+  >();
   const maxResponsesByOrg = new Map<string, number>();
   for (const row of rows) {
     let acc = byItem.get(row.itemId);
     if (!acc) {
-      acc = { correct: 0, responses: 0, orgs: new Set() };
+      acc = { tally: emptyTally(), responses: 0, orgs: new Set() };
       byItem.set(row.itemId, acc);
     }
-    acc.correct += row.correctCount;
+    addTally(acc.tally, { scoreSum: row.scoreSum, maxSum: row.maxSum });
     acc.responses += row.responseCount;
     acc.orgs.add(row.orgId);
     maxResponsesByOrg.set(
@@ -238,7 +244,7 @@ export function aggregateItemSample(rows: readonly ItemSampleSourceRow[]): ItemS
   for (const [itemId, acc] of byItem) {
     items.push({
       itemId,
-      correctRate: acc.responses === 0 ? null : round2((acc.correct / acc.responses) * 100),
+      correctRate: pctOfTally(acc.tally),
       responseCount: acc.responses,
       schoolCount: acc.orgs.size,
     });

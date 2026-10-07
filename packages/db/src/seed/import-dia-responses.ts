@@ -29,7 +29,13 @@ import { students } from '../schema/students';
 import { assessments, assessmentCourseAssignments, importJobs } from '../schema/assessments';
 import { responses } from '../schema/responses';
 import { assessmentResults, skillResults } from '../schema/results';
+import type { SkillResultForCohort } from '@soe/types';
 import { recomputeCohortStatsFromResponses } from '../queries/cohort-stats';
+import {
+  toAssessmentResultRow,
+  toSkillResultForCohort,
+  toSkillResultRow,
+} from '../queries/result-rows';
 import {
   aggregateStudentResults,
   aggregateSkillResults,
@@ -162,7 +168,7 @@ async function main() {
     const allItems = await tx
       .select({ id: items.id, instrumentId: items.instrumentId, position: items.position, type: items.type, content: items.content, scoringConfig: items.scoringConfig })
       .from(items)
-      .where(inArray(items.instrumentId, instIds));
+      .where(and(inArray(items.instrumentId, instIds), dsql`${items.deletedAt} is null`));
 
     // Guarda de secciones electivas: este cargador escribe una respuesta por CADA ítem del
     // instrumento, así que con ramas a elección inventaría respuestas incorrectas.
@@ -309,7 +315,7 @@ async function main() {
     const allResponses: Array<typeof responses.$inferInsert> = [];
     const arValues: Array<typeof assessmentResults.$inferInsert> = [];
     const srValues: Array<typeof skillResults.$inferInsert> = [];
-    const cohortStatsInput: Array<{ assessmentId: string; calc: CalcRow[]; skills: Array<{ studentId: string; nodeId: string; correctCount: number; totalCount: number; percentage: number | null }> }> = [];
+    const cohortStatsInput: Array<{ assessmentId: string; calc: CalcRow[]; skills: SkillResultForCohort[] }> = [];
     for (let i = 0; i < pending.length; i++) {
       const p = pending[i];
       const assessmentId = assessIdByIdx[i];
@@ -322,28 +328,10 @@ async function main() {
       const studentAgg = aggregateStudentResults(autoScored, scale);
       const skillAgg = aggregateSkillResults(p.calc, scale);
       for (const a of studentAgg) {
-        arValues.push({
-          assessmentId, studentId: a.studentId,
-          totalScore: a.totalScore.toFixed(2), maxScore: a.maxScore.toFixed(2),
-          percentage: (a.percentage * 100).toFixed(2), grade: a.grade.toFixed(2),
-          performanceLevel: a.performanceLevel,
-          isComplete: a.isComplete && !withPending.has(a.studentId),
-          completedAt: now,
-        });
+        arValues.push(toAssessmentResultRow(assessmentId, { ...a, isComplete: a.isComplete && !withPending.has(a.studentId) }, now));
       }
-      for (const a of skillAgg) {
-        srValues.push({
-          assessmentId, studentId: a.studentId, nodeId: a.nodeId,
-          correctCount: a.correctCount, totalCount: a.totalCount,
-          percentage: (a.percentage * 100).toFixed(2), performanceLevel: a.performanceLevel,
-        });
-      }
-      cohortStatsInput.push({
-        assessmentId,
-        calc: p.calc,
-        // El escritor del read-model trabaja en 0..1; la columna es 0..100.
-        skills: skillAgg.map((a) => ({ studentId: a.studentId, nodeId: a.nodeId, correctCount: a.correctCount, totalCount: a.totalCount, percentage: a.percentage })),
-      });
+      for (const a of skillAgg) srValues.push(toSkillResultRow(assessmentId, a));
+      cohortStatsInput.push({ assessmentId, calc: p.calc, skills: skillAgg.map(toSkillResultForCohort) });
     }
     for (const c of chunk(allResponses, CHUNK)) await tx.insert(responses).values(c);
     for (const c of chunk(arValues, CHUNK)) await tx.insert(assessmentResults).values(c);

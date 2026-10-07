@@ -30,8 +30,12 @@ export type BenchmarkMode = z.infer<typeof benchmarkModeSchema>;
 export const benchmarkSkillAggregateSchema = z.object({
   nodeId: z.string(),
   nodeName: z.string(),
-  achievement: z.number().nullable(), // % logro promedio del grupo
+  /** % de logro del colegio en el nodo = scoreSum / maxSum (docs/diseno-logro-unificado-y-cohorte.md §3.1). */
+  achievement: z.number().nullable(),
   studentCount: z.number().int(),
+  /** Tally del colegio en el nodo: lo que se suma para la muestra. */
+  scoreSum: z.number(),
+  maxSum: z.number(),
 });
 export type BenchmarkSkillAggregate = z.infer<typeof benchmarkSkillAggregateSchema>;
 
@@ -168,9 +172,7 @@ export type BenchmarkInstrumentOption = z.infer<typeof benchmarkInstrumentOption
 export const benchmarkInstrumentListResponseSchema = z.object({
   data: z.array(benchmarkInstrumentOptionSchema),
 });
-export type BenchmarkInstrumentListResponse = z.infer<
-  typeof benchmarkInstrumentListResponseSchema
->;
+export type BenchmarkInstrumentListResponse = z.infer<typeof benchmarkInstrumentListResponseSchema>;
 
 // ── Consulta de comparación ──
 

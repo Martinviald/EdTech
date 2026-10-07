@@ -29,11 +29,17 @@ import { appendFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
-import { and, eq, ne, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, ne, sql } from 'drizzle-orm';
 import { createDbClient, type Database } from '../client';
 import { computeFingerprint, findRepoRoot } from '../lib/cohort-stats-fingerprint';
 import { assessments } from '../schema/assessments';
-import { assessmentItemStats, assessmentResults, readModelStamps } from '../schema/results';
+import {
+  assessmentItemStats,
+  assessmentResults,
+  assessmentSkillStats,
+  readModelStamps,
+  skillResults,
+} from '../schema/results';
 import { organizations } from '../schema/organizations';
 import { withOrgContext } from '../with-org-context';
 
@@ -115,6 +121,52 @@ async function countCoverage(db: Database): Promise<{ inReadModel: number; withR
   }
 
   return { inReadModel, withResults };
+}
+
+/**
+ * Filas con % pero sin tally (`max_sum = 0`): las dejó una versión anterior y el backfill no
+ * las recalculó. Con la regla única del % de logro (docs/diseno-logro-unificado-y-cohorte.md
+ * §3.1) un % sin tally es imposible, y los lectores que suman tallies las leerían como "sin
+ * dato". Mismo filtro por org que `countCoverage`, por la misma razón.
+ */
+async function countStaleTallies(
+  db: Database,
+): Promise<{ skillStats: number; skillResults: number }> {
+  const orgs = await db.select({ id: organizations.id }).from(organizations);
+  let staleSkillStats = 0;
+  let staleSkillResults = 0;
+
+  for (const org of orgs) {
+    const [stats, results] = await withOrgContext(db, org.id, async (tx) => {
+      const s = await tx
+        .select({ n: sql<number>`count(*)::int` })
+        .from(assessmentSkillStats)
+        .innerJoin(assessments, eq(assessments.id, assessmentSkillStats.assessmentId))
+        .where(
+          and(
+            eq(assessments.orgId, org.id),
+            isNotNull(assessmentSkillStats.percentage),
+            eq(assessmentSkillStats.maxSum, '0'),
+          ),
+        );
+      const r = await tx
+        .select({ n: sql<number>`count(*)::int` })
+        .from(skillResults)
+        .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+        .where(
+          and(
+            eq(assessments.orgId, org.id),
+            isNotNull(skillResults.percentage),
+            eq(skillResults.maxSum, '0'),
+          ),
+        );
+      return [Number(s[0]?.n ?? 0), Number(r[0]?.n ?? 0)] as const;
+    });
+    staleSkillStats += stats;
+    staleSkillResults += results;
+  }
+
+  return { skillStats: staleSkillStats, skillResults: staleSkillResults };
 }
 
 function emitOutput(name: string, value: string): void {
@@ -227,6 +279,24 @@ async function runVerify(db: Database): Promise<void> {
     throw new Error(
       `El read-model quedó vacío pero el último estampado tenía ${stamp.assessmentsCount} ` +
         `evaluación(es). Algo lo borró; NO publiques sin repoblar.`,
+    );
+  }
+
+  const stale = await countStaleTallies(db);
+  if (stale.skillStats > 0) {
+    throw new Error(
+      `Hay ${stale.skillStats} fila(s) de assessment_skill_stats con % de logro pero sin tally ` +
+        `(max_sum = 0). El backfill de cohort-stats no las recalculó; corre el backfill ` +
+        `(force_backfill=true) antes de publicar.`,
+    );
+  }
+  // En skill_results puede quedar legítimamente una fila vieja de un nodo que el ítem ya no
+  // etiqueta: el backfill no la reescribe (no mueve números por alumno) y desaparece al
+  // re-puntuar la evaluación. Se avisa sin fallar.
+  if (stale.skillResults > 0) {
+    console.warn(
+      `[cohort-stamp] ⚠️ ${stale.skillResults} fila(s) de skill_results con % pero sin tally. ` +
+        `Son nodos que ya no etiquetan esas preguntas; se limpian al re-puntuar la evaluación.`,
     );
   }
 
