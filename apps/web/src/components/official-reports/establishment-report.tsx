@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type {
   InstrumentSampleEntry,
   OfficialEstablishmentReportResponse,
@@ -8,6 +9,8 @@ import type {
   SexComparisonResult,
 } from '@soe/types';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/routes';
+import { AlertCallout } from '@/components/shared/AlertCallout';
 import {
   ReportShell,
   ReportCover,
@@ -18,19 +21,17 @@ import {
   fmtDateTime,
 } from './report-primitives';
 import { resolveDisclaimers, resolveLevelDefinitions } from './report-copy';
-import { DIA_LEVEL_ORDER, DIA_LEVEL_OF, DIA_LEVEL_LABELS, diaLevelBadgeClass } from './dia-levels';
 import { bandBadgeClass } from './band-levels';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TKT-25 — Informe de establecimiento (Área Académica). Server Component.
-// Reproduce las Tablas 1.1–1.9: una por asignatura con niveles de logro I/II/III
-// por grado, comparación por sexo, y conteos. Si la asignatura trae las bandas de
-// sus instrumentos (`bands`/`bandDistribution`), las filas son esas bandas — la
-// misma clasificación del informe por evaluación. Si no, el colapso de los 4
-// niveles de la plataforma a I/II/III lo aplica el frontend (ver `dia-levels.ts`).
+// TKT-25 — Informe de establecimiento (Área Académica) de UN proceso de medición.
+// Server Component. Reproduce las Tablas 1.1–1.9 por asignatura. Cada columna de
+// grado sale de una sola evaluación del proceso: si el grado tiene más de una, la
+// columna va sin números y lo advierte. Los niveles son SIEMPRE las bandas del
+// instrumento de la columna; una columna sin bandas lo dice ("Sin niveles
+// definidos") en vez de caer a cortes heredados.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Mapea el resultado de comparación por sexo al símbolo oficial. */
 const SEX_SYMBOL: Record<SexComparisonResult, string> = {
   more_female: '+M',
   more_male: '+H',
@@ -43,6 +44,9 @@ const SEX_TITLE: Record<SexComparisonResult, string> = {
   no_difference: 'Sin diferencia significativa',
   insufficient_sample: 'Muestra insuficiente para el cálculo',
 };
+
+const MULTIPLE_ASSESSMENTS_LABEL = 'Más de una evaluación';
+const BANDS_MISSING_LABEL = 'Sin niveles definidos';
 
 export type EstablishmentSamples = ReadonlyMap<string, InstrumentSampleEntry>;
 
@@ -63,8 +67,9 @@ export function EstablishmentReport({
     { label: 'RBD', value: meta.rbd ?? '—' },
     { label: 'Director(a)', value: meta.directorName ?? '—' },
     { label: 'Comuna', value: meta.commune ?? '—' },
+    { label: 'Proceso de medición', value: meta.processName },
     { label: 'Año académico', value: meta.academicYear ? String(meta.academicYear) : '—' },
-    { label: 'Momento', value: meta.periodLabel ?? meta.period ?? 'Todos' },
+    { label: 'Momento', value: meta.periodLabel ?? meta.period ?? '—' },
     { label: 'Generado', value: fmtDateTime(meta.generatedAt) },
   ];
 
@@ -72,8 +77,9 @@ export function EstablishmentReport({
     <ReportShell>
       <ReportCover
         eyebrow="Informe de resultados — Establecimiento"
-        title={meta.orgName}
+        title={meta.processName}
         subtitle={[
+          meta.orgName,
           meta.periodLabel ?? meta.period,
           meta.academicYear ? String(meta.academicYear) : null,
         ]
@@ -92,7 +98,7 @@ export function EstablishmentReport({
 
       {subjects.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No hay asignaturas con datos para el año/momento seleccionado.
+          Este proceso todavía no tiene evaluaciones con asignatura asociada.
         </p>
       ) : (
         subjects.map((subject, i) => (
@@ -120,17 +126,33 @@ function SubjectBlock({
   sexDataAvailable: boolean;
   samples?: EstablishmentSamples | null;
 }) {
+  const multipleColumns = subject.grades.filter((g) => g.multipleAssessments);
   return (
     <ReportSection title={subject.subjectName}>
-      {/* Tabla 1.x — niveles de logro por grado */}
+      <CoverageLine grades={subject.grades} />
+
+      {multipleColumns.length > 0 ? <MultipleAssessmentsNotice grades={multipleColumns} /> : null}
+
       <div className="space-y-2">
         <p className="text-sm font-medium">
           Tabla 1.{tableIndex} — Estudiantes por nivel de logro (%)
         </p>
-        <LevelDistributionTable subject={subject} samples={samples} />
+        {subject.bands && subject.bands.length > 0 ? (
+          <BandDistributionTable
+            grades={subject.grades}
+            bands={subject.bands}
+            cells={subject.bandDistribution}
+            samples={samples}
+          />
+        ) : (
+          <PerColumnBandTables
+            grades={subject.grades}
+            cells={subject.bandDistribution}
+            samples={samples}
+          />
+        )}
       </div>
 
-      {/* Tabla 1.(4+x) — comparación por sexo, o nota si no hay dato */}
       <div className="space-y-2">
         <p className="text-sm font-medium">
           Tabla 1.{tableIndex + 4} — Comparación mujeres vs hombres
@@ -145,53 +167,92 @@ function SubjectBlock({
         )}
       </div>
 
-      {/* Tabla 1.9 — conteos M/H/Total */}
       <div className="space-y-2">
         <p className="text-sm font-medium">Tabla 1.9 — Cantidad de estudiantes evaluados</p>
-        <CountsTable subject={subject} />
+        {subject.counts.length > 0 ? (
+          <CountsTable subject={subject} />
+        ) : (
+          <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
+            Ningún grado de esta asignatura tiene una sola evaluación en el proceso.
+          </p>
+        )}
       </div>
     </ReportSection>
   );
 }
 
-function LevelDistributionTable({
-  subject,
-  samples,
-}: {
-  subject: EstablishmentSubjectSection;
-  samples?: EstablishmentSamples | null;
-}) {
-  if (subject.bands && subject.bands.length > 0 && subject.bandDistribution) {
-    return (
-      <BandDistributionTable
-        grades={subject.grades}
-        bands={subject.bands}
-        cells={subject.bandDistribution}
-        samples={samples}
-      />
-    );
-  }
-  return <LegacyLevelDistributionTable subject={subject} />;
+function CoverageLine({ grades }: { grades: EstablishmentGradeColumn[] }) {
+  return (
+    <p className="text-sm text-muted-foreground">
+      <span className="font-medium text-foreground">Cobertura (evaluados / esperados): </span>
+      {grades.map((g, i) => (
+        <span key={g.gradeId} className="whitespace-nowrap">
+          {i > 0 ? ' · ' : null}
+          {g.gradeName} {g.coverage.evaluated} / {g.coverage.expected ?? '—'}
+        </span>
+      ))}
+    </p>
+  );
 }
 
-/** % de la muestra por banda para cada grado con un solo instrumento y la misma escala. */
-function sampleSharesByGrade(
-  grades: EstablishmentGradeColumn[],
+function MultipleAssessmentsNotice({ grades }: { grades: EstablishmentGradeColumn[] }) {
+  return (
+    <AlertCallout tone="warning" title="Hay más de una evaluación de este grado en el proceso">
+      <p className="text-sm">
+        Esos grados se muestran sin números para no mezclar resultados de evaluaciones distintas.
+        Deja una sola evaluación por grado y asignatura en el proceso para verlos.
+      </p>
+      <ul className="mt-2 space-y-1 text-sm">
+        {grades.map((g) => (
+          <li key={g.gradeId}>
+            <span className="font-medium">{g.gradeName}:</span>{' '}
+            {g.assessments.map((a, i) => (
+              <span key={a.id}>
+                {i > 0 ? ', ' : null}
+                <Link href={ROUTES.evaluacion(a.id)} className="underline underline-offset-2">
+                  {a.name ?? 'Evaluación sin nombre'}
+                </Link>
+              </span>
+            ))}
+          </li>
+        ))}
+      </ul>
+    </AlertCallout>
+  );
+}
+
+function columnStatusLabel(grade: EstablishmentGradeColumn): string | null {
+  if (grade.multipleAssessments) return MULTIPLE_ASSESSMENTS_LABEL;
+  if (grade.bandsMissing) return BANDS_MISSING_LABEL;
+  return null;
+}
+
+function sampleSharesFor(
+  grade: EstablishmentGradeColumn,
   bands: PerformanceBandView[],
   samples: EstablishmentSamples | null | undefined,
-): Map<string, Map<string, number>> {
-  const result = new Map<string, Map<string, number>>();
-  if (!samples) return result;
-  for (const grade of grades) {
-    const bandCounts = grade.instrumentId
-      ? samples.get(grade.instrumentId)?.global?.bandCounts
-      : null;
-    if (!bandCounts || bandCounts.length === 0) continue;
-    const total = bandCounts.reduce((acc, band) => acc + band.count, 0);
-    const shares = new Map(bandCounts.map((band) => [band.bandKey, (band.count / total) * 100]));
-    if (total > 0 && bands.every((band) => shares.has(band.key))) result.set(grade.gradeId, shares);
-  }
-  return result;
+): Map<string, number> | null {
+  if (!samples || !grade.instrumentId) return null;
+  const bandCounts = samples.get(grade.instrumentId)?.global?.bandCounts;
+  if (!bandCounts || bandCounts.length === 0) return null;
+  const total = bandCounts.reduce((acc, band) => acc + band.count, 0);
+  if (total === 0) return null;
+  const shares = new Map(bandCounts.map((band) => [band.bandKey, (band.count / total) * 100]));
+  return bands.every((band) => shares.has(band.key)) ? shares : null;
+}
+
+function BandBadge({ band, bands }: { band: PerformanceBandView; bands: PerformanceBandView[] }) {
+  const orders = bands.map((b) => b.order);
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
+        bandBadgeClass(band.order, orders),
+      )}
+    >
+      {band.label}
+    </span>
+  );
 }
 
 function BandDistributionTable({
@@ -206,9 +267,10 @@ function BandDistributionTable({
   samples?: EstablishmentSamples | null;
 }) {
   const byCell = new Map(cells.map((c) => [`${c.gradeId}|${c.bandKey}`, c]));
-  const sampleShares = sampleSharesByGrade(grades, bands, samples);
   const orderedBands = [...bands].sort((a, b) => a.order - b.order);
-  const orders = orderedBands.map((b) => b.order);
+  const sharesByGrade = new Map(
+    grades.map((g) => [g.gradeId, g.bands ? sampleSharesFor(g, orderedBands, samples) : null]),
+  );
 
   return (
     <div className="overflow-x-auto rounded-md border">
@@ -220,18 +282,11 @@ function BandDistributionTable({
           {orderedBands.map((band) => (
             <tr key={band.key} className="border-b last:border-0">
               <th className="whitespace-nowrap px-3 py-2 text-left font-medium">
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
-                    bandBadgeClass(band.order, orders),
-                  )}
-                >
-                  {band.label}
-                </span>
+                <BandBadge band={band} bands={orderedBands} />
               </th>
               {grades.map((g) => {
                 const cell = byCell.get(`${g.gradeId}|${band.key}`);
-                const sampleShare = sampleShares.get(g.gradeId)?.get(band.key);
+                const sampleShare = sharesByGrade.get(g.gradeId)?.get(band.key);
                 return (
                   <td key={g.gradeId} className="px-3 py-2 text-center tabular-nums">
                     {cell ? fmtPct(cell.percentage, 0) : '—'}
@@ -251,53 +306,59 @@ function BandDistributionTable({
   );
 }
 
-function LegacyLevelDistributionTable({ subject }: { subject: EstablishmentSubjectSection }) {
-  const { grades, levelDistribution } = subject;
-  // Agrega las celdas (grade, platformLevel) al numeral I/II/III correspondiente.
-  // clave: `${gradeId}|${diaLevel}` → { count, total }
-  const agg = new Map<string, { count: number; total: number }>();
-  const gradeTotal = new Map<string, number>();
-  for (const cell of levelDistribution) {
-    const dia = DIA_LEVEL_OF[cell.level];
-    const key = `${cell.gradeId}|${dia}`;
-    const prev = agg.get(key) ?? { count: 0, total: cell.total };
-    agg.set(key, { count: prev.count + cell.count, total: cell.total });
-    gradeTotal.set(cell.gradeId, cell.total);
-  }
-
+function PerColumnBandTables({
+  grades,
+  cells,
+  samples,
+}: {
+  grades: EstablishmentGradeColumn[];
+  cells: EstablishmentBandCell[];
+  samples?: EstablishmentSamples | null;
+}) {
+  const byCell = new Map(cells.map((c) => [`${c.gradeId}|${c.bandKey}`, c]));
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <table className="w-full min-w-[480px] border-collapse text-sm">
-        <thead>
-          <GradeHeader grades={grades} firstCol="Nivel" />
-        </thead>
-        <tbody>
-          {DIA_LEVEL_ORDER.map((dia) => (
-            <tr key={dia} className="border-b last:border-0">
-              <th className="whitespace-nowrap px-3 py-2 text-left font-medium">
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
-                    diaLevelBadgeClass(dia),
-                  )}
-                >
-                  {DIA_LEVEL_LABELS[dia]}
-                </span>
-              </th>
-              {grades.map((g) => {
-                const entry = agg.get(`${g.gradeId}|${dia}`);
-                const total = gradeTotal.get(g.gradeId) ?? 0;
-                const pct = entry && total > 0 ? (entry.count / total) * 100 : null;
-                return (
-                  <td key={g.gradeId} className="px-3 py-2 text-center tabular-nums">
-                    {total > 0 ? fmtPct(pct, 0) : '—'}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="grid gap-3 sm:grid-cols-2">
+      {grades.map((g) => {
+        const status = columnStatusLabel(g);
+        const bands = g.bands ? [...g.bands].sort((a, b) => a.order - b.order) : null;
+        const shares = bands ? sampleSharesFor(g, bands, samples) : null;
+        return (
+          <div key={g.gradeId} className="rounded-md border">
+            <p className="border-b bg-muted/50 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {g.gradeName}
+            </p>
+            {bands && !status ? (
+              <table className="w-full border-collapse text-sm">
+                <tbody>
+                  {bands.map((band) => {
+                    const cell = byCell.get(`${g.gradeId}|${band.key}`);
+                    const sampleShare = shares?.get(band.key);
+                    return (
+                      <tr key={band.key} className="border-b last:border-0">
+                        <th className="whitespace-nowrap px-3 py-2 text-left font-medium">
+                          <BandBadge band={band} bands={bands} />
+                        </th>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {cell ? fmtPct(cell.percentage, 0) : '—'}
+                          {sampleShare === undefined ? null : (
+                            <span className="block text-xs text-muted-foreground print:hidden">
+                              Muestra {fmtPct(sampleShare, 0)}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <p className="px-3 py-3 text-sm text-muted-foreground">
+                {status ?? BANDS_MISSING_LABEL}
+              </p>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -382,11 +443,19 @@ function GradeHeader({
   return (
     <tr className="border-b bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
       <th className="px-3 py-2 font-medium">{firstCol}</th>
-      {grades.map((g) => (
-        <th key={g.gradeId} className="px-3 py-2 text-center font-medium">
-          {g.gradeName}
-        </th>
-      ))}
+      {grades.map((g) => {
+        const status = columnStatusLabel(g);
+        return (
+          <th key={g.gradeId} className="px-3 py-2 text-center font-medium">
+            {g.gradeName}
+            {status ? (
+              <span className="block text-2xs font-normal normal-case tracking-normal">
+                {status}
+              </span>
+            ) : null}
+          </th>
+        );
+      })}
     </tr>
   );
 }

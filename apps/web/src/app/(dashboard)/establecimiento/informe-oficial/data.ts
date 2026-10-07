@@ -1,19 +1,10 @@
 import { cache } from 'react';
 
 import { apiGet } from '@/lib/api';
-import type {
-  DashboardFilterOptionsResponse,
-  OfficialEstablishmentReportResponse,
-} from '@soe/types';
+import type { MeasurementProcessListResponse } from '@soe/types';
 
-export const getEstablishmentFilterOptions = cache(() =>
-  apiGet<DashboardFilterOptionsResponse>('/dashboards/filters').catch(
-    (): DashboardFilterOptionsResponse | null => null,
-  ),
-);
-
-export const getEstablishmentReport = cache((querySuffix: string) =>
-  apiGet<OfficialEstablishmentReportResponse>(`/reports/establishment${querySuffix}`).catch(
-    (): OfficialEstablishmentReportResponse | null => null,
+export const getEstablishmentProcessOptions = cache(() =>
+  apiGet<MeasurementProcessListResponse>('/measurement-processes?limit=100').catch(
+    (): MeasurementProcessListResponse | null => null,
   ),
 );

@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
-import type { PeriodFilterOption } from '@soe/types';
+import { INSTRUMENT_APPLICATION_PERIOD_LABELS, type MeasurementProcessModel } from '@soe/types';
 import {
   Select,
   SelectContent,
@@ -11,58 +11,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { TopProgressBar } from '@/components/shared/TopProgressBar';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Filtro del informe de establecimiento (TKT-25). El endpoint agrega por
-// grado × asignatura para un año académico. El "momento" (period) es un string
-// genérico de `assessments.config.period` que no se enumera desde ningún
-// endpoint, por lo que aquí sólo se expone el selector de año académico
-// (data-driven de `options.periods`). Sin selección, el backend usa el año
-// marcado `is_current`. El `period` puede pasarse por querystring si un enlace
-// externo lo trae, pero no se hardcodea una lista de momentos.
-// ─────────────────────────────────────────────────────────────────────────────
+export type EstablishmentProcessOption = Pick<
+  MeasurementProcessModel,
+  'id' | 'name' | 'academicYear' | 'period'
+>;
 
-const ALL = '__all__';
+function describe(process: EstablishmentProcessOption): string {
+  const details = [
+    process.period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[process.period] : null,
+    process.academicYear ? String(process.academicYear) : null,
+  ].filter(Boolean);
+  return details.length > 0 ? `${process.name} (${details.join(' · ')})` : process.name;
+}
 
-export function EstablishmentReportFilters({
-  academicYears,
+/**
+ * Selector del proceso de medición del informe del establecimiento. El informe se
+ * calcula por proceso (nunca por año), así que elegir uno navega con `processId`.
+ */
+export function EstablishmentReportProcessPicker({
+  processes,
   value,
   basePath,
 }: {
-  academicYears: PeriodFilterOption[];
-  value: { academicYearId?: string };
+  processes: EstablishmentProcessOption[];
+  value: string | undefined;
   basePath: string;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  const onChange = useCallback(
-    (next: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (next && next !== ALL) {
-        params.set('academicYearId', next);
-      } else {
-        params.delete('academicYearId');
-      }
-      const qs = params.toString();
-      router.push(`${basePath}${qs ? `?${qs}` : ''}` as Route);
-    },
-    [router, searchParams, basePath],
-  );
+  const onChange = (processId: string) => {
+    const params = new URLSearchParams({ processId });
+    startTransition(() => router.push(`${basePath}?${params.toString()}` as Route));
+  };
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 print:hidden">
-      <div className="flex min-w-[180px] flex-col gap-1">
-        <span className="text-xs font-medium text-muted-foreground">Año académico</span>
-        <Select value={value.academicYearId ?? ALL} onValueChange={onChange}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Año en curso" />
+    <div className="relative flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4 print:hidden">
+      <TopProgressBar active={isPending} />
+      <div className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:min-w-[320px]">
+        <span className="text-xs font-medium text-muted-foreground">Proceso de medición</span>
+        <Select value={value} onValueChange={onChange} disabled={processes.length === 0}>
+          <SelectTrigger className="w-full sm:w-[360px]">
+            <SelectValue
+              placeholder={
+                processes.length === 0 ? 'No hay procesos de medición' : 'Elige un proceso'
+              }
+            />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Año en curso</SelectItem>
-            {academicYears.map((y) => (
-              <SelectItem key={y.id} value={y.id}>
-                {y.label}
+            {processes.map((process) => (
+              <SelectItem key={process.id} value={process.id}>
+                {describe(process)}
               </SelectItem>
             ))}
           </SelectContent>
