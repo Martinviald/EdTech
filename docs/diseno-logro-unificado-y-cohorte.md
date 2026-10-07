@@ -187,6 +187,7 @@ derivadas.
 | A-4 | `aggregateReference` (`/detalle`, nivel) da 0 a una pregunta sin respuestas corregidas, y `attachCorrectRates` da `null` | `null` en ambos                                                                                    |
 | A-5 | La fila "% Logro nivel" recalcula su total con aciertos ÷ respuestas e ignora el `rate` del API                          | Usar los tallies del API                                                                           |
 | A-6 | `isComplete` existe pero ninguna pantalla lo muestra                                                                     | Aviso en `/resultados` y `/detalle` de una evaluación: "N alumnos con preguntas por corregir" (D6) |
+| A-7 | 2 evaluaciones importadas guardan el logro por nodo en escala 0..1 (§8)                                                  | Re-derivar desde sus estadísticas por ítem (A2-5); `achievementPct` fija una sola escala           |
 
 ### 4.6 Cambios de número esperados
 
@@ -299,28 +300,78 @@ distinta. Guardar `score_sum / max_sum` deja una sola forma de combinar: sumar.
 
 ## 7. Riesgos
 
-| Riesgo                                                 | Mitigación                                                                                                                        |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| Los colegios ven números distintos de un día para otro | Informe de diferencias antes de promover; aviso a los colegios (lo coordina el equipo)                                            |
-| Deploy con tablas sin recalcular                       | Backfills como pasos del deploy, con sello y un chequeo que falla si quedan filas con `max_sum = 0` y respuestas corregidas       |
-| Umbrales de alertas calibrados con la fórmula vieja    | Se mantienen los valores; el informe de diferencias incluye el conteo de alertas antes y después; el reajuste se decide con datos |
-| Una vista olvidada sigue con la fórmula vieja          | Inventario §9 como checklist del PR, más un test que recorre los servicios buscando `avg(` sobre `percentage`                     |
-| Evaluaciones sin puntajes (ver §8)                     | Se cuentan antes de cambiar nada                                                                                                  |
+| Riesgo                                                  | Mitigación                                                                                                                        |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Los colegios ven números distintos de un día para otro  | Informe de diferencias antes de promover; aviso a los colegios (lo coordina el equipo)                                            |
+| Deploy con tablas sin recalcular                        | Backfills como pasos del deploy, con sello y un chequeo que falla si quedan filas con `max_sum = 0` y respuestas corregidas       |
+| Umbrales de alertas calibrados con la fórmula vieja     | Se mantienen los valores; el informe de diferencias incluye el conteo de alertas antes y después; el reajuste se decide con datos |
+| Una vista olvidada sigue con la fórmula vieja           | Inventario §9 como checklist del PR, más un test que recorre los servicios buscando `avg(` sobre `percentage`                     |
+| Pendientes de corrección inflan a CSCJ en 2025 (ver §8) | Aviso de pendientes (A-6) y decisión sobre la muestra (§8)                                                                        |
 
 ---
 
-## 8. Pendiente de datos (no de diseño)
+## 8. Verificación en demo (A0, 2026-10-06)
 
-- **Evaluaciones sin datos de puntaje.**
-  - El backfill de niveles del Diagnóstico (`apps/api/scripts/backfill-student-levels.ts`) escribe un
-    `percentage` por alumno leído del gráfico del informe, sin `total_score / max_score` ni
-    estadísticas por ítem.
-  - Si una evaluación sólo tiene eso, la regla no tiene con qué calcular y el grupo queda sin %; se
-    muestra la distribución por niveles.
-  - Hay que contar en demo cuántas son antes de la fase A3, junto con el usuario. Si son muchas, se
-    decide ahí cómo presentarlas.
-- **Secciones electivas en DIA 2026.** Verificar en demo si algún instrumento DIA 2026 tiene secciones
-  electivas. Si tiene, revisar las respuestas que cargó el seed sin guarda (A-3).
+Medido en la base de demo, en solo lectura.
+
+**Evaluaciones sin datos de puntaje: ninguna.**
+
+| Colegio                                     | Evaluaciones | Respuestas por alumno | Estadísticas por ítem con máximo |
+| ------------------------------------------- | ------------ | --------------------- | -------------------------------- |
+| CSCJ, `item_level`                          | 238          | sí                    | sí                               |
+| CSCJ, `aggregate_only` (informes oficiales) | 6            | no                    | sí                               |
+| San Agustín                                 | 14           | sí                    | sí                               |
+| Andes Centro (sintético)                    | 10           | sí                    | sí                               |
+
+- Las 4 evaluaciones del Diagnóstico 2025 cargadas desde el gráfico del informe tienen `percentage`
+  por alumno sin puntaje. Igual tienen estadísticas por ítem importadas, así que el % del grupo se
+  calcula con la regla. El % de cada alumno sigue siendo el del informe y sólo se usa para su banda.
+
+**Secciones electivas en DIA: ninguna.**
+
+- Sólo 3 instrumentos PAES CIE tienen secciones electivas. Ningún alumno tiene respuestas en más de una
+  rama. La guarda del seed DIA 2026 (A-3) queda como prevención.
+
+**Cuánto cambian los números con la regla única.**
+
+| Nivel                                 | Comparación                    | CSCJ                                                   | San Agustín                                |
+| ------------------------------------- | ------------------------------ | ------------------------------------------------------ | ------------------------------------------ |
+| % general por evaluación              | A (promedio de %) vs B         | máx 0,22 pp (`item_level`), 0,68 pp (`aggregate_only`) | 0                                          |
+| % por nodo, origen calculado          | A vs B                         | media 0,04 pp; 12 de 8.120 celdas ≥ 5 pp               | 0                                          |
+| % por nodo usado en alertas y muestra | C (aciertos ÷ respuestas) vs B | media 1,35 pp, máx 57 pp; 678 celdas ≥ 5 pp            | media 1,58 pp, máx 39 pp; 43 celdas ≥ 5 pp |
+
+- El cambio visible en las vistas principales es mínimo.
+- El cambio grande está en lo que hoy usa la fórmula C: las alertas por nodo y por pregunta, la tabla
+  de especificaciones, el panorama del alumno por habilidad y **el "Muestra X%" por nodo**, que hoy
+  está desviado hasta 39 pp para San Agustín.
+
+**Pendientes de corrección: el efecto no es menor en CSCJ.**
+
+| Año · período      | Evaluaciones con pendientes | Preguntas pendientes | En blanco | Inflación media | Máx     |
+| ------------------ | --------------------------- | -------------------- | --------- | --------------- | ------- |
+| 2025 · Diagnóstico | 29                          | 2.910                | 1.829     | 6,5 pp          | 22,3 pp |
+| 2025 · Intermedio  | 20                          | 2.357                | 1.814     | 8,7 pp          | 38,0 pp |
+| 2025 · Cierre      | 46                          | 2.708                | 2.708     | 4,6 pp          | 20,1 pp |
+| 2026 · Diagnóstico | 34                          | 2.140                | 2.140     | 4,2 pp          | 9,2 pp  |
+| 2026 · Intermedio  | 12                          | 34                   | 12        | 0,3 pp          | 1,9 pp  |
+
+- "Inflación" = % excluyendo pendientes menos % contándolas como 0.
+- 141 de 238 evaluaciones de CSCJ tienen preguntas de desarrollo pendientes: 10.115 respuestas, 8.491
+  de ellas en blanco. San Agustín y Andes Centro no tienen.
+- **El Monitoreo Intermedio 2026, que es lo que comparten CSCJ y San Agustín en la muestra, casi no se
+  ve afectado (0,3 pp).** Las comparaciones contra la muestra de hoy son justas. Una muestra con
+  evaluaciones de 2025 no lo sería, porque CSCJ quedaría inflado frente a colegios que corrigieron
+  todo.
+- Esto reabre D6: el aviso de pendientes sigue en el alcance (A-6), pero conviene decidir si la
+  muestra excluye o marca las evaluaciones con pendientes.
+
+**Error vivo encontrado: escala del logro por nodo importado (A-7).**
+
+- `MATH intermedio 2025 — 6 A` y `— 6 B` (47 filas cada una, escritas el 2026-07-21) guardan
+  `assessment_skill_stats.percentage` en escala 0..1 (p. ej. `0.98`) en vez de 0..100. Hoy esos nodos
+  se muestran como "1%".
+- El importador actual ya multiplica por 100, así que lo escribió una versión anterior. Se corrige
+  con la pasada de re-derivación de A2-5, que reescribe esas filas desde sus estadísticas por ítem.
 
 ---
 

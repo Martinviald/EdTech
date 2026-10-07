@@ -56,20 +56,24 @@ agente se le pasan las reglas de `.claude/rules/backend` (cero comentarios en `a
 
 ## 2. Decisiones
 
-Todas tomadas (§2 del diseño). Queda un pendiente **de datos**, no de diseño: cuántas evaluaciones no
-tienen puntajes (§8). Se cuenta en A0 y, si son muchas, se decide ahí cómo presentarlas.
+Tomadas (§2 del diseño). A0 ya se hizo (§8 del diseño): no hay evaluaciones sin puntaje y DIA no tiene
+secciones electivas. Queda una decisión abierta que salió de los datos: **qué hace la muestra con las
+evaluaciones que tienen preguntas pendientes** (en CSCJ inflan el % 5 pp en promedio en 2025).
 
 ---
 
 ## 3. PR A — % de logro unificado
 
-### A0 · Verificación de datos (con el usuario, sin código)
+### A0 · Verificación de datos en demo ✅ (2026-10-06)
 
-| #    | Qué                               | Cómo                                                                                                                    | Sale                                                  |
-| ---- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| A0-1 | Evaluaciones sin datos de puntaje | Contar en demo las evaluaciones con resultados donde `total_score / max_score` es null y no hay `assessment_item_stats` | Lista por colegio. Si hay, decisión de presentación.  |
-| A0-2 | Secciones electivas en DIA 2026   | ¿Algún instrumento DIA 2026 tiene `instrument_sections.role = 'elective'`?                                              | Si hay, revisar respuestas de ramas no rendidas (A-3) |
-| A0-3 | Foto "antes"                      | Correr `snapshot-panorama` y el script de A5 sobre demo, sin cambios                                                    | Base del informe de diferencias                       |
+Resultados en §8 del diseño:
+
+| #    | Qué                               | Resultado                                                                                                                                                                    |
+| ---- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A0-1 | Evaluaciones sin datos de puntaje | Ninguna: todas tienen estadísticas por ítem con máximo                                                                                                                       |
+| A0-2 | Secciones electivas en DIA        | Ninguna (sólo PAES CIE, sin respuestas cruzadas entre ramas)                                                                                                                 |
+| A0-3 | Foto "antes"                      | No hace falta guardarla: A5-1 recalcula la fórmula vieja y la nueva sobre los mismos datos en el mismo momento, que es una comparación más estricta que una foto de otro día |
+| A0-4 | Hallazgos                         | Pendientes que inflan a CSCJ en 2025; logro por nodo en escala 0..1 en 2 evaluaciones (A-7)                                                                                  |
 
 ### A1 · Definición en `@soe/types` y correcciones por alumno
 
@@ -90,7 +94,7 @@ tienen puntajes (§8). Se cuenta en A0 y, si son muchas, se decide ahí cómo pr
 | A2-2 | Escritores: persistencia de `skill_results`, cohorte calculada e importada, importador de informes oficiales                                                                                         | `persist-results.ts`, `packages/db/src/queries/cohort-stats.ts`, `official-report-import.service.ts` | Toda fila nueva sale con sumas y `percentage = sumas`                         |
 | A2-3 | Refresh de la muestra con tallies: `score_sum / max_sum` por colegio e instrumento (desde `assessment_item_stats`), `per_skill[].scoreSum / maxSum` (desde `assessment_skill_stats`), sumas por ítem | `packages/db/src/queries/benchmark-aggregates.ts` (+spec)                                            | `avg_achievement = sumas`; sin `pctSum`                                       |
 | A2-4 | `db:backfill:student-scores`: rellena `skill_results.score_sum / max_sum` desde `responses`, por evaluación, idempotente, con `--dry-run` que reporta discrepancias de `percentage`                  | `packages/db/src/scripts/backfill-student-scores.ts`, `package.json`                                 | Dry-run en local: 0 discrepancias salvo las de A1-2 (todo pendiente)          |
-| A2-5 | Backfill de cohorte: pasada para evaluaciones `aggregate_only` (re-deriva skill stats importadas desde sus item stats)                                                                               | `backfill-cohort-stats.ts`, huella en `lib/cohort-stats-fingerprint.ts`                              | La huella cambia → el deploy reconstruye                                      |
+| A2-5 | Backfill de cohorte: pasada para evaluaciones `aggregate_only` (re-deriva skill stats importadas desde sus item stats; corrige A-7)                                                                  | `backfill-cohort-stats.ts`, huella en `lib/cohort-stats-fingerprint.ts`                              | La huella cambia → el deploy reconstruye                                      |
 | A2-6 | Deploy: paso del backfill de A2-4 con sello propio y chequeo final (falla si hay filas con respuestas corregidas y `max_sum = 0`)                                                                    | `.github/workflows/deploy-backend.yml`, script de chequeo                                            | Orden de §1.3; un deploy sin backfill falla en vez de publicar vacío          |
 
 ### A3 · Lectores del API (inventario §9 del diseño)
