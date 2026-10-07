@@ -1,11 +1,10 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { BarChart3, BookOpen, FileText, LayoutDashboard, ListChecks, Sparkles } from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
-import { Button } from '@/components/ui/button';
 import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
@@ -14,14 +13,16 @@ import {
   AI_ANALYSIS_VIEWER_ROLES,
   REMEDIAL_VIEWER_ROLES,
   OFFICIAL_REPORT_VIEWER_ROLES,
+  COMPARE_RESULTS_VIEWER_ROLES,
+  type AssessmentComparisonCandidatesResponse,
   type AssessmentReportResponse,
   type InstrumentAttachmentModel,
 } from '@soe/types';
 import { PageActions, PageContainer } from '@/components/shared';
 import { SetPageTitle } from '@/components/layout/page-title-context';
 import { AskAiButton } from '@/components/assistant';
-import { EnunciadoViewButton } from '@/components/instruments/EnunciadoViewButton';
 import { AssessmentTabsNav, type HubTab } from './components/assessment-tabs-nav';
+import { AssessmentActionsMenu, type CompareMenuEntry } from './components/assessment-actions-menu';
 import { HubAssistantContext } from './components/hub-assistant-context';
 import { getAssessmentReportMeta } from './data';
 
@@ -69,9 +70,9 @@ export default async function EvaluacionLayout({
   const roles = session.user.roles;
   const title = meta.assessmentName ?? meta.instrumentName;
 
-  // PDF del enunciado del instrumento de esta evaluación (si existe). Se ofrece en
-  // el encabezado del hub para abrirlo en una pestaña aparte y consultarlo junto a
-  // los resultados. Falla en silencio (botón oculto) si el rol no puede leer el
+  // PDF del enunciado del instrumento de esta evaluación (si existe). Se ofrece en el
+  // menú ⋮ del hub para abrirlo en una pestaña aparte y consultarlo junto a
+  // los resultados. Falla en silencio (opción oculta) si el rol no puede leer el
   // instrumento o el almacenamiento no está configurado.
   let enunciadoPdf: InstrumentAttachmentModel | null = null;
   try {
@@ -136,6 +137,17 @@ export default async function EvaluacionLayout({
       : []),
   ];
 
+  const compare: CompareMenuEntry | null = canAccess(roles, COMPARE_RESULTS_VIEWER_ROLES)
+    ? {
+        href: `${ROUTES.compararInstrumentos}?baseId=${assessmentId}` as Route,
+        comparableCount: apiGet<AssessmentComparisonCandidatesResponse>(
+          `/assessment-comparisons/candidates?baseAssessmentId=${assessmentId}`,
+        )
+          .then((candidates) => candidates.data.length)
+          .catch(() => 0),
+      }
+    : null;
+
   const date = formatDate(meta.administeredAt);
   // Sólo identidad de la evaluación (instrumento/asignatura/grado/fecha). El nº de
   // alumnos depende del filtro de curso y el layout no recibe `searchParams`, así
@@ -161,11 +173,12 @@ export default async function EvaluacionLayout({
 
       <PageActions>
         <span className="mr-auto truncate text-sm text-muted-foreground">{description}</span>
-        {enunciadoPdf ? <EnunciadoViewButton instrumentId={meta.instrumentId} /> : null}
-        <Button asChild variant="outline" size="sm">
-          <Link href={ROUTES.bancoItemSpecTable(meta.instrumentId)}>Tabla de especificaciones</Link>
-        </Button>
         <AskAiButton prompt="Analiza esta evaluación: ¿qué cursos y habilidades están más descendidos y qué priorizar?" />
+        <AssessmentActionsMenu
+          instrumentId={meta.instrumentId}
+          showEnunciado={enunciadoPdf !== null}
+          compare={compare}
+        />
       </PageActions>
 
       {children}
