@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/shared';
+import { StudentLink } from '@/components/students/student-link';
 import {
   Table,
   TableBody,
@@ -124,7 +125,11 @@ export default async function ClassGroupDetailPage({
                 <TableBody>
                   {students.map((s) => (
                     <TableRow key={s.studentId}>
-                      <TableCell className="font-medium">{s.lastName}</TableCell>
+                      <TableCell className="font-medium">
+                        <StudentLink studentId={s.studentId} roles={session.user.roles}>
+                          {s.lastName}
+                        </StudentLink>
+                      </TableCell>
                       <TableCell>{s.firstName}</TableCell>
                       <TableCell className="text-muted-foreground tabular-nums">{s.rut}</TableCell>
                       <TableCell>

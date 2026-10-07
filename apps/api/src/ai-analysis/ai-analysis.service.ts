@@ -19,7 +19,10 @@ import {
 } from '@soe/db';
 import {
   INSTRUMENT_COMPARISON_ANALYSIS_TYPE,
+  areInstrumentsComparable,
+  buildInstrumentHistoryKey,
   type AiAnalysisModel,
+  type ComparabilityInstrumentRef,
   type ComparableAssessment,
   type CompareInstrumentsDto,
   type GenerateAnalysisDto,
@@ -463,7 +466,7 @@ export class AiAnalysisService {
   /**
    * Lista las evaluaciones de la org que YA tienen resultados, con metadatos de su
    * instrumento (tipo, año, grado, asignatura) y cobertura. El frontend agrupa por
-   * `comparableKey` (tipo|grado|asignatura, derivado de datos, NO hardcodeado): solo
+   * `comparableKey` (`buildInstrumentHistoryKey`: tipo|asignatura|grado|línea): solo
    * dos candidatas del mismo grupo son comparables. Vista org-wide (roles de
    * generación de análisis IA).
    */
@@ -493,6 +496,7 @@ export class AiAnalysisService {
           gradeName: grades.name,
           subjectId: instruments.subjectId,
           subjectName: subjects.name,
+          trackId: instruments.trackId,
           studentsEvaluated: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
         })
         .from(assessments)
@@ -517,6 +521,7 @@ export class AiAnalysisService {
           grades.name,
           instruments.subjectId,
           subjects.name,
+          instruments.trackId,
         )
         .orderBy(desc(assessments.administeredAt));
     });
@@ -534,7 +539,15 @@ export class AiAnalysisService {
       subjectName: r.subjectName,
       studentsEvaluated: Number(r.studentsEvaluated),
       administeredAt: r.administeredAt ? r.administeredAt.toISOString() : null,
-      comparableKey: comparableKey(r.instrumentType, r.gradeId, r.subjectId),
+      comparableKey: buildInstrumentHistoryKey(
+        this.toComparabilityRef({
+          instrumentId: r.instrumentId,
+          type: r.instrumentType,
+          gradeId: r.gradeId,
+          subjectId: r.subjectId,
+          trackId: r.trackId,
+        }),
+      ),
     }));
   }
 
@@ -550,6 +563,7 @@ export class AiAnalysisService {
         type: sql<string>`${instruments.type}::text`,
         gradeId: instruments.gradeId,
         subjectId: instruments.subjectId,
+        trackId: instruments.trackId,
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
@@ -564,13 +578,13 @@ export class AiAnalysisService {
       type: row.type,
       gradeId: row.gradeId,
       subjectId: row.subjectId,
+      trackId: row.trackId,
     };
   }
 
   /**
-   * Comparabilidad por DATOS: mismo tipo de instrumento + mismo grado + misma
-   * asignatura, y distintos instrumentos. No hay strings hardcodeados ("DIA", etc.):
-   * la regla se deriva de `type/gradeId/subjectId`, extensible a SIMCE/PAES/Cambridge.
+   * Comparabilidad por DATOS: `areInstrumentsComparable` (la misma regla que el
+   * comparador sin IA), y distintos instrumentos.
    */
   private assertComparable(a: ComparableInstrument, b: ComparableInstrument): void {
     if (a.instrumentId === b.instrumentId) {
@@ -578,11 +592,23 @@ export class AiAnalysisService {
         'Las dos evaluaciones usan el mismo instrumento; selecciona instrumentos distintos.',
       );
     }
-    if (a.type !== b.type || a.gradeId !== b.gradeId || a.subjectId !== b.subjectId) {
+    if (!areInstrumentsComparable(this.toComparabilityRef(a), this.toComparabilityRef(b))) {
       throw new BadRequestException(
-        'Los instrumentos no son comparables: deben ser del mismo tipo, grado y asignatura.',
+        'Los instrumentos no son comparables: deben ser del mismo tipo, grado, asignatura y línea de prueba.',
       );
     }
+  }
+
+  private toComparabilityRef(instrument: ComparableInstrument): ComparabilityInstrumentRef {
+    return {
+      instrumentId: instrument.instrumentId,
+      type: instrument.type,
+      subjectId: instrument.subjectId,
+      gradeId: instrument.gradeId,
+      applicationPeriod: null,
+      year: null,
+      trackId: instrument.trackId ?? null,
+    };
   }
 
   /**
@@ -700,12 +726,5 @@ interface ComparableInstrument {
   type: string;
   gradeId: string | null;
   subjectId: string | null;
-}
-
-/**
- * Clave de comparabilidad derivada de datos: `tipo|grado|asignatura`. Dos
- * evaluaciones son comparables sii comparten esta clave. No hardcodea instrumentos.
- */
-function comparableKey(type: string, gradeId: string | null, subjectId: string | null): string {
-  return `${type}|${gradeId ?? ''}|${subjectId ?? ''}`;
+  trackId?: string | null;
 }

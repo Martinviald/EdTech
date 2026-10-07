@@ -128,6 +128,18 @@ export function buildInstrumentHistoryKey(ref: ComparabilityInstrumentRef): stri
   return withTrack([ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE].join('|'), ref);
 }
 
+/**
+ * ¿Se pueden comparar dos evaluaciones lado a lado? Sí cuando sus instrumentos miden lo
+ * mismo (tipo, asignatura, grado y rama electiva): la misma historia de instrumento, en
+ * cualquier año o momento. Es la regla del comparador de evaluaciones, con y sin IA.
+ */
+export function areInstrumentsComparable(
+  a: ComparabilityInstrumentRef,
+  b: ComparabilityInstrumentRef,
+): boolean {
+  return buildInstrumentHistoryKey(a) === buildInstrumentHistoryKey(b);
+}
+
 /** El momento anterior del ciclo, o `null` si es el primero (o no declara momento). */
 export function previousApplicationPeriod(
   period: InstrumentApplicationPeriod | null,

@@ -10,6 +10,7 @@ import {
   OFFICIAL_REPORT_VIEWER_ROLES,
   sampleSizeLabel,
   type OfficialCourseReportResponse,
+  type UserRole,
 } from '@soe/types';
 import { EmptyState, SampleDeltaChip } from '@/components/shared';
 import { CourseReport } from '@/components/official-reports/course-report';
@@ -35,6 +36,7 @@ export default async function InformeOficialPage({
   if (!session?.user) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, OFFICIAL_REPORT_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
+  const roles = session.user.roles;
   const { assessmentId } = await params;
   const sp = await searchParams;
   // El informe oficial por-evaluación se acota a UN curso de los que la rindieron.
@@ -62,15 +64,16 @@ export default async function InformeOficialPage({
 
       {report ? (
         canSeeBenchmark(session.user.roles) ? (
-          <Suspense fallback={courseReport(report, classGroupId, assessmentId, true, null)}>
+          <Suspense fallback={courseReport(report, classGroupId, assessmentId, roles, true, null)}>
             <CourseReportWithItemSamples
               report={report}
+              roles={roles}
               classGroupId={classGroupId}
               assessmentId={assessmentId}
             />
           </Suspense>
         ) : (
-          courseReport(report, classGroupId, assessmentId, false, null)
+          courseReport(report, classGroupId, assessmentId, roles, false, null)
         )
       ) : (
         <EmptyState
@@ -126,6 +129,7 @@ function courseReport(
   report: OfficialCourseReportResponse,
   classGroupId: string | undefined,
   assessmentId: string,
+  roles: readonly UserRole[],
   canSeeSample: boolean,
   itemSamples: ReadonlyMap<string, number | null> | null,
 ) {
@@ -133,6 +137,7 @@ function courseReport(
     <CourseReport
       report={report}
       studentReportBasePath={ROUTES.evaluacionInformeAlumnoBase(assessmentId)}
+      roles={roles}
       itemSamples={itemSamples}
       generalSample={
         canSeeSample ? (
@@ -154,11 +159,13 @@ async function CourseReportWithItemSamples({
   report,
   classGroupId,
   assessmentId,
+  roles,
 }: {
   report: OfficialCourseReportResponse;
   classGroupId: string | undefined;
   assessmentId: string;
+  roles: readonly UserRole[];
 }) {
   const itemSamples = await getItemSampleRates(report.meta.instrumentId);
-  return courseReport(report, classGroupId, assessmentId, true, itemSamples);
+  return courseReport(report, classGroupId, assessmentId, roles, true, itemSamples);
 }

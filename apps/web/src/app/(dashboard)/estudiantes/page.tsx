@@ -11,6 +11,7 @@ import {
   type StudentSignal,
   type StudentSignalsQueryDto,
   type StudentSignalsResponse,
+  type UserRole,
 } from '@soe/types';
 import { PageContainer, EmptyState, CardSkeleton } from '@/components/shared';
 import { SignalsTable } from './components/signals-table';
@@ -47,13 +48,19 @@ export default async function EstudiantesPage({
       </p>
 
       <Suspense key={JSON.stringify(query)} fallback={<CardSkeleton rows={8} />}>
-        <SignalsSection query={query} />
+        <SignalsSection query={query} roles={session.user.roles} />
       </Suspense>
     </PageContainer>
   );
 }
 
-async function SignalsSection({ query }: { query: StudentSignalsQueryDto }) {
+async function SignalsSection({
+  query,
+  roles,
+}: {
+  query: StudentSignalsQueryDto;
+  roles: readonly UserRole[];
+}) {
   const result = await apiGet<StudentSignalsResponse>(
     `/students/signals${buildQuery(query)}`,
   ).catch((): StudentSignalsResponse | null => null);
@@ -73,6 +80,7 @@ async function SignalsSection({ query }: { query: StudentSignalsQueryDto }) {
       result={result}
       activeSignal={(query.signal as StudentSignal | undefined) ?? null}
       search={query.search ?? ''}
+      roles={roles}
     />
   );
 }

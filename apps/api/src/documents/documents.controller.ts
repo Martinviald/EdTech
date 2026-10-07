@@ -16,6 +16,7 @@ import {
   documentImageConfirmRequestSchema,
   documentImageUploadRequestSchema,
   documentListQuerySchema,
+  materialLibraryQuerySchema,
   updateDocumentSchema,
   DOCUMENT_EDITOR_ROLES,
   DOCUMENT_VIEWER_ROLES,
@@ -25,6 +26,7 @@ import {
   type DocumentModel,
   type DocumentSpecificationResponse,
   type FileUploadUrlResponse,
+  type MaterialLibraryResponse,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt-payload.types';
@@ -33,9 +35,11 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { DocumentsService } from './documents.service';
 import { DocumentImagesService } from './document-images.service';
 import { DocumentImportService } from './document-import.service';
+import { DocumentLibraryService } from './document-library.service';
 import { DocumentItemsService } from './document-items.service';
 import { DocumentPromotionService } from './document-promotion.service';
 import { DocumentSpecificationService } from './document-specification.service';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 
 @Controller('documents')
 @UseGuards(RolesGuard)
@@ -44,6 +48,7 @@ export class DocumentsController {
     private readonly documentsService: DocumentsService,
     private readonly imagesService: DocumentImagesService,
     private readonly importService: DocumentImportService,
+    private readonly libraryService: DocumentLibraryService,
     private readonly itemsService: DocumentItemsService,
     private readonly promotionService: DocumentPromotionService,
     private readonly specificationService: DocumentSpecificationService,
@@ -67,12 +72,19 @@ export class DocumentsController {
     return this.importService.fromInstrument(user, instrumentId);
   }
 
-  @Get()
+  @Get('library')
   @Roles(...DOCUMENT_VIEWER_ROLES)
-  list(
+  library(
     @Query() query: unknown,
     @CurrentUser() user: JwtPayload,
-  ): Promise<DocumentListResponse> {
+  ): Promise<MaterialLibraryResponse> {
+    const dto = parseDtoOrBadRequest(materialLibraryQuerySchema, query ?? {});
+    return this.libraryService.list(user, dto);
+  }
+
+  @Get()
+  @Roles(...DOCUMENT_VIEWER_ROLES)
+  list(@Query() query: unknown, @CurrentUser() user: JwtPayload): Promise<DocumentListResponse> {
     const dto = documentListQuerySchema.parse(query);
     return this.documentsService.list(user, dto);
   }
@@ -110,10 +122,7 @@ export class DocumentsController {
 
   @Post(':id/duplicate')
   @Roles(...DOCUMENT_EDITOR_ROLES)
-  duplicate(
-    @Param('id') id: string,
-    @CurrentUser() user: JwtPayload,
-  ): Promise<DocumentModel> {
+  duplicate(@Param('id') id: string, @CurrentUser() user: JwtPayload): Promise<DocumentModel> {
     return this.documentsService.duplicate(user, id);
   }
 

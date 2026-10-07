@@ -1,15 +1,11 @@
 import {
   Activity,
   BarChart3,
-  BookOpen,
   CalendarRange,
   ClipboardList,
   Cpu,
-  FileText,
-  GitCompareArrows,
   LayoutDashboard,
   Library,
-  Lightbulb,
   MessageSquarePlus,
   PenSquare,
   ScanLine,
@@ -25,13 +21,9 @@ import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
   PROCESS_VIEWER_ROLES,
-  AI_ANALYSIS_GENERATOR_ROLES,
   DOCUMENT_VIEWER_ROLES,
-  REMEDIAL_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
-  ESTABLISHMENT_REPORT_ROLES,
   SHEET_MANAGEMENT_ROLES,
-  TELEMETRY_VIEWER_ROLES,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
 import { ADMIN_HUB_PATHS, ADMIN_HUB_ROLES } from './admin-hub';
@@ -68,18 +60,6 @@ export type NavGroup = {
   items: readonly NavItem[];
 };
 
-const ALL_STAFF_ROLES = [
-  'teacher',
-  'homeroom_teacher',
-  'school_admin',
-  'academic_director',
-  'cycle_director',
-  'dept_head',
-  'coordinator',
-  'eval_coordinator',
-  'platform_admin',
-] as const satisfies readonly UserRole[];
-
 const ALL_ROLES = [
   'platform_admin',
   'foundation_director',
@@ -95,15 +75,17 @@ const ALL_ROLES = [
 ] as const satisfies readonly UserRole[];
 
 /**
- * Navegación principal agrupada por propósito. El orden de los grupos refleja la
- * frecuencia de uso: Análisis (diario) → Contenido y datos (ocasional) →
- * Administración (rara). Cada item se filtra por rol (unión); un grupo sin items
- * visibles para el usuario se oculta completo (ver `visibleNavGroups`).
+ * Navegación principal, ordenada según el ciclo de trabajo: se aplica la prueba
+ * (Evaluaciones), se analizan los resultados (Análisis) y se actúa con material
+ * (Material y contenido). Las vistas que se usan desde un contexto (comparar dos
+ * evaluaciones, el informe de un proceso, el material de una brecha) no tienen item
+ * propio: se abren desde ese contexto. Cada item se filtra por rol (unión); un grupo
+ * sin items visibles se oculta completo (ver `visibleNavGroups`). Diseño:
+ * docs/diseno/rediseno-navegacion.md.
  */
 export const NAV_GROUPS: readonly NavGroup[] = [
   {
-    id: 'analisis',
-    label: 'Análisis',
+    id: 'inicio',
     items: [
       {
         href: ROUTES.dashboard,
@@ -111,6 +93,19 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         icon: LayoutDashboard,
         status: 'live',
         roles: ALL_ROLES,
+      },
+    ],
+  },
+  {
+    id: 'evaluaciones',
+    label: 'Evaluaciones',
+    items: [
+      {
+        href: ROUTES.procesos,
+        label: 'Procesos de medición',
+        icon: CalendarRange,
+        status: 'live',
+        roles: PROCESS_VIEWER_ROLES,
       },
       {
         href: ROUTES.evaluaciones,
@@ -120,12 +115,20 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         roles: DASHBOARD_VIEWER_ROLES,
       },
       {
-        href: ROUTES.procesos,
-        label: 'Procesos de medición',
-        icon: CalendarRange,
+        // E22 · Lector de marcas: diseñar/imprimir hojas de respuesta propias,
+        // escanear las pruebas rendidas y revisar las lecturas.
+        href: ROUTES.hojas,
+        label: 'Hojas de respuesta',
+        icon: ScanLine,
         status: 'live',
-        roles: PROCESS_VIEWER_ROLES,
+        roles: SHEET_MANAGEMENT_ROLES,
       },
+    ],
+  },
+  {
+    id: 'analisis',
+    label: 'Análisis',
+    items: [
       {
         href: ROUTES.resultados,
         label: 'Panorama pedagógico',
@@ -135,66 +138,26 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         children: toNavChildren(RESULTADOS_TABS),
       },
       {
-        // Vista 360 del estudiante (T2-20): panorama consolidado de un alumno.
+        // Ficha del estudiante (T2-20): panorama consolidado de un alumno.
         // Misma audiencia que los dashboards de resultados.
         href: ROUTES.estudiantes,
-        label: 'Vista 360 del estudiante',
+        label: 'Ficha del estudiante',
         icon: UserSearch,
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
       },
       {
-        // TKT-23: diagnóstico IA de la variación entre instrumentos comparables.
-        href: ROUTES.compararInstrumentos,
-        label: 'Comparar instrumentos',
-        icon: GitCompareArrows,
-        status: 'live',
-        roles: AI_ANALYSIS_GENERATOR_ROLES,
-      },
-      {
-        href: ROUTES.materialRemedial,
-        label: 'Material Remedial',
-        icon: Lightbulb,
-        status: 'live',
-        roles: REMEDIAL_VIEWER_ROLES,
-      },
-      {
         href: ROUTES.benchmarking,
-        label: 'Benchmarking',
+        label: 'Comparación entre colegios',
         icon: TrendingUp,
         status: 'live',
         roles: BENCHMARKING_VIEWER_ROLES,
-      },
-      {
-        href: ROUTES.establecimientoInformeOficial,
-        label: 'Informe establecimiento',
-        icon: FileText,
-        status: 'live',
-        roles: ESTABLISHMENT_REPORT_ROLES,
-      },
-      {
-        // Telemetría de uso del colegio (uso por usuario, módulo backend y vista
-        // frontend). Audiencia: admins/directivos (TELEMETRY_VIEWER_ROLES).
-        href: ROUTES.telemetria,
-        label: 'Telemetría de uso',
-        icon: Activity,
-        status: 'live',
-        roles: TELEMETRY_VIEWER_ROLES,
-      },
-      {
-        // Vista del profesor (sus cursos): acceso menos frecuente para directivos,
-        // por eso va al final del grupo (T2-08).
-        href: ROUTES.myClasses,
-        label: 'Mis cursos',
-        icon: BookOpen,
-        status: 'live',
-        roles: ALL_STAFF_ROLES,
       },
     ],
   },
   {
     id: 'contenido',
-    label: 'Contenido y datos',
+    label: 'Material y contenido',
     items: [
       {
         href: ROUTES.bancoItems,
@@ -212,15 +175,6 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         children: toNavChildren(BANCO_TABS),
       },
       {
-        // E22 · Lector de marcas: diseñar/imprimir hojas de respuesta propias,
-        // escanear las pruebas rendidas y revisar las lecturas.
-        href: ROUTES.hojas,
-        label: 'Hojas de respuesta',
-        icon: ScanLine,
-        status: 'live',
-        roles: SHEET_MANAGEMENT_ROLES,
-      },
-      {
         // Editor de Materiales: biblioteca de documentos por bloques (guías,
         // ejercitación, versiones imprimibles) con branding del colegio.
         href: ROUTES.materiales,
@@ -232,9 +186,9 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     ],
   },
   {
-    // Las vistas administrativas (colegio, equipo, alumnos, marcos, config) se
-    // usan muy de vez en cuando: ya no ocupan un item cada una, se alcanzan
-    // desde la grilla de `/administracion` (ver admin-hub.ts).
+    // Las vistas administrativas (colegio, equipo, alumnos, marcos, telemetría,
+    // config) se usan muy de vez en cuando: se alcanzan desde la grilla de
+    // `/administracion` (ver admin-hub.ts).
     id: 'administracion',
     items: [
       {

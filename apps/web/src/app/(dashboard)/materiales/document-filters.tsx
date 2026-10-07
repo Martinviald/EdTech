@@ -6,6 +6,7 @@ import type { Route } from 'next';
 import {
   DOCUMENT_TYPES,
   documentStatusSchema,
+  MATERIAL_ORIGINS,
   type CatalogEntryModel,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
@@ -18,16 +19,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DOCUMENT_STATUS_LABELS, DOCUMENT_TYPE_LABELS } from './labels';
+import { DOCUMENT_STATUS_LABELS, DOCUMENT_TYPE_LABELS, MATERIAL_ORIGIN_LABELS } from './labels';
 
 const ALL = 'all';
 
 type DocumentFiltersProps = {
   subjects: CatalogEntryModel[];
   grades: CatalogEntryModel[];
+  showReviewFilter: boolean;
 };
 
-export function DocumentFilters({ subjects, grades }: DocumentFiltersProps) {
+export function DocumentFilters({ subjects, grades, showReviewFilter }: DocumentFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -36,7 +38,9 @@ export function DocumentFilters({ subjects, grades }: DocumentFiltersProps) {
   const currentStatus = searchParams.get('status') ?? '';
   const currentSubject = searchParams.get('subjectId') ?? '';
   const currentGrade = searchParams.get('gradeId') ?? '';
+  const currentOrigin = searchParams.get('origin') ?? '';
   const onlyMine = searchParams.get('mine') === 'true';
+  const onlyPendingReview = searchParams.get('review') === 'pending_review';
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
@@ -57,6 +61,20 @@ export function DocumentFilters({ subjects, grades }: DocumentFiltersProps) {
   return (
     <div className="relative flex flex-wrap items-center gap-3">
       <TopProgressBar active={isPending} />
+      <Select value={currentOrigin || ALL} onValueChange={(v) => updateFilter('origin', v)}>
+        <SelectTrigger className="w-[220px]" aria-label="Origen">
+          <SelectValue placeholder="Origen" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>Todos los orígenes</SelectItem>
+          {MATERIAL_ORIGINS.map((origin) => (
+            <SelectItem key={origin} value={origin}>
+              {MATERIAL_ORIGIN_LABELS[origin]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       <Select value={currentType || ALL} onValueChange={(v) => updateFilter('type', v)}>
         <SelectTrigger className="w-[190px]" aria-label="Tipo de material">
           <SelectValue placeholder="Tipo" />
@@ -117,10 +135,23 @@ export function DocumentFilters({ subjects, grades }: DocumentFiltersProps) {
         type="button"
         variant={onlyMine ? 'secondary' : 'outline'}
         size="sm"
+        aria-pressed={onlyMine}
         onClick={() => updateFilter('mine', onlyMine ? '' : 'true')}
       >
         Solo mis materiales
       </Button>
+
+      {showReviewFilter ? (
+        <Button
+          type="button"
+          variant={onlyPendingReview ? 'secondary' : 'outline'}
+          size="sm"
+          aria-pressed={onlyPendingReview}
+          onClick={() => updateFilter('review', onlyPendingReview ? '' : 'pending_review')}
+        >
+          Por revisar
+        </Button>
+      ) : null}
     </div>
   );
 }

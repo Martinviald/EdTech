@@ -205,7 +205,7 @@ export class DocumentsService {
     return user.orgId;
   }
 
-  private visibleCondition(orgId: string, userId: string) {
+  visibleCondition(orgId: string, userId: string) {
     return or(
       eq(documents.createdById, userId),
       and(eq(documents.orgId, orgId), ne(documents.visibility, 'private')),
@@ -292,7 +292,7 @@ export class DocumentsService {
     };
   }
 
-  private toListItem(row: Document, createdByName: string | null): DocumentListItem {
+  toListItem(row: Document, createdByName: string | null): DocumentListItem {
     return {
       ...this.toSharedFields(row, createdByName),
       ...summarizeContent(row.content),

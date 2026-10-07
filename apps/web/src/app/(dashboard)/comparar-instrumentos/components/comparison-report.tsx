@@ -2,7 +2,7 @@
 
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Info } from 'lucide-react';
 import type {
-  ComparableAssessment,
+  AssessmentComparisonCandidate,
   ComparisonDirection,
   ComparisonLikelihood,
   InstrumentComparisonOutput,
@@ -13,8 +13,8 @@ import { AlertCallout } from '@/components/shared';
 
 interface ComparisonReportProps {
   output: InstrumentComparisonOutput;
-  base: ComparableAssessment;
-  comparison: ComparableAssessment;
+  base: AssessmentComparisonCandidate;
+  comparison: AssessmentComparisonCandidate;
   model: string | null;
 }
 
@@ -37,8 +37,8 @@ const LIKELIHOOD_LABEL: Record<ComparisonLikelihood, string> = {
   low: 'Baja',
 };
 
-function sideLabel(a: ComparableAssessment): string {
-  const year = a.year ? ` ${a.year}` : '';
+function sideLabel(a: AssessmentComparisonCandidate): string {
+  const year = a.academicYear ? ` ${a.academicYear}` : '';
   return `${a.instrumentName}${year}`;
 }
 

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull, or } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import {
   documents,
   instrumentSections,
@@ -48,6 +48,12 @@ export class DocumentImportService {
     const orgId = this.documentsService.requireOrgId(user);
 
     const documentId = await withOrgContext(this.db, orgId, async (tx) => {
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtext(${`documents:from-remedial:${remedialId}`}))`,
+      );
+      const existingId = await this.findRemedialDocumentId(tx, orgId, user, remedialId);
+      if (existingId) return existingId;
+
       const [material] = await tx
         .select()
         .from(remedialMaterials)
@@ -242,9 +248,7 @@ export class DocumentImportService {
         : Promise.resolve([]),
     ]);
 
-    const snapshotsByItemId = new Map(
-      liveItems.map((item) => [item.id, buildItemSnapshot(item)]),
-    );
+    const snapshotsByItemId = new Map(liveItems.map((item) => [item.id, buildItemSnapshot(item)]));
     const passagesBySectionId = new Map(
       passages.map((section) => [
         section.id,
@@ -252,6 +256,29 @@ export class DocumentImportService {
       ]),
     );
     return remedialPracticeToBlocks(practice, snapshotsByItemId, passagesBySectionId);
+  }
+
+  private async findRemedialDocumentId(
+    tx: Database,
+    orgId: string,
+    user: JwtPayload,
+    remedialId: string,
+  ): Promise<string | null> {
+    const [existing] = await tx
+      .select({ id: documents.id })
+      .from(documents)
+      .where(
+        and(
+          eq(documents.orgId, orgId),
+          isNull(documents.deletedAt),
+          sql`${documents.source}->>'kind' = 'remedial'`,
+          sql`${documents.source}->>'refId' = ${remedialId}`,
+          eq(documents.createdById, user.userId),
+        ),
+      )
+      .orderBy(asc(documents.createdAt))
+      .limit(1);
+    return existing?.id ?? null;
   }
 
   private async findNode(tx: Database, nodeId: string) {

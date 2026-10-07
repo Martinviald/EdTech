@@ -1,12 +1,10 @@
 import { z } from 'zod';
-import type { PerformanceLevel } from '../enums';
 import type { PerformanceBandView } from './performance-band.schema';
-import { INSTRUMENT_APPLICATION_PERIODS } from './instrument.schema';
 import type { OfficialReportVariant } from './official-report-common.schema';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TKT-25 — Informe de establecimiento (Área Académica)
-// GET /api/reports/establishment?academicYearId=...&period=...
+// GET /api/reports/establishment?processId=...
 //
 // Formato AGREGADO por grado × asignatura a nivel de toda la organización
 // (distinto del informe por curso de TKT-24: no baja a pregunta ni a estudiante).
@@ -18,47 +16,60 @@ import type { OfficialReportVariant } from './official-report-common.schema';
 // enum `performance_level`. Nada hardcodea "DIA"/asignaturas/grados.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const officialEstablishmentReportQuerySchema = z.object({
-  // Año académico a reportar. Si se omite, el service usa el año marcado
-  // `is_current` de la organización.
-  academicYearId: z.string().uuid().optional(),
-  // Momento (Diagnóstico/Monitoreo/Cierre) a reportar: filtra por
-  // `instruments.application_period` — el momento es del INSTRUMENTO, no de la
-  // evaluación (cada aplicación DIA es un cuadernillo distinto). Si se omite,
-  // incluye todas las del año.
-  period: z.enum(INSTRUMENT_APPLICATION_PERIODS).optional(),
-});
+export const officialEstablishmentReportQuerySchema = z
+  .object({
+    // Proceso de medición a reportar (ej. "DIA Monitoreo 2026"). El proceso fija año,
+    // momento y tipo de instrumento, así que el informe nunca mezcla resultados que no
+    // son comparables. Sólo entran las evaluaciones con `assessments.process_id` = este.
+    processId: z.string().uuid(),
+  })
+  .strict();
 export type OfficialEstablishmentReportQueryDto = z.infer<
   typeof officialEstablishmentReportQuerySchema
 >;
 
-/** Un grado presente como columna de las tablas agregadas. */
+/** Cobertura de un grado: estudiantes evaluados contra los esperados por el proceso. */
+export type EstablishmentCoverage = {
+  evaluated: number;
+  /** `null` si el proceso no permite derivar cuántos estudiantes se esperaban. */
+  expected: number | null;
+};
+
+/** Evaluación del proceso que alimenta una columna (para listarlas cuando hay más de una). */
+export type EstablishmentColumnAssessment = {
+  id: string;
+  name: string | null;
+};
+
+/**
+ * Un grado presente como columna de las tablas de una asignatura. Cada columna sale de
+ * UN instrumento del proceso: las evaluaciones de ese instrumento (normalmente una por
+ * curso) se agregan. Si el grado × asignatura tiene más de un instrumento, la columna
+ * queda sin números (`multipleInstruments`) en vez de mezclar pruebas distintas.
+ */
 export type EstablishmentGradeColumn = {
   gradeId: string;
   gradeName: string;
   gradeOrder: number;
-  /** Instrumento de la columna; `null` si el grado mezcla instrumentos (p. ej. varios momentos). */
+  /** Instrumento de la columna; `null` si `multipleInstruments`. */
   instrumentId: string | null;
+  /** Evaluaciones del proceso en este grado × asignatura (típicamente una por curso). */
+  assessmentIds: string[];
+  /** Las mismas evaluaciones de `assessmentIds`, con su nombre, en el mismo orden. */
+  assessments: EstablishmentColumnAssessment[];
+  multipleInstruments: boolean;
+  /** El instrumento no tiene bandas: la columna no clasifica por nivel (nunca cortes heredados). */
+  bandsMissing: boolean;
+  /** Bandas del instrumento de la columna; `null` si `bandsMissing` o `multipleInstruments`. */
+  bands: PerformanceBandView[] | null;
+  coverage: EstablishmentCoverage;
 };
 
 /**
- * Celda de la Tabla 1.1–1.4 (niveles de logro): % de estudiantes de un grado en
- * un nivel para una asignatura. `count`/`total` permiten reconstruir el conteo.
- * Sparse: grados/niveles sin datos simplemente no aparecen.
- */
-export type EstablishmentLevelCell = {
-  gradeId: string;
-  level: PerformanceLevel;
-  count: number;
-  total: number; // estudiantes del grado en esa asignatura (denominador)
-  percentage: number; // 0..100
-};
-
-/**
- * Celda de la Tabla 1.1–1.4 cuando la asignatura se clasifica por las BANDAS del
- * instrumento (ej. DIA Nivel I/II/III): % de estudiantes de un grado en una banda.
- * Es la misma clasificación que usa el informe por evaluación, así que ambos
- * coinciden. `total` = estudiantes del grado con banda resuelta.
+ * Celda de la Tabla 1.1–1.4: % de estudiantes de un grado en una banda del instrumento
+ * de esa columna (ej. DIA Nivel I/II/III). Es la misma clasificación que usa el informe
+ * por evaluación, así que ambos coinciden. `total` = estudiantes del grado con banda
+ * resuelta.
  */
 export type EstablishmentBandCell = {
   gradeId: string;
@@ -116,25 +127,25 @@ export type EstablishmentCountRow = {
 export type EstablishmentSubjectSection = {
   subjectId: string;
   subjectName: string;
-  levels: PerformanceLevel[]; // niveles con datos (filas de las tablas 1.1–1.4)
-  grades: EstablishmentGradeColumn[]; // grados con datos (columnas), ordenados
-  // Tabla 1.1–1.4 (una por asignatura): % de estudiantes por grado × nivel.
-  levelDistribution: EstablishmentLevelCell[];
-  // Presentes sólo si TODOS los instrumentos de la asignatura tienen bandas y
-  // comparten el mismo set de claves. Cuando vienen, son la fuente de verdad de
-  // la Tabla 1.1–1.4 (la UI ignora `levels`/`levelDistribution`).
-  bands?: PerformanceBandView[];
-  bandDistribution?: EstablishmentBandCell[];
-  // Tabla 1.5–1.8 (una por asignatura): comparación mujeres vs hombres por grado.
+  grades: EstablishmentGradeColumn[]; // grados con evaluación en el proceso, ordenados
+  // Bandas compartidas por TODAS las columnas con bandas de la asignatura (mismo set
+  // de claves): con ellas la Tabla 1.1–1.4 es una sola tabla. `null` si las columnas
+  // traen sets distintos: la UI muestra cada columna con sus propias bandas.
+  bands: PerformanceBandView[] | null;
+  // Tabla 1.1–1.4: % de estudiantes por grado × banda (de la banda de cada columna).
+  bandDistribution: EstablishmentBandCell[];
+  // Tabla 1.5–1.8: comparación mujeres vs hombres por grado, dentro de cada columna
+  // (un solo instrumento). `femaleAvg`/`maleAvg` son medias de los % individuales
+  // porque son el estadístico del t de Welch (excepción acordada al logro unificado).
   sexComparison: EstablishmentSexComparisonRow[];
   // Tabla 1.9 (parte de la asignatura): conteo M/H/Total por grado.
   counts: EstablishmentCountRow[];
 };
 
 /**
- * Meta del informe de establecimiento: a nivel ORG (no de un instrumento único,
- * porque el informe agrega varias asignaturas/instrumentos). No extiende
- * `OfficialReportMeta` (que es por instrumento).
+ * Meta del informe de establecimiento: a nivel ORG y de un PROCESO de medición (no de
+ * un instrumento único, porque el informe agrega varias asignaturas/instrumentos). No
+ * extiende `OfficialReportMeta` (que es por instrumento).
  */
 export type OfficialEstablishmentReportMeta = {
   orgId: string;
@@ -143,6 +154,8 @@ export type OfficialEstablishmentReportMeta = {
   commune: string | null;
   region: string | null;
   directorName: string | null;
+  processId: string;
+  processName: string;
   academicYearId: string;
   academicYear: number | null;
   period: string | null;
@@ -158,6 +171,9 @@ export type OfficialEstablishmentReportResponse = {
   // `instruments.config.levelDefinitions`; `[]` si no está configurado.
   levelDefinitions: string[];
   subjects: EstablishmentSubjectSection[];
+  // Alguna columna del proceso clasifica por bandas. Si es false (ej. un proceso que se
+  // lee en puntaje), la UI no muestra las tablas de niveles y lo explica.
+  bandsAvailable: boolean;
   // Si la plataforma pudo calcular la comparación por sexo (Tablas 1.5–1.8).
   // TRUE porque `students.gender` existe; puede ser parcial si faltan datos de
   // género. El frontend muestra las tablas 1.1–1.4 y 1.9 aunque esto sea false.

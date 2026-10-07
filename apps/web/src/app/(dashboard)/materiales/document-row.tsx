@@ -6,7 +6,7 @@ import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { Copy, FileText, MoreVertical, Trash2 } from 'lucide-react';
 import type { Route } from 'next';
-import type { DocumentListItem } from '@soe/types';
+import type { DocumentListItem, MaterialOrigin, MaterialRemedialRef } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
 import { StatusBadge } from '@/components/shared';
 import { Badge } from '@/components/ui/badge';
@@ -33,16 +33,27 @@ import {
   DOCUMENT_STATUS_TONES,
   DOCUMENT_TYPE_LABELS,
   DOCUMENT_VISIBILITY_LABELS,
+  LIBRARY_REMEDIAL_STATUS_LABELS,
+  LIBRARY_REMEDIAL_STATUS_TONES,
+  MATERIAL_ORIGIN_LABELS,
 } from './labels';
 import { deleteDocument, duplicateDocument } from './actions';
 
 type DocumentRowProps = {
   document: DocumentListItem;
+  origin: MaterialOrigin;
+  remedial: MaterialRemedialRef | null;
   currentUserId: string;
   catalogNames: Record<string, string>;
 };
 
-export function DocumentRow({ document, currentUserId, catalogNames }: DocumentRowProps) {
+export function DocumentRow({
+  document,
+  origin,
+  remedial,
+  currentUserId,
+  catalogNames,
+}: DocumentRowProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const isOwner = document.createdById === currentUserId;
@@ -82,15 +93,20 @@ export function DocumentRow({ document, currentUserId, catalogNames }: DocumentR
     <div className="hover:bg-muted/50 flex items-center gap-4 px-4 py-3">
       <FileText className="text-muted-foreground size-5 shrink-0" aria-hidden />
       <div className="min-w-0 flex-1">
-        <Link
-          href={ROUTES.material(document.id) as Route}
-          className="font-medium hover:underline"
-        >
+        <Link href={ROUTES.material(document.id) as Route} className="font-medium hover:underline">
           {document.title}
         </Link>
         <p className="text-muted-foreground truncate text-sm">
           {metaParts.join(' · ') || 'Sin detalles'}
         </p>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <Badge variant="outline">{MATERIAL_ORIGIN_LABELS[origin]}</Badge>
+          {remedial ? (
+            <StatusBadge tone={LIBRARY_REMEDIAL_STATUS_TONES[remedial.status]}>
+              {LIBRARY_REMEDIAL_STATUS_LABELS[remedial.status]}
+            </StatusBadge>
+          ) : null}
+        </div>
       </div>
       <div className="hidden shrink-0 items-center gap-2 sm:flex">
         <Badge variant="outline">{DOCUMENT_TYPE_LABELS[document.type]}</Badge>
@@ -125,8 +141,8 @@ export function DocumentRow({ document, currentUserId, catalogNames }: DocumentR
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar este material?</AlertDialogTitle>
             <AlertDialogDescription>
-              &ldquo;{document.title}&rdquo; dejará de estar disponible para ti y para quienes
-              lo compartías. Esta acción no se puede deshacer desde la aplicación.
+              &ldquo;{document.title}&rdquo; dejará de estar disponible para ti y para quienes lo
+              compartías. Esta acción no se puede deshacer desde la aplicación.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
