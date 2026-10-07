@@ -360,3 +360,48 @@ Nada de esto se hace en la ejecución autónoma.
    directivos.
 7. **Recapturar** los baselines de `snapshot-panorama`.
 8. **Ajuste de umbrales de alertas** si el conteo cambió mucho (decisión con datos).
+
+---
+
+## 9. Registro de ejecución
+
+### Parte A
+
+| Fase  | Commit            | CI     | Notas                                                                                  |
+| ----- | ----------------- | ------ | -------------------------------------------------------------------------------------- |
+| PR 0  | `58eeb2da` (#283) | ✅ 6/6 | `achievement.ts`, contrato congelado                                                   |
+| A1–A2 | `b2430c7e`        | ✅ 6/6 | Ver decisiones 1 y 2                                                                   |
+| A3    | `cb13e905`        | ✅ 6/6 | 3 agentes en worktrees aislados (informes, dashboards, alumnos/remedial/IA) + guardián |
+| A4    | `b34fac4c`        | —      | Referencia del nivel con tally, `pendingStudentCount` y aviso                          |
+| A5    | este commit       | —      | Informe de diferencias, gates locales, docs                                            |
+
+**Decisiones tomadas en el camino (§7.2):**
+
+1. **A1 y A2 en un solo commit.** El cambio de tipos (`SkillAggregateResult` con tally, alumno sin
+   preguntas corregidas en `null`) obliga a cambiar escritores, seeds y base en el mismo paso; por
+   separado el CI de A1 no habría compilado.
+2. **Sin script ni paso de deploy aparte para `skill_results`.** El relleno del tally por alumno vive
+   dentro de `db:backfill:cohort-stats`, que ya recalcula desde `responses` y lo dispara la huella.
+   El smoke check `db:cohort-stamp verify` falla si queda un % sin tally en `assessment_skill_stats`
+   y avisa (sin fallar) si queda en `skill_results` una fila de un nodo que ya no etiqueta la
+   pregunta. A2-4 y A2-6 quedan cubiertos así.
+3. **Las utilidades de la muestra y los servicios de benchmarking pasaron a tallies en A1–A2**, no en
+   A3-9: dependían del formato nuevo de `per_skill`.
+4. **El informe de diferencias vive en `packages/db/src/scripts/diff-achievement.ts`**
+   (`db:diff:achievement`), junto a los otros scripts que leen la base con el rol admin.
+5. **Helper compartido `pending-responses.helper.ts`** para contar alumnos con preguntas sin
+   corregir: lo usan el informe de evaluación y la matriz de `/detalle`.
+
+**Gates locales (§7.3), base `soe_logro` con `db:seed:dev`:**
+
+- `db:migrate`: las 41 migraciones, incluida `0041_achievement_tallies`, sin errores.
+- Con los tallies en 0 (estado de demo justo después de migrar), `db:cohort-stamp verify` **falla**
+  con 33 filas de `assessment_skill_stats` sin tally.
+- `db:backfill:cohort-stats`: 10 evaluaciones, 488/488 filas de `skill_results` con tally, 0
+  discrepancias de %, 0 respuestas huérfanas. Después `verify` pasa.
+- `db:refresh:benchmark`: 20/20 filas y 80/80 preguntas de la muestra con tally.
+- `db:diff:achievement`: 43 filas; 0 pp de diferencia, porque los datos sintéticos son dicotómicos y
+  sin pendientes. El caso real (CSCJ, desarrollo y crédito parcial) se mide en demo con el usuario
+  (§8 paso 2).
+- **No se recorrieron las vistas en un navegador local:** la máquina estaba con < 100 MB libres y
+  `next dev` + API habrían sido un segundo y tercer proceso pesado. Queda en §8 paso 6.
