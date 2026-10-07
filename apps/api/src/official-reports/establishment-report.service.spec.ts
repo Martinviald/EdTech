@@ -291,7 +291,7 @@ describe('EstablishmentReportService — alcance por proceso', () => {
     const [column] = report.subjects[0]!.grades;
     expect(column).toMatchObject({
       assessmentIds: ['a-lang-6'],
-      multipleAssessments: false,
+      multipleInstruments: false,
       instrumentId: 'lectura-6',
     });
     expect(column!.coverage.evaluated).toBe(1);
@@ -308,8 +308,8 @@ describe('EstablishmentReportService — alcance por proceso', () => {
   });
 });
 
-describe('EstablishmentReportService — una evaluación por grado × asignatura', () => {
-  it('marca multipleAssessments sin números cuando la celda tiene dos evaluaciones', async () => {
+describe('EstablishmentReportService — un instrumento por grado × asignatura', () => {
+  it('marca multipleInstruments sin números cuando la celda tiene dos instrumentos', async () => {
     const report = await run(
       emptyStore({
         assignments: [
@@ -339,7 +339,7 @@ describe('EstablishmentReportService — una evaluación por grado × asignatura
     const [section] = report.subjects;
     const sixth = section!.grades.find((g) => g.gradeId === 'g6');
     expect(sixth).toMatchObject({
-      multipleAssessments: true,
+      multipleInstruments: true,
       instrumentId: null,
       bands: null,
       bandsMissing: false,
@@ -354,6 +354,38 @@ describe('EstablishmentReportService — una evaluación por grado × asignatura
     expect(section!.sexComparison.some((r) => r.gradeId === 'g6')).toBe(false);
     expect(section!.counts.some((r) => r.gradeId === 'g6')).toBe(false);
     expect(section!.counts.map((r) => r.gradeId)).toEqual(['g7']);
+  });
+
+  it('agrega en una columna las evaluaciones por curso del mismo instrumento', async () => {
+    const report = await run(
+      emptyStore({
+        assignments: [
+          assignment(),
+          assignment({
+            assessmentId: 'a-lang-6b',
+            assessmentName: 'Lectura 6° B',
+            classGroupId: 'cg-6b',
+          }),
+        ],
+        results: [
+          result(1, 60, { gender: 'F' }),
+          result(2, 90, { gender: 'M', assessmentId: 'a-lang-6b', classGroupId: 'cg-6b' }),
+        ],
+      }),
+    );
+
+    const [section] = report.subjects;
+    expect(section!.grades).toHaveLength(1);
+    expect(section!.grades[0]).toMatchObject({
+      multipleInstruments: false,
+      instrumentId: 'lectura-6',
+      assessmentIds: ['a-lang-6', 'a-lang-6b'],
+      coverage: { evaluated: 2 },
+    });
+    expect(report.bandsAvailable).toBe(true);
+    const total = section!.bandDistribution.find((c) => c.gradeId === 'g6')?.total;
+    expect(total).toBe(2);
+    expect(section!.counts[0]).toMatchObject({ female: 1, male: 1, total: 2 });
   });
 
   it('cuenta una sola vez a un estudiante matriculado en dos cursos del mismo grado', async () => {

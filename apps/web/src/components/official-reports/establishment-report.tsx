@@ -45,7 +45,7 @@ const SEX_TITLE: Record<SexComparisonResult, string> = {
   insufficient_sample: 'Muestra insuficiente para el cálculo',
 };
 
-const MULTIPLE_ASSESSMENTS_LABEL = 'Más de una evaluación';
+const MULTIPLE_INSTRUMENTS_LABEL = 'Más de un instrumento';
 const BANDS_MISSING_LABEL = 'Sin niveles definidos';
 
 export type EstablishmentSamples = ReadonlyMap<string, InstrumentSampleEntry>;
@@ -126,12 +126,12 @@ function SubjectBlock({
   sexDataAvailable: boolean;
   samples?: EstablishmentSamples | null;
 }) {
-  const multipleColumns = subject.grades.filter((g) => g.multipleAssessments);
+  const multipleColumns = subject.grades.filter((g) => g.multipleInstruments);
   return (
     <ReportSection title={subject.subjectName}>
       <CoverageLine grades={subject.grades} />
 
-      {multipleColumns.length > 0 ? <MultipleAssessmentsNotice grades={multipleColumns} /> : null}
+      {multipleColumns.length > 0 ? <MultipleInstrumentsNotice grades={multipleColumns} /> : null}
 
       <div className="space-y-2">
         <p className="text-sm font-medium">
@@ -195,12 +195,12 @@ function CoverageLine({ grades }: { grades: EstablishmentGradeColumn[] }) {
   );
 }
 
-function MultipleAssessmentsNotice({ grades }: { grades: EstablishmentGradeColumn[] }) {
+function MultipleInstrumentsNotice({ grades }: { grades: EstablishmentGradeColumn[] }) {
   return (
-    <AlertCallout tone="warning" title="Hay más de una evaluación de este grado en el proceso">
+    <AlertCallout tone="warning" title="Hay más de un instrumento de este grado en el proceso">
       <p className="text-sm">
-        Esos grados se muestran sin números para no mezclar resultados de evaluaciones distintas.
-        Deja una sola evaluación por grado y asignatura en el proceso para verlos.
+        Esos grados se muestran sin números para no mezclar resultados de pruebas distintas. Deja un
+        solo instrumento por grado y asignatura en el proceso para verlos.
       </p>
       <ul className="mt-2 space-y-1 text-sm">
         {grades.map((g) => (
@@ -222,7 +222,7 @@ function MultipleAssessmentsNotice({ grades }: { grades: EstablishmentGradeColum
 }
 
 function columnStatusLabel(grade: EstablishmentGradeColumn): string | null {
-  if (grade.multipleAssessments) return MULTIPLE_ASSESSMENTS_LABEL;
+  if (grade.multipleInstruments) return MULTIPLE_INSTRUMENTS_LABEL;
   if (grade.bandsMissing) return BANDS_MISSING_LABEL;
   return null;
 }

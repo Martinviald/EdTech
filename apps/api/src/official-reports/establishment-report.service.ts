@@ -83,6 +83,7 @@ type ColumnAcc = {
   assessments: Map<string, string | null>;
   instrumentIds: Set<string>;
   classGroupIds: Set<string>;
+  cells: Set<string>;
   evaluatedStudentIds: Set<string>;
   bandCounts: Map<string, number>;
   bandTotal: number;
@@ -249,6 +250,7 @@ export class EstablishmentReportService {
           assessments: new Map(),
           instrumentIds: new Set(),
           classGroupIds: new Set(),
+          cells: new Set(),
           evaluatedStudentIds: new Set(),
           bandCounts: new Map(),
           bandTotal: 0,
@@ -259,6 +261,7 @@ export class EstablishmentReportService {
       column.assessments.set(row.assessmentId, row.assessmentName);
       column.instrumentIds.add(row.instrumentId);
       column.classGroupIds.add(row.classGroupId);
+      column.cells.add(this.cellKey(row.assessmentId, row.classGroupId));
     }
     return columns;
   }
@@ -272,7 +275,7 @@ export class EstablishmentReportService {
   }
 
   private isMultiple(column: ColumnAcc): boolean {
-    return column.assessments.size > 1;
+    return column.instrumentIds.size > 1;
   }
 
   private assessmentIdsOf(columns: Map<string, ColumnAcc>): string[] {
@@ -304,11 +307,7 @@ export class EstablishmentReportService {
     const byCell = new Map<string, ColumnAcc>();
     for (const column of columns.values()) {
       if (this.isMultiple(column)) continue;
-      const [assessmentId] = column.assessments.keys();
-      if (!assessmentId) continue;
-      for (const classGroupId of column.classGroupIds) {
-        byCell.set(this.cellKey(assessmentId, classGroupId), column);
-      }
+      for (const cell of column.cells) byCell.set(cell, column);
     }
     return byCell;
   }
@@ -413,11 +412,7 @@ export class EstablishmentReportService {
     const multipleByCell = new Map<string, ColumnAcc>();
     for (const column of columns.values()) {
       if (!this.isMultiple(column)) continue;
-      for (const assessmentId of column.assessments.keys()) {
-        for (const classGroupId of column.classGroupIds) {
-          multipleByCell.set(this.cellKey(assessmentId, classGroupId), column);
-        }
-      }
+      for (const cell of column.cells) multipleByCell.set(cell, column);
     }
     if (multipleByCell.size === 0) return;
     for (const row of results) {
@@ -558,7 +553,7 @@ export class EstablishmentReportService {
           instrumentId: multiple ? null : (instrumentId ?? null),
           assessmentIds: assessmentEntries.map((a) => a.id),
           assessments: assessmentEntries,
-          multipleAssessments: multiple,
+          multipleInstruments: multiple,
           bandsMissing: !multiple && bandViews === null,
           bands: bandViews,
           coverage: {

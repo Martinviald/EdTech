@@ -43,23 +43,24 @@ export type EstablishmentColumnAssessment = {
 
 /**
  * Un grado presente como columna de las tablas de una asignatura. Cada columna sale de
- * UNA evaluación del proceso: si el grado × asignatura tiene más de una, la columna
- * queda sin números (`multipleAssessments`) en vez de mezclarlas.
+ * UN instrumento del proceso: las evaluaciones de ese instrumento (normalmente una por
+ * curso) se agregan. Si el grado × asignatura tiene más de un instrumento, la columna
+ * queda sin números (`multipleInstruments`) en vez de mezclar pruebas distintas.
  */
 export type EstablishmentGradeColumn = {
   gradeId: string;
   gradeName: string;
   gradeOrder: number;
-  /** Instrumento de la columna; `null` si `multipleAssessments`. */
+  /** Instrumento de la columna; `null` si `multipleInstruments`. */
   instrumentId: string | null;
-  /** Evaluaciones del proceso en este grado × asignatura (más de una ⇒ `multipleAssessments`). */
+  /** Evaluaciones del proceso en este grado × asignatura (típicamente una por curso). */
   assessmentIds: string[];
   /** Las mismas evaluaciones de `assessmentIds`, con su nombre, en el mismo orden. */
   assessments: EstablishmentColumnAssessment[];
-  multipleAssessments: boolean;
+  multipleInstruments: boolean;
   /** El instrumento no tiene bandas: la columna no clasifica por nivel (nunca cortes heredados). */
   bandsMissing: boolean;
-  /** Bandas del instrumento de la columna; `null` si `bandsMissing` o `multipleAssessments`. */
+  /** Bandas del instrumento de la columna; `null` si `bandsMissing` o `multipleInstruments`. */
   bands: PerformanceBandView[] | null;
   coverage: EstablishmentCoverage;
 };
