@@ -11,10 +11,12 @@ import {
   type BenchmarkBandCount,
   type DashboardPerformanceResponse,
   type PerformanceLevel,
+  type UserRole,
 } from '@soe/types';
 import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import { EmptyState, FilterBarSkeleton, CardSkeleton, TableSkeleton } from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
+import { StudentLink } from '@/components/students/student-link';
 import {
   Table,
   TableBody,
@@ -95,6 +97,7 @@ export default async function ClasificacionPage({
           limit={limit}
           performanceLevel={performanceLevel}
           canSeeSample={canSeeBenchmark(session.user.roles)}
+          roles={session.user.roles}
         />
       </Suspense>
     </>
@@ -137,12 +140,14 @@ async function PerformanceSection({
   limit,
   performanceLevel,
   canSeeSample,
+  roles,
 }: {
   filters: DashboardFilterValues;
   page: number;
   limit: number;
   performanceLevel: PerformanceLevel | undefined;
   canSeeSample: boolean;
+  roles: readonly UserRole[];
 }) {
   const options = await getDashboardFilters(buildDashboardQuery(filters));
   const scopedQuery = buildPerformanceQuery(
@@ -207,7 +212,9 @@ async function PerformanceSection({
                     {students.data.map((s) => (
                       <TableRow key={s.studentId}>
                         <TableCell className="font-medium">
-                          {s.studentFullName}
+                          <StudentLink studentId={s.studentId} roles={roles}>
+                            {s.studentFullName}
+                          </StudentLink>
                           <span className="block text-xs text-muted-foreground sm:hidden">
                             {s.studentRut}
                           </span>

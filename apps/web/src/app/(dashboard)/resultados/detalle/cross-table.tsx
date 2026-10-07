@@ -10,6 +10,7 @@ import type {
   MatrixQuestionColumn,
   MatrixStudentRow,
   QuestionAnalysisResponse,
+  UserRole,
 } from '@soe/types';
 import { toast } from 'sonner';
 import {
@@ -32,6 +33,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { StudentLink } from '@/components/students/student-link';
 import { nodeTypeLabel } from '@/lib/taxonomy-labels';
 import { QuestionDetailPanel } from '../components/question-detail-panel';
 import { TagFilterMenu, type TagFilterOption } from '../components/tag-filter-menu';
@@ -175,10 +177,13 @@ export function CrossTable({
   matrix,
   assessmentId,
   classGroupId,
+  roles = [],
 }: {
   matrix: ItemMatrixResponse;
   assessmentId: string;
   classGroupId?: string;
+  /** Roles del usuario: sin ellos el nombre del alumno no enlaza a su Ficha del estudiante. */
+  roles?: readonly UserRole[];
 }): JSX.Element {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<QuestionAnalysisResponse | null>(null);
@@ -512,7 +517,12 @@ export function CrossTable({
                   multi-colegio; llegará como `q.references.sample` sin romper esto. */}
               <LevelReferenceRow questions={displayQuestions} sublabel={levelSublabel} />
               {displayStudents.map((row) => (
-                <StudentRow key={row.studentId} row={row} questions={displayQuestions} />
+                <StudentRow
+                  key={row.studentId}
+                  row={row}
+                  questions={displayQuestions}
+                  roles={roles}
+                />
               ))}
             </TableBody>
           </Table>
@@ -613,9 +623,11 @@ function LevelReferenceRow({
 function StudentRow({
   row,
   questions,
+  roles,
 }: {
   row: MatrixStudentRow;
   questions: MatrixQuestionColumn[];
+  roles: readonly UserRole[];
 }): JSX.Element {
   // Mapa itemId → celda para emparejar columnas aunque el orden no coincida.
   const cellByItem = new Map<string, MatrixCell>();
@@ -645,7 +657,9 @@ function StudentRow({
               row.classGroupName ? ` · ${row.classGroupName}` : ''
             } · ${row.correctCount}/${row.answeredCount} correctas`}
           >
-            {displayName}
+            <StudentLink studentId={row.studentId} roles={roles}>
+              {displayName}
+            </StudentLink>
           </div>
         </div>
       </TableCell>

@@ -15,6 +15,7 @@ import {
   type AssessmentReportResponse,
   type InstrumentSampleEntry,
   type SkillAchievementModel,
+  type UserRole,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -26,6 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { StudentLink } from '@/components/students/student-link';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
 import { SampleDeltaChip, StatCard } from '@/components/shared';
@@ -83,6 +85,7 @@ export function ReportBody({
   assessmentId,
   classGroupId,
   samplePromise,
+  roles = [],
 }: {
   report: AssessmentReportResponse;
   // TKT-11/TKT-10: desglose interactivo por dimensión + drill-down a preguntas,
@@ -92,6 +95,8 @@ export function ReportBody({
   classGroupId?: string;
   /** Muestra de benchmarking del instrumento; sólo llega para roles directivos. */
   samplePromise?: Promise<InstrumentSampleEntry | null>;
+  /** Roles del usuario: sin ellos el nombre del alumno no enlaza a su Ficha del estudiante. */
+  roles?: readonly UserRole[];
 }) {
   const { summary } = report;
   const sampleSubject = classGroupId ? 'course' : 'school';
@@ -229,7 +234,7 @@ export function ReportBody({
       />
 
       {/* 6. Alumnos en foco */}
-      <RiskStudents report={report} />
+      <RiskStudents report={report} roles={roles} />
 
       {/* 7. Recomendaciones */}
       <Recommendations report={report} />
@@ -627,7 +632,13 @@ function SkillsSection({
 
 // ── Alumnos en foco ───────────────────────────────────────────────────────────
 
-function RiskStudents({ report }: { report: AssessmentReportResponse }) {
+function RiskStudents({
+  report,
+  roles,
+}: {
+  report: AssessmentReportResponse;
+  roles: readonly UserRole[];
+}) {
   const students = report.studentsAtRisk;
   if (students.length === 0) return null;
 
@@ -658,7 +669,9 @@ function RiskStudents({ report }: { report: AssessmentReportResponse }) {
               {students.map((s) => (
                 <TableRow key={s.studentId}>
                   <TableCell className="font-medium">
-                    {s.studentFullName}
+                    <StudentLink studentId={s.studentId} roles={roles}>
+                      {s.studentFullName}
+                    </StudentLink>
                     <span className="block text-xs text-muted-foreground">{s.studentRut}</span>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{s.classGroupName ?? '—'}</TableCell>
