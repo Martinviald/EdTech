@@ -69,8 +69,8 @@ export function TrajectoryComparePicker({ series }: { series: ComparableTrajecto
         <CardTitle className="text-base">Comparar dos puntos</CardTitle>
         <CardDescription>
           Elige la base y luego el punto a comparar. Si un punto reúne varias evaluaciones (varios
-          cursos), el comparador se abre sólo con la base; elige un curso para comparar evaluaciones
-          puntuales.
+          cursos), el comparador se abre sólo con el punto que tiene una evaluación, como base;
+          elige un curso para comparar evaluaciones puntuales.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -108,7 +108,8 @@ export function TrajectoryComparePicker({ series }: { series: ComparableTrajecto
           ) : null}
           {opensBaseOnly ? (
             <p className="mr-auto text-sm text-muted-foreground">
-              Un punto reúne varias evaluaciones: el comparador se abrirá sólo con la base.
+              Un punto reúne varias evaluaciones: el comparador se abrirá sólo con el otro punto,
+              como base.
             </p>
           ) : null}
           {href ? (

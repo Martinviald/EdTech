@@ -343,7 +343,7 @@ export class AssessmentComparisonsService {
       })
       .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
-      .where(and(eq(assessments.orgId, orgId), condition));
+      .where(and(eq(assessments.orgId, orgId), isNull(instruments.deletedAt), condition));
   }
 
   private async loadCourseIds(

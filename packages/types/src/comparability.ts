@@ -128,7 +128,6 @@ export function buildInstrumentHistoryKey(ref: ComparabilityInstrumentRef): stri
   return withTrack([ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE].join('|'), ref);
 }
 
-/** El momento anterior del ciclo, o `null` si es el primero (o no declara momento). */
 /**
  * ¿Se pueden comparar dos evaluaciones lado a lado? Sí cuando sus instrumentos miden lo
  * mismo (tipo, asignatura, grado y rama electiva): la misma historia de instrumento, en
@@ -141,6 +140,7 @@ export function areInstrumentsComparable(
   return buildInstrumentHistoryKey(a) === buildInstrumentHistoryKey(b);
 }
 
+/** El momento anterior del ciclo, o `null` si es el primero (o no declara momento). */
 export function previousApplicationPeriod(
   period: InstrumentApplicationPeriod | null,
 ): InstrumentApplicationPeriod | null {
