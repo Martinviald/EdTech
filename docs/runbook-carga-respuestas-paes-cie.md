@@ -1,7 +1,8 @@
 # Runbook — cargar las respuestas de los ensayos PAES de Ciencias (CIE)
 
-Aplica a los ensayos 1, 3 y 4 de 2026 escaneados en GradeCam. Los ensayos 2 y 5
-de Ciencias no existen.
+Aplica a los ensayos 1, 3, 4 y 5 de 2026 escaneados en GradeCam. El ensayo 2 de
+Ciencias no existe. Los ensayos 1, 3 y 4 se cargaron por los pasos 1-4 y después se
+migraron al instrumento fusionado; el 5 entró directo por el camino de la §6.
 
 ## 1. La decisión de fondo: contra qué instrumentos se carga
 
@@ -142,3 +143,40 @@ Al verificar en SQL, filtra **siempre y explícitamente** por
 - **Fusión a un instrumento por ensayo con secciones electivas** (camino B):
   bloqueada por las figuras ancladas a la posición y por la extracción
   incompleta de E1 y E4.
+
+## 6. Ensayo 5 y siguientes: cargar y fusionar en una pasada
+
+Hoy los ensayos viven en el modelo fusionado (un instrumento por ensayo con secciones
+electivas), pero el cargador sigue sin poder escribir contra él (`assertNoElectiveSections`).
+El camino es el mismo que recorrieron los ensayos 1, 3 y 4, comprimido:
+
+1. Importar los 3 cuadernillos por mención (`CIE-E5-{BIO,FIS,QUI}-con-pauta.json`) con
+   `INSTRUMENTS_DATA_DIR` apuntando a un directorio que tenga sólo esos tres.
+2. **Aplicar los tags a esos 3 cuadernillos** (`CIE-E5-por-mencion-item-tags-plan.json`).
+   ⚠️ No al fusionado: la migración _sincroniza_ los tags del fusionado con los de los
+   cuadernillos por mención y deja en 0 los que no tengan par. Si los tags van al
+   fusionado, la migración los borra y `skill_results` queda vacío.
+3. Exportar el mapa de ítems (§3 paso 1, filtrando el ensayo) y construir el artefacto con
+   `cie_a_artefacto.py --ensayos 5`. ⚠️ Desde el Ensayo 5 la hoja común de GradeCam trae
+   tres versiones, cada una con la numeración de su cuadernillo; el script lo detecta solo
+   (ver el punto 4 de su docstring) y exige que la versión común del alumno sea la de su
+   mención.
+4. Cargar con `--loadKey=paes-2026-cie` (dry-run y `--commit`). Que las 9 evaluaciones
+   queden sin proceso es lo esperado: se vinculan al migrar.
+5. Migrar con un mapa que tenga **sólo ese ensayo**, para no tocar los ya migrados:
+   ```bash
+   pnpm --filter @soe/db exec tsx src/scripts/migrate-elective-sections.ts \
+     --map data/instruments-paes/cie-electivas-mapa-e5.json --loadKey paes-2026-cie \
+     --org <CSCJ> [--commit]
+   ```
+   El mapa empareja el común por la Tabla de especificaciones (`N°B`/`N°F`/`N°Q`), no por
+   texto: en el Ensayo 5 el emparejamiento por enunciado deja sin par a Química #3, que
+   sólo difiere de Biología #39 en el subíndice de "H₂".
+6. `import-instruments.ts` no copia `itemPiloto`/`itemPilotoNota`, sólo `points: 0`: las
+   marcas de piloto se agregan con un UPDATE de `scoring_config` sobre el fusionado.
+
+Si algo sale mal, `--rollback --commit` con el mismo mapa devuelve las respuestas a los
+cuadernillos por mención (con gate de % por alumno); migrar de nuevo reactiva el fusionado.
+
+Verificado en el Ensayo 5 (2026-10-07): 60 alumnos, 4.800 respuestas, corrección idéntica a la
+de GradeCam en los 60 (delta 0), 132 tags en 78 ítems y 930 `skill_results`.

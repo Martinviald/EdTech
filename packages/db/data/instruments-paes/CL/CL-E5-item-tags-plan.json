@@ -1,0 +1,719 @@
+{
+  "plan": [
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 1,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 2,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 3,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 4,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 5,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 6,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 7,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 8,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 9,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 10,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 11,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 12,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 13,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 14,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 15,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 16,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 17,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 18,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 19,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 20,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 21,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 22,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 23,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 24,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 25,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 26,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 27,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 28,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 29,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 30,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 31,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 32,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 33,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 34,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 35,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 36,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 37,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 38,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 39,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 40,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 41,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 42,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 43,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 44,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 45,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 46,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 47,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 48,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 49,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 50,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 51,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 52,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 53,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 54,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 55,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.LOCALIZAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 56,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 57,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 58,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 59,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 60,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 61,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 62,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 63,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 64,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.INTERPRETAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    },
+    {
+      "instrument": "CL-E5-con-pauta.json",
+      "position": 65,
+      "tags": [
+        {
+          "code": "PAES.CL.HAB.EVALUAR",
+          "type": "skill",
+          "tagType": "primary"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "instrument": "HIS-E5-con-pauta.json",
+  "slug": "paes-his-e5-2026",
+  "bucket": "edtech-demo-uploadsbucket-xccufosb",
+  "figuras": [
+    {
+      "position": 2,
+      "printedNumber": 2,
+      "key": "item/global/paes-his-e5-2026/item_figure/02.png",
+      "sizePx": [1864, 2011],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 4,
+      "printedNumber": 4,
+      "key": "item/global/paes-his-e5-2026/item_figure/04.png",
+      "sizePx": [1893, 945],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 6,
+      "printedNumber": 6,
+      "key": "item/global/paes-his-e5-2026/item_figure/06.png",
+      "sizePx": [1892, 1414],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 7,
+      "printedNumber": 7,
+      "key": "item/global/paes-his-e5-2026/item_figure/07.png",
+      "sizePx": [1863, 1560],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 12,
+      "printedNumber": 12,
+      "key": "item/global/paes-his-e5-2026/item_figure/12.png",
+      "sizePx": [1887, 1127],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 17,
+      "printedNumber": 17,
+      "key": "item/global/paes-his-e5-2026/item_figure/17.png",
+      "sizePx": [1887, 1649],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 22,
+      "printedNumber": 22,
+      "key": "item/global/paes-his-e5-2026/item_figure/22.png",
+      "sizePx": [1862, 1743],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 23,
+      "printedNumber": 23,
+      "key": "item/global/paes-his-e5-2026/item_figure/23.png",
+      "sizePx": [1892, 1175],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 24,
+      "printedNumber": 24,
+      "key": "item/global/paes-his-e5-2026/item_figure/24.png",
+      "sizePx": [1892, 1463],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 26,
+      "printedNumber": 26,
+      "key": "item/global/paes-his-e5-2026/item_figure/26.png",
+      "sizePx": [1892, 1511],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 29,
+      "printedNumber": 29,
+      "key": "item/global/paes-his-e5-2026/item_figure/29.png",
+      "sizePx": [1892, 1692],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 31,
+      "printedNumber": 31,
+      "key": "item/global/paes-his-e5-2026/item_figure/31.png",
+      "sizePx": [1893, 1453],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 32,
+      "printedNumber": 32,
+      "key": "item/global/paes-his-e5-2026/item_figure/32.png",
+      "sizePx": [1893, 1357],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 33,
+      "printedNumber": 33,
+      "key": "item/global/paes-his-e5-2026/item_figure/33.png",
+      "sizePx": [1893, 1587],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 35,
+      "printedNumber": 35,
+      "key": "item/global/paes-his-e5-2026/item_figure/35.png",
+      "sizePx": [1893, 1473],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 39,
+      "printedNumber": 39,
+      "key": "item/global/paes-his-e5-2026/item_figure/39.png",
+      "sizePx": [1864, 1850],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 40,
+      "printedNumber": 40,
+      "key": "item/global/paes-his-e5-2026/item_figure/40.png",
+      "sizePx": [1893, 1416],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 43,
+      "printedNumber": 43,
+      "key": "item/global/paes-his-e5-2026/item_figure/43.png",
+      "sizePx": [1893, 1070],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 51,
+      "printedNumber": 51,
+      "key": "item/global/paes-his-e5-2026/item_figure/51.png",
+      "sizePx": [1892, 1405],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 52,
+      "printedNumber": 52,
+      "key": "item/global/paes-his-e5-2026/item_figure/52.png",
+      "sizePx": [1865, 1702],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 53,
+      "printedNumber": 53,
+      "key": "item/global/paes-his-e5-2026/item_figure/53.png",
+      "sizePx": [1892, 1531],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 54,
+      "printedNumber": 54,
+      "key": "item/global/paes-his-e5-2026/item_figure/54.png",
+      "sizePx": [1892, 1357],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 57,
+      "printedNumber": 57,
+      "key": "item/global/paes-his-e5-2026/item_figure/57.png",
+      "sizePx": [1892, 1184],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    },
+    {
+      "position": 62,
+      "printedNumber": 62,
+      "key": "item/global/paes-his-e5-2026/item_figure/62.png",
+      "sizePx": [1892, 1301],
+      "bucket": "edtech-demo-uploadsbucket-xccufosb"
+    }
+  ]
+}
