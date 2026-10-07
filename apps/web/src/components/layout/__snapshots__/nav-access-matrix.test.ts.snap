@@ -1,0 +1,463 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matriz de acceso de la navegación multi-rol teacher + eval_coordinator (unión) 1`] = `
+{
+  "hub": [
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Comparar instrumentos",
+        "Material Remedial",
+        "Benchmarking",
+        "Informe establecimiento",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Hojas de respuesta",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación platform_admin por tabla (ve todo el hub) 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Alumnos (próximamente)",
+    "Marcos Académicos",
+    "Escalas de notas",
+    "Modelos de IA",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Comparar instrumentos",
+        "Material Remedial",
+        "Benchmarking",
+        "Informe establecimiento",
+        "Telemetría de uso",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Hojas de respuesta",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol academic_director 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Alumnos (próximamente)",
+    "Marcos Académicos",
+    "Escalas de notas",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Comparar instrumentos",
+        "Material Remedial",
+        "Benchmarking",
+        "Informe establecimiento",
+        "Telemetría de uso",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Hojas de respuesta",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol coordinator 1`] = `
+{
+  "hub": [
+    "Alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Informe establecimiento",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol cycle_director 1`] = `
+{
+  "hub": [
+    "Alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Benchmarking",
+        "Informe establecimiento",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol dept_head 1`] = `
+{
+  "hub": [
+    "Alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Informe establecimiento",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol eval_coordinator 1`] = `
+{
+  "hub": [
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Comparar instrumentos",
+        "Material Remedial",
+        "Benchmarking",
+        "Informe establecimiento",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Hojas de respuesta",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol foundation_director 1`] = `
+{
+  "hub": [],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Benchmarking",
+        "Telemetría de uso",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol guardian 1`] = `
+{
+  "hub": [],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol homeroom_teacher 1`] = `
+{
+  "hub": [
+    "Alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol platform_admin 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Alumnos (próximamente)",
+    "Marcos Académicos",
+    "Escalas de notas",
+    "Modelos de IA",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Comparar instrumentos",
+        "Material Remedial",
+        "Benchmarking",
+        "Informe establecimiento",
+        "Telemetría de uso",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Hojas de respuesta",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol school_admin 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Alumnos (próximamente)",
+    "Marcos Académicos",
+    "Escalas de notas",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Comparar instrumentos",
+        "Material Remedial",
+        "Benchmarking",
+        "Informe establecimiento",
+        "Telemetría de uso",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Hojas de respuesta",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol teacher 1`] = `
+{
+  "hub": [],
+  "sidebar": [
+    {
+      "group": "Análisis",
+      "items": [
+        "Inicio",
+        "Evaluaciones",
+        "Procesos de medición",
+        "Panorama pedagógico",
+        "Vista 360 del estudiante",
+        "Material Remedial",
+        "Mis cursos",
+      ],
+    },
+    {
+      "group": "Contenido y datos",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+  ],
+}
+`;

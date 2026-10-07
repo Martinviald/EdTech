@@ -44,6 +44,8 @@ export const ROUTES = {
   procesos: route('/procesos'),
   proceso: (processId: string) => route(`/procesos/${processId}`),
   procesoRendicion: (processId: string) => route(`/procesos/${processId}/rendicion`),
+  procesoInformeEstablecimiento: (processId: string) =>
+    route(`/procesos/${processId}/informe-establecimiento`),
 
   resultados: route('/resultados'),
   telemetria: route('/telemetria'),

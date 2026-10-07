@@ -37,6 +37,11 @@ export const HEATMAP_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 // resto de dashboards (el scoping por curso para profesores lo aplica el service).
 export const MASTER_BOARD_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
 
+// Comparar dos evaluaciones sin IA es otra VISTA sobre los mismos resultados: mismos
+// permisos (el scoping por curso para profesores lo aplica el service). El diagnóstico
+// con IA de esa comparación sigue gateado por AI_ANALYSIS_GENERATOR_ROLES + flag.
+export const COMPARE_RESULTS_VIEWER_ROLES: readonly UserRole[] = RESULTS_VIEWER_ROLES;
+
 // La página de desempeño de un profesor expone datos agregados de la org enfocados en
 // un docente: sólo la ven directivos/admin (decisión P4b del diseño). Es un
 // subconjunto ESTRICTO de RESULTS_VIEWER_ROLES (excluye teacher/homeroom_teacher), así
