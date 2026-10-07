@@ -271,9 +271,10 @@ por evaluación, curso y nodo, para revisarlo y avisar a los colegios (plan §A5
 
 ### 5.4 `/resultados` de una evaluación (logro por OA, habilidad, contenido y eje)
 
-- **Referencia del nivel por nodo.** `GET /dashboards/skills?assessmentId=…&reference=level` devuelve
-  el logro por nodo de todo el nivel. Se calcula con la misma población que la fila del nivel de
-  `/detalle` (mismo instrumento, nivel y año), en un helper común extraído de `item-analysis`.
+- **Referencias por nodo.** `GET /item-analysis/skill-references?assessmentId=…&classGroupId=…`
+  devuelve, por nodo, el % del nivel completo (misma población que la fila del nivel de
+  `/detalle`: mismo instrumento, nivel y año) y, para quien puede verla, la muestra calculada sólo
+  sobre las preguntas del nodo que el grupo tiene corregidas (D9).
 - **`SkillsBreakdown`:**
   - La barra muestra dos marcas, nivel y muestra.
   - El `title` se reemplaza por el tooltip de los chips (`SampleTooltipBody`): "Curso · Nivel ·

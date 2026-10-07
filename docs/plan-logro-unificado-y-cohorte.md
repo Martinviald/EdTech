@@ -405,3 +405,41 @@ Nada de esto se hace en la ejecución autónoma.
   (§8 paso 2).
 - **No se recorrieron las vistas en un navegador local:** la máquina estaba con < 100 MB libres y
   `next dev` + API habrían sido un segundo y tercer proceso pesado. Queda en §8 paso 6.
+
+### Revisión intermedia A5-2
+
+Un subagente de sólo lectura revisó la parte A completa. Encontró 2 defectos confirmados y 4
+plausibles; todos se corrigieron en `67d78778`:
+
+| Hallazgo                                                                             | Arreglo                                                                        |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| La comparación del alumno sumaba dos veces un curso con respuestas e informe oficial | `preferComputedOverImported` en el tally por curso                             |
+| Cambiar `aggregateSkillResults` no disparaba el backfill                             | `grade-calculator.ts` en la huella                                             |
+| Filas escritas por la imagen vieja durante el deploy bloqueaban el deploy siguiente  | `check` pide el backfill si hay filas calculadas con % y sin tally (auto-cura) |
+| La re-derivación de importadas podía borrar ejes si se perdían tags                  | Upsert en su lugar, nunca borra; aviso en `verify`                             |
+| Preguntas borradas: % distinto entre vistas hasta re-puntuar                         | El backfill lista esas evaluaciones para re-puntuarlas                         |
+| Tasa de aprobación contaba como reprobado a quien no tenía nada corregido            | Filtro `grade is not null`                                                     |
+
+### Parte B
+
+| Fase  | Commit     | Notas                                                                                         |
+| ----- | ---------- | --------------------------------------------------------------------------------------------- |
+| B0–B2 | `dc62d291` | Contratos, muestra por conjunto de preguntas, tablero maestro (API y web) y API de `/detalle` |
+| B3    | `e5950eb7` | Web de `/detalle`: tooltip curso · nivel · muestra, fila de la muestra, panel                 |
+| B4    | `59dee1e3` | `GET /item-analysis/skill-references` y desglose por nodo en `/resultados`                    |
+
+**Decisiones tomadas en el camino:**
+
+6. **B1-2 sin helper aparte.** La población del nivel ya vive en `ItemAnalysisService`
+   (`resolveReferenceCohort` + `loadReferenceRows`); el endpoint de referencias por nodo se agregó
+   en ese mismo servicio en vez de extraer un helper con un solo consumidor más.
+7. **Un solo endpoint para nivel y muestra por nodo** (`/item-analysis/skill-references`) en vez de
+   `reference=level` en `/dashboards/skills`: el query de dashboards es compartido por muchas vistas
+   y el nivel se calcula distinto (misma población que `/detalle`).
+8. **`canSeeSample` vive en `BenchmarkSamplesService`** y lo usan el tablero y `/detalle`: rol de la
+   muestra y fuera de la vista docente, igual que el panorama.
+9. **El selector de métricas del tablero usa `availableMetrics` de la API**, para no ofrecer
+   "Diferencia vs muestra" a quien la API no se la calcula.
+10. **En `/resultados` la muestra por nodo deja de salir del `per_skill` del instrumento** y pasa a
+    calcularse sobre las preguntas corregidas del grupo (D9). La vista de dimensiones del panorama
+    sigue usando `per_skill`, que ya es tally.
