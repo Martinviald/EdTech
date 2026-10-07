@@ -55,16 +55,17 @@ Consecuencias:
 
 Tomadas el 2026-10-06.
 
-| #   | Decisión                                                | Resolución                                                                                                                                    |
-| --- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | ¿Unificar la fórmula aunque cambien números publicados? | **Sí.** Se quiere analítica definitiva, sin deuda técnica.                                                                                    |
-| D2  | Percentil en celdas de curso                            | **No.** Sólo la diferencia en pp. Un curso no se compara contra promedios de colegios completos (igual que en el panorama).                   |
-| D3  | Métrica "diferencia vs muestra" en el tablero           | **Se incluye** en la parte B.                                                                                                                 |
-| D4  | Pregunta en blanco                                      | **Es una incorrecta:** 0 puntos y su máximo cuenta.                                                                                           |
-| D5  | Preguntas de una sección que el alumno no rindió        | **No cuentan**, ni en numerador ni en denominador.                                                                                            |
-| D6  | Pendientes de corrección                                | Se excluyen, como hoy. Es tolerable que afecten el número en esta fase. El aviso se hace **sólo donde es barato** (vistas de una evaluación). |
-| D7  | Respuesta que falta en la base                          | **No cuenta** en el % de logro.                                                                                                               |
-| D8  | Tablas de benchmark                                     | Se mantienen como tablas precalculadas (razones en §6.1).                                                                                     |
+| #   | Decisión                                                                 | Resolución                                                                                                                                    |
+| --- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | ¿Unificar la fórmula aunque cambien números publicados?                  | **Sí.** Se quiere analítica definitiva, sin deuda técnica.                                                                                    |
+| D2  | Percentil en celdas de curso                                             | **No.** Sólo la diferencia en pp. Un curso no se compara contra promedios de colegios completos (igual que en el panorama).                   |
+| D3  | Métrica "diferencia vs muestra" en el tablero                            | **Se incluye** en la parte B.                                                                                                                 |
+| D4  | Pregunta en blanco                                                       | **Es una incorrecta:** 0 puntos y su máximo cuenta.                                                                                           |
+| D5  | Preguntas de una sección que el alumno no rindió                         | **No cuentan**, ni en numerador ni en denominador.                                                                                            |
+| D6  | Pendientes de corrección                                                 | Se excluyen, como hoy. Es tolerable que afecten el número en esta fase. El aviso se hace **sólo donde es barato** (vistas de una evaluación). |
+| D7  | Respuesta que falta en la base                                           | **No cuenta** en el % de logro.                                                                                                               |
+| D8  | Tablas de benchmark                                                      | Se mantienen como tablas precalculadas (razones en §6.1).                                                                                     |
+| D9  | ¿Qué hace la muestra con evaluaciones que tienen preguntas sin corregir? | **Ninguna se excluye.** La muestra se calcula sobre las preguntas que el grupo comparado tiene corregidas (§5.1).                             |
 
 ---
 
@@ -214,8 +215,17 @@ por evaluación, curso y nodo, para revisarlo y avisar a los colegios (plan §A5
   a los que se retiraron). Exige k ≥ `BENCHMARK_K_MIN_SCHOOLS` colegios por instrumento y, para
   preguntas y secciones, por ítem. La red aparece en el tooltip si existe.
 - **Misma fórmula en los dos lados.** El valor de la muestra para cualquier conjunto de ítems (prueba,
-  sección o pregunta) es la suma de los tallies de los colegios elegibles. El percentil se calcula
-  sobre el % de cada colegio. Para nodos se usa `per_skill`.
+  sección, nodo o pregunta) es la suma de los tallies por ítem de los colegios elegibles
+  (`benchmark_item_aggregates`). Los nodos se arman con los tags del ítem, que son datos de referencia
+  globales. El percentil se calcula sobre el % de cada colegio.
+- **Sobre las mismas preguntas (D9).** La muestra se calcula **sólo sobre las preguntas que el grupo
+  comparado tiene corregidas** (`max_sum > 0`). Si a CSCJ le faltan las preguntas de desarrollo de una
+  evaluación, la muestra con la que se compara también las deja fuera. Así no se excluye ninguna
+  evaluación de la muestra y la comparación es pareja.
+  - Cada colegio de la muestra aporta lo que tiene corregido dentro de ese conjunto.
+  - El k se exige por pregunta. Una pregunta que queda bajo k sale del conjunto de los dos lados.
+  - El tooltip dice sobre cuántas preguntas se comparó cuando no son todas: "Comparado sobre 28 de 30
+    preguntas: 2 sin corrección".
 - **Un grupo, tres niveles de lectura:** curso · nivel · muestra, con la diferencia en pp contra la
   muestra. El percentil y la zona típica sólo se muestran cuando el grupo es el nivel completo del
   colegio (D2).
@@ -362,8 +372,18 @@ Medido en la base de demo, en solo lectura.
   ve afectado (0,3 pp).** Las comparaciones contra la muestra de hoy son justas. Una muestra con
   evaluaciones de 2025 no lo sería, porque CSCJ quedaría inflado frente a colegios que corrigieron
   todo.
-- Esto reabre D6: el aviso de pendientes sigue en el alcance (A-6), pero conviene decidir si la
-  muestra excluye o marca las evaluaciones con pendientes.
+- **Resuelto con D9:** ninguna evaluación sale de la muestra. La comparación se hace sobre las
+  preguntas que el grupo tiene corregidas, y el tooltip lo dice. El % propio de CSCJ en esas
+  evaluaciones sigue midiendo sólo lo corregido, y se tolera (D6).
+- **Por qué faltan:** el export SAI de la Agencia trae `-` en todo el curso para cada pregunta de
+  desarrollo, en 2025 y 2026. Se verificó en los dos archivos y calza 1 a 1 con las posiciones de
+  desarrollo de la BDD. Son datos faltantes, no blancos: puntuarlos 0 sería falso.
+- **Recuperación posible, fuera de este diseño:**
+  - Unas 1.600 respuestas pendientes **sí** tienen respuesta. Son preguntas cerradas (numéricas, de
+    selección múltiple, pares ordenados) tipadas como desarrollo en instrumentos 2025 de Matemática 1°,
+    5°, 6° y 7° y Ciencias 5°.
+  - El puntaje de desarrollo se podría despejar desde el % por dimensión del XLS
+    `Resultados_de_estudiantes`.
 
 **Error vivo encontrado: escala del logro por nodo importado (A-7).**
 
