@@ -41,16 +41,16 @@ export default async function MaterialRemedialPage({
   if (!session?.user) redirect(ROUTES.login);
   if (!canAccess(session.user.roles, REMEDIAL_VIEWER_ROLES)) redirect(ROUTES.dashboard);
 
+  if (!(await isFeatureEnabled('remedial'))) {
+    return <FeatureUpgradeNotice feature="remedial" />;
+  }
+
   const params = await searchParams;
   const generate = pickParam(params.generate) === '1';
   if (!generate) {
     const libraryQuery = new URLSearchParams({ origin: 'remedial' });
     if (pickParam(params.status) === 'ready') libraryQuery.set('review', 'pending_review');
     redirect(`${ROUTES.materiales}?${libraryQuery.toString()}` as Route);
-  }
-
-  if (!(await isFeatureEnabled('remedial'))) {
-    return <FeatureUpgradeNotice feature="remedial" />;
   }
 
   const nodeId = pickParam(params.nodeId);
