@@ -132,6 +132,7 @@ function makeDb(store: Store): Database {
         innerJoin: () => chain,
         leftJoin: () => chain,
         groupBy: () => chain,
+        orderBy: () => chain,
         limit: () => chain,
         where: (p: Predicate) => {
           predicate = p;

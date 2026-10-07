@@ -58,7 +58,13 @@ export class DocumentLibraryService {
       const remedialScope = remedialAccess
         ? await this.remedialService.scopeCondition(tx, user, orgId)
         : undefined;
-      const documentWhere = this.documentConditions(user, orgId, query, remedialAccess);
+      const documentWhere = this.documentConditions(
+        user,
+        orgId,
+        query,
+        remedialAccess,
+        remedialScope,
+      );
       const remedialWhere =
         remedialAccess && this.includesRemedials(query)
           ? this.remedialConditions(user, orgId, query, remedialScope)
@@ -104,6 +110,7 @@ export class DocumentLibraryService {
     orgId: string,
     query: MaterialLibraryQueryDto,
     remedialAccess: boolean,
+    remedialScope: SQL | undefined,
   ): SQL | undefined {
     const conditions: Array<SQL | undefined> = [
       isNull(documents.deletedAt),
@@ -119,7 +126,7 @@ export class DocumentLibraryService {
     if (query.review === 'pending_review') {
       conditions.push(
         remedialAccess
-          ? sql`${documents.source}->>'kind' = 'remedial' and exists (select 1 from ${remedialMaterials} where ${remedialMaterials.id}::text = ${documents.source}->>'refId' and ${remedialMaterials.status} = 'ready' and ${remedialMaterials.deletedAt} is null)`
+          ? sql`${documents.source}->>'kind' = 'remedial' and exists (select 1 from ${remedialMaterials} where ${remedialMaterials.id}::text = ${documents.source}->>'refId' and ${remedialMaterials.status} = 'ready' and ${remedialMaterials.deletedAt} is null and ${remedialScope ?? sql`true`})`
           : sql`false`,
       );
     }

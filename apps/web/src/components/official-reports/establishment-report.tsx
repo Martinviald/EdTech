@@ -26,8 +26,8 @@ import { bandBadgeClass } from './band-levels';
 // ─────────────────────────────────────────────────────────────────────────────
 // TKT-25 — Informe de establecimiento (Área Académica) de UN proceso de medición.
 // Server Component. Reproduce las Tablas 1.1–1.9 por asignatura. Cada columna de
-// grado sale de una sola evaluación del proceso: si el grado tiene más de una, la
-// columna va sin números y lo advierte. Los niveles son SIEMPRE las bandas del
+// grado sale de un solo instrumento del proceso (sus evaluaciones por curso se
+// agregan): si el grado mezcla instrumentos, la columna va sin números y lo advierte. Los niveles son SIEMPRE las bandas del
 // instrumento de la columna; una columna sin bandas lo dice ("Sin niveles
 // definidos") en vez de caer a cortes heredados.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -173,7 +173,7 @@ function SubjectBlock({
           <CountsTable subject={subject} />
         ) : (
           <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
-            Ningún grado de esta asignatura tiene una sola evaluación en el proceso.
+            Ningún grado de esta asignatura tiene un solo instrumento en el proceso.
           </p>
         )}
       </div>

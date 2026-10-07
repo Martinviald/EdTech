@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { and, countDistinct, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, countDistinct, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentCourseAssignments,
@@ -344,6 +344,11 @@ export class EstablishmentReportService {
           eq(students.orgId, orgId),
           isNull(students.deletedAt),
         ),
+      )
+      .orderBy(
+        assessmentResults.studentId,
+        desc(assessmentResults.createdAt),
+        assessmentResults.assessmentId,
       );
     return rows.map((r) => ({
       studentId: r.studentId,
