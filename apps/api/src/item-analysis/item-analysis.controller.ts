@@ -3,6 +3,7 @@ import {
   ITEM_ANALYSIS_VIEWER_ROLES,
   assessmentListQuerySchema,
   itemMatrixQuerySchema,
+  skillReferencesQuerySchema,
   questionAnalysisQuerySchema,
 } from '@soe/types';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -39,6 +40,13 @@ export class ItemAnalysisController {
   matrix(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
     const dto = itemMatrixQuerySchema.parse(query ?? {});
     return this.service.getMatrix(user, dto);
+  }
+
+  @Get('skill-references')
+  @Roles(...ITEM_ANALYSIS_VIEWER_ROLES)
+  skillReferences(@Query() query: unknown, @CurrentUser() user: JwtPayload) {
+    const dto = skillReferencesQuerySchema.parse(query ?? {});
+    return this.service.getSkillReferences(user, dto);
   }
 
   /**

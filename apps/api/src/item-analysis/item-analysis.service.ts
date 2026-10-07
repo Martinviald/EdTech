@@ -51,6 +51,8 @@ import {
   type MatrixReferenceScopes,
   type MatrixStudentRow,
   type QuestionAnalysisQueryDto,
+  type SkillReferencesQueryDto,
+  type SkillReferencesResponse,
   type QuestionReferences,
   type ReferenceRate,
   type QuestionAnalysisResponse,
@@ -62,6 +64,7 @@ import {
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
   BenchmarkSamplesService,
+  type ItemSetRequest,
   type ItemSetSampleResult,
 } from '../benchmarking/benchmark-samples.service';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
@@ -445,6 +448,61 @@ export class ItemAnalysisService {
   // ───────────────────────────────────────────────────────────────────────────
   // H6.12 — GET /api/item-analysis/questions/:itemId
   // ───────────────────────────────────────────────────────────────────────────
+
+  async getSkillReferences(
+    user: JwtPayload,
+    query: SkillReferencesQueryDto,
+  ): Promise<SkillReferencesResponse> {
+    const orgId = this.requireOrgId(user);
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const assessment = await this.requireAssessmentOwnedByUser(
+        tx,
+        user,
+        orgId,
+        query.assessmentId,
+      );
+      const scope = await this.getAccessibleClassGroupIds(tx, user, orgId);
+      if (!scope.scopeAll) {
+        const hasScope = await this.assessmentTouchesScope(
+          tx,
+          query.assessmentId,
+          scope.classGroupIds,
+        );
+        if (!hasScope) {
+          throw new ForbiddenException('No tiene acceso a los resultados de esta evaluación');
+        }
+      }
+      if (query.classGroupId) {
+        const ok = await this.classGroupInScope(tx, orgId, scope, query.classGroupId);
+        if (!ok) throw new ForbiddenException('No tiene acceso a ese curso');
+      }
+
+      const itemsByNode = await this.loadItemsByNode(tx, assessment.instrumentId);
+      const itemIds = Array.from(new Set([...itemsByNode.values()].flat()));
+      if (itemIds.length === 0) return { level: null, sample: null };
+
+      const level = await this.loadSkillLevelReference(
+        tx,
+        orgId,
+        query.assessmentId,
+        assessment.instrumentId,
+        itemIds,
+        itemsByNode,
+      );
+      const sample = this.samples.canSeeSample(user)
+        ? await this.loadSkillSampleReference(
+            tx,
+            orgId,
+            user.userId,
+            query.assessmentId,
+            assessment.instrumentId,
+            this.resolveAccessibleClassGroupIds(scope, query.classGroupId),
+            itemsByNode,
+          )
+        : null;
+      return { level, sample };
+    });
+  }
 
   async getQuestionAnalysis(
     user: JwtPayload,
@@ -895,6 +953,110 @@ export class ItemAnalysisService {
           inArray(assessmentItemStats.itemId, itemIds),
         ),
       );
+  }
+
+  private async loadItemsByNode(
+    tx: Database,
+    instrumentId: string,
+  ): Promise<Map<string, string[]>> {
+    const rows = await tx
+      .select({ itemId: itemTaxonomyTags.itemId, nodeId: itemTaxonomyTags.nodeId })
+      .from(itemTaxonomyTags)
+      .innerJoin(items, eq(items.id, itemTaxonomyTags.itemId))
+      .where(and(eq(items.instrumentId, instrumentId), isNull(items.deletedAt)));
+    const byNode = new Map<string, Set<string>>();
+    for (const row of rows) {
+      const set = byNode.get(row.nodeId);
+      if (set) set.add(row.itemId);
+      else byNode.set(row.nodeId, new Set([row.itemId]));
+    }
+    return new Map(Array.from(byNode, ([nodeId, set]) => [nodeId, Array.from(set)]));
+  }
+
+  private async loadSkillLevelReference(
+    tx: Database,
+    orgId: string,
+    assessmentId: string,
+    instrumentId: string,
+    itemIds: string[],
+    itemsByNode: Map<string, string[]>,
+  ): Promise<SkillReferencesResponse['level']> {
+    const cohort = await this.resolveReferenceCohort(tx, assessmentId);
+    if (cohort === null) return null;
+    const rows = await this.loadReferenceRows(
+      tx,
+      orgId,
+      instrumentId,
+      cohort.gradeIds,
+      cohort.yearIds,
+      itemIds,
+    );
+    const agg = this.aggregateReference(rows);
+    const skills = Array.from(itemsByNode, ([nodeId, nodeItems]) => {
+      const tally = emptyTally();
+      for (const itemId of nodeItems) {
+        const reference = agg.byItem.get(itemId);
+        if (reference) addTally(tally, { scoreSum: reference.scoreSum, maxSum: reference.maxSum });
+      }
+      return { nodeId, achievement: achievementPct(tally) };
+    });
+    return {
+      gradeName: cohort.gradeName,
+      classGroupCount: agg.summary.classGroupCount,
+      studentCount: agg.summary.studentCount,
+      skills,
+    };
+  }
+
+  private async loadSkillSampleReference(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    assessmentId: string,
+    instrumentId: string,
+    classGroupFilter: string[] | null,
+    itemsByNode: Map<string, string[]>,
+  ): Promise<SkillReferencesResponse['sample']> {
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return null;
+    const conditions = [eq(assessmentItemStats.assessmentId, assessmentId)];
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
+    }
+    const corrected = await tx
+      .select({ itemId: assessmentItemStats.itemId })
+      .from(assessmentItemStats)
+      .where(and(...conditions))
+      .groupBy(assessmentItemStats.itemId)
+      .having(sql`sum(${assessmentItemStats.maxSum}) > 0`);
+    const correctedIds = new Set(corrected.map((row) => row.itemId));
+
+    const totals = new Map<string, number>();
+    const requests: ItemSetRequest[] = [];
+    for (const [nodeId, nodeItems] of itemsByNode) {
+      const groupItems = nodeItems.filter((itemId) => correctedIds.has(itemId));
+      if (groupItems.length === 0) continue;
+      totals.set(nodeId, groupItems.length);
+      requests.push({ key: nodeId, instrumentId, itemIds: groupItems });
+    }
+    const results = await this.samples.getItemSetSamples(requests, tx);
+    if (results.size === 0) return null;
+    await this.samples.logSampleAccess(tx, orgId, userId, [instrumentId]);
+
+    let refreshedAt = '';
+    let label = '';
+    const skills = Array.from(results, ([nodeId, result]) => {
+      if (result.refreshedAt > refreshedAt) refreshedAt = result.refreshedAt;
+      label = result.label;
+      return {
+        nodeId,
+        value: result.value,
+        schoolCount: result.schoolCount,
+        studentCount: result.studentCount,
+        comparedItems: result.comparedItemIds.length,
+        totalItems: totals.get(nodeId) ?? result.comparedItemIds.length,
+      };
+    });
+    return { instrumentId, label, refreshedAt, skills };
   }
 
   private async attachSampleReferences(

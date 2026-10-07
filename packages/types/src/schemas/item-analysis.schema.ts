@@ -339,3 +339,52 @@ export type QuestionAnalysisResponse = {
   // en contexto (solo se calcula acotado a la cohorte de una evaluación).
   rawAnswerDistribution: RawAnswerCount[] | null;
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Referencias por nodo de una evaluación: nivel y muestra de colegios
+// GET /api/item-analysis/skill-references?assessmentId=...&classGroupId=...
+// docs/diseno-logro-unificado-y-cohorte.md §5.4
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const skillReferencesQuerySchema = z
+  .object({
+    assessmentId: z.string().uuid(),
+    classGroupId: z.string().uuid().optional(),
+  })
+  .strict();
+export type SkillReferencesQueryDto = z.infer<typeof skillReferencesQuerySchema>;
+
+/** % de logro del NIVEL en un nodo: mismo instrumento, nivel y año (misma población que `/detalle`). */
+export type SkillLevelReference = {
+  nodeId: string;
+  achievement: number | null;
+};
+
+/**
+ * Muestra de colegios en un nodo, calculada sólo sobre las preguntas del nodo que el grupo
+ * consultado (curso o evaluación en su alcance) tiene corregidas (D9).
+ */
+export type SkillSampleReference = {
+  nodeId: string;
+  value: number | null;
+  schoolCount: number;
+  studentCount: number;
+  comparedItems: number;
+  totalItems: number;
+};
+
+export type SkillReferencesResponse = {
+  level: {
+    gradeName: string | null;
+    classGroupCount: number;
+    studentCount: number;
+    skills: SkillLevelReference[];
+  } | null;
+  /** `null` si el usuario no puede ver la muestra o no hay muestra válida. */
+  sample: {
+    instrumentId: string;
+    label: string;
+    refreshedAt: string;
+    skills: SkillSampleReference[];
+  } | null;
+};

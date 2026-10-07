@@ -377,19 +377,6 @@ export type SkillAchievementModel = {
   performanceBand?: PerformanceBandView | null;
 };
 
-/**
- * GET /dashboards/skills/level-reference — logro por nodo de TODO el nivel de una evaluación
- * (mismo instrumento, nivel y año académico), para contrastar el curso contra su nivel en
- * `/resultados` (docs/diseno-logro-unificado-y-cohorte.md §5.4). Misma población que la fila
- * "% Logro nivel" de `/detalle`. Responde `DashboardSkillsResponse`.
- */
-export const skillsLevelReferenceQuerySchema = z
-  .object({
-    assessmentId: z.string().uuid(),
-  })
-  .strict();
-export type SkillsLevelReferenceQueryDto = z.infer<typeof skillsLevelReferenceQuerySchema>;
-
 export type DashboardSkillsResponse = {
   skills: SkillAchievementModel[];
   // Bandas del instrumento cuando el scope es un único instrumento con bandas.

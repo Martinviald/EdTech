@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type JSX } from 'react';
 import { ChevronRight } from 'lucide-react';
-import type { SampleSkillStat, SkillAchievementModel } from '@soe/types';
+import type { SampleSkillStat, SkillAchievementModel, SkillSampleReference } from '@soe/types';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
@@ -11,6 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SampleComparisonLines } from '@/components/shared/sample-contrast';
+import { useTelemetry } from '@/lib/telemetry';
 import { cn } from '@/lib/utils';
 import { formatNodeCode, nodeTypeLabel } from '@/lib/taxonomy-labels';
 import { PerformanceBadge } from './performance-badge';
@@ -43,6 +46,20 @@ export type SkillsSample = {
   skills: SampleSkillStat[];
 };
 
+/**
+ * Referencias por nodo de una evaluación (docs/diseno-logro-unificado-y-cohorte.md §5.4): el %
+ * del nivel completo (sólo cuando el grupo es un curso) y la muestra de colegios sobre las
+ * preguntas del nodo que el grupo tiene corregidas.
+ */
+export type SkillComparison = {
+  groupLabel: string;
+  levelByNode: ReadonlyMap<string, number | null> | null;
+  sampleByNode: ReadonlyMap<string, SkillSampleReference> | null;
+  sampleMeta: { instrumentId: string; label: string; refreshedAt: string } | null;
+};
+
+const SAMPLE_SURFACE = 'skills_breakdown';
+
 /** Orden de relevancia de las dimensiones en el dropdown. */
 const DIMENSION_ORDER = [
   'skill',
@@ -64,12 +81,15 @@ export function SkillsBreakdown({
   filters,
   assessmentId,
   sample,
+  comparison,
 }: {
   skills: SkillAchievementModel[];
   /** Filtros base del dashboard: fijan el peldaño inicial del drill-down. */
   filters?: DrilldownBaseFilters;
   assessmentId?: string;
   sample?: SkillsSample | null;
+  /** Con una evaluación en contexto: nivel y muestra sobre las mismas preguntas. Tiene precedencia sobre `sample`. */
+  comparison?: SkillComparison | null;
 }): JSX.Element {
   const sampleByNode = useMemo(
     () => new Map((sample?.skills ?? []).map((skill) => [skill.nodeId, skill])),
@@ -123,17 +143,22 @@ export function SkillsBreakdown({
         </Select>
       </div>
 
-      <div className="space-y-3">
-        {visibleSkills.map((skill) => (
-          <SkillRow
-            key={skill.nodeId}
-            skill={skill}
-            sample={sample ? sampleByNode.get(skill.nodeId) : undefined}
-            sampleLabel={sample ? `${sample.label} (${sample.sizeLabel})` : undefined}
-            onOpen={() => openDrilldown(skill)}
-          />
-        ))}
-      </div>
+      <TooltipProvider delayDuration={150}>
+        <div className="space-y-3">
+          {visibleSkills.map((skill) => (
+            <SkillRow
+              key={skill.nodeId}
+              skill={skill}
+              sample={!comparison && sample ? sampleByNode.get(skill.nodeId) : undefined}
+              sampleLabel={
+                !comparison && sample ? `${sample.label} (${sample.sizeLabel})` : undefined
+              }
+              comparison={comparison ?? null}
+              onOpen={() => openDrilldown(skill)}
+            />
+          ))}
+        </div>
+      </TooltipProvider>
 
       <SkillDrilldownDialog
         node={activeNode}
@@ -150,15 +175,20 @@ function SkillRow({
   skill,
   sample,
   sampleLabel,
+  comparison,
   onOpen,
 }: {
   skill: SkillAchievementModel;
   sample?: SampleSkillStat;
   sampleLabel?: string;
+  comparison: SkillComparison | null;
   onOpen: () => void;
 }): JSX.Element {
+  const { track } = useTelemetry();
   const pct = skill.averageAchievement ?? 0;
-  const samplePct = sample?.achievement ?? null;
+  const nodeSample = comparison?.sampleByNode?.get(skill.nodeId) ?? null;
+  const levelPct = comparison?.levelByNode?.get(skill.nodeId) ?? null;
+  const samplePct = nodeSample ? nodeSample.value : (sample?.achievement ?? null);
   const barClass = skill.performanceLevel
     ? PERFORMANCE_LEVEL_BAR_CLASS[skill.performanceLevel]
     : 'bg-muted-foreground/40';
@@ -187,7 +217,40 @@ function SkillRow({
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {samplePct !== null ? (
+              {nodeSample && comparison?.sampleMeta ? (
+                <Tooltip
+                  onOpenChange={(open) => {
+                    if (open && comparison.sampleMeta) {
+                      track('benchmark.sample_viewed', {
+                        surface: SAMPLE_SURFACE,
+                        instrumentId: comparison.sampleMeta.instrumentId,
+                      });
+                    }
+                  }}
+                >
+                  <TooltipTrigger asChild>
+                    <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-2 tabular-nums">
+                      {levelPct !== null ? `Nivel ${formatAchievement(levelPct)} · ` : ''}
+                      Muestra {formatAchievement(nodeSample.value)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="end" className="max-w-xs">
+                    <SampleComparisonLines
+                      lines={[
+                        { label: comparison.groupLabel, value: skill.averageAchievement },
+                        ...(comparison.levelByNode ? [{ label: 'Nivel', value: levelPct }] : []),
+                      ]}
+                      sample={{ ...nodeSample, refreshedAt: comparison.sampleMeta.refreshedAt }}
+                      instrumentId={comparison.sampleMeta.instrumentId}
+                      surface={SAMPLE_SURFACE}
+                    />
+                  </TooltipContent>
+                </Tooltip>
+              ) : levelPct !== null ? (
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  Nivel {formatAchievement(levelPct)}
+                </span>
+              ) : samplePct !== null ? (
                 <span className="text-xs text-muted-foreground tabular-nums" title={sampleLabel}>
                   Muestra {formatAchievement(samplePct)}
                 </span>
@@ -208,14 +271,25 @@ function SkillRow({
             aria-label={`Logro de ${skill.nodeName}`}
           >
             <div
-              className={cn('h-full rounded-full transition-[width] motion-reduce:transition-none', barClass)}
+              className={cn(
+                'h-full rounded-full transition-[width] motion-reduce:transition-none',
+                barClass,
+              )}
               style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
             />
+            {levelPct !== null ? (
+              <div
+                className="absolute inset-y-0 w-0.5 bg-primary/70"
+                style={{ left: `${Math.min(100, Math.max(0, levelPct))}%` }}
+                title={`Nivel ${formatAchievement(levelPct)}`}
+                aria-hidden
+              />
+            ) : null}
             {samplePct !== null ? (
               <div
                 className="absolute inset-y-0 w-0.5 bg-foreground/70"
                 style={{ left: `${Math.min(100, Math.max(0, samplePct))}%` }}
-                title={sampleLabel}
+                title={sampleLabel ?? `Muestra ${formatAchievement(samplePct)}`}
                 aria-hidden
               />
             ) : null}

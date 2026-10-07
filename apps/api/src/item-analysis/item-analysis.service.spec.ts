@@ -32,6 +32,7 @@ type QueryBuilder = {
   innerJoin: (..._: unknown[]) => QueryBuilder;
   leftJoin: (..._: unknown[]) => QueryBuilder;
   groupBy: (..._: unknown[]) => QueryBuilder;
+  having: (..._: unknown[]) => QueryBuilder;
   orderBy: (..._: unknown[]) => QueryBuilder;
   limit: (..._: unknown[]) => QueryBuilder;
   offset: (..._: unknown[]) => QueryBuilder;
@@ -50,6 +51,7 @@ function makeDb(selectResults: unknown[][]): DbMock {
       innerJoin: () => chain,
       leftJoin: () => chain,
       groupBy: () => chain,
+      having: () => chain,
       orderBy: () => chain,
       limit: () => chain,
       offset: () => chain,
@@ -1604,5 +1606,102 @@ describe('ItemAnalysisService.getMatrix — muestra de colegios', () => {
     expect(asked).toBe(false);
     expect(res.references.sample).toBeNull();
     expect(res.questions[0]!.references.sample).toBeNull();
+  });
+});
+
+describe('ItemAnalysisService.getSkillReferences', () => {
+  const NODE_INFERIR = 'cccccccc-0000-4000-8000-000000000001';
+  const NODE_LOCALIZAR = 'cccccccc-0000-4000-8000-000000000002';
+
+  function referencesDb(): DbMock {
+    return makeDb([
+      [assessmentRow],
+      [
+        { itemId: ITEM_A, nodeId: NODE_INFERIR },
+        { itemId: ITEM_B, nodeId: NODE_INFERIR },
+        { itemId: ITEM_B, nodeId: NODE_LOCALIZAR },
+      ],
+      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+      [
+        {
+          itemId: ITEM_A,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 1,
+          scoreSum: '3',
+          maxSum: '4',
+        },
+        {
+          itemId: ITEM_B,
+          classGroupId: CLASS_GROUP_ID,
+          studentCount: 2,
+          responseCount: 2,
+          correctCount: 0,
+          scoreSum: '1',
+          maxSum: '4',
+        },
+      ],
+      [{ itemId: ITEM_A }],
+    ]);
+  }
+
+  it('da el % del nivel por nodo sumando los tallies de sus preguntas (3+1)/(4+4) = 50', async () => {
+    const res = await makeService(referencesDb()).getSkillReferences(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+    });
+    expect(res.level?.gradeName).toBe('3° Básico');
+    const byNode = new Map(res.level!.skills.map((s) => [s.nodeId, s.achievement]));
+    expect(byNode.get(NODE_INFERIR)).toBe(50);
+    expect(byNode.get(NODE_LOCALIZAR)).toBe(25);
+    expect(res.sample).toBeNull();
+  });
+
+  it('pide la muestra de cada nodo sólo sobre las preguntas que el grupo tiene corregidas', async () => {
+    const asked: Array<{ key: string; itemIds: readonly string[] }> = [];
+    const samples = {
+      canSeeSample: () => true,
+      getItemSetSamples: async (reqs: Array<{ key: string; itemIds: readonly string[] }>) => {
+        asked.push(...reqs);
+        return new Map([
+          [
+            NODE_INFERIR,
+            {
+              instrumentId: INSTRUMENT_ID,
+              label: 'Muestra',
+              refreshedAt: '2026-10-07T06:30:00.000Z',
+              comparedItemIds: [ITEM_A],
+              tally: { scoreSum: 30, maxSum: 40 },
+              value: 75,
+              schoolCount: 2,
+              studentCount: 40,
+              schoolValues: [70, 80],
+            },
+          ],
+        ]);
+      },
+      logSampleAccess: async () => undefined,
+    } as unknown as BenchmarkSamplesService;
+
+    const res = await makeService(referencesDb(), samples).getSkillReferences(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+    });
+
+    expect(asked).toEqual([{ key: NODE_INFERIR, instrumentId: INSTRUMENT_ID, itemIds: [ITEM_A] }]);
+    expect(res.sample).toEqual({
+      instrumentId: INSTRUMENT_ID,
+      label: 'Muestra',
+      refreshedAt: '2026-10-07T06:30:00.000Z',
+      skills: [
+        {
+          nodeId: NODE_INFERIR,
+          value: 75,
+          schoolCount: 2,
+          studentCount: 40,
+          comparedItems: 1,
+          totalItems: 1,
+        },
+      ],
+    });
   });
 });
