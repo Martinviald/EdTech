@@ -29,9 +29,9 @@ const STATIC_TITLES: Record<string, PageTitle> = {
 
   [ROUTES.evaluaciones]: { title: 'Evaluaciones' },
 
-  // Vista 360 del estudiante: el picker usa este título estático; la ficha de un
+  // Ficha del estudiante: el buscador usa este título estático; la ficha de un
   // alumno (`/estudiantes/[studentId]`) lo sobre-escribe con `<SetPageTitle>`.
-  [ROUTES.estudiantes]: { title: 'Vista 360 del estudiante' },
+  [ROUTES.estudiantes]: { title: 'Ficha del estudiante' },
 
   // Hub de Panorama pedagógico: todas las tabs comparten título (la tab activa
   // ya se identifica en la barra de pestañas del cuerpo).
@@ -70,12 +70,12 @@ const STATIC_TITLES: Record<string, PageTitle> = {
   },
 
   [ROUTES.administracion]: { title: 'Administración' },
-  [ROUTES.benchmarking]: { title: 'Benchmarking' },
-  [ROUTES.compararInstrumentos]: { title: 'Comparar instrumentos con IA' },
+  [ROUTES.benchmarking]: { title: 'Comparación entre colegios' },
+  [ROUTES.compararInstrumentos]: { title: 'Comparar evaluaciones' },
   [ROUTES.materialRemedial]: { title: 'Material Remedial' },
   [ROUTES.materiales]: { title: 'Materiales' },
   [ROUTES.establecimientoInformeOficial]: { title: 'Informe oficial de establecimiento' },
-  [ROUTES.telemetria]: { title: 'Telemetría de uso' },
+  [ROUTES.telemetria]: { title: 'Telemetría de uso', parent: adminHubParent() },
 
   [ROUTES.equipo]: { title: 'Equipo', parent: adminHubParent() },
   [ROUTES.equipoAsignaciones]: { title: 'Equipo', parent: adminHubParent() },

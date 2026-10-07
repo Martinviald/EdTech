@@ -1,4 +1,5 @@
 import {
+  Activity,
   Building2,
   Cpu,
   FolderTree,
@@ -23,6 +24,7 @@ import {
   STAFF_MANAGEMENT_ROLES,
   STUDENT_ROSTER_ROLES,
   TAXONOMY_ROLES,
+  TELEMETRY_VIEWER_ROLES,
   type UserRole,
 } from '@soe/types';
 import { ROUTES } from '@/lib/routes';
@@ -101,7 +103,7 @@ export const ADMIN_HUB_OPTIONS: readonly AdminHubOption[] = [
   },
   {
     href: ROUTES.alumnos,
-    label: 'Alumnos',
+    label: 'Nómina de alumnos',
     description: 'Nómina de estudiantes del colegio.',
     icon: Users,
     roles: STUDENT_ROSTER_ROLES,
@@ -113,6 +115,13 @@ export const ADMIN_HUB_OPTIONS: readonly AdminHubOption[] = [
     description: 'Currículums, marcos de evaluación y taxonomías de habilidades.',
     icon: FolderTree,
     roles: TAXONOMY_ROLES,
+  },
+  {
+    href: ROUTES.telemetria,
+    label: 'Telemetría de uso',
+    description: 'Quién usa la plataforma y qué módulos y vistas visita.',
+    icon: Activity,
+    roles: TELEMETRY_VIEWER_ROLES,
   },
   ...CONFIG_HUB_OPTIONS,
 ];
@@ -134,6 +143,7 @@ export const ADMIN_HUB_PATHS: readonly string[] = [
   ROUTES.equipo,
   ROUTES.alumnos,
   ROUTES.marcosAcademicos,
+  ROUTES.telemetria,
   ROUTES.configuracion,
 ];
 
