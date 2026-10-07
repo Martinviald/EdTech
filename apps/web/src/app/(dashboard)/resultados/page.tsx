@@ -37,11 +37,13 @@ import {
   buildDashboardQuery,
   buildDashboardHref,
   buildClearProcessQuery,
+  hasNarrowingFilters,
   withEntryDefaults,
   type DashboardFilterValues,
 } from './components/dashboard-filters';
 import { ComparabilityNotice } from './components/comparability-notice';
 import { ProcessPreviewBanner } from './components/process-preview-banner';
+import { ProcessResultsSection } from './components/process-results-section';
 import { formatAchievement } from './components/performance-level';
 import { getComparableOverview, getDashboardFilters, getDashboardTeacherKpis } from './data';
 
@@ -69,6 +71,14 @@ export default async function ResultadosOverviewPage({
 
       <Suspense fallback={null}>
         <ProcessPreviewSection query={query} filters={filters} />
+      </Suspense>
+
+      {/* La síntesis por conteo y la matriz del proceso activo. Streamean aparte:
+          piden `/coverage`, y el panorama no tiene que esperarlas. El fallback es
+          nulo porque la sección no pinta nada sin proceso activo, y un skeleton
+          fantasma deja un salto de layout. */}
+      <Suspense fallback={null}>
+        <ProcessResultsBlock query={query} filters={filters} />
       </Suspense>
 
       <Suspense
@@ -111,6 +121,32 @@ async function ProcessPreviewSection({
       processId={scoped.processId}
       scopedQuery={buildDashboardQuery(scoped)}
       clearHref={`${ROUTES.resultados}${buildClearProcessQuery(scoped)}`}
+    />
+  );
+}
+
+/**
+ * La síntesis y la matriz del proceso, sólo con proceso activo. Resuelve los
+ * defaults de entrada igual que la banda, porque `processId` puede venir de la
+ * URL o de la preselección.
+ */
+async function ProcessResultsBlock({
+  query,
+  filters,
+}: {
+  query: string;
+  filters: DashboardFilterValues;
+}) {
+  const options = await getDashboardFilters(query);
+  const scoped = withEntryDefaults(filters, options);
+  if (!scoped.processId) return null;
+
+  return (
+    <ProcessResultsSection
+      processId={scoped.processId}
+      scopedQuery={buildDashboardQuery(scoped)}
+      grades={options.grades}
+      narrowedByFilters={hasNarrowingFilters(scoped)}
     />
   );
 }

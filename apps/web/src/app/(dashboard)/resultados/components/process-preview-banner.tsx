@@ -107,11 +107,11 @@ export async function ProcessPreviewBanner({
               <GraduationCap className="size-3.5" aria-hidden />
               Alumnos evaluados
             </p>
-            {/* El conteo del proceso, NO el de `comparable.totals`: ése suma por
-                unidad comparable, así que un alumno evaluado en cuatro asignaturas
-                cuenta cuatro veces. Con datos realistas la diferencia es visible
-                (490 contra 850 en el mismo proceso) y bajo la misma etiqueta que
-                usa la ficha del proceso sería contradecirse. */}
+            {/* El conteo del proceso, no el de `comparable.totals`. Los dos cuentan
+                personas distintas desde `e563d3c0` —antes `totals` sumaba por unidad
+                comparable y el mismo proceso decía 490 acá y 850 en el panorama—, pero
+                el del proceso es el de TODO su alcance, no el del filtro activo, y es
+                el mismo número que muestra la ficha del proceso. */}
             <p className="text-xl font-semibold">
               {process.studentsAssessed.toLocaleString('es-CL')}
             </p>
