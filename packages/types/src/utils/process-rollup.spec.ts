@@ -240,7 +240,7 @@ describe('la matriz nivel × asignatura', () => {
     expect(r.matrix.cells[0]!.coverage).toBe('missing');
   });
 
-  it('con varias unidades en la celda toma la severidad peor y el share mayor', () => {
+  it('con varias unidades en la celda toma la severidad peor y el share mayor por unidad', () => {
     const r = deriveProcessRollup(
       [
         diaUnit('a', [1, 9, 0], {
@@ -260,8 +260,78 @@ describe('la matriz nivel × asignatura', () => {
     );
     const cell = r.matrix.cells[0]!;
     expect(cell.severity).toBe('high');
+    // `lowestBandShare` sigue siendo el máximo POR UNIDAD: es lo que ordena y
+    // alerta desde antes. Lo que no se puede es mostrarlo junto a
+    // `classifications`, que es la suma de las dos unidades.
     expect(cell.lowestBandShare).toBe(60);
+    expect(cell.classifications).toBe(20);
     expect(cell.unitKeys).toEqual(['a', 'b']);
+  });
+
+  it('suma los conteos por banda de la celda y da el share con su propio denominador', () => {
+    const r = deriveProcessRollup(
+      [
+        diaUnit('a', [1, 9, 0], { gradeId: 'g1', subjectId: 's1', lowestBandShare: 10 }),
+        diaUnit('b', [6, 4, 0], { gradeId: 'g1', subjectId: 's1', lowestBandShare: 60 }),
+      ],
+      null,
+    );
+    const cell = r.matrix.cells[0]!;
+    expect(cell.ladders).toHaveLength(1);
+    expect(cell.ladders[0]!.buckets.map((b) => b.classifications)).toEqual([7, 13, 0]);
+    // Ni 60 (el máximo de una unidad) ni 20 como denominador de ese 60: 7 de 20.
+    expect(cell.lowestBand).toEqual({ classifications: 7, of: 20, share: 35 });
+  });
+
+  it('con dos escaleras distintas en la celda no emite ningún share', () => {
+    const cefr = unit({
+      key: 'ingles',
+      gradeId: 'g1',
+      subjectId: 's1',
+      studentsAssessed: 10,
+      bands: CEFR_LADDER,
+      bandDistribution: CEFR_LADDER.map((b, i) => ({
+        key: b.key,
+        label: b.label,
+        order: b.order,
+        color: null,
+        count: i === 0 ? 10 : 0,
+        percentage: i === 0 ? 100 : 0,
+      })),
+      lowestBandShare: 100,
+    });
+    const r = deriveProcessRollup(
+      [diaUnit('dia', [1, 9, 0], { gradeId: 'g1', subjectId: 's1' }), cefr],
+      null,
+    );
+    const cell = r.matrix.cells[0]!;
+    expect(cell.ladders).toHaveLength(2);
+    expect(cell.lowestBand).toBeNull();
+  });
+
+  it('con una sola unidad el share de la celda es el de la unidad', () => {
+    const r = deriveProcessRollup(
+      [diaUnit('u1', [5, 10, 5], { gradeId: 'g1', subjectId: 's1' })],
+      null,
+    );
+    const cell = r.matrix.cells[0]!;
+    expect(cell.lowestBand).toEqual({ classifications: 5, of: 20, share: 25 });
+    expect(cell.lowestBand!.share).toBeCloseTo(cell.lowestBandShare as number, 10);
+  });
+
+  it('un alumno sin banda no entra en el denominador de la celda', () => {
+    // El alumno con TODAS sus preguntas pendientes queda sin banda: aporta a
+    // `studentsAssessed` de la unidad pero no a su `bandDistribution`. El
+    // denominador de la celda es el de las clasificaciones, no el de los
+    // alumnos. Ver §10 del plan.
+    const conPendiente = diaUnit('u1', [3, 7, 0], { gradeId: 'g1', subjectId: 's1' });
+    const r = deriveProcessRollup(
+      [{ ...conPendiente, studentsAssessed: 12 } as ComparableUnitSummary],
+      null,
+    );
+    const cell = r.matrix.cells[0]!;
+    expect(cell.classifications).toBe(12);
+    expect(cell.lowestBand).toEqual({ classifications: 3, of: 10, share: 30 });
   });
 });
 

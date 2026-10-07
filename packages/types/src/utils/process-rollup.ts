@@ -42,15 +42,45 @@ export type ProcessLadderRollup = {
 
 export type ProcessMatrixAxis = { id: string; name: string; order: number };
 
+/**
+ * Los conteos por banda de una celda, para UNA escalera (borde L1).
+ *
+ * `classifications` es el denominador honesto de esta escalera dentro de la
+ * celda: la suma de sus propios conteos, no el total de la celda. Las unidades
+ * sin bandas aportan a `ProcessMatrixCell.classifications` y no a esto.
+ */
+export type ProcessCellLadder = {
+  ladderKey: string;
+  bands: PerformanceBandView[];
+  buckets: ProcessLadderBucket[];
+  classifications: number;
+};
+
 export type ProcessMatrixCell = {
   gradeId: string | null;
   subjectId: string | null;
   unitKeys: string[];
   assessmentIds: string[];
   severity: UnitSeverity | null;
+  /**
+   * El share MÁXIMO de las unidades de la celda, no el de la celda.
+   *
+   * Se conserva porque es lo que ordena y alerta desde antes, pero no se puede
+   * mostrar junto a `classifications`: ése es la SUMA de todas las unidades, y
+   * la yuxtaposición afirma un denominador compartido que no existe. Para
+   * mostrar, usa `lowestBand`.
+   */
   lowestBandShare: number | null;
   classifications: number;
   coverage: ProcessCoverageCellStatus | null;
+  /** Conteos por banda de la celda, agrupados por escalera. */
+  ladders: ProcessCellLadder[];
+  /**
+   * La concentración en la banda más baja de la celda, con su propio
+   * denominador. `null` cuando la celda mezcla escaleras distintas: alinear sus
+   * ordinales a la fuerza es lo que D2 prohíbe, y entonces no hay un número.
+   */
+  lowestBand: { classifications: number; of: number; share: number } | null;
 };
 
 export type ProcessSubjectRollup = {
@@ -215,6 +245,10 @@ export function deriveProcessRollup(
   const gradeAxis = new Map<string, ProcessMatrixAxis>();
   const subjectAxis = new Map<string, ProcessMatrixAxis>();
   const cells = new Map<string, ProcessMatrixCell>();
+  const cellLadders = new Map<
+    string,
+    Map<string, { bands: PerformanceBandView[]; buckets: Map<string, ProcessLadderBucket> }>
+  >();
   const cellKey = (gradeId: string | null, subjectId: string | null) =>
     `${gradeId ?? '-'}::${subjectId ?? '-'}`;
 
@@ -245,6 +279,8 @@ export function deriveProcessRollup(
       lowestBandShare: null,
       classifications: 0,
       coverage: cell.status,
+      ladders: [],
+      lowestBand: null,
     });
   }
 
@@ -275,6 +311,8 @@ export function deriveProcessRollup(
         lowestBandShare: null,
         classifications: 0,
         coverage: null,
+        ladders: [],
+        lowestBand: null,
       };
       cells.set(key, cell);
     }
@@ -291,6 +329,55 @@ export function deriveProcessRollup(
     ) {
       cell.lowestBandShare = unit.lowestBandShare;
     }
+
+    // Los conteos por banda de la celda, por escalera. Misma regla que la barra
+    // del titular (L1): sólo se suman unidades con la misma estructura ordinal.
+    if (unit.bands && unit.bands.length > 0 && unit.bandDistribution) {
+      let ladderMap = cellLadders.get(key);
+      if (!ladderMap) {
+        ladderMap = new Map();
+        cellLadders.set(key, ladderMap);
+      }
+      const ladderKey = ladderKeyOf(unit.bands);
+      let ladder = ladderMap.get(ladderKey);
+      if (!ladder) {
+        ladder = {
+          bands: unit.bands.slice().sort((a, b) => a.order - b.order),
+          buckets: new Map(),
+        };
+        ladderMap.set(ladderKey, ladder);
+      }
+      foldBuckets(ladder.buckets, unit.bandDistribution);
+    }
+  }
+
+  for (const [key, ladderMap] of cellLadders) {
+    const cell = cells.get(key);
+    if (!cell) continue;
+
+    cell.ladders = Array.from(ladderMap.entries())
+      .map(([ladderKey, ladder]) => {
+        const buckets = Array.from(ladder.buckets.values()).sort((a, b) => a.order - b.order);
+        const total = buckets.reduce((acc, b) => acc + b.classifications, 0);
+        for (const bucket of buckets) {
+          bucket.percentage = total > 0 ? (bucket.classifications / total) * 100 : 0;
+        }
+        return { ladderKey, bands: ladder.bands, buckets, classifications: total };
+      })
+      .sort((a, b) => b.classifications - a.classifications);
+
+    // Con más de una escalera no hay un número: sumar ordinales de escaleras
+    // distintas es exactamente lo que D2 prohíbe.
+    const only = cell.ladders.length === 1 ? cell.ladders[0] : null;
+    const lowest = only?.buckets[0];
+    cell.lowestBand =
+      only && lowest && only.classifications > 0
+        ? {
+            classifications: lowest.classifications,
+            of: only.classifications,
+            share: (lowest.classifications / only.classifications) * 100,
+          }
+        : null;
   }
 
   const bySubject = new Map<string, ProcessSubjectRollup>();
