@@ -31,3 +31,4 @@ export * from './benchmark-sample';
 export * from './process-rollup';
 export * from './process-grouping';
 export * from './test-tracks';
+export * from './achievement';
