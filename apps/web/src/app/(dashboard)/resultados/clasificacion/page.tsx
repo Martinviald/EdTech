@@ -14,7 +14,12 @@ import {
   type UserRole,
 } from '@soe/types';
 import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
-import { EmptyState, FilterBarSkeleton, CardSkeleton, TableSkeleton } from '@/components/shared';
+import {
+  EmptyState,
+  CompactFilterBarSkeleton,
+  CardSkeleton,
+  TableSkeleton,
+} from '@/components/shared';
 import { Card, CardContent } from '@/components/ui/card';
 import { StudentLink } from '@/components/students/student-link';
 import {
@@ -78,7 +83,7 @@ export default async function ClasificacionPage({
 
   return (
     <>
-      <Suspense fallback={<FilterBarSkeleton />}>
+      <Suspense fallback={<CompactFilterBarSkeleton />}>
         <FiltersSection query={filterQuery} filters={filters} />
       </Suspense>
 

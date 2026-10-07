@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { FilterBarSkeleton, TableSkeleton } from '@/components/shared';
+import { CompactFilterBarSkeleton, TableSkeleton } from '@/components/shared';
 
 export default function MapaCalorLoading() {
   return (
@@ -8,7 +8,7 @@ export default function MapaCalorLoading() {
         <Skeleton className="h-7 w-64" />
         <Skeleton className="h-4 w-96 max-w-full" />
       </div>
-      <FilterBarSkeleton />
+      <CompactFilterBarSkeleton />
       <TableSkeleton rows={6} />
     </>
   );

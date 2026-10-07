@@ -10,7 +10,12 @@ import {
   type SkillAchievementModel,
 } from '@soe/types';
 import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
-import { PageActions, EmptyState, FilterBarSkeleton, CardSkeleton } from '@/components/shared';
+import {
+  PageActions,
+  EmptyState,
+  CompactFilterBarSkeleton,
+  CardSkeleton,
+} from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
 import {
@@ -71,7 +76,7 @@ export default async function DimensionesPage({
         </Suspense>
       </PageActions>
 
-      <Suspense fallback={<FilterBarSkeleton />}>
+      <Suspense fallback={<CompactFilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
       </Suspense>
 

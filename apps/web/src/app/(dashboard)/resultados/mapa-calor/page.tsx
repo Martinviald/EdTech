@@ -11,7 +11,12 @@ import {
   type HeatmapRow,
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
-import { PageActions, EmptyState, FilterBarSkeleton, TableSkeleton } from '@/components/shared';
+import {
+  PageActions,
+  EmptyState,
+  CompactFilterBarSkeleton,
+  TableSkeleton,
+} from '@/components/shared';
 import { AskAiButton, RegisterAssistantContext } from '@/components/assistant';
 import { ComparabilityNotice } from '../components/comparability-notice';
 import { DashboardFilterBar } from '../components/dashboard-filter-bar';
@@ -64,7 +69,7 @@ export default async function MapaCalorPage({
         </Suspense>
       </PageActions>
 
-      <Suspense fallback={<FilterBarSkeleton />}>
+      <Suspense fallback={<CompactFilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
       </Suspense>
 
