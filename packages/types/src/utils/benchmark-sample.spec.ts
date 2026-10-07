@@ -1,5 +1,6 @@
 import {
   aggregateItemSample,
+  aggregateItemSetSample,
   aggregateSample,
   classifyTypicalZone,
   percentileOf,
@@ -193,5 +194,79 @@ describe('aggregateItemSample', () => {
       { orgId: 'a', itemId: 'i1', correctCount: 0, responseCount: 12, scoreSum: 0, maxSum: 0 },
     ]);
     expect(sample.items[0]!.correctRate).toBeNull();
+  });
+});
+
+describe('aggregateItemSetSample', () => {
+  const row = (
+    orgId: string,
+    itemId: string,
+    scoreSum: number,
+    maxSum: number,
+    responseCount = 20,
+  ) => ({
+    orgId,
+    itemId,
+    scoreSum,
+    maxSum,
+    responseCount,
+  });
+
+  it('suma los tallies de los colegios sobre las preguntas pedidas', () => {
+    const sample = aggregateItemSetSample(
+      [
+        row('a', 'i1', 15, 20),
+        row('a', 'i2', 10, 20),
+        row('b', 'i1', 5, 20),
+        row('b', 'i2', 10, 20),
+      ],
+      ['i1', 'i2'],
+      2,
+      20,
+    )!;
+    expect(sample.comparedItemIds).toEqual(['i1', 'i2']);
+    expect(sample.value).toBe(50);
+    expect(sample.schoolCount).toBe(2);
+    expect(sample.studentCount).toBe(40);
+    expect(sample.schoolValues).toEqual([37.5, 62.5]);
+  });
+
+  it('sólo compara las preguntas que pidió el grupo (las que tiene corregidas)', () => {
+    const sample = aggregateItemSetSample(
+      [
+        row('a', 'i1', 15, 20),
+        row('a', 'dev', 0, 40),
+        row('b', 'i1', 5, 20),
+        row('b', 'dev', 40, 40),
+      ],
+      ['i1'],
+      2,
+      20,
+    )!;
+    expect(sample.comparedItemIds).toEqual(['i1']);
+    expect(sample.value).toBe(50);
+  });
+
+  it('deja fuera la pregunta que no alcanza k colegios corregidos, sin descartar el conjunto', () => {
+    const sample = aggregateItemSetSample(
+      [
+        row('a', 'i1', 15, 20),
+        row('b', 'i1', 5, 20),
+        row('a', 'dev', 10, 40),
+        row('b', 'dev', 0, 0),
+      ],
+      ['i1', 'dev'],
+      2,
+      20,
+    )!;
+    expect(sample.comparedItemIds).toEqual(['i1']);
+    expect(sample.value).toBe(50);
+  });
+
+  it('es null si la muestra no cumple k colegios o el mínimo de alumnos', () => {
+    expect(aggregateItemSetSample([row('a', 'i1', 15, 20)], ['i1'], 2, 1)).toBeNull();
+    expect(
+      aggregateItemSetSample([row('a', 'i1', 15, 20, 5), row('b', 'i1', 5, 20, 5)], ['i1'], 2, 20),
+    ).toBeNull();
   });
 });

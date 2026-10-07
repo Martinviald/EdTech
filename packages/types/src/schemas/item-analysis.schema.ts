@@ -121,14 +121,13 @@ export type ItemTaxonomyRef = {
  *   del colegio para esa evaluación. Trasciende el scope del usuario (un profesor
  *   ve su curso en `correctRate` y el nivel aquí). Sale del token; nunca expone
  *   datos de otra org (RLS + withOrgContext).
- * - `sample` (DIFERIDO): % de logro de la MUESTRA de colegios (benchmark
- *   inter-colegio). Bloqueado hasta existir un pool multi-colegio (TKT-20). El
- *   campo se deja opcional para poblarlo después sin cambiar el contrato.
+ * - `sample`: % de logro de la MUESTRA de colegios en la pregunta (pool global, k-anónimo
+ *   por pregunta). Sólo para roles que ven la muestra y fuera de la vista docente; si no,
+ *   `null` (docs/diseno-logro-unificado-y-cohorte.md §5.3).
  *
- * ⚠️ La tasa es SIEMPRE ponderada por alumno: `sum(correctCount)/sum(responseCount)`
- * sobre las cohortes involucradas, NUNCA el promedio de los % de cada curso (cursos
- * de distinto N pesarían igual). Los conteos crudos viajan en el contrato para que
- * el frontend pueda agregar con el mismo criterio.
+ * ⚠️ La tasa es SIEMPRE Σ puntaje ÷ Σ máximo sobre las cohortes involucradas, NUNCA el
+ * promedio de los % de cada curso (cursos de distinto N pesarían igual). El tally viaja en el
+ * contrato para que el frontend agregue con el mismo criterio.
  */
 export type ReferenceRate = {
   rate: number | null; // 0..100 — Σ puntaje ÷ Σ máximo de la población
@@ -165,6 +164,13 @@ export type MatrixReferenceScopes = {
     classGroupCount: number;
     studentCount: number;
   };
+  /** Resumen de la muestra de colegios del instrumento; `null` si no aplica. */
+  sample: {
+    label: string;
+    schoolCount: number;
+    studentCount: number;
+    refreshedAt: string;
+  } | null;
 };
 
 /** Una columna de la matriz = una pregunta (ítem) de la evaluación. */

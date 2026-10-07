@@ -251,3 +251,98 @@ export function aggregateItemSample(rows: readonly ItemSampleSourceRow[]): ItemS
   }
   return { schoolCount: maxResponsesByOrg.size, studentCount, items };
 }
+
+/** Fila de un colegio en un ítem para armar la muestra de un conjunto de preguntas. */
+export type ItemSetSourceRow = {
+  orgId: string;
+  itemId: string;
+  scoreSum: number;
+  maxSum: number;
+  responseCount: number;
+};
+
+/** Muestra de colegios sobre un conjunto de preguntas (prueba, sección, nodo o pregunta). */
+export type ItemSetSample = {
+  /** Preguntas del conjunto pedido que quedaron en la comparación (k colegios corregidos). */
+  comparedItemIds: string[];
+  tally: AchievementTally;
+  /** % de la muestra (0..100, 2 decimales) sobre `comparedItemIds`. */
+  value: number | null;
+  schoolCount: number;
+  /** Aproximación: por colegio, el máximo de respuestas en alguna pregunta comparada. */
+  studentCount: number;
+  /** % de cada colegio sobre `comparedItemIds`, ascendente (para el percentil). */
+  schoolValues: number[];
+};
+
+/**
+ * Muestra de un conjunto de preguntas (docs/diseno-logro-unificado-y-cohorte.md §5.1, D9).
+ *
+ * `itemIds` debe venir ya acotado a las preguntas que el GRUPO COMPARADO tiene corregidas: así
+ * los dos lados miden lo mismo y ninguna evaluación sale de la muestra. De ese conjunto quedan
+ * las preguntas que al menos `kMinSchools` colegios tienen corregidas (k por pregunta); cada
+ * colegio aporta su tally sobre ellas. Devuelve `null` si la muestra resultante no cumple k
+ * colegios y `nMinStudents` alumnos.
+ */
+export function aggregateItemSetSample(
+  rows: readonly ItemSetSourceRow[],
+  itemIds: readonly string[],
+  kMinSchools: number,
+  nMinStudents: number,
+): ItemSetSample | null {
+  const wanted = new Set(itemIds);
+  const schoolsByItem = new Map<string, Set<string>>();
+  for (const row of rows) {
+    if (!wanted.has(row.itemId) || !(row.maxSum > 0)) continue;
+    let schools = schoolsByItem.get(row.itemId);
+    if (!schools) {
+      schools = new Set();
+      schoolsByItem.set(row.itemId, schools);
+    }
+    schools.add(row.orgId);
+  }
+
+  const compared = new Set<string>();
+  for (const [itemId, schools] of schoolsByItem) {
+    if (schools.size >= kMinSchools) compared.add(itemId);
+  }
+  if (compared.size === 0) return null;
+
+  const tally = emptyTally();
+  const tallyByOrg = new Map<string, AchievementTally>();
+  const maxResponsesByOrg = new Map<string, number>();
+  for (const row of rows) {
+    if (!compared.has(row.itemId) || !(row.maxSum > 0)) continue;
+    const source = { scoreSum: row.scoreSum, maxSum: row.maxSum };
+    addTally(tally, source);
+    let orgTally = tallyByOrg.get(row.orgId);
+    if (!orgTally) {
+      orgTally = emptyTally();
+      tallyByOrg.set(row.orgId, orgTally);
+    }
+    addTally(orgTally, source);
+    maxResponsesByOrg.set(
+      row.orgId,
+      Math.max(maxResponsesByOrg.get(row.orgId) ?? 0, row.responseCount),
+    );
+  }
+
+  let studentCount = 0;
+  for (const responses of maxResponsesByOrg.values()) studentCount += responses;
+  if (tallyByOrg.size < kMinSchools || studentCount < nMinStudents) return null;
+
+  const schoolValues: number[] = [];
+  for (const orgTally of tallyByOrg.values()) {
+    const pct = pctOfTally(orgTally);
+    if (pct !== null) schoolValues.push(pct);
+  }
+
+  return {
+    comparedItemIds: itemIds.filter((id) => compared.has(id)),
+    tally,
+    value: pctOfTally(tally),
+    schoolCount: tallyByOrg.size,
+    studentCount,
+    schoolValues: sortedAscending(schoolValues),
+  };
+}

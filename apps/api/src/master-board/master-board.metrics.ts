@@ -1,11 +1,14 @@
 import {
+  ALERT_THRESHOLDS,
   DEFAULT_PERFORMANCE_THRESHOLDS,
   METRIC_LABELS,
   METRIC_KEYS,
   bandToLegacyLevel,
   classifyByBands,
   type MasterBoardLevel,
+  type CellSample,
   type MetricKey,
+  type MetricTone,
   type MetricValue,
   type PerformanceBandInput,
   type PerformanceLevel,
@@ -19,12 +22,14 @@ export type CellAggregate = {
 
 export type MetricContext = {
   bands: readonly PerformanceBandInput[] | null;
+  sample: CellSample | null;
 };
 
 type MetricComputation = {
   value: number | null;
   display: string;
   level: MasterBoardLevel | null;
+  tone: MetricTone | null;
 };
 
 type MetricDescriptor = {
@@ -110,29 +115,74 @@ const achievementDescriptor: MetricDescriptor = {
   compute: (aggregate, context) => {
     const value = aggregate.maxSum > 0 ? (aggregate.scoreSum / aggregate.maxSum) * 100 : null;
     const level = value === null ? null : levelForPercentage(value / 100, context.bands);
-    return { value, display: formatPercentage(value), level };
+    return { value, display: formatPercentage(value), level, tone: null };
   },
 };
 
-const METRIC_REGISTRY: readonly MetricDescriptor[] = [achievementDescriptor];
+export function toneForDelta(deltaPp: number | null): MetricTone | null {
+  if (deltaPp === null) return null;
+  if (deltaPp < -ALERT_THRESHOLDS.cohort.similarPp) return 'below';
+  if (deltaPp > ALERT_THRESHOLDS.cohort.similarPp) return 'above';
+  return 'similar';
+}
+
+function formatDelta(deltaPp: number | null): string {
+  if (deltaPp === null) return '—';
+  const rounded = Math.round(deltaPp * 10) / 10;
+  return `${rounded > 0 ? '+' : ''}${rounded.toFixed(1)}`;
+}
+
+const sampleDeltaDescriptor: MetricDescriptor = {
+  key: 'sample_delta',
+  label: METRIC_LABELS.sample_delta,
+  compute: (_aggregate, context) => {
+    const deltaPp = context.sample?.deltaPp ?? null;
+    return {
+      value: deltaPp,
+      display: formatDelta(deltaPp),
+      level: null,
+      tone: toneForDelta(deltaPp),
+    };
+  },
+};
+
+const METRIC_REGISTRY: readonly MetricDescriptor[] = [achievementDescriptor, sampleDeltaDescriptor];
+
+const SAMPLE_METRIC_KEYS: ReadonlySet<MetricKey> = new Set(['sample_delta']);
 
 const DEFAULT_METRIC_KEY: MetricKey = 'achievement';
 
-export function resolvePrimaryMetricKey(requested: MetricKey | undefined): MetricKey {
-  if (requested && METRIC_REGISTRY.some((descriptor) => descriptor.key === requested)) {
+function visibleDescriptors(canSeeSample: boolean): readonly MetricDescriptor[] {
+  return canSeeSample
+    ? METRIC_REGISTRY
+    : METRIC_REGISTRY.filter((descriptor) => !SAMPLE_METRIC_KEYS.has(descriptor.key));
+}
+
+export function resolvePrimaryMetricKey(
+  requested: MetricKey | undefined,
+  canSeeSample: boolean,
+): MetricKey {
+  if (requested && visibleDescriptors(canSeeSample).some((d) => d.key === requested)) {
     return requested;
   }
   return DEFAULT_METRIC_KEY;
 }
 
-export function availableMetrics(): { key: MetricKey; label: string }[] {
-  return METRIC_REGISTRY.map((descriptor) => ({ key: descriptor.key, label: descriptor.label }));
+export function availableMetrics(canSeeSample: boolean): { key: MetricKey; label: string }[] {
+  return visibleDescriptors(canSeeSample).map((descriptor) => ({
+    key: descriptor.key,
+    label: descriptor.label,
+  }));
 }
 
-export function computeMetrics(aggregate: CellAggregate, context: MetricContext): MetricValue[] {
-  return METRIC_REGISTRY.map((descriptor) => {
-    const { value, display, level } = descriptor.compute(aggregate, context);
-    return { key: descriptor.key, label: descriptor.label, value, display, level };
+export function computeMetrics(
+  aggregate: CellAggregate,
+  context: MetricContext,
+  canSeeSample: boolean,
+): MetricValue[] {
+  return visibleDescriptors(canSeeSample).map((descriptor) => {
+    const { value, display, level, tone } = descriptor.compute(aggregate, context);
+    return { key: descriptor.key, label: descriptor.label, value, display, level, tone };
   });
 }
 

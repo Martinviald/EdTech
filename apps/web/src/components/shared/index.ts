@@ -31,4 +31,11 @@ export { PaginationControls } from './PaginationControls';
 export { ListSearchMemory, useRememberedHref } from './list-search-memory';
 export { BackLink } from './BackLink';
 export { Markdown } from './markdown';
-export { SampleDeltaChip, SampleTooltipBody, type SampleSubject } from './sample-contrast';
+export {
+  SampleComparisonLines,
+  SampleDeltaChip,
+  SampleTooltipBody,
+  type ComparisonLine,
+  type ComparisonSample,
+  type SampleSubject,
+} from './sample-contrast';

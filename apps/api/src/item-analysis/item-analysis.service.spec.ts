@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import type { Database } from '@soe/db';
 import { assessmentListQuerySchema, type UserRole } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import type { BenchmarkSamplesService } from '../benchmarking/benchmark-samples.service';
 import { ItemAnalysisService } from './item-analysis.service';
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -77,8 +78,13 @@ function makeDb(selectResults: unknown[][]): DbMock {
   return db;
 }
 
-function makeService(db: Database): ItemAnalysisService {
-  return new (ItemAnalysisService as new (db: Database) => ItemAnalysisService)(db);
+const noSamples = { canSeeSample: () => false } as unknown as BenchmarkSamplesService;
+
+function makeService(
+  db: Database,
+  samples: BenchmarkSamplesService = noSamples,
+): ItemAnalysisService {
+  return new ItemAnalysisService(db, samples);
 }
 
 const ASSESSMENT_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -153,118 +159,122 @@ const tagRows = [
 // getMatrix (H6.11)
 // ──────────────────────────────────────────────────────────────────────────────
 
+function matrixDbRows(): unknown[][] {
+  return [
+    [assessmentRow], // requireAssessmentOwnedByUser
+    // getAccessibleClassGroupIds → admin → sin query
+    itemRows, // loadQuestionColumns → items
+    tagRows, // loadTagsByItems
+    // resolveAccessibleStudentIds → scopeAll, sin classGroupId → null (sin query)
+    [
+      // attachCorrectRates → group by item_id
+      { itemId: ITEM_A, maxSum: '2', scoreSum: '1' },
+      { itemId: ITEM_B, maxSum: '2', scoreSum: '2' },
+    ],
+    // attachLevelReferences → grado/año de la evaluación (selectDistinct)
+    [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
+    // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
+    [
+      // 3°A — el curso mirado
+      {
+        itemId: ITEM_A,
+        classGroupId: CLASS_GROUP_ID,
+        studentCount: 2,
+        responseCount: 2,
+        correctCount: 1,
+        scoreSum: '1',
+        maxSum: '2',
+      },
+      {
+        itemId: ITEM_B,
+        classGroupId: CLASS_GROUP_ID,
+        studentCount: 2,
+        responseCount: 2,
+        correctCount: 2,
+        scoreSum: '2',
+        maxSum: '2',
+      },
+      // 3°B — MISMO nivel, OTRA evaluación: la referencia debe incluirlo
+      {
+        itemId: ITEM_A,
+        classGroupId: 'cg-3b',
+        studentCount: 2,
+        responseCount: 2,
+        correctCount: 2,
+        scoreSum: '2',
+        maxSum: '2',
+      },
+      {
+        itemId: ITEM_B,
+        classGroupId: 'cg-3b',
+        studentCount: 2,
+        responseCount: 2,
+        correctCount: 0,
+        scoreSum: '0',
+        maxSum: '2',
+      },
+    ],
+    [{ total: 2 }], // loadStudentsPage → count
+    [
+      // loadStudentsPage → page
+      {
+        studentId: STUDENT_1,
+        studentRut: '11.111.111-1',
+        firstName: 'Ana',
+        lastName: 'Soto',
+        classGroupId: CLASS_GROUP_ID,
+        classGroupName: '3A',
+        percentage: '50.00',
+      },
+      {
+        studentId: STUDENT_2,
+        studentRut: '22.222.222-2',
+        firstName: 'Beto',
+        lastName: 'Vera',
+        percentage: null,
+      },
+    ],
+    [
+      // loadStudentClassGroups → curso por alumno (1 query, dedupe en JS)
+      { studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
+      { studentId: STUDENT_2, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
+    ],
+    [
+      // loadCells
+      {
+        studentId: STUDENT_1,
+        itemId: ITEM_A,
+        value: { answer: 'B' },
+        isCorrect: true,
+        finalScore: '1.00',
+        rawScore: '1.00',
+        maxScore: '1.00',
+      },
+      {
+        studentId: STUDENT_1,
+        itemId: ITEM_B,
+        value: { answer: 'B' },
+        isCorrect: false,
+        finalScore: null,
+        rawScore: '0.00',
+        maxScore: '1.00',
+      },
+      {
+        studentId: STUDENT_2,
+        itemId: ITEM_A,
+        value: { answer: 'A' },
+        isCorrect: false,
+        finalScore: null,
+        rawScore: null,
+        maxScore: '1.00',
+      },
+    ],
+  ];
+}
+
 describe('ItemAnalysisService.getMatrix', () => {
   it('arma columnas y celdas en el mismo orden, con paginación (admin)', async () => {
-    const db = makeDb([
-      [assessmentRow], // requireAssessmentOwnedByUser
-      // getAccessibleClassGroupIds → admin → sin query
-      itemRows, // loadQuestionColumns → items
-      tagRows, // loadTagsByItems
-      // resolveAccessibleStudentIds → scopeAll, sin classGroupId → null (sin query)
-      [
-        // attachCorrectRates → group by item_id
-        { itemId: ITEM_A, maxSum: '2', scoreSum: '1' },
-        { itemId: ITEM_B, maxSum: '2', scoreSum: '2' },
-      ],
-      // attachLevelReferences → grado/año de la evaluación (selectDistinct)
-      [{ gradeId: GRADE_ID, gradeName: '3° Básico', academicYearId: YEAR_ID }],
-      // attachLevelReferences → read-model del NIVEL (org + instrumento + año)
-      [
-        // 3°A — el curso mirado
-        {
-          itemId: ITEM_A,
-          classGroupId: CLASS_GROUP_ID,
-          studentCount: 2,
-          responseCount: 2,
-          correctCount: 1,
-          scoreSum: '1',
-          maxSum: '2',
-        },
-        {
-          itemId: ITEM_B,
-          classGroupId: CLASS_GROUP_ID,
-          studentCount: 2,
-          responseCount: 2,
-          correctCount: 2,
-          scoreSum: '2',
-          maxSum: '2',
-        },
-        // 3°B — MISMO nivel, OTRA evaluación: la referencia debe incluirlo
-        {
-          itemId: ITEM_A,
-          classGroupId: 'cg-3b',
-          studentCount: 2,
-          responseCount: 2,
-          correctCount: 2,
-          scoreSum: '2',
-          maxSum: '2',
-        },
-        {
-          itemId: ITEM_B,
-          classGroupId: 'cg-3b',
-          studentCount: 2,
-          responseCount: 2,
-          correctCount: 0,
-          scoreSum: '0',
-          maxSum: '2',
-        },
-      ],
-      [{ total: 2 }], // loadStudentsPage → count
-      [
-        // loadStudentsPage → page
-        {
-          studentId: STUDENT_1,
-          studentRut: '11.111.111-1',
-          firstName: 'Ana',
-          lastName: 'Soto',
-          classGroupId: CLASS_GROUP_ID,
-          classGroupName: '3A',
-          percentage: '50.00',
-        },
-        {
-          studentId: STUDENT_2,
-          studentRut: '22.222.222-2',
-          firstName: 'Beto',
-          lastName: 'Vera',
-          percentage: null,
-        },
-      ],
-      [
-        // loadStudentClassGroups → curso por alumno (1 query, dedupe en JS)
-        { studentId: STUDENT_1, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
-        { studentId: STUDENT_2, classGroupId: CLASS_GROUP_ID, classGroupName: '3A' },
-      ],
-      [
-        // loadCells
-        {
-          studentId: STUDENT_1,
-          itemId: ITEM_A,
-          value: { answer: 'B' },
-          isCorrect: true,
-          finalScore: '1.00',
-          rawScore: '1.00',
-          maxScore: '1.00',
-        },
-        {
-          studentId: STUDENT_1,
-          itemId: ITEM_B,
-          value: { answer: 'B' },
-          isCorrect: false,
-          finalScore: null,
-          rawScore: '0.00',
-          maxScore: '1.00',
-        },
-        {
-          studentId: STUDENT_2,
-          itemId: ITEM_A,
-          value: { answer: 'A' },
-          isCorrect: false,
-          finalScore: null,
-          rawScore: null,
-          maxScore: '1.00',
-        },
-      ],
-    ]);
+    const db = makeDb(matrixDbRows());
     const service = makeService(db);
 
     const res = await service.getMatrix(makeUser(), {
@@ -1524,5 +1534,74 @@ describe('ItemAnalysisService.aggregateReference', () => {
     const res = aggregate([]);
     expect(res.byItem.size).toBe(0);
     expect(res.summary.rate).toBeNull();
+  });
+});
+
+describe('ItemAnalysisService.getMatrix — muestra de colegios', () => {
+  const sampleFor = (itemId: string, value: number, scoreSum: number, maxSum: number) => ({
+    instrumentId: INSTRUMENT_ID,
+    label: 'Muestra',
+    refreshedAt: '2026-10-07T06:30:00.000Z',
+    comparedItemIds: [itemId],
+    tally: { scoreSum, maxSum },
+    value,
+    schoolCount: 2,
+    studentCount: 60,
+    schoolValues: [value],
+  });
+
+  it('llena la referencia de la muestra por pregunta y su resumen, y registra el acceso', async () => {
+    const logged: string[][] = [];
+    const samples = {
+      canSeeSample: () => true,
+      getItemSetSamples: async () => new Map([[ITEM_A, sampleFor(ITEM_A, 62.5, 50, 80)]]),
+      logSampleAccess: async (_tx: unknown, _org: string, _user: string, ids: string[]) => {
+        logged.push(ids);
+      },
+    } as unknown as BenchmarkSamplesService;
+
+    const res = await makeService(makeDb(matrixDbRows()), samples).getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      page: 1,
+      limit: 50,
+      all: false,
+    });
+
+    expect(res.questions[0]!.references.sample).toEqual({
+      rate: 62.5,
+      scoreSum: 50,
+      maxSum: 80,
+      schoolCount: 2,
+    });
+    expect(res.questions[1]!.references.sample).toBeNull();
+    expect(res.references.sample).toEqual({
+      label: 'Muestra',
+      schoolCount: 2,
+      studentCount: 60,
+      refreshedAt: '2026-10-07T06:30:00.000Z',
+    });
+    expect(logged).toEqual([[INSTRUMENT_ID]]);
+  });
+
+  it('no pide la muestra a quien no puede verla', async () => {
+    let asked = false;
+    const samples = {
+      canSeeSample: () => false,
+      getItemSetSamples: async () => {
+        asked = true;
+        return new Map();
+      },
+    } as unknown as BenchmarkSamplesService;
+
+    const res = await makeService(makeDb(matrixDbRows()), samples).getMatrix(makeUser(), {
+      assessmentId: ASSESSMENT_ID,
+      page: 1,
+      limit: 50,
+      all: false,
+    });
+
+    expect(asked).toBe(false);
+    expect(res.references.sample).toBeNull();
+    expect(res.questions[0]!.references.sample).toBeNull();
   });
 });

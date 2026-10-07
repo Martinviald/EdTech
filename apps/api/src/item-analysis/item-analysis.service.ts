@@ -60,6 +60,10 @@ import {
   extractItemStem,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import {
+  BenchmarkSamplesService,
+  type ItemSetSampleResult,
+} from '../benchmarking/benchmark-samples.service';
 import { loadCohortAchievementByAssessment } from '../common/helpers/cohort-item-stats.helper';
 import { countStudentsWithPendingResponses } from '../common/helpers/pending-responses.helper';
 import { InjectDb, type Database } from '../database/database.types';
@@ -96,7 +100,10 @@ interface ItemContent {
 
 @Injectable()
 export class ItemAnalysisService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly samples: BenchmarkSamplesService,
+  ) {}
 
   // ───────────────────────────────────────────────────────────────────────────
   // GET /api/item-analysis/assessments  (selector de la tabla cruzada)
@@ -334,7 +341,7 @@ export class ItemAnalysisService {
         classGroupFilter,
       );
 
-      const references = await this.attachLevelReferences(
+      const levelReferences = await this.attachLevelReferences(
         tx,
         orgId,
         query.assessmentId,
@@ -342,6 +349,15 @@ export class ItemAnalysisService {
         questionsWithRate,
         itemIds,
       );
+      const references = this.samples.canSeeSample(user)
+        ? await this.attachSampleReferences(
+            tx,
+            orgId,
+            user.userId,
+            assessment.instrumentId,
+            levelReferences,
+          )
+        : levelReferences;
 
       // ── Alumnos visibles con respuestas en la evaluación ──────────────────────
       // TKT-09 — con `all=true` se devuelve el curso COMPLETO (sin paginar) para
@@ -535,7 +551,7 @@ export class ItemAnalysisService {
       // T2-17 — referencias comparativas: % de logro de la MISMA pregunta en el
       // colegio (toda la org) y en el nivel/grado. Independientes del scope del
       // usuario (líneas de referencia), acotadas a la org por `assessmentId`.
-      const references = await this.loadQuestionReferences(
+      const levelReferences = await this.loadQuestionReferences(
         tx,
         orgId,
         item.instrumentId,
@@ -543,6 +559,17 @@ export class ItemAnalysisService {
         itemId,
         query.classGroupId,
       );
+      const references =
+        item.instrumentId && this.samples.canSeeSample(user)
+          ? await this.attachQuestionSample(
+              tx,
+              orgId,
+              user.userId,
+              item.instrumentId,
+              itemId,
+              levelReferences,
+            )
+          : levelReferences;
 
       // Recortes por alternativa (ítems con opciones-imagen). Se expone solo el flag; la
       // imagen se sirve firmada por `/items/{id}/alternativa/{key}/figura`.
@@ -769,6 +796,7 @@ export class ItemAnalysisService {
     const noData: ReferenceRate = this.emptyReference();
     const emptyScopes: MatrixReferenceScopes = {
       grade: { rate: null, gradeName: null, classGroupCount: 0, studentCount: 0 },
+      sample: null,
     };
     if (itemIds.length === 0) return { questions, scopes: emptyScopes };
 
@@ -790,7 +818,7 @@ export class ItemAnalysisService {
         ...q,
         references: { ...q.references, grade: agg.byItem.get(q.itemId) ?? noData },
       })),
-      scopes: { grade: { ...agg.summary, gradeName: cohort.gradeName } },
+      scopes: { grade: { ...agg.summary, gradeName: cohort.gradeName }, sample: null },
     };
   }
 
@@ -867,6 +895,67 @@ export class ItemAnalysisService {
           inArray(assessmentItemStats.itemId, itemIds),
         ),
       );
+  }
+
+  private async attachSampleReferences(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    instrumentId: string,
+    references: { questions: MatrixQuestionColumn[]; scopes: MatrixReferenceScopes },
+  ): Promise<{ questions: MatrixQuestionColumn[]; scopes: MatrixReferenceScopes }> {
+    const results = await this.samples.getItemSetSamples(
+      references.questions.map((q) => ({ key: q.itemId, instrumentId, itemIds: [q.itemId] })),
+      tx,
+    );
+    if (results.size === 0) return references;
+    await this.samples.logSampleAccess(tx, orgId, userId, [instrumentId]);
+
+    let schoolCount = 0;
+    let studentCount = 0;
+    let refreshedAt = '';
+    let label = '';
+    for (const result of results.values()) {
+      schoolCount = Math.max(schoolCount, result.schoolCount);
+      studentCount = Math.max(studentCount, result.studentCount);
+      if (result.refreshedAt > refreshedAt) refreshedAt = result.refreshedAt;
+      label = result.label;
+    }
+
+    return {
+      questions: references.questions.map((q) => ({
+        ...q,
+        references: { ...q.references, sample: this.toSampleReference(results.get(q.itemId)) },
+      })),
+      scopes: { ...references.scopes, sample: { label, schoolCount, studentCount, refreshedAt } },
+    };
+  }
+
+  private async attachQuestionSample(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    instrumentId: string,
+    itemId: string,
+    references: QuestionReferences,
+  ): Promise<QuestionReferences> {
+    const results = await this.samples.getItemSetSamples(
+      [{ key: itemId, instrumentId, itemIds: [itemId] }],
+      tx,
+    );
+    const sample = this.toSampleReference(results.get(itemId));
+    if (sample) await this.samples.logSampleAccess(tx, orgId, userId, [instrumentId]);
+    return { ...references, sample };
+  }
+
+  private toSampleReference(result: ItemSetSampleResult | undefined): QuestionReferences['sample'] {
+    if (!result) return null;
+    return {
+      rate: result.value,
+      scoreSum: result.tally.scoreSum,
+      maxSum: result.tally.maxSum,
+      schoolCount: result.schoolCount,
+    };
   }
 
   private emptyReference(): ReferenceRate {

@@ -10,6 +10,10 @@ import type {
 } from '@soe/types';
 import { MasterBoardLegend, MasterBoardTable } from './master-board-table';
 
+jest.mock('@/lib/telemetry', () => ({
+  useTelemetry: () => ({ track: () => undefined }),
+}));
+
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
@@ -83,11 +87,13 @@ function cell(
         value,
         display: value === null ? '—' : `${value.toFixed(1)}%`,
         level: options.level ?? null,
+        tone: null,
       },
     ],
     mixed: options.mixed ?? false,
     hasLevels: options.hasLevels ?? false,
     comparability: options.comparability ?? COMPARABLE,
+    sample: null,
   };
 }
 
@@ -247,5 +253,59 @@ describe('MasterBoardLegend', () => {
       el.getAttribute('data-legend'),
     );
     expect(keys).toEqual(['unleveled', 'mixed']);
+  });
+});
+
+describe('métrica "diferencia vs muestra"', () => {
+  function deltaCell(testKey: string, deltaPp: number | null): MasterBoardCell {
+    const base = cell('s1', testKey, 60);
+    return {
+      ...base,
+      metrics: [
+        ...base.metrics,
+        {
+          key: 'sample_delta',
+          label: 'Diferencia vs muestra',
+          value: deltaPp,
+          display: deltaPp === null ? '—' : `${deltaPp > 0 ? '+' : ''}${deltaPp.toFixed(1)}`,
+          level: null,
+          tone:
+            deltaPp === null ? null : deltaPp < -5 ? 'below' : deltaPp > 5 ? 'above' : 'similar',
+        },
+      ],
+    };
+  }
+
+  function deltaMatrix(): MasterBoardMatrix {
+    const tests = [
+      test_('a', 'Lectura', 'LEN'),
+      test_('b', 'Matemática', 'MAT'),
+      test_('c', 'Historia', 'HIS'),
+    ];
+    const data = matrix(
+      [subject('s1', 'Lenguaje', tests)],
+      [deltaCell('a', -8), deltaCell('b', 2), deltaCell('c', null)],
+    );
+    return { ...data, primaryMetricKey: 'sample_delta' };
+  }
+
+  it('pinta cada celda por su tono y deja en gris la que no tiene muestra', () => {
+    const { container } = render(<MasterBoardTable data={deltaMatrix()} canViewTeacher={false} />);
+    const kinds = Array.from(container.querySelectorAll('tbody td[data-cell-kind]')).map((el) =>
+      el.getAttribute('data-cell-kind'),
+    );
+    expect(kinds).toEqual(['tone', 'tone', 'empty']);
+    expect(screen.getByText('-8.0')).toBeTruthy();
+    expect(screen.getByText('+2.0')).toBeTruthy();
+  });
+
+  it('la leyenda habla de la muestra, no de niveles', () => {
+    const { container } = render(<MasterBoardLegend data={deltaMatrix()} />);
+    const keys = Array.from(container.querySelectorAll('[data-legend]')).map((el) =>
+      el.getAttribute('data-legend'),
+    );
+    expect(keys).toEqual(['below', 'similar', 'empty']);
+    expect(screen.getByText('Frente a la muestra:')).toBeTruthy();
+    expect(screen.getByText('Sin muestra')).toBeTruthy();
   });
 });
