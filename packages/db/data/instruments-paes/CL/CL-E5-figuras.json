@@ -1,0 +1,9 @@
+{
+  "instrument": "CL-E5-con-pauta.json",
+  "bucket": "edtech-demo-uploadsbucket-xccufosb",
+  "prefix": "item/global/paes-cl-e5-2026/",
+  "item_figure": {},
+  "alt_figure": {},
+  "subidas": 0,
+  "nota": "Ningún ítem ni alternativa de CL-E5 tiene figura. El heurístico marcó #36 y #43, pero al revisar el PDF renderizado son citas en recuadro transcritas completas en el enunciado (falso positivo, hasFigure apagado). Las únicas imágenes del cuadernillo son de pasaje: dos infografías raster en la Lectura 2 (págs. 11 y 12, a las que alude la pregunta 17) y fotos decorativas en la Lectura 4 (págs. 24 y 27). No se recortaron ni subieron: el pipeline PAES no maneja figuras de pasaje."
+}

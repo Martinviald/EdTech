@@ -1,0 +1,2185 @@
+{
+  "instrument": {
+    "name": "PAES CL — Ensayo 5 (Tanda 5) · IV° Medio 2026",
+    "subject": "Competencia Lectora",
+    "subjectCode": "LANG",
+    "grade": "IV° Medio",
+    "gradeCode": "4TH_MEDIO",
+    "year": 2026,
+    "applicationPeriod": null,
+    "type": "paes",
+    "isOfficial": false,
+    "paes": {
+      "prueba": "CL",
+      "tanda": "Tanda 5",
+      "mencion": null,
+      "appliedOn": "2026-09-07",
+      "basadoEn": "DEMRE PAES Invierno ADM 2024 (Forma 101)"
+    }
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "LECTURA 1 (Preguntas 1 a 9)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Artículo publicado en el sitio del Consejo de Monumentos Nacionales de Chile , consultado el 2021. HUMBERSTONE Y SANTA LAURA Las oficinas salitreras Humberstone y Santa Laura se encuentran ubicadas en el desierto del norte grande de Chile, a 47 km del puerto de Iquique, región de Tarapacá. En este árido ambiente se procesó industrialmente el mayor yacimiento de salitre del mundo. Distantes entre sí por 1.5 km, estas oficinas comparten una historia similar ligad a a la explotación del llamado “oro blanco”, desde el último cuarto del siglo XIX. Este tipo de explotación se basó en el desarrollo de unidades productivas dispersas en el territorio nortino, la técnica de explotación del salitre fue evolucionando hasta la consolidación del sistema llamado Shanks ‒ambas oficinas la utilizaron‒ lo que permitió mejorar el volumen de extracción de la mano de la inversión extranjera en nuestro país. Con ello se atrajo mayor cantidad de población trabajadora y a sus familias. Construidas en 1872, y con diversos cambios de propietarios, estas oficinas abrieron o paralizaron sus faenas de acuerdo al ritmo de los mercados internacionales, especialmente a partir de la crisis de 1914 y las que le sucedieron (1929). Su cierre definitivo ocurrió a fines de la década de 1950. El saqueo, las demoliciones y la falta de mantenimiento y conservación, antes de su inclusión en la Lista del Patrimonio Mundial, las han comprometido y es por ello que el bien está en la Lista en Peligro desde su inscripción en 2005. Esto permite que con cargo al Fondo de Patrimonio Mundial se le asigne inmediatamente asisten cia de emergencia al bien amenazado, entre otras medidas. Hoy constituyen un conjunto integral y representativo del fenómeno del salitre y las formas de trabajo y vida que este generó. Humberstone conserva principalmente su campamento y Santa Laura su área industrial, permitiéndonos así conocer cabalmente la naturaleza de la explotación del nitrato (instalaciones, infraestructura energética, diseño urbano) y los distintos aspectos de la vida cotidiana asociada a la industria (edificaciones habitacionales, espacios públicos, edificios de uso comunitario, etc.). Por lo anterior, el sitio reconocido por la Convención se circunscribe “a la categoría del patrimonio industrial en particular, que en su esencia es tanto arqueológico como histórico”. Los Criterios de Valor Universal Excepcional por los cuales estas salitreras forman parte de los Sitios del Patrimonio Mundial de la UNESCO son múltiples. Uno de ellos se vincula con el modo en que el desarrollo de la industria salitrera refleja el conocimiento, habilidades, tecnología e inversión financiera de una comunidad diversa de inmigrantes, provenientes de Sudamérica y Europa, que hicieron de esta industria un complejo espacio de intercambio cultural (Criterio ii). Por otro lado, los yacimientos del salitre y sus asentamientos industriales necesarios para su conformación y funcionamiento, se desarrollaron hasta el punto de convertirse en una comunidad urbana extensiva y muy particular, con su propio lenguaje, organización, costumbres y expresiones creativas, además de desplegar su emprendimiento técnico. De este modo las dos salitreras son huellas de una cultura distintiva (Criterio iii). Asimismo, todas las salitreras en su conjunto son parte de una transformación industrial y económica muy importante, que Humberstone y Santa Laura representan. Estas se convirtieron ‒durante un periodo específico de la historia nacional‒ en los mayores productores de salitre natural del mundo, transformando la pampa e indirectamente las tierras agrícolas que se beneficiaron con el fertilizante que ellas producían (Criterio iv). CONSERVACIÓN Y MANEJO Datos del Patrimonio Nº 1178, inscrito en la Lista del Patrimonio Mundial y en la Lista en Peligro el 2005 Monumentos Históricos, Decreto Supremo Nº 320, 1970 Link Unesco: http://whc.unesco.org/en/list/1178/ Consejo de Monumentos Nacionales de Chile. (s.f.). Humberstone y Santa Laura. https://www.monumentos.gob.cl/patrimonio-mundial/lista-actual/humberstone-santa-laura",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "¿Cuál fue el factor decisivo en el cierre de las oficinas de Humberstone y Santa Laura?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La dispersión de las unidades productivas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El ritmo de los mercados internacionales.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La falta de un propietario permanente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El inestable desarrollo de las faenas.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "¿En qué se diferencian las oficinas de Humberstone y Santa Laura?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el método de producción.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En la clase de mantenimiento.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En el tipo de espacio que se conserva.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En la fecha en que fueron construidas.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿qué originó el aumento de la población trabajadora en las salitreras?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La explotación del llamado “oro blanco”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La distancia que separaba a las oficinas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La mejora en los volúmenes de extracción.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La llegada de las familias a los campamentos.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "Según la UNESCO, ¿por qué Humberstone y Santa Laura cumplen con el Criterio iii?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque simbolizan una importante transformación en el ámbito industrial.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque reflejan el complejo espacio del intercambio cultural.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque representan una serie de costumbres sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque son huella de una cultura distintiva.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Según el texto, ¿por qué estas salitreras eran un espacio de intercambio cultural?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Por la zona geográfica en que se encontraban las salitreras.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Por el origen diverso de quienes estaban vinculados a las salitreras.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Por la tecnología empleada en las salitreras para extraer el mineral.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Por el contacto con las tierras agrícolas que circundaban a las salitreras.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "¿Qué valoración prima en el Criterio iv de este Patrimonio Mundial?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su importancia histórica.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su importancia arqueológica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su importancia industrial y económica.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Su importancia cultural e intercultural.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿De qué se trata el texto leído?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "De las razones que llevaron a considerar a Humberstone y Santa Laura como Sitios de Patrimonio Mundial de la UNESCO.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "De la preocupación de la UNESCO por conservar Humberstone y Santa Laura debido a su riqueza histórica y arqueológica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "De las diversas causas económicas y tecnológicas que produjeron el auge y caída de Humberstone y Santa Laura.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De la particularidad cultural que tuvieron Humberstone y Santa Laura en cuanto a su complejidad y diversidad.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "A partir del texto, ¿qué representan hoy las oficinas de Humberstone y Santa Laura?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un reflejo integral del fenómeno cultural que significó la industria salitrera.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Un reconocimiento tardío al valor patrimonial que poseen las oficinas salitreras.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Una mirada idealizada de la forma de vida que caracterizó a la minería de la época.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Una denuncia implícita sobre el descuido en la mantención de lugares patrimoniales.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "¿Qué elemento presente en el texto refuerza la importancia de las salitreras como Patrimonio Mundial de la Humanidad?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La exposición inicial acerca de la historia y relevancia económica de las salitreras.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La incorporación del apartado “CONSERVACIÓN Y MANEJO” con respecto al reconocimiento mencionado.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La alusión a la normativa legal chilena en conjunción con la UNESCO: Monumentos Históricos, Decreto Supremo Nº 320, 1970.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La explicación de los Criterios de Valor Universal Excepcional que se consideran para ser parte de los Sitios del Patrimonio Mundial.",
+              "isCorrect": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "LECTURA 2 (Preguntas 10 a 17)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Fragmento del artículo de Kristin Skoog, publicado el 2020. Las mujeres y la radio: en plena sintonía En un contexto sonoro en el que los hombres han predominado durante largo tiempo, las mujeres tardaron un poco en labrarse un nicho profesional. Pero en su función de oyentes asiduas desde los orígenes de la radiodifusión, las mujeres han contribuido a moldear la historia de este medio de comunicación. Kristin Skoog Desde el decenio de 1920, cuando comenzó a llegar a los hogares, la radio ofrece a las mujeres un espacio que les permite hacerse oír, tanto en sentido recto como figurado, en un contexto sonoro ampliamente dominado por los hombres. La radio ha acercado, ha creado vínculos y ha difuminado las fronteras entre la esfera pública y la privada, al dirigirse por igual a amas de casa, trabajadoras, consumidoras y ciudadanas. En muchos países, la irrupción de la radio en el ámbito doméstico coincidió también con la obtención del derecho de sufragio para las mujeres. Historias olvidadas En la actualidad se realizan cada vez más investigaciones históricas sobre el tema. Los estudios (que examinan la situación en Argentina, Australia, Alemania, Estados Unidos, Turquía o Suecia) han recuperado el papel de la mujer en la historia de la radiodifusión. Esos trabajos han permitido actualizar relatos sobre temas que habían sido marginados y a menudo silenciados. Asimismo, han señalado los principales cambios que se han producido en la programación destinada a las mujeres, en particular las redefiniciones sucesivas del controvertido concepto de “sujetos femeninos”, y han puesto de relieve los debates sobre las opiniones de las mujeres, tanto en la radio como fuera de ella. Esos estudios muestran de qué manera esa relación ha evolucionado a la par de los procesos de democratización y modernización. Fuente: Consejo Superior del Audiovisual 2019. Tanto en su función de oyentes como de profesionales de la radio, las mujeres han desempeñado un papel esencial en el desarrollo general del medio y en las prácticas de radiodifusión, sobre las que han influido de manera notable. Diversos formatos y tipos de programas que hoy se consideran evidentes, en particular las series dramáticas o “culebrones” y los debates, fueron concebidos inicialmente para una audiencia femenina. En Estados Unidos, durante el decenio de 1930, cuando predominaba la radio comercial, las oyentes desempeñaban una función importante en calidad de consumidoras, por lo que se convirtieron en destinatarias preferentes de anunciantes y patrocinadores. Incluso los programas diurnos llegaron a denominarse “femeninos” y los culebrones radiofónicos pronto se impusieron en las ondas. Según Michele Hilmes, profesora de estudios mediáticos y culturales y especialista de la radio en Estados Unidos, los culebrones se transformaron rápidamente en espacios destinados a la mujer. Hilmes asegura que, “al amparo de la luz”, esos programas comenzaron a abordar los problemas y las preocupaciones a los que se enfrentaban las mujeres estadounidenses en los decenios de 1930 y 1940. En el formato de revista radiofónica se puede constatar una evolución análoga. El programa británico Woman’s Hour1, que la BBC emitió en 1946, estaba dirigido principalmente a las amas de casa. Esta transmisión, que al principio hizo hincapié en la función y las responsabilidades domésticas de las mujeres, evolucionó rápidamente hacia el examen de sus derechos políticos y sociales. En poco tiempo, Woman’s Hour abordó, por ejemplo, temas delicados y tabúes como la menopausia o las relaciones sexuales en el matrimonio. “Desde el decenio de 1920 la radio ofrece a las mujeres un espacio que les permite hacerse oír, tanto en sentido Fuente: RTDNA/Hofstra recto como figurado” University Newsroom Survey 2018. Reporteras y pioneras Las mujeres contribuyeron también a la creación de nuevos formatos, en particular los programas de temática social. Aquí cabe citar, por ejemplo, a Olive Shapley (1910 - 1999), que en 1934 se incorporó a la BBC, donde tuvo a su cargo la emisión Children’s Hour2. La depresión de la década de 1930 había sumido en la pobreza a numerosas regiones del Reino Unido, especialmente en la zona de Manchester. Shapley utilizó las camionetas de grabación móvil para recorrer la región y entrevistar a los vecinos en sus hogares, en la calle o en los centros de trabajo. Sus grabaciones eran vanguardistas, tanto desde el punto de vista técnico como del temático. Poco antes de la Segunda Guerra Mundial, la periodista produjo una emisión que llevó por título Miners’ Wives3 en la que se examinaba el estilo de vida de las mujeres en dos pueblos 1 La Hora de la Mujer. 2 La Hora de los Niños. 3 Las Esposas de los Mineros. mineros, uno en el condado de Durham (Reino Unido) y otro cercano a Béthune (Francia). Durante la guerra, este programa fue traducido y difundido por el servicio francés de la BBC. También durante ese conflicto bélico hicieron su aparición las primeras mujeres corresponsales de guerra. La periodista estadounidense Betty Wason (1912 -2001) viajó inicialmente a Europa por cuenta de Transradio Press Service, una agencia que proporcionaba informaciones a las emisoras de radio. A continuación, Wason fue contratada por la CBS, que le asignó una corresponsalía en el frente noruego y luego la envió a cubrir los combates en Grecia. Pero muy pronto le pidieron que buscara a un hombre que leyera sus reportajes ante el micrófono. En aquella época se consideraba que la voz femenina no era adecuada para ese tipo de información. Años después, Betty Wason comentaría: “Los jefes decían que las mujeres no transmitíamos autoridad suficiente o que no teníamos las competencias necesarias para abordar temas profundos”. Audrey Russell (1906-1989) fue otra pionera de la radio: primera corresponsal de guerra de la BBC, realizó reportajes y entrevistas entre 1941 y 1945. Russell se interesó primordialmente por las vivencias de la población civil durante el conflicto, en particular por el impacto de los obuses de artillería lanzados contra Douvres y Folkestone. Pero su condición de mujer le impidió informar sobre lo que ocurría en el frente de lucha, un terreno que entonces estaba reservado a sus colegas masculinos. A pesar de los obstáculos con que tropezaron, tanto Betty Wason como Audrey Russell pusieron en tela de juicio un espacio dominado por la voz de los hombres […]. En este aspecto, RadiOrakel, creada en La radio y la UNESCO, historia de octubre de 1982 en Oslo (Noruega), se una afinidad duradera presenta a menudo como la primera estación de radio feminista del mundo. En la primera reunión de la Esta emisora se asignó la misión de Conferencia General de la instruir a las mujeres en ámbitos como el UNESCO, celebrada en 1946, ya periodismo radial y la ingeniería de se abordó el tema de la radio. sonido. Con esta perspectiva, RadiOrakel Julian Huxley, el que era entonces apoya activamente la realización de Director General de la entrevistas a mujeres y por mujeres. La Organización, la definió como “un música que la planta difunde debe estar instrumento capaz de traspasar las compuesta o interpretada por mujeres, en barreras nacionales, allí donde una proporción no inferior al 50 %. otros medios informativos estarían condenados al fracaso”, o sea, el Las estaciones de radio comunitarias vector ideal para promover la paz y ofrecen también un espacio importante la comprensión mutua entre los para la consecución de la autonomía pueblos. femenina. Estas emisoras, que con frecuencia se consideran el “tercer Liviana, portátil y capaz de modelo” de radio, porque constituyen una prescindir de la conexión con la red alternativa a la radio pública y la eléctrica, la radio desempeña comercial, suelen operar sin fines también una función clave en lucrativos, están gestionadas por periodos posteriores a conflictos voluntarios y sirven a las necesidades de armados o desastres naturales. La las comunidades locales, a menudo son UNESCO lleva más de 70 años vistas con desdén por los medios de promoviendo este medio comunicación tradicionales. Como ha informativo, cercano al público por señalado Caroline Mitchell, profesora antonomasia, que crea lazos entre adjunta de radio en la Facultad de arte e las personas, se dirige a la inmensa industrias creativas de la Universidad de mayoría de ellas, lleva su voz a las Sunderland (Reino Unido), la radio poblaciones más vulnerables y comunitaria ofrece a las mujeres “un cubre las regiones más apartadas espacio de representación, participación y del planeta, fomentando al mismo resistencia”. tiempo la libertad de expresión e información. […] Esta reinterpretación de las funciones que han desempeñado las mujeres como profesionales de la radio y como oyentes aporta una perspectiva novedosa a la historia de este medio de comunicación. Si se hace abstracción de las obvias diferencias existentes entre Radio Roshani de Afganistán, las series dramáticas emitidas en Estados Unidos en la década de 1930 y la emisora militante noruega RadiOrakel, la radiodifusión aparece como una tribuna que las mujeres, según modalidades que variaron a lo largo del tiempo, conquistaron en fecha muy temprana. Skoog, K. (2020). Las mujeres y la radio: en plena sintonía. Correo Unesco, (1), 20-22. https://unesdoc.unesco.org/ark:/48223/pf0000372618_spa",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "A partir de la lectura, ¿cómo influyó la radio en la participación de la mujer en la sociedad?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Posibilitó la difusión del concepto de “sujetos femeninos”.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Favoreció la visibilización de la mujer en el ámbito público.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Redefinió los roles asumidos por las mujeres según su contexto.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Facilitó la propaganda por la participación política de las mujeres.",
+              "isCorrect": false
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "GradeCam (assignment ENSAYO PAES 5 CL (SEPTIEMBRE) - IV°) lo puntúa con max_points 0 en los 122 escaneos; la portada declara 65 preguntas de las cuales 60 cuentan para el puntaje. La Tabla de especificaciones marca pilotos solo con color de celda, no legible en el volcado."
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "Según la estructura que presenta la lectura 2, ¿cuál es la función del siguiente párrafo? «Desde el decenio de 1920, cuando comenzó a llegar a los hogares, la radio ofrece a las mujeres un espacio que les permite hacerse oír, tanto en sentido recto como figurado, en un contexto sonoro ampliamente dominado por los hombres. La radio ha acercado, ha creado vínculos y ha difuminado las fronteras entre la esfera pública y la privada, al dirigirse por igual a amas de casa, trabajadoras, consumidoras y ciudadanas. En muchos países, la irrupción de la radio en el ámbito doméstico coincidió también con la obtención del derecho a sufragio para las mujeres».",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Plantear la influencia de la radio en los hogares de sus auditoras.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Entregar un contexto sobre la relación entre la radio y las mujeres.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Presentar la oposición existente entre el mundo masculino y el femenino.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Introducir el tema de la liberación femenina y su participación ciudadana.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "A partir de la relación entre las mujeres y la radio propuesta en la lectura, ¿qué se concluye del siguiente fragmento? «La radio ha acercado, ha creado vínculos y ha difuminado las fronteras entre la esfera pública y privada, al dirigirse por igual a amas de casa, trabajadoras, consumidoras y ciudadanas».",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la radio tiene como locutoras a mujeres que se desempeñan en diferentes rubros.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que la radio diferencia los ámbitos familiar y laboral según el contenido y horario de emisión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que la radio promueve campañas de reivindicación de la labor femenina a través de sus programas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que la radio abarca en su programación temas que pueden ser de interés para distintas mujeres.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "Según la lectura, ¿qué similitud comparten los programas “femeninos” estadounidenses y el programa británico Woman´s Hour?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Transforman los “culebrones” en programas orientados a conversaciones con figuras políticas y sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Describen los roles femeninos desde el ámbito personal hasta el ámbito público a través de su contenido.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Muestran una evolución desde temas cotidianos hasta preocupaciones sociales que conciernen a las mujeres.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Manifiestan una mirada selectiva al dirigirse a las amas de casa en primer lugar, y luego a un público femenino con trabajos remunerados.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "¿Qué se destaca en la lectura 2 sobre el trabajo de Olive Shapley?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su preocupación por las familias francesas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su participación como corresponsal de guerra.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Su enfoque social y comunitario en sus programas.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Su tratamiento de tabúes y temas femeninos delicados.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "¿Qué situación evidenció la discriminación hacia Betty Wason en su trabajo?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que los editores le impidieran cubrir los combates durante la guerra.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que un hombre leyera ante la audiencia los reportajes que ella realizaba.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que la emisora la limitara a informar sobre las vivencias de la población civil.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que se le asignara cubrir países poco involucrados en la guerra, como Noruega o Grecia.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes opciones plantea el punto de vista de la autora de Las mujeres y la radio: en plena sintonía?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las mujeres realizaron un relevante aporte al desarrollo radial.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Las mujeres dominan actualmente el espacio de la radiodifusión.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Las mujeres lograron hacerse escuchar con el surgimiento de la radio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las mujeres son las principales destinatarias de los programas radiales.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "En relación con la información de la lectura, ¿cuál es el propósito de los gráficos?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ilustrar la importancia social de los programas radiales femeninos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Evidenciar la discriminación de la mujer en la radio a través del tiempo.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ejemplificar el desarrollo profesional de las mujeres en el trabajo radial.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Dar cuenta del grado de participación femenina en la radio en distintos países.",
+              "isCorrect": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "LECTURA 3 (Preguntas 18 a 25)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Capítulo del libro escrito por Adam Hart-Davis, publicado el 2018. Medicina y cirugía antiguas Los orígenes de la medicina se imbrican en los de la misma civilización. La medicina prehistórica, esto es, anterior a la palabra escrita, se caracterizó probablemente por una mezcla de primeros auxilios primitivos y la creencia en poderes sobrenaturales. Las pistas sobre las primeras prácticas médicas proceden de observaciones antropológicas de los pueblos indígenas actuales y sugieren que las sociedades prehistóricas usarían hierbas para tratar dolencias simples. Las prácticas curativas habrían sido desarrolladas por un chamán o hechicero tribal. Una vez que se controló el fuego, se pudo utilizar para esterilizar y cerrar heridas y las herramientas para el trabajo de la piedra y los metales, en operaciones rudimentarias. Los procedimientos médicos se transmitieron al principio de forma oral, pero la medicina organizada comenzó propiamente con la escritura. Los textos médicos más antiguos datan de 2000 a.C., en China y Egipto. Origen de la medicina y la cirugía La medicina empezó en China muy probablemente a mediados del tercer milenio a.C., cuando el Emperador Amarillo (Huangdi) supuestamente escribió el Huangdi Neijing o Canon médico del Emperador Amarillo. Este documento ha sido la base de la medicina tradicional china, predominante en gran parte de Asia. Sus practicantes diagnosticaban y trataban la enfermedad atendiendo a la interacción de las personas con su entorno y recurrían a técnicas como la meditación y la acupuntura. En el Egipto del mismo milenio, 2600 a.C., Imhotep, un sabio arquitecto de pirámides, fue venerado como dios de la medicina y la sanación. El Papiro Edwin Smith, 1700 a.C., se cree basado en los textos de Imhotep. Es el documento quirúrgico más antiguo del mundo y llama la atención por la ausencia de pensamiento mágico en lo que se refiere al diagnóstico, el tratamiento y pronóstico de las enfermedades. Dos siglos después, 1500 a.C., el texto babilonio Manual de diagnóstico médico de Esagil-kin-apli se refería quizá al primer médico al sugerir un personaje llamado Urlugaledin que había practicado la cirugía en 4000 a.C. Las raíces del sistema médico ayurvédico en el valle del Indo se remontan a una época aún anterior, quizá a 9000 a.C. El Ayurveda (que significa “vida de la ciencia”) constituye la base de la medicina tradicional india de hoy, que preconiza un estilo de vida saludable, basado en las hierbas, el masaje y el yoga. Sus textos, como el Sushrutasamhita, sobre cirugía, aparecieron más tarde, a partir de 500 a.C. Dicho texto se refiere a técnicas invasivas que incluyen la cirugía estética y las operaciones de cataratas, entre otras. En la antigua Grecia En 700 a.C., se abrió la primera escuela médica griega en Cnido. La antigua medicina griega, al igual que las de Egipto e India, hacía hincapié en el control de la dieta, el estilo de vida y la higiene. Trescientos años después, Hipócrates fundó su propia escuela médica en Cos. Describió muchas enfermedades, por primera vez introdujo términos médicos que siguen vigentes en la actualidad, como la calificación de “aguda” para una dolencia intensa y breve, y la de “crónica” para una de desarrollo lento y prolongado. La escuela hipocrática rechazó las causas sobrenaturales en favor de las causas físicas de la enfermedad, e insistió en los cuidados y el pronóstico, fomentando el minucioso estudio de casos, precedente de la medicina clínica. Hipócrates también defendió las ideas del humoralismo, según las cuales en el organismo había cuatro humores (o líquidos) básicos: la bilis negra, la flema, la bilis amarilla y la sangre. Los estados de ánimo y las enfermedades se atribuían a desequilibrios en la proporción de dichos humores. El médico Galeno (129-216 d.C.) reforzó dicha teoría con la creencia de que la sangre se fabricaba continuamente en el cuerpo y que podía estancarse. Esto sirvió de estímulo a la dudosa práctica de la sangría, consistente en extraer una cantidad determinada de sangre para corregir el desequilibrio de los humores. En 1543, el anatomista flamenco Andrés Vesalio desacreditó muchas de las teorías de Galeno. El juramento hipocrático Es una costumbre asentada en la tradición tomar a todos los médicos el juramento hipocrático, una serie de directrices y deberes integrados en el corpus hipocrático, los textos de la escuela hipocrática en la antigua Grecia. Se cree que fue el propio Hipócrates quien lo redactó, pero es probable que muchos otros hicieran aportaciones. En la versión original, el que jura contrae una deuda de gratitud con su maestro y promete llevar una vida “pura” y preservar la confidencialidad de quienes estén a su cuidado. La medicina científica En el siglo V d.C., al huir los sabios griegos de la persecución bizantina y asentarse en Persia, la academia de Gundishapur pasó a ser un centro importante de los estudios médicos y más tarde el primer hospital clínico. La edad de oro del Islam (700-1200 d.C.) vio surgir las primeras farmacias y hospitales públicos gratuitos en Bagdad. El Islam medieval produjo también tratados médicos de figuras como Avicena (Ibn Sina 980-1037 d.C.) que fue un prolífico sabio persa que hizo importantes aportaciones en medicina, química, astronomía, geología, matemáticas y psicología. Su obra principal, Canon de medicina, se convirtió en un texto obligado en las universidades europeas. Fue pionero en muchos procedimientos médicos, como las pruebas clínicas en el uso experimental de fármacos. Hart-Davis, A. (2018). Medicina y cirugía antiguas. En A. Hart-Davis, Ciencia La guía visual definitiva (pp. 24- 25). DK.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "En el primer párrafo, ¿con qué propósito se mencionan los estudios antropológicos de los pueblos indígenas actuales?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para contrastar sus métodos curativos con respecto a los de la prehistoria.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para explicar en qué se basa la investigación de la práctica médica primitiva.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Para analizar el origen de la interpretación sobrenatural de las enfermedades.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para destacar la importancia de los conocimientos médicos antes de la escritura.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "En la lectura 3, ¿por qué se utilizan las palabras “probablemente” y “supuestamente” dentro del siguiente fragmento? «La medicina empezó en China muy probablemente a mediados del tercer milenio a.C., cuando el Emperador Amarillo (Huangdi) supuestamente escribió el Huangdi Neijing o Canon médico del Emperador Amarillo. Este documento ha sido la base de la medicina tradicional china, predominante en gran parte de Asia. Sus practicantes diagnosticaban y trataban la enfermedad atendiendo a la interacción de las personas con su entorno y recurrían a técnicas como la meditación y la acupuntura».",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque relativizan la importancia del documento del Emperador Amarillo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque cuestionan la tradición médica de la sociedad china.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque presumen sobre el origen de la medicina china.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Porque validan los métodos del Canon médico.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "¿Cuál fue la importancia de la escritura en el desarrollo de la medicina antigua?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Permitió organizar y sentar los fundamentos de los procedimientos médicos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Permitió crear y desarrollar una serie de técnicas quirúrgicas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Permitió difundir información sobre enfermedades en diferentes lugares.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Permitió prescindir de las antiguas creencias en poderes sobrenaturales.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "En la lectura 3, ¿con qué finalidad el emisor menciona las dolencias “aguda” y “crónica” en el segmento “En la antigua Grecia”?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para ejemplificar la vigencia de los términos médicos acuñados por Hipócrates.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Para explicar el rechazo de la medicina hipocrática a las causas sobrenaturales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para describir el tipo de pronóstico usado en la medicina clínica por Hipócrates.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para señalar las enfermedades descritas en los estudios de la escuela hipocrática.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "¿En qué se asemeja la visión de la medicina egipcia expuesta en el Papiro Edwin Smith con la medicina hipocrática?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En que promueven el control de la dieta, estilo de vida e higiene para evitar enfermedades.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En que desestiman las causas sobrenaturales como explicación de las enfermedades.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En que atribuían las enfermedades a los desequilibrios de los líquidos corporales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En que recurren a técnicas como la meditación para sanar enfermedades.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "¿En qué se basó la práctica de la sangría?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En la distinción de enfermedades agudas y crónicas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el estudio de casos de la medicina clínica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "En las directrices del juramento hipocrático.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En los principios del humoralismo.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "¿Qué función cumple el apartado “El juramento hipocrático”?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Explicar los orígenes griegos de la graduación en medicina.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Precisar la importancia de una iniciación médica de origen griego.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Mostrar la vigencia de los valores de una antigua escuela médica griega.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Juzgar los procedimientos que realizaban los griegos en sus rituales médicos.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "Según la lectura, ¿cuál es el documento quirúrgico más antiguo del mundo?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El Sushrutasamhita.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El Papiro Edwin Smith.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El Canon médico del Emperador Amarillo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El Manual del diagnóstico médico de Esagil-kin-apli.",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "LECTURA 4 (Preguntas 26 a 33)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Texto publicado en la página web de Chile Artesanía, visitada en marzo del 2021. Chile Artesanía Chile Artesanía es una plataforma creada con el objeto de identificar y reconocer a quienes cultivan la artesanía en Chile, así como las diversas manifestaciones artesanales del país, con miras a preservar, valorar y fomentar su desarrollo. Busca reconocer y valorar la artesanía nacional y a quienes la desarrollan, garantizando su autenticidad, características de su identidad, atributos de la creación y la promoción de su calidad, reconociendo y visibilizando toda la cadena de valor asociada al sector, promoviendo así, la circulación de obras y la asociatividad del sector. Sus objetivos específicos son:  Reconocer a los/as artesanos/as, la producción de artesanía y su origen.  Relevar la identidad y calidad de la producción de artesanía.  Potenciar la comercialización, producción y gestión de la actividad artesanal.  Fortalecer la organización del sector artesanal. ¿Quiénes pueden postular? Artesanas y artesanos dedicados a oficios como la textilería, alfarería y cerámica, orfebrería y metales, cestería y trabajos en madera, piedra, cuero, cuerno, conchas, huesos, vidrio o papel, así como instrumentos musicales, entre otros. En el caso de las organizaciones, podrán participar corporaciones, fundaciones u otras agrupaciones sin fines de lucro, con más de tres años de trayectoria, legalmente constituidas y cuyos fines contemplen la promoción, formación, salvaguardia o desarrollo de la artesanía nacional. ¿Cómo se evalúa? Las postulaciones serán evaluadas por un Comité Regional integrado por representantes de organizaciones aprobadas en el registro, artesanos con Sello de Excelencia, Maestros Artesanos y evaluadores Fondart 4 para la artesanía, según corresponda en cada uno de los territorios del país. ¿Por qué es importante formar parte de Chile Artesanía? Chile Artesanía es el único instrumento público que puede acreditar la condición de artesano/a creador/a. Asimismo, la plataforma permite establecer una red de información sobre el desarrollo de la disciplina, así como conocer a los creadores y su ubicación geográfica, las disciplinas en las que se desempeñan y la diversidad de materialidades existente en Chile, insumos fundamentales para respaldar el trabajo enfocado en mejorar las políticas del sector. Los/as artesanos/as y las organizaciones que sean inscritas en el sistema de registro de Chile Artesanía podrán obtener:  Certificado de artesano/a inscrito/a en el Registro de Artesanos/as.  Certificado de organización de artesanos/as inscrita en el Registro de Organizaciones, lo que habilita a la respectiva organización de artesanos/as para el desarrollo de programas vinculados a la artesanía.  Participar de una plataforma que facilita el intercambio de información y asociatividad del sector.  Acceso a información relacionada con fuentes de financiamiento, ferias de artesanía y concursos a nivel nacional e internacional. Definiciones conceptuales Artesano/a: Creador/a o cultor/a que lleva a cabo la transformación de la materia prima en una pieza, obra u objeto artesanal con características utilitarias, simbólicas, rituales o estéticas, de manera individual o colectiva, con permanencia en el tiempo. 4 Fondo Nacional de Desarrollo Cultural y las Artes. Artesanía: La elaboración de piezas u objetos realizados individual o colectivamente donde pueden utilizarse herramientas y/o instrumentos predominando la ejecución manual. En este dominio de la técnica y la transformación de las materias primas, confluyen la habilidad, el sentido de pertenencia y la creatividad en la elaboración de productos pertenecientes a una determinada cultura. Tales aptitudes se expanden mediante diversas maneras de combinar la memoria, la reflexión y el conocimiento experto que sustentan el proceso creativo y la materialización de la obra. Artesanía tradicional: Es toda aquella práctica asociada al dominio de un oficio, transmitida de generación en generación en un pueblo o comunidad ligada a su territorio y paisaje cultural. Su principal característica es el hecho de formar parte de la memoria y el patrimonio que constituyen la cultura material de un colectivo que emerge y se desarrolla en un contexto histórico particular. La artesanía tradicional manifiesta una continuidad de determinados patrones estéticos y simbólicos ‒definidos por formas, colores y técnicas‒ cuyas estructuras originales pueden ser mantenidas a través del tiempo así como también reelaboradas, aunque siempre conservando aquellos elementos distintivos que le otorgan identidad y sentido de pertenencia a la cultura e historia a las cuales pertenece. La artesanía tradicional constituye la referencia cultural de base para el desarrollo de la artesanía contemporánea o de innovación, y tiene como principal motivo de sustento y promoción la memoria cultural de una comunidad arraigada en su territorio y paisaje cultural. Artesanía indígena: Es toda aquella práctica asociada directamente con las manifestaciones culturales de los pueblos originarios, y entendida como vehículo del patrimonio inmaterial. Es el testimonio de las creencias y sabidurías de diversos grupos étnicos, que se manifiesta en artefactos con fines utilitarios y/o rituales, que incluso puede ser proyectada con otros fines. Es una actividad ancestral transmitida a través de las generaciones en una comunidad particular. Los objetos artesanales, formas y producción deben respetar, resguardar y tener coherencia con la iconografía y medios simbólicos de los pueblos originarios a quienes representan. La permanencia en el tiempo de estas manifestaciones y sus múltiples reelaboraciones está asociada a formas particulares de transmisión intergeneracional de esos conocimientos y al modo en que estas expresan valores fundamentales para dichas comunidades. Por lo tanto, estas producciones forman parte de un capital cultural y un patrimonio colectivo que tiene una significación cultural e identitaria. Artesanía contemporánea: Corresponde a las producciones y expresiones actuales que incorporan propuestas creativas y reflexivas, a través de la transformación o reinterpretación en el uso y aplicación de materiales, técnicas, formas y conceptos emanados de la artesanía tradicional en objetos artesanales que no requieren de una referencia identitaria específica (aunque podrían tenerla). Materias primas: En los oficios artesanales el foco principal estará puesto no solo en la definición de la técnica y proceso creativo, sino que se deberá tener especial precisión en la disponibilidad, provisión y manejo de las materias primas, como insumo inicial del proceso de transformación artesanal. Las materias primas para la confección de las piezas artesanales (objetos o artefactos), se establecen de acuerdo con las características y relación con el entorno geográfico y cultural en el cual se desenvuelven en su cotidiano los artesanos (espacios determinados de uso privado , individual, público, colectivo o mixto). Otras veces, las materias primas se establecen considerando acciones de adquisición, recolección o intercambio con otros artesanos recolectores, o relaciones de venta con proveedores locales […]. Manualidades: Se consideran manualidades los trabajos realizados principalmente por la unión de elementos procesados o industriales, donde el uso de materiales no implica necesariamente una transformación. Las técnicas son básicas, de rápida adopción y utilizan prototipos de referencias. Sus funciones pueden ser educativas, terapéuticas, de uso cotidiano e incluso conteniendo un componente económico relevante. No serán consideradas en esta convocatoria porque, en general, no se contemplan dentro de los oficios artesanales con identidad cultural. Las manualidades, aunque son también trabajos efectuados con las manos con o sin ayuda de herramientas, tienen un objetivo diferente. Sistema de Registro Nacional de artesanías. (s.f.). Chile Artesanía. https://chileartesania.cultura.gob.cl/quienes-somos",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "¿A qué lectores está dirigida la información de la lectura 4?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A personas que quieren comprar artesanías y manualidades hechas en Chile.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A personas que hacen manualidades y que quieren convertirse en artesanos/as.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A profesoras/es y estudiantes que quieren conocer las características de la artesanía.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A artesanos/as y organizaciones que quieren inscribirse en una red de fomento artesanal.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "¿Qué tipo de organizaciones pueden inscribirse en Chile Artesanía?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Organizaciones cuyo propósito sea promover el arte en general.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Organizaciones cuya constitución carezca de un carácter formal.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Organizaciones artesanales que hayan sido creadas recientemente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Organizaciones sin la finalidad de obtener un beneficio económico.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes opciones sintetiza la información de la sección “¿Por qué es importante formar parte de Chile Artesanía?”?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los/as artesanos/as pueden desarrollar proyectos y obras a través del uso de la plataforma.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Los/as artesanos/as pueden acceder a nuevos servicios una vez admitidos en la plataforma.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Los/as artesanos/as pueden optar a ayudas económicas si son certificados en la plataforma.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los/as artesanos/as pueden obtener información y certificación al ingresar a la plataforma.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "¿Qué certifica Chile Artesanía?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los programas de desarrollo vinculados a la artesanía nacional.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El registro de artesanos/as y organizaciones vinculadas a la artesanía.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Las iniciativas de emprendimiento de los artesanos/as y organizaciones.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El acceso a fuentes de financiamiento para artesanos/as y organizaciones.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "Según la lectura, ¿qué requisito debe cumplir una obra para que sea considerada artesanía?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que sea efectuada con las manos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que sea el trabajo de un pueblo originario.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que sea la transformación de una materia prima.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que sea transmitida de generación en generación.",
+              "isCorrect": false
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "GradeCam (assignment ENSAYO PAES 5 CL (SEPTIEMBRE) - IV°) lo puntúa con max_points 0 en los 122 escaneos; la portada declara 65 preguntas de las cuales 60 cuentan para el puntaje. La Tabla de especificaciones marca pilotos solo con color de celda, no legible en el volcado."
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "En relación con la postulación a Chile Artesanía, ¿qué información útil presenta la sección “Definiciones conceptuales”?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las características de los elementos y participantes seleccionables para el registro.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La jerarquización de los tipos de oficios para la selección de artesanos/as registrados/as.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El tipo de acreditación al que puede postular cada artesano/a registrado/a en Chile Artesanía.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El conjunto de beneficios a los que acceden los artesanos/as y organizaciones seleccionados/as.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "¿Con qué finalidad se incluye la definición de “Manualidades”?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para evitar la postulación de personas con intenciones comerciales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para destacar la funcionalidad de esta categoría de productos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para mostrar la importancia de la selección de los materiales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para precisar la diferencia entre los distintos tipos de oficio.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "stem": "¿Qué tienen en común la artesanía tradicional y la artesanía indígena?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ambas utilizan las mismas técnicas en su elaboración.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ambas representan la memoria de un grupo humano.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Ambas buscan redefinir el uso de los materiales nobles.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Ambas tienen un sentido religioso para sus comunidades.",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "LECTURA 5 (Preguntas 34 a 40)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Fragmento del libro de Mark Rosenzweig y Arnold Leiman, publicado en 1994. 1 Psicología fisiológica ¿QUÉ ES LA PSICOLOGÍA FISIOLÓGICA? Una leyenda de la India (retomada por Thomas Mann en su libro Las cabezas cambiadas) ilustra el modo en que la cabeza y el cuerpo contribuyen a la identidad y a la personalidad. En esta historia, la bella Sita se casa con un comerciante joven, delgado e inteligente. Ella se sentía atraída también por su mejor amigo, un herrero fuerte y musculoso. Un día los dos jóvenes se cortaron la cabeza mutuamente en un templo de la divinidad Kali. Sita entró al templo buscándolos, y los encontró yaciendo en charcos de sangre frente a la estatua de la diosa Kali. Horrorizada, Sita rogó a Kali que retornase a los hombres a la vida. Kali concedió el deseo e instruyó a Sita para que colocase las cabezas cuidadosamente sobre los cuerpos. Sita acometió la tarea con energía febril y pronto advirtió que los hombres volvían a la vida. ¡Solamente entonces se dio cuenta de que había puesto las cabezas en los cuerpos equivocados! Ahora los tres jóvenes se enfrentaban a un problema de difícil solución: ¿Quién era el esposo de Sita? ¿El de la cabeza del mercader y el cuerpo del herrero o el de la cabeza del herrero y el cuerpo del mercader? La leyenda explora las complejidades de este rompecabezas, considerando además cómo cada cabeza afecta al cuerpo que ahora controla y también cómo el cuerpo ejerce influencias recíprocas sobre la cabeza. Afortunadamente nosotros no necesitamos resolver el dilema de Sita. Sabemos que la identidad individual, la personalidad y los talentos son principalmente funciones del cerebro; sin embargo, también reconocemos las influencias que ejercen sobre el sistema nervioso otros sistemas corporales, como las glándulas endocrinas. Este libro explora las formas en que los estados y procesos corporales producen y controlan la conducta, así como el modo en que la conducta influye sobre los sistemas corporales. Este tema posee gran alcance y amplitud, tiende un puente entre muchas disciplinas científicas. Así, nos basaremos en investigaciones de psicólogos, anatomistas, químicos, endocrinólogos, ingenieros, genetistas, neurólogos, fisiólogos y zoólogos. Para intentar obtener una visión panorámica del rápido desarrollo del campo de la psicología fisiológica, intentaremos ir más allá de los límites de cualquier especialidad aislada. La frecuente aparición en la prensa de temas de la psicología fisiológica refleja un creciente interés popular por este campo. Los artículos ilustran el rápido avance de la investigación e indican la relevancia de los estudios del cerebro en la solución de los problemas humanos. Los periódicos y las revistas proclaman nuevos descubrimientos que mejoran nuestro conocimiento de por qué hacemos lo que hacemos y por qué somos lo que somos. La investigación en psicología fisiológica y en campos relacionados está iluminando muchos aspectos de la conducta normal, incluyendo el sexo, el aprendizaje y la memoria, el lenguaje y la comunicación, los papeles conductuales del sueño y los ritmos diarios y la sensibilidad y la selectividad de nuestros procesos perceptivos. Cuestiones básicas sobre las capacidades del sistema nervioso humano El acelerado paso al que avanzan la psicología fisiológica, la neurociencia y los campos relacionados, ha proporcionado respuestas a algunas cuestiones fundamentales y ofrece perspectivas de nuevas y productivas aproximaciones (por ejemplo, Hillyard, 1982; Gerstein, Luce, Smelser & Sperlich, 1988). Las mediciones sofisticadas de la conducta unidas a las nuevas técnicas para estimular y registrar los procesos corporales están incrementando enormemente el poder y el alcance de la investigación. He aquí algunas de las más interesantes áreas de investigación actual: 1. ¿Cómo se desarrolla, mantiene y repara a sí mismo el sistema nervioso a lo largo del ciclo vital, y cómo se relacionan estas capacidades con la conducta? Pocos meses después de la concepción y mucho antes del nacimiento, el humano en desarrollo está equipado con un sistema nervioso que contiene miles de millones de células nerviosas organizadas en un orden preciso con interconexiones específicas. El plan para el desarrollo del sistema nervioso humano se parece en muchos aspectos al de los otros mamíferos, e incluso al de todos los vertebrados, pero posee importantes adaptaciones específicas de especie. Cada especie debe estar preparada para manifestar muchas conductas en el momento del nacimiento y para adquirir otras muy pronto, al poco tiempo de haber nacido. El anteproyecto del desarrollo no solo especifica la disposición de la mayor parte de las células nerviosas mucho antes del nacimiento, sino que también las mantiene, y depende de las influencias ambien tales para ayudar a configurar el desarrollo neural después del nacimiento. 2. ¿Cómo adquiere, procesa y emplea el sistema nervioso la información sobre el ambiente? Los investigadores han aprendido mucho acerca de la forma en que el mundo que nos rodea está representado en circuitos y actividades del sistema nervioso. Los estímulos sensoriales –desde simples contactos hasta sonidos complejos y despliegues elaborados de forma y color– son procesados por muchas regiones encefálicas especializadas. Este procesamiento sensorial-perceptual ayuda a activar y controlar las respuestas corporales coordinadas, desde los movimientos oculares finos hasta el grácil salto de un bailarín. 3. ¿Cómo controla y regula el sistema nervioso las conductas motivadas tales como la reproducción, la comida y el balance de energía, el sueño y la vigilia y las emociones? La organización de numerosas regiones del sistema nervioso se ve influenciada por sustancias neuroquímicas, entre las que se incluyen las hormonas, y muchos circuitos neuronales son activados o inhibidos por mensajes químicos. Por ejemplo, los investigadores están estudiando actualmente similitudes y diferencias entre los sexos en aspectos de la estructura química cerebral como claves para comprender tanto sus semejanzas como sus diferencias conductuales. 4. ¿Cómo adquiere y almacena la información el sistema nervioso y más tarde la hace accesible para su uso? El aprendizaje y la memoria están entre las capacidades más extraordinarias de los seres vivos. La investigación más avanzada en esta área está explorando cómo realiza el sistema nervioso estas proezas. Cada una de las cuestiones precedentes se volverá a tomar en partes posteriores de este libro. Algunos de los ejemplos que consideraremos pueden parecer casi más fantásticos que la leyenda de las cabezas cambiadas. En efecto, ciertos logros de la investigación de las relaciones entre sistema nervioso y conducta podían haberse considerado como milagros solo una generación atrás. Estos descubrimientos han llevado a la curación de la psicosis, la eliminación del dolor, la restauración parcial de la vista y la estimulación del crecimiento del cerebro mejorando de este modo la capacidad de aprendizaje. Estos y otros avances que hoy en día nos son familiares habrían parecido increíbles unas cuantas décadas atrás. Como dijo el escritor de ciencia ficción Arthur C. Clarke, “La ciencia de una generación era la magia de la precedente”. Rosenzweig, M., & Leiman, A. (1994). Psicología fisiológica. Mc Graw Hill.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "En la leyenda de Sita, ¿a qué se debe que pusiera las cabezas de los hombres cambiadas?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A su confusión, debido a las similitudes entre el mercader y el herrero.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A su atracción por la inteligencia y la fuerza de ambos hombres.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A su tristeza, debido al trágico desenlace de sus amados.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "A su impulsividad por seguir las instrucciones de Kali.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "¿Qué función cumple el primer párrafo de la lectura 5?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Muestra que hay creencias erradas sobre la psicología fisiológica.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Introduce el tema de la psicología fisiológica con un relato literario.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Ejemplifica los principios de la psicología fisiológica con un caso conocido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Aporta antecedentes sobre el origen del concepto psicología fisiológica.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 36,
+          "type": "multiple_choice",
+          "stem": "¿Con qué apartado de la sección “Cuestiones básicas sobre las capacidades del sistema nervioso humano” se relaciona el avance técnico descrito en el siguiente fragmento? «Finalmente, otro ejemplo de avance técnico lo proporcionan las técnicas optogenéticas. Estas combinan la genética, las propiedades de la fibra óptica y la utilización de la luz para inhibir o activar grupos de neuronas. Boyden y colaboradores publicaron en 2005 los resultados de sus investigaciones dando a conocer los fundamentos de esta técnica, basada en añadir al ADN de grupos concretos de neuronas genes procedentes de algas verdes unicelulares que van a expresar en la membrana neuronal canales iónicos cuya conductancia depende de que se iluminen con luz de una determinada longitud de onda. Esa preparación permite controlar de forma muy precisa la actividad del grupo de neuronas en cuyas membranas se encuentren los canales iónicos sensibles, que son estimulados o inhibidos mediante la luz guiada por cables de fibra óptica». Psikipedia. (22 de agosto de 2019). Técnicas de investigación en Psicología Fisiológica. https://psikipedia.com/libro/fisiologica/4197-tecnicas-de-investigacion-en-psicologia-fisiologica",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "“¿Cómo controla y regula el sistema nervioso las conductas motivadas tales como la reproducción, la comida y el balance de energía, el sueño y la vigilia y las emociones?”",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "“¿Cómo adquiere, procesa y emplea el sistema nervioso la información sobre el ambiente?”",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "“¿Cómo adquiere y almacena la información el sistema nervioso y más tarde la hace accesible para su uso?”",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "“¿Cómo se desarrolla, mantiene y repara a sí mismo el sistema nervioso a lo largo del ciclo vital, y cómo se relacionan estas capacidades con la conducta?”",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 37,
+          "type": "multiple_choice",
+          "stem": "Según la lectura, ¿qué es el salto de un bailarín?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Una respuesta corporal coordinada.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Una actividad del sistema nervioso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un proceso de la región encefálica.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Un control de estímulo sensorial.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 38,
+          "type": "multiple_choice",
+          "stem": "En la lectura 5, ¿cómo reaccionan los emisores ante los avances de la psicología fisiológica expresados en el último párrafo?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con orgullo, pues recalcan que su generación ha logrado más avances que ninguna otra.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Con incredulidad, pues comparan los avances que mencionan con milagros y relatos fantásticos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con asombro, pues enfatizan la magnitud que han tenido los avances de las últimas décadas.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Con optimismo, pues aseguran que los avances actuales permitirán alcanzar un futuro extraordinario.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 39,
+          "type": "multiple_choice",
+          "stem": "En el último párrafo, ¿con qué finalidad los emisores citan al escritor Arthur C. Clarke?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para ejemplificar la manera en que la ciencia aporta al conocimiento del comportamiento humano.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para demostrar la importancia que tiene la ciencia ficción en el estudio de la psicología fisiológica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para reforzar la idea de que los avances científicos de hoy fueron considerados imposibles en el pasado.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para respaldar la crítica que hacen los emisores al rápido desarrollo que ha tenido la psicología fisiológica.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 40,
+          "type": "multiple_choice",
+          "stem": "¿Por qué se puede calificar como pertinente la propuesta de comenzar el libro con una leyenda?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque introduce la definición de psicología fisiológica a través de un ejemplo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Porque facilita abordar la psicología fisiológica desde la mirada de distintas disciplinas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque permite representar las dificultades que enfrenta el estudio de la psicología fisiológica.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque ayuda a entender la psicología fisiológica mostrando la relación entre el cuerpo y la mente.",
+              "isCorrect": true
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "GradeCam (assignment ENSAYO PAES 5 CL (SEPTIEMBRE) - IV°) lo puntúa con max_points 0 en los 122 escaneos; la portada declara 65 preguntas de las cuales 60 cuentan para el puntaje. La Tabla de especificaciones marca pilotos solo con color de celda, no legible en el volcado."
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "LECTURA 6 (Preguntas 41 a 48)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Cuento escrito por Jules Renard, publicado en 1893. El barco a vapor Retirados al pueblo, los Bornet son vecinos de los Navot y entre las dos parejas existe muy buena relación. Les gusta por igual la tranquilidad, el aire puro, la sombra y el agua. Simpatizan tanto que se imitan. Por la mañana las señoras van juntas al mercado. ―Me dan ganas de preparar un pato, ―dice la señora Navot. ―¡Ah! A mí también, ―dice la señora Bornet. Los señores se consultan cuando proyectan embellecer uno su jardín ventajosamente orientado, y el otro su casa situada sobre una loma y nunca húmeda. Se llevan bien. Mejor es así. ¡Con tal de que dure! Pero es al atardecer, cuando se pasean por el Marne, cuando los Navot y los Bornet desean estar siempre de acuerdo. Los dos barcos, de la misma forma y de color verde, se deslizan uno al lado del otro. El señor Navot y el señor Bornet reman acariciando el agua como si lo hicieran con sus manos prolongadas. A veces se excitan hasta que aparece una primera gota de sudor, pero sin envidia, tan fraternales que no pueden vencerse uno al otro y reman al unísono. Una de las señoras sorbe discretamente y dice: ―¡Qué delicia! ―Sí, ―responde la otra― es delicioso. Pero, una tarde, cuando los Bornet van a reunirse con los Navot para su habitual paseo, la señora Bornet mira un punto determinado del Marne y dice: ―¡Caray! El señor Bornet, que está cerrando la puerta con llave, se da la vuelta: ―¿Qué ocurre? ―¡Caramba! ―prosigue la señora Bornet― nuestros amigos no se privan de nada. Tienen un barco a vapor. ―¡Demonios! ―dice el señor Bornet. Es cierto. En la orilla, en el estrecho espacio reservado a los Navot, se divisa un pequeño barco a vapor, con su tubo negro que brilla al sol, y las nubes de humo que de él escapan. Ya instalados, el señor y la señora Navot esperan y agitan un pañuelo. ―¡Muy gracioso! ―dice el señor Bornet molesto. ―Quieren deslumbrarnos, ―dice la señora Bornet con despecho. ―No sabía que actuaran con tantos tapujos ―dice el señor Bornet―. Por lo que a mí respecta, yo no habría comprado jamás un barco a vapor sin que ellos lo supieran. ¡Fíese usted de los amigos! ¡En fin! Yo había observado estos últimos tiempos que estaban algo raros. ¡Caramba, era esto! ―¿Y si no fuéramos? ―Sería excesivo. Pero dado que ellos carecen de delicadeza, no les demos el gusto de sorprendernos. Permanezcamos indiferentes. ―Es muy pequeño su barco a vapor ―dice la señora Bornet―. Es apenas un poco más grande que el otro. ¿Qué te parece? ―¡Oh! de lejos un barco a vapor causa más impresión. Además, ahora hacen verdaderas joyas. Mientras tanto los Navot continúan haciendo gestos. Sin duda gritan: ―¡Dense prisa! Los Bornet descienden hacia el Marne y se guardan mucho de apresurarse. ―Está bien, vamos allá ―dice el señor Bornet―. ¡Qué desagradable, Dios mío! ―Nosotros también podríamos tener un barco a vapor si nos apretáramos un poco ―dice la señora Bornet. Avanzan a pasos lentos, hacen como que bajan la cabeza, que la giran o que observan el cielo. Es verdad, su intención no es enemistarse con los Navot. Incluso están decididos a admirar adecuadamente, según es costumbre en sociedad, pero acaban de oír romperse, con un ruido seco, el primero de los finos hilos que unen los corazones, y la señora Bornet concluye: ―Solo soy una mujer, pero no soy mujer para nada: no olvidaré en mi vida lo que han hecho. ¿Y tú? Sin responder, el señor Bornet la toma de la mano. ―¡Alto ahí, amiga mía! ¡Estamos locos! La señora Bornet se detiene, lo mira, mira hacia los Navot y dice: ―Mi pobre amigo, ¡qué espejismo! Se frotan los ojos, apartan las hilachas de bruma y se creen cegados. Luego se echan a reír, silenciosamente, hombro con hombro, buenos de nuevo, satisfechos, felices de vivir en este mundo en el que todo tiene una explicación. Sentado entre el señor y la señora Navot, en su barco habitual, un extraño fuma, tal vez algún amigo de París, que, grave bajo su chistera 5 negra que brilla al sol, expulsa naturalmente el humo por la boca. Renard, J. (2015). El barco a vapor. En Obras-Colección de Jules Renard. Iberia Literatura. 5 Sombrero de ala estrecha y copa alta, casi cilíndrica y plana por encima, generalmente forrado de felpa de seda negra.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 41,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes opciones presenta un título alternativo que represente la idea central de la lectura 6?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Una compra inesperada",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una amistad traicionada",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un error de percepción",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Un extraño visitante",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 42,
+          "type": "multiple_choice",
+          "stem": "Según el narrador, ¿en qué situación los Bornet y los Navot desean estar siempre de acuerdo?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cuando navegan en sus barcos.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cuando mejoran sus casas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cuando arreglan sus jardines.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cuando compran en el mercado.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 43,
+          "type": "multiple_choice",
+          "stem": "En el texto, ¿qué función cumple el siguiente diálogo sostenido entre las dos señoras? «Retirados al pueblo, los Bornet son vecinos de los Navot y entre las dos parejas existe muy buena relación. Les gusta por igual la tranquilidad, el aire puro, la sombra y el agua. Simpatizan tanto que se imitan. Por la mañana las señoras van juntas al mercado. ―Me dan ganas de preparar un pato, ―dice la señora Navot. ―¡Ah! A mí también, ―dice la señora Bornet».",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Nombrar los lugares que visitaban frecuentemente las personas del pueblo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cuestionar lo planteado por el narrador sobre la simpatía entre los vecinos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Entregar una evidencia sobre el hecho de que los vecinos se imitaban.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Explicar las aficiones comunes entre los vecinos del pueblo.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 44,
+          "type": "multiple_choice",
+          "stem": "Considerando la historia en su totalidad, ¿qué función tiene la descripción inicial del primer párrafo?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Permite comprender la perspectiva del narrador.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Permite comprender la motivación de los personajes.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Permite comprender el periodo en que transcurre la narración.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Permite comprender el escenario en que se desarrollan las acciones.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 45,
+          "type": "multiple_choice",
+          "stem": "¿Con qué finalidad se menciona al extraño sentado entre los señores Navot?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para aclarar la confusión de los Bornet frente a la procedencia del humo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Para exponer la alegría de los Bornet debido a la llegada de nuevas amistades.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para explicar la sorpresa de los Bornet ante el origen parisino del barco a vapor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para confirmar el motivo de enojo de los Bornet al ser reemplazados por un nuevo amigo.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 46,
+          "type": "multiple_choice",
+          "stem": "¿Por qué están molestos los Bornet con sus vecinos?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque los Bornet piensan que debiesen haber sido informados por sus amigos antes de la compra del barco.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque los Bornet consideran que el barco a vapor de los Navot es ostentoso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque los Bornet están imposibilitados de comprarse un barco a vapor.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque los Bornet creen que sus vecinos deberían haber comprado un barco mejor.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 47,
+          "type": "multiple_choice",
+          "stem": "¿Qué representa el barco de vapor en el relato?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La oportunidad para fortalecer la amistad entre las parejas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El elemento que desestabiliza la relación entre los vecinos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La ostentación de quienes poseen más poder económico.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El ascenso social de quienes compiten con sus vecinos.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 48,
+          "type": "multiple_choice",
+          "stem": "¿Qué vicio de la sociedad se refleja en la descripción de los personajes y sus acciones?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La arrogancia, representada por el hecho de que los Bornet son incapaces de reconocer su error al ver el barco.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La codicia, encarnada en la Sra. Bornet cuando sostiene que ellos también son capaces de adquirir nuevos bienes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La desconfianza, evidenciada en el Sr. Bornet cuando afirma que él había observado que sus vecinos estaban algo raros.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La hipocresía, reflejada en los Bornet cuando ocultan lo que realmente pensaban de sus amigos por la compra del barco.",
+              "isCorrect": true
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "GradeCam (assignment ENSAYO PAES 5 CL (SEPTIEMBRE) - IV°) lo puntúa con max_points 0 en los 122 escaneos; la portada declara 65 preguntas de las cuales 60 cuentan para el puntaje. La Tabla de especificaciones marca pilotos solo con color de celda, no legible en el volcado."
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "name": "LECTURA 7 (Preguntas 49 a 56)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Fragmento del ensayo escrito por Andrew J. Smart, publicado el 2013. El arte y la ciencia de no hacer nada: el piloto automático del cerebro Introducción “Con frecuencia me pregunto si esos días en que nos vemos obligados a permanecer ociosos no son, justamente, los días en los que nos involucramos en la actividad más profunda; si nuestras acciones, aun a pesar de suceder en algún momento posterior, no son sino los últimos reflejos de un vasto movimiento que se produce en nuestro interior en los días de ocio. Como sea, es fundamental entregarse al ocio con confianza, con devoción, incluso, tal vez, con alegría. Los días en que ni siquiera nuestras manos se mueven son tan increíblemente silenciosos que apenas es posible levantarlas sin que oigamos un ruido atronador”. Rainer Maria Rilke Este libro trata sobre el ocio. El ocio es una de las actividades más importantes de la vida; me he decidido a compartir mis ideas sobre el tema, con la esperanza de convencer a otras personas, a pesar de que en el mundo entero el horario laboral está en crecimiento y de que todos los libros sobre administración del tiempo que se ofrecen en el mercado aseguran que se puede, y se debe, “hacer más”. El mensaje de este libro es, precisamente, el opuesto. Sobre la base de los datos disponibles, las neurociencias argumentan que el cerebro necesita descansar. Si bien como resultado de la evolución, el cerebro humano se encuentra exquisitamente preparado para la actividad intensa, para poder funcionar con normalidad también necesita estar ocioso, y buena parte del tiempo, según parece. Siempre actuamos con un propósito, con un objetivo determinado: deberíamos permitirnos actuar más a menudo con piloto automático. En la aviación, el piloto automático es un sistema para controlar una aeronave sin la intervención del piloto; se ideó porque pilotar un avión en forma manual requiere de la atención absoluta y constante de la persona que lo conduce. Cuando los aviones empezaron a volar a mayor altura, mayor velocidad y durante periodos más extendidos, el vuelo manual se volvió causa de graves (y peligrosos) niveles de fatiga en los pilotos. La invención del piloto automático hizo posible que los pilotos pudieran dejar de controlar físicamente la aeronave y ahorrar, de ese modo, su energía mental para las etapas más arriesgadas del vuelo, como el despegue y el aterrizaje. En la actualidad, los pilotos automáticos utilizan programas de software para llevar las aeronaves. El aspecto negativo del piloto automático es que, en ocasiones, los pilotos no saben con claridad si son ellos o el piloto automático quienes comandan la nave, un fenómeno denominado “mode confusion” o “en modo confusión” que ha dado como resultado accidentes fatales. El cerebro también cuenta con piloto automático. Cuando se entra en estado de reposo y se abandona el “control manual” sobre la propia vida, el piloto automático del cerebro se activa. El piloto automático sabe dónde queremos ir en realidad y qué deseamos hacer. Pero el único modo de averiguar qué sabe el piloto automático es dejar de gobernar la aeronave y permitir que sea el piloto automático el que guíe el camino. Así como los pilotos alcanzan niveles peligrosos de fatiga cuando vuelan en modo manual, todos nosotros necesitamos tomarnos un descanso y dejar que sea el piloto automático el que guíe nuestra aeronave durante un tiempo mayor: el truco consiste en evitar el “modo confusión” tomándonos las cosas con tranquilidad, abandonando nuestra agenda y no haciendo nada. Diversas investigaciones psicológicas mostraron que los seres humanos, en especial los estadounidenses, tienden a sentir terror ante el ocio. No obstante, las mismas investigaciones también indican que si las personas no tienen una justificación para estar ocupadas, preferirían estar ociosas. Nuestro contradictorio temor al ocio junto con nuestra preferencia por la pereza puede ser un vestigio de nuestra historia evolutiva. Durante la mayor parte de nuestra evolución, conservar la energía constituyó la prioridad número uno, por la mera razón de que obtener alimento suficiente constituía un desafío físico monumental. En la actualidad, sobrevivir no requiere de mucho (o ningún) esfuerzo físico, por lo que hemos inventado ocupaciones superficiales de todo tipo. Dado el motivo menos importante o, incluso, una razón especiosa para hacer algo, las personas se abocan a la tarea. Quienes disponen de demasiado tiempo libre tienden a deprimirse o aburrirse. No obstante, el ocio puede constituir el único camino verdadero al autoconocimiento, como veremos en el presente volumen. Lo que se le presenta a la conciencia mientras se está ocioso puede muchas veces provenir de las profundidades del yo inconsciente, y esa información puede no ser siempre agradable. Sin embargo, es probable que el cerebro tenga buenas razones para llamar nuestra atención sobre esos datos. Gracias al ocio, grandes ideas enterradas en el inconsciente tienen ocasión de abrirse paso a la conciencia. Nuestra “fobia al ocio” de larga data nos ha conducido casi inexorablemente a nuestra actual cuasi obsesión con estar ocupados. En una profética nota editorial publicada en 2006 en la revista Medical Hypotheses, Bruce Charlton postuló que la sociedad moderna se encuentra dominada por empleos cuya característica fundamental reside en el ajetreo. El ajetreo remite al multitasking o multitarea: desempeñar numerosas labores secuenciales y cambiar con frecuencia de una a otra según un plan impuesto externamente. En la mayoría de las carreras profesionales, la única vía hacia el progreso radica en el dominio aparente del ajetreo. Es conocida la historia de Francis Crick, uno de los descubridores del ADN y ganador del Premio Nobel, quien se negó a ascender recorriendo la jerarquía administrativa del mundo académico porque detestaba el ajetreo que tal ascenso le hubiera impuesto. La definición de ocio que exploro en este libro es lo opuesto del exceso de actividad: hacer, quizás, una o dos cosas por día según un programa impuesto internamente. El ajetreo crónico es perjudicial para el cerebro y a largo plazo, puede entrañar consecuencias de gravedad para la salud. A corto plazo, el ajetreo destruye la creatividad, el autoconocimiento, el bienestar emocional, la capacidad social y puede dañar la salud cardiovascular. Desde la perspectiva de las neurociencias, estudiar el ocio en el laboratorio es sencillo. Y en rigor, la increíble actividad cerebral que se produce solo durante el ocio se descubrió por accidente, cuando ciertos sujetos sometidos a estudios de escaneo cerebral se encontraban tumbados en las máquinas soñando despiertos. Amplío la definición de laboratorio del término “ocio” con la inclusión de cualquier momento del día en que un individuo no se encuentra sujeto a un horario impuesto externamente y tiene ocasión de no hacer nada o bien cuenta con la libertad de dejar vagar el pensamiento hacia donde sea que lo lleven las ideas que se presenten en la conciencia en ausencia de ocupaciones. Las verdaderas percepciones, sean artísticas o científicas, emocionales o sociales, solo pueden producirse en esos raros momentos de ocio. Smart, A. (2013). El arte y la ciencia de no hacer nada: el piloto automático del cerebro. Clave intelectual.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 49,
+          "type": "multiple_choice",
+          "stem": "¿Con qué aspecto sobre el concepto de ocio se relaciona el siguiente fragmento de la lectura 7? «Con frecuencia me pregunto si esos días en que nos vemos obligados a permanecer ociosos no son, justamente, los días en los que nos involucramos en la actividad más profunda; si nuestras acciones, aun a pesar de suceder en algún momento posterior, no son sino los últimos reflejos de un vasto movimiento que se produce en nuestro interior en los días de ocio».",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Con el autoconocimiento que propicia el ocio.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Con el piloto automático que posee el cerebro.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Con el terror que se experimenta frente al ocio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Con el daño que provoca el ajetreo en el cerebro.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 50,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la idea principal del siguiente párrafo de la lectura 7? «Este libro trata sobre el ocio. El ocio es una de las actividades más importantes de la vida; me he decidido a compartir mis ideas sobre el tema, con la esperanza de convencer a otras personas, a pesar de que en el mundo entero el horario laboral está en crecimiento y de que todos los libros sobre administración del tiempo que se ofrecen en el mercado aseguran que se puede, y se debe, “hacer más”. El mensaje de este libro es, precisamente, el opuesto. Sobre la base de los datos disponibles, las neurociencias argumentan que el cerebro necesita descansar. Si bien como resultado de la evolución, el cerebro humano se encuentra exquisitamente preparado para la actividad intensa, para poder funcionar con normalidad también necesita estar ocioso, y buena parte del tiempo, según parece».",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La literatura sobre gestión del tiempo promueve acortar los tiempos de ocio.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El funcionamiento adecuado del cerebro necesita de momentos de ocio.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La evidencia neurocientífica disponible respalda la necesidad de ocio.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El horario laboral actual restringe las horas dedicadas al ocio.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 51,
+          "type": "multiple_choice",
+          "stem": "¿Qué actitud evidencia el emisor frente a las exigencias de “hacer más”?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Relativista, pues les asigna un valor variable.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Sesgada, pues distorsiona sus argumentos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Crítica, pues polemiza sus fundamentos.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Analítica, pues examina sus ventajas y desventajas.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 52,
+          "type": "multiple_choice",
+          "stem": "Según la lectura 7, ¿qué nos permite hacer el “piloto automático” cuando nuestro cerebro está en reposo?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Evadir nuestro inconsciente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Planificar labores secuenciales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Idear todo tipo de tareas superficiales.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Abandonar el control de nuestras acciones.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 53,
+          "type": "multiple_choice",
+          "stem": "¿Con qué finalidad el emisor usa el término “fobia” para referirse al ocio?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para criticar el miedo de las personas ante las multitareas.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para fundamentar el temor de las personas al inconsciente.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para explicar la urgencia de las personas por mantenerse activas.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Para llamar la atención de las personas sobre los riesgos del ajetreo.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 54,
+          "type": "multiple_choice",
+          "stem": "De acuerdo con lo leído, ¿qué es el multitasking o multitarea?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ejecutar distintas acciones simultáneas que pueden derivar en un aparente ajetreo laboral.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Generar diversas opciones sobre lo que queremos hacer en realidad, activando el piloto automático.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Cumplir tareas de diferente naturaleza supervisadas por otros para ascender en la jerarquía administrativa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Realizar varias labores secuenciales cambiándolas con frecuencia, según un plan impuesto externamente.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 55,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la definición de ocio que el emisor explorará en su libro?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Hacer algunas actividades al día según un programa personal.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Inventar ocupaciones superficiales diversas para evitar el esfuerzo físico.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Actividad cerebral producida por un sujeto que está soñando despierto.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Estado depresivo experimentado por disponer de demasiado tiempo libre.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 56,
+          "type": "multiple_choice",
+          "stem": "Con respecto al ocio, ¿cuál de las siguientes alternativas sintetiza el contenido de la lectura 7?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El ocio favorece la actividad del cerebro.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El ocio permite liberarse del horario impuesto.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El ocio ha sido revalorado por las neurociencias.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El ocio ha causado temor en el mundo moderno.",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "name": "LECTURA 8 (Preguntas 57 a 65)",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": {
+        "title": null,
+        "text": "Artículo escrito por María del Carmen Horno, publicado en el sitio web Letras libres el 2021. CULTURA Tus mensajes dicen mucho de ti Las características lingüísticas de nuestros mensajes pueden ser tan eficaces para demostrar nuestra autoría que se han comparado a las huellas digitales o las pruebas de ADN. Por María del Carmen Horno 04 mayo 2021 La propiedad más atractiva del lenguaje tal vez sea que nos permite expresar nuestros pensamientos y emociones. Ejercer la capacidad de hablar o de escribir no deja de ser, en ese sentido, una eficiente herramienta contra la soledad. Me conoces, lector, porque escribo. Leer los mensajes de alguien, sean estos breves como un tuit o extensos como un libro, implica dibujar una personalidad, conocer el modo en el que entiende el mundo, los deseos que le mueven, los miedos que alberga su cerebro. Y de este modo los hablantes ya no estamos solos en el mundo. Existimos, más allá de nosotros mismos, en la mente de los otros. A nadie le es ajeno esto. Por eso las personas más tímidas, aquellas que tienen más pudor de manifestarse ante los demás, tienden a hablar menos y no son muy amigas de escribir en las redes sociales. Cada enunciado, cada mensaje es un retazo de nosotros mismos. Un regalo que ofreces y que te deja desnudo frente al auditorio. No obstante, hasta hace relativamente poco tiempo creíamos que de alguna manera podíamos controlar lo que contábamos a los demás. La escritura nos dejaba al descubierto, es cierto, pero pensábamos que podíamos elegir lo que decíamos y lo que no. Nuestra procedencia geográfica, nuestra adscripción social, nuestro género o nuestra edad, por ejemplo, eran datos sobre nuestra biografía que podíamos exponer u ocultar a placer. Siempre, en última instancia, podíamos dejar nuestros escritos sin firmar. Y entonces todo estaba oculto. Eso creíamos, pero resulta que no es cierto. Nuestros mensajes revelan mucho de nosotros y lo hacen más allá del contenido de nuestras palabras y, por tanto (y esto es lo impactante), más allá de nuestro propio control. Con independencia de lo que estemos diciendo, las elecciones lingüísticas que hacemos (muchas de ellas automatizadas) están dibujando un perfil muy específico. Los especialistas pueden saber multitud de detalles sobre nuestra biografía a través de las palabras que elegimos, la forma en que ordenamos las oraciones, las decisiones ortográficas que tomamos o, en su versión oral, el modo en el que articulamos los sonidos. Todos estos rasgos, que difícilmente podemos controlar en su conjunto, pueden revelar nuestra procedencia geográfica, nuestro género, nuestra edad, nuestra profesión o nuestra clase social. En realidad no es algo tan extraño, si lo pensamos bien. Se trata de que los viejos conocimientos que tenemos sobre el uso del lenguaje de ciertos grupos y comunidades se pusieran al servicio del objetivo único de saber cómo o incluso quién es el emisor de un mensaje. Y esto es lo que hicieron los lingüistas forenses6, con un enorme éxito, por cierto. Las características lingüísticas de nuestros mensajes pueden ser tan eficaces para demostrar nuestra autoría que se han comparado con las huellas digitales o las pruebas de ADN. Saber quién ha sido el autor de un anónimo amenazante, decidir sobre asuntos de plagio o de suplantación de identidad son asuntos cotidianos en la labor de estos lingüistas que aplican todos sus conocimientos al mundo del derecho. Sobre este asunto trata un pequeño libro divulgativo que recomiendo: Atrapados por la lengua, de Sheila Queralt. En él, la autora, que es lingüista forense en ejercicio, relata cincuenta casos en los que el análisis lingüístico fue decisivo para determinar si los sospechosos eran culpables de los delitos que se les atribuían. Y no solo eso. El análisis detallado de un mensaje puede dar información también sobre cuál fue la intención del emisor: ¿qué quería decir exactamente el jurista que redactó esta ley? ¿Podemos considerar un determinado correo como una amenaza o como simple advertencia? ¿Qué quiso decir exactamente el testigo del delito y cómo podemos traducirlo de la mejor manera posible a otra lengua? Estas preguntas y otras similares son fundamentales en el ejercicio de la abogacía y un análisis lingüístico puede ofrecer luz en todas ellas. Y si un solo mensaje puede dar tanta información sobre cómo somos, ¿qué no sabrán de nosotros si recurren a cientos o miles de mensajes nuestros? Efectivamente, la denominada ciencia de los “Big Data” (también llamados macrodatos o datos masivos) puede extraer de nuestros mensajes ya no solo nuestras características sociolingüísticas –aquellas que forman parte de la comunidad y grupo al que pertenecemos‒, sino incluso nuestros rasgos de personalidad, nuestro estado de ánimo, nuestras carencias y nuestras fortalezas. Pero este es otro asunto del que hablaré en otro momento. Horno, M. (2021). Tus mensajes dicen mucho de ti. Letras libres. https://letraslibres.com/cultura/tus- mensajes-dicen-mucho-de-ti/ 6 Especialistas que analizan el lenguaje para aportar pruebas en procedimientos judiciales, en investigaciones policiales e incluso en temas privados.",
+        "format": "plain",
+        "attachments": []
+      },
+      "items": [
+        {
+          "position": 57,
+          "type": "multiple_choice",
+          "stem": "¿Qué idea desmiente la emisora en la lectura 8?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que la lingüística forense ayuda a identificar la intención de mensajes amenazantes.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que las personas tímidas se expresan con menor frecuencia en las redes sociales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que las personas tienen control de la información que expresan al comunicarse.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Que el lenguaje permite la expresión de los pensamientos y las emociones.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 58,
+          "type": "multiple_choice",
+          "stem": "¿Qué busca destacar la emisora cuando hace referencia a las personas tímidas?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que los miedos contenidos en el cerebro condicionan la personalidad de los sujetos.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que el desarrollo de las características lingüísticas nos permite la interacción con otros.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Que el uso de la función expresiva caracteriza tanto el lenguaje hablado como el escrito.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que la información que entregamos al comunicarnos revela aspectos de nuestra personalidad.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 59,
+          "type": "multiple_choice",
+          "stem": "Según la lectura 8, ¿por qué el lenguaje se convierte en un objeto de estudio para las ciencias forenses?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Porque el análisis del lenguaje permite conocer la identidad del emisor de un determinado mensaje.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Porque la comprensión del lenguaje revela las consecuencias que puede generar el contenido de un mensaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Porque la caracterización del lenguaje define el perfil psicológico del posible destinatario de un mensaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Porque la interpretación del lenguaje deja en evidencia la multiplicidad de propósitos que puede tener un mensaje.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 60,
+          "type": "multiple_choice",
+          "stem": "Según la lectura 8, frente a un delito, ¿quién podría plantearse las preguntas que aparecen en el penúltimo párrafo?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El emisor del mensaje.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El sospechoso.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Un abogado.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Un jurista.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 61,
+          "type": "multiple_choice",
+          "stem": "De acuerdo con el contenido de la lectura 8, ¿qué se entiende por “características lingüísticas”?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Aspectos del lenguaje que se encuentran predeterminados genéticamente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Particularidades del lenguaje que permiten identificar a quien escribe un texto.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Rasgos del lenguaje que implican la expresión de la emocionalidad de las personas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cualidades del lenguaje que condicionan la forma en que se comunican las personas.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 62,
+          "type": "multiple_choice",
+          "stem": "De acuerdo con el tratamiento del tema, ¿qué actitud adopta la emisora frente a la función de la lingüística forense?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Complaciente, porque destaca los distintos métodos y recursos utilizados por la lingüística forense.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Admirativa, porque resalta los logros y alcances de la lingüística forense en el área de la investigación.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Prudente, porque demuestra cautela y moderación al abordar los estudios realizados por la lingüística forense.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Reflexiva, porque proyecta los efectos jurídicos y policiales que posee la lingüística forense acerca del uso del lenguaje.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 63,
+          "type": "multiple_choice",
+          "stem": "¿Con qué propósito la emisora del texto menciona la ciencia de los “Big Data”?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Para cuestionar la información privada que entregan las personas por medio de los mensajes que emiten.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Para advertir a la población sobre la relación entre el análisis forense y la información que se comparte por las redes.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Para enfatizar la exposición indiscriminada de las características sociolingüísticas de los sujetos a través de las redes.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Para exponer a la comunidad una inquietud por el fácil acceso a información confidencial de las personas a través de sus mensajes.",
+              "isCorrect": true
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "GradeCam (assignment ENSAYO PAES 5 CL (SEPTIEMBRE) - IV°) lo puntúa con max_points 0 en los 122 escaneos; la portada declara 65 preguntas de las cuales 60 cuentan para el puntaje. La Tabla de especificaciones marca pilotos solo con color de celda, no legible en el volcado."
+        },
+        {
+          "position": 64,
+          "type": "multiple_choice",
+          "stem": "En relación con el contenido de la lectura 8, ¿cuál es el propósito del último párrafo?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Plantear el surgimiento de una problemática relacionada con el acceso a información que implica la ciencia de los “Big Data”.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Exponer una síntesis de los principales impactos generados por el nacimiento de la ciencia de los “Big Data”.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Informar de una nueva arista de la lingüística forense a partir del surgimiento de la ciencia de los “Big Data”.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Reflexionar en torno a los avances que ha alcanzado la sociedad gracias a la ciencia de los “Big Data”.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 65,
+          "type": "multiple_choice",
+          "stem": "En la lectura 8, ¿a quién se apela directamente en el último párrafo?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "A personas que trabajan en áreas ligadas a la Psicología.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "A personas que tienen conocimientos especializados de Lingüística.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "A personas que utilizan las redes sociales como medio de comunicación.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "A personas que quieren mejorar sus habilidades comunicativas en internet.",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pauta": {
+    "source": {
+      "instrumentJson": "CL-E5-con-pauta.json"
+    }
+  },
+  "extraction": {
+    "itemCount": 65,
+    "warnings": ["ítems piloto (points 0, clave conservada): [10, 30, 40, 48, 63]"],
+    "needsHumanReview": false,
+    "itemsConClave": 65,
+    "correccionesManuales": [
+      "#42 D: nota al pie 5 movida de la alternativa al pasaje de la Lectura 6",
+      "#65 D: quitado el aviso de contraportada",
+      "#36, #43: hasFigure falso positivo (cita en recuadro, transcrita) → false"
+    ],
+    "pauta": {
+      "fuente": "Tabla de especificaciones IV° medio, pestaña CL (1Kjl2ClkbLuVKjdn7o4PXQC8WoNy6cxZ9s5YASvoxNL4)",
+      "crossCheck": "GradeCam 6a95abd6559b00c80b418249: 122 escaneos, 65/65 claves idénticas a la tabla",
+      "pctLogro": "GradeCam, 122 escaneos"
+    }
+  }
+}

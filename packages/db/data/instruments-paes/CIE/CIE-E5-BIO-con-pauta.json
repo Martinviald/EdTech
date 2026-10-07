@@ -1,0 +1,2579 @@
+{
+  "instrument": {
+    "name": "PAES CIE mención Biología — Ensayo 5 (Tanda 5) · IV° Medio 2026",
+    "subject": "Ciencias — mención Biología",
+    "subjectCode": "SCI",
+    "grade": "IV° Medio",
+    "gradeCode": "4TH_MEDIO",
+    "year": 2026,
+    "applicationPeriod": null,
+    "type": "paes",
+    "isOfficial": false,
+    "paes": {
+      "prueba": "CIE",
+      "tanda": "Tanda 5",
+      "mencion": "Biología",
+      "appliedOn": null,
+      "basadoEn": "Forma 261 — Proceso de Admisión 2027"
+    }
+  },
+  "sections": [
+    {
+      "order": 1,
+      "name": "Prueba completa",
+      "type": "multiple_choice",
+      "instructions": null,
+      "passage": null,
+      "items": [
+        {
+          "position": 1,
+          "type": "multiple_choice",
+          "stem": "Un grupo de investigadores observó que las Halobacterias (un tipo de bacterias arqueas) sobreviven en ambientes con altas concentraciones de sal. Uno de los científicos propone que “estas bacterias deben poseer adaptaciones en sus membranas celulares que les permiten tolerar condiciones salinas extremas”. ¿A qué etapa del proceso científico corresponde la oración que se encuentra entre comillas?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Una teoría científica.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Una ley científica.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Una hipótesis científica.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Un dato experimental.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "type": "multiple_choice",
+          "stem": "Un método de control de la natalidad, denominado TCB, se basa en que la temperatura corporal basal de las mujeres aumenta levemente poco después de la ovulación. Este fenómeno “se debe fundamentalmente a la acción de la progesterona, una hormona que se secreta en mayor cantidad después de la ovulación”. Con base en esta información, la parte del texto destacada entre comillas corresponde a",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "un modelo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "una predicción.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "una conclusión.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "una observación.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "type": "multiple_choice",
+          "stem": "En las células de una planta terrestre se observa una aumento en la cantidad de NADPH en los tilacoides de sus cloroplastos. Este evento podría explicarse, en primera instancia, porque",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "aumentó la intensidad lumínica.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "aumentó el contenido de oxígeno.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "disminuyó la disponibilidad de agua.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "aumentó el dióxido de carbono en el aire.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 4,
+          "type": "multiple_choice",
+          "stem": "Una estudiante de biología recibe sólo la prolongación de una neurona. Su hipótesis es que se trata de un axón. Para poder demostrarlo, esta prolongación debe carecer de:",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "mitocondrias",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "sustancia de Nissl",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "neurofibrillas",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "centríolos",
+              "isCorrect": false
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "Ítem piloto: la tabla de especificaciones del colegio marca la clave con asterisco (fila pintada), el clavijero FACS 261 lo lista con asterisco (\"Preguntas que no se consideran para el cálculo de puntaje\") y GradeCam lo corrige con max_points 0. No puntúa: queda fuera del numerador y del denominador."
+        },
+        {
+          "position": 5,
+          "type": "multiple_choice",
+          "stem": "Desde captar el estímulo hasta efectuar una respuesta, la secuencia que sigue el impulso nervioso en el arco reflejo es",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "vía aferente – vía eferente – centro elaborador – receptor – efector",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "receptor – vía sensitiva – centro elaborador – vía motora – efector",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "receptor – vía eferente – centro elaborador – vía aferente – efector",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "receptor – vía aferente – efector – vía eferente – centro elaborador",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 6,
+          "type": "multiple_choice",
+          "stem": "Observe el siguiente esquema que representa una neurona típica Desde donde hasta donde fluye el impulso nervioso",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/06.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Desde 1 hasta 3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Desde 1 hasta 4",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Desde 4 hasta 1",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Desde 4 hasta 2",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 7,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes estructuras incluye a las otras cuatro?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "SNC",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Cerebro",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Encéfalo",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Cerebelo",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 8,
+          "type": "multiple_choice",
+          "stem": "Durante la despolarización de la membrana de la neurona recientemente estimulada, se produce:",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ingreso de iones potasio",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Perdida de iones en la membrana",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Transporte activo de sodio al interior de la neurona",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Un cambio en la polaridad de la membrana",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 9,
+          "type": "multiple_choice",
+          "stem": "La menor severidad de los síntomas de abstinencia asociada al consumo de cierto tipo de drogas de abuso, se debe a que",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "el consumidor se vuelve tolerante a la droga",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "la concentración sanguínea del compuesto activo se reduce lentamente",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "hay sujetos refractarios al efecto de drogas de abuso",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "son drogas que se absorben lentamente",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 10,
+          "type": "multiple_choice",
+          "stem": "La figura corresponde al cariotipo de una célula humana. Basándose en la figura, es correcto afirmar que el cariotipo",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/10.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "presenta la fórmula cromosómica 2n = 23.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "es de un gameto.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "pertenece a una mujer.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "corresponde a una célula somática.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 11,
+          "type": "multiple_choice",
+          "stem": "Si en el ser humano, un ovocito que experimentó no disyunción en su par sexual, es fecundado por un espermatozoide normal, ¿cuál será el cariotipo del individuo que se forme?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "44 XY",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "45 XX",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "45 XY",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "44 XXY",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 12,
+          "type": "multiple_choice",
+          "stem": "En los vacunos (Bos taurus y Bos indicus), se encuentran 60 cromosomas (30 pares) en sus células somáticas, ¿cuál es la dotación cromosómica normal de uno de sus gametos?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "2n = 30",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2n = 60",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "n = 60",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "n = 30",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 13,
+          "type": "multiple_choice",
+          "stem": "En el intestino humano conviven habitualmente bacterias del tipo Escherichia coli y Bifidobacterium, con las células intestinales (enterocitos). Esta microbiota es esencial para la digestión, defensa contra patógenos y la salud. Todas estas células presentan diferencias estructurales y funcionales significativas, aunque comparten algunas características esenciales para su funcionamiento. Considerando lo anterior, ¿qué característica tienen en común las bacterias y los enterocitos?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se originan a partir del mismo tipo celular.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ambos tipos de células presentan nutrición autótrofa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Poseen como material genético la molécula de ADN.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "En el citoplasma de ambas células se visualizan organelos.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 14,
+          "type": "multiple_choice",
+          "stem": "El conducto deferente del aparato reproductor masculino transporta",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "orina.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "espermios y fluido testicular.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "espermios y secreción prostática.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "espermios y secreción de vesículas seminales.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 15,
+          "type": "multiple_choice",
+          "stem": "Para investigar la síntesis de proteínas asociada al retículo endoplasmático rugoso (RER), se utilizó un detergente, para romper la membrana plasmática del RER y proteasas específicas para degradar las proteínas dentro del RER. Sabiendo que la proteasa actúa a nivel citoplasmático y no puede ingresar al interior del RER, ¿cuál de las siguientes predicciones serian correctas?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Si se utiliza sólo detergente las proteínas X se degradarán.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Si se utiliza sólo proteasa, las proteínas X no se degradarán.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Si se utiliza sólo detergente, las proteínas X no se liberarán ni se degradarán.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Si se utiliza detergente y posteriormente proteasas las proteínas X se degradarán.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 16,
+          "type": "multiple_choice",
+          "stem": "En una investigación, se ha proporcionado a 20 mujeres jóvenes, el fármaco Daridorexant, un nuevo hipnótico para el insomnio. Un laboratorio nacional presentó una solicitud para poner a la venta este fármaco en nuestro país, pero las autoridades que revisaron el protocolo experimental implementado rechazaron la utilización de este fármaco, indicando que dicho protocolo presentaba una baja confiabilidad. En relación con el contexto planteado, ¿cuál de las siguientes opciones presenta una acción que permite superar la deficiencia por la que se rechazó este estudio?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Evaluar el fármaco en individuos de distinto género.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Evaluar el fármaco en individuos sin problemas de insomnio.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Evaluar el fármaco en individuos con problemas para conciliar el sueño.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Evaluar el fármaco en un número mayor de personas de diferentes características.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 17,
+          "type": "multiple_choice",
+          "stem": "Durante la meiosis, el entrecruzamiento requiere de enzimas que generen un corte del ADN y promuevan el intercambio del material genético. En un experimento se insertaron los genes para producir estas enzimas en células no reproductoras e inducir la división celular. Al respecto, ¿qué evidencia respalda este modelo en las células resultantes?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Que no dupliquen su material genético durante la interfase.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Que presenten nuevas combinaciones de genes en los cromosomas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Que presenten la mitad de los cromosomas respecto a la célula progenitora.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Que no presenten cromosomas alineados en el centro de la célula durante la metafase.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 18,
+          "type": "multiple_choice",
+          "stem": "Durante su estadía en las islas Galápagos, Darwin encontró un tipo de pinzón que habitaba exclusivamente en una de las islas del archipiélago. Darwin sospecha que hace algunos años, ese ejemplar habitaba en el continente. ¿Qué tipo de experimento podría demostrar que las aves de la isla y las aves continentales son de la misma especie?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Comparar sus embriones para buscar similitudes estructurales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Comparar el código genético con el que se traducen sus proteínas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Intentar cruces entre individuos de las dos poblaciones de aves.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Realizar estudios de anatomía comparada para buscar órganos homólogos.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 19,
+          "type": "multiple_choice",
+          "stem": "Una onda electromagnética pasa desde el vacío a un medio material, disminuyendo su rapidez. ¿Cuál de las siguientes afirmaciones es correcta?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Su frecuencia disminuye",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Su longitud de onda disminuye",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Su período aumenta",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Su amplitud permanece constante",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 20,
+          "type": "multiple_choice",
+          "stem": "La luz proveniente de una galaxia presenta corrimiento al rojo. ¿Qué se puede inferir?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La galaxia no se mueve",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La galaxia se acerca a la Tierra",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La galaxia se aleja de la Tierra",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La galaxia emite luz de menor energía",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 21,
+          "type": "multiple_choice",
+          "stem": "Un estudiante investiga cómo interactúan distintas ondas electromagnéticas con diversos materiales. Durante su estudio, observa que algunos dispositivos pueden transmitir señales a través de paredes, mientras que otros no logran hacerlo. A partir de esta observación, el estudiante propone distintas hipótesis para explicar la diferencia en la capacidad de penetración de estas ondas. ¿Cuál de las siguientes hipótesis es más adecuada desde el punto de vista científico?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/21.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Las ondas de mayor amplitud atraviesan mejor los materiales.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Todas las ondas electromagnéticas interactúan de la misma forma con los materiales.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La frecuencia de las ondas no influye en su interacción con la materia.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Las ondas con mayor longitud de onda presentan mayor capacidad de penetrar materiales como las paredes.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 22,
+          "type": "multiple_choice",
+          "stem": "Un grupo de estudiantes investiga cómo se comportan distintos colores de la luz al atravesar un prisma. Para ello, hacen incidir un haz de luz blanca y observan que los distintos colores emergen en direcciones diferentes. Si su objetivo es comparar cuantitativamente cuánto se desvía cada color al salir del prisma, ¿qué instrumento es más adecuado para registrar esta información?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/22.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Un cronómetro.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Un transportador de ángulos.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Un termómetro.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Un amperímetro.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 23,
+          "type": "multiple_choice",
+          "stem": "Un grupo de estudiantes diseña una investigación para analizar cómo varía la rapidez de propagación de una onda electromagnética al cambiar el medio en el que se propaga, con el objetivo de comprender cómo se transmiten las señales en distintos sistemas de telecomunicaciones. En este contexto, ¿cuál corresponde a la variable dependiente del estudio?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El medio en el que se propaga la onda.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La frecuencia de la onda electromagnética.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La rapidez de propagación de la onda.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La longitud de onda inicial.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 24,
+          "type": "multiple_choice",
+          "stem": "Una persona se observa en un espejo plano. ¿Cuál de las siguientes características describe correctamente la imagen que observa?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/24.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Es real y de menor tamaño",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Es virtual y del mismo tamaño",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Es real e invertida",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Es virtual y de mayor tamaño",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 25,
+          "type": "multiple_choice",
+          "stem": "Una persona camina en línea recta 3 m hacia el este y luego 3 m hacia el oeste. ¿Cuál es su desplazamiento?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0m",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "3m",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "6m",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "9m",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 26,
+          "type": "multiple_choice",
+          "stem": "Un grupo de estudiantes realiza un experimento mecánico al interior de un barco que se desplaza con velocidad constante en línea recta respecto a la costa. Buscan determinar si el movimiento del sistema afecta los resultados obtenidos. De acuerdo con el principio de relatividad de Galileo, ¿cuál de las siguientes conclusiones es correcta?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los resultados del experimento son equivalentes a los que se obtendrían si el barco estuviera en reposo.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Los resultados del experimento dependen del movimiento del barco respecto a la costa.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La fuerza de gravedad que actúa sobre los objetos cambia debido al movimiento del barco.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La masa de los objetos varía al interior del barco en movimiento.",
+              "isCorrect": false
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "Ítem piloto: la tabla de especificaciones del colegio marca la clave con asterisco (fila pintada), el clavijero FACS 261 lo lista con asterisco (\"Preguntas que no se consideran para el cálculo de puntaje\") y GradeCam lo corrige con max_points 0. No puntúa: queda fuera del numerador y del denominador."
+        },
+        {
+          "position": 27,
+          "type": "multiple_choice",
+          "stem": "Un estudiante desea modelar el movimiento de un carrito que se desplaza en línea recta con rapidez constante, con el objetivo de predecir su posición en distintos instantes de tiempo. ¿Qué procedimiento experimental le permite obtener la ecuación de itinerario de manera más adecuada?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Medir únicamente el tiempo total del recorrido",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Medir la posición inicial y luego registrar posiciones en distintos tiempos para determinar la pendiente del gráfico posición-tiempo",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Medir la aceleración del móvil en un solo instante",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Construir solamente un gráfico rapidez-tiempo sin medir posiciones",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 28,
+          "type": "multiple_choice",
+          "stem": "Un objeto presenta el siguiente comportamiento para la velocidad en función del tiempo: v(t) = 2t – 4 ¿Cuál de las siguientes afirmaciones es correcta?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Parte con velocidad positiva y acelera",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Siempre se mueve en el mismo sentido",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Parte con velocidad negativa y cambia de sentido",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Su aceleración es negativa",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 29,
+          "type": "multiple_choice",
+          "stem": "Un bloque es empujado hacia la derecha con 20 N. Existe una fuerza de roce de 5 N hacia la izquierda. La masa del bloque es 3 kg. ¿Cuál es su aceleración?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "5 m/s²",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "3 m/s²",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "15 m/s²",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "25 m/s²",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 30,
+          "type": "multiple_choice",
+          "stem": "Un investigador observa que las rocas del fondo oceánico son más jóvenes cerca de una dorsal y más antiguas al alejarse. ¿Cómo se interpreta este patrón?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La corteza se destruye en las dorsales",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Las rocas no cambian con el tiempo",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La edad depende de la profundidad",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Se forma nueva corteza en las dorsales oceánicas",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 31,
+          "type": "multiple_choice",
+          "stem": "El monitoreo de volcanes activos permite anticipar posibles erupciones y reducir riesgos para la población, a partir del estudio de la dinámica interna de la Tierra. ¿Cuál es el principal aporte tecnológico derivado de estas investigaciones?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Predecir con exactitud todas las erupciones volcánicas del mundo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Reducir la temperatura del magma en el interior de la Tierra.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Eliminar la actividad volcánica mediante intervención humana.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Diseñar instrumentos para medir gases, sismos y deformaciones del terreno.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 32,
+          "type": "multiple_choice",
+          "stem": "El monitoreo de volcanes activos se basa en modelos científicos que explican el ascenso del magma hacia la superficie, lo que puede generar erupciones. ¿Cuál de las siguientes evidencias respalda mejor este modelo?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La disminución de la temperatura ambiente en la zona del volcán.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El aumento de la actividad sísmica y la deformación del terreno alrededor del volcán.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "La presencia de nubes en el cielo cercano al volcán.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La variación en la cantidad de turistas que visitan la zona.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 33,
+          "type": "multiple_choice",
+          "stem": "Un grupo de estudiantes construye un modelo para investigar cómo las corrientes de convección del manto pueden influir en el movimiento de las placas tectónicas. En el experimento, modifican la velocidad de las corrientes de convección y observan cómo cambia el desplazamiento de una placa superficial del modelo. ¿Cuál es la variable dependiente de esta investigación?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El movimiento de la placa superficial",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La velocidad de las corrientes de convección",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La temperatura ambiente del laboratorio",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El tamaño del recipiente usado en el modelo",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 34,
+          "type": "multiple_choice",
+          "stem": "Un estudiante construye distintos circuitos eléctricos utilizando una batería y varios resistores idénticos conectados en paralelo. En cada caso, varía el número de resistores conectados y mide la corriente total que entrega la batería. ¿Cuál es el objetivo principal de esta investigación?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/34.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Determinar la potencia disipada en cada resistor.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Analizar cómo cambia la corriente total al variar el número de resistencias en el circuito.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Medir la resistencia interna de la batería.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Comparar distintos materiales conductores.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 35,
+          "type": "multiple_choice",
+          "stem": "En un experimento, un resistor se conecta a una fuente de voltaje constante. Luego, por alguna modificación del circuito, se observa que la corriente que circula por la resistencia aumenta. A partir de esta situación, ¿qué se puede predecir respecto a la potencia eléctrica disipada por el resistor?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Disminuirá",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Permanecerá constante",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Aumentará",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Se anulará",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 36,
+          "type": "multiple_choice",
+          "stem": "Dos circuitos tienen corriente distinta. En uno circula más corriente que en el otro. ¿Cuál de las siguientes afirmaciones describe correctamente esta diferencia?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "En el primero las cargas se destruyen más rápido",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "En el primero pasa mayor cantidad de carga por unidad de tiempo",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "En el segundo la batería tiene más energía almacenada",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "En el segundo las cargas dejan de moverse",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 37,
+          "type": "multiple_choice",
+          "stem": "En un laboratorio de análisis ambiental, se recibe una muestra de agua extraída de la desembocadura de un río. La muestra presenta una fase líquida transparente con sal disuelta y una fase sólida visible compuesta por partículas de arena de gran tamaño que decantaron en el fondo del recipiente. ¿Cuál de los siguientes procedimientos permite separar de manera efectiva la arena del resto de la mezcla aprovechando la diferencia de estado físico y tamaño entre los componentes?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Tamizado",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Cristalización",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Filtración",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Destilación",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 38,
+          "type": "multiple_choice",
+          "stem": "La siguiente tabla muestra la composición y características de cuatro muestras líquidas obtenidas de distintas fuentes de agua en una zona industrial: Comportamiento Composición Aspecto al Muestra frente a la reportada microscopio evaporación Solo moléculas Uniforme y una No deja residuos de H2O sola fase Agua y cloruro Uniforme y una Deja un residuo Q de sodio sola fase sólido blanco disuelto Agua y Se observan Deja un residuo R partículas de partículas sólido café arcilla suspendidas No deja residuos Solo átomos de Uniforme y una S (se evapora Mercurio (Hg) sola fase íntegro) Un equipo de científicos necesita identificar cuál de estas muestras corresponde exclusivamente a un compuesto, considerando que estas son sustancias puras formadas por la combinación química de dos o más elementos distintos en proporciones fijas. ¿Cuál de las muestras analizadas cumple con las características de un compuesto?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/38.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Muestra P",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Muestra Q",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Muestra R",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Muestra S",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 39,
+          "type": "multiple_choice",
+          "stem": "Una investigación estudia el uso de hidrógeno gaseoso (H ) como combustible, ya que 2 al reaccionar con el oxígeno (O2) del aire solo produce vapor de agua (H2O). El proceso se representa mediante la siguiente ecuación química aún no balanceada: H2(g) + O2(g)  H2O(g) Un equipo de ingeniería necesita determinar la proporción exacta de las sustancias involucradas para optimizar el rendimiento de un motor de hidrógeno, cumpliendo con la Ley de conservación de la materia. Para ello, se debe realizar el balance de la ecuación química identificando correctamente los coeficientes estequiométricos de los reactantes y productos. ¿Cuáles son los coeficientes estequiométricos mínimos enteros que permiten balancear correctamente la ecuación planteada?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/39.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1, 1 y 1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "1, 2 y 2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "2, 1 y 2",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "2, 2 y 1",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 40,
+          "type": "multiple_choice",
+          "stem": "Para prevenir la anemia ferropénica, una persona consume un suplemento nutricional que contiene 2,8 g de Hierro (Fe) por cada dosis diaria. Se sabe que la masa molar del Hierro es aproximadamente 56 g/mol. Un especialista en nutrición desea calcular la cantidad de sustancia de este mineral que el paciente está ingiriendo realmente en cada dosis para compararlo con los niveles de absorción celular. Según los datos proporcionados, se requiere realizar la conversión de la masa medida al equivalente en cantidad de materia. ¿A cuántos moles de Hierro (Fe) equivale la dosis diaria del suplemento?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/40.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "0,05 moles",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "0,20 moles",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "0,50 moles",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "2,00 moles",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 41,
+          "type": "multiple_choice",
+          "stem": "En la industria de fertilizantes, se utiliza el proceso Haber-Bosch para sintetizar amoníaco (NH3) a partir de nitrógeno (N2) e hidrógeno (H2) gaseosos, según la siguiente ecuación química balanceada: N2(g) + 3H2(g)  2 NH3(g) Un equipo de ingenieros químicos realiza un ensayo en un reactor cerrado alimentándolo con 2 moles de N2 y 3 moles de H2. Considerando la proporción estequiométrica de la reacción, se requiere establecer el comportamiento de las sustancias químicas para optimizar el uso de las materias primas en el futuro. ¿Cuál es la conclusión correcta respecto a la función de los reactantes en este ensayo?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/41.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El hidrógeno actúa como reactivo limitante.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "El nitrógeno actúa como reactivo limitante.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El nitrógeno es el reactivo que se consume íntegramente.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "El hidrógeno se encuentra en exceso respecto a la estequiometría.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 42,
+          "type": "multiple_choice",
+          "stem": "En el desarrollo de nuevos compuestos orgánicos para prótesis médicas, se sintetiza una cadena carbonada que presenta diferentes tipos de enlaces para otorgar flexibilidad al material. La estructura de un segmento de este compuesto se representa a continuación: CH3 −CH=CH−C≡C−CH3 Considerando la disposición espacial de los átomos y los ángulos de enlace necesarios para la estabilidad de la prótesis, ¿cuál es la hibridación que presentan los átomos de carbono que forman el enlace triple en esta estructura?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/42.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "sp3",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "sp3d",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "sp",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "sp2",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 43,
+          "type": "multiple_choice",
+          "stem": "En el diseño de fármacos analgésicos, se utiliza la representación topológica para visualizar rápidamente la estructura de los principios activos. Un investigador analiza la estructura del compuesto que se presenta a continuación: CH2=CH−CH2 −CH2 −CH3 Considerando la valencia del carbono y la disposición de los átomos en el modelo lineal, ¿cuál es la fórmula molecular correcta para este compuesto?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura o notación en el cuadernillo (marcada en otra mención)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/43.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "C5H10",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "C5H12",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "C5 H 8",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "C 4H8",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 44,
+          "type": "multiple_choice",
+          "stem": "En un proceso de desalinización para obtener agua potable a partir de agua de mar, se obtienen distintos productos en diferentes etapas del proceso. El siguiente diagrama representa la composición a nivel microscópico de cuatro muestras obtenidas durante el tratamiento: Muestra 1 Muestra 2 Muestra 3 Muestra 4 Átomos de Moléculas de agua Átomos de Cloro Moléculas de agua Magnesio (H2O) con iones de (Cl) y Sodio (Na) (H2O) distribuidas (Mg) metálico + unidos formando Sodio (Na ) y Cloro de forma uniforme. recolectados como – una red cristalina. (Cl ) dispersos. residuo. Para asegurar la calidad del agua de consumo humano, es fundamental distinguir entre los diferentes tipos de materia obtenidos. Se requiere identificar cuál de estas muestras representa una mezcla, entendiendo esta como la combinación de dos o más sustancias puras que mantienen sus propiedades químicas individuales. ¿Cuál de las muestras descritas en el estímulo clasifica como una mezcla?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/44.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Muestra 1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Muestra 2",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Muestra 3",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Muestra 4",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 45,
+          "type": "multiple_choice",
+          "stem": "En la síntesis de fármacos analgésicos, es común encontrar moléculas que poseen múltiples grupos funcionales que determinan su actividad biológica. Un químico analiza un compuesto con la siguiente estructura semidesarrollada: CH3 −CH(OH)−CH2 −COOH Considerando las reglas de prioridad de la nomenclatura IUPAC y la estructura química presentada, ¿cuál es el nombre correcto para esta molécula?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/45.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "3-hidroxibutanal",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Butan-1,3-diol",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Ácido 3-hidroxibutanoico",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Ácido 2-hidroxibutanoico",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 46,
+          "type": "multiple_choice",
+          "stem": "En un laboratorio de química ambiental, se busca capturar dióxido de carbono (CO ) 2 mediante la reacción con hidróxido de litio (LiOH) sólido, proceso utilizado en naves espaciales para purificar el aire. La ecuación balanceada es: 2LiOH(s) + CO2(g)  Li2CO3(s) + H2O(l) Se realiza un experimento en un sistema cerrado donde se introducen 48 g de LiOH (masa molar = 24 g/mol) y una cantidad suficiente de CO2. Tras finalizar la reacción, el científico mide la masa del agua formada y la del carbonato de litio (Li2CO3) producido. Considerando que la reacción tuvo un rendimiento del 100 % y basándose en la estequiometría de la reacción y la Ley de Conservación de la Masa, un analista debe predecir la masa total de los productos obtenidos. ¿Cuál es la masa total de productos (Li2CO3 + H2O) que se espera obtener a partir de los 48 g de LiOH?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/46.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "46 g",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "62 g",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "92 g",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "140 g",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 47,
+          "type": "multiple_choice",
+          "stem": "En la metalurgia del hierro, se utiliza el proceso de tostación de la pirita (FeS2) para obtener óxido férrico (Fe2O3) y dióxido de azufre (SO2) mediante la siguiente ecuación química balanceada: 4FeS2(s) + 11O2(g) → 2Fe2O3(s) + 8SO2(g) Un ingeniero químico realiza un ensayo cargando un reactor con 240 g de FeS2. Tras completar la reacción, observa que se han consumido 176 g de O2 y se han producido 160 g de Fe2O3. Considerando que la materia no se crea ni se destruye, ¿cuál es la masa total de dióxido de azufre (SO2) que se recolectó en el sistema?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/47.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "128 g",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "256 g",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "80 g",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "416 g",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 48,
+          "type": "multiple_choice",
+          "stem": "El modelo atómico de Bohr fue revolucionario al explicar por qué los átomos emiten luz en colores específicos (espectros de emisión). El siguiente diagrama representa las transiciones electrónicas en un átomo de hidrógeno: Transición Cambio de nivel Energía del fotón emitido I De n = 3 a n = 2 Baja (Luz roja) II De n = 4 a n = 2 Media (Luz verde/azul) III De n = 5 a n = 2 Alta (Luz violeta) Un grupo de astrónomos analiza la luz proveniente de una estrella lejana y observa una línea brillante en el espectro que corresponde exactamente a la transición de un electrón desde un nivel de mayor energía a uno de menor energía. Según los postulados de Bohr, este fenómeno se produce porque los electrones no pueden permanecer entre dos órbitas. A partir de la información anterior, ¿qué concepto del modelo de Bohr permite comprender la aparición de estas líneas de colores definidos en el espectro?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/48.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los electrones se desplazan en órbitas circulares de radio variable y continuo.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La energía del electrón está cuantizada y solo cambia al saltar entre órbitas permitidas.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "El núcleo atómico atrae a los electrones con una fuerza proporcional a su masa.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los electrones pierden energía constantemente mientras orbitan alrededor del núcleo.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 49,
+          "type": "multiple_choice",
+          "stem": "En la ingeniería de materiales, se estudia el grafeno y los nanotubos de carbono debido a la alta resistencia de sus enlaces. Estos materiales están formados por átomos de 2 carbono con hibridación sp , lo que genera enlaces dobles entre carbonos. Para optimizar su fabricación, se comparan sus propiedades con las de los alcanos (enlaces simples) y los alquinos (enlaces triples). Los datos de referencia se presentan en la siguiente tabla: Tipo de Enlace Longitud de Enlace (pm) Energía de Enlace (kJ/mol) Simple 154 348 Doble 134 614 Triple 120 839 Un equipo de investigación necesita identificar la relación general entre las características físicas de los enlaces covalentes del carbono para predecir el comportamiento de nuevas estructuras orgánicas. De acuerdo con los datos presentados, ¿qué relación se reconoce entre la longitud y la energía de los enlaces entre átomos de carbono?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/49.png",
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La energía de enlace aumenta a medida que la longitud de enlace disminuye.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "La energía de enlace disminuye conforme aumenta el número de enlaces compartidos.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La longitud de enlace aumenta proporcionalmente a la energía necesaria para romperlo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La longitud de enlace se mantiene constante independientemente del tipo de hibridación.",
+              "isCorrect": false
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "Ítem piloto: la tabla de especificaciones del colegio marca la clave con asterisco (fila pintada), el clavijero FACS 261 lo lista con asterisco (\"Preguntas que no se consideran para el cálculo de puntaje\") y GradeCam lo corrige con max_points 0. No puntúa: queda fuera del numerador y del denominador."
+        },
+        {
+          "position": 50,
+          "type": "multiple_choice",
+          "stem": "Se analizan dos muestras de óxidos de azufre obtenidos de una fundición de cobre. Los datos de composición de masa se registran en la siguiente tabla: Muestra Masa de Azufre (S) Masa de Oxígeno (O) I 32 g 32 g II 32 g 48 g Al comparar ambas muestras mediante la Ley de las Proporciones Múltiples, se observa que la masa de oxígeno que se combina con una masa fija de azufre varía en una razón de números enteros. ¿Cuál es la relación atómica de oxígeno entre la Muestra II y la Muestra I por cada átomo de azufre?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/50.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "1:1",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "2:1",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "3:2",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "4:3",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 51,
+          "type": "multiple_choice",
+          "stem": "En un laboratorio farmacéutico se analiza la composición del óxido de magnesio (MgO), un compuesto utilizado como antiácido. Se realizan dos experimentos de síntesis a partir de magnesio puro y oxígeno, obteniéndose los siguientes registros: Masa de Magnesio Masa de Oxígeno Masa de Óxido de Magnesio Experimento (Mg) reaccionado (O) reaccionado (MgO) obtenido 1 1,20 g 0,80 g 2,00 g 2 2,40 g 1,60 g 4,00 g Al comparar los resultados de ambos experimentos, los analistas observan que, aunque las masas iniciales de los reactantes se duplicaron en el segundo ensayo, la relación numérica entre la masa de magnesio y la de oxígeno que forman el compuesto permanece constante. ¿Qué ley ponderal permite comprender que los elementos en un compuesto químico siempre se combinan en una razón de masa fija y determinada?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/51.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Ley de las proporciones múltiples",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ley de las proporciones definidas",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Ley de conservación de la materia",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Ley de los volúmenes de combinación",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 52,
+          "type": "multiple_choice",
+          "stem": "En un estudio sobre la purificación de sales minerales de interés farmacológico, un equipo de investigadores analiza la solubilidad del Clorato de potasio (KClO3) en agua. Para ello, registran la cantidad máxima de sal que logra disolverse en 100 g de agua a diferentes temperaturas, obteniendo la siguiente curva de solubilidad: Temperatura (°C) Solubilidad (g de sal / 100 g de H2O) 20 7 40 14 60 25 80 38 Un técnico de laboratorio prepara una mezcla que contiene 25 g de KClO3 en 100 g de agua a 80 °C, logrando una disolución insaturada y transparente. Posteriormente, para iniciar un proceso de cristalización, el técnico enfría el sistema lentamente hasta alcanzar los 40 °C. Considerando los datos proporcionados en el estímulo, ¿cuál es la masa de sal que precipitará al fondo del recipiente una vez que el sistema alcance el equilibrio a 40 °C?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/52.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "11 g",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "14 g",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "18 g",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "25 g",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 53,
+          "type": "multiple_choice",
+          "stem": "En un laboratorio de control de calidad, se preparan dos soluciones acuosas de urea (NH2CONH2) utilizando las proporciones descritas en la siguiente tabla: Solución Moles de Urea (soluto) Moles de Agua (disolvente) X 1 9 Y 2 18 Considerando que la densidad del agua es 1 g/mL y que las soluciones se comportan de manera ideal, se requiere determinar la relación de concentración entre ambas muestras. ¿Cuál es la fracción molar (X) del soluto en la Solución Y en comparación con la Solución X?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/53.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Es el doble, debido al aumento en la cantidad de sustancia del soluto.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Es la misma, porque la proporción entre soluto y disolvente es idéntica.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Es la mitad, ya que el volumen total de la solución se ha duplicado.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Es el cuádruple, por el efecto combinado de masa molar y moles totales.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 54,
+          "type": "multiple_choice",
+          "stem": "En un servicio de urgencias, se requiere administrar una dosis de antibiótico a un paciente pediátrico. El fármaco viene en una ampolla con una concentración de 250 mg/mL. Sin embargo, la prescripción médica indica que la concentración final administrada debe ser menor para evitar efectos secundarios. Para ello, el personal de enfermería toma 1 mL del fármaco original y le añade 9 mL de suero fisiológico. Al realizar este procedimiento, el equipo observa que la intensidad del color de la solución disminuye y se cuestiona cómo varía la cantidad de partículas del soluto respecto al volumen total. Considerando los criterios de la investigación científica, ¿qué hipótesis permite explicar la variación de la concentración tras el procedimiento de dilución?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/54.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La concentración de la mezcla final es idéntica a la del fármaco original debido a la homogeneidad de la solución.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El volumen de la solución final es equivalente al volumen de suero agregado independientemente de la muestra inicial.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La cantidad de miligramos de fármaco presentes en el matraz aumenta proporcionalmente al volumen de suero añadido.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La concentración disminuye porque la cantidad de soluto se mantiene constante mientras aumenta el volumen del disolvente.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 55,
+          "type": "multiple_choice",
+          "stem": "Un equipo de investigadores está desarrollando biofertilizantes a partir de bacterias que fijan nitrógeno en el suelo, con el objetivo de mejorar la productividad agrícola. Para evaluar la eficiencia de los biofertilizantes, realizaron un experimento en el que midieron la cantidad de nitrógeno fijado por un tipo de cepa bacteriana a diversas concentraciones de nutrientes en el suelo. Los resultados se presentan en la siguiente tabla: Concentración de Nitrógeno fijado (u.a.) nutrientes en el suelo (%) 10 50 20 70 30 90 40 80 50 60 ¿Cuál de las siguientes preguntas de investigación dio origen a este experimento?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/55.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "¿Qué cepa bacteriana fija la mayor cantidad de nitrógeno a diferentes concentraciones de nutrientes?",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "¿Qué cepa bacteriana es más eficiente en la fijación de nitrógeno en suelos con bajos nutrientes?",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "¿Qué concentración de nutrientes en el suelo es más efectiva para optimizar la fijación de nitrógeno en el suelo?",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "¿Cómo afectan a la supervivencia de la cepa bacteriana fijadora de nitrógeno, las concentraciones crecientes de nutrientes?",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 56,
+          "type": "multiple_choice",
+          "stem": "La ventaja que le confiere la vaina de mielina a un axón neuronal, con respecto a uno no mielinizado, se aprecia en el siguiente hecho:",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La capacidad de “bombear” iones sodio a través de la membrana aumenta considerablemente.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "El grosor que adquiere la fibra nerviosa le otorga mayor capacidad de conducción.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La velocidad con que se propaga el impulso nervioso se ve enormemente aumentada.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "El aislamiento es el factor preponderante para aumentar su capacidad de despolarización y repolarización.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 57,
+          "type": "multiple_choice",
+          "stem": "El esquema adjunto corresponde a un esquema neuronal elaborado por los estudiantes y muestra las conexiones entre las neuronas a, b y c. ¿Cuáles de las siguientes afirmaciones no se puede explicar correctamente con este modelo si se produce un estado de excitación en el punto “X”? a b c 0 0 0 x",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/57.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Los impulsos generados en “X” se propagarán en ambas direcciones del axón de la neurona b",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La sinapsis entre a y b bloqueará el paso de impulsos generados en x",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La sinapsis entre b y c acelerará la velocidad de transmisión de los impulsos generados en x",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Los impulsos generados en x se extinguirán al llegar a la sinapsis entre b y c, pero se generarán nuevos impulsos en la neurona c",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 58,
+          "type": "multiple_choice",
+          "stem": "En las sinapsis neuromusculares de mamífero, el Ca extracelular es responsable de la 2+ liberación del neurotransmisor acetilcolina. Un grupo de investigadores desea reemplazar el Ca2+ por el Mg2+. ¿Cuál sería la consecuencia de esta modificación?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La función de la neurona presináptica permanezca inalterada.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Disminuya la exocitosis de acetilcolina desde la neurona presináptica.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Se bloquee la liberación de acetilcolina desde la neurona presináptica.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Aumente la exocitosis de la acetilcolina desde la neurona presináptica.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 59,
+          "type": "multiple_choice",
+          "stem": "Al estimular un nervio “in vitro” se observa que al aumentar la intensidad del estímulo, la respuesta eléctrica del nervio es mayor y más compleja (mayor número de ondas registradas). Esto tiene una explicación porque:",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "El nervio está formado por una población de axones de diferente excitabilidad (umbrales diferentes).",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "En el nervio existen axones de diferentes diámetros que conducen a distintas velocidades.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La presencia de mielina en algunos axones determinan las características de las respuestas registradas.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Los nervios tienen diferentes estructuras envolventes que le otorgan diferente protección a los estímulos",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 60,
+          "type": "multiple_choice",
+          "stem": "La siguiente tabla muestra la concentración de dos electrolitos del medio intra y extracelular en una célula nerviosa en condiciones experimentales. Concentración mEq/l Iones Eritrocitos Plasma sanguíneo Sodio (Na+) 5 140 Potasio (K+) 150 5 De la interpretación de los datos de la tabla, podemos deducir que la neurona está",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/60.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "polarizada.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "repolarizada.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "despolarizada.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "hiperpolarizada.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 61,
+          "type": "multiple_choice",
+          "stem": "La presencia de cantidades excesivas de colinesterasa en las uniones neuromusculares del organismo humano produce uno de los siguientes efectos:",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Aumenta el tono muscular",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Extrema debilidad muscular",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Espasmos musculares frecuentes",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Parálisis muscular de las extremidades",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 62,
+          "type": "multiple_choice",
+          "stem": "El siguiente gráfico representa los cambios en el potencial de membrana en una neurona. Al respecto, ¿qué ésta indicando la flecha?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/62.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "polarización.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "repolarización.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "despolarización.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "potencial de acción.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 63,
+          "type": "multiple_choice",
+          "stem": "¿Qué área cerebral está relacionada con el control del lenguaje oral y escrito?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Motora",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Límbica",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Somestésica",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "De asociación",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 64,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de las siguientes células o partes de células NO forma parte de las astas de materia gris de la médula espinal?",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Neuronas amielínicas de conexión",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Células de Schwann",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "Cuerpos de neuronas motoras",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Axones de neuronas sensitivas",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 65,
+          "type": "multiple_choice",
+          "stem": "Señale en cuál de las opciones se indica la resultante de la destrucción de una vía eferente en el hombre",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "ceguera",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "pérdida del gusto",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "sordera",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "parálisis",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 66,
+          "type": "multiple_choice",
+          "stem": "La figura representa neuronas (A, B, C y D), sinapsis (1, 2, 3 y 4) y efectores musculares esqueléticos (M1 y M2). Sabemos que la contracción de un músculo (agonista) se acompaña de la relajación de otro (antagonista). Según las relaciones representadas, y los mecanismos de control involucrados, podremos esperar que al estimular la neurona",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/66.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "C, se hiperpolarizará A y despolarizará B",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "D, se despolarizará D y se contraerá M2",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "A, se contraerá M1 pero no M2",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "B, se contraerá M1 y M2",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 67,
+          "type": "multiple_choice",
+          "stem": "El tálamo es una estructura encefálica que cumple numerosas funciones. Un grupo de estudiantes cree que si se le daña con una descarga eléctrica de alta intensidad, se verá dañada la siguiente actividad",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "el relevo sensorial",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "la integración olfatoria",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "el relevo de la motricidad refleja",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "la mantención del tono muscular",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 68,
+          "type": "multiple_choice",
+          "stem": "El esquema representa una sinapsis entre neuronas del tronco encefálico y la acción de la cocaína sobre ella. En relación al esquema, es correcto afirmar que el efecto de la cocaína es bloquear la",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/68.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "recaptura de dopamina.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "liberación de dopamina.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "síntesis de dopamina.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "degradación de dopamina.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 69,
+          "type": "multiple_choice",
+          "stem": "Los estudiantes de un curso proponen 4 gráficos para representar la respuesta (R), de una fibra nerviosa frente a los aumentos de intensidad (I), del estímulo. ¿Cuál de los siguientes gráficos representa mejor la situación planteada?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Alternativas gráficas en grilla 2×2; recorte por alternativa en alt_figure",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/69.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Gráfico R vs. intensidad: recta creciente",
+              "isCorrect": false,
+              "isImage": true,
+              "imageRef": "item/global/paes-cie-bio-e5-2026/alt_figure/69_A.png"
+            },
+            {
+              "key": "B",
+              "text": "Gráfico R vs. intensidad: recta horizontal (R constante)",
+              "isCorrect": false,
+              "isImage": true,
+              "imageRef": "item/global/paes-cie-bio-e5-2026/alt_figure/69_B.png"
+            },
+            {
+              "key": "C",
+              "text": "Gráfico R vs. intensidad: escalón (R baja constante y luego sube a un valor alto constante)",
+              "isCorrect": true,
+              "isImage": true,
+              "imageRef": "item/global/paes-cie-bio-e5-2026/alt_figure/69_C.png"
+            },
+            {
+              "key": "D",
+              "text": "Gráfico R vs. intensidad: recta decreciente",
+              "isCorrect": false,
+              "isImage": true,
+              "imageRef": "item/global/paes-cie-bio-e5-2026/alt_figure/69_D.png"
+            }
+          ]
+        },
+        {
+          "position": 70,
+          "type": "multiple_choice",
+          "stem": "Un grupo de científicos intenta transformar a cierto tipo de bacterias introduciéndoles un plásmido que tiene resistencia para un antibiótico específico. Posteriormente se quiere verificar si el proceso de transformación fue exitoso, entonces, ¿cuál de las siguientes afirmaciones corresponde a una predicción correcta?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Si las bacterias incorporaron el plásmido proliferarán en un medio de cultivo con el antibiótico.",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Si las bacterias no incorporaron el plásmido se multiplicarán en medios de cultivo con el antibiótico.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Si las bacterias no incorporaron el plásmido se multiplicarán en medios de cultivo con y sin el antibiótico.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Si las bacterias incorporaron el plásmido no proliferarán en un medio de cultivo con el antibiótico.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 71,
+          "type": "multiple_choice",
+          "stem": "Una investigadora está estudiando los efectos de la transferencia nuclear entre dos tipos de células (I y II). La particularidad de este experimento es que el núcleo de la célula I presenta un nucléolo, mientras que el núcleo de la célula II presenta dos nucléolos. Posterior a la remoción de su núcleo, a la célula I se le transfiere el núcleo de la célula II, originando la célula III, de acuerdo con el siguiente esquema: Como primer resultado, post transferencia nuclear, se mantiene constante la presencia de ambos nucléolos. Si la investigadora decide estimular la multiplicación celular de la célula III, ¿cuál de las siguientes opciones corresponde al resultado esperado?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/71.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Se originan células con dos nucléolos",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "Se originan células con de tres nucléolos",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Se originan células con de un solo nucléolo",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Se originan células con un nucléolo y otras con dos nucléolos.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 72,
+          "type": "multiple_choice",
+          "stem": "Si tenemos una rata decapitada (animal espinal) y estimulamos eléctricamente la piel de una de sus patas, observaremos que esa pata se flecta y la contraria se extiende. ¿Cuál de las siguientes explicaciones no concuerda con lo observado?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "la piel posee receptores",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "la respuesta corresponde a un “reflejo espinal”",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "la respuesta depende exclusivamente del cerebro",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "hay conexión de neuronas sensitivas y motoras a nivel medular",
+              "isCorrect": false
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "Ítem piloto: la tabla de especificaciones del colegio marca la clave con asterisco (fila pintada), el clavijero FACS 261 lo lista con asterisco (\"Preguntas que no se consideran para el cálculo de puntaje\") y GradeCam lo corrige con max_points 0. No puntúa: queda fuera del numerador y del denominador."
+        },
+        {
+          "position": 73,
+          "type": "multiple_choice",
+          "stem": "La fecundación in vitro es una técnica de reproducción asistida, que consiste en fecundar óvulos de una mujer en condiciones controladas de laboratorio. Producto de esa fecundación se generan embriones, los cuales son transferidos al útero para que continúen su desarrollo y, en caso de que el procedimiento sea exitoso, comenzar con el embarazo. Los embriones que no son transferidos pueden ser conservados para repetir el procedimiento en el futuro, en caso que se requiera. Considerando la información anterior y desde el punto de vista de las Ciencias Naturales, ¿cuál de las siguientes opciones es una pregunta que puede ser respondida mediante una investigación experimental?",
+          "correctKey": "A",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "¿Cuál es el costo económico de la conservación de embriones obtenidos?",
+              "isCorrect": true
+            },
+            {
+              "key": "B",
+              "text": "¿Es necesario desarrollar una técnica para mantener la funcionalidad de los embriones?",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "¿Los embriones generados in vitro deben tener los mismos derechos de los obtenidos naturalmente?",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "¿Cuál es el porcentaje de éxito de la fecundación in vitro?",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 74,
+          "type": "multiple_choice",
+          "stem": "Durante la evaluación de una nueva pastilla anticonceptiva el equipo de investigación constató que el 85 % de las mujeres que lo usaron periódicamente alcanzaron niveles seguros de protección contra el embarazo. No obstante, un 5 % de este mismo grupo quedó embarazada. ¿Qué componente de la investigación científica está reflejado en el párrafo anterior?",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La descripción de un procedimiento experimental.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La formulación de un problema de investigación.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "El planteamiento de una hipótesis.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "La presentación de resultados.",
+              "isCorrect": true
+            }
+          ]
+        },
+        {
+          "position": 75,
+          "type": "multiple_choice",
+          "stem": "Las hormigas obreras, dentro de una misma colonia, pueden variar significativamente en tamaño para cumplir diferentes funciones. Los depredadores, como la araña saltarina, consumen con mayor facilidad los individuos intermedios, porque los pequeños se esconden en grietas y los grandes se defienden mejor. Antes de selección Después de selección ¿Cuál de las siguientes conclusiones corresponde a los resultados observados antes y después de operar la selección?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/75.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "La selección disruptiva concentra la población en un tamaño intermedio",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "La selección disruptiva elimina completamente a las hormigas pequeñas y grandes",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "La selección disruptiva aumenta la frecuencia de los valores extremos",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "La selección disruptiva desplaza la población hacia uno de los extremos",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 76,
+          "type": "multiple_choice",
+          "stem": "El esquema muestra las relaciones evolutivas de un grupo de organismos A partir del esquema, se puede concluir que la(s) especie(s)",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/76.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "J es más antigua que la W",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "W e Y no tienen ningún ancestro en común",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "X, R, S y T comparten un ancestro común con la especie Y",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "W y T surgieron por un proceso de convergencia evolutivo",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 77,
+          "type": "multiple_choice",
+          "stem": "¿Cuál de los siguientes rasgos no corresponde ser caracterizado como un carácter sexual secundario en la especie humana?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "points": 0,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Cambio de voz aguda a grave.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Ensanchamiento de las caderas.",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Presencia de testículos u ovarios.",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Desarrollo de glándulas mamarias.",
+              "isCorrect": false
+            }
+          ],
+          "itemPiloto": true,
+          "itemPilotoNota": "Ítem piloto: la tabla de especificaciones del colegio marca la clave con asterisco (fila pintada), el clavijero FACS 261 lo lista con asterisco (\"Preguntas que no se consideran para el cálculo de puntaje\") y GradeCam lo corrige con max_points 0. No puntúa: queda fuera del numerador y del denominador."
+        },
+        {
+          "position": 78,
+          "type": "multiple_choice",
+          "stem": "El consumo de alcohol constituye un grave problema de salud pública. La prevención primaria de éste tiene como propósito",
+          "correctKey": "B",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "modificar la conducta del bebedor moderado.",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "evitar el inicio de una conducta que resultará perjudicial.",
+              "isCorrect": true
+            },
+            {
+              "key": "C",
+              "text": "provocar la abstinencia de consumo en el bebedor excesivo.",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "la detección precoz de los daños hepáticos (cirrosis) para hacer tratamiento.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 79,
+          "type": "multiple_choice",
+          "stem": "¿Cuál es la secuencia de estructuras por la que deben pasar los espermatozoides desde el lugar de su formación, hasta encontrarse con un óvulo para fecundarlo?",
+          "correctKey": "C",
+          "responseFormat": "choice",
+          "hasFigure": false,
+          "figureNote": null,
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Testículo – epidídimo – próstata – uretra – vagina",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Epidídimo – testículo – próstata – vagina – útero – trompa",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Testículo – epidídimo – uretra – vagina – útero – trompa",
+              "isCorrect": true
+            },
+            {
+              "key": "D",
+              "text": "Testículo – vejiga – próstata – vagina – trompa – ovario",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "position": 80,
+          "type": "multiple_choice",
+          "stem": "Durante su vida intrauterina, a las 20 semanas de gestación, las mujeres poseen alrededor de unos 6 a 7 millones de folículos primordiales. Al nacer, quedan entre 1 y 2 millones, reduciéndose a unos 300.000 a 400.000 durante la pubertad. En la vida adulta, esta reserva continúa disminuyendo hasta el agotamiento en la menopausia. una investigación de los ovarios de mujeres de diferentes edades cronológicas, se constató una disminución en el número de folículos primordiales desde la etapa prenatal hasta la vejez. A partir de lo anterior, ¿cuál de las siguientes opciones incluye las variables dependiente e independiente, respectivamente, en esta investigación? Variable dependiente Variable independiente",
+          "correctKey": "D",
+          "responseFormat": "choice",
+          "hasFigure": true,
+          "figureNote": "Figura no transcrita (hueco en el cuadernillo)",
+          "imageRef": "item/global/paes-cie-bio-e5-2026/item_figure/80.png",
+          "alternatives": [
+            {
+              "key": "A",
+              "text": "Estado de los ovarios Grado de degeneración folicular",
+              "isCorrect": false
+            },
+            {
+              "key": "B",
+              "text": "Etapa del desarrollo Número de folículos primordiales",
+              "isCorrect": false
+            },
+            {
+              "key": "C",
+              "text": "Duración del ciclo folicular Estado de los ovarios",
+              "isCorrect": false
+            },
+            {
+              "key": "D",
+              "text": "Numero de folículos primordiales Etapas del desarrollo",
+              "isCorrect": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pauta": {
+    "source": {
+      "instrumentJson": "CIE-E5-BIO-con-pauta.json"
+    }
+  },
+  "extraction": {
+    "itemCount": 80,
+    "warnings": [],
+    "needsHumanReview": false,
+    "itemsConClave": 80
+  }
+}

@@ -1,0 +1,607 @@
+{
+  "instrument": "CIE-E5-fusionado.json",
+  "bucket": "edtech-demo-uploadsbucket-xccufosb",
+  "esquema": "item/global/paes-cie-{men}-e5-2026/item_figure/{NN}.png (NN = nº impreso en el cuadernillo de origen; el común sale de Biología) · alt_figure/{NN}_{K}.png",
+  "figuras": [
+    {
+      "position": 6,
+      "printedNumber": "6",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/06.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/06.png",
+      "sizePx": [1616, 1265]
+    },
+    {
+      "position": 10,
+      "printedNumber": "10",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/10.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/10.png",
+      "sizePx": [1499, 1572]
+    },
+    {
+      "position": 21,
+      "printedNumber": "21",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/21.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/21.png",
+      "sizePx": [2104, 1074]
+    },
+    {
+      "position": 22,
+      "printedNumber": "22",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/22.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/22.png",
+      "sizePx": [2102, 1432]
+    },
+    {
+      "position": 24,
+      "printedNumber": "24",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/24.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/24.png",
+      "sizePx": [2102, 1425]
+    },
+    {
+      "position": 34,
+      "printedNumber": "34",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/34.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/34.png",
+      "sizePx": [2101, 1436]
+    },
+    {
+      "position": 38,
+      "printedNumber": "38",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/38.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/38.png",
+      "sizePx": [2102, 2082]
+    },
+    {
+      "position": 39,
+      "printedNumber": "39",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/39.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/39.png",
+      "sizePx": [2103, 1333]
+    },
+    {
+      "position": 40,
+      "printedNumber": "40",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/40.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/40.png",
+      "sizePx": [2103, 1074]
+    },
+    {
+      "position": 41,
+      "printedNumber": "41",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/41.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/41.png",
+      "sizePx": [2106, 1325]
+    },
+    {
+      "position": 42,
+      "printedNumber": "42",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/42.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/42.png",
+      "sizePx": [2103, 1001]
+    },
+    {
+      "position": 43,
+      "printedNumber": "43",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/43.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/43.png",
+      "sizePx": [2104, 870]
+    },
+    {
+      "position": 44,
+      "printedNumber": "44",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/44.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/44.png",
+      "sizePx": [2119, 1587]
+    },
+    {
+      "position": 45,
+      "printedNumber": "45",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/45.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/45.png",
+      "sizePx": [2104, 934]
+    },
+    {
+      "position": 46,
+      "printedNumber": "46",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/46.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/46.png",
+      "sizePx": [2104, 1452]
+    },
+    {
+      "position": 47,
+      "printedNumber": "47",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/47.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/47.png",
+      "sizePx": [2104, 1193]
+    },
+    {
+      "position": 48,
+      "printedNumber": "48",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/48.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/48.png",
+      "sizePx": [2110, 1944]
+    },
+    {
+      "position": 49,
+      "printedNumber": "49",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/49.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/49.png",
+      "sizePx": [2107, 2011]
+    },
+    {
+      "position": 50,
+      "printedNumber": "50",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/50.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/50.png",
+      "sizePx": [2101, 1465]
+    },
+    {
+      "position": 51,
+      "printedNumber": "51",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/51.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/51.png",
+      "sizePx": [2104, 1662]
+    },
+    {
+      "position": 52,
+      "printedNumber": "52",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/52.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/52.png",
+      "sizePx": [2101, 1988]
+    },
+    {
+      "position": 53,
+      "printedNumber": "53",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/53.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/53.png",
+      "sizePx": [2102, 1490]
+    },
+    {
+      "position": 54,
+      "printedNumber": "54",
+      "section": "Módulo común",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/54.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/54.png",
+      "sizePx": [2104, 1464]
+    },
+    {
+      "position": 55,
+      "printedNumber": "55",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/55.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/55.png",
+      "sizePx": [2101, 2352]
+    },
+    {
+      "position": 57,
+      "printedNumber": "57",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/57.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/57.png",
+      "sizePx": [2101, 1373]
+    },
+    {
+      "position": 60,
+      "printedNumber": "60",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/60.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/60.png",
+      "sizePx": [2103, 1218]
+    },
+    {
+      "position": 62,
+      "printedNumber": "62",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/62.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/62.png",
+      "sizePx": [2099, 1251]
+    },
+    {
+      "position": 66,
+      "printedNumber": "66",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/66.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/66.png",
+      "sizePx": [2102, 1512]
+    },
+    {
+      "position": 68,
+      "printedNumber": "68",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/68.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/68.png",
+      "sizePx": [2101, 1575]
+    },
+    {
+      "position": 69,
+      "printedNumber": "69",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/69.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/69.png",
+      "sizePx": [2109, 1062]
+    },
+    {
+      "position": 69,
+      "printedNumber": "69",
+      "section": "Mención Biología",
+      "kind": "alt",
+      "alternative": "A",
+      "key": "item/global/paes-cie-bio-e5-2026/alt_figure/69_A.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras-alt/CIE-E5-BIO/69_A.png",
+      "sizePx": [535, 362]
+    },
+    {
+      "position": 69,
+      "printedNumber": "69",
+      "section": "Mención Biología",
+      "kind": "alt",
+      "alternative": "B",
+      "key": "item/global/paes-cie-bio-e5-2026/alt_figure/69_B.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras-alt/CIE-E5-BIO/69_B.png",
+      "sizePx": [574, 367]
+    },
+    {
+      "position": 69,
+      "printedNumber": "69",
+      "section": "Mención Biología",
+      "kind": "alt",
+      "alternative": "C",
+      "key": "item/global/paes-cie-bio-e5-2026/alt_figure/69_C.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras-alt/CIE-E5-BIO/69_C.png",
+      "sizePx": [554, 368]
+    },
+    {
+      "position": 69,
+      "printedNumber": "69",
+      "section": "Mención Biología",
+      "kind": "alt",
+      "alternative": "D",
+      "key": "item/global/paes-cie-bio-e5-2026/alt_figure/69_D.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras-alt/CIE-E5-BIO/69_D.png",
+      "sizePx": [560, 365]
+    },
+    {
+      "position": 71,
+      "printedNumber": "71",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/71.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/71.png",
+      "sizePx": [2101, 1613]
+    },
+    {
+      "position": 75,
+      "printedNumber": "75",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/75.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/75.png",
+      "sizePx": [2102, 1560]
+    },
+    {
+      "position": 76,
+      "printedNumber": "76",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/76.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/76.png",
+      "sizePx": [1795, 1293]
+    },
+    {
+      "position": 80,
+      "printedNumber": "80",
+      "section": "Mención Biología",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-bio-e5-2026/item_figure/80.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-BIO/80.png",
+      "sizePx": [2101, 1235]
+    },
+    {
+      "position": 90,
+      "printedNumber": "64",
+      "section": "Mención Física",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-fis-e5-2026/item_figure/64.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-FIS/64.png",
+      "sizePx": [2100, 1603]
+    },
+    {
+      "position": 91,
+      "printedNumber": "65",
+      "section": "Mención Física",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-fis-e5-2026/item_figure/65.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-FIS/65.png",
+      "sizePx": [2102, 2011]
+    },
+    {
+      "position": 94,
+      "printedNumber": "68",
+      "section": "Mención Física",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-fis-e5-2026/item_figure/68.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-FIS/68.png",
+      "sizePx": [2103, 1450]
+    },
+    {
+      "position": 95,
+      "printedNumber": "69",
+      "section": "Mención Física",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-fis-e5-2026/item_figure/69.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-FIS/69.png",
+      "sizePx": [2102, 1628]
+    },
+    {
+      "position": 97,
+      "printedNumber": "71",
+      "section": "Mención Física",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-fis-e5-2026/item_figure/71.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-FIS/71.png",
+      "sizePx": [1849, 1476]
+    },
+    {
+      "position": 102,
+      "printedNumber": "76",
+      "section": "Mención Física",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-fis-e5-2026/item_figure/76.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-FIS/76.png",
+      "sizePx": [2104, 1333]
+    },
+    {
+      "position": 103,
+      "printedNumber": "77",
+      "section": "Mención Física",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-fis-e5-2026/item_figure/77.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-FIS/77.png",
+      "sizePx": [2101, 1153]
+    },
+    {
+      "position": 108,
+      "printedNumber": "56",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/56.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/56.png",
+      "sizePx": [2101, 1943]
+    },
+    {
+      "position": 109,
+      "printedNumber": "57",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/57.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/57.png",
+      "sizePx": [2102, 1138]
+    },
+    {
+      "position": 110,
+      "printedNumber": "58",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/58.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/58.png",
+      "sizePx": [2104, 1960]
+    },
+    {
+      "position": 113,
+      "printedNumber": "61",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/61.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/61.png",
+      "sizePx": [2102, 1904]
+    },
+    {
+      "position": 114,
+      "printedNumber": "62",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/62.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/62.png",
+      "sizePx": [2105, 1621]
+    },
+    {
+      "position": 115,
+      "printedNumber": "63",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/63.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/63.png",
+      "sizePx": [2109, 1944]
+    },
+    {
+      "position": 116,
+      "printedNumber": "64",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/64.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/64.png",
+      "sizePx": [2102, 1763]
+    },
+    {
+      "position": 117,
+      "printedNumber": "65",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/65.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/65.png",
+      "sizePx": [2102, 1386]
+    },
+    {
+      "position": 119,
+      "printedNumber": "67",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/67.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/67.png",
+      "sizePx": [2103, 1763]
+    },
+    {
+      "position": 120,
+      "printedNumber": "68",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/68.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/68.png",
+      "sizePx": [2102, 1830]
+    },
+    {
+      "position": 121,
+      "printedNumber": "69",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/69.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/69.png",
+      "sizePx": [2102, 1673]
+    },
+    {
+      "position": 122,
+      "printedNumber": "70",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/70.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/70.png",
+      "sizePx": [2102, 1664]
+    },
+    {
+      "position": 123,
+      "printedNumber": "71",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/71.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/71.png",
+      "sizePx": [2100, 1208]
+    },
+    {
+      "position": 124,
+      "printedNumber": "72",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/72.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/72.png",
+      "sizePx": [2101, 1784]
+    },
+    {
+      "position": 130,
+      "printedNumber": "78",
+      "section": "Mención Química",
+      "kind": "item",
+      "alternative": null,
+      "key": "item/global/paes-cie-qui-e5-2026/item_figure/78.png",
+      "localPng": "ensayos-paes/tanda5/CIE/figuras/CIE-E5-QUI/78.png",
+      "sizePx": [2100, 1001]
+    }
+  ]
+}
