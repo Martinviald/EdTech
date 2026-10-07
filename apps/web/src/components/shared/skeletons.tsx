@@ -7,6 +7,17 @@ import { cn } from '@/lib/utils';
  * Que el placeholder CALCE con la vista destino (no un spinner genérico).
  */
 
+/** Placeholder de la barra compacta (alcance + búsqueda + botón Filtros) del panorama. */
+export function CompactFilterBarSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('flex flex-wrap items-start gap-2', className)}>
+      <Skeleton className="h-9 w-full sm:w-[240px]" />
+      <Skeleton className="h-9 min-w-[220px] flex-1 sm:max-w-sm" />
+      <Skeleton className="ml-auto h-9 w-28" />
+    </div>
+  );
+}
+
 export function FilterBarSkeleton({
   fields = 5,
   className,

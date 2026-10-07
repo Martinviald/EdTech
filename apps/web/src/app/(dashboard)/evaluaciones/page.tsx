@@ -14,7 +14,12 @@ import {
   ANSWER_SHEET_IMPORT_ROLES,
   type AssessmentSort,
 } from '@soe/types';
-import { PageContainer, EmptyState, FilterBarSkeleton, TableSkeleton } from '@/components/shared';
+import {
+  PageContainer,
+  EmptyState,
+  CompactFilterBarSkeleton,
+  TableSkeleton,
+} from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { DashboardFilterBar } from '../resultados/components/dashboard-filter-bar';
 import {
@@ -64,7 +69,7 @@ export default async function EvaluacionesPage({
 
   return (
     <PageContainer>
-      <Suspense fallback={<FilterBarSkeleton />}>
+      <Suspense fallback={<CompactFilterBarSkeleton />}>
         <FiltersSection filters={filters} query={filterQuery} />
       </Suspense>
 

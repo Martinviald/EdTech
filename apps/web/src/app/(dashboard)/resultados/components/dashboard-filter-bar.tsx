@@ -9,14 +9,31 @@ import {
   MIN_SEARCH_TERM_LENGTH,
   type DashboardFilterOptionsResponse,
 } from '@soe/types';
-import { FilterX } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { FilterBar, MultiSelectFilter, type FilterField } from '@/components/shared';
 import {
-  FILTER_KEYS,
+  BookOpen,
+  CalendarDays,
+  ClipboardList,
+  Clock,
+  GraduationCap,
+  Shapes,
+  Users,
+} from 'lucide-react';
+import {
+  ActiveFilterChips,
+  FilterMenu,
+  TopProgressBar,
+  type FilterDimension,
+} from '@/components/shared';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   PROCESS_OPT_OUT_KEY,
   classGroupSelectOptionsMulti,
-  hasActiveFilters,
   type DashboardFilterValues,
 } from './dashboard-filters';
 import { AssessmentSearchField } from './assessment-search-field';
@@ -126,7 +143,6 @@ export function DashboardFilterBar({
     [applyFilters, options.classGroups, value.classGroupId],
   );
 
-  const resetSearch = search.reset;
   // El proceso por defecto necesita su propia marca de "quitado": borrar la clave
   // de la URL no alcanza, porque la preselección la volvería a poner en el acto.
   const updateProcess = useCallback(
@@ -147,21 +163,6 @@ export function DashboardFilterBar({
     },
     [router, searchParams, basePath],
   );
-
-  const clearAll = useCallback(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    for (const key of FILTER_KEYS) params.delete(key);
-    params.delete('page');
-    params.set(PROCESS_OPT_OUT_KEY, '1');
-    const qs = params.toString();
-    // Sin esto el input quedaría con texto mientras la URL ya no tiene `q`.
-    resetSearch();
-    startTransition(() => {
-      router.push(`${basePath}${qs ? `?${qs}` : ''}` as Route);
-    });
-  }, [router, searchParams, basePath, resetSearch]);
-
-  const hasActive = hasActiveFilters(value);
 
   // Tipos de instrumento únicos derivados de las opciones de instrumentos.
   const instrumentTypes = Array.from(new Set(options.instruments.map((i) => i.type)));
@@ -211,143 +212,168 @@ export function DashboardFilterBar({
     return { id: p.id, label: p.hasResults ? base : `${base} · sin resultados` };
   });
 
-  // El buscador va en su propia fila de ancho completo, no entre los selects:
-  // es el control que más ancho necesita y el único donde se escribe.
-  const searchField: FilterField = {
-    key: 'q',
-    label: 'Buscar por nombre de evaluación o instrumento',
-    control: (
-      <AssessmentSearchField
-        term={search.term}
-        onTermChange={search.setTerm}
-        onSubmit={search.submitNow}
-        isDebouncing={search.isDebouncing}
-        isTooShort={search.isTooShort}
-        minLength={MIN_SEARCH_TERM_LENGTH}
-      />
-    ),
-  };
+  // Proceso y período definen QUÉ se está comparando (Panorama preselecciona un
+  // proceso para no mezclar pruebas no comparables), así que el control de alcance
+  // queda siempre a la vista. Cuando el colegio no tiene procesos, ese lugar lo
+  // ocupa el período. El resto de las dimensiones vive en el menú "Filtros" y lo
+  // aplicado se ve como chips: esconder qué filtra los datos llevaría a leerlos mal.
+  const scopeIsProcess = processOptions.length > 0;
+  const periodOptions = options.periods.map((p) => ({ id: p.id, label: p.label }));
 
-  const fields: FilterField[] = [
+  const dimensions: FilterDimension[] = [
     {
       key: 'academicYearId',
       label: 'Período',
-      placeholder: 'Todos los períodos',
-      value: value.academicYearId,
-      options: options.periods.map((p) => ({ id: p.id, label: p.label })),
-      onChange: (v) => updateSingle('academicYearId', v),
-    },
-    {
-      key: 'processId',
-      label: 'Proceso de medición',
-      placeholder: 'Todos los procesos',
-      value: value.processId,
-      options: processOptions,
-      onChange: updateProcess,
-      hidden: processOptions.length === 0,
+      icon: CalendarDays,
+      mode: 'single',
+      options: periodOptions,
+      selected: value.academicYearId ? [value.academicYearId] : [],
+      onChange: (ids) => updateSingle('academicYearId', ids[0] ?? ''),
+      hidden: !scopeIsProcess,
     },
     {
       key: 'subjectId',
       label: 'Asignatura',
-      control: (
-        <MultiSelectFilter
-          label="asignaturas"
-          placeholder="Todas las asignaturas"
-          options={options.subjects}
-          selected={value.subjectId ?? []}
-          onChange={(ids) => updateMulti('subjectId', ids)}
-        />
-      ),
+      icon: BookOpen,
+      mode: 'multi',
+      options: options.subjects,
+      selected: value.subjectId ?? [],
+      onChange: (ids) => updateMulti('subjectId', ids),
     },
     {
       key: 'gradeId',
-      label: 'Nivel / Grado',
-      control: (
-        <MultiSelectFilter
-          label="niveles"
-          placeholder="Todos los grados"
-          options={options.grades}
-          selected={value.gradeId ?? []}
-          onChange={updateGrades}
-        />
-      ),
+      label: 'Nivel',
+      icon: GraduationCap,
+      mode: 'multi',
+      options: options.grades,
+      selected: value.gradeId ?? [],
+      onChange: updateGrades,
     },
     {
       key: 'classGroupId',
       label: 'Curso',
-      control: (
-        <MultiSelectFilter
-          label="cursos"
-          placeholder="Todos los cursos"
-          options={courseOptions}
-          selected={value.classGroupId ?? []}
-          onChange={(ids) => updateMulti('classGroupId', ids)}
-        />
-      ),
+      icon: Users,
+      mode: 'multi',
+      options: courseOptions,
+      selected: value.classGroupId ?? [],
+      onChange: (ids) => updateMulti('classGroupId', ids),
     },
     {
       key: 'instrumentType',
       label: 'Tipo de instrumento',
+      icon: Shapes,
+      mode: 'multi',
+      options: instrumentTypes.map((t) => ({ id: t, label: t.toUpperCase() })),
+      selected: value.instrumentType ?? [],
+      onChange: updateInstrumentTypes,
       hidden: instrumentTypes.length === 0,
-      control: (
-        <MultiSelectFilter
-          label="tipos"
-          placeholder="Todos los tipos"
-          options={instrumentTypes.map((t) => ({ id: t, label: t.toUpperCase() }))}
-          selected={value.instrumentType ?? []}
-          onChange={updateInstrumentTypes}
-        />
-      ),
     },
     {
       key: 'instrumentId',
       label: 'Instrumento',
-      placeholder: 'Todos los instrumentos',
-      value: value.instrumentId,
+      icon: ClipboardList,
+      mode: 'single',
       options: instrumentOptions,
-      onChange: (v) => updateSingle('instrumentId', v),
-      hidden: instrumentOptions.length === 0,
+      selected: value.instrumentId ? [value.instrumentId] : [],
+      onChange: (ids) => updateSingle('instrumentId', ids[0] ?? ''),
+      hidden: instrumentOptions.length === 0 && !value.instrumentId,
     },
     {
       key: 'applicationPeriod',
       label: 'Momento',
+      icon: Clock,
+      mode: 'multi',
+      options: INSTRUMENT_APPLICATION_PERIODS.map((p) => ({
+        id: p,
+        label: INSTRUMENT_APPLICATION_PERIOD_LABELS[p],
+        hint: periodsWithData.has(p) ? undefined : 'sin evaluaciones',
+      })),
+      selected: value.applicationPeriod ?? [],
+      onChange: (ids) => updateMulti('applicationPeriod', ids),
       hidden: !showPeriod,
-      control: (
-        <MultiSelectFilter
-          label="momentos"
-          placeholder="Todos los momentos"
-          options={INSTRUMENT_APPLICATION_PERIODS.map((p) => ({
-            id: p,
-            label: INSTRUMENT_APPLICATION_PERIOD_LABELS[p],
-            hint: periodsWithData.has(p) ? undefined : 'sin evaluaciones',
-          }))}
-          selected={value.applicationPeriod ?? []}
-          onChange={(ids) => updateMulti('applicationPeriod', ids)}
-        />
-      ),
     },
   ];
 
+  const clearMenuFilters = () =>
+    applyFilters(
+      Object.fromEntries(dimensions.filter((d) => !d.hidden).map((d) => [d.key, null])) as Partial<
+        Record<keyof DashboardFilterValues, null>
+      >,
+    );
+
   return (
-    <FilterBar
-      fields={fields}
-      fullWidthField={searchField}
-      // El `isPending` de la transición NO se enciende durante la espera del
-      // temporizador: sin `isDebouncing` la barra se ve muerta justo en esos
-      // segundos (docs/diseno-buscador-evaluaciones.md §D9).
-      pending={isPending || search.isDebouncing}
-      actions={
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={clearAll}
-          disabled={!hasActive}
-          title="Limpiar filtros"
-          aria-label="Limpiar filtros"
-        >
-          <FilterX />
-        </Button>
-      }
-    />
+    <div className="relative space-y-2">
+      {/* El `isPending` de la transición NO se enciende durante la espera del
+          temporizador: sin `isDebouncing` la barra se ve muerta justo en esos
+          segundos (docs/diseno-buscador-evaluaciones.md §D9). */}
+      <TopProgressBar active={isPending || search.isDebouncing} />
+      <div className="flex flex-wrap items-start gap-2">
+        {scopeIsProcess ? (
+          <ScopeSelect
+            ariaLabel="Proceso de medición"
+            placeholder="Todos los procesos"
+            value={value.processId}
+            options={processOptions}
+            onChange={updateProcess}
+          />
+        ) : (
+          <ScopeSelect
+            ariaLabel="Período"
+            placeholder="Todos los períodos"
+            value={value.academicYearId}
+            options={periodOptions}
+            onChange={(v) => updateSingle('academicYearId', v)}
+          />
+        )}
+        <div className="min-w-[220px] flex-1 sm:max-w-sm">
+          <AssessmentSearchField
+            term={search.term}
+            onTermChange={search.setTerm}
+            onSubmit={search.submitNow}
+            isDebouncing={search.isDebouncing}
+            isTooShort={search.isTooShort}
+            minLength={MIN_SEARCH_TERM_LENGTH}
+          />
+        </div>
+        <FilterMenu dimensions={dimensions} className="ml-auto" />
+      </div>
+      <ActiveFilterChips dimensions={dimensions} onClearAll={clearMenuFilters} />
+    </div>
+  );
+}
+
+/** Valor centinela para la opción "todos" (Radix Select no admite value vacío). */
+const ALL = '__all__';
+
+function ScopeSelect({
+  ariaLabel,
+  placeholder,
+  value,
+  options,
+  onChange,
+}: {
+  ariaLabel: string;
+  placeholder: string;
+  value: string | undefined;
+  options: readonly { id: string; label: string }[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Select value={value || ALL} onValueChange={(next) => onChange(next === ALL ? '' : next)}>
+      <SelectTrigger
+        aria-label={ariaLabel}
+        className="h-9 w-full bg-card sm:w-auto sm:min-w-[220px] sm:max-w-[320px]"
+      >
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL}>{placeholder}</SelectItem>
+        {options.map((opt) => (
+          <SelectItem key={opt.id} value={opt.id}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

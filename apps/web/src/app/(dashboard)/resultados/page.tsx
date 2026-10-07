@@ -14,7 +14,7 @@ import { canSeeBenchmark, getInstrumentSamples } from '@/lib/benchmark-samples';
 import {
   EmptyState,
   StatCard,
-  FilterBarSkeleton,
+  CompactFilterBarSkeleton,
   KpiGridSkeleton,
   CardSkeleton,
   TableSkeleton,
@@ -65,7 +65,7 @@ export default async function ResultadosOverviewPage({
   // sección. `key={query}` reinicia el skeleton al cambiar los filtros.
   return (
     <>
-      <Suspense fallback={<FilterBarSkeleton />}>
+      <Suspense fallback={<CompactFilterBarSkeleton />}>
         <FiltersSection query={query} filters={filters} />
       </Suspense>
 
