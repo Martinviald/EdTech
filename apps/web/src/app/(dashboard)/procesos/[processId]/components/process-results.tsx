@@ -9,7 +9,7 @@ import {
   type ProcessMatrixCell,
   type UnitSeverity,
 } from '@soe/types';
-import { AlertCallout } from '@/components/shared';
+import { AlertCallout } from '@/components/shared/AlertCallout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
@@ -21,10 +21,6 @@ const SEVERITY_CELL: Record<UnitSeverity, string> = {
 };
 
 const NEUTRAL_BAND = '#94a3b8';
-
-// Mismo umbral que la banda generacional del panorama: bajo 2 pp el movimiento
-// no se distingue del ruido.
-const MIN_RELEVANT_DROP_PP = 2;
 
 const COVERAGE_CELL = 'bg-muted/50 text-muted-foreground border-transparent';
 
@@ -78,9 +74,6 @@ export function ProcessResults({
     ? coverage.totals.complete
     : rollup.matrix.cells.filter((c) => c.unitKeys.length > 0).length;
   const expectedCells = coverage?.totals.expected ?? rollup.matrix.cells.length;
-  const drops = comparable.generational
-    .filter((cell) => cell.deltaPp != null && cell.deltaPp <= -MIN_RELEVANT_DROP_PP)
-    .slice(0, 5);
 
   if (rollup.totals.classifications === 0) {
     return (
@@ -197,66 +190,16 @@ export function ProcessResults({
         </CardContent>
       </Card>
 
-      {drops.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Celdas que más retrocedieron</CardTitle>
-            <CardDescription>
-              Cada celda contra su propio comparable. El proceso no se compara contra otro proceso.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="divide-y">
-              {drops.map((item) => (
-                <li
-                  key={`${item.subjectId ?? '-'}-${item.gradeId ?? '-'}`}
-                  className="flex flex-wrap items-baseline justify-between gap-2 py-2 text-sm"
-                >
-                  <span className="font-medium">
-                    {item.subjectName ?? '—'} · {item.gradeName ?? '—'}
-                  </span>
-                  <span className="text-destructive font-medium tabular-nums">
-                    {(item.deltaPp as number).toFixed(1).replace('.', ',')} pp
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-
-      {comparable.alerts.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Lo más urgente</CardTitle>
-            <CardDescription>{comparable.alertsTotal} alerta(s) en este proceso.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {comparable.alerts.slice(0, 3).map((alert) => (
-              <div
-                key={alert.dedupKey}
-                className={cn(
-                  'rounded-md border-l-2 px-3 py-2 text-sm',
-                  alert.severity === 'high'
-                    ? 'border-destructive bg-destructive/5'
-                    : 'border-warning bg-warning/5',
-                )}
-              >
-                <p>{alert.message}</p>
-                {alert.unitLabel && (
-                  <p className="text-muted-foreground text-xs">{alert.unitLabel}</p>
-                )}
-              </div>
-            ))}
-            <Link
-              href={`${ROUTES.resultados}?processId=${processId}` as Route}
-              className="text-primary inline-block text-sm hover:underline"
-            >
-              Ver las {comparable.alertsTotal} en el panorama →
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+      <p className="text-muted-foreground text-sm">
+        Las alertas de este proceso y el movimiento de cada celda se leen en el{' '}
+        <Link
+          href={`${ROUTES.resultados}?processId=${processId}` as Route}
+          className="text-primary hover:underline"
+        >
+          panorama filtrado por el proceso
+        </Link>
+        .
+      </p>
     </div>
   );
 }
