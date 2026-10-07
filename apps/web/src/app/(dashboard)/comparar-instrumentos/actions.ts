@@ -1,20 +1,7 @@
 'use server';
 
-import {
-  compareInstrumentsSchema,
-  type AiAnalysisModel,
-  type ComparableAssessment,
-} from '@soe/types';
+import { compareInstrumentsSchema, type AiAnalysisModel } from '@soe/types';
 import { apiGet, apiPost } from '@/lib/api';
-
-/**
- * Lista las evaluaciones candidatas (con resultados) para comparar, con metadatos
- * de su instrumento. La autorización efectiva la aplica el guard del endpoint
- * (`AI_ANALYSIS_GENERATOR_ROLES`).
- */
-export async function fetchComparableAssessments(): Promise<ComparableAssessment[]> {
-  return apiGet<ComparableAssessment[]>('/ai-analysis/compare-instruments/candidates');
-}
 
 /**
  * Gatilla el diagnóstico IA de la variación entre dos instrumentos comparables.
