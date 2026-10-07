@@ -209,6 +209,10 @@ function bandsFromAvg(n: number, avg: number): BenchmarkBandCount[] {
   ];
 }
 
+/** Puntos por alumno y nodo con que se fabrica el tally de los fixtures (sólo escala). */
+const DEMO_SKILL_POINTS_PER_STUDENT = 4;
+const DEMO_INSTRUMENT_POINTS_PER_STUDENT = 30;
+
 const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v * 100) / 100));
 
 /** perSkill: habilidades con logro alrededor del promedio del colegio. */
@@ -218,12 +222,18 @@ function buildPerSkill(
   studentCount: number,
 ): BenchmarkSkillAggregate[] {
   const offsets = [-7, 2, 8] as const;
-  return skills.map((s, i) => ({
-    nodeId: s.nodeId,
-    nodeName: s.nodeName,
-    achievement: clamp(avg + (offsets[i % offsets.length] ?? 0)),
-    studentCount,
-  }));
+  return skills.map((s, i) => {
+    const achievement = clamp(avg + (offsets[i % offsets.length] ?? 0));
+    const maxSum = studentCount * DEMO_SKILL_POINTS_PER_STUDENT;
+    return {
+      nodeId: s.nodeId,
+      nodeName: s.nodeName,
+      achievement,
+      studentCount,
+      scoreSum: Math.round(maxSum * achievement) / 100,
+      maxSum,
+    };
+  });
 }
 
 async function main() {
@@ -402,6 +412,8 @@ async function main() {
     commune: r.s.commune,
     networkOrgId: r.networkOrgId,
     studentCount: r.n,
+    scoreSum: ((r.n * DEMO_INSTRUMENT_POINTS_PER_STUDENT * r.avg) / 100).toFixed(2),
+    maxSum: (r.n * DEMO_INSTRUMENT_POINTS_PER_STUDENT).toFixed(2),
     avgAchievement: r.avg.toFixed(2),
     bandCounts: bandsFromAvg(r.n, r.avg),
     perSkill: buildPerSkill(r.skills, r.avg, r.n),

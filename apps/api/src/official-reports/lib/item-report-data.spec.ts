@@ -194,7 +194,7 @@ describe('loadDevelopmentDistributions — paridad con el `case` SQL viejo', () 
 describe('loadItemDistributions', () => {
   const MC_ITEM = '22222222-2222-2222-2222-222222222222';
 
-  it('recombina cohortes sumando conteos, no promediando porcentajes', async () => {
+  it('recombina cohortes sumando conteos y tallies (9/12), no promediando porcentajes', async () => {
     const db = makeDb([
       [
         // Curso grande: 9/10 correctas.
@@ -202,6 +202,8 @@ describe('loadItemDistributions', () => {
           itemId: MC_ITEM,
           responseCount: 10,
           correctCount: 9,
+          scoreSum: '9.00',
+          maxSum: '10.00',
           answerCounts: [
             { key: 'B', isCorrect: true, count: 9 },
             { key: 'A', isCorrect: false, count: 1 },
@@ -212,6 +214,8 @@ describe('loadItemDistributions', () => {
           itemId: MC_ITEM,
           responseCount: 2,
           correctCount: 0,
+          scoreSum: '0.00',
+          maxSum: '2.00',
           answerCounts: [
             { key: 'A', isCorrect: false, count: 1 },
             { key: null, isCorrect: false, count: 1 },
@@ -227,8 +231,8 @@ describe('loadItemDistributions', () => {
     expect(d.correctCount).toBe(9);
     expect(d.answeredCount).toBe(11); // 12 − 1 blanco
     expect(d.byAnswer.get('B')).toBe(9);
-    expect(d.byAnswer.get('A')).toBe(2); // 1 + 1, sumados entre cohortes
-    // El caller deriva blankCount = totalResponses − answeredCount = 1.
+    expect(d.byAnswer.get('A')).toBe(2);
+    expect(d.tally).toEqual({ scoreSum: 9, maxSum: 12 });
   });
 
   it('suma las variantes de isCorrect de una misma clave', async () => {

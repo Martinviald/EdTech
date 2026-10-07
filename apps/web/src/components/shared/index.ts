@@ -12,22 +12,37 @@ export {
 export { PageTabs, type PageTab } from './PageTabs';
 export { FilterBar, type FilterField, type FilterOption } from './FilterBar';
 export { MultiSelectFilter, type MultiSelectOption } from './MultiSelectFilter';
+export { ActiveFilterChips, FilterMenu, type FilterDimension } from './FilterMenu';
 export { TopProgressBar } from './TopProgressBar';
 export { useOptimisticRoute } from './use-optimistic-route';
 export { MetaItem } from './MetaItem';
 export { StatusDot } from './StatusDot';
 export { StatusBadge, type StatusTone } from './StatusBadge';
 export { AlertCallout, type CalloutTone } from './AlertCallout';
+export { PendingCorrectionNotice } from './pending-correction-notice';
 export { Field } from './Field';
 export { Stepper, type Step } from './Stepper';
 export { EmptyState } from './EmptyState';
 export { MetricComparison, type MetricDelta } from './MetricComparison';
 export { MetricsGroup, type Metric } from './MetricsGroup';
-export { FilterBarSkeleton, KpiGridSkeleton, CardSkeleton, TableSkeleton } from './skeletons';
+export {
+  CompactFilterBarSkeleton,
+  FilterBarSkeleton,
+  KpiGridSkeleton,
+  CardSkeleton,
+  TableSkeleton,
+} from './skeletons';
 export { StatCard } from './StatCard';
 export { MetricTrendChip, type MetricTrend } from './metric-trend';
 export { PaginationControls } from './PaginationControls';
 export { ListSearchMemory, useRememberedHref } from './list-search-memory';
 export { BackLink } from './BackLink';
 export { Markdown } from './markdown';
-export { SampleDeltaChip, SampleTooltipBody, type SampleSubject } from './sample-contrast';
+export {
+  SampleComparisonLines,
+  SampleDeltaChip,
+  SampleTooltipBody,
+  type ComparisonLine,
+  type ComparisonSample,
+  type SampleSubject,
+} from './sample-contrast';

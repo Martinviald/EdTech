@@ -13,11 +13,15 @@ import {
 import {
   BENCHMARK_K_MIN_SCHOOLS,
   BENCHMARK_N_MIN_STUDENTS,
+  achievementPct,
+  addTally,
+  emptyTally,
   percentileOf,
   percentileRank,
   round2,
   sumBandCounts,
-  weightedAverage,
+  tallyOf,
+  type AchievementTally,
   type BenchmarkAccessLogModel,
   type BenchmarkAuditListQueryDto,
   type BenchmarkAuditListResponse,
@@ -285,8 +289,8 @@ export class BenchmarkingService {
     return {
       schoolCount: new Set(rows.map((r) => r.orgId)).size,
       studentCount,
-      avgAchievement: weightedAverage(
-        rows.map((r) => ({ value: toNum(r.avgAchievement), weight: r.studentCount })),
+      avgAchievement: this.pctOf(
+        tallyOf(rows.map((r) => ({ scoreSum: r.scoreSum, maxSum: r.maxSum }))),
       ),
       median: percentileOf(achievements, 50),
       p25: percentileOf(achievements, 25),
@@ -294,6 +298,11 @@ export class BenchmarkingService {
       bandCounts: sumBandCounts(rows.map((r) => r.bandCounts)),
       perSkill: this.buildCohortSkills(rows, yourRow),
     };
+  }
+
+  private pctOf(tally: AchievementTally): number | null {
+    const pct = achievementPct(tally);
+    return pct === null ? null : round2(pct);
   }
 
   /** Desempeño de tu colegio + percentil dentro de la cohorte. */
@@ -322,19 +331,15 @@ export class BenchmarkingService {
     rows: BenchmarkAggregate[],
     yourRow: BenchmarkAggregate | null,
   ): CohortSkillStat[] {
-    // Acumula achievement ponderado por studentCount para cada nodeId.
-    const acc = new Map<string, { name: string; sum: number; count: number }>();
+    const acc = new Map<string, { name: string; tally: AchievementTally }>();
     for (const row of rows) {
       for (const skill of row.perSkill ?? []) {
-        if (skill.achievement === null) continue;
-        const entry = acc.get(skill.nodeId) ?? {
-          name: skill.nodeName,
-          sum: 0,
-          count: 0,
-        };
-        entry.sum += skill.achievement * skill.studentCount;
-        entry.count += skill.studentCount;
-        acc.set(skill.nodeId, entry);
+        let entry = acc.get(skill.nodeId);
+        if (!entry) {
+          entry = { name: skill.nodeName, tally: emptyTally() };
+          acc.set(skill.nodeId, entry);
+        }
+        addTally(entry.tally, { scoreSum: skill.scoreSum, maxSum: skill.maxSum });
       }
     }
 
@@ -345,7 +350,7 @@ export class BenchmarkingService {
 
     const result: CohortSkillStat[] = [];
     for (const [nodeId, entry] of acc) {
-      const cohortAchievement = entry.count > 0 ? round2(entry.sum / entry.count) : null;
+      const cohortAchievement = this.pctOf(entry.tally);
       const yourAchievement = yourSkills.get(nodeId)?.achievement ?? null;
       const delta =
         cohortAchievement !== null && yourAchievement !== null

@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { JSX } from 'react';
-import { responseOutcome, type ResponseOutcome } from '@soe/types';
+import {
+  achievementPct,
+  addTally,
+  emptyTally,
+  responseOutcome,
+  type ResponseOutcome,
+} from '@soe/types';
 import type {
   ItemMatrixResponse,
   ItemTaxonomyRef,
@@ -10,6 +16,7 @@ import type {
   MatrixQuestionColumn,
   MatrixStudentRow,
   QuestionAnalysisResponse,
+  UserRole,
 } from '@soe/types';
 import { toast } from 'sonner';
 import {
@@ -32,6 +39,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { StudentLink } from '@/components/students/student-link';
+import { useTelemetry } from '@/lib/telemetry';
+import { SampleComparisonLines } from '@/components/shared/sample-contrast';
 import { nodeTypeLabel } from '@/lib/taxonomy-labels';
 import { QuestionDetailPanel } from '../components/question-detail-panel';
 import { TagFilterMenu, type TagFilterOption } from '../components/tag-filter-menu';
@@ -175,11 +185,21 @@ export function CrossTable({
   matrix,
   assessmentId,
   classGroupId,
+  roles = [],
 }: {
   matrix: ItemMatrixResponse;
   assessmentId: string;
   classGroupId?: string;
+  /** Roles del usuario: sin ellos el nombre del alumno no enlaza a su Ficha del estudiante. */
+  roles?: readonly UserRole[];
 }): JSX.Element {
+  const { track } = useTelemetry();
+  const sampleScope = matrix.references.sample ?? null;
+  const scopeLabel = useMemo(() => {
+    if (classGroupId) return 'Curso';
+    const courses = new Set(matrix.students.data.map((row) => row.classGroupId));
+    return courses.size > 1 ? 'Esta evaluación' : 'Curso';
+  }, [classGroupId, matrix.students.data]);
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<QuestionAnalysisResponse | null>(null);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
@@ -447,7 +467,16 @@ export function CrossTable({
                     <TableHead key={q.itemId} className="bg-background px-0.5 text-center">
                       <div className="flex flex-col items-center gap-0.5">
                         {/* Principal: el número de la pregunta abre el detalle. */}
-                        <Tooltip>
+                        <Tooltip
+                          onOpenChange={(isOpen) => {
+                            if (isOpen && q.references.sample && sampleScope) {
+                              track('benchmark.sample_viewed', {
+                                surface: SAMPLE_SURFACE,
+                                instrumentId: sampleScope.instrumentId,
+                              });
+                            }
+                          }}
+                        >
                           <TooltipTrigger asChild>
                             <button
                               type="button"
@@ -477,7 +506,31 @@ export function CrossTable({
                             {q.skill ? <p>Habilidad: {q.skill.nodeName}</p> : null}
                             {q.content ? <p>Contenido: {q.content.nodeName}</p> : null}
                             <p>Clave correcta: {q.correctKey ?? '—'}</p>
-                            <p>% de logro: {formatPct(q.correctRate)}</p>
+                            {q.references.sample && sampleScope ? (
+                              <div className="mt-1.5">
+                                <SampleComparisonLines
+                                  lines={[
+                                    { label: scopeLabel, value: q.correctRate },
+                                    { label: 'Nivel', value: q.references.grade.rate },
+                                  ]}
+                                  sample={{
+                                    value: q.references.sample.rate,
+                                    schoolCount: q.references.sample.schoolCount,
+                                    studentCount: sampleScope.studentCount,
+                                    refreshedAt: sampleScope.refreshedAt,
+                                  }}
+                                  surface={SAMPLE_SURFACE}
+                                />
+                              </div>
+                            ) : (
+                              <>
+                                <p>
+                                  % de logro · {scopeLabel.toLowerCase()}:{' '}
+                                  {formatPct(q.correctRate)}
+                                </p>
+                                <p>% de logro · nivel: {formatPct(q.references.grade.rate)}</p>
+                              </>
+                            )}
                             <p className="mt-1 text-muted-foreground">
                               Clic para ver el detalle de la pregunta.
                             </p>
@@ -504,15 +557,22 @@ export function CrossTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* TKT-22 — fila de referencia "% de logro del colegio" por pregunta:
-                  el promedio de TODA la org, con independencia del scope del
-                  usuario (un profesor ve su curso en las celdas de alumnos y el
-                  colegio completo aquí). La línea de "muestra de colegios"
-                  (benchmark inter-colegio) queda DIFERIDA hasta existir un pool
-                  multi-colegio; llegará como `q.references.sample` sin romper esto. */}
+              {/* Filas de referencia por pregunta: el nivel completo (con independencia
+                  del scope del usuario) y, para quien puede verla, la muestra de colegios. */}
               <LevelReferenceRow questions={displayQuestions} sublabel={levelSublabel} />
+              {sampleScope ? (
+                <SampleReferenceRow
+                  questions={displayQuestions}
+                  sublabel={`${sampleScope.schoolCount} colegios · ${sampleScope.studentCount} alumnos`}
+                />
+              ) : null}
               {displayStudents.map((row) => (
-                <StudentRow key={row.studentId} row={row} questions={displayQuestions} />
+                <StudentRow
+                  key={row.studentId}
+                  row={row}
+                  questions={displayQuestions}
+                  roles={roles}
+                />
               ))}
             </TableBody>
           </Table>
@@ -536,6 +596,8 @@ export function CrossTable({
   );
 }
 
+const SAMPLE_SURFACE = 'item_matrix';
+
 /** Color de texto de la referencia del colegio por % de logro (mismos cortes). */
 function referenceCellClass(rate: number | null): string {
   if (rate === null) return 'text-muted-foreground';
@@ -556,12 +618,10 @@ function describeScope(name: string, classGroupCount: number, studentCount: numb
  * T2-17 — Fila de referencia del tablero maestro: "% de logro del nivel" por
  * pregunta (`q.references.grade`), independiente del scope del usuario. Como los
  * instrumentos son siempre por nivel, es la referencia del colegio para esa
- * evaluación. Cuando exista el pool multi-colegio (TKT-20), la "muestra de
- * colegios" (`q.references.sample`) se agrega como una segunda fila análoga.
+ * evaluación. La muestra de colegios va en la fila siguiente (`SampleReferenceRow`).
  *
- * ⚠️ La columna "% Logro" es el % ponderado sobre TODAS las respuestas de TODOS
- * los alumnos del nivel (`sum(correctCount)/sum(responseCount)` de las columnas
- * visibles), NUNCA el promedio de los % por pregunta ni por curso. El subtítulo
+ * ⚠️ La columna "% Logro" es Σ puntaje ÷ Σ máximo de TODOS los alumnos del nivel sobre
+ * las columnas visibles, NUNCA el promedio de los % por pregunta ni por curso. El subtítulo
  * dice sobre cuántos cursos y alumnos agrega: sin eso, un nivel de un solo curso
  * se lee como un duplicado de la fila del alumno.
  */
@@ -572,14 +632,16 @@ function LevelReferenceRow({
   questions: MatrixQuestionColumn[];
   sublabel: string;
 }): JSX.Element {
-  // Agregado ponderado sobre las columnas VISIBLES (respeta el filtro por tags).
-  let totalResponses = 0;
-  let totalCorrect = 0;
+  // Σ puntaje ÷ Σ máximo sobre las columnas VISIBLES (respeta el filtro por tags): la
+  // misma regla que el % de cada pregunta (docs/diseno-logro-unificado-y-cohorte.md §3.1).
+  const total = emptyTally();
   for (const q of questions) {
-    totalResponses += q.references.grade.responseCount;
-    totalCorrect += q.references.grade.correctCount;
+    addTally(total, {
+      scoreSum: q.references.grade.scoreSum ?? 0,
+      maxSum: q.references.grade.maxSum ?? 0,
+    });
   }
-  const levelOverall = totalResponses > 0 ? (totalCorrect / totalResponses) * 100 : null;
+  const levelOverall = achievementPct(total);
 
   return (
     <TableRow className="border-b-2 bg-muted/30">
@@ -610,12 +672,73 @@ function LevelReferenceRow({
   );
 }
 
+/**
+ * Fila "% Logro muestra": el % de la muestra de colegios en cada pregunta (§5.3 del diseño). El
+ * total es Σ puntaje ÷ Σ máximo de la muestra sobre las columnas visibles que tienen muestra y que
+ * el nivel tiene corregidas, para comparar sobre las mismas preguntas que la fila del nivel (D9).
+ */
+function SampleReferenceRow({
+  questions,
+  sublabel,
+}: {
+  questions: MatrixQuestionColumn[];
+  sublabel: string;
+}): JSX.Element {
+  const total = emptyTally();
+  let compared = 0;
+  for (const q of questions) {
+    const sample = q.references.sample;
+    if (!sample || !(q.references.grade.maxSum > 0)) continue;
+    addTally(total, { scoreSum: sample.scoreSum, maxSum: sample.maxSum });
+    compared += 1;
+  }
+  const sampleOverall = achievementPct(total);
+  const coverage =
+    compared < questions.length
+      ? ` · total sobre ${compared} de ${questions.length} preguntas`
+      : '';
+
+  return (
+    <TableRow className="border-b-2 bg-muted/20">
+      <TableCell className="sticky left-0 z-10 w-[150px] bg-muted/40 px-2 align-top">
+        <div className="w-[134px]">
+          <span className="block text-sm font-semibold">% Logro muestra</span>
+          <span className="block text-xs font-normal text-muted-foreground">
+            {sublabel}
+            {coverage}
+          </span>
+        </div>
+      </TableCell>
+      <TableCell className="w-[68px] px-2 text-right font-semibold tabular-nums">
+        {formatPct(sampleOverall)}
+      </TableCell>
+      {questions.map((q) => {
+        const rate = q.references.sample?.rate ?? null;
+        return (
+          <TableCell
+            key={q.itemId}
+            className={cn(
+              'px-0.5 py-1.5 text-center text-xs font-semibold tabular-nums',
+              referenceCellClass(rate),
+            )}
+            title={`Muestra · Pregunta ${q.position}: ${formatPct(rate)} de logro`}
+          >
+            {formatPct(rate)}
+          </TableCell>
+        );
+      })}
+    </TableRow>
+  );
+}
+
 function StudentRow({
   row,
   questions,
+  roles,
 }: {
   row: MatrixStudentRow;
   questions: MatrixQuestionColumn[];
+  roles: readonly UserRole[];
 }): JSX.Element {
   // Mapa itemId → celda para emparejar columnas aunque el orden no coincida.
   const cellByItem = new Map<string, MatrixCell>();
@@ -645,7 +768,9 @@ function StudentRow({
               row.classGroupName ? ` · ${row.classGroupName}` : ''
             } · ${row.correctCount}/${row.answeredCount} correctas`}
           >
-            {displayName}
+            <StudentLink studentId={row.studentId} roles={roles}>
+              {displayName}
+            </StudentLink>
           </div>
         </div>
       </TableCell>

@@ -78,6 +78,11 @@ describe('grade-calculator — golden DIA (cero regresión)', () => {
   });
 });
 
+const DIA_BANDS_FOR_PENDING = [
+  { id: 'b1', key: 'nivel_1', label: 'Nivel I', order: 1, minThreshold: 0, maxThreshold: 0.5 },
+  { id: 'b2', key: 'nivel_2', label: 'Nivel II', order: 2, minThreshold: 0.5, maxThreshold: 1 },
+];
+
 describe('aggregateStudentResults — ítems pendientes no contaminan el % (fuente única)', () => {
   // Instrumento MIXTO: 2 MCQ auto-corregidos (1 correcto) + 1 ítem pendiente
   // (no auto-corregible: isCorrect/rawScore/finalScore null, maxScore 5). El
@@ -102,11 +107,22 @@ describe('aggregateStudentResults — ítems pendientes no contaminan el % (fuen
     const scoredOnly = mixed.filter((r) => r.isCorrect !== null);
     const withPending = aggregateStudentResults(mixed, DIA_SCALE)[0]!;
     const preFiltered = aggregateStudentResults(scoredOnly, DIA_SCALE)[0]!;
-    expect(withPending.percentage).toBeCloseTo(preFiltered.percentage, 10);
+    expect(withPending.percentage).toBeCloseTo(preFiltered.percentage!, 10);
     expect(withPending.totalScore).toBe(preFiltered.totalScore);
     expect(withPending.maxScore).toBe(preFiltered.maxScore);
     expect(withPending.isComplete).toBe(false); // con pendiente
     expect(preFiltered.isComplete).toBe(true); // sin pendiente
+  });
+
+  it('sin preguntas corregidas no hay logro: percentage, nota y nivel en null', () => {
+    const allPending = mixed.filter((r) => r.isCorrect === null);
+    const [r] = aggregateStudentResults(allPending, DIA_SCALE, DIA_BANDS_FOR_PENDING);
+    expect(r!.maxScore).toBe(0);
+    expect(r!.percentage).toBeNull();
+    expect(r!.grade).toBeNull();
+    expect(r!.performanceLevel).toBeNull();
+    expect(r!.performanceBandId).toBeNull();
+    expect(r!.isComplete).toBe(false);
   });
 });
 
@@ -374,6 +390,18 @@ describe('aggregateSkillResults — ponderación por maxScore y finalScore (#7/#
     expect(r!.percentage).toBeCloseTo(1, 10);
     expect(r!.totalCount).toBe(2); // conteo de ítems sigue contando ambos
     expect(r!.correctCount).toBe(1);
+    expect(r!.scoreSum).toBe(4);
+    expect(r!.maxSum).toBe(4);
+  });
+
+  it('nodo sin preguntas corregidas: percentage y nivel en null, tally vacío', () => {
+    const [r] = aggregateSkillResults([
+      { studentId: 's', itemId: 'open', isCorrect: null, rawScore: null, finalScore: null, maxScore: 2, itemPosition: 1, taxonomyNodeIds: ['n'] },
+    ]);
+    expect(r!.percentage).toBeNull();
+    expect(r!.performanceLevel).toBeNull();
+    expect(r!.scoreSum).toBe(0);
+    expect(r!.maxSum).toBe(0);
   });
 });
 

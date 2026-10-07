@@ -128,6 +128,18 @@ export function buildInstrumentHistoryKey(ref: ComparabilityInstrumentRef): stri
   return withTrack([ref.type, ref.subjectId ?? NONE, ref.gradeId ?? NONE].join('|'), ref);
 }
 
+/**
+ * ¿Se pueden comparar dos evaluaciones lado a lado? Sí cuando sus instrumentos miden lo
+ * mismo (tipo, asignatura, grado y rama electiva): la misma historia de instrumento, en
+ * cualquier año o momento. Es la regla del comparador de evaluaciones, con y sin IA.
+ */
+export function areInstrumentsComparable(
+  a: ComparabilityInstrumentRef,
+  b: ComparabilityInstrumentRef,
+): boolean {
+  return buildInstrumentHistoryKey(a) === buildInstrumentHistoryKey(b);
+}
+
 /** El momento anterior del ciclo, o `null` si es el primero (o no declara momento). */
 export function previousApplicationPeriod(
   period: InstrumentApplicationPeriod | null,
@@ -245,34 +257,71 @@ export function deltaInPoints(current: number | null, baseline: number | null): 
 
 // ── Severidad de una unidad comparable ───────────────────────────────────────
 
-/**
- * Umbrales de concentración en la banda inferior del instrumento que determinan la
- * severidad de una unidad.
- *
- * Se expresan como % de alumnos, NO como % de logro: un corte absoluto de logro
- * (el viejo "curso bajo 60%") no significa lo mismo en instrumentos con cortes
- * distintos, que es justo lo que #1C corrige. "Cuántos alumnos quedaron en el nivel
- * más bajo de SU instrumento" sí es comparable entre instrumentos.
- */
-export const SEVERITY_LOWEST_BAND_THRESHOLDS = { high: 40, medium: 25 } as const;
+/** Lo mínimo de una banda que hace falta para ubicar un % de logro en ella. */
+export type SeverityBand = {
+  key: string;
+  label: string;
+  order: number;
+  minThreshold: number; // 0..1 inclusivo
+  maxThreshold: number; // 0..1 exclusivo, salvo la banda superior
+};
 
 /**
- * Severidad de una unidad a partir de la concentración en su banda inferior.
+ * Banda del instrumento en la que cae un % de logro (0..100).
  *
- * `null` cuando el instrumento no define bandas ni niveles: sin corte propio no hay
- * forma honesta de decir si está bien o mal, y ordenar por un número inventado es
- * exactamente el problema que este módulo existe para evitar. Esas unidades van al
+ * Es la misma regla que clasifica a cada alumno (`classifyByBands`): rango
+ * `[min, max)` con la banda superior cerrada arriba. Se repite acá en vez de
+ * importarla para que este módulo no dependa de `utils/`.
+ */
+export function bandForAchievement<B extends SeverityBand>(
+  achievement: number | null,
+  bands: readonly B[] | null | undefined,
+): B | null {
+  if (achievement == null || !bands || bands.length === 0) return null;
+  const p = Math.max(0, Math.min(1, achievement / 100));
+  const sorted = [...bands].sort((a, b) => a.order - b.order);
+  const top = sorted[sorted.length - 1]!;
+  for (const band of sorted) {
+    const isTop = band === top;
+    if (p >= band.minThreshold && (p < band.maxThreshold || (isTop && p <= band.maxThreshold))) {
+      return band;
+    }
+  }
+  return null;
+}
+
+/**
+ * Severidad de una evaluación o unidad: la banda de SU instrumento en la que cae el
+ * promedio de logro.
+ *
+ * Es el mismo criterio con el que se pintan las habilidades y los nodos, así que la
+ * gravedad y los colores del detalle no se contradicen. No es un corte absoluto de
+ * logro (el viejo "curso bajo 60%" que #1C retiró): el umbral es el del instrumento,
+ * y un 55% puede ser grave en una prueba y leve en otra.
+ *
+ *  - banda inferior → `high`
+ *  - banda superior → `low`
+ *  - bandas intermedias → `medium` (un instrumento binario, como el DIA Diagnóstico,
+ *    nunca da `medium`)
+ *
+ * `null` cuando el instrumento no define al menos dos bandas o no hay promedio: sin
+ * corte propio no hay forma honesta de decir si está bien o mal. Esas unidades van al
  * final de la vista, ordenadas por recencia.
  *
- * Cuando exista el motor de alertas (roadmap #3B), la severidad pasa a ser el MÁXIMO
- * entre ésta y la del delta contra el baseline: el movimiento puede subir la
- * severidad, nunca bajarla.
+ * La concentración de alumnos en la banda inferior sigue existiendo como dato y como
+ * alerta (`ALERT_THRESHOLDS.bandConcentration`), pero ya no gobierna la severidad.
  */
-export function severityFromLowestBandShare(share: number | null): UnitSeverityValue | null {
-  if (share == null) return null;
-  if (share >= SEVERITY_LOWEST_BAND_THRESHOLDS.high) return 'high';
-  if (share >= SEVERITY_LOWEST_BAND_THRESHOLDS.medium) return 'medium';
-  return 'low';
+export function severityFromAverageBand(
+  achievement: number | null,
+  bands: readonly SeverityBand[] | null | undefined,
+): UnitSeverityValue | null {
+  if (!bands || bands.length < 2) return null;
+  const band = bandForAchievement(achievement, bands);
+  if (!band) return null;
+  const orders = bands.map((b) => b.order);
+  if (band.order === Math.min(...orders)) return 'high';
+  if (band.order === Math.max(...orders)) return 'low';
+  return 'medium';
 }
 
 type UnitSeverityValue = 'high' | 'medium' | 'low';

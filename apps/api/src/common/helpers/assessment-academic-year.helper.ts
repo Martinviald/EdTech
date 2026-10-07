@@ -54,6 +54,8 @@ export function scopedAssessmentResults(tx: Database, assessmentIds: string[]) {
       assessmentId: assessmentResults.assessmentId,
       studentId: assessmentResults.studentId,
       percentage: assessmentResults.percentage,
+      totalScore: assessmentResults.totalScore,
+      maxScore: assessmentResults.maxScore,
       performanceBandId: assessmentResults.performanceBandId,
       priorPerformanceBandId: assessmentResults.priorPerformanceBandId,
       instrumentId: assessments.instrumentId,

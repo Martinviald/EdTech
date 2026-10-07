@@ -20,8 +20,18 @@ import {
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
   INSTRUMENT_TYPE_LABELS,
+  achievementPct,
+  addTally,
   buildComparabilityMeta,
+  classifyTypicalZone,
+  emptyTally,
+  percentileOf,
+  percentileRank,
+  round2,
+  sampleDeltaPp,
   trackOrSubjectTestKey,
+  type AchievementTally,
+  type CellSample,
   type ComparabilityInstrumentRef,
   type InstrumentApplicationPeriod,
   type InstrumentType,
@@ -46,6 +56,11 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
+  BenchmarkSamplesService,
+  type ItemSetRequest,
+  type ItemSetSampleResult,
+} from '../benchmarking/benchmark-samples.service';
+import {
   buildAssessmentScopeCondition,
   resolveClassGroupScope,
   type ClassGroupScope,
@@ -61,7 +76,12 @@ import {
   type CellAggregate,
   type MetricContext,
 } from './master-board.metrics';
-import { loadMatrixRows, type MatrixRow } from './queries/matrix-rows.query';
+import {
+  loadMatrixItemTallies,
+  loadMatrixRows,
+  type MatrixRow,
+  type MatrixRowsFilter,
+} from './queries/matrix-rows.query';
 import {
   loadLegacyTakeRows,
   loadProcessLinkSummaries,
@@ -119,18 +139,28 @@ type SubjectAccumulator = {
 type CellContext = {
   refsByInstrument: Map<string, ComparabilityInstrumentRef>;
   bandsByInstrument: Map<string, EffectiveBands>;
+  samples: Map<string, CellSample>;
+  canSeeSample: boolean;
 };
 
 type CellView = Pick<
   MasterBoardCell,
-  'studentsAssessed' | 'metrics' | 'mixed' | 'hasLevels' | 'comparability'
+  'studentsAssessed' | 'metrics' | 'mixed' | 'hasLevels' | 'comparability' | 'sample'
 >;
+
+type CellItems = {
+  instrumentIds: Set<string>;
+  items: Map<string, AchievementTally>;
+};
 
 const LEGACY_TAKE_SUFFIX = ' · sin proceso';
 
 @Injectable()
 export class MasterBoardService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly samples: BenchmarkSamplesService,
+  ) {}
 
   async getTakes(
     user: JwtPayload,
@@ -184,25 +214,29 @@ export class MasterBoardService {
   }
 
   async getMatrix(user: JwtPayload, query: MasterBoardMatrixQueryDto): Promise<MasterBoardMatrix> {
-    const primaryMetricKey = resolvePrimaryMetricKey(query.metric);
+    const canSeeSample = this.samples.canSeeSample(user);
+    const primaryMetricKey = resolvePrimaryMetricKey(query.metric, canSeeSample);
     const orgId = user.orgId;
-    if (!orgId) return this.emptyMatrix(this.emptyToma(query), primaryMetricKey);
+    if (!orgId) return this.emptyMatrix(this.emptyToma(query), primaryMetricKey, canSeeSample);
 
     return withOrgContext(this.db, orgId, async (tx) => {
       const scope = await resolveClassGroupScope(tx, user, orgId);
       if (!scope.scopeAll && scope.classGroupIds.length === 0) {
-        return this.emptyMatrix(this.emptyToma(query), primaryMetricKey);
+        return this.emptyMatrix(this.emptyToma(query), primaryMetricKey, canSeeSample);
       }
 
       const toma = await this.resolveToma(tx, orgId, scope, query);
-      if (toma.assessmentIds.length === 0) return this.emptyMatrix(toma, primaryMetricKey);
+      if (toma.assessmentIds.length === 0) {
+        return this.emptyMatrix(toma, primaryMetricKey, canSeeSample);
+      }
 
-      const rows = await loadMatrixRows(tx, {
+      const filter: MatrixRowsFilter = {
         assessmentIds: toma.assessmentIds,
         scopedClassGroupIds: scope.scopeAll ? null : scope.classGroupIds,
         gradeIds: query.gradeId,
         subjectIds: query.subjectId,
-      });
+      };
+      const rows = await loadMatrixRows(tx, filter);
       const instrumentIds = new Set<string>();
       for (const row of rows) for (const id of row.instrumentIds ?? []) instrumentIds.add(id);
       const bandsByInstrument = await resolveEffectiveBandsForInstruments(tx, [...instrumentIds]);
@@ -211,19 +245,26 @@ export class MasterBoardService {
         rows.map((row) => row.classGroupId),
       );
 
+      const samples =
+        canSeeSample && rows.length > 0
+          ? await this.loadCellSamples(tx, orgId, user.userId, filter, scope.scopeAll)
+          : new Map<string, CellSample>();
+
       const { subjects: subjectList, grades: gradeList } = this.assembleMatrix(
         rows,
         teacherByCell,
         {
           refsByInstrument: new Map(toma.refs.map((ref) => [ref.instrumentId, ref])),
           bandsByInstrument,
+          samples,
+          canSeeSample,
         },
       );
 
       return {
         take: this.toResolvedTake(toma),
         primaryMetricKey,
-        availableMetrics: availableMetrics(),
+        availableMetrics: availableMetrics(canSeeSample),
         subjects: subjectList,
         grades: gradeList,
         comparability: buildComparabilityMeta(toma.refs, toma.assessmentIds.length),
@@ -237,7 +278,7 @@ export class MasterBoardService {
     teacherUserId: string,
     query: TeacherPerformanceQueryDto,
   ): Promise<TeacherPerformance> {
-    const primaryMetricKey = resolvePrimaryMetricKey(undefined);
+    const primaryMetricKey = resolvePrimaryMetricKey(undefined, false);
     const orgId = user.orgId;
     const empty: TeacherPerformance = {
       teacher: { userId: teacherUserId, name: '', email: '' },
@@ -290,7 +331,7 @@ export class MasterBoardService {
 
       const classGroupIds = Array.from(new Set(assignments.map((row) => row.classGroupId)));
       const statByCell = await this.loadCourseSubjectStats(tx, orgId, classGroupIds);
-      const context: MetricContext = { bands: LEGACY_PERFORMANCE_BANDS };
+      const context: MetricContext = { bands: LEGACY_PERFORMANCE_BANDS, sample: null };
 
       const classMap = new Map<string, TeacherPerformanceClass>();
       for (const assignment of assignments) {
@@ -311,7 +352,7 @@ export class MasterBoardService {
           subjectId: assignment.subjectId,
           subjectName: assignment.subjectName,
           role: assignment.role === 'assistant' ? 'assistant' : 'primary',
-          metrics: computeMetrics(aggregate, context),
+          metrics: computeMetrics(aggregate, context, false),
           studentsAssessed: aggregate.studentsAssessed,
           assessmentIds: cell?.assessmentIds ?? [],
         });
@@ -663,11 +704,12 @@ export class MasterBoardService {
   private emptyMatrix(
     toma: TomaResolution,
     primaryMetricKey: MasterBoardMatrix['primaryMetricKey'],
+    canSeeSample: boolean,
   ): MasterBoardMatrix {
     return {
       take: this.toResolvedTake(toma),
       primaryMetricKey,
-      availableMetrics: availableMetrics(),
+      availableMetrics: availableMetrics(canSeeSample),
       subjects: [],
       grades: [],
       comparability: buildComparabilityMeta([]),
@@ -872,7 +914,12 @@ export class MasterBoardService {
     const cells: MasterBoardCell[] = [];
     for (const subject of subjectList) {
       for (const test of subject.tests) {
-        const view = this.buildCellView(grade.cells.get(test.testKey), test, context);
+        const view = this.buildCellView(
+          grade.cells.get(test.testKey),
+          test,
+          context,
+          this.gradeCellKey(grade.gradeId, test.testKey),
+        );
         if (view.hasLevels) test.hasLevels = true;
         if (view.mixed) test.mixed = true;
         cells.push({ subjectId: subject.subjectId, testKey: test.testKey, ...view });
@@ -889,7 +936,12 @@ export class MasterBoardService {
             courseCells.push({
               subjectId: subject.subjectId,
               testKey: test.testKey,
-              ...this.buildCellView(cell, test, context),
+              ...this.buildCellView(
+                cell,
+                test,
+                context,
+                this.courseCellKey(course.classGroupId, test.testKey),
+              ),
               teacher: teacherByCell.get(`${course.classGroupId}:${subject.subjectId}`) ?? null,
               assessmentIds: cell ? Array.from(cell.assessmentIds) : [],
             });
@@ -905,6 +957,7 @@ export class MasterBoardService {
     cell: CellAccumulator | undefined,
     test: MasterBoardTest,
     context: CellContext,
+    sampleKey: string,
   ): CellView {
     const aggregate = cell?.aggregate ?? emptyCellAggregate();
     const instrumentIds = cell ? Array.from(cell.instrumentIds) : [];
@@ -919,7 +972,12 @@ export class MasterBoardService {
         ? (context.bandsByInstrument.get(singleInstrumentId)?.bands ?? [])
         : [];
     const hasLevels = bands.length > 0;
-    const metrics: MetricValue[] = computeMetrics(aggregate, { bands: hasLevels ? bands : null });
+    const sample = singleInstrumentId ? (context.samples.get(sampleKey) ?? null) : null;
+    const metrics: MetricValue[] = computeMetrics(
+      aggregate,
+      { bands: hasLevels ? bands : null, sample },
+      context.canSeeSample,
+    );
 
     return {
       studentsAssessed: aggregate.studentsAssessed,
@@ -927,6 +985,95 @@ export class MasterBoardService {
       mixed: test.source === 'subject' && instrumentIds.length > 1,
       hasLevels,
       comparability: buildComparabilityMeta(refs, cell?.assessmentIds.size),
+      sample,
+    };
+  }
+
+  private gradeCellKey(gradeId: string, testKey: string): string {
+    return `grade:${gradeId}:${testKey}`;
+  }
+
+  private courseCellKey(classGroupId: string, testKey: string): string {
+    return `course:${classGroupId}:${testKey}`;
+  }
+
+  private async loadCellSamples(
+    tx: Database,
+    orgId: string,
+    userId: string,
+    filter: MatrixRowsFilter,
+    fullScope: boolean,
+  ): Promise<Map<string, CellSample>> {
+    const itemRows = await loadMatrixItemTallies(tx, filter);
+    const cells = new Map<string, CellItems>();
+    const gradeKeys = new Set<string>();
+    for (const row of itemRows) {
+      const testKey = row.trackId ? `track:${row.trackId}` : `subject:${row.subjectId}`;
+      const gradeKey = this.gradeCellKey(row.gradeId, testKey);
+      gradeKeys.add(gradeKey);
+      const tally = { scoreSum: Number(row.scoreSum), maxSum: Number(row.maxSum) };
+      for (const key of [gradeKey, this.courseCellKey(row.classGroupId, testKey)]) {
+        let cell = cells.get(key);
+        if (!cell) {
+          cell = { instrumentIds: new Set(), items: new Map() };
+          cells.set(key, cell);
+        }
+        cell.instrumentIds.add(row.instrumentId);
+        const itemTally = cell.items.get(row.itemId);
+        if (itemTally) addTally(itemTally, tally);
+        else cell.items.set(row.itemId, { ...tally });
+      }
+    }
+
+    const requests: ItemSetRequest[] = [];
+    for (const [key, cell] of cells) {
+      const [instrumentId] = cell.instrumentIds;
+      if (cell.instrumentIds.size !== 1 || !instrumentId) continue;
+      requests.push({ key, instrumentId, itemIds: Array.from(cell.items.keys()) });
+    }
+    const results = await this.samples.getItemSetSamples(requests, tx);
+
+    const samples = new Map<string, CellSample>();
+    const sampledInstruments = new Set<string>();
+    for (const [key, result] of results) {
+      const cell = cells.get(key);
+      if (!cell) continue;
+      sampledInstruments.add(result.instrumentId);
+      samples.set(key, this.toCellSample(result, cell, fullScope && gradeKeys.has(key)));
+    }
+    if (sampledInstruments.size > 0) {
+      await this.samples.logSampleAccess(tx, orgId, userId, Array.from(sampledInstruments));
+    }
+    return samples;
+  }
+
+  private toCellSample(
+    result: ItemSetSampleResult,
+    cell: CellItems,
+    withPosition: boolean,
+  ): CellSample {
+    const cellTally = emptyTally();
+    for (const itemId of result.comparedItemIds) {
+      const itemTally = cell.items.get(itemId);
+      if (itemTally) addTally(cellTally, itemTally);
+    }
+    const cellPct = achievementPct(cellTally);
+    const cellValue = cellPct === null ? null : round2(cellPct);
+    const p25 = percentileOf(result.schoolValues, 25);
+    const p75 = percentileOf(result.schoolValues, 75);
+    return {
+      instrumentId: result.instrumentId,
+      label: result.label,
+      value: result.value,
+      cellValue,
+      deltaPp: sampleDeltaPp(cellValue, result.value),
+      schoolCount: result.schoolCount,
+      studentCount: result.studentCount,
+      comparedItems: result.comparedItemIds.length,
+      totalItems: cell.items.size,
+      percentile: withPosition ? percentileRank(result.schoolValues, cellValue) : null,
+      typicalZone: withPosition ? classifyTypicalZone(cellValue, p25, p75) : null,
+      refreshedAt: result.refreshedAt,
     };
   }
 

@@ -255,18 +255,14 @@ function baseSelectResults(): unknown[][] {
         ],
       },
     ],
-    // 8. buildSkills → assessment_skill_stats, ya agregado en SQL al grano
-    // (nodo × curso). `pctSum`/`pctWeight` son el promedio ponderado por
-    // studentCount: 120/4 = 30% y 320/4 = 80%, los mismos números que daba el
-    // `avg(skill_results.percentage)` que reemplaza.
     [
       {
         nodeId: 'n2',
         nodeName: 'Interpretar',
         nodeType: 'skill',
         nodeCode: null,
-        pctSum: '120.00',
-        pctWeight: 4,
+        scoreSum: '12.00',
+        maxSum: '40.00',
         studentsAssessed: 4,
       },
       {
@@ -274,10 +270,14 @@ function baseSelectResults(): unknown[][] {
         nodeName: 'Localizar información',
         nodeType: 'skill',
         nodeCode: null,
-        pctSum: '320.00',
-        pctWeight: 4,
+        scoreSum: '32.00',
+        maxSum: '40.00',
         studentsAssessed: 4,
       },
+    ],
+    [
+      { classGroupId: 'cg1', scoreSum: '33.00', maxSum: '40.00' },
+      { classGroupId: 'cg2', scoreSum: '11.00', maxSum: '30.00' },
     ],
     // 9. loadWeakestSkillPerStudent (atRisk = s3, s4)
     [
@@ -288,21 +288,21 @@ function baseSelectResults(): unknown[][] {
 }
 
 describe('AssessmentReportService.getReport', () => {
-  it('sin escala configurada: reporta cobertura/logro/nivel pero anula los campos de nota (TKT-04)', async () => {
+  it('sin escala configurada: reporta cobertura, logro Σpuntaje/Σmáximo de los cursos (44/70) y nivel, pero anula los campos de nota (TKT-04)', async () => {
     const svc = makeService(makeDb(baseSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
 
     expect(res.summary.studentsEvaluated).toBe(4);
     expect(res.summary.studentsEnrolled).toBe(5);
     expect(res.summary.coverageRate).toBeCloseTo(80);
-    expect(res.summary.averageAchievement).toBeCloseTo(57.5);
+    expect(res.summary.averageAchievement).toBeCloseTo(62.857, 2);
     // TKT-04 — instrumento sin grading scale: no se inventa el corte 4.0.
     expect(res.summary.hasGradingScale).toBe(false);
     expect(res.summary.averageGrade).toBeNull();
     expect(res.summary.passingGrade).toBeNull();
     expect(res.summary.passingRate).toBeNull();
     // El % de logro y el nivel de desempeño NO dependen de la escala de notas.
-    expect(res.summary.performanceLevel).toBe('elementary'); // 57.5% → elemental
+    expect(res.summary.performanceLevel).toBe('elementary');
     expect(res.meta.itemsCount).toBe(2);
     // Sin escala, la comparativa por curso tampoco reporta tasa de aprobación.
     expect(res.courseComparison.every((c) => c.passingRate === null)).toBe(true);
@@ -323,7 +323,7 @@ describe('AssessmentReportService.getReport', () => {
     expect(res.summary.passingRate).toBeCloseTo(50); // 6.30 y 5.00 aprueban
   });
 
-  it('distribuye los niveles y ordena la comparativa por curso con su brecha', async () => {
+  it('distribuye los niveles y ordena la comparativa por curso con su logro Σ/Σ (33/40 y 11/30) y su brecha contra 44/70', async () => {
     const svc = makeService(makeDb(baseSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
 
@@ -335,14 +335,13 @@ describe('AssessmentReportService.getReport', () => {
       advanced: 1,
     });
 
-    // 3°A (82.5%) por delante de 3°B (32.5%); brechas simétricas vs 57.5%.
     expect(res.courseComparison.map((c) => c.classGroupName)).toEqual(['3°A', '3°B']);
     const [a, b] = res.courseComparison;
     expect(a.averageAchievement).toBeCloseTo(82.5);
-    expect(a.gapVsAverage).toBeCloseTo(25);
+    expect(a.gapVsAverage).toBeCloseTo(19.643, 2);
     expect(a.criticalStudents).toBe(0);
-    expect(b.averageAchievement).toBeCloseTo(32.5);
-    expect(b.gapVsAverage).toBeCloseTo(-25);
+    expect(b.averageAchievement).toBeCloseTo(36.667, 2);
+    expect(b.gapVsAverage).toBeCloseTo(-26.19, 2);
     expect(b.criticalStudents).toBe(2); // elemental + insuficiente
   });
 
@@ -365,11 +364,10 @@ describe('AssessmentReportService.getReport', () => {
     expect(i2.flags).toContain('dominant_error');
   });
 
-  it('ordena habilidades por brecha y deriva fortalezas/brechas y alumnos en foco', async () => {
+  it('ordena habilidades por brecha (12/40 antes que 32/40) y deriva fortalezas/brechas y alumnos en foco', async () => {
     const svc = makeService(makeDb(baseSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
 
-    // skills asc por logro: Interpretar (30%) antes que Localizar (80%).
     expect(res.skills[0].nodeName).toBe('Interpretar');
     expect(res.highlights.gaps[0]).toBe('Interpretar');
     expect(res.highlights.strengths[0]).toBe('Localizar información');
@@ -491,6 +489,7 @@ describe('AssessmentReportService.getReport', () => {
     // loadFamilyRows + loadBandsForInstruments (2 selects), no los 4 del caso
     // 'none' de la base. Reemplaza el bloque de bandas por el de 'own'.
     results.splice(7, 4, ...effectiveBandsOwnSelects(DIA_BANDS));
+    results[11] = [{ classGroupId: 'cg1', scoreSum: '90.00', maxSum: '120.00' }];
     return results;
   }
 
@@ -504,11 +503,8 @@ describe('AssessmentReportService.getReport', () => {
     const results = baseSelectResults();
     (results[0][0] as Record<string, unknown>).dataGranularity = 'aggregate_only';
     results[4] = []; // loadEvaluatedStudents sin filas
-    results.splice(5, 1); // loadStudentClassGroups no consulta con 0 alumnos
-    // Tras el splice: pre-band 0..5, bloque de bandas 'none' 6..9, loadItemCohortStats
-    // 10, buildSkills 11, loadCohortOverallAchievement 12, loadCohortLevelCounts 13.
-    // loadCohortOverallAchievement (agrupado por curso): Σscore/Σmax = 90/120 = 75%, N=4.
-    results[12] = [{ scoreSum: '90.00', maxSum: '120.00', studentsAssessed: 4 }];
+    results.splice(5, 1);
+    results.splice(12, 2, [{ scoreSum: '90.00', maxSum: '120.00', studentsAssessed: 4 }]);
     return results;
   }
 
@@ -565,7 +561,7 @@ describe('AssessmentReportService.getReport', () => {
     expect(legacy).toEqual({ insufficient: 2, elementary: 0, adequate: 0, advanced: 2 });
   });
 
-  it('con datos agregados sirve ítems y habilidades desde el read-model, y anula sólo lo irreducible', async () => {
+  it('con datos agregados sirve ítems, habilidades y el logro del curso (90/120) desde el read-model aunque no haya % por alumno', async () => {
     const svc = makeService(makeDb(aggregateSelectResults()));
     const res = await svc.getReport(makeUser(), { assessmentId: ASSESSMENT_ID });
 
@@ -579,10 +575,11 @@ describe('AssessmentReportService.getReport', () => {
     expect(i2.difficulty).toBeCloseTo(25);
     expect(i2.totalResponses).toBe(4);
     expect(i2.topDistractorKey).toBe('C');
-    expect(res.skills.map((s) => s.averageAchievement)).toEqual([30, 80]);
+    expect(res.skills[0].averageAchievement).toBeCloseTo(30);
+    expect(res.skills[1].averageAchievement).toBeCloseTo(80);
 
-    // §8.5 — el informe oficial no trae el % de cada alumno, así que no hay promedio.
-    expect(res.summary.averageAchievement).toBeNull();
+    expect(res.summary.averageAchievement).toBeCloseTo(75);
+    expect(res.courseComparison[0].averageAchievement).toBeCloseTo(75);
   });
 
   it('con datos agregados distribuye por banda leyendo el nivel importado, no re-clasificando el %', async () => {

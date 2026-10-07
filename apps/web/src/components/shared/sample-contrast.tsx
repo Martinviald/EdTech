@@ -191,3 +191,92 @@ export function SampleDeltaChip({
     </TooltipProvider>
   );
 }
+
+/**
+ * Una línea de la comparación: "Curso 58,1%", "Nivel 64,2%". `withDelta: false` muestra el valor
+ * sin diferencia, cuando no está calculado sobre las mismas preguntas que la muestra.
+ */
+export type ComparisonLine = { label: string; value: number | null; withDelta?: boolean };
+
+/** La muestra contra la que se compara, ya calculada para el grupo y sus preguntas (D9). */
+export type ComparisonSample = {
+  value: number | null;
+  schoolCount: number;
+  studentCount: number;
+  refreshedAt?: string;
+  /** Preguntas sobre las que se comparó, y cuántas tenía el grupo. */
+  comparedItems?: number;
+  totalItems?: number;
+  percentile?: number | null;
+  typicalZone?: TypicalZone | null;
+};
+
+/**
+ * Bloque de tooltip "Curso · Nivel · Muestra" con la diferencia de cada línea contra la muestra
+ * (docs/diseno-logro-unificado-y-cohorte.md §5). Lo comparten el tablero maestro, `/detalle` y
+ * `/resultados`. Dice sobre cuántas preguntas se comparó cuando no son todas.
+ */
+export function SampleComparisonLines({
+  lines,
+  sample,
+  instrumentId,
+  surface,
+}: {
+  lines: readonly ComparisonLine[];
+  sample: ComparisonSample;
+  instrumentId?: string;
+  surface: string;
+}) {
+  const { track } = useTelemetry();
+  const missing =
+    sample.comparedItems !== undefined && sample.totalItems !== undefined
+      ? sample.totalItems - sample.comparedItems
+      : 0;
+
+  return (
+    <div className="space-y-1.5 text-xs">
+      <dl className="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-0.5 tabular-nums">
+        {lines.map((line) => {
+          const delta = line.withDelta === false ? null : sampleDeltaPp(line.value, sample.value);
+          return (
+            <div key={line.label} className="contents">
+              <dt className="text-muted-foreground">{line.label}</dt>
+              <dd className="text-right font-medium">{formatPct(line.value)}</dd>
+              <dd className="text-right text-muted-foreground">
+                {delta === null ? '' : formatPp(delta)}
+              </dd>
+            </div>
+          );
+        })}
+        <dt className="text-muted-foreground">Muestra</dt>
+        <dd className="text-right font-medium">{formatPct(sample.value)}</dd>
+        <dd />
+      </dl>
+      {sample.percentile != null ? (
+        <p className="text-muted-foreground">
+          Percentil {Math.round(sample.percentile)}
+          {sample.typicalZone ? ` · ${ZONE_LABEL[sample.typicalZone].toLowerCase()}` : ''}
+        </p>
+      ) : null}
+      {missing > 0 ? (
+        <p className="text-muted-foreground">
+          Comparado sobre {sample.comparedItems} de {sample.totalItems} preguntas:{' '}
+          {formatCount(missing, 'sin corrección o sin muestra', 'sin corrección o sin muestra')}
+        </p>
+      ) : null}
+      <p className="text-muted-foreground">
+        {sampleSizeLabel(sample)}
+        {sample.refreshedAt ? ` · actualizado ${formatRefreshedAt(sample.refreshedAt)}` : ''}
+      </p>
+      {instrumentId ? (
+        <Link
+          href={sampleDetailHref(instrumentId)}
+          className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+          onClick={() => track('benchmark.sample_detail_opened', { surface, instrumentId })}
+        >
+          Ver comparación <ArrowRight className="size-3" aria-hidden />
+        </Link>
+      ) : null}
+    </div>
+  );
+}

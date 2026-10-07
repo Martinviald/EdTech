@@ -5,6 +5,7 @@ import { BarChart3, CalendarRange } from 'lucide-react';
 import { auth } from '@/auth';
 import {
   canAccess,
+  ESTABLISHMENT_REPORT_ROLES,
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
   PROCESS_KIND_LABELS,
   PROCESS_VIEWER_ROLES,
@@ -40,6 +41,14 @@ export default async function ProcesoLayout({
   const tabs: PageTab[] = [
     { href: base, label: 'Resumen', exact: true },
     { href: ROUTES.procesoRendicion(process.id), label: 'Rendición' },
+    ...(canAccess(session.user.roles, ESTABLISHMENT_REPORT_ROLES)
+      ? [
+          {
+            href: ROUTES.procesoInformeEstablecimiento(process.id),
+            label: 'Informe del establecimiento',
+          },
+        ]
+      : []),
   ];
 
   return (

@@ -10,6 +10,7 @@ import type { InstrumentApplicationPeriod } from '@soe/types';
 import type { JwtPayload } from '../src/auth/jwt-payload.types';
 import type { Database } from '../src/database/database.types';
 import { MasterBoardService } from '../src/master-board/master-board.service';
+import { BenchmarkSamplesService } from '../src/benchmarking/benchmark-samples.service';
 import { loadMatrixRows } from '../src/master-board/queries/matrix-rows.query';
 
 config({ path: resolve(__dirname, '../../../.env') });
@@ -258,7 +259,7 @@ async function main(): Promise<void> {
         `[golden] en la transacción: ${neutralized.tracks} instrumento(s) sin línea, ${neutralized.links} evaluación(es) sin proceso, ${neutralized.processes} proceso(s) borrado(s) (se revierte al final)`,
       );
 
-      const service = new MasterBoardService(outer);
+      const service = new MasterBoardService(outer, new BenchmarkSamplesService(outer));
       const codes = await loadCodes(outer);
       const takes = await service.getTakes(user, {});
       const servedKeys = new Map(takes.takes.map((take) => [take.key, take]));

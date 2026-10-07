@@ -288,6 +288,13 @@
       "when": 1791288663191,
       "tag": "0040_greedy_serpent_society",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1791342214889,
+      "tag": "0041_achievement_tallies",
+      "breakpoints": true
     }
   ]
 }

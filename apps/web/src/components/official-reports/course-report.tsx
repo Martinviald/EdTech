@@ -7,9 +7,10 @@ import type {
   OfficialSpecTableRow,
   OfficialCourseStudentRow,
   PerformanceBandDistributionBucket,
-  PerformanceLevel,
+  UserRole,
 } from '@soe/types';
 import { cn } from '@/lib/utils';
+import { StudentLink } from '@/components/students/student-link';
 import {
   PERFORMANCE_LEVEL_CHART_COLOR,
   PERFORMANCE_LEVEL_LABELS,
@@ -55,10 +56,13 @@ const DEV_CATEGORY_LABELS: Record<string, string> = {
 export function CourseReport({
   report,
   studentReportBasePath,
+  roles,
   generalSample,
   itemSamples,
 }: {
   report: OfficialCourseReportResponse;
+  /** Roles del usuario: deciden si el nombre del alumno enlaza a su Ficha del estudiante. */
+  roles: readonly UserRole[];
   /** Base para enlazar el informe individual por alumno (TKT-26). */
   studentReportBasePath?: string;
   /** Contraste del resultado general con la muestra de colegios (benchmarking en contexto). */
@@ -264,6 +268,7 @@ export function CourseReport({
             <StudentTable
               students={studentResults}
               basePath={studentReportBasePath}
+              roles={roles}
               isDiagnostic={isDiagnostic}
               showAdvance={showAdvance}
               bands={report.bands}
@@ -438,12 +443,14 @@ function ResponseDistribution({ row }: { row: OfficialSpecTableRow }) {
 function StudentTable({
   students,
   basePath,
+  roles,
   isDiagnostic = false,
   showAdvance = false,
   bands,
 }: {
   students: OfficialCourseStudentRow[];
   basePath?: string;
+  roles: readonly UserRole[];
   /**
    * Diagnóstico: no clasifica por niveles I/II/III. Se muestra "Requiere apoyo"
    * (Sí/No, la señal confiable) + "Posición (est.)" en vez de "% Logro" + "Nivel".
@@ -475,7 +482,7 @@ function StudentTable({
             )}
             {basePath ? (
               <th className="w-10 px-3 py-2 font-medium print:hidden">
-                <span className="sr-only">Informe</span>
+                <span className="sr-only">Informe de esta evaluación</span>
               </th>
             ) : null}
           </tr>
@@ -484,7 +491,9 @@ function StudentTable({
           {students.map((s) => (
             <tr key={s.studentId} className="border-b align-middle last:border-0">
               <td className="px-3 py-2 font-medium">
-                {s.studentFullName}
+                <StudentLink studentId={s.studentId} roles={roles}>
+                  {s.studentFullName}
+                </StudentLink>
                 {/* Fuera de Diagnóstico el aviso "Requiere apoyo" va junto al nombre;
                     en Diagnóstico la franja de logro lo muestra por posición. */}
                 {!isDiagnostic && s.requiresSupport ? (
@@ -548,8 +557,8 @@ function StudentTable({
                 <td className="px-3 py-2 text-right print:hidden">
                   <Link
                     href={`${basePath}/${s.studentId}` as Route}
-                    aria-label={`Ver informe de ${s.studentFullName}`}
-                    title="Ver informe del estudiante"
+                    aria-label={`Ver informe de esta evaluación de ${s.studentFullName}`}
+                    title="Ver informe de esta evaluación"
                     className="inline-flex size-7 items-center justify-center rounded-md text-primary hover:bg-muted"
                   >
                     <ArrowRight className="size-4" aria-hidden />

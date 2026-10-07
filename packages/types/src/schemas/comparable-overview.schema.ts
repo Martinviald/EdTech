@@ -41,6 +41,23 @@ export type ComparableUnitClassGroup = {
   lowestBandShare: number | null; // % de alumnos en la banda inferior, 0..100
 };
 
+/**
+ * Una aplicación (evaluación) dentro de la unidad, con su propia severidad.
+ *
+ * La lista de evaluaciones muestra la gravedad de CADA aplicación, no la de la unidad:
+ * si 7°A y 7°B rindieron el mismo instrumento, el badge del 7°B tiene que hablar del
+ * 7°B, que es lo que el usuario ve al abrir el detalle.
+ */
+export type ComparableUnitAssessment = {
+  assessmentId: string;
+  studentsAssessed: number;
+  averageAchievement: number | null; // 0..100
+  /** Alumnos en la banda inferior del instrumento. Null si no hay distribución. */
+  lowestBandCount: number | null;
+  lowestBandShare: number | null; // 0..100
+  severity: UnitSeverity | null;
+};
+
 export type ComparableUnitSummary = {
   /** `instrumentId`: la unidad comparable mínima que agrupa varias aplicaciones. */
   key: string;
@@ -65,10 +82,12 @@ export type ComparableUnitSummary = {
   bandDistribution: PerformanceBandDistributionBucket[] | null;
   /** Distribución legacy de 4 niveles, cuando el instrumento no define bandas. */
   levelDistribution: PerformanceDistributionBucket[] | null;
-  /** % de alumnos en la banda/nivel inferior. Es lo que gobierna la severidad. */
+  /** % de alumnos en la banda/nivel inferior. Dato y alerta; NO gobierna la severidad. */
   lowestBandShare: number | null; // 0..100
   byClassGroup: ComparableUnitClassGroup[];
+  byAssessment: ComparableUnitAssessment[];
   baseline: BaselineRef | null;
+  /** Banda del instrumento en la que cae `averageAchievement` (`severityFromAverageBand`). */
   severity: UnitSeverity | null;
 };
 

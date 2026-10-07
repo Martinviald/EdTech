@@ -19,7 +19,7 @@
  * `tx` debe correr dentro de `withOrgContext` (CLAUDE.md §5.2): las cuatro tablas
  * tienen RLS.
  */
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import {
   assessmentResults,
   itemTaxonomyTags,
@@ -27,6 +27,9 @@ import {
   recomputeCohortStatsFromResponses,
   responses,
   skillResults,
+  toAssessmentResultRow,
+  toSkillResultForCohort,
+  toSkillResultRow,
 } from '@soe/db';
 import {
   aggregateSkillResults,
@@ -125,7 +128,7 @@ export async function loadResponsesForPersist(
     })
     .from(responses)
     .innerJoin(items, eq(items.id, responses.itemId))
-    .where(eq(responses.assessmentId, assessmentId));
+    .where(and(eq(responses.assessmentId, assessmentId), isNull(items.deletedAt)));
 
   if (rows.length === 0) return [];
 
@@ -191,48 +194,29 @@ export async function persistAssessmentResults(
   await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
 
   if (studentAggregates.length > 0) {
-    await tx.insert(assessmentResults).values(
-      studentAggregates.map((a) => ({
-        assessmentId,
-        studentId: a.studentId,
-        totalScore: a.totalScore.toFixed(2),
-        maxScore: a.maxScore.toFixed(2),
-        // Contrato del modelo: percentage es 0..100 (decimal string).
-        percentage: (a.percentage * 100).toFixed(2),
-        grade: a.grade.toFixed(2),
-        performanceBandId: a.performanceBandId ?? null,
-        performanceLevel: a.performanceLevel,
-        isComplete: a.isComplete,
-        completedAt: policy.alwaysStampCompletedAt ? now : a.isComplete ? now : null,
-      })),
-    );
+    await tx
+      .insert(assessmentResults)
+      .values(
+        studentAggregates.map((a) =>
+          toAssessmentResultRow(
+            assessmentId,
+            a,
+            policy.alwaysStampCompletedAt || a.isComplete ? now : null,
+          ),
+        ),
+      );
   }
 
   if (skillAggregates.length > 0) {
-    await tx.insert(skillResults).values(
-      skillAggregates.map((a) => ({
-        assessmentId,
-        studentId: a.studentId,
-        nodeId: a.nodeId,
-        correctCount: a.correctCount,
-        totalCount: a.totalCount,
-        percentage: (a.percentage * 100).toFixed(2),
-        performanceBandId: a.performanceBandId ?? null,
-        performanceLevel: a.performanceLevel,
-      })),
-    );
+    await tx
+      .insert(skillResults)
+      .values(skillAggregates.map((a) => toSkillResultRow(assessmentId, a)));
   }
 
   await recomputeCohortStatsFromResponses(tx, {
     assessmentId,
     responses,
-    skillResults: skillAggregates.map((a) => ({
-      studentId: a.studentId,
-      nodeId: a.nodeId,
-      correctCount: a.correctCount,
-      totalCount: a.totalCount,
-      percentage: a.percentage,
-    })),
+    skillResults: skillAggregates.map(toSkillResultForCohort),
   });
 
   return { studentAggregates, skillAggregates };

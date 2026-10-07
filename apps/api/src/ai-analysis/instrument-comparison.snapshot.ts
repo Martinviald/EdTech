@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import {
+  assessmentItemStats,
   assessmentResults,
   assessments,
   instruments,
@@ -8,13 +9,15 @@ import {
   items,
   withOrgContext,
 } from '@soe/db';
-import type {
-  AiAnalysisSnapshot,
-  ComparisonAlternative,
-  ComparisonItem,
-  ComparisonPassage,
-  ComparisonSide,
-  InstrumentComparisonSnapshot,
+import {
+  achievementPct,
+  tallyOf,
+  type AiAnalysisSnapshot,
+  type ComparisonAlternative,
+  type ComparisonItem,
+  type ComparisonPassage,
+  type ComparisonSide,
+  type InstrumentComparisonSnapshot,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { SNAPSHOT_BUILDER, type SnapshotBuilder } from './snapshot.port';
@@ -31,7 +34,7 @@ const PASSAGE_MAX_CHARS = 600;
  * (TKT-23). Para cada lado reusa el snapshot de evaluación ya existente
  * (`SnapshotBuilder`: contenido + resultados anonimizados) y lo enriquece con:
  *  - metadatos del instrumento (año, tipo) resueltos desde el assessment,
- *  - % de logro global (avg de `assessment_results.percentage`),
+ *  - % de logro global,
  *  - alternativas y pasaje/sección por ítem (para el análisis de CONTENIDO).
  *
  * Multi-tenancy: el `orgId` proviene SIEMPRE del token (lo pasa el runner). Toda
@@ -136,14 +139,26 @@ export class InstrumentComparisonSnapshotService {
     return { instrumentId: row.instrumentId, instrumentType: row.instrumentType, year: row.year };
   }
 
-  /** % de logro global de la evaluación (avg de assessment_results.percentage). */
   private async loadAverageAchievement(tx: Database, assessmentId: string): Promise<number | null> {
-    const [row] = await tx
-      .select({ avg: sql<number | null>`avg(${assessmentResults.percentage})::float` })
+    const [byStudent] = await tx
+      .select({
+        scoreSum: sql<string>`coalesce(sum(${assessmentResults.totalScore}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentResults.maxScore}), 0)`,
+      })
       .from(assessmentResults)
       .where(eq(assessmentResults.assessmentId, assessmentId));
-    const avg = row?.avg ?? null;
-    return avg === null ? null : round1(avg);
+    const studentPct = byStudent ? achievementPct(tallyOf([byStudent])) : null;
+    if (studentPct !== null) return round1(studentPct);
+
+    const [byItem] = await tx
+      .select({
+        scoreSum: sql<string>`coalesce(sum(${assessmentItemStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
+      })
+      .from(assessmentItemStats)
+      .where(eq(assessmentItemStats.assessmentId, assessmentId));
+    const itemPct = byItem ? achievementPct(tallyOf([byItem])) : null;
+    return itemPct === null ? null : round1(itemPct);
   }
 
   /**

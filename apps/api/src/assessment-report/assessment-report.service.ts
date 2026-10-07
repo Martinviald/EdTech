@@ -22,11 +22,14 @@ import {
 } from '@soe/db';
 import {
   RESULT_HIDDEN_NODE_TYPES,
+  achievementPct,
   bandToLegacyLevel,
   capabilitiesFor,
   classifyByBands,
   mergeAnswerCounts,
   percentageToPerformanceLevel,
+  tallyOf,
+  type AchievementTally,
   type AnswerCount,
   type AssessmentReportCourseRow,
   type AssessmentReportItemRow,
@@ -46,13 +49,14 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
-  COHORT_PCT_SUM,
-  COHORT_PCT_WEIGHT,
+  COHORT_SCORE_SUM,
+  COHORT_MAX_SUM,
   COHORT_STUDENTS_ASSESSED,
   addCohortRow,
   cohortAverage,
   type CohortAccumulator,
 } from '../common/helpers/cohort-skill-stats.helper';
+import { countStudentsWithPendingResponses } from '../common/helpers/pending-responses.helper';
 import {
   loadCohortOverallAchievement,
   type CohortOverallAchievement,
@@ -71,7 +75,14 @@ import {
 
 /** PerformanceBandInput (con thresholds) → vista mínima para la respuesta. */
 function toBandView(b: PerformanceBandInput): PerformanceBandView {
-  return { key: b.key, label: b.label, order: b.order, color: b.color ?? null };
+  return {
+    key: b.key,
+    label: b.label,
+    order: b.order,
+    color: b.color ?? null,
+    minThreshold: b.minThreshold,
+    maxThreshold: b.maxThreshold,
+  };
 }
 
 // Roles administrativos: ven toda la org. Idéntico a los demás services de
@@ -222,6 +233,7 @@ export class AssessmentReportService {
         administeredAt: assessment.administeredAt,
         classGroups: reportClassGroups.map((c) => ({ id: c.id, name: c.name })),
         itemsCount: itemColumns.length,
+        pendingStudentCount: 0,
         dataGranularity: assessment.dataGranularity,
         capabilities: [...capabilitiesFor(assessment.dataGranularity)],
         hasItemLevelData: assessment.dataGranularity === 'item_level',
@@ -314,8 +326,10 @@ export class AssessmentReportService {
       }
 
       // ── Síntesis ejecutiva ──────────────────────────────────────────────────
+      const courseTallies = await this.loadCourseTallies(tx, query.assessmentId, classGroupFilter);
       const summary = this.buildSummary(
         evaluated,
+        courseTallies,
         studentsEnrolled,
         passingGrade,
         assessment.gradingScaleConfig,
@@ -329,6 +343,7 @@ export class AssessmentReportService {
       const courseComparison = this.buildCourseComparison(
         evaluated,
         classGroupByStudent,
+        courseTallies,
         passingGrade,
         summary.averageAchievement,
       );
@@ -343,6 +358,12 @@ export class AssessmentReportService {
 
       // ── Recomendaciones (reglas) ────────────────────────────────────────────
       const recommendations = this.buildRecommendations(summary, skills, items, studentsAtRisk);
+
+      meta.pendingStudentCount = await countStudentsWithPendingResponses(
+        tx,
+        query.assessmentId,
+        studentFilter,
+      );
 
       return {
         meta,
@@ -393,6 +414,7 @@ export class AssessmentReportService {
 
   private buildSummary(
     evaluated: EvaluatedStudent[],
+    courseTallies: Map<string, AchievementTally>,
     studentsEnrolled: number,
     passingGrade: number | null,
     scaleConfig: unknown,
@@ -403,10 +425,9 @@ export class AssessmentReportService {
     // % de logro y el nivel de desempeño sí, porque no dependen de la escala.
     const hasGradingScale = passingGrade !== null;
 
-    const pcts = evaluated.map((e) => e.percentage).filter((p): p is number => p !== null);
     const grades = evaluated.map((e) => e.grade).filter((g): g is number => g !== null);
 
-    const averageAchievement = pcts.length > 0 ? avg(pcts) : null;
+    const averageAchievement = achievementPct(tallyOf(courseTallies.values()));
     const averageGrade = hasGradingScale && grades.length > 0 ? avg(grades) : null;
     const passingRate =
       hasGradingScale && grades.length > 0
@@ -525,23 +546,23 @@ export class AssessmentReportService {
   private buildCourseComparison(
     evaluated: EvaluatedStudent[],
     classGroupByStudent: Map<string, { id: string; name: string }>,
+    courseTallies: Map<string, AchievementTally>,
     passingGrade: number | null,
     overallAchievement: number | null,
   ): AssessmentReportCourseRow[] {
     const byCourse = new Map<
       string,
-      { name: string; evaluated: number; pcts: number[]; grades: number[]; critical: number }
+      { name: string; evaluated: number; grades: number[]; critical: number }
     >();
     for (const e of evaluated) {
       const cg = classGroupByStudent.get(e.studentId);
       if (!cg) continue;
       let entry = byCourse.get(cg.id);
       if (!entry) {
-        entry = { name: cg.name, evaluated: 0, pcts: [], grades: [], critical: 0 };
+        entry = { name: cg.name, evaluated: 0, grades: [], critical: 0 };
         byCourse.set(cg.id, entry);
       }
       entry.evaluated += 1;
-      if (e.percentage !== null) entry.pcts.push(e.percentage);
       if (e.grade !== null) entry.grades.push(e.grade);
       if (e.performanceLevel && AT_RISK_LEVELS.includes(e.performanceLevel)) {
         entry.critical += 1;
@@ -550,7 +571,8 @@ export class AssessmentReportService {
 
     const rows: AssessmentReportCourseRow[] = [];
     for (const [classGroupId, entry] of byCourse) {
-      const averageAchievement = entry.pcts.length > 0 ? avg(entry.pcts) : null;
+      const tally = courseTallies.get(classGroupId);
+      const averageAchievement = tally ? achievementPct(tally) : null;
       // TKT-04 — sin escala (passingGrade null) no hay tasa de aprobación por curso.
       const passingRate =
         passingGrade !== null && entry.grades.length > 0
@@ -559,11 +581,6 @@ export class AssessmentReportService {
       rows.push({
         classGroupId,
         classGroupName: entry.name,
-        // Alumnos con resultado en el curso, NO los que traen `percentage`: un
-        // informe oficial entrega el nivel de cada alumno sin su %, y contar por
-        // `pcts` habría reportado "0 alumnos evaluados" en un curso con resultados.
-        // Es además la misma definición que `summary.studentsEvaluated`, que ya
-        // contaba filas; sólo pueden diferir donde hoy ya se contradicen en pantalla.
         studentsEvaluated: entry.evaluated,
         averageAchievement,
         passingRate,
@@ -612,11 +629,7 @@ export class AssessmentReportService {
       );
       const blankCount = totalResponses - answeredCount;
       const correctCount = s?.correctCount ?? 0;
-      // Dificultad ponderada por PUNTAJE: con `correctCount` un ítem de crédito
-      // parcial bien respondido daba 0% y se marcaba `critical` sin serlo. En un
-      // ítem dicotómico sin pendientes ambas fórmulas dan el mismo número.
-      const gradedMax = s?.maxSum ?? 0;
-      const difficulty = gradedMax > 0 ? ((s?.scoreSum ?? 0) / gradedMax) * 100 : null;
+      const difficulty = s ? achievementPct(s) : null;
 
       const { key: topDistractorKey, count: topDistractorCount } = this.pickTopDistractor(
         col,
@@ -707,24 +720,6 @@ export class AssessmentReportService {
   // Habilidades / fortalezas y brechas
   // ───────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Logro por habilidad desde el read-model de cohorte (`assessment_skill_stats`),
-   * el mismo que leen los dashboards de habilidades y el heatmap desde la Fase 5 —
-   * de modo que el informe y el heatmap ya no pueden discrepar sobre el mismo eje.
-   *
-   * La aritmética de recombinación NO se reimplementa acá: vive una sola vez en
-   * `cohort-skill-stats.helper` (CLAUDE.md §4.2). Es un promedio PONDERADO por
-   * `studentCount`, y esa ponderación es justo lo que lo hace numéricamente neutro
-   * frente al `avg(skill_results.percentage)` que reemplaza: con `source='computed'`
-   * el `percentage` del read-model es, por decisión §9.2 del plan, la media de los
-   * porcentajes por alumno del curso, así que
-   *   Σ_alumnos pct / N  =  Σ_curso (pct_curso × n_curso) / Σ_curso n_curso.
-   * Un promedio simple de los cursos NO sería equivalente.
-   *
-   * `studentsAssessed` usa `max` por curso y se suma entre cursos (ver el helper).
-   * Un informe es SIEMPRE de una única evaluación, que es el caso donde `max`
-   * reproduce exacto el `count(distinct student_id)` anterior.
-   */
   private async buildSkills(
     db: Database,
     assessmentId: string,
@@ -749,8 +744,8 @@ export class AssessmentReportService {
         nodeName: taxonomyNodes.name,
         nodeType: sql<string>`${taxonomyNodes.type}::text`,
         nodeCode: taxonomyNodes.code,
-        pctSum: COHORT_PCT_SUM,
-        pctWeight: COHORT_PCT_WEIGHT,
+        scoreSum: COHORT_SCORE_SUM,
+        maxSum: COHORT_MAX_SUM,
         studentsAssessed: COHORT_STUDENTS_ASSESSED,
       })
       .from(assessmentSkillStats)
@@ -1176,6 +1171,35 @@ export class AssessmentReportService {
     }
     for (const [itemId, buckets] of bucketsByItem) {
       result.get(itemId)!.answerCounts = mergeAnswerCounts(buckets);
+    }
+    return result;
+  }
+
+  private async loadCourseTallies(
+    db: Database,
+    assessmentId: string,
+    classGroupFilter: string[] | null,
+  ): Promise<Map<string, AchievementTally>> {
+    const result = new Map<string, AchievementTally>();
+    if (classGroupFilter !== null && classGroupFilter.length === 0) return result;
+
+    const conditions = [eq(assessmentItemStats.assessmentId, assessmentId)];
+    if (classGroupFilter !== null) {
+      conditions.push(inArray(assessmentItemStats.classGroupId, classGroupFilter));
+    }
+
+    const rows = await db
+      .select({
+        classGroupId: assessmentItemStats.classGroupId,
+        scoreSum: sql<string>`coalesce(sum(${assessmentItemStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
+      })
+      .from(assessmentItemStats)
+      .where(and(...conditions))
+      .groupBy(assessmentItemStats.classGroupId);
+
+    for (const r of rows) {
+      result.set(r.classGroupId, tallyOf([r]));
     }
     return result;
   }

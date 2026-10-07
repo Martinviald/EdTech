@@ -8,6 +8,7 @@ import { ROUTES } from '@/lib/routes';
 import { canSeeBenchmark, getInstrumentSample } from '@/lib/benchmark-samples';
 import {
   ANALYTICS_VIEWER_ROLES,
+  COMPARE_RESULTS_VIEWER_ROLES,
   canAccess,
   type ComparableTrajectoryPoint,
   type ComparableTrajectoryResponse,
@@ -30,6 +31,7 @@ import { formatAchievement } from '../components/performance-level';
 import { getDashboardFilters } from '../data';
 import { getComparableTrajectory } from './data';
 import { TrajectoryScopeBar, type TrajectorySelection } from './trajectory-scope-bar';
+import { TrajectoryComparePicker } from './trajectory-compare-picker';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -152,6 +154,7 @@ export default async function TrayectoriaPage({
           selection={selection}
           query={query}
           canSeeSample={canSeeBenchmark(session.user.roles)}
+          canCompare={canAccess(session.user.roles, COMPARE_RESULTS_VIEWER_ROLES)}
         />
       </Suspense>
     </>
@@ -181,10 +184,12 @@ async function TrajectorySection({
   selection,
   query,
   canSeeSample,
+  canCompare,
 }: {
   selection: TrajectorySelection;
   query: string | null;
   canSeeSample: boolean;
+  canCompare: boolean;
 }) {
   if (!query) {
     return (
@@ -274,6 +279,8 @@ async function TrajectorySection({
       <TrajectoryCard summary={summary}>
         <TrajectoryChart series={series} periods={periods} />
       </TrajectoryCard>
+
+      {canCompare ? <TrajectoryComparePicker series={series} /> : null}
 
       {current.bandDistribution && data.bands ? (
         <DistributionBar

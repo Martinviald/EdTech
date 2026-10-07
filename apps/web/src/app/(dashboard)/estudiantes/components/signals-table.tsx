@@ -1,7 +1,6 @@
 'use client';
 
 import { useTransition } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
 import { Search, UserRound } from 'lucide-react';
@@ -11,11 +10,13 @@ import {
   STUDENT_SIGNAL_LABELS,
   type StudentSignal,
   type StudentSignalsResponse,
+  type UserRole,
 } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { EmptyState, TopProgressBar } from '@/components/shared';
 import { ROUTES } from '@/lib/routes';
+import { StudentLink } from '@/components/students/student-link';
 import { PerformanceBadge } from '../../resultados/components/performance-badge';
 import { formatAchievement } from '../../resultados/components/performance-level';
 import { cn } from '@/lib/utils';
@@ -24,10 +25,12 @@ export function SignalsTable({
   result,
   activeSignal,
   search,
+  roles,
 }: {
   result: StudentSignalsResponse;
   activeSignal: StudentSignal | null;
   search: string;
+  roles: readonly UserRole[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -128,12 +131,9 @@ export function SignalsTable({
               {result.data.map((row) => (
                 <tr key={row.studentId} className="border-b last:border-0 hover:bg-muted/50">
                   <td className="px-4 py-2">
-                    <Link
-                      href={ROUTES.estudiante(row.studentId)}
-                      className="font-medium hover:underline"
-                    >
+                    <StudentLink studentId={row.studentId} roles={roles} className="font-medium">
                       {row.fullName}
-                    </Link>
+                    </StudentLink>
                     <span className="block text-xs text-muted-foreground">{row.rut}</span>
                   </td>
                   <td className="px-4 py-2 text-muted-foreground">

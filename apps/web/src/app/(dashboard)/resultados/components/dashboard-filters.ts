@@ -308,6 +308,40 @@ export function buildClearProcessQuery(value: DashboardFilterValues): string {
 }
 
 /** Serializa los filtros a una querystring (orden estable, sin claves vacías). */
+/**
+ * Claves que ACOTAN el alcance dentro de un proceso.
+ *
+ * `processId` no está: es el alcance mismo. `academicYearId` tampoco — se
+ * preselecciona solo y el proceso vive en un año, así que filtrar por ese año no
+ * recorta nada. `studentId` sí: un alumno es un subconjunto del proceso.
+ */
+const NARROWING_KEYS = [
+  'subjectId',
+  'gradeId',
+  'classGroupId',
+  'instrumentType',
+  'applicationPeriod',
+  'instrumentId',
+  'studentId',
+  'q',
+] as const;
+
+/**
+ * ¿Hay algún filtro que recorte el proceso?
+ *
+ * Importa porque `/measurement-processes/:id/coverage` NO acepta filtros: su
+ * denominador es el del proceso completo. Cruzarlo con un numerador recortado
+ * hunde el cociente bajo el piso del titular y deja las celdas de las otras
+ * asignaturas marcadas como si no tuvieran niveles. Es el mismo desajuste que ya
+ * se evita con alcance docente.
+ */
+export function hasNarrowingFilters(value: DashboardFilterValues): boolean {
+  return NARROWING_KEYS.some((key) => {
+    const found = value[key];
+    return Array.isArray(found) ? found.length > 0 : found != null && found !== '';
+  });
+}
+
 export function buildDashboardQuery(value: DashboardFilterValues): string {
   const params = new URLSearchParams();
   for (const key of FILTER_KEYS) {

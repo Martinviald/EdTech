@@ -8,19 +8,13 @@ import {
 } from '@soe/types';
 import { Badge } from '@/components/ui/badge';
 import { ROUTES } from '@/lib/routes';
+import { SeverityBadge } from '@/components/shared/severity-badge';
 
-// La gravedad de una evaluación es la severidad de su unidad comparable, con los
-// cortes de su propio instrumento. `null` es "no clasificable" (el instrumento no
-// define bandas), NO "está bien": por eso no hay insignia verde — la ausencia de
-// insignia no afirma nada.
-const SEVERITY_BADGE: Record<
-  'high' | 'medium' | 'low',
-  { label: string; variant: 'destructive' | 'warning' | 'secondary' }
-> = {
-  high: { label: 'Grave', variant: 'destructive' },
-  medium: { label: 'Atención', variant: 'warning' },
-  low: { label: 'Leve', variant: 'secondary' },
-};
+// La gravedad de una evaluación es la banda de SU instrumento en la que cae el
+// promedio de ESA aplicación (no el de la unidad completa). `null` es "no
+// clasificable" (el instrumento no define bandas), NO "está bien": por eso no hay
+// insignia verde — la ausencia de insignia no afirma nada. El motivo se lee en el
+// tooltip del badge.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Lista de evaluaciones (H6 / hub de evaluación). Cada fila es el punto de
@@ -86,9 +80,7 @@ export function AssessmentList({
                     {title}
                   </h2>
                   {a.severity ? (
-                    <Badge variant={SEVERITY_BADGE[a.severity].variant} className="shrink-0">
-                      {SEVERITY_BADGE[a.severity].label}
-                    </Badge>
+                    <SeverityBadge severity={a.severity} reason={a.severityReason} />
                   ) : null}
                   {a.instrumentType ? (
                     <Badge variant="secondary" className="shrink-0 uppercase">

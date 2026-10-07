@@ -36,8 +36,8 @@ function totalsRow(
     classGroupName: 'A',
     gradeName: '4° Medio',
     studentsAssessed: 1,
-    percentageSum: '50',
-    percentageCount: 1,
+    scoreSum: '5',
+    maxSum: '10',
     ...overrides,
   };
 }
@@ -45,21 +45,36 @@ function totalsRow(
 describe('ComparableUnitAssembler.foldByClassGroup', () => {
   const assembler = new ComparableUnitAssembler();
 
-  it('promedia con la suma y el conteo que agregó Postgres', () => {
+  it('logro del curso = Σ puntaje ÷ Σ máximo que agregó Postgres (9/20 = 45)', () => {
     const [course] = assembler.foldByClassGroup(
       breakdown({
-        totals: [totalsRow({ studentsAssessed: 2, percentageSum: '100', percentageCount: 2 })],
+        totals: [totalsRow({ studentsAssessed: 2, scoreSum: '9', maxSum: '20' })],
       }),
       BANDS,
     );
 
     expect(course.studentsAssessed).toBe(2);
-    expect(course.averageAchievement).toBe(50);
+    expect(course.averageAchievement).toBe(45);
   });
 
-  it('deja el logro en null cuando ninguna fila tenía porcentaje', () => {
+  it('suma los tallies de varios instrumentos del mismo curso: (9 + 6) / (20 + 30) = 30, no el promedio 37,5 de 45 y 20', () => {
     const [course] = assembler.foldByClassGroup(
-      breakdown({ totals: [totalsRow({ percentageSum: null, percentageCount: 0 })] }),
+      breakdown({
+        totals: [
+          totalsRow({ instrumentId: 'i-1', studentsAssessed: 2, scoreSum: '9', maxSum: '20' }),
+          totalsRow({ instrumentId: 'i-2', studentsAssessed: 3, scoreSum: '6', maxSum: '30' }),
+        ],
+      }),
+      BANDS,
+    );
+
+    expect(course.studentsAssessed).toBe(5);
+    expect(course.averageAchievement).toBe(30);
+  });
+
+  it('deja el logro en null cuando no hay puntaje corregido (maxSum 0)', () => {
+    const [course] = assembler.foldByClassGroup(
+      breakdown({ totals: [totalsRow({ scoreSum: '0', maxSum: '0' })] }),
       BANDS,
     );
 
@@ -70,7 +85,7 @@ describe('ComparableUnitAssembler.foldByClassGroup', () => {
   it('suma los conteos de banda que ya clasificó la base', () => {
     const [course] = assembler.foldByClassGroup(
       breakdown({
-        totals: [totalsRow({ studentsAssessed: 4, percentageSum: '200', percentageCount: 4 })],
+        totals: [totalsRow({ studentsAssessed: 4, scoreSum: '20', maxSum: '40' })],
         classification: [
           {
             instrumentId: 'i-1',
@@ -97,7 +112,7 @@ describe('ComparableUnitAssembler.foldByClassGroup', () => {
   it('clasifica con las bandas del instrumento las filas que no traen banda', () => {
     const [course] = assembler.foldByClassGroup(
       breakdown({
-        totals: [totalsRow({ studentsAssessed: 2, percentageSum: '110', percentageCount: 2 })],
+        totals: [totalsRow({ studentsAssessed: 2, scoreSum: '11', maxSum: '20' })],
         classification: [
           {
             instrumentId: 'i-1',
@@ -124,7 +139,7 @@ describe('ComparableUnitAssembler.foldByClassGroup', () => {
   it('mezcla los dos orígenes de clasificación en el mismo curso', () => {
     const [course] = assembler.foldByClassGroup(
       breakdown({
-        totals: [totalsRow({ studentsAssessed: 3, percentageSum: '150', percentageCount: 3 })],
+        totals: [totalsRow({ studentsAssessed: 3, scoreSum: '15', maxSum: '30' })],
         classification: [
           {
             instrumentId: 'i-1',
@@ -152,8 +167,8 @@ describe('ComparableUnitAssembler.foldByClassGroup', () => {
     const courses = assembler.foldByClassGroup(
       breakdown({
         totals: [
-          totalsRow({ classGroupId: 'cg-1', classGroupName: 'A', percentageSum: '80' }),
-          totalsRow({ classGroupId: 'cg-2', classGroupName: 'B', percentageSum: '30' }),
+          totalsRow({ classGroupId: 'cg-1', classGroupName: 'A', scoreSum: '8' }),
+          totalsRow({ classGroupId: 'cg-2', classGroupName: 'B', scoreSum: '3' }),
         ],
       }),
       BANDS,

@@ -9,6 +9,7 @@ import {
   ANALYTICS_VIEWER_ROLES,
   type AssessmentReportResponse,
   type DashboardSkillsResponse,
+  type SkillReferencesResponse,
 } from '@soe/types';
 import { EmptyState } from '@/components/shared';
 import { ReportBody } from '../../../resultados/informe/report-body';
@@ -56,6 +57,11 @@ export default async function EvaluacionResultadosPage({
     reportResult && canSeeBenchmark(session.user.roles)
       ? getInstrumentSample(reportResult.meta.instrumentId)
       : undefined;
+  const skillReferencesPromise = reportResult
+    ? apiGet<SkillReferencesResponse>(
+        `/item-analysis/skill-references?${skillsQuery.toString()}`,
+      ).catch((): SkillReferencesResponse | null => null)
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -68,6 +74,8 @@ export default async function EvaluacionResultadosPage({
           assessmentId={assessmentId}
           classGroupId={classGroupId}
           samplePromise={samplePromise}
+          skillReferencesPromise={skillReferencesPromise}
+          roles={session.user.roles}
         />
       ) : (
         <EmptyState

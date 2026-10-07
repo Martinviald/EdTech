@@ -228,7 +228,7 @@ function QuickAccess({ roles, canImport }: { roles: readonly UserRole[]; canImpo
       show: canAccess(roles, AI_ANALYSIS_VIEWER_ROLES),
     },
     {
-      href: ROUTES.materialRemedial,
+      href: `${ROUTES.materiales}?origin=remedial` as Route,
       label: 'Material remedial',
       icon: Lightbulb,
       show: canAccess(roles, REMEDIAL_VIEWER_ROLES),

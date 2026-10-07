@@ -113,3 +113,72 @@ export async function loadMatrixRows(tx: Database, filter: MatrixRowsFilter): Pr
       testTracks.order,
     );
 }
+
+export type MatrixItemTallyRow = {
+  gradeId: string;
+  classGroupId: string;
+  subjectId: string;
+  trackId: string | null;
+  instrumentId: string;
+  itemId: string;
+  scoreSum: string;
+  maxSum: string;
+};
+
+export async function loadMatrixItemTallies(
+  tx: Database,
+  filter: MatrixRowsFilter,
+): Promise<MatrixItemTallyRow[]> {
+  if (filter.assessmentIds.length === 0) return [];
+
+  const conditions: SQL[] = [
+    inArray(assessments.id, filter.assessmentIds),
+    sql`${instruments.subjectId} is not null`,
+  ];
+  if (filter.scopedClassGroupIds !== null) {
+    conditions.push(inArray(assessmentItemStats.classGroupId, filter.scopedClassGroupIds));
+  }
+  if (filter.gradeIds?.length) conditions.push(inArray(classGroups.gradeId, filter.gradeIds));
+  if (filter.subjectIds?.length) {
+    conditions.push(inArray(instruments.subjectId, filter.subjectIds));
+  }
+
+  const columnTrackId = sql<
+    string | null
+  >`coalesce(${instrumentSections.trackId}, ${instruments.trackId})`;
+
+  const rows = await tx
+    .select({
+      gradeId: classGroups.gradeId,
+      classGroupId: assessmentItemStats.classGroupId,
+      subjectId: instruments.subjectId,
+      trackId: columnTrackId,
+      instrumentId: instruments.id,
+      itemId: assessmentItemStats.itemId,
+      scoreSum: sql<string>`sum(${assessmentItemStats.scoreSum}::numeric)`,
+      maxSum: sql<string>`sum(${assessmentItemStats.maxSum}::numeric)`,
+    })
+    .from(assessmentItemStats)
+    .innerJoin(assessments, eq(assessments.id, assessmentItemStats.assessmentId))
+    .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
+    .innerJoin(items, eq(items.id, assessmentItemStats.itemId))
+    .leftJoin(instrumentSections, eq(instrumentSections.id, items.sectionId))
+    .innerJoin(classGroups, eq(classGroups.id, assessmentItemStats.classGroupId))
+    .where(and(...conditions))
+    .groupBy(
+      classGroups.gradeId,
+      assessmentItemStats.classGroupId,
+      instruments.subjectId,
+      columnTrackId,
+      instruments.id,
+      assessmentItemStats.itemId,
+    )
+    .having(sql`sum(${assessmentItemStats.maxSum}::numeric) > 0`);
+
+  const tallies: MatrixItemTallyRow[] = [];
+  for (const row of rows) {
+    if (row.subjectId === null) continue;
+    tallies.push({ ...row, subjectId: row.subjectId });
+  }
+  return tallies;
+}

@@ -1,5 +1,6 @@
 import { getTableName } from 'drizzle-orm';
 import {
+  assessmentItemStats,
   assessmentResults,
   assessments,
   instruments,
@@ -181,6 +182,7 @@ type Fixtures = {
   assessmentIdsByCall: string[][];
   studentCourseId: string | null;
   visibilityEnrollment?: unknown[];
+  courseTallies: Record<string, { scoreSum: string; maxSum: string }>;
 };
 
 function makeRoute(fx: Fixtures): Route {
@@ -196,6 +198,12 @@ function makeRoute(fx: Fixtures): Route {
     if (table === assessments) {
       return assessmentQueue.shift() ?? [];
     }
+    if (table === assessmentItemStats) {
+      return Object.entries(fx.courseTallies).map(([classGroupId, tally]) => ({
+        classGroupId,
+        ...tally,
+      }));
+    }
     if (table === studentEnrollments && chain.joins >= 2) {
       return fx.studentCourseId ? [{ classGroupId: fx.studentCourseId }] : [];
     }
@@ -207,7 +215,7 @@ function makeRoute(fx: Fixtures): Route {
 }
 
 describe('StudentComparisonsService', () => {
-  it('compara al alumno contra su curso, su nivel y una generación anterior', async () => {
+  it('compara al alumno contra su curso, su nivel y una generación anterior sumando el puntaje de los cursos, no ponderando su % por alumnos', async () => {
     const coursesByAssessment = new Map<string, ComparableUnitClassGroup[]>([
       ['a-anchor', [course('cg-3a-2026', '3°A', 70, 25), course('cg-3b-2026', '3°B', 50, 15)]],
       ['a-2024', [course('cg-3a-2024', '3°A', 60, 20), course('cg-3b-2024', '3°B', 40, 20)]],
@@ -221,6 +229,12 @@ describe('StudentComparisonsService', () => {
       ],
       assessmentIdsByCall: [['a-anchor'], ['a-2024']],
       studentCourseId: 'cg-3a-2026',
+      courseTallies: {
+        'cg-3a-2026': { scoreSum: '700.00', maxSum: '1000.00' },
+        'cg-3b-2026': { scoreSum: '150.00', maxSum: '300.00' },
+        'cg-3a-2024': { scoreSum: '600.00', maxSum: '1000.00' },
+        'cg-3b-2024': { scoreSum: '80.00', maxSum: '200.00' },
+      },
     });
 
     const result = await makeService(
@@ -248,15 +262,15 @@ describe('StudentComparisonsService', () => {
 
     expect(subject.grade?.label).toBe('3° básico');
     expect(subject.grade?.studentsAssessed).toBe(40);
-    expect(subject.grade?.achievement).toBeCloseTo((70 * 25 + 50 * 15) / 40, 5);
-    expect(subject.grade?.deltaPp).toBeCloseTo(80 - (70 * 25 + 50 * 15) / 40, 1);
+    expect(subject.grade?.achievement).toBeCloseTo((850 / 1300) * 100, 5);
+    expect(subject.grade?.deltaPp).toBeCloseTo(80 - (850 / 1300) * 100, 1);
 
     expect(subject.generations).toHaveLength(1);
     const gen = subject.generations[0]!;
     expect(gen.label).toBe('2024');
     expect(gen.studentsAssessed).toBe(40);
-    expect(gen.achievement).toBeCloseTo((60 * 20 + 40 * 20) / 40, 5);
-    expect(gen.deltaPp).toBeCloseTo(80 - 50, 1);
+    expect(gen.achievement).toBeCloseTo((680 / 1200) * 100, 5);
+    expect(gen.deltaPp).toBeCloseTo(80 - (680 / 1200) * 100, 1);
   });
 
   it('devuelve generations vacío cuando no hay años anteriores', async () => {
@@ -269,6 +283,7 @@ describe('StudentComparisonsService', () => {
       familyInstruments: [familyInstrumentRow('inst-2026', 2026)],
       assessmentIdsByCall: [['a-anchor']],
       studentCourseId: 'cg-3a-2026',
+      courseTallies: { 'cg-3a-2026': { scoreSum: '700.00', maxSum: '1000.00' } },
     });
 
     const result = await makeService(
@@ -283,7 +298,7 @@ describe('StudentComparisonsService', () => {
     expect(subject.grade?.achievement).toBe(70);
   });
 
-  it('acota las cohortes a los cursos del profesor y reporta scope teacher', async () => {
+  it('acota las cohortes a los cursos del profesor y reporta scope teacher (el puntaje de 3°B no entra al nivel)', async () => {
     const coursesByAssessment = new Map<string, ComparableUnitClassGroup[]>([
       ['a-anchor', [course('cg-3a-2026', '3°A', 70, 25), course('cg-3b-2026', '3°B', 50, 15)]],
     ]);
@@ -295,6 +310,10 @@ describe('StudentComparisonsService', () => {
       assessmentIdsByCall: [['a-anchor']],
       studentCourseId: 'cg-3a-2026',
       visibilityEnrollment: [{ id: 'enr-1', classGroupId: 'cg-3a-2026' }],
+      courseTallies: {
+        'cg-3a-2026': { scoreSum: '700.00', maxSum: '1000.00' },
+        'cg-3b-2026': { scoreSum: '150.00', maxSum: '300.00' },
+      },
     });
 
     const result = await makeService(

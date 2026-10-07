@@ -1,0 +1,552 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matriz de acceso de la navegación multi-rol teacher + eval_coordinator (unión) 1`] = `
+{
+  "hub": [
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+        "Hojas de respuesta",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación platform_admin por tabla (ve todo el hub) 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Nómina de alumnos (próximamente)",
+    "Marcos Académicos",
+    "Telemetría de uso",
+    "Escalas de notas",
+    "Modelos de IA",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+        "Hojas de respuesta",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol academic_director 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Nómina de alumnos (próximamente)",
+    "Marcos Académicos",
+    "Telemetría de uso",
+    "Escalas de notas",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+        "Hojas de respuesta",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol coordinator 1`] = `
+{
+  "hub": [
+    "Nómina de alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol cycle_director 1`] = `
+{
+  "hub": [
+    "Nómina de alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol dept_head 1`] = `
+{
+  "hub": [
+    "Nómina de alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol eval_coordinator 1`] = `
+{
+  "hub": [
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+        "Hojas de respuesta",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol foundation_director 1`] = `
+{
+  "hub": [
+    "Telemetría de uso",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol guardian 1`] = `
+{
+  "hub": [],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol homeroom_teacher 1`] = `
+{
+  "hub": [
+    "Nómina de alumnos (próximamente)",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol platform_admin 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Nómina de alumnos (próximamente)",
+    "Marcos Académicos",
+    "Telemetría de uso",
+    "Escalas de notas",
+    "Modelos de IA",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+        "Hojas de respuesta",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol school_admin 1`] = `
+{
+  "hub": [
+    "Mi Colegio",
+    "Equipo",
+    "Nómina de alumnos (próximamente)",
+    "Marcos Académicos",
+    "Telemetría de uso",
+    "Escalas de notas",
+    "Observabilidad IA",
+    "Identidad del colegio",
+    "Revisión de hojas",
+  ],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+        "Hojas de respuesta",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+        "Comparación entre colegios",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+    {
+      "group": "(administracion)",
+      "items": [
+        "Administración",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`matriz de acceso de la navegación rol teacher 1`] = `
+{
+  "hub": [],
+  "sidebar": [
+    {
+      "group": "(inicio)",
+      "items": [
+        "Inicio",
+      ],
+    },
+    {
+      "group": "Evaluaciones",
+      "items": [
+        "Procesos de medición",
+        "Evaluaciones",
+      ],
+    },
+    {
+      "group": "Análisis",
+      "items": [
+        "Panorama pedagógico",
+        "Ficha del estudiante",
+      ],
+    },
+    {
+      "group": "Material y contenido",
+      "items": [
+        "Banco de contenido",
+        "Materiales",
+      ],
+    },
+  ],
+}
+`;

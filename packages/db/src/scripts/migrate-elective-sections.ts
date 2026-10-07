@@ -37,6 +37,11 @@ import { createDbClient, type Database } from '../client';
 import { withOrgContext } from '../with-org-context';
 import { recomputeCohortStatsFromResponses, replaceCohortStats } from '../queries/cohort-stats';
 import {
+  toAssessmentResultRow,
+  toSkillResultForCohort,
+  toSkillResultRow,
+} from '../queries/result-rows';
+import {
   formatLoadProcessLinkReport,
   linkLoadedAssessmentsToProcesses,
 } from '../queries/process-linking';
@@ -451,40 +456,20 @@ async function recomputeAssessment(
 
   await tx.delete(assessmentResults).where(eq(assessmentResults.assessmentId, assessmentId));
   await tx.delete(skillResults).where(eq(skillResults.assessmentId, assessmentId));
-  const resultValues = computed.students.map((a) => ({
-    assessmentId,
-    studentId: a.studentId,
-    totalScore: a.totalScore.toFixed(2),
-    maxScore: a.maxScore.toFixed(2),
-    percentage: (a.percentage * 100).toFixed(2),
-    grade: a.grade.toFixed(2),
-    performanceLevel: a.performanceLevel,
-    isComplete: a.isComplete && !computed.studentsWithPending.has(a.studentId),
-    completedAt: completedAtByStudent.get(a.studentId) ?? null,
-  }));
+  const resultValues = computed.students.map((a) =>
+    toAssessmentResultRow(
+      assessmentId,
+      { ...a, isComplete: a.isComplete && !computed.studentsWithPending.has(a.studentId) },
+      completedAtByStudent.get(a.studentId) ?? null,
+    ),
+  );
   for (const c of chunks(resultValues)) await tx.insert(assessmentResults).values(c);
-  const skillValues = computed.skills.map((a) => ({
-    assessmentId,
-    studentId: a.studentId,
-    nodeId: a.nodeId,
-    correctCount: a.correctCount,
-    totalCount: a.totalCount,
-    percentage: (a.percentage * 100).toFixed(2),
-    performanceLevel: a.performanceLevel,
-  }));
+  const skillValues = computed.skills.map((a) => toSkillResultRow(assessmentId, a));
   for (const c of chunks(skillValues)) await tx.insert(skillResults).values(c);
-  // El % de skill_results pasa por la columna (2 decimales), como en db:backfill:cohort-stats:
-  // así el read-model queda idéntico al que deja el backfill y el rollback es exacto.
   await recomputeCohortStatsFromResponses(tx, {
     assessmentId,
     responses: computed.calc,
-    skillResults: computed.skills.map((a) => ({
-      studentId: a.studentId,
-      nodeId: a.nodeId,
-      correctCount: a.correctCount,
-      totalCount: a.totalCount,
-      percentage: Number((a.percentage * 100).toFixed(2)) / 100,
-    })),
+    skillResults: computed.skills.map(toSkillResultForCohort),
   });
 }
 

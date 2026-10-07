@@ -49,6 +49,7 @@ import { items, itemTaxonomyTags } from '../schema/items';
 import { assessments, assessmentCourseAssignments } from '../schema/assessments';
 import { responses } from '../schema/responses';
 import { assessmentResults, skillResults } from '../schema/results';
+import { toAssessmentResultRow, toSkillResultRow } from '../queries/result-rows';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -582,21 +583,9 @@ async function main() {
     const studentAgg = aggregateStudentResults(calcRows, SCALE);
     const skillAgg = aggregateSkillResults(calcRows, SCALE);
     await db.insert(assessmentResults).values(
-      studentAgg.map((s) => ({
-        assessmentId: a.id, studentId: s.studentId,
-        totalScore: s.totalScore.toFixed(2), maxScore: s.maxScore.toFixed(2),
-        percentage: (s.percentage * 100).toFixed(2), grade: s.grade.toFixed(2),
-        performanceLevel: s.performanceLevel, isComplete: s.isComplete,
-        completedAt: new Date(`${a.date}T12:00:00Z`),
-      })),
+      studentAgg.map((s) => toAssessmentResultRow(a.id, s, new Date(`${a.date}T12:00:00Z`))),
     );
-    await db.insert(skillResults).values(
-      skillAgg.map((s) => ({
-        assessmentId: a.id, studentId: s.studentId, nodeId: s.nodeId,
-        correctCount: s.correctCount, totalCount: s.totalCount,
-        percentage: (s.percentage * 100).toFixed(2), performanceLevel: s.performanceLevel,
-      })),
-    );
+    await db.insert(skillResults).values(skillAgg.map((s) => toSkillResultRow(a.id, s)));
     console.log(`  ✓ ${a.name} — ${cohort.length} alumnos, ${respRows.length} respuestas`);
   }
 

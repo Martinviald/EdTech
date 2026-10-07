@@ -30,16 +30,21 @@ const DIA_BANDS: PerformanceBandInput[] = [
   },
 ];
 
-const legacyContext: MetricContext = { bands: LEGACY_PERFORMANCE_BANDS };
+const legacyContext: MetricContext = { bands: LEGACY_PERFORMANCE_BANDS, sample: null };
 
 describe('master-board.metrics', () => {
   describe('resolvePrimaryMetricKey', () => {
     it('returns achievement for a known key', () => {
-      expect(resolvePrimaryMetricKey('achievement')).toBe('achievement');
+      expect(resolvePrimaryMetricKey('achievement', false)).toBe('achievement');
     });
 
     it('falls back to the default when undefined', () => {
-      expect(resolvePrimaryMetricKey(undefined)).toBe('achievement');
+      expect(resolvePrimaryMetricKey(undefined, true)).toBe('achievement');
+    });
+
+    it('does not let a user without sample access pick the sample metric', () => {
+      expect(resolvePrimaryMetricKey('sample_delta', false)).toBe('achievement');
+      expect(resolvePrimaryMetricKey('sample_delta', true)).toBe('sample_delta');
     });
   });
 
@@ -89,6 +94,7 @@ describe('master-board.metrics', () => {
       const [metric] = computeMetrics(
         { scoreSum: 42, maxSum: 50, studentsAssessed: 25 },
         legacyContext,
+        false,
       );
       expect(metric.key).toBe('achievement');
       expect(metric.value).toBeCloseTo(84);
@@ -97,7 +103,7 @@ describe('master-board.metrics', () => {
     });
 
     it('returns a null value and dash display when there is no evaluated points', () => {
-      const [metric] = computeMetrics(emptyCellAggregate(), legacyContext);
+      const [metric] = computeMetrics(emptyCellAggregate(), legacyContext, false);
       expect(metric.value).toBeNull();
       expect(metric.display).toBe('—');
       expect(metric.level).toBeNull();
@@ -106,7 +112,8 @@ describe('master-board.metrics', () => {
     it('shows the number but no level when the cell has no bands', () => {
       const [metric] = computeMetrics(
         { scoreSum: 42, maxSum: 50, studentsAssessed: 25 },
-        { bands: null },
+        { bands: null, sample: null },
+        false,
       );
       expect(metric.value).toBeCloseTo(84);
       expect(metric.display).toBe('84.0%');
@@ -116,16 +123,51 @@ describe('master-board.metrics', () => {
     it('classifies with the instrument bands', () => {
       const [metric] = computeMetrics(
         { scoreSum: 10, maxSum: 50, studentsAssessed: 25 },
-        { bands: DIA_BANDS },
+        { bands: DIA_BANDS, sample: null },
+        false,
       );
       expect(metric.value).toBeCloseTo(20);
       expect(metric.level).toMatchObject({ key: 'dia_nivel_1', label: 'Nivel I' });
     });
   });
 
+  describe('sample_delta', () => {
+    const sampleContext = (deltaPp: number | null): MetricContext => ({
+      bands: null,
+      sample: deltaPp === null ? null : ({ deltaPp } as MetricContext['sample']),
+    });
+    const delta = (deltaPp: number | null) =>
+      computeMetrics(emptyCellAggregate(), sampleContext(deltaPp), true).find(
+        (metric) => metric.key === 'sample_delta',
+      );
+
+    it('reads below, similar and above against the ±5 pp similarity band', () => {
+      expect(delta(-12.34)).toMatchObject({ value: -12.34, display: '-12.3', tone: 'below' });
+      expect(delta(5)).toMatchObject({ display: '+5.0', tone: 'similar' });
+      expect(delta(-5)).toMatchObject({ tone: 'similar' });
+      expect(delta(5.01)).toMatchObject({ tone: 'above' });
+    });
+
+    it('is empty without a sample', () => {
+      expect(delta(null)).toMatchObject({ value: null, display: '—', tone: null });
+    });
+
+    it('is not computed for a user without sample access', () => {
+      const keys = computeMetrics(emptyCellAggregate(), sampleContext(3), false).map((m) => m.key);
+      expect(keys).toEqual(['achievement']);
+    });
+  });
+
   describe('availableMetrics', () => {
-    it('exposes the achievement metric for the selector', () => {
-      expect(availableMetrics()).toEqual([{ key: 'achievement', label: '% de logro' }]);
+    it('exposes only achievement to a user without sample access', () => {
+      expect(availableMetrics(false)).toEqual([{ key: 'achievement', label: '% de logro' }]);
+    });
+
+    it('adds the sample delta for a user who can see the sample', () => {
+      expect(availableMetrics(true)).toEqual([
+        { key: 'achievement', label: '% de logro' },
+        { key: 'sample_delta', label: 'Diferencia vs muestra' },
+      ]);
     });
   });
 });

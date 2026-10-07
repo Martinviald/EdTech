@@ -8,6 +8,16 @@
 > **Rama/worktree:** `fix/alertas-key` en `wt-procesos-medicion`.
 > **Relacionado:** `docs/diseno-procesos-de-medicion.md`, `docs/diseno-entrada-por-proceso.md`,
 > `docs/diseno-panorama-comparable.md` (el que fija la restricción #1C que gobierna todo esto).
+>
+> **⚠️ Actualización 2026-10-06 — cambió la regla de severidad.** La severidad de una unidad (y de
+> cada evaluación) ya no sale del % de alumnos en la banda inferior (40 % / 25 %), sino de **la banda
+> de SU instrumento en la que cae el promedio de logro** (`severityFromAverageBand` en
+> `packages/types/src/comparability.ts`): banda inferior → alta, superior → baja, intermedias →
+> media. Motivo: en instrumentos binarios con corte alto (DIA Diagnóstico, ~79 %) la banda inferior
+> es tan ancha que casi todo curso salía "Grave", y la regla vieja no coincidía con la que pinta
+> habilidades y nodos. La concentración en la banda inferior sigue como dato (`lowestBandShare`) y
+> como alerta. Donde este documento cita `SEVERITY_LOWEST_BAND_THRESHOLDS` o
+> `severityFromLowestBandShare`, describe la regla anterior.
 
 ---
 
@@ -69,6 +79,8 @@ falta: no falta _el panorama dentro del proceso_, falta **una síntesis que el p
 contrato, no puede producir**.
 
 ### 2.1 Por qué el enlace a `/resultados?processId=X` no alcanza
+
+> ⚠️ **Enmendada el 2026-10-07 — ver §14.** El hecho que sostenía esta sección cambió.
 
 Es la pregunta que hay que contestar antes de escribir una línea, porque si la respuesta honesta
 es "nada justifica una vista propia", eso es una conclusión válida. No lo es, y la razón es
@@ -302,6 +314,8 @@ La misma lógica aplica a "por nivel/grado", que cruza asignaturas.
 
 ### D6 — La vista principal es una matriz nivel × asignatura pintada por presencia y severidad
 
+> ⚠️ **Enmendada el 2026-10-07 — ver §14.** El encoding de la celda cambió.
+
 Filas = grados, columnas = asignaturas, una celda por unidad comparable. En la org sintética eso es
 una grilla de 8 × 4 = 32 celdas, que es exactamente el conjunto de unidades: la grilla no agrega
 nada, **sólo cambia el orden de la lista por una posición que codifica identidad**.
@@ -341,6 +355,8 @@ nueva que la §5 de `diseno-procesos-de-medicion.md` decidió no construir. Desd
 a esa lista.
 
 ### D7 — Sección dentro de la pestaña Resumen; no una pestaña nueva, no un reemplazo
+
+> ⚠️ **Enmendada el 2026-10-07 — ver §14.** La síntesis y la matriz se mudaron al panorama.
 
 `/procesos/[processId]` sigue teniendo dos pestañas. El Resumen queda así, de arriba abajo:
 
@@ -517,6 +533,13 @@ string. El dato ya está en la query: `process-coverage.service.ts:105` hace
 ---
 
 ## 6. Cambios por paquete, archivo por archivo
+
+> ⚠️ **Esta sección quedó desactualizada por la enmienda de §14.** Describe los
+> archivos como se planearon bajo `…/[processId]/components/`; la implementación
+> los puso en `apps/web/src/components/procesos/` (`process-level-headline.tsx`,
+> `process-results-matrix.tsx`, `band-view.ts`), compartidos entre la ficha del
+> proceso y el panorama, y no creó `subject-rollup-list.tsx` ni
+> `level-tally-bar.tsx`. Se conserva como registro de lo que se diseñó.
 
 ### `packages/types`
 
@@ -734,4 +757,66 @@ contra uso real: conviene revisarlo cuando haya procesos vivos de verdad.
 
 | Fecha      | Cambio                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-07 | **Enmienda a §2.1, D6 y D7** (§14): la síntesis por conteo y la matriz se mudan a `/resultados?processId=X`; `/procesos/[id]` conserva la rendición y un titular compacto. D4 se preserva: la cobertura viaja con la síntesis. Motivo: §2.1 afirmaba que el panorama no podía cruzar resultados con el denominador, y eso dejó de ser cierto cuando se construyó `ProcessPreviewBanner`. Plan: `docs/plan-fusion-panorama-procesos.md`.                                                                                                     |
 | 2026-09-27 | Documento creado. Regla de §3.3 ("se suman clasificaciones, no se promedian puntajes") con sus cuatro bordes; decisiones D1-D11; contrato sin endpoints nuevos; plan en 5 olas. Medido contra `soe_dev`: conteos por nivel de los 3 procesos, dispersión de cortes (cero en la org sintética, 25 instrumentos con cortes propios en el resto de la base), aplanamiento del corte por asignatura y efecto composición (23,9 % → 24,6 % al parear celdas). Latencia **no medida**: los servidores de desarrollo se cayeron durante el diseño. |
+
+---
+
+## 14. Enmienda del 2026-10-07 — la síntesis y la matriz viven en el panorama
+
+Esta sección **modifica D6, D7 y §2.1**. No se editan en su lugar: quedan como estaban, con el
+razonamiento que tenían, y acá está qué cambió y por qué.
+
+### Qué se conserva
+
+**D4, íntegro, y es la condición de la enmienda.** Si el titular por nivel se puede leer sin la
+cobertura al lado, un proceso a medio cargar —el estado normal mientras está vivo— se lee como
+completo. La mudanza se hace moviendo la síntesis **y su denominador** juntos, no separándolos. Con
+alcance docente sigue valiendo la regla de no entregar el denominador del colegio entero.
+
+### Qué cambió, y por qué
+
+**§2.1 dejó de describir el código.** Cerraba así: el panorama "no puede cruzar resultados con las
+celdas que faltan… el denominador vive únicamente en `measurement_processes.expected_scope`". Era
+cierto cuando se escribió. Después se construyó `ProcessPreviewBanner`, que pide
+`/measurement-processes/:id` y pinta su `CoverageBar` dentro del panorama. Falta sólo `/coverage`
+(el estado por celda), que es una request más en una página que ya hace dos. La fusión dejó de ser
+imposible y pasó a ser una mudanza.
+
+El otro argumento de §2.1 sigue en pie y es lo que la mudanza resuelve: el panorama no debe agregar,
+y con 32 instrumentos entrega 32 filas. La síntesis por conteo llega al panorama en vez de obligar a
+leerla en otra vista.
+
+**D7 se enmienda.** `/procesos/[id]` conserva la rendición (KPIs, avance, alcance, vincular
+evaluaciones) y el titular compacto, que es la cifra que se lee en tres segundos junto a la
+cobertura. El aviso de **celdas fuera del alcance declarado** se va con la matriz al panorama; en la
+ficha se sigue llegando a él por la pestaña Rendición, a la que el resumen ya enlaza ("Ver la matriz
+completa"). Deja de ser proactivo en el resumen, y eso es una pérdida chica pero real.
+Contrapartida: un profesor ya no lo ve por ningún camino, porque depende de `/coverage` y con
+alcance docente no se pide — correcto, porque su denominador no es el suyo. La matriz y el resto del análisis se leen en
+`/resultados?processId=X`, donde conviven con la banda generacional, el aviso de comparabilidad, la
+tabla de unidades y las cinco pestañas de análisis que el proceso no heredaba.
+
+**Los bloques 4 y 5 de D7 se borran, no se mudan.** "Celdas que más retrocedieron" es
+`comparable.generational`, que el panorama ya pinta con `GenerationalBanner`; "Lo más urgente" es
+`comparable.alerts`, que ya pinta `LiveAlertsBanner`. §2.1 había decidido "todo lo demás se deja
+donde está y se enlaza" — la implementación no lo cumplió. Borrarlas honra la decisión.
+
+**D6 se corrige en un punto de encoding.** La celda pintaba el `%` de alumnos en el nivel más bajo
+junto a su `N`. Dos problemas: la palabra "nivel" significaba curso en el eje y banda en el valor; y
+un número suelto en una grilla curso × asignatura se lee como % de logro, donde más es mejor —
+acá más es peor, así que el verde con 5 % se lee como catástrofe. Ahora la celda pinta la
+distribución por banda con los colores de la escalera y la fracción de alumnos (`18 de 52`), el eje
+de filas se llama "Curso" y "nivel" queda reservado para la banda.
+
+Además, el `%` que mostraba era el máximo de una unidad junto al `N` sumado de todas: un denominador
+compartido que no existía. Corregido en `deriveProcessRollup` (`lowestBand`), con la misma regla L1
+que la barra del titular.
+
+### Lo que no se hizo, y por qué
+
+**No se movió la matriz al Mapa de calor.** Era tentador —ya es una grilla— pero el Mapa de calor
+pinta **% de logro por habilidad × asignatura**, y meter ahí concentración en banda inferior junta
+las dos escalas que `diseno-panorama-comparable.md` §8.1 decidió no mezclar. Además la matriz
+perdería su capa de cobertura, que es lo que la justifica. Vive en el Resumen del panorama y sólo
+con `processId` activo: sin proceso no hay huecos que mostrar.

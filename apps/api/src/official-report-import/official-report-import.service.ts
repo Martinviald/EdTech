@@ -739,6 +739,8 @@ function toSkillStatsRow(stats: SkillCohortStats, assessmentId: string, now: Dat
     studentCount: stats.studentCount,
     correctCount: stats.correctCount,
     totalCount: stats.totalCount,
+    scoreSum: stats.scoreSum.toFixed(2),
+    maxSum: stats.maxSum.toFixed(2),
     // Model contract: `percentage` en la BD es 0..100; el calculador puro devuelve 0..1.
     percentage: stats.percentage != null ? (stats.percentage * 100).toFixed(2) : null,
     source: 'imported' as const,

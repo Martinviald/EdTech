@@ -41,6 +41,7 @@ const DIA_BANDS: PerformanceBandInput[] = [
 
 type GeneralResultLike = {
   studentsConsidered: number;
+  averageAchievement: number | null;
   requiresSupportCount: number;
   requiresSupportPercentage: number | null;
   distribution: { level: string; count: number }[];
@@ -48,7 +49,8 @@ type GeneralResultLike = {
 
 type BuildGeneralResult = (
   evaluated: unknown[],
-  aggregate: { averageAchievement: number | null; studentsAssessed: number } | null,
+  cohort: { averageAchievement: number | null; studentsAssessed: number },
+  isAggregate: boolean,
   levelData: { counts: CohortLevelCount[]; bands: PerformanceBandInput[] } | null,
 ) => GeneralResultLike;
 
@@ -181,6 +183,7 @@ describe('CourseReportService.buildGeneralResult — informe agregado (Bloque B5
       svc,
       [],
       { averageAchievement: 62, studentsAssessed: 4 },
+      true,
       {
         counts: [
           { performanceBandId: 'b1', count: 3 },
@@ -205,6 +208,7 @@ describe('CourseReportService.buildGeneralResult — informe agregado (Bloque B5
       svc,
       [],
       { averageAchievement: 62, studentsAssessed: 4 },
+      true,
       { counts: [], bands: DIA_BANDS },
     );
 
@@ -213,7 +217,7 @@ describe('CourseReportService.buildGeneralResult — informe agregado (Bloque B5
     expect(res.distribution.every((b) => b.count === 0)).toBe(true);
   });
 
-  it('item_level (no agregado): sin regresión, usa el nivel por alumno', () => {
+  it('item_level (no agregado): el logro es el Σ/Σ del read-model de ítems (16/25 = 64), no el promedio de los % por alumno (55), y el nivel sigue por alumno', () => {
     const svc = makeService();
     const evaluated = [
       {
@@ -236,10 +240,16 @@ describe('CourseReportService.buildGeneralResult — informe agregado (Bloque B5
       },
     ];
 
-    const res = buildGeneralResult(svc, evaluated, null, null);
+    const res = buildGeneralResult(
+      svc,
+      evaluated,
+      { averageAchievement: (16 / 25) * 100, studentsAssessed: 2 },
+      false,
+      null,
+    );
 
     expect(res.studentsConsidered).toBe(2);
-    // 'insufficient' es REQUIRES_SUPPORT_LEVEL.
+    expect(res.averageAchievement).toBeCloseTo(64);
     expect(res.requiresSupportCount).toBe(1);
     const dist = Object.fromEntries(res.distribution.map((b) => [b.level, b.count]));
     expect(dist.insufficient).toBe(1);

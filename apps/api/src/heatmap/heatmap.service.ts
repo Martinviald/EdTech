@@ -18,6 +18,9 @@ import {
   buildComparabilityMeta,
   classifyByBands,
   percentageToPerformanceLevel,
+  addTally,
+  emptyTally,
+  tallyOf,
   type ComparabilityInstrumentRef,
   type ComparabilityMeta,
   type HeatmapCell,
@@ -30,8 +33,8 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
-  COHORT_PCT_SUM,
-  COHORT_PCT_WEIGHT,
+  COHORT_SCORE_SUM,
+  COHORT_MAX_SUM,
   COHORT_STUDENTS_ASSESSED,
   addCohortRow,
   cohortAverage,
@@ -67,8 +70,8 @@ type CellRow = {
   nodeCode: string | null;
   subjectId: string;
   subjectName: string;
-  pctSum: string | null;
-  pctWeight: number;
+  scoreSum: string | null;
+  maxSum: string | null;
   studentsAssessed: number;
 };
 
@@ -85,10 +88,6 @@ export class HeatmapService {
   // `skill_results` (grano alumno): así una evaluación cargada desde un informe
   // oficial DIA —sin respuestas por alumno— entra por el mismo camino que una
   // calculada desde `responses` (plan §5 y Fase 5).
-  //
-  // Los números NO se mueven: el `percentage` de `source='computed'` es la media de
-  // los porcentajes por alumno del curso (decisión §9.2), y acá se recombina
-  // ponderado por `studentCount`, que es exactamente el `avg()` por alumno de antes.
   // ───────────────────────────────────────────────────────────────────────────
 
   async getHeatmap(user: JwtPayload, query: HeatmapQueryDto): Promise<HeatmapResponse> {
@@ -317,8 +316,8 @@ export class HeatmapService {
           nodeCode: taxonomyNodes.code,
           subjectId: subjects.id,
           subjectName: subjects.name,
-          pctSum: COHORT_PCT_SUM,
-          pctWeight: COHORT_PCT_WEIGHT,
+          scoreSum: COHORT_SCORE_SUM,
+          maxSum: COHORT_MAX_SUM,
           studentsAssessed: COHORT_STUDENTS_ASSESSED,
         })
         .from(assessmentSkillStats)
@@ -385,13 +384,12 @@ export class HeatmapService {
           nodeType: r.nodeType,
           nodeCode: r.nodeCode,
           cellsBySubject: new Map(),
-          overall: { pctSum: 0, pctWeight: 0, studentsAssessed: 0 },
+          overall: { tally: emptyTally(), studentsAssessed: 0 },
         };
         nodeMap.set(r.nodeId, node);
       }
       addCohortRow(node.cellsBySubject, r.subjectId, r);
-      node.overall.pctSum += r.pctSum == null ? 0 : Number(r.pctSum);
-      node.overall.pctWeight += Number(r.pctWeight ?? 0);
+      addTally(node.overall.tally, tallyOf([r]));
     }
 
     const levelFor = (pct: number): HeatmapCell['performanceLevel'] => {

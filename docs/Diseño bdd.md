@@ -927,7 +927,9 @@ student_id      uuid        FK → students.id
 node_id         uuid        FK → taxonomy_nodes.id
 correct_count   integer     NOT NULL DEFAULT 0
 total_count     integer     NOT NULL DEFAULT 0
-percentage      decimal     Calculado
+score_sum       decimal     NOT NULL DEFAULT 0   Σ puntaje de las preguntas corregidas del nodo
+max_sum         decimal     NOT NULL DEFAULT 0   Σ puntaje máximo de esas preguntas
+percentage      decimal     score_sum / max_sum (0..100); NULL sin preguntas corregidas
 performance_level enum      NULLABLE
 
 UNIQUE(assessment_id, student_id, node_id)
@@ -936,6 +938,25 @@ INDEX(student_id, node_id)
 ```
 
 **Nota:** Esta tabla se materializa/recalcula al cerrar una evaluación. En F2 se implementará como vista materializada de PostgreSQL (H19.13) para el benchmarking.
+
+#### % de logro de un grupo (regla única)
+
+Ver `docs/diseno-logro-unificado-y-cohorte.md` §3.1. El % de logro de **cualquier grupo** (curso,
+nivel, colegio, muestra; prueba, sección, nodo, pregunta) es Σ puntaje ÷ Σ puntaje máximo de las
+respuestas registradas y corregidas. Nunca se promedian porcentajes. Por eso todas las tablas que
+alimentan un % de grupo guardan su **tally** (`score_sum`, `max_sum`) y el % se deriva de él con
+`achievementPct` (`@soe/types`):
+
+| Tabla | Tally |
+| --- | --- |
+| `assessment_results` | `total_score`, `max_score` (por alumno) |
+| `skill_results` | `score_sum`, `max_sum` (alumno × nodo) |
+| `assessment_item_stats` | `score_sum`, `max_sum` (curso × pregunta) |
+| `assessment_skill_stats` | `score_sum`, `max_sum` (curso × nodo); `percentage` = tally para ambos orígenes |
+| `benchmark_aggregates` | `score_sum`, `max_sum` (colegio × instrumento); `per_skill[]` lleva el tally por nodo |
+| `benchmark_item_aggregates` | `score_sum`, `max_sum` (colegio × pregunta) |
+
+Un alumno sin preguntas corregidas no tiene % ni nivel (`NULL`).
 
 ---
 

@@ -394,47 +394,64 @@ describe('aggregateCohortSkillStats', () => {
     ['s2', CURSO_A],
   ]);
 
-  it('promedia los porcentajes POR ALUMNO (decisión §9.2: no mover números vivos)', () => {
+  it('suma los tallies de los alumnos: Σ puntaje ÷ Σ máximo', () => {
     const out = aggregateCohortSkillStats(
       [
-        { studentId: 's1', nodeId: 'n1', correctCount: 4, totalCount: 4, percentage: 1 },
-        { studentId: 's2', nodeId: 'n1', correctCount: 1, totalCount: 4, percentage: 0.25 },
+        { studentId: 's1', nodeId: 'n1', correctCount: 4, totalCount: 4, scoreSum: 4, maxSum: 4 },
+        { studentId: 's2', nodeId: 'n1', correctCount: 1, totalCount: 4, scoreSum: 1, maxSum: 4 },
       ],
       enrollment,
     );
 
     expect(out).toHaveLength(1);
-    // Media de porcentajes por alumno = (1 + 0.25) / 2 = 0.625.
-    // La tasa agrupada daría 5/8 = 0.625 también acá; divergen cuando los
-    // denominadores por alumno difieren (ver el test siguiente).
+    expect(out[0]!.scoreSum).toBe(5);
+    expect(out[0]!.maxSum).toBe(8);
     expect(out[0]!.percentage).toBeCloseTo(0.625, 6);
     expect(out[0]!.correctCount).toBe(5);
     expect(out[0]!.totalCount).toBe(8);
     expect(out[0]!.studentCount).toBe(2);
   });
 
-  it('diverge de la tasa agrupada cuando los alumnos responden distinta cantidad', () => {
+  it('no promedia porcentajes cuando los alumnos tienen máximos distintos', () => {
     const out = aggregateCohortSkillStats(
       [
-        { studentId: 's1', nodeId: 'n1', correctCount: 1, totalCount: 1, percentage: 1 },
-        { studentId: 's2', nodeId: 'n1', correctCount: 1, totalCount: 4, percentage: 0.25 },
+        { studentId: 's1', nodeId: 'n1', correctCount: 1, totalCount: 1, scoreSum: 1, maxSum: 1 },
+        { studentId: 's2', nodeId: 'n1', correctCount: 1, totalCount: 4, scoreSum: 1, maxSum: 4 },
       ],
       enrollment,
     );
-    // Media por alumno = 0.625. Tasa agrupada sería 2/5 = 0.4. Documentamos que
-    // conservamos la primera a propósito.
-    expect(out[0]!.percentage).toBeCloseTo(0.625, 6);
+    // El promedio de los % por alumno daría (1 + 0.25) / 2 = 0.625; la regla única da 2/5.
+    expect(out[0]!.percentage).toBeCloseTo(0.4, 6);
   });
 
-  it('ignora percentage null al promediar', () => {
+  it('pondera el crédito parcial y las preguntas de 2 puntos', () => {
     const out = aggregateCohortSkillStats(
       [
-        { studentId: 's1', nodeId: 'n1', correctCount: 1, totalCount: 1, percentage: 1 },
-        { studentId: 's2', nodeId: 'n1', correctCount: 0, totalCount: 0, percentage: null },
+        { studentId: 's1', nodeId: 'n1', correctCount: 0, totalCount: 2, scoreSum: 1.5, maxSum: 3 },
+        { studentId: 's2', nodeId: 'n1', correctCount: 1, totalCount: 2, scoreSum: 3, maxSum: 3 },
+      ],
+      enrollment,
+    );
+    expect(out[0]!.percentage).toBeCloseTo(0.75, 6);
+  });
+
+  it('un alumno sin preguntas corregidas no suma al %', () => {
+    const out = aggregateCohortSkillStats(
+      [
+        { studentId: 's1', nodeId: 'n1', correctCount: 1, totalCount: 1, scoreSum: 1, maxSum: 1 },
+        { studentId: 's2', nodeId: 'n1', correctCount: 0, totalCount: 1, scoreSum: 0, maxSum: 0 },
       ],
       enrollment,
     );
     expect(out[0]!.percentage).toBe(1);
+  });
+
+  it('es null cuando nadie tiene puntaje corregido en el nodo', () => {
+    const out = aggregateCohortSkillStats(
+      [{ studentId: 's1', nodeId: 'n1', correctCount: 0, totalCount: 1, scoreSum: 0, maxSum: 0 }],
+      enrollment,
+    );
+    expect(out[0]!.percentage).toBeNull();
   });
 });
 

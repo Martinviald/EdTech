@@ -17,7 +17,12 @@ import {
   ALERT_THRESHOLDS,
   AUTO_SCORABLE_ITEM_TYPES,
   ALERT_HIDDEN_NODE_TYPES,
+  achievementPct,
+  addTally,
+  emptyTally,
+  tallyOf,
   sampleDeltaPp,
+  type AchievementTally,
   type AlertSeverity,
   type ComparableUnitSummary,
   type DashboardAlert,
@@ -488,8 +493,8 @@ export class ComparableAlertsService {
         assessmentId: assessmentSkillStats.assessmentId,
         nodeId: assessmentSkillStats.nodeId,
         nodeName: taxonomyNodes.name,
-        scoreSum: sql<string | null>`sum(${assessmentSkillStats.correctCount}::numeric)`,
-        totalSum: sql<string | null>`sum(${assessmentSkillStats.totalCount}::numeric)`,
+        scoreSum: sql<string>`coalesce(sum(${assessmentSkillStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentSkillStats.maxSum}), 0)`,
         students: sql<number>`sum(${assessmentSkillStats.studentCount})::int`,
       })
       .from(assessmentSkillStats)
@@ -513,8 +518,7 @@ export class ComparableAlertsService {
         unit: ComparableUnitSummary;
         nodeId: string;
         nodeName: string;
-        correct: number;
-        total: number;
+        tally: AchievementTally;
         students: number;
       }
     >();
@@ -526,24 +530,23 @@ export class ComparableAlertsService {
         unit,
         nodeId: row.nodeId,
         nodeName: row.nodeName,
-        correct: 0,
-        total: 0,
+        tally: emptyTally(),
         students: 0,
       };
-      entry.correct += Number(row.scoreSum ?? 0);
-      entry.total += Number(row.totalSum ?? 0);
+      addTally(entry.tally, tallyOf([row]));
       entry.students += Number(row.students ?? 0);
       byUnitNode.set(key, entry);
     }
 
     const achievements: NodeAchievement[] = [];
     for (const entry of byUnitNode.values()) {
-      if (entry.total === 0) continue;
+      const achievement = achievementPct(entry.tally);
+      if (achievement === null) continue;
       achievements.push({
         unit: entry.unit,
         nodeId: entry.nodeId,
         nodeName: entry.nodeName,
-        achievement: (entry.correct / entry.total) * 100,
+        achievement,
       });
     }
     return achievements;
@@ -582,7 +585,8 @@ export class ComparableAlertsService {
         assessmentId: assessmentItemStats.assessmentId,
         itemId: assessmentItemStats.itemId,
         position: items.position,
-        correct: sql<number>`sum(${assessmentItemStats.correctCount})::int`,
+        scoreSum: sql<string>`coalesce(sum(${assessmentItemStats.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentItemStats.maxSum}), 0)`,
         responses: sql<number>`sum(${assessmentItemStats.responseCount})::int`,
       })
       .from(assessmentItemStats)
@@ -606,7 +610,7 @@ export class ComparableAlertsService {
         unit: ComparableUnitSummary;
         itemId: string;
         label: string;
-        correct: number;
+        tally: AchievementTally;
         responses: number;
       }
     >();
@@ -618,22 +622,23 @@ export class ComparableAlertsService {
         unit,
         itemId: row.itemId,
         label: row.position ? `Pregunta ${row.position}` : 'Una pregunta',
-        correct: 0,
+        tally: emptyTally(),
         responses: 0,
       };
-      entry.correct += Number(row.correct ?? 0);
+      addTally(entry.tally, tallyOf([row]));
       entry.responses += Number(row.responses ?? 0);
       byUnitItem.set(key, entry);
     }
 
     const rates: ItemRate[] = [];
     for (const entry of byUnitItem.values()) {
-      if (entry.responses === 0) continue;
+      const rate = achievementPct(entry.tally);
+      if (rate === null) continue;
       rates.push({
         unit: entry.unit,
         itemId: entry.itemId,
         label: entry.label,
-        rate: (entry.correct / entry.responses) * 100,
+        rate,
         responses: entry.responses,
       });
     }

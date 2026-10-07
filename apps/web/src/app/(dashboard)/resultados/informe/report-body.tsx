@@ -10,10 +10,13 @@ import {
   Users,
 } from 'lucide-react';
 import {
+  explainAssessmentSeverity,
   sampleSizeLabel,
   type AssessmentReportResponse,
   type InstrumentSampleEntry,
   type SkillAchievementModel,
+  type UserRole,
+  type SkillReferencesResponse,
 } from '@soe/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -25,9 +28,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { StudentLink } from '@/components/students/student-link';
 import { DistributionBar } from '../components/distribution-bar';
 import { PerformanceBadge } from '../components/performance-badge';
-import { SampleDeltaChip, StatCard } from '@/components/shared';
+import { PendingCorrectionNotice, SampleDeltaChip, StatCard } from '@/components/shared';
+import { SeverityBadge } from '@/components/shared/severity-badge';
 import {
   bandLabel,
   formatAchievement,
@@ -35,7 +40,7 @@ import {
 } from '../components/performance-level';
 import { ReportExportButton } from './report-export-button';
 import { ItemsAnalysisTable } from './items-analysis-table';
-import { SkillsBreakdown } from '../components/skills-breakdown';
+import { SkillsBreakdown, type SkillComparison } from '../components/skills-breakdown';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cuerpo del informe de evaluación (H6.13). Server Component: sólo presenta los
@@ -81,6 +86,8 @@ export function ReportBody({
   assessmentId,
   classGroupId,
   samplePromise,
+  roles = [],
+  skillReferencesPromise,
 }: {
   report: AssessmentReportResponse;
   // TKT-11/TKT-10: desglose interactivo por dimensión + drill-down a preguntas,
@@ -90,6 +97,10 @@ export function ReportBody({
   classGroupId?: string;
   /** Muestra de benchmarking del instrumento; sólo llega para roles directivos. */
   samplePromise?: Promise<InstrumentSampleEntry | null>;
+  /** Roles del usuario: sin ellos el nombre del alumno no enlaza a su Ficha del estudiante. */
+  roles?: readonly UserRole[];
+  /** Nivel y muestra por nodo de la evaluación en contexto (§5.4 del diseño). */
+  skillReferencesPromise?: Promise<SkillReferencesResponse | null>;
 }) {
   const { summary } = report;
   const sampleSubject = classGroupId ? 'course' : 'school';
@@ -111,6 +122,8 @@ export function ReportBody({
   return (
     <div className="space-y-6">
       <FichaTecnica report={report} />
+
+      <PendingCorrectionNotice studentCount={report.meta.pendingStudentCount} />
 
       {/* 1. Síntesis ejecutiva */}
       <section className={`grid grid-cols-1 gap-4 ${summaryGridCols}`}>
@@ -168,6 +181,8 @@ export function ReportBody({
         />
       </section>
 
+      <SeverityExplanation report={report} />
+
       <Highlights report={report} />
 
       {/* 2. Distribución por nivel */}
@@ -189,7 +204,27 @@ export function ReportBody({
       )}
 
       {/* 4. Logro por habilidad (dimensión + drill-down si hay evaluación) */}
-      {samplePromise ? (
+      {skillReferencesPromise && skillsBreakdown && skillsBreakdown.length > 0 ? (
+        <Suspense
+          fallback={
+            <SkillsSection
+              report={report}
+              skillsBreakdown={skillsBreakdown}
+              assessmentId={assessmentId}
+              classGroupId={classGroupId}
+            />
+          }
+        >
+          <SkillsSectionWithReferences
+            report={report}
+            skillsBreakdown={skillsBreakdown}
+            assessmentId={assessmentId}
+            classGroupId={classGroupId}
+            referencesPromise={skillReferencesPromise}
+            samplePromise={samplePromise}
+          />
+        </Suspense>
+      ) : samplePromise ? (
         <Suspense
           fallback={
             <SkillsSection
@@ -225,11 +260,40 @@ export function ReportBody({
       />
 
       {/* 6. Alumnos en foco */}
-      <RiskStudents report={report} />
+      <RiskStudents report={report} roles={roles} />
 
       {/* 7. Recomendaciones */}
       <Recommendations report={report} />
     </div>
+  );
+}
+
+// ── Gravedad ──────────────────────────────────────────────────────────────────
+
+// Por qué la evaluación sale con su gravedad en la lista: en qué banda del
+// instrumento cae el promedio y cuál es el corte. Sin esta frase, un 71% junto a
+// "Grave" se lee como una contradicción. Usa la misma regla que la lista
+// (`explainAssessmentSeverity`), así que respeta el filtro de curso del informe.
+function SeverityExplanation({ report }: { report: AssessmentReportResponse }) {
+  const distribution = report.bandDistribution ?? [];
+  const lowest =
+    distribution.length > 0
+      ? distribution.reduce((min, bucket) => (bucket.order < min.order ? bucket : min))
+      : null;
+  const classified = distribution.reduce((sum, bucket) => sum + bucket.count, 0);
+  const explanation = explainAssessmentSeverity({
+    averageAchievement: report.summary.averageAchievement,
+    bands: report.bands ?? null,
+    studentsAssessed: classified > 0 ? classified : report.summary.studentsEvaluated,
+    lowestBandCount: lowest?.count ?? null,
+  });
+  if (!explanation) return null;
+
+  return (
+    <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+      <SeverityBadge severity={explanation.severity} reason={null} />
+      <span>{explanation.reason}</span>
+    </p>
   );
 }
 
@@ -494,18 +558,68 @@ async function SkillsSectionWithSample({
   return <SkillsSection {...props} sample={await samplePromise} />;
 }
 
+async function SkillsSectionWithReferences({
+  referencesPromise,
+  samplePromise,
+  ...props
+}: {
+  report: AssessmentReportResponse;
+  skillsBreakdown?: SkillAchievementModel[];
+  assessmentId?: string;
+  classGroupId?: string;
+  referencesPromise: Promise<SkillReferencesResponse | null>;
+  samplePromise?: Promise<InstrumentSampleEntry | null>;
+}) {
+  const references = await referencesPromise;
+  const comparison = toSkillComparison(references, props.classGroupId);
+  // Sin muestra por nodo (API anterior o sin muestra válida) se conserva la del instrumento.
+  const sample = !comparison?.sampleByNode && samplePromise ? await samplePromise : null;
+  return <SkillsSection {...props} comparison={comparison} sample={sample} />;
+}
+
+/**
+ * Referencias del desglose: el nivel sólo cuando el grupo es un curso (sin filtro de curso el
+ * grupo ya es el nivel y sería el mismo número), y la muestra si la API la devolvió.
+ */
+function toSkillComparison(
+  references: SkillReferencesResponse | null,
+  classGroupId: string | undefined,
+): SkillComparison | null {
+  if (!references) return null;
+  const level = classGroupId ? references.level : null;
+  if (!level && !references.sample) return null;
+  return {
+    groupLabel: classGroupId ? 'Curso' : 'Esta evaluación',
+    levelByNode: level
+      ? new Map(level.skills.map((skill) => [skill.nodeId, skill.achievement]))
+      : null,
+    sampleByNode: references.sample
+      ? new Map(references.sample.skills.map((skill) => [skill.nodeId, skill]))
+      : null,
+    sampleMeta: references.sample
+      ? {
+          instrumentId: references.sample.instrumentId,
+          label: references.sample.label,
+          refreshedAt: references.sample.refreshedAt,
+        }
+      : null,
+  };
+}
+
 function SkillsSection({
   report,
   skillsBreakdown,
   assessmentId,
   classGroupId,
   sample,
+  comparison,
 }: {
   report: AssessmentReportResponse;
   skillsBreakdown?: SkillAchievementModel[];
   assessmentId?: string;
   classGroupId?: string;
   sample?: InstrumentSampleEntry | null;
+  comparison?: SkillComparison | null;
 }) {
   const global = sample?.global;
   // TKT-11/TKT-10: con una evaluación en contexto se usa el desglose interactivo
@@ -525,6 +639,7 @@ function SkillsSection({
             skills={skillsBreakdown}
             filters={{ classGroupId }}
             assessmentId={assessmentId}
+            comparison={comparison}
             sample={
               global
                 ? {
@@ -594,7 +709,13 @@ function SkillsSection({
 
 // ── Alumnos en foco ───────────────────────────────────────────────────────────
 
-function RiskStudents({ report }: { report: AssessmentReportResponse }) {
+function RiskStudents({
+  report,
+  roles,
+}: {
+  report: AssessmentReportResponse;
+  roles: readonly UserRole[];
+}) {
   const students = report.studentsAtRisk;
   if (students.length === 0) return null;
 
@@ -625,7 +746,9 @@ function RiskStudents({ report }: { report: AssessmentReportResponse }) {
               {students.map((s) => (
                 <TableRow key={s.studentId}>
                   <TableCell className="font-medium">
-                    {s.studentFullName}
+                    <StudentLink studentId={s.studentId} roles={roles}>
+                      {s.studentFullName}
+                    </StudentLink>
                     <span className="block text-xs text-muted-foreground">{s.studentRut}</span>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{s.classGroupName ?? '—'}</TableCell>

@@ -29,11 +29,17 @@ import { appendFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 config({ path: resolve(__dirname, '../../../../.env') });
 
-import { and, eq, ne, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, ne, sql } from 'drizzle-orm';
 import { createDbClient, type Database } from '../client';
 import { computeFingerprint, findRepoRoot } from '../lib/cohort-stats-fingerprint';
 import { assessments } from '../schema/assessments';
-import { assessmentItemStats, assessmentResults, readModelStamps } from '../schema/results';
+import {
+  assessmentItemStats,
+  assessmentResults,
+  assessmentSkillStats,
+  readModelStamps,
+  skillResults,
+} from '../schema/results';
 import { organizations } from '../schema/organizations';
 import { withOrgContext } from '../with-org-context';
 
@@ -117,6 +123,60 @@ async function countCoverage(db: Database): Promise<{ inReadModel: number; withR
   return { inReadModel, withResults };
 }
 
+/**
+ * Filas con % pero sin tally (`max_sum = 0`): las dejó una versión anterior (o la imagen vieja
+ * mientras se desplegaba la nueva) y el backfill no las recalculó. `check` las usa para pedir
+ * el backfill aunque la huella no haya cambiado, así el read-model se auto-cura. Con la regla única del % de logro (docs/diseno-logro-unificado-y-cohorte.md
+ * §3.1) un % sin tally es imposible, y los lectores que suman tallies las leerían como "sin
+ * dato". Mismo filtro por org que `countCoverage`, por la misma razón.
+ */
+type StaleTallies = {
+  computedSkillStats: number;
+  importedSkillStats: number;
+  skillResults: number;
+};
+
+async function countStaleTallies(db: Database): Promise<StaleTallies> {
+  const orgs = await db.select({ id: organizations.id }).from(organizations);
+  const total: StaleTallies = { computedSkillStats: 0, importedSkillStats: 0, skillResults: 0 };
+
+  for (const org of orgs) {
+    const [stats, results] = await withOrgContext(db, org.id, async (tx) => {
+      const s = await tx
+        .select({
+          computed: sql<number>`count(*) filter (where ${assessmentSkillStats.source} = 'computed')::int`,
+          imported: sql<number>`count(*) filter (where ${assessmentSkillStats.source} = 'imported')::int`,
+        })
+        .from(assessmentSkillStats)
+        .innerJoin(assessments, eq(assessments.id, assessmentSkillStats.assessmentId))
+        .where(
+          and(
+            eq(assessments.orgId, org.id),
+            isNotNull(assessmentSkillStats.percentage),
+            eq(assessmentSkillStats.maxSum, '0'),
+          ),
+        );
+      const r = await tx
+        .select({ n: sql<number>`count(*)::int` })
+        .from(skillResults)
+        .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
+        .where(
+          and(
+            eq(assessments.orgId, org.id),
+            isNotNull(skillResults.percentage),
+            eq(skillResults.maxSum, '0'),
+          ),
+        );
+      return [s[0], Number(r[0]?.n ?? 0)] as const;
+    });
+    total.computedSkillStats += Number(stats?.computed ?? 0);
+    total.importedSkillStats += Number(stats?.imported ?? 0);
+    total.skillResults += results;
+  }
+
+  return total;
+}
+
 function emitOutput(name: string, value: string): void {
   const file = process.env.GITHUB_OUTPUT;
   if (file) appendFileSync(file, `${name}=${value}\n`);
@@ -155,6 +215,10 @@ async function runCheck(db: Database, force: boolean, out?: string): Promise<voi
     reasons.push('sin estampado previo (BDD nueva, restore o primer deploy del gate)');
   if (stamp && stamp.calculatorHash !== hash) reasons.push('cambió la semántica del recálculo');
   if (stamp && stamp.migrationTag !== migrationTag) reasons.push('hay una migración nueva');
+  const stale = await countStaleTallies(db);
+  if (stale.computedSkillStats > 0) {
+    reasons.push(`${stale.computedSkillStats} fila(s) del read-model con % pero sin tally`);
+  }
 
   const run = reasons.length > 0;
   if (out) writeFileSync(out, String(run));
@@ -227,6 +291,31 @@ async function runVerify(db: Database): Promise<void> {
     throw new Error(
       `El read-model quedó vacío pero el último estampado tenía ${stamp.assessmentsCount} ` +
         `evaluación(es). Algo lo borró; NO publiques sin repoblar.`,
+    );
+  }
+
+  const stale = await countStaleTallies(db);
+  if (stale.computedSkillStats > 0) {
+    throw new Error(
+      `Hay ${stale.computedSkillStats} fila(s) de assessment_skill_stats con % de logro pero sin tally ` +
+        `(max_sum = 0). El backfill de cohort-stats no las recalculó; corre el backfill ` +
+        `(force_backfill=true) antes de publicar.`,
+    );
+  }
+  // En skill_results puede quedar legítimamente una fila vieja de un nodo que el ítem ya no
+  // etiqueta: el backfill no la reescribe (no mueve números por alumno) y desaparece al
+  // re-puntuar la evaluación. Se avisa sin fallar.
+  if (stale.importedSkillStats > 0) {
+    console.warn(
+      `[cohort-stamp] ⚠️ ${stale.importedSkillStats} fila(s) importadas de assessment_skill_stats ` +
+        `sin tally: sus preguntas ya no tienen el nodo etiquetado y no se pueden re-derivar. ` +
+        `Conservan el % del informe oficial.`,
+    );
+  }
+  if (stale.skillResults > 0) {
+    console.warn(
+      `[cohort-stamp] ⚠️ ${stale.skillResults} fila(s) de skill_results con % pero sin tally. ` +
+        `Son nodos que ya no etiquetan esas preguntas; se limpian al re-puntuar la evaluación.`,
     );
   }
 

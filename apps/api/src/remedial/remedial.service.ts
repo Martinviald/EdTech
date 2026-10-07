@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, or, sql, type SQL } from 'drizzle-orm';
 import {
   instrumentSections,
   items,
@@ -245,16 +245,8 @@ export class RemedialService {
         conditions.push(eq(remedialMaterials.assessmentId, query.assessmentId));
       }
 
-      // Alcance docente: un profesor sólo ve material anclado a sus cursos. El
-      // material sin curso explícito es agregado de toda la org y queda fuera.
-      const scope = await resolveClassGroupScope(tx, user, orgId);
-      if (!scope.scopeAll) {
-        conditions.push(
-          scope.classGroupIds.length === 0
-            ? sql`false`
-            : inArray(remedialMaterials.classGroupId, scope.classGroupIds),
-        );
-      }
+      const scopeCondition = await this.scopeCondition(tx, user, orgId);
+      if (scopeCondition) conditions.push(scopeCondition);
 
       const where = and(...conditions);
       const rows = await tx
@@ -274,6 +266,14 @@ export class RemedialService {
       const data = await Promise.all(rows.map((row) => this.toModel(tx, row)));
       return { data, total, page, limit };
     });
+  }
+
+  async scopeCondition(tx: Database, user: JwtPayload, orgId: string): Promise<SQL | undefined> {
+    const scope = await resolveClassGroupScope(tx, user, orgId);
+    if (scope.scopeAll) return undefined;
+    return scope.classGroupIds.length === 0
+      ? sql`false`
+      : inArray(remedialMaterials.classGroupId, scope.classGroupIds);
   }
 
   /** Marca el material como `processing` y sella `startedAt`. */

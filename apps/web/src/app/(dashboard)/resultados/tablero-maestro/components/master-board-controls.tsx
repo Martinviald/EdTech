@@ -29,16 +29,17 @@ import {
 } from '../master-board-filters';
 import { assessmentCountLabel, formatTakeWindow, groupTakesByYear } from './take-options';
 
-const METRIC_OPTIONS = Object.keys(METRIC_LABELS) as MetricKey[];
-
 export function MasterBoardControls({
   takes,
   academicYears,
   value,
+  metricOptions = ['achievement'],
 }: {
   takes: MasterBoardTake[];
   academicYears: MasterBoardAcademicYear[];
   value: MasterBoardFilterValues;
+  /** Métricas que la API ofrece a este usuario (`availableMetrics` de la matriz). */
+  metricOptions?: readonly MetricKey[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -105,15 +106,17 @@ export function MasterBoardControls({
       <div className="flex w-full flex-col gap-1.5 sm:w-auto">
         <label className="text-xs font-medium text-muted-foreground">Métrica</label>
         <Select
-          value={value.metric ?? METRIC_OPTIONS[0]}
+          value={
+            value.metric && metricOptions.includes(value.metric) ? value.metric : 'achievement'
+          }
           onValueChange={onMetricChange}
-          disabled={METRIC_OPTIONS.length <= 1}
+          disabled={metricOptions.length <= 1}
         >
           <SelectTrigger className="w-full sm:w-[200px]" aria-label="Métrica">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {METRIC_OPTIONS.map((metric) => (
+            {metricOptions.map((metric) => (
               <SelectItem key={metric} value={metric}>
                 {METRIC_LABELS[metric]}
               </SelectItem>

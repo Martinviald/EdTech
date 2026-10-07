@@ -1,6 +1,8 @@
 import {
   compareSeverity,
-  severityFromLowestBandShare,
+  severityFromAverageBand,
+  bandForAchievement,
+  type SeverityBand,
   buildComparabilityMeta,
   buildInstrumentFamilyKey,
   buildInstrumentHistoryKey,
@@ -221,17 +223,63 @@ describe('deltaInPoints', () => {
 });
 
 describe('severidad de una unidad comparable', () => {
-  it('la determina la concentración en la banda inferior, no un corte de logro', () => {
-    expect(severityFromLowestBandShare(62)).toBe('high');
-    expect(severityFromLowestBandShare(40)).toBe('high');
-    expect(severityFromLowestBandShare(30)).toBe('medium');
-    expect(severityFromLowestBandShare(25)).toBe('medium');
-    expect(severityFromLowestBandShare(10)).toBe('low');
-    expect(severityFromLowestBandShare(0)).toBe('low');
+  const BINARIA: SeverityBand[] = [
+    {
+      key: 'apoyo',
+      label: 'Requiere mayor apoyo',
+      order: 0,
+      minThreshold: 0,
+      maxThreshold: 0.7884,
+    },
+    {
+      key: 'logrado',
+      label: 'No requiere mayor apoyo',
+      order: 1,
+      minThreshold: 0.7884,
+      maxThreshold: 1,
+    },
+  ];
+  const TRES_NIVELES: SeverityBand[] = [
+    { key: 'n1', label: 'Nivel I', order: 0, minThreshold: 0, maxThreshold: 0.4 },
+    { key: 'n2', label: 'Nivel II', order: 1, minThreshold: 0.4, maxThreshold: 0.76 },
+    { key: 'n3', label: 'Nivel III', order: 2, minThreshold: 0.76, maxThreshold: 1 },
+  ];
+
+  it('la determina la banda del instrumento en la que cae el promedio', () => {
+    expect(severityFromAverageBand(71.4, BINARIA)).toBe('high');
+    expect(severityFromAverageBand(82.6, BINARIA)).toBe('low');
+    expect(severityFromAverageBand(35, TRES_NIVELES)).toBe('high');
+    expect(severityFromAverageBand(55, TRES_NIVELES)).toBe('medium');
+    expect(severityFromAverageBand(90, TRES_NIVELES)).toBe('low');
   });
 
-  it('sin bandas configuradas no se inventa una severidad', () => {
-    expect(severityFromLowestBandShare(null)).toBeNull();
+  it('el mismo promedio es grave o leve según el corte de su instrumento', () => {
+    expect(severityFromAverageBand(71.4, BINARIA)).toBe('high');
+    expect(severityFromAverageBand(71.4, TRES_NIVELES)).toBe('medium');
+  });
+
+  it('un instrumento binario nunca da atención', () => {
+    for (const promedio of [0, 20, 50, 78.83, 78.84, 95, 100]) {
+      expect(severityFromAverageBand(promedio, BINARIA)).not.toBe('medium');
+    }
+  });
+
+  it('el corte exacto pertenece a la banda superior y el 100% a la última', () => {
+    expect(severityFromAverageBand(78.84, BINARIA)).toBe('low');
+    expect(severityFromAverageBand(100, BINARIA)).toBe('low');
+    expect(bandForAchievement(78.84, BINARIA)?.key).toBe('logrado');
+    expect(bandForAchievement(78.83, BINARIA)?.key).toBe('apoyo');
+  });
+
+  it('no depende del orden en que lleguen las bandas', () => {
+    expect(severityFromAverageBand(55, [...TRES_NIVELES].reverse())).toBe('medium');
+  });
+
+  it('sin bandas, con una sola o sin promedio no se inventa una severidad', () => {
+    expect(severityFromAverageBand(71.4, null)).toBeNull();
+    expect(severityFromAverageBand(71.4, [])).toBeNull();
+    expect(severityFromAverageBand(71.4, [BINARIA[0]!])).toBeNull();
+    expect(severityFromAverageBand(null, BINARIA)).toBeNull();
   });
 
   it('ordena lo urgente primero y deja al final lo que no se puede evaluar', () => {

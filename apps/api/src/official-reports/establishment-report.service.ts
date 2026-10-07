@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, countDistinct, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   academicYears,
   assessmentCourseAssignments,
@@ -8,6 +8,7 @@ import {
   classGroups,
   grades,
   instruments,
+  measurementProcesses,
   studentEnrollments,
   students,
   subjects,
@@ -16,20 +17,20 @@ import {
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
-  OFFICIAL_REPORT_LEVEL_ORDER,
+  expandExpectedCells,
+  isExpectedScopeDefined,
   type EstablishmentBandCell,
   type EstablishmentCountRow,
   type EstablishmentGradeColumn,
-  type EstablishmentLevelCell,
   type EstablishmentSexComparisonRow,
   type EstablishmentSubjectSection,
-  type OfficialEstablishmentReportQueryDto,
-  type OfficialEstablishmentReportResponse,
+  type ExpectedScope,
   type InstrumentApplicationPeriod,
   type MetricType,
+  type OfficialEstablishmentReportQueryDto,
+  type OfficialEstablishmentReportResponse,
   type PerformanceBandInput,
   type PerformanceBandView,
-  type PerformanceLevel,
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -40,36 +41,58 @@ import { compareSexes } from './lib/sex-comparison';
 const SCOPE_NOTE_SOCIOEMOTIONAL =
   'El Área Socioemocional del informe oficial no se reproduce: la plataforma no ingesta el cuestionario socioemocional. Sólo se genera el Área Académica (Tablas 1.1–1.9).';
 
-// Fila cruda por estudiante × asignatura × grado.
-type RawRow = {
+type ProcessRecord = {
+  id: string;
+  name: string;
+  academicYearId: string;
+  academicYear: number | null;
+  period: InstrumentApplicationPeriod | null;
+  expectedScope: ExpectedScope;
+};
+
+type AssignmentRow = {
+  assessmentId: string;
+  assessmentName: string | null;
+  instrumentId: string;
+  subjectId: string | null;
+  subjectName: string | null;
+  classGroupId: string;
+  gradeId: string;
+  gradeName: string;
+  gradeOrder: number;
+};
+
+type ResultRow = {
   studentId: string;
+  assessmentId: string;
+  classGroupId: string;
   gender: string | null;
   percentage: number | null;
-  performanceLevel: PerformanceLevel | null;
   metricType: MetricType;
   performanceBandId: string | null;
-  band: PerformanceBandInput | null;
+};
+
+type SexTally = { female: number[]; male: number[]; f: number; m: number; other: number };
+
+type ColumnAcc = {
   subjectId: string;
   subjectName: string;
   gradeId: string;
   gradeName: string;
   gradeOrder: number;
-  instrumentId: string;
+  assessments: Map<string, string | null>;
+  instrumentIds: Set<string>;
+  classGroupIds: Set<string>;
+  cells: Set<string>;
+  evaluatedStudentIds: Set<string>;
+  bandCounts: Map<string, number>;
+  bandTotal: number;
+  sex: SexTally;
 };
 
-// Acumulador por asignatura.
-type SubjectAcc = {
-  subjectId: string;
-  subjectName: string;
-  grades: Map<string, EstablishmentGradeColumn>;
-  // (gradeId → level → count) y total por grado.
-  levelCounts: Map<string, Map<PerformanceLevel, number>>;
-  gradeTotals: Map<string, number>;
-  instrumentIds: Set<string>;
-  bandCounts: Map<string, Map<string, number>>;
-  bandGradeTotals: Map<string, number>;
-  // (gradeId → { female %[], male %[], counts }).
-  sex: Map<string, { female: number[]; male: number[]; f: number; m: number; other: number }>;
+type ClassGroupCatalog = {
+  gradeByClassGroup: Map<string, string>;
+  activeByClassGroup: Map<string, number>;
 };
 
 @Injectable()
@@ -86,24 +109,31 @@ export class EstablishmentReportService {
     const orgId = this.support.requireOrgId(user);
 
     return withOrgContext(this.db, orgId, async (tx) => {
-      const academicYear = await this.resolveAcademicYear(tx, orgId, query.academicYearId);
+      const process = await this.requireProcess(tx, orgId, query.processId);
+      const assignments = await this.loadAssignments(tx, orgId, process.id);
+      const columns = this.buildColumns(assignments);
 
-      const rawRows = await this.loadRawRows(tx, orgId, academicYear.id, query.period ?? null);
+      const results = await this.loadResults(tx, orgId, this.assessmentIdsOf(columns));
+      const singleColumnByCell = this.indexSingleColumns(columns);
+      const instrumentIds = this.singleInstrumentIds(columns);
+      const bandsByInstrument = await this.loadBandsByInstrument(tx, instrumentIds);
+      this.accumulateResults(results, singleColumnByCell, bandsByInstrument);
+      this.accumulateMultipleCoverage(results, columns);
 
-      const [orgMeta, directorName] = await Promise.all([
-        this.support.loadOrgMeta(tx, orgId),
-        this.support.loadDirectorName(tx, orgId),
-      ]);
+      const catalog = await this.loadClassGroupCatalog(tx, orgId, process.expectedScope, columns);
+      const { disclaimers, levelDefinitions } = await this.loadInstrumentMeta(
+        tx,
+        this.allInstrumentIds(columns),
+      );
+      const orgMeta = await this.support.loadOrgMeta(tx, orgId);
+      const directorName = await this.support.loadDirectorName(tx, orgId);
 
-      const instrumentIds = Array.from(new Set(rawRows.map((r) => r.instrumentId)));
-      const [{ disclaimers, levelDefinitions }, bandsByInstrument] = await Promise.all([
-        this.loadInstrumentMeta(tx, instrumentIds),
-        this.loadBandsByInstrument(tx, instrumentIds),
-      ]);
-      this.hydrateBands(rawRows, bandsByInstrument);
-
-      const subjects = this.aggregate(rawRows, bandsByInstrument);
-      const sexDataAvailable = rawRows.some((r) => r.gender === 'F' || r.gender === 'M');
+      const sections = this.buildSections(
+        columns,
+        bandsByInstrument,
+        process.expectedScope,
+        catalog,
+      );
 
       return {
         meta: {
@@ -113,366 +143,508 @@ export class EstablishmentReportService {
           commune: orgMeta.commune,
           region: orgMeta.region,
           directorName,
-          academicYearId: academicYear.id,
-          academicYear: academicYear.year,
-          period: query.period ?? null,
-          periodLabel: query.period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[query.period] : null,
+          processId: process.id,
+          processName: process.name,
+          academicYearId: process.academicYearId,
+          academicYear: process.academicYear,
+          period: process.period,
+          periodLabel: process.period ? INSTRUMENT_APPLICATION_PERIOD_LABELS[process.period] : null,
           generatedAt: new Date().toISOString(),
           disclaimers,
-          variant: this.support.resolveVariant(query.period ?? null),
+          variant: this.support.resolveVariant(process.period),
         },
         levelDefinitions,
-        subjects,
-        sexDataAvailable,
+        subjects: sections,
+        bandsAvailable: sections.some((s) => s.grades.some((g) => g.bands !== null)),
+        sexDataAvailable: sections.some((s) =>
+          s.counts.some((row) => row.female > 0 || row.male > 0),
+        ),
         scopeNotes: [SCOPE_NOTE_SOCIOEMOTIONAL],
       };
     });
   }
 
-  private async resolveAcademicYear(
+  private async requireProcess(
     tx: Database,
     orgId: string,
-    academicYearId: string | undefined,
-  ): Promise<{ id: string; year: number | null }> {
-    if (academicYearId) {
-      const [row] = await tx
-        .select({ id: academicYears.id, year: academicYears.year })
-        .from(academicYears)
-        .where(and(eq(academicYears.id, academicYearId), eq(academicYears.orgId, orgId)))
-        .limit(1);
-      if (!row) throw new NotFoundException('Año académico no encontrado');
-      return { id: row.id, year: row.year };
-    }
-    const [current] = await tx
-      .select({ id: academicYears.id, year: academicYears.year })
-      .from(academicYears)
-      .where(and(eq(academicYears.orgId, orgId), eq(academicYears.isCurrent, true)))
+    processId: string,
+  ): Promise<ProcessRecord> {
+    const [row] = await tx
+      .select({
+        id: measurementProcesses.id,
+        name: measurementProcesses.name,
+        academicYearId: measurementProcesses.academicYearId,
+        academicYear: academicYears.year,
+        period: measurementProcesses.period,
+        expectedScope: measurementProcesses.expectedScope,
+      })
+      .from(measurementProcesses)
+      .leftJoin(academicYears, eq(academicYears.id, measurementProcesses.academicYearId))
+      .where(
+        and(
+          eq(measurementProcesses.id, processId),
+          eq(measurementProcesses.orgId, orgId),
+          isNull(measurementProcesses.deletedAt),
+        ),
+      )
       .limit(1);
-    if (!current) {
-      throw new NotFoundException(
-        'No hay un año académico actual configurado; especifique academicYearId',
-      );
-    }
-    return { id: current.id, year: current.year };
+    if (!row) throw new NotFoundException('Proceso de medición no encontrado.');
+    return {
+      id: row.id,
+      name: row.name,
+      academicYearId: row.academicYearId,
+      academicYear: row.academicYear ?? null,
+      period: row.period ?? null,
+      expectedScope: row.expectedScope ?? {},
+    };
   }
 
-  private async loadRawRows(
+  private async loadAssignments(
     tx: Database,
     orgId: string,
-    academicYearId: string,
-    period: InstrumentApplicationPeriod | null,
-  ): Promise<RawRow[]> {
-    const conditions = [
-      eq(assessments.orgId, orgId),
-      eq(classGroups.academicYearId, academicYearId),
-      eq(students.orgId, orgId),
-      isNull(students.deletedAt),
-      isNull(instruments.deletedAt),
-    ];
-    if (period) {
-      conditions.push(eq(instruments.applicationPeriod, period));
-    }
-
-    const rows = await tx
+    processId: string,
+  ): Promise<AssignmentRow[]> {
+    return tx
       .select({
-        studentId: assessmentResults.studentId,
-        gender: sql<string | null>`${students.gender}::text`,
-        percentage: assessmentResults.percentage,
-        performanceLevel: assessmentResults.performanceLevel,
-        metricType: assessmentResults.metricType,
-        performanceBandId: assessmentResults.performanceBandId,
+        assessmentId: assessments.id,
+        assessmentName: assessments.name,
+        instrumentId: assessments.instrumentId,
         subjectId: instruments.subjectId,
         subjectName: subjects.name,
-        gradeId: classGroups.gradeId,
+        classGroupId: classGroups.id,
+        gradeId: grades.id,
         gradeName: grades.name,
         gradeOrder: grades.order,
-        instrumentId: assessments.instrumentId,
       })
-      .from(assessmentResults)
-      .innerJoin(assessments, eq(assessments.id, assessmentResults.assessmentId))
+      .from(assessments)
       .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
       .leftJoin(subjects, eq(subjects.id, instruments.subjectId))
-      .innerJoin(students, eq(students.id, assessmentResults.studentId))
       .innerJoin(
         assessmentCourseAssignments,
         eq(assessmentCourseAssignments.assessmentId, assessments.id),
       )
       .innerJoin(classGroups, eq(classGroups.id, assessmentCourseAssignments.classGroupId))
-      .innerJoin(
-        studentEnrollments,
+      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
+      .where(
         and(
-          eq(studentEnrollments.studentId, assessmentResults.studentId),
-          eq(studentEnrollments.classGroupId, classGroups.id),
+          eq(assessments.orgId, orgId),
+          eq(assessments.processId, processId),
+          isNull(instruments.deletedAt),
+        ),
+      );
+  }
+
+  private buildColumns(assignments: AssignmentRow[]): Map<string, ColumnAcc> {
+    const columns = new Map<string, ColumnAcc>();
+    for (const row of assignments) {
+      if (!row.subjectId || !row.subjectName) continue;
+      const key = this.columnKey(row.subjectId, row.gradeId);
+      let column = columns.get(key);
+      if (!column) {
+        column = {
+          subjectId: row.subjectId,
+          subjectName: row.subjectName,
+          gradeId: row.gradeId,
+          gradeName: row.gradeName,
+          gradeOrder: row.gradeOrder,
+          assessments: new Map(),
+          instrumentIds: new Set(),
+          classGroupIds: new Set(),
+          cells: new Set(),
+          evaluatedStudentIds: new Set(),
+          bandCounts: new Map(),
+          bandTotal: 0,
+          sex: { female: [], male: [], f: 0, m: 0, other: 0 },
+        };
+        columns.set(key, column);
+      }
+      column.assessments.set(row.assessmentId, row.assessmentName);
+      column.instrumentIds.add(row.instrumentId);
+      column.classGroupIds.add(row.classGroupId);
+      column.cells.add(this.cellKey(row.assessmentId, row.classGroupId));
+    }
+    return columns;
+  }
+
+  private columnKey(subjectId: string, gradeId: string): string {
+    return `${subjectId}|${gradeId}`;
+  }
+
+  private cellKey(assessmentId: string, classGroupId: string): string {
+    return `${assessmentId}|${classGroupId}`;
+  }
+
+  private isMultiple(column: ColumnAcc): boolean {
+    return column.instrumentIds.size > 1;
+  }
+
+  private assessmentIdsOf(columns: Map<string, ColumnAcc>): string[] {
+    const ids = new Set<string>();
+    for (const column of columns.values()) {
+      for (const id of column.assessments.keys()) ids.add(id);
+    }
+    return Array.from(ids);
+  }
+
+  private singleInstrumentIds(columns: Map<string, ColumnAcc>): string[] {
+    const ids = new Set<string>();
+    for (const column of columns.values()) {
+      if (this.isMultiple(column)) continue;
+      for (const id of column.instrumentIds) ids.add(id);
+    }
+    return Array.from(ids);
+  }
+
+  private allInstrumentIds(columns: Map<string, ColumnAcc>): string[] {
+    const ids = new Set<string>();
+    for (const column of columns.values()) {
+      for (const id of column.instrumentIds) ids.add(id);
+    }
+    return Array.from(ids);
+  }
+
+  private indexSingleColumns(columns: Map<string, ColumnAcc>): Map<string, ColumnAcc> {
+    const byCell = new Map<string, ColumnAcc>();
+    for (const column of columns.values()) {
+      if (this.isMultiple(column)) continue;
+      for (const cell of column.cells) byCell.set(cell, column);
+    }
+    return byCell;
+  }
+
+  private async loadResults(
+    tx: Database,
+    orgId: string,
+    assessmentIds: string[],
+  ): Promise<ResultRow[]> {
+    if (assessmentIds.length === 0) return [];
+    const rows = await tx
+      .select({
+        studentId: assessmentResults.studentId,
+        assessmentId: assessmentResults.assessmentId,
+        classGroupId: studentEnrollments.classGroupId,
+        gender: sql<string | null>`${students.gender}::text`,
+        percentage: assessmentResults.percentage,
+        metricType: assessmentResults.metricType,
+        performanceBandId: assessmentResults.performanceBandId,
+      })
+      .from(assessmentResults)
+      .innerJoin(students, eq(students.id, assessmentResults.studentId))
+      .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, assessmentResults.studentId))
+      .innerJoin(
+        assessmentCourseAssignments,
+        and(
+          eq(assessmentCourseAssignments.assessmentId, assessmentResults.assessmentId),
+          eq(assessmentCourseAssignments.classGroupId, studentEnrollments.classGroupId),
         ),
       )
-      .innerJoin(grades, eq(grades.id, classGroups.gradeId))
-      .where(and(...conditions));
-
-    // Sólo filas con asignatura conocida (el informe agrega por asignatura).
-    const seen = new Set<string>();
-    const out: RawRow[] = [];
-    for (const r of rows) {
-      if (!r.subjectId || !r.subjectName) continue;
-      const key = `${r.studentId}|${r.subjectId}|${r.gradeId}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({
-        studentId: r.studentId,
-        gender: r.gender,
-        percentage: r.percentage === null ? null : Number(r.percentage),
-        performanceLevel: r.performanceLevel,
-        metricType: r.metricType,
-        performanceBandId: r.performanceBandId ?? null,
-        band: null,
-        subjectId: r.subjectId,
-        subjectName: r.subjectName,
-        gradeId: r.gradeId,
-        gradeName: r.gradeName,
-        gradeOrder: r.gradeOrder,
-        instrumentId: r.instrumentId,
-      });
-    }
-    return out;
+      .where(
+        and(
+          inArray(assessmentResults.assessmentId, assessmentIds),
+          eq(students.orgId, orgId),
+          isNull(students.deletedAt),
+        ),
+      )
+      .orderBy(
+        assessmentResults.studentId,
+        desc(assessmentResults.createdAt),
+        assessmentResults.assessmentId,
+      );
+    return rows.map((r) => ({
+      studentId: r.studentId,
+      assessmentId: r.assessmentId,
+      classGroupId: r.classGroupId,
+      gender: r.gender,
+      percentage: r.percentage === null ? null : Number(r.percentage),
+      metricType: r.metricType,
+      performanceBandId: r.performanceBandId ?? null,
+    }));
   }
 
   private async loadBandsByInstrument(
     tx: Database,
     instrumentIds: string[],
   ): Promise<Map<string, PerformanceBandInput[]>> {
-    const effective = await resolveEffectiveBandsForInstruments(tx, instrumentIds);
     const bandsByInstrument = new Map<string, PerformanceBandInput[]>();
+    if (instrumentIds.length === 0) return bandsByInstrument;
+    const effective = await resolveEffectiveBandsForInstruments(tx, instrumentIds);
     for (const [instrumentId, { bands }] of effective) {
-      bandsByInstrument.set(instrumentId, bands);
+      if (bands.length > 0) bandsByInstrument.set(instrumentId, bands);
     }
     return bandsByInstrument;
   }
 
-  private hydrateBands(
-    rawRows: RawRow[],
+  private accumulateResults(
+    results: ResultRow[],
+    singleColumnByCell: Map<string, ColumnAcc>,
     bandsByInstrument: Map<string, PerformanceBandInput[]>,
   ): void {
-    for (const r of rawRows) {
-      const bands = bandsByInstrument.get(r.instrumentId) ?? [];
-      r.band = hydrateBandForStudent(r, bands).band;
+    for (const row of results) {
+      const column = singleColumnByCell.get(this.cellKey(row.assessmentId, row.classGroupId));
+      if (!column || column.evaluatedStudentIds.has(row.studentId)) continue;
+      column.evaluatedStudentIds.add(row.studentId);
+
+      const bands = this.columnBands(column, bandsByInstrument);
+      if (bands) {
+        const band = hydrateBandForStudent(
+          {
+            metricType: row.metricType,
+            percentage: row.percentage,
+            performanceLevel: null,
+            performanceBandId: row.performanceBandId,
+          },
+          bands,
+        ).band;
+        if (band) {
+          column.bandCounts.set(band.key, (column.bandCounts.get(band.key) ?? 0) + 1);
+          column.bandTotal += 1;
+        }
+      }
+
+      if (row.gender === 'F') {
+        column.sex.f += 1;
+        if (row.percentage !== null) column.sex.female.push(row.percentage);
+      } else if (row.gender === 'M') {
+        column.sex.m += 1;
+        if (row.percentage !== null) column.sex.male.push(row.percentage);
+      } else {
+        column.sex.other += 1;
+      }
     }
   }
 
-  private aggregate(
-    rawRows: RawRow[],
+  private accumulateMultipleCoverage(results: ResultRow[], columns: Map<string, ColumnAcc>): void {
+    const multipleByCell = new Map<string, ColumnAcc>();
+    for (const column of columns.values()) {
+      if (!this.isMultiple(column)) continue;
+      for (const cell of column.cells) multipleByCell.set(cell, column);
+    }
+    if (multipleByCell.size === 0) return;
+    for (const row of results) {
+      multipleByCell
+        .get(this.cellKey(row.assessmentId, row.classGroupId))
+        ?.evaluatedStudentIds.add(row.studentId);
+    }
+  }
+
+  private columnBands(
+    column: ColumnAcc,
     bandsByInstrument: Map<string, PerformanceBandInput[]>,
+  ): PerformanceBandInput[] | null {
+    if (this.isMultiple(column)) return null;
+    const [instrumentId] = column.instrumentIds;
+    if (!instrumentId) return null;
+    return bandsByInstrument.get(instrumentId) ?? null;
+  }
+
+  private async loadClassGroupCatalog(
+    tx: Database,
+    orgId: string,
+    scope: ExpectedScope,
+    columns: Map<string, ColumnAcc>,
+  ): Promise<ClassGroupCatalog> {
+    const catalog: ClassGroupCatalog = {
+      gradeByClassGroup: new Map(),
+      activeByClassGroup: new Map(),
+    };
+    const classGroupIds = new Set<string>(scope.classGroupIds ?? []);
+    for (const column of columns.values()) {
+      for (const id of column.classGroupIds) classGroupIds.add(id);
+    }
+    if (classGroupIds.size === 0) return catalog;
+    const ids = Array.from(classGroupIds);
+
+    const groupRows = await tx
+      .select({ id: classGroups.id, gradeId: classGroups.gradeId })
+      .from(classGroups)
+      .where(and(eq(classGroups.orgId, orgId), inArray(classGroups.id, ids)));
+    for (const row of groupRows) catalog.gradeByClassGroup.set(row.id, row.gradeId);
+
+    const enrollmentRows = await tx
+      .select({
+        classGroupId: studentEnrollments.classGroupId,
+        total: countDistinct(studentEnrollments.studentId),
+      })
+      .from(studentEnrollments)
+      .innerJoin(students, eq(students.id, studentEnrollments.studentId))
+      .where(
+        and(
+          inArray(studentEnrollments.classGroupId, ids),
+          eq(studentEnrollments.status, 'active'),
+          eq(students.orgId, orgId),
+          isNull(students.deletedAt),
+        ),
+      )
+      .groupBy(studentEnrollments.classGroupId);
+    for (const row of enrollmentRows) {
+      catalog.activeByClassGroup.set(row.classGroupId, Number(row.total));
+    }
+    return catalog;
+  }
+
+  private scopeClassGroupsByColumn(
+    scope: ExpectedScope,
+    catalog: ClassGroupCatalog,
+  ): Map<string, Set<string>> {
+    const byColumn = new Map<string, Set<string>>();
+    if (!isExpectedScopeDefined(scope)) return byColumn;
+    for (const cell of expandExpectedCells(scope)) {
+      const gradeId = catalog.gradeByClassGroup.get(cell.classGroupId);
+      if (!gradeId) continue;
+      const key = this.columnKey(cell.subjectId, gradeId);
+      let bucket = byColumn.get(key);
+      if (!bucket) {
+        bucket = new Set();
+        byColumn.set(key, bucket);
+      }
+      bucket.add(cell.classGroupId);
+    }
+    return byColumn;
+  }
+
+  private expectedFor(
+    column: ColumnAcc,
+    scopeClassGroups: Set<string> | undefined,
+    catalog: ClassGroupCatalog,
+  ): number | null {
+    const classGroupIds = scopeClassGroups ?? column.classGroupIds;
+    let expected = 0;
+    let known = false;
+    for (const classGroupId of classGroupIds) {
+      const active = catalog.activeByClassGroup.get(classGroupId);
+      if (active === undefined) continue;
+      expected += active;
+      known = true;
+    }
+    return known ? expected : null;
+  }
+
+  private buildSections(
+    columns: Map<string, ColumnAcc>,
+    bandsByInstrument: Map<string, PerformanceBandInput[]>,
+    scope: ExpectedScope,
+    catalog: ClassGroupCatalog,
   ): EstablishmentSubjectSection[] {
-    const bySubject = new Map<string, SubjectAcc>();
-
-    for (const r of rawRows) {
-      let acc = bySubject.get(r.subjectId);
-      if (!acc) {
-        acc = {
-          subjectId: r.subjectId,
-          subjectName: r.subjectName,
-          grades: new Map(),
-          levelCounts: new Map(),
-          gradeTotals: new Map(),
-          instrumentIds: new Set(),
-          bandCounts: new Map(),
-          bandGradeTotals: new Map(),
-          sex: new Map(),
-        };
-        bySubject.set(r.subjectId, acc);
+    const scopeByColumn = this.scopeClassGroupsByColumn(scope, catalog);
+    const bySubject = new Map<string, ColumnAcc[]>();
+    for (const column of columns.values()) {
+      let bucket = bySubject.get(column.subjectId);
+      if (!bucket) {
+        bucket = [];
+        bySubject.set(column.subjectId, bucket);
       }
-
-      const gradeColumn = acc.grades.get(r.gradeId);
-      if (!gradeColumn) {
-        acc.grades.set(r.gradeId, {
-          gradeId: r.gradeId,
-          gradeName: r.gradeName,
-          gradeOrder: r.gradeOrder,
-          instrumentId: r.instrumentId,
-        });
-      } else if (gradeColumn.instrumentId !== r.instrumentId) {
-        gradeColumn.instrumentId = null;
-      }
-
-      // Total del grado (denominador de la tabla de niveles) = estudiantes evaluados.
-      acc.gradeTotals.set(r.gradeId, (acc.gradeTotals.get(r.gradeId) ?? 0) + 1);
-
-      // Conteo por nivel (sólo si tiene nivel calculado).
-      if (r.performanceLevel) {
-        let levelMap = acc.levelCounts.get(r.gradeId);
-        if (!levelMap) {
-          levelMap = new Map();
-          acc.levelCounts.set(r.gradeId, levelMap);
-        }
-        levelMap.set(r.performanceLevel, (levelMap.get(r.performanceLevel) ?? 0) + 1);
-      }
-
-      acc.instrumentIds.add(r.instrumentId);
-      if (r.band) {
-        let bandMap = acc.bandCounts.get(r.gradeId);
-        if (!bandMap) {
-          bandMap = new Map();
-          acc.bandCounts.set(r.gradeId, bandMap);
-        }
-        bandMap.set(r.band.key, (bandMap.get(r.band.key) ?? 0) + 1);
-        acc.bandGradeTotals.set(r.gradeId, (acc.bandGradeTotals.get(r.gradeId) ?? 0) + 1);
-      }
-
-      // Datos por sexo.
-      let sex = acc.sex.get(r.gradeId);
-      if (!sex) {
-        sex = { female: [], male: [], f: 0, m: 0, other: 0 };
-        acc.sex.set(r.gradeId, sex);
-      }
-      if (r.gender === 'F') {
-        sex.f += 1;
-        if (r.percentage !== null) sex.female.push(r.percentage);
-      } else if (r.gender === 'M') {
-        sex.m += 1;
-        if (r.percentage !== null) sex.male.push(r.percentage);
-      } else {
-        sex.other += 1;
-      }
+      bucket.push(column);
     }
 
     const sections: EstablishmentSubjectSection[] = [];
-    for (const acc of bySubject.values()) {
-      const gradeCols = Array.from(acc.grades.values()).sort((a, b) => a.gradeOrder - b.gradeOrder);
+    for (const subjectColumns of bySubject.values()) {
+      subjectColumns.sort((a, b) => a.gradeOrder - b.gradeOrder);
+      const grades: EstablishmentGradeColumn[] = [];
+      const bandDistribution: EstablishmentBandCell[] = [];
+      const sexComparison: EstablishmentSexComparisonRow[] = [];
+      const counts: EstablishmentCountRow[] = [];
 
-      // Niveles presentes (con al menos una fila), en orden canónico.
-      const levelsPresent = new Set<PerformanceLevel>();
-      for (const levelMap of acc.levelCounts.values()) {
-        for (const level of levelMap.keys()) levelsPresent.add(level);
-      }
-      const levels = OFFICIAL_REPORT_LEVEL_ORDER.filter((l) => levelsPresent.has(l));
+      for (const column of subjectColumns) {
+        const multiple = this.isMultiple(column);
+        const bands = this.columnBands(column, bandsByInstrument);
+        const bandViews = bands ? this.toBandViews(bands) : null;
+        const [instrumentId] = column.instrumentIds;
+        const assessmentEntries = Array.from(column.assessments, ([id, name]) => ({ id, name }));
 
-      // Tabla 1.1–1.4: % por grado × nivel.
-      const levelDistribution: EstablishmentLevelCell[] = [];
-      for (const grade of gradeCols) {
-        const total = acc.gradeTotals.get(grade.gradeId) ?? 0;
-        const levelMap = acc.levelCounts.get(grade.gradeId);
-        if (!levelMap || total === 0) continue;
-        for (const level of levels) {
-          const count = levelMap.get(level) ?? 0;
-          levelDistribution.push({
-            gradeId: grade.gradeId,
-            level,
-            count,
-            total,
-            percentage: (count / total) * 100,
-          });
+        grades.push({
+          gradeId: column.gradeId,
+          gradeName: column.gradeName,
+          gradeOrder: column.gradeOrder,
+          instrumentId: multiple ? null : (instrumentId ?? null),
+          assessmentIds: assessmentEntries.map((a) => a.id),
+          assessments: assessmentEntries,
+          multipleInstruments: multiple,
+          bandsMissing: !multiple && bandViews === null,
+          bands: bandViews,
+          coverage: {
+            evaluated: column.evaluatedStudentIds.size,
+            expected: this.expectedFor(
+              column,
+              scopeByColumn.get(this.columnKey(column.subjectId, column.gradeId)),
+              catalog,
+            ),
+          },
+        });
+
+        if (multiple) continue;
+
+        if (bandViews && column.bandTotal > 0) {
+          for (const band of bandViews) {
+            const count = column.bandCounts.get(band.key) ?? 0;
+            bandDistribution.push({
+              gradeId: column.gradeId,
+              bandKey: band.key,
+              count,
+              total: column.bandTotal,
+              percentage: (count / column.bandTotal) * 100,
+            });
+          }
         }
-      }
 
-      // Tabla 1.5–1.8: comparación por sexo.
-      const sexComparison: EstablishmentSexComparisonRow[] = gradeCols.map((grade) => {
-        const sex = acc.sex.get(grade.gradeId) ?? {
-          female: [],
-          male: [],
-          f: 0,
-          m: 0,
-          other: 0,
-        };
-        const outcome = compareSexes(sex.female, sex.male);
-        return {
-          gradeId: grade.gradeId,
-          gradeName: grade.gradeName,
-          gradeOrder: grade.gradeOrder,
+        const outcome = compareSexes(column.sex.female, column.sex.male);
+        sexComparison.push({
+          gradeId: column.gradeId,
+          gradeName: column.gradeName,
+          gradeOrder: column.gradeOrder,
           result: outcome.result,
           femaleAvg: outcome.femaleAvg,
           maleAvg: outcome.maleAvg,
           femaleN: outcome.femaleN,
           maleN: outcome.maleN,
-        };
-      });
+        });
 
-      // Tabla 1.9: conteo M/H/Total.
-      const counts: EstablishmentCountRow[] = gradeCols.map((grade) => {
-        const sex = acc.sex.get(grade.gradeId) ?? { f: 0, m: 0, other: 0 };
-        return {
-          gradeId: grade.gradeId,
-          gradeName: grade.gradeName,
-          gradeOrder: grade.gradeOrder,
-          female: sex.f,
-          male: sex.m,
-          other: sex.other,
-          total: sex.f + sex.m + sex.other,
-        };
-      });
+        counts.push({
+          gradeId: column.gradeId,
+          gradeName: column.gradeName,
+          gradeOrder: column.gradeOrder,
+          female: column.sex.f,
+          male: column.sex.m,
+          other: column.sex.other,
+          total: column.sex.f + column.sex.m + column.sex.other,
+        });
+      }
 
-      const sharedBands = this.resolveSharedBands(acc.instrumentIds, bandsByInstrument);
-
+      const [first] = subjectColumns;
+      if (!first) continue;
       sections.push({
-        subjectId: acc.subjectId,
-        subjectName: acc.subjectName,
-        levels,
-        grades: gradeCols,
-        levelDistribution,
-        ...(sharedBands
-          ? {
-              bands: sharedBands,
-              bandDistribution: this.buildBandDistribution(acc, gradeCols, sharedBands),
-            }
-          : {}),
+        subjectId: first.subjectId,
+        subjectName: first.subjectName,
+        grades,
+        bands: this.resolveSharedBands(grades),
+        bandDistribution,
         sexComparison,
         counts,
       });
     }
 
-    // Orden estable por nombre de asignatura.
     return sections.sort((a, b) => a.subjectName.localeCompare(b.subjectName, 'es'));
   }
 
-  private resolveSharedBands(
-    instrumentIds: Set<string>,
-    bandsByInstrument: Map<string, PerformanceBandInput[]>,
-  ): PerformanceBandView[] | null {
-    let reference: PerformanceBandInput[] | null = null;
+  private toBandViews(bands: PerformanceBandInput[]): PerformanceBandView[] {
+    return [...bands]
+      .sort((a, b) => a.order - b.order)
+      .map((b) => ({ key: b.key, label: b.label, order: b.order, color: b.color ?? null }));
+  }
+
+  private resolveSharedBands(grades: EstablishmentGradeColumn[]): PerformanceBandView[] | null {
+    let reference: PerformanceBandView[] | null = null;
     let referenceSignature: string | null = null;
-    for (const instrumentId of instrumentIds) {
-      const bands = bandsByInstrument.get(instrumentId) ?? [];
-      if (bands.length === 0) return null;
-      const signature = this.bandSetSignature(bands);
+    for (const grade of grades) {
+      if (!grade.bands) continue;
+      const signature = grade.bands.map((b) => b.key).join('|');
       if (referenceSignature === null) {
-        reference = bands;
+        reference = grade.bands;
         referenceSignature = signature;
       } else if (signature !== referenceSignature) {
         return null;
       }
     }
-    if (!reference) return null;
-    return [...reference]
-      .sort((a, b) => a.order - b.order)
-      .map((b) => ({ key: b.key, label: b.label, order: b.order, color: b.color ?? null }));
-  }
-
-  private bandSetSignature(bands: PerformanceBandInput[]): string {
-    return [...bands]
-      .sort((a, b) => a.order - b.order)
-      .map((b) => b.key)
-      .join('|');
-  }
-
-  private buildBandDistribution(
-    acc: SubjectAcc,
-    gradeCols: EstablishmentGradeColumn[],
-    bands: PerformanceBandView[],
-  ): EstablishmentBandCell[] {
-    const cells: EstablishmentBandCell[] = [];
-    for (const grade of gradeCols) {
-      const total = acc.bandGradeTotals.get(grade.gradeId) ?? 0;
-      if (total === 0) continue;
-      const bandMap = acc.bandCounts.get(grade.gradeId);
-      for (const band of bands) {
-        const count = bandMap?.get(band.key) ?? 0;
-        cells.push({
-          gradeId: grade.gradeId,
-          bandKey: band.key,
-          count,
-          total,
-          percentage: (count / total) * 100,
-        });
-      }
-    }
-    return cells;
+    return reference;
   }
 
   private async loadInstrumentMeta(
@@ -489,18 +661,17 @@ export class EstablishmentReportService {
     const levelDefinitions = new Set<string>();
     for (const r of rows) {
       const config = (r.config ?? {}) as Record<string, unknown>;
-      collectStrings(config.reportDisclaimers, disclaimers);
-      collectStrings(config.levelDefinitions, levelDefinitions);
+      this.collectStrings(config.reportDisclaimers, disclaimers);
+      this.collectStrings(config.levelDefinitions, levelDefinitions);
     }
     return {
       disclaimers: Array.from(disclaimers),
       levelDefinitions: Array.from(levelDefinitions),
     };
   }
-}
 
-function collectStrings(raw: unknown, into: Set<string>): void {
-  if (Array.isArray(raw)) {
+  private collectStrings(raw: unknown, into: Set<string>): void {
+    if (!Array.isArray(raw)) return;
     for (const s of raw) if (typeof s === 'string') into.add(s);
   }
 }
