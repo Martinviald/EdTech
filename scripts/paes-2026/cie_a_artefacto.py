@@ -30,6 +30,14 @@ Por qué Ciencias necesita su propio conversor y no le sirve
    ensayo y esa posición es la burbuja de la hoja. En los ensayos 3 y 4 los tres
    cuadernillos ya vienen en el mismo orden y el remapeo es la identidad.
 
+4. Desde el Ensayo 5 la hoja del común trae TRES versiones, igual que la de mención, y
+   cada versión usa la numeración del cuadernillo de su mención (verificado: la clave de
+   la versión v calza 54/54 por identidad con su cuadernillo y sólo 13-30/54 vía
+   Biología). Ahí el remapeo por enunciado del punto 3 corregiría a los alumnos de Física
+   y Química contra preguntas equivocadas. El script lo decide por los datos: si el
+   archivo común trae más de una versión, el común se lee por identidad y además exige
+   que la versión común de cada alumno sea la de su mención.
+
 El artefacto queda con un "curso" por (mención × ensayo × sección), apuntando al
 instrumento por mención que ya existe en la BDD.
 
@@ -56,7 +64,7 @@ import sys
 VERSION_A_MENCION = {"1": "Biología", "2": "Física", "3": "Química"}
 CODIGO_MENCION = {"Biología": "BIO", "Física": "FIS", "Química": "QUI"}
 
-ENSAYOS = (1, 3, 4)
+ENSAYOS_POR_DEFECTO = "1,3,4"
 GRADE_CODE = "4TH_MEDIO"
 # `subjects` guarda la asignatura ACADÉMICA, no la prueba PAES.
 SUBJECT_NAME = "Ciencias Naturales"
@@ -166,16 +174,27 @@ def verifica_gate(ensayo: int, mencion_por_version: dict, mapa: dict, remapeo: d
         reg = mapa[nombre_instrumento(mencion, ensayo)]
         rem = remapeo[mencion]
         comparables = [p for p in reg["posiciones"] if p <= POSICIONES_COMUN and reg["claves"][p] and p in rem]
-        aciertos = sum(1 for p in comparables if reg["claves"][p] == remapeo["_claves_hoja"].get(rem[p]))
+        hoja = remapeo["_claves_hoja"][mencion]
+        aciertos = sum(1 for p in comparables if reg["claves"][p] == hoja.get(rem[p]))
         print(f"  común E{ensayo} {mencion}: clave del banco vs hoja {aciertos}/{len(comparables)}"
               + ("" if aciertos == len(comparables) else "  ← revisar los que difieren"))
 
 
-def construye_remapeo(ensayo: int, mapa: dict) -> dict:
+def construye_remapeo(ensayo: int, mapa: dict, hoja_por_cuadernillo: bool) -> dict:
     """
     Devuelve, por mención, {posicion_en_el_cuadernillo -> burbuja de la hoja del común}.
-    La numeración de la hoja es la del cuadernillo de Biología (ver docstring).
+    Con una sola hoja común, su numeración es la del cuadernillo de Biología; con una hoja
+    por cuadernillo (puntos 3 y 4 del docstring), la burbuja es la propia posición.
     """
+    if hoja_por_cuadernillo:
+        return {
+            mencion: {
+                p: p
+                for p in mapa[nombre_instrumento(mencion, ensayo)]["posiciones"]
+                if p <= POSICIONES_COMUN
+            }
+            for mencion in VERSION_A_MENCION.values()
+        }
     bio = mapa[nombre_instrumento("Biología", ensayo)]
     burbuja_de = {
         bio["enunciados"][p]: p for p in bio["posiciones"] if p <= POSICIONES_COMUN
@@ -199,13 +218,16 @@ def main() -> None:
     ap.add_argument("--dir", required=True, help="Carpeta con los JSON de GradeCam")
     ap.add_argument("--mapa", required=True, help="TSV de ítems exportado de la BDD")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--ensayos", default=ENSAYOS_POR_DEFECTO,
+                    help="Ensayos a convertir, separados por coma (ej. 5)")
     args = ap.parse_args()
+    ensayos = [int(e) for e in args.ensayos.split(",")]
 
     mapa = carga_mapa(args.mapa)
     cursos, marcados, incidencias = [], [], collections.defaultdict(list)
     version_por_alumno = collections.defaultdict(dict)
 
-    for ensayo in ENSAYOS:
+    for ensayo in ensayos:
         (ruta_comun,) = glob.glob(os.path.join(args.dir, f"E{ensayo}_CIE-COMUN_*.json"))
         (ruta_mencion,) = glob.glob(os.path.join(args.dir, f"E{ensayo}_CIE-MENCION_*.json"))
         meta_comun, filas_comun, desc_comun = lee_escaneos(ruta_comun)
@@ -220,9 +242,18 @@ def main() -> None:
             uid = (escaneo["student"].get("student_uid") or "").strip().upper()
             comun_por_uid[uid] = escaneo
 
-        remapeo = construye_remapeo(ensayo, mapa)
-        claves_hoja = claves_por_label(filas_comun[0])
-        remapeo["_claves_hoja"] = claves_hoja
+        hoja_por_cuadernillo = len({e["stats"]["version"] for e in filas_comun}) > 1
+        remapeo = construye_remapeo(ensayo, mapa, hoja_por_cuadernillo)
+        if hoja_por_cuadernillo:
+            primera_por_version = {}
+            for e in filas_comun:
+                primera_por_version.setdefault(e["stats"]["version"], e)
+            remapeo["_claves_hoja"] = {
+                VERSION_A_MENCION[v]: claves_por_label(e) for v, e in primera_por_version.items()
+            }
+        else:
+            claves_hoja = claves_por_label(filas_comun[0])
+            remapeo["_claves_hoja"] = {m: claves_hoja for m in VERSION_A_MENCION.values()}
         por_version = {}
         for escaneo in filas_mencion:
             v = escaneo["stats"]["version"]
@@ -246,6 +277,15 @@ def main() -> None:
             rem = remapeo[mencion]
             propias = respuestas_por_label(escaneo)
             escaneo_comun = comun_por_uid.get(uid)
+            if (
+                hoja_por_cuadernillo
+                and escaneo_comun is not None
+                and escaneo_comun["stats"]["version"] != version
+            ):
+                raise SystemExit(
+                    f"E{ensayo} {nombre_de(escaneo['student'])}: versión de la hoja común "
+                    f"{escaneo_comun['stats']['version']} distinta de la de mención {version}"
+                )
             del_comun = respuestas_por_label(escaneo_comun) if escaneo_comun else {}
             if escaneo_comun is None:
                 incidencias["sin_comun"].append(
