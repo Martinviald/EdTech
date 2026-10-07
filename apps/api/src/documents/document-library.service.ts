@@ -55,10 +55,13 @@ export class DocumentLibraryService {
 
     return withOrgContext(this.db, orgId, async (tx) => {
       const remedialAccess = await this.hasRemedialAccess(tx, user, orgId);
+      const remedialScope = remedialAccess
+        ? await this.remedialService.scopeCondition(tx, user, orgId)
+        : undefined;
       const documentWhere = this.documentConditions(user, orgId, query, remedialAccess);
       const remedialWhere =
         remedialAccess && this.includesRemedials(query)
-          ? await this.remedialConditions(tx, user, orgId, query)
+          ? this.remedialConditions(user, orgId, query, remedialScope)
           : null;
 
       const [entries, documentTotal, remedialTotal] = await Promise.all([
@@ -69,7 +72,7 @@ export class DocumentLibraryService {
           : Promise.resolve([{ total: 0 }]),
       ]);
 
-      const data = await this.hydrate(tx, entries, remedialAccess);
+      const data = await this.hydrate(tx, entries, remedialAccess, remedialScope);
       return {
         data,
         total: (documentTotal[0]?.total ?? 0) + (remedialTotal[0]?.total ?? 0),
@@ -123,19 +126,19 @@ export class DocumentLibraryService {
     return and(...conditions);
   }
 
-  private async remedialConditions(
-    tx: Database,
+  private remedialConditions(
     user: JwtPayload,
     orgId: string,
     query: MaterialLibraryQueryDto,
-  ): Promise<SQL> {
+    remedialScope: SQL | undefined,
+  ): SQL {
     const visibleDocument = this.documentsService.visibleCondition(orgId, user.userId);
     const conditions: Array<SQL | undefined> = [
       eq(remedialMaterials.orgId, orgId),
       isNull(remedialMaterials.deletedAt),
       inArray(remedialMaterials.status, [...LIBRARY_REMEDIAL_STATUSES]),
       sql`not exists (select 1 from ${documents} where ${documents.source}->>'kind' = 'remedial' and ${documents.source}->>'refId' = ${remedialMaterials.id}::text and ${documents.deletedAt} is null and ${visibleDocument})`,
-      await this.remedialService.scopeCondition(tx, user, orgId),
+      remedialScope,
     ];
     if (query.review === 'pending_review') conditions.push(eq(remedialMaterials.status, 'ready'));
     if (query.mine) conditions.push(eq(remedialMaterials.createdById, user.userId));
@@ -197,6 +200,7 @@ export class DocumentLibraryService {
     tx: Database,
     entries: LibraryEntry[],
     remedialAccess: boolean,
+    remedialScope: SQL | undefined,
   ): Promise<MaterialLibraryItem[]> {
     const documentIds: string[] = [];
     const remedialIds = new Set<string>();
@@ -240,6 +244,7 @@ export class DocumentLibraryService {
               and(
                 inArray(remedialMaterials.id, [...remedialIds]),
                 isNull(remedialMaterials.deletedAt),
+                remedialScope,
               ),
             )
         : [];

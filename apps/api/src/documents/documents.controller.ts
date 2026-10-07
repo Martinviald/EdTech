@@ -39,6 +39,7 @@ import { DocumentLibraryService } from './document-library.service';
 import { DocumentItemsService } from './document-items.service';
 import { DocumentPromotionService } from './document-promotion.service';
 import { DocumentSpecificationService } from './document-specification.service';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 
 @Controller('documents')
 @UseGuards(RolesGuard)
@@ -77,7 +78,7 @@ export class DocumentsController {
     @Query() query: unknown,
     @CurrentUser() user: JwtPayload,
   ): Promise<MaterialLibraryResponse> {
-    const dto = materialLibraryQuerySchema.parse(query);
+    const dto = parseDtoOrBadRequest(materialLibraryQuerySchema, query ?? {});
     return this.libraryService.list(user, dto);
   }
 

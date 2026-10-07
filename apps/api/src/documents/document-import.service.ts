@@ -273,7 +273,7 @@ export class DocumentImportService {
           isNull(documents.deletedAt),
           sql`${documents.source}->>'kind' = 'remedial'`,
           sql`${documents.source}->>'refId' = ${remedialId}`,
-          this.documentsService.visibleCondition(orgId, user.userId),
+          eq(documents.createdById, user.userId),
         ),
       )
       .orderBy(asc(documents.createdAt))

@@ -223,7 +223,7 @@ const DYNAMIC_TITLES: readonly { pattern: RegExp; resolve: (m: RegExpMatchArray)
       pattern: /^\/material-remedial\/[^/]+$/,
       resolve: () => ({
         title: 'Material remedial',
-        parent: { href: ROUTES.materialRemedial, label: 'Material Remedial' },
+        parent: { href: `${ROUTES.materiales}?origin=remedial`, label: 'Materiales' },
       }),
     },
     {
