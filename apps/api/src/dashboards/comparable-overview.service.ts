@@ -17,13 +17,14 @@ import {
   compareSeverity,
   deltaInPoints,
   deriveGenerationalHighlights,
-  severityFromLowestBandShare,
+  severityFromAverageBand,
   MAX_DASHBOARD_ALERTS,
   type BaselineRef,
   type ComparabilityInstrumentRef,
   type ComparableAlertsResponse,
   type ComparableOverviewQueryDto,
   type ComparableOverviewResponse,
+  type ComparableUnitAssessment,
   type ComparableUnitSummary,
   type PerformanceBandInput,
 } from '@soe/types';
@@ -373,8 +374,42 @@ export class ComparableOverviewService {
       levelDistribution: null,
       lowestBandShare,
       byClassGroup,
+      byAssessment: unit.assessmentIds.map((assessmentId) =>
+        this.buildAssessmentSeverity(assessmentId, bands, scope),
+      ),
       baseline: null,
-      severity: severityFromLowestBandShare(lowestBandShare),
+      severity: severityFromAverageBand(achievement, bands),
+    };
+  }
+
+  private buildAssessmentSeverity(
+    assessmentId: string,
+    bands: PerformanceBandInput[],
+    scope: ScopeData,
+  ): ComparableUnitAssessment {
+    const { achievement, students } = this.assembler.foldAchievement(
+      [assessmentId],
+      scope.achievementByAssessment,
+    );
+    const distribution =
+      bands.length > 0
+        ? this.assembler.foldBandDistribution(
+            this.assembler.foldLevelCounts([assessmentId], scope.levelCountsByAssessment),
+            scope.classificationRowsByAssessment.get(assessmentId) ?? [],
+            bands,
+          )
+        : null;
+    const lowestBucket =
+      distribution && distribution.length > 0
+        ? distribution.reduce((min, bucket) => (bucket.order < min.order ? bucket : min))
+        : null;
+    return {
+      assessmentId,
+      studentsAssessed: students,
+      averageAchievement: achievement,
+      lowestBandCount: lowestBucket?.count ?? null,
+      lowestBandShare: lowestBucket?.percentage ?? null,
+      severity: severityFromAverageBand(achievement, bands),
     };
   }
 
@@ -456,5 +491,7 @@ function toBandView(band: PerformanceBandInput) {
     order: band.order,
     color: band.color ?? null,
     source: band.source,
+    minThreshold: band.minThreshold,
+    maxThreshold: band.maxThreshold,
   };
 }
