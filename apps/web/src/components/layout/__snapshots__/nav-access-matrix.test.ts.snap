@@ -25,7 +25,6 @@ exports[`matriz de acceso de la navegación multi-rol teacher + eval_coordinator
       "items": [
         "Panorama pedagógico",
         "Ficha del estudiante",
-        "Comparar evaluaciones",
         "Comparación entre colegios",
       ],
     },
@@ -80,7 +79,6 @@ exports[`matriz de acceso de la navegación platform_admin por tabla (ve todo el
       "items": [
         "Panorama pedagógico",
         "Ficha del estudiante",
-        "Comparar evaluaciones",
         "Comparación entre colegios",
       ],
     },
@@ -134,7 +132,6 @@ exports[`matriz de acceso de la navegación rol academic_director 1`] = `
       "items": [
         "Panorama pedagógico",
         "Ficha del estudiante",
-        "Comparar evaluaciones",
         "Comparación entre colegios",
       ],
     },
@@ -307,7 +304,6 @@ exports[`matriz de acceso de la navegación rol eval_coordinator 1`] = `
       "items": [
         "Panorama pedagógico",
         "Ficha del estudiante",
-        "Comparar evaluaciones",
         "Comparación entre colegios",
       ],
     },
@@ -447,7 +443,6 @@ exports[`matriz de acceso de la navegación rol platform_admin 1`] = `
       "items": [
         "Panorama pedagógico",
         "Ficha del estudiante",
-        "Comparar evaluaciones",
         "Comparación entre colegios",
       ],
     },
@@ -501,7 +496,6 @@ exports[`matriz de acceso de la navegación rol school_admin 1`] = `
       "items": [
         "Panorama pedagógico",
         "Ficha del estudiante",
-        "Comparar evaluaciones",
         "Comparación entre colegios",
       ],
     },

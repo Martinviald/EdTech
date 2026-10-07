@@ -4,7 +4,6 @@ import {
   CalendarRange,
   ClipboardList,
   Cpu,
-  GitCompareArrows,
   LayoutDashboard,
   Library,
   MessageSquarePlus,
@@ -22,7 +21,6 @@ import {
   canAccess,
   DASHBOARD_VIEWER_ROLES,
   PROCESS_VIEWER_ROLES,
-  AI_ANALYSIS_GENERATOR_ROLES,
   DOCUMENT_VIEWER_ROLES,
   BENCHMARKING_VIEWER_ROLES,
   SHEET_MANAGEMENT_ROLES,
@@ -147,14 +145,6 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         icon: UserSearch,
         status: 'live',
         roles: DASHBOARD_VIEWER_ROLES,
-      },
-      {
-        // TKT-23: diagnóstico de la variación entre dos evaluaciones comparables.
-        href: ROUTES.compararInstrumentos,
-        label: 'Comparar evaluaciones',
-        icon: GitCompareArrows,
-        status: 'live',
-        roles: AI_ANALYSIS_GENERATOR_ROLES,
       },
       {
         href: ROUTES.benchmarking,
