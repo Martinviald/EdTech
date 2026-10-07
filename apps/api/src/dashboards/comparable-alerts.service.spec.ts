@@ -498,8 +498,8 @@ const NODE_ROW = {
   assessmentId: 'a1',
   nodeId: 'n1',
   nodeName: 'Inferir',
-  scoreSum: '30',
-  totalSum: '100',
+  scoreSum: '45',
+  maxSum: '150',
   students: 30,
 };
 
@@ -647,8 +647,15 @@ function makeDbWithResults(results: unknown[][]): Database {
   } as unknown as Database;
 }
 
-function itemRateRow(correct: number) {
-  return { assessmentId: 'a1', itemId: 'item-7', position: 7, correct, responses: 100 };
+function itemRateRow(scoreSum: number, maxSum = 100, responses = 100) {
+  return {
+    assessmentId: 'a1',
+    itemId: 'item-7',
+    position: 7,
+    scoreSum: String(scoreSum),
+    maxSum: String(maxSum),
+    responses,
+  };
 }
 
 function itemSamplesFor(correctRate: number) {
@@ -685,6 +692,20 @@ describe('ComparableAlertsService — ítems frente a la muestra', () => {
       basis: 'absolute',
       cohort: { sampleValue: 17, similarToSample: true, schoolCount: 12 },
     });
+  });
+
+  it('el logro del ítem es Σ puntaje ÷ Σ máximo con crédito parcial (27/150 = 18), no aciertos ÷ respuestas', async () => {
+    const alerts = await svc.deriveAlerts(
+      makeDbWithResults([[], [itemRateRow(27, 150, 75)]]),
+      'org-1',
+      [makeUnit()],
+      null,
+      null,
+      itemSamplesFor(17),
+    );
+    const item = alerts.find((a) => a.contextId === 'item-7');
+
+    expect(item).toMatchObject({ type: 'item_gap', value: 18, studentsAffected: 75 });
   });
 
   it('un ítem bajo el umbral y muy bajo la muestra queda en una sola alerta', async () => {

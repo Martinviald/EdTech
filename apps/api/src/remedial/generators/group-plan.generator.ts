@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { and, eq, isNull, lt } from 'drizzle-orm';
 import { skillResults, studentEnrollments, students, withOrgContext } from '@soe/db';
 import {
+  achievementPct,
   remedialPlanContentSchema,
+  tallyOf,
   type RemedialMaterialType,
   type RemedialPlanContent,
 } from '@soe/types';
@@ -29,7 +31,7 @@ const BELOW_THRESHOLD_PCT = 60;
  *
  * La AGRUPACIÓN es DETERMINISTA en backend: consulta los alumnos del
  * `classGroupId` que están bajo umbral en la habilidad `nodeId` (vía
- * `skill_results`), calcula `studentCount` y el promedio. La IA SOLO recibe
+ * `skill_results`) y calcula `studentCount`. La IA SOLO recibe
  * AGREGADOS anónimos + contexto RAG y produce `groupLabel` + `sequence`. CERO PII
  * al LLM (Ley 19.628). Las queries corren dentro de `withOrgContext` con `tx`.
  */
@@ -81,8 +83,8 @@ export class GroupPlanGenerator implements RemedialGenerator {
 
   /**
    * Agrupación determinista: alumnos del classGroup (enrollment activo) que están
-   * bajo umbral en `skill_results` para el `nodeId`. Devuelve solo agregados
-   * (conteo + promedio), nunca identidades.
+   * bajo umbral en `skill_results` para el `nodeId`. Devuelve solo agregados,
+   * nunca identidades.
    */
   private async computeAggregates(
     orgId: string,
@@ -91,7 +93,7 @@ export class GroupPlanGenerator implements RemedialGenerator {
   ): Promise<GroupPlanAggregates> {
     return withOrgContext(this.db, orgId, async (tx) => {
       const rows = await tx
-        .select({ percentage: skillResults.percentage })
+        .select({ scoreSum: skillResults.scoreSum, maxSum: skillResults.maxSum })
         .from(skillResults)
         .innerJoin(students, eq(skillResults.studentId, students.id))
         .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, students.id))
@@ -107,13 +109,8 @@ export class GroupPlanGenerator implements RemedialGenerator {
         );
 
       const studentCount = rows.length;
-      const pcts = rows
-        .map((r) => (r.percentage === null ? null : Number(r.percentage)))
-        .filter((p): p is number => p !== null && Number.isFinite(p));
-      const averagePct =
-        pcts.length > 0
-          ? Math.round((pcts.reduce((a, b) => a + b, 0) / pcts.length) * 100) / 100
-          : null;
+      const groupPct = achievementPct(tallyOf(rows));
+      const averagePct = groupPct === null ? null : Math.round(groupPct * 100) / 100;
 
       return {
         studentCount,

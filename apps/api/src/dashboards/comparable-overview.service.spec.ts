@@ -75,8 +75,8 @@ function buildSummary(
 
 describe('ComparableOverviewService — severidad por banda del promedio', () => {
   const achievement: AchievementByAssessment = new Map([
-    ['7A', { achievement: 85, students: 38 }],
-    ['7B', { achievement: 71.4, students: 43 }],
+    ['7A', { tally: { scoreSum: 646, maxSum: 760 }, students: 38 }],
+    ['7B', { tally: { scoreSum: 614.04, maxSum: 860 }, students: 43 }],
   ]);
   const levelCounts = new Map<string, CohortLevelCount[]>([
     [
@@ -95,20 +95,20 @@ describe('ComparableOverviewService — severidad por banda del promedio', () =>
     ],
   ]);
 
-  it('cada aplicación tiene la severidad de su propio promedio', () => {
+  it('cada aplicación tiene la severidad de su propio logro (646/760 = 85, 614,04/860 = 71,4)', () => {
     const summary = buildSummary(BANDS, achievement, levelCounts);
 
     expect(summary.byAssessment).toEqual([
       expect.objectContaining({
         assessmentId: '7A',
-        averageAchievement: 85,
+        averageAchievement: expect.closeTo(85, 6),
         studentsAssessed: 38,
         lowestBandCount: 8,
         severity: 'low',
       }),
       expect.objectContaining({
         assessmentId: '7B',
-        averageAchievement: 71.4,
+        averageAchievement: expect.closeTo(71.4, 6),
         studentsAssessed: 43,
         lowestBandCount: 32,
         severity: 'high',
@@ -117,7 +117,7 @@ describe('ComparableOverviewService — severidad por banda del promedio', () =>
     expect(summary.byAssessment[1]!.lowestBandShare).toBeCloseTo(74.42, 1);
   });
 
-  it('la unidad toma la banda de su promedio ponderado, no la concentración de alumnos', () => {
+  it('la unidad toma la banda de su Σ puntaje ÷ Σ máximo ((646 + 614,04) / 1620 = 77,8), no la concentración de alumnos', () => {
     const summary = buildSummary(BANDS, achievement, levelCounts);
 
     expect(summary.averageAchievement).toBeCloseTo(77.8, 1);

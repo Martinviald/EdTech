@@ -1470,3 +1470,60 @@ describe('ItemAnalysisService.listAssessments', () => {
     expect(res.data[0].studentsCount).toBe(40);
   });
 });
+
+describe('ItemAnalysisService.aggregateReference', () => {
+  type ReferenceRow = {
+    itemId: string;
+    classGroupId: string;
+    studentCount: number;
+    responseCount: number;
+    correctCount: number;
+    scoreSum: string | null;
+    maxSum: string | null;
+  };
+  type Aggregated = {
+    byItem: Map<string, { rate: number | null; responseCount: number; correctCount: number }>;
+    summary: { rate: number | null; classGroupCount: number; studentCount: number };
+  };
+
+  function aggregate(rows: ReferenceRow[]): Aggregated {
+    const service = makeService({} as Database);
+    return (
+      service as unknown as { aggregateReference: (r: ReferenceRow[]) => Aggregated }
+    ).aggregateReference(rows);
+  }
+
+  it('un ítem sin respuestas corregidas (Σ máximo 0) queda con rate null, no 0, igual que attachCorrectRates', () => {
+    const res = aggregate([
+      {
+        itemId: ITEM_A,
+        classGroupId: 'cg-3a',
+        studentCount: 2,
+        responseCount: 2,
+        correctCount: 0,
+        scoreSum: '0',
+        maxSum: '0',
+      },
+      {
+        itemId: ITEM_B,
+        classGroupId: 'cg-3a',
+        studentCount: 2,
+        responseCount: 2,
+        correctCount: 1,
+        scoreSum: '1',
+        maxSum: '2',
+      },
+    ]);
+
+    expect(res.byItem.get(ITEM_A)?.rate).toBeNull();
+    expect(res.byItem.get(ITEM_A)?.responseCount).toBe(2);
+    expect(res.byItem.get(ITEM_B)?.rate).toBe(50);
+    expect(res.summary.rate).toBe(50);
+  });
+
+  it('sin filas, el resumen del nivel queda con rate null', () => {
+    const res = aggregate([]);
+    expect(res.byItem.size).toBe(0);
+    expect(res.summary.rate).toBeNull();
+  });
+});

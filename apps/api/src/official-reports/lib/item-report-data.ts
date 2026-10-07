@@ -1,6 +1,13 @@
 import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { assessmentItemStats, itemTaxonomyTags, items, taxonomyNodes } from '@soe/db';
-import { mergeAnswerCounts, type AnswerCount } from '@soe/types';
+import {
+  addTally,
+  emptyTally,
+  mergeAnswerCounts,
+  tallyOf,
+  type AchievementTally,
+  type AnswerCount,
+} from '@soe/types';
 import type { Database } from '../../database/database.types';
 
 // Carga de datos por ítem para la tabla de especificaciones (TKT-24) y el detalle
@@ -39,6 +46,7 @@ export type ItemAnswerDistribution = {
   totalResponses: number;
   answeredCount: number;
   correctCount: number;
+  tally: AchievementTally;
   byAnswer: Map<string, number>; // key → nº que la eligió
 };
 
@@ -182,6 +190,7 @@ export async function loadItemDistributions(
       totalResponses: stat.responseCount,
       answeredCount: 0,
       correctCount: stat.correctCount,
+      tally: stat.tally,
       byAnswer: new Map(),
     };
     for (const bucket of stat.answerCounts) {
@@ -195,6 +204,13 @@ export async function loadItemDistributions(
   return result;
 }
 
+type CohortItemStat = {
+  responseCount: number;
+  correctCount: number;
+  tally: AchievementTally;
+  answerCounts: AnswerCount[];
+};
+
 /**
  * Filas del read-model de cohorte recombinadas por ítem (1 query).
  *
@@ -207,13 +223,8 @@ async function loadCohortStatsByItem(
   assessmentId: string,
   itemIds: string[],
   classGroupFilter: string[] | null,
-): Promise<
-  Map<string, { responseCount: number; correctCount: number; answerCounts: AnswerCount[] }>
-> {
-  const result = new Map<
-    string,
-    { responseCount: number; correctCount: number; answerCounts: AnswerCount[] }
-  >();
+): Promise<Map<string, CohortItemStat>> {
+  const result = new Map<string, CohortItemStat>();
   if (itemIds.length === 0) return result;
   if (classGroupFilter !== null && classGroupFilter.length === 0) return result;
 
@@ -230,6 +241,8 @@ async function loadCohortStatsByItem(
       itemId: assessmentItemStats.itemId,
       responseCount: assessmentItemStats.responseCount,
       correctCount: assessmentItemStats.correctCount,
+      scoreSum: assessmentItemStats.scoreSum,
+      maxSum: assessmentItemStats.maxSum,
       answerCounts: assessmentItemStats.answerCounts,
     })
     .from(assessmentItemStats)
@@ -240,12 +253,13 @@ async function loadCohortStatsByItem(
   for (const r of rows) {
     let acc = result.get(r.itemId);
     if (!acc) {
-      acc = { responseCount: 0, correctCount: 0, answerCounts: [] };
+      acc = { responseCount: 0, correctCount: 0, tally: emptyTally(), answerCounts: [] };
       result.set(r.itemId, acc);
       bucketsByItem.set(r.itemId, []);
     }
     acc.responseCount += Number(r.responseCount);
     acc.correctCount += Number(r.correctCount);
+    addTally(acc.tally, tallyOf([r]));
     bucketsByItem.get(r.itemId)!.push(r.answerCounts ?? []);
   }
   for (const [itemId, buckets] of bucketsByItem) {

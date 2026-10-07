@@ -32,6 +32,11 @@ import {
   parseSelectedKeys,
   mergeAnswerCounts,
   trueFalseKeyOf,
+  achievementPct,
+  addTally,
+  emptyTally,
+  tallyOf,
+  type AchievementTally,
   type AlternativeDistribution,
   type ScoreCategoryDistribution,
   type RawAnswerCount,
@@ -745,10 +750,6 @@ export class ItemAnalysisService {
    * — que es exactamente el bug que esto corrige. La población es
    * (org, instrumento, grade_id, año académico).
    *
-   * Ponderada por alumno: `sum(correctCount)/sum(responseCount)` sobre las cohortes
-   * del nivel. NUNCA el promedio de los % de cada curso — cursos de distinto N
-   * pesarían igual y el número sería falso.
-   *
    * La query corre dentro de `withOrgContext` y filtra `assessments.orgId`
    * explícitamente: nunca cruza datos de otra org (RLS + filtro manual, §5.2). Es
    * independiente del scope del usuario, que es el punto de una referencia: un
@@ -869,24 +870,6 @@ export class ItemAnalysisService {
       );
   }
 
-  /**
-   * Agrega las filas del read-model en (a) conteos por ítem — las celdas de la
-   * fila de referencia — y (b) el resumen de toda la población, que es
-   * `sum(scoreSum) / sum(maxSum)` sobre TODAS las respuestas de TODOS sus alumnos.
-   * Nunca un promedio de los % por curso: los cursos tienen N distinto y promediar
-   * sus % los ponderaría igual (mismo criterio que `attachCorrectRates`).
-   *
-   * Los conteos `responseCount`/`correctCount` se siguen reportando tal cual —son
-   * "cuántos respondieron" y "cuántos lo lograron entero"—, pero la TASA se pondera
-   * por puntaje para no dar 0% en los ítems de crédito parcial.
-   *
-   * `studentCount` viene por (assessment, curso, ítem): son los alumnos que
-   * respondieron ESE ítem → se toma el `max` por curso y recién ahí se suma; si no,
-   * se contaría cada alumno tantas veces como preguntas tiene la prueba. El `max`
-   * sigue dando el N del curso cuando hay secciones electivas, porque los ítems
-   * comunes los responde el curso entero; y para un instrumento que todos rinden
-   * entero todas las filas traen el mismo número, igual que antes.
-   */
   private aggregateReference(
     rows: Array<{
       itemId: string;
@@ -903,35 +886,29 @@ export class ItemAnalysisService {
   } {
     const byItem = new Map<string, ReferenceRate>();
     const studentsByGroup = new Map<string, number>();
-    let totalScore = 0;
-    let totalMax = 0;
-    const weightByItem = new Map<string, { scoreSum: number; maxSum: number }>();
+    const total = emptyTally();
+    const tallyByItem = new Map<string, AchievementTally>();
 
     for (const r of rows) {
-      const responseCount = Number(r.responseCount);
-      const correctCount = Number(r.correctCount);
-      const scoreSum = Number(r.scoreSum ?? 0);
-      const maxSum = Number(r.maxSum ?? 0);
+      const rowTally = tallyOf([r]);
       const acc = byItem.get(r.itemId) ?? { rate: null, responseCount: 0, correctCount: 0 };
-      acc.responseCount += responseCount;
-      acc.correctCount += correctCount;
+      acc.responseCount += Number(r.responseCount);
+      acc.correctCount += Number(r.correctCount);
       byItem.set(r.itemId, acc);
 
-      const weight = weightByItem.get(r.itemId) ?? { scoreSum: 0, maxSum: 0 };
-      weight.scoreSum += scoreSum;
-      weight.maxSum += maxSum;
-      weightByItem.set(r.itemId, weight);
+      const itemTally = tallyByItem.get(r.itemId) ?? emptyTally();
+      addTally(itemTally, rowTally);
+      tallyByItem.set(r.itemId, itemTally);
 
-      totalScore += scoreSum;
-      totalMax += maxSum;
+      addTally(total, rowTally);
 
       const prev = studentsByGroup.get(r.classGroupId) ?? 0;
       studentsByGroup.set(r.classGroupId, Math.max(prev, Number(r.studentCount)));
     }
 
     for (const [itemId, acc] of byItem) {
-      const weight = weightByItem.get(itemId);
-      acc.rate = weight && weight.maxSum > 0 ? (weight.scoreSum / weight.maxSum) * 100 : 0;
+      const itemTally = tallyByItem.get(itemId);
+      acc.rate = itemTally ? achievementPct(itemTally) : null;
     }
 
     let studentCount = 0;
@@ -940,7 +917,7 @@ export class ItemAnalysisService {
     return {
       byItem,
       summary: {
-        rate: totalMax > 0 ? (totalScore / totalMax) * 100 : null,
+        rate: achievementPct(total),
         classGroupCount: studentsByGroup.size,
         studentCount,
       },

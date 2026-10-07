@@ -30,7 +30,9 @@ import {
   bandToLegacyLevel,
   buildComparabilityMeta,
   classifyByBands,
+  achievementPct,
   percentageToPerformanceLevel,
+  tallyOf,
   type AssessmentStatus,
   type ComparabilityInstrumentRef,
   type DashboardAssessmentSummary,
@@ -56,8 +58,8 @@ import {
 } from '@soe/types';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import {
-  COHORT_PCT_SUM,
-  COHORT_PCT_WEIGHT,
+  COHORT_SCORE_SUM,
+  COHORT_MAX_SUM,
   COHORT_STUDENTS_ASSESSED,
   addCohortRow,
   cohortAverage,
@@ -580,14 +582,8 @@ export class DashboardsService {
       const resolvedThresholds = await this.resolveThresholds(tx, orgId, query, assessmentIds);
       const comparability = buildComparabilityMeta(scoped.refs, assessmentIds.length);
 
-      // Clasificación por alumno: promediamos el % logro por alumno sobre el set de
-      // evaluaciones que matchean los filtros. Una fila por alumno.
       const baseConditions = this.buildResultConditions(assessmentIds, studentIds, undefined);
 
-      // Para filtrar por performanceLevel del promedio, calculamos el nivel a
-      // partir del promedio (no del nivel por evaluación). El filtro se aplica
-      // en SQL sobre el promedio para que la paginación sea consistente.
-      const avgPct = sql`avg(${assessmentResults.percentage}::numeric)`;
       const avgGrade = sql`avg(${assessmentResults.grade}::numeric)`;
 
       const aggregateRows = await tx
@@ -596,7 +592,8 @@ export class DashboardsService {
           studentRut: students.rut,
           firstName: students.firstName,
           lastName: students.lastName,
-          avgPct: sql<string | null>`${avgPct}`,
+          scoreSum: sql<string>`coalesce(sum(${assessmentResults.totalScore}), 0)`,
+          maxSum: sql<string>`coalesce(sum(${assessmentResults.maxScore}), 0)`,
           avgGrade: sql<string | null>`${avgGrade}`,
         })
         .from(assessmentResults)
@@ -619,20 +616,12 @@ export class DashboardsService {
         advanced: resolvedThresholds.advanced,
       };
 
-      // Bandas del instrumento cuando el scope es un único instrumento (ej. una
-      // evaluación DIA): la clasificación usa el corte configurado, no 40/70/85.
-      //
-      // Si el alcance NO es agregable no se clasifica en absoluto (#1C): el promedio del
-      // % de un alumno a través de instrumentos de distinta dificultad no tiene lectura
-      // pedagógica, y clasificarlo con un corte que no es el de ninguno de ellos —el
-      // viejo fallback silencioso a 40/70/85— era peor que no mostrarlo. La UI pide
-      // elegir una unidad comparable con `comparability.reason`.
       const bands = comparability.aggregatable
         ? await this.resolveScopedBands(tx, query, assessmentIds)
         : null;
 
       let classified: StudentClassificationModel[] = aggregateRows.map((r) => {
-        const pct = r.avgPct == null || !comparability.aggregatable ? null : Number(r.avgPct);
+        const pct = comparability.aggregatable ? achievementPct(tallyOf([r])) : null;
         const band = pct == null ? null : classifyByBands(pct / 100, bands);
         const level =
           pct == null
@@ -654,11 +643,6 @@ export class DashboardsService {
         };
       });
 
-      // Distribución por nivel: se calcula sobre la MISMA clasificación por alumno
-      // (promedio) que alimenta la tabla, para que seleccionar un badge coincida
-      // exactamente con el conteo de la gráfica. Antes se contaba por resultado
-      // (alumno × evaluación), lo que producía discrepancias cuando el promedio del
-      // alumno caía en un nivel distinto al de alguna de sus evaluaciones.
       const classifiedTotal = classified.filter((c) => c.performanceLevel != null).length;
       const countByLevel = new Map<PerformanceLevel, number>();
       for (const c of classified) {
@@ -820,11 +804,6 @@ export class DashboardsService {
 
   /**
    * Agrega el read-model de cohorte por nodo sobre el scope.
-   *
-   * El `group by` incluye `class_group_id` a propósito: el promedio se recombina
-   * ponderado por `studentCount` y los alumnos evaluados por curso se toman con `max`
-   * sobre las evaluaciones (ver `cohort-skill-stats.helper`). Agregar directo por nodo
-   * en SQL impediría ambas cosas.
    */
   private async loadSkillsFromCohortStats(
     tx: Database,
@@ -847,8 +826,8 @@ export class DashboardsService {
         nodeType: taxonomyNodes.type,
         nodeCode: taxonomyNodes.code,
         parentId: taxonomyNodes.parentId,
-        pctSum: COHORT_PCT_SUM,
-        pctWeight: COHORT_PCT_WEIGHT,
+        scoreSum: COHORT_SCORE_SUM,
+        maxSum: COHORT_MAX_SUM,
         studentsAssessed: COHORT_STUDENTS_ASSESSED,
       })
       .from(assessmentSkillStats)
@@ -915,7 +894,8 @@ export class DashboardsService {
         nodeType: taxonomyNodes.type,
         nodeCode: taxonomyNodes.code,
         parentId: taxonomyNodes.parentId,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
+        scoreSum: sql<string>`coalesce(sum(${skillResults.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${skillResults.maxSum}), 0)`,
         studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
       })
       .from(skillResults)
@@ -936,7 +916,7 @@ export class DashboardsService {
       nodeType: r.nodeType,
       nodeCode: r.nodeCode,
       parentId: r.parentId,
-      averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+      averageAchievement: achievementPct(tallyOf([r])),
       studentsAssessed: Number(r.studentsAssessed ?? 0),
     }));
   }
@@ -1049,8 +1029,7 @@ export class DashboardsService {
 
   /**
    * Desglose desde el read-model de cohorte. Las cuatro dimensiones comparten forma:
-   * se agrupa por (dimensión × curso) y se recombina en memoria — el curso en el
-   * `group by` es lo que permite ponderar el promedio y contar alumnos sin duplicar.
+   * se agrupa por (dimensión × curso) y se recombina en memoria.
    *
    * `grade`/`classGroup` ya no pasan por `student_enrollments`: el read-model trae el
    * curso resuelto. Eso además elimina la duplicación por multi-matrícula que el camino
@@ -1073,8 +1052,8 @@ export class DashboardsService {
     }
 
     const stats = {
-      pctSum: COHORT_PCT_SUM,
-      pctWeight: COHORT_PCT_WEIGHT,
+      scoreSum: COHORT_SCORE_SUM,
+      maxSum: COHORT_MAX_SUM,
       studentsAssessed: COHORT_STUDENTS_ASSESSED,
     };
 
@@ -1167,7 +1146,7 @@ export class DashboardsService {
    * es función de la dimensión, así que las filas de una misma dimensión son contiguas.
    */
   private foldBreakdown<
-    R extends { pctSum: string | null; pctWeight: number; studentsAssessed: number },
+    R extends { scoreSum: string | null; maxSum: string | null; studentsAssessed: number },
   >(
     raw: R[],
     identity: (row: R) => { id: string; label: string; sublabel: string | null },
@@ -1204,7 +1183,8 @@ export class DashboardsService {
     ];
     if (studentIds !== null) base.push(inArray(skillResults.studentId, studentIds));
 
-    const avgPct = sql<string | null>`avg(${skillResults.percentage}::numeric)`;
+    const scoreSum = sql<string>`coalesce(sum(${skillResults.scoreSum}), 0)`;
+    const maxSum = sql<string>`coalesce(sum(${skillResults.maxSum}), 0)`;
     const studentsAssessed = sql<number>`count(distinct ${skillResults.studentId})::int`;
 
     if (query.groupBy === 'assessment') {
@@ -1214,7 +1194,8 @@ export class DashboardsService {
           name: assessments.name,
           instrumentName: instruments.name,
           subjectName: subjects.name,
-          avgPct,
+          scoreSum,
+          maxSum,
           studentsAssessed,
         })
         .from(skillResults)
@@ -1229,14 +1210,14 @@ export class DashboardsService {
         id: r.id,
         label: r.name ?? r.instrumentName,
         sublabel: r.subjectName,
-        averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+        averageAchievement: achievementPct(tallyOf([r])),
         studentsAssessed: Number(r.studentsAssessed ?? 0),
       }));
     }
 
     if (query.groupBy === 'subject') {
       const raw = await tx
-        .select({ id: subjects.id, name: subjects.name, avgPct, studentsAssessed })
+        .select({ id: subjects.id, name: subjects.name, scoreSum, maxSum, studentsAssessed })
         .from(skillResults)
         .innerJoin(assessments, eq(assessments.id, skillResults.assessmentId))
         .innerJoin(instruments, eq(instruments.id, assessments.instrumentId))
@@ -1249,7 +1230,7 @@ export class DashboardsService {
         id: r.id,
         label: r.name,
         sublabel: null,
-        averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+        averageAchievement: achievementPct(tallyOf([r])),
         studentsAssessed: Number(r.studentsAssessed ?? 0),
       }));
     }
@@ -1266,7 +1247,7 @@ export class DashboardsService {
 
     if (query.groupBy === 'grade') {
       const raw = await tx
-        .select({ id: grades.id, name: grades.name, avgPct, studentsAssessed })
+        .select({ id: grades.id, name: grades.name, scoreSum, maxSum, studentsAssessed })
         .from(skillResults)
         .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, skillResults.studentId))
         .innerJoin(classGroups, eq(classGroups.id, studentEnrollments.classGroupId))
@@ -1279,7 +1260,7 @@ export class DashboardsService {
         id: r.id,
         label: r.name,
         sublabel: null,
-        averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+        averageAchievement: achievementPct(tallyOf([r])),
         studentsAssessed: Number(r.studentsAssessed ?? 0),
       }));
     }
@@ -1289,7 +1270,8 @@ export class DashboardsService {
         id: classGroups.id,
         name: classGroups.name,
         gradeName: grades.name,
-        avgPct,
+        scoreSum,
+        maxSum,
         studentsAssessed,
       })
       .from(skillResults)
@@ -1304,7 +1286,7 @@ export class DashboardsService {
       id: r.id,
       label: r.name,
       sublabel: r.gradeName,
-      averageAchievement: r.avgPct == null ? null : Number(r.avgPct),
+      averageAchievement: achievementPct(tallyOf([r])),
       studentsAssessed: Number(r.studentsAssessed ?? 0),
     }));
   }
@@ -1398,14 +1380,12 @@ export class DashboardsService {
           continue;
         }
 
-        // Una fila por INSTRUMENTO del curso: el promedio sólo tiene lectura dentro de
-        // una unidad comparable (#1C). Antes se promediaba el curso entero a través de
-        // todas sus evaluaciones, mezclando instrumentos de dificultad distinta.
         const aggRows = await tx
           .select({
             instrumentId: instruments.id,
             instrumentName: instruments.name,
-            avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
+            scoreSum: sql<string>`coalesce(sum(${assessmentResults.totalScore}), 0)`,
+            maxSum: sql<string>`coalesce(sum(${assessmentResults.maxScore}), 0)`,
             assessmentsCount: sql<number>`count(distinct ${assessmentResults.assessmentId})::int`,
             totalResults: sql<number>`count(*)::int`,
             passingResults: sql<number>`count(*) filter (where ${assessmentResults.grade}::numeric >= ${passingGrade})::int`,
@@ -1435,7 +1415,7 @@ export class DashboardsService {
             ...emptyRow,
             instrumentId: agg.instrumentId,
             instrumentName: agg.instrumentName,
-            averageAchievement: agg.avgPct == null ? null : Number(agg.avgPct),
+            averageAchievement: achievementPct(tallyOf([agg])),
             passingRate: totalResults > 0 ? (passingResults / totalResults) * 100 : null,
             criticalStudents: Number(agg.criticalStudents ?? 0),
             assessmentsCount: Number(agg.assessmentsCount ?? 0),
@@ -1960,18 +1940,22 @@ export class DashboardsService {
       .select({
         assessmentId: assessmentResults.assessmentId,
         studentsCount: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
-        avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
+        scoreSum: sql<string>`coalesce(sum(${assessmentResults.totalScore}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentResults.maxScore}), 0)`,
       })
       .from(assessmentResults)
       .innerJoin(students, eq(students.id, assessmentResults.studentId))
       .where(and(...statsConditions, isNull(students.deletedAt)))
       .groupBy(assessmentResults.assessmentId);
 
-    const statsByAssessment = new Map<string, { studentsCount: number; avgPct: number | null }>();
+    const statsByAssessment = new Map<
+      string,
+      { studentsCount: number; achievement: number | null }
+    >();
     for (const s of statsRows) {
       statsByAssessment.set(s.assessmentId, {
         studentsCount: Number(s.studentsCount ?? 0),
-        avgPct: s.avgPct == null ? null : Number(s.avgPct),
+        achievement: achievementPct(tallyOf([s])),
       });
     }
 
@@ -1989,14 +1973,9 @@ export class DashboardsService {
     const data = rows.map((r) => {
       const cohort = cohortByAssessment.get(r.assessmentId);
       const perStudent = statsByAssessment.get(r.assessmentId);
-      // ⚠️ El fallback es CAMPO A CAMPO, no todo-o-nada. Un informe oficial cargado
-      // en modo agregado puede tener filas por alumno que sólo traen el nivel de
-      // desempeño (`performance_band_id`) con `percentage` NULL: existían filas, así
-      // que el fallback todo-o-nada se daba por satisfecho y la evaluación mostraba
-      // logro "—" teniendo el dato en el read-model de cohorte.
       const stats = {
         studentsCount: perStudent?.studentsCount || (cohort?.studentsAssessed ?? 0),
-        avgPct: perStudent?.avgPct ?? cohort?.averageAchievement ?? null,
+        achievement: perStudent?.achievement ?? cohort?.averageAchievement ?? null,
       };
       return {
         assessmentId: r.assessmentId,
@@ -2007,7 +1986,7 @@ export class DashboardsService {
         gradeName: r.gradeName,
         administeredAt: r.administeredAt,
         studentsCount: stats?.studentsCount ?? 0,
-        averageAchievement: stats?.avgPct ?? null,
+        averageAchievement: stats?.achievement ?? null,
         status: r.status as AssessmentStatus,
       };
     });

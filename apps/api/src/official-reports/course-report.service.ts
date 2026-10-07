@@ -17,7 +17,9 @@ import {
   REQUIRES_SUPPORT_LEVEL,
   OFFICIAL_REPORT_LEVEL_ORDER,
   RESULT_HIDDEN_NODE_TYPES,
+  achievementPct,
   percentageToPerformanceLevel,
+  tallyOf,
   type OfficialAlternativeDistribution,
   type OfficialCourseGeneralResult,
   type OfficialCourseReportQueryDto,
@@ -43,8 +45,8 @@ import {
   type CohortLevelCount,
 } from '../common/helpers/cohort-level-stats.helper';
 import {
-  COHORT_PCT_SUM,
-  COHORT_PCT_WEIGHT,
+  COHORT_SCORE_SUM,
+  COHORT_MAX_SUM,
   COHORT_STUDENTS_ASSESSED,
   addCohortRow,
   cohortAverage,
@@ -198,16 +200,9 @@ export class CourseReportService {
       const { bands: instrumentBands } = await resolveEffectiveBands(tx, assessment.instrumentId);
       this.hydratePerformanceLevels(evaluated, instrumentBands);
 
-      // Informe oficial cargado en modo agregado: sin filas por alumno. El logro del
-      // curso (§2) sale del read-model de ítems y los ejes de habilidad (§3) del
-      // read-model por eje, ambos ya persistidos por el importador. La distribución
-      // por nivel y "requiere apoyo" dependen del dato por alumno / de la Figura 1 y
-      // quedan fuera de esta capa (se ven vacíos hasta cargar los niveles).
       const isAggregate = assessment.dataGranularity === 'aggregate_only';
-      const aggregate = isAggregate
-        ? await loadCohortOverallAchievement(tx, query.assessmentId, classGroupFilter)
-        : null;
-      const studentsConsidered = aggregate ? aggregate.studentsAssessed : evaluated.length;
+      const cohort = await loadCohortOverallAchievement(tx, query.assessmentId, classGroupFilter);
+      const studentsConsidered = isAggregate ? cohort.studentsAssessed : evaluated.length;
 
       // Distribución por nivel del informe agregado (§2 torta + "requiere apoyo"):
       // desde `assessment_level_stats`. Sin filas → se deja vacío como antes. Las
@@ -256,7 +251,7 @@ export class CourseReportService {
         dataGranularity: assessment.dataGranularity,
       };
 
-      const generalResult = this.buildGeneralResult(evaluated, aggregate, levelData);
+      const generalResult = this.buildGeneralResult(evaluated, cohort, isAggregate, levelData);
       const skillAxes = isAggregate
         ? await this.buildSkillAxesFromCohort(
             tx,
@@ -312,18 +307,15 @@ export class CourseReportService {
 
   private buildGeneralResult(
     evaluated: EvaluatedStudent[],
-    aggregate: CohortOverallAchievement | null,
+    cohort: CohortOverallAchievement,
+    isAggregate: boolean,
     levelData: { counts: CohortLevelCount[]; bands: PerformanceBandInput[] } | null,
   ): OfficialCourseGeneralResult {
-    // Modo agregado: el logro del curso y el N vienen del read-model de ítems; la
-    // distribución por nivel y "requiere apoyo" del read-model por nivel
-    // (`assessment_level_stats`, Gráfico 1). Sin filas de nivel quedan vacíos, como
-    // antes de cargar los niveles.
-    if (aggregate) {
-      const averageAchievement = aggregate.averageAchievement;
-      const performanceLevel =
-        averageAchievement === null ? null : percentageToPerformanceLevel(averageAchievement / 100);
+    const averageAchievement = cohort.averageAchievement;
+    const performanceLevel =
+      averageAchievement === null ? null : percentageToPerformanceLevel(averageAchievement / 100);
 
+    if (isAggregate) {
       if (levelData && levelData.counts.length > 0) {
         const { counts, bands } = levelData;
         const total = counts.reduce((acc, c) => acc + c.count, 0);
@@ -333,7 +325,7 @@ export class CourseReportService {
           ? (counts.find((c) => c.performanceBandId === lowestBand.id)?.count ?? 0)
           : 0;
         return {
-          studentsConsidered: aggregate.studentsAssessed,
+          studentsConsidered: cohort.studentsAssessed,
           averageAchievement,
           performanceLevel,
           requiresSupportCount,
@@ -352,7 +344,7 @@ export class CourseReportService {
         ? withBand.filter((e) => e.band!.id === lowestBand.id).length
         : 0;
       return {
-        studentsConsidered: aggregate.studentsAssessed,
+        studentsConsidered: cohort.studentsAssessed,
         averageAchievement,
         performanceLevel,
         requiresSupportCount,
@@ -362,16 +354,13 @@ export class CourseReportService {
       };
     }
 
-    const pcts = evaluated.map((e) => e.percentage).filter((p): p is number => p !== null);
-    const averageAchievement = pcts.length > 0 ? avg(pcts) : null;
     const requiresSupportCount = evaluated.filter(
       (e) => e.performanceLevel === REQUIRES_SUPPORT_LEVEL,
     ).length;
     return {
       studentsConsidered: evaluated.length,
       averageAchievement,
-      performanceLevel:
-        averageAchievement === null ? null : percentageToPerformanceLevel(averageAchievement / 100),
+      performanceLevel,
       requiresSupportCount,
       requiresSupportPercentage:
         evaluated.length > 0 ? (requiresSupportCount / evaluated.length) * 100 : null,
@@ -405,7 +394,8 @@ export class CourseReportService {
         nodeName: taxonomyNodes.name,
         nodeType: sql<string>`${taxonomyNodes.type}::text`,
         nodeCode: taxonomyNodes.code,
-        avgPct: sql<string | null>`avg(${skillResults.percentage}::numeric)`,
+        scoreSum: sql<string>`coalesce(sum(${skillResults.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${skillResults.maxSum}), 0)`,
         studentsAssessed: sql<number>`count(distinct ${skillResults.studentId})::int`,
       })
       .from(skillResults)
@@ -415,7 +405,7 @@ export class CourseReportService {
       .groupBy(taxonomyNodes.id, taxonomyNodes.name, taxonomyNodes.type, taxonomyNodes.code);
 
     const axes: OfficialCourseSkillAxis[] = rows.map((r) => {
-      const averageAchievement = r.avgPct === null ? null : Number(r.avgPct);
+      const averageAchievement = achievementPct(tallyOf([r]));
       return {
         nodeId: r.nodeId,
         nodeName: r.nodeName,
@@ -436,13 +426,6 @@ export class CourseReportService {
     return axes.sort((a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101));
   }
 
-  /**
-   * Ejes de habilidad para un informe cargado en modo agregado: lee el read-model de
-   * cohorte (`assessment_skill_stats`) en vez de `skill_results`, que no existe sin
-   * dato por alumno. Misma aritmética ponderada por `studentCount` que
-   * `AssessmentReportService.buildSkills` (helper `cohort-skill-stats`), de modo que
-   * el eje del informe oficial y el del heatmap no discrepan.
-   */
   private async buildSkillAxesFromCohort(
     tx: Database,
     assessmentId: string,
@@ -466,8 +449,8 @@ export class CourseReportService {
         nodeName: taxonomyNodes.name,
         nodeType: sql<string>`${taxonomyNodes.type}::text`,
         nodeCode: taxonomyNodes.code,
-        pctSum: COHORT_PCT_SUM,
-        pctWeight: COHORT_PCT_WEIGHT,
+        scoreSum: COHORT_SCORE_SUM,
+        maxSum: COHORT_MAX_SUM,
         studentsAssessed: COHORT_STUDENTS_ASSESSED,
       })
       .from(assessmentSkillStats)
@@ -546,7 +529,7 @@ export class CourseReportService {
       const answeredCount = d?.answeredCount ?? 0;
       const blankCount = totalResponses - answeredCount;
       const correctCount = d?.correctCount ?? 0;
-      const difficulty = totalResponses > 0 ? (correctCount / totalResponses) * 100 : null;
+      const difficulty = d ? achievementPct(d.tally) : null;
       const correctRate = difficulty;
 
       let alternatives: OfficialAlternativeDistribution[] = [];
@@ -827,10 +810,6 @@ export class CourseReportService {
 }
 
 // ── util ─────────────────────────────────────────────────────────────────────
-
-function avg(values: number[]): number {
-  return values.reduce((a, b) => a + b, 0) / values.length;
-}
 
 function buildDistribution(levels: (PerformanceLevel | null)[]): PerformanceDistributionBucket[] {
   const counts = new Map<PerformanceLevel, number>();

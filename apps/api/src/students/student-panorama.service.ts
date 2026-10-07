@@ -13,6 +13,8 @@ import {
 } from '@soe/db';
 import {
   INSTRUMENT_APPLICATION_PERIOD_LABELS,
+  achievementPct,
+  tallyOf,
   RESULT_HIDDEN_NODE_TYPES,
   bandToLegacyLevel,
   buildComparabilityMeta,
@@ -314,6 +316,8 @@ export class StudentPanoramaService {
         nodeOrder: taxonomyNodes.order,
         correctCount: sql<number>`sum(${skillResults.correctCount})::int`,
         totalCount: sql<number>`sum(${skillResults.totalCount})::int`,
+        scoreSum: sql<string>`coalesce(sum(${skillResults.scoreSum}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${skillResults.maxSum}), 0)`,
         assessmentsCount: sql<number>`count(distinct ${skillResults.assessmentId})::int`,
       })
       .from(skillResults)
@@ -339,7 +343,7 @@ export class StudentPanoramaService {
       .map((r) => {
         const correctCount = Number(r.correctCount ?? 0);
         const totalCount = Number(r.totalCount ?? 0);
-        const achievement = totalCount > 0 ? (correctCount / totalCount) * 100 : null;
+        const achievement = achievementPct(tallyOf([r]));
         return {
           nodeId: r.nodeId,
           nodeName: r.nodeName,

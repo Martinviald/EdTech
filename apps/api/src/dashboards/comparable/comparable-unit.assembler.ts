@@ -10,10 +10,15 @@ import {
   students,
 } from '@soe/db';
 import {
+  achievementPct,
+  addTally,
+  emptyTally,
+  tallyOf,
   buildInstrumentFamilyKey,
   buildPeriodSeriesKey,
   classifyByBands,
   previousApplicationPeriod,
+  type AchievementTally,
   type ComparabilityInstrumentRef,
   type ComparableUnitClassGroup,
   type PerformanceBandDistributionBucket,
@@ -32,7 +37,7 @@ import {
 } from '../../common/helpers/cohort-level-stats.helper';
 import type { Database } from '../../database/database.types';
 
-export type AchievementByAssessment = Map<string, { achievement: number | null; students: number }>;
+export type AchievementByAssessment = Map<string, { tally: AchievementTally; students: number }>;
 
 export type ClassGroupTotalsRow = {
   instrumentId: string;
@@ -40,8 +45,8 @@ export type ClassGroupTotalsRow = {
   classGroupName: string;
   gradeName: string | null;
   studentsAssessed: number;
-  percentageSum: string | null;
-  percentageCount: number;
+  scoreSum: string | null;
+  maxSum: string | null;
 };
 
 export type ClassGroupClassificationRow = {
@@ -70,8 +75,8 @@ export type BaselineCandidate = {
 };
 
 /**
- * Arma UNA unidad comparable a partir de sus evaluaciones: % de logro (ponderado por
- * alumnos), distribución por bandas del instrumento, desglose por curso y sus baselines.
+ * Arma UNA unidad comparable a partir de sus evaluaciones: % de logro, distribución por
+ * bandas del instrumento, desglose por curso y sus baselines.
  *
  * Vive aquí —y no como métodos privados de `ComparableOverviewService`— porque lo reusan
  * dos orquestadores distintos: `ComparableOverviewService` (la matriz de muchas unidades)
@@ -82,11 +87,6 @@ export type BaselineCandidate = {
  */
 @Injectable()
 export class ComparableUnitAssembler {
-  /**
-   * % de logro por evaluación, por el primer camino con datos: primero el promedio real
-   * por alumno (`assessment_results`), y como respaldo el read-model de cohorte —lo único
-   * que hay cuando la evaluación vino de un informe oficial agregado.
-   */
   async loadAchievementByAssessment(
     tx: Database,
     assessmentIds: string[],
@@ -97,7 +97,8 @@ export class ComparableUnitAssembler {
     const perStudent = await tx
       .select({
         assessmentId: assessmentResults.assessmentId,
-        avgPct: sql<string | null>`avg(${assessmentResults.percentage}::numeric)`,
+        scoreSum: sql<string>`coalesce(sum(${assessmentResults.totalScore}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${assessmentResults.maxScore}), 0)`,
         students: sql<number>`count(distinct ${assessmentResults.studentId})::int`,
       })
       .from(assessmentResults)
@@ -110,7 +111,7 @@ export class ComparableUnitAssembler {
     const byAssessment: AchievementByAssessment = new Map();
     for (const row of perStudent) {
       byAssessment.set(row.assessmentId, {
-        achievement: row.avgPct == null ? null : Number(row.avgPct),
+        tally: tallyOf([row]),
         students: Number(row.students ?? 0),
       });
     }
@@ -118,32 +119,28 @@ export class ComparableUnitAssembler {
     const cohort = await loadCohortAchievementByAssessment(tx, assessmentIds, classGroupIds);
     for (const row of cohort) {
       const existing = byAssessment.get(row.assessmentId);
-      if (existing && existing.achievement != null) continue;
+      if (existing && existing.tally.maxSum > 0) continue;
       byAssessment.set(row.assessmentId, {
-        achievement: row.averageAchievement,
+        tally: { scoreSum: row.scoreSum, maxSum: row.maxSum },
         students: existing?.students || row.studentsAssessed,
       });
     }
     return byAssessment;
   }
 
-  /** Promedio ponderado por alumnos sobre las evaluaciones de una unidad. */
   foldAchievement(
     assessmentIds: string[],
     byAssessment: AchievementByAssessment,
   ): { achievement: number | null; students: number } {
-    let weighted = 0;
-    let weight = 0;
+    const tally = emptyTally();
     let students = 0;
     for (const id of assessmentIds) {
       const row = byAssessment.get(id);
       if (!row) continue;
       students += row.students;
-      if (row.achievement == null || row.students === 0) continue;
-      weighted += row.achievement * row.students;
-      weight += row.students;
+      addTally(tally, row.tally);
     }
-    return { achievement: weight > 0 ? weighted / weight : null, students };
+    return { achievement: achievementPct(tally), students };
   }
 
   /**
@@ -299,8 +296,8 @@ export class ComparableUnitAssembler {
    *
    * La matrícula se une por el AÑO de la evaluación: `student_enrollments` es única
    * por (alumno, año), así que unir sólo por alumno traía una fila por cada año
-   * cursado —el mismo alumno contado en 3° y en 4° Medio, y su porcentaje promediado
-   * dos veces—. Medido en la demo: 2.164 filas para 1.082 resultados.
+   * cursado —el mismo alumno contado en 3° y en 4° Medio—. Medido en la demo: 2.164 filas
+   * para 1.082 resultados.
    */
   async loadByClassGroup(
     tx: Database,
@@ -352,8 +349,8 @@ export class ComparableUnitAssembler {
         classGroupName: classGroups.name,
         gradeName: grades.name,
         studentsAssessed: sql<number>`count(distinct ${scoped.studentId})::int`,
-        percentageSum: sql<string | null>`sum(${scoped.percentage}::numeric)`,
-        percentageCount: sql<number>`count(${scoped.percentage})::int`,
+        scoreSum: sql<string>`coalesce(sum(${scoped.totalScore}), 0)`,
+        maxSum: sql<string>`coalesce(sum(${scoped.maxScore}), 0)`,
       })
       .from(scoped)
       .innerJoin(assessmentYear, eq(assessmentYear.assessmentId, scoped.assessmentId))
@@ -398,8 +395,7 @@ export class ComparableUnitAssembler {
       classGroupName: string;
       gradeName: string | null;
       studentsAssessed: number;
-      percentageSum: number;
-      percentageCount: number;
+      tally: AchievementTally;
       inLowestBand: number;
       classified: number;
     };
@@ -411,14 +407,12 @@ export class ComparableUnitAssembler {
         classGroupName: row.classGroupName,
         gradeName: row.gradeName,
         studentsAssessed: 0,
-        percentageSum: 0,
-        percentageCount: 0,
+        tally: emptyTally(),
         inLowestBand: 0,
         classified: 0,
       };
       acc.studentsAssessed += row.studentsAssessed;
-      acc.percentageSum += row.percentageSum === null ? 0 : Number(row.percentageSum);
-      acc.percentageCount += row.percentageCount;
+      addTally(acc.tally, tallyOf([row]));
       if (!existing) byCourse.set(row.classGroupId, acc);
     }
 
@@ -439,8 +433,7 @@ export class ComparableUnitAssembler {
         classGroupName: acc.classGroupName,
         gradeName: acc.gradeName,
         studentsAssessed: acc.studentsAssessed,
-        averageAchievement:
-          acc.percentageCount > 0 ? acc.percentageSum / acc.percentageCount : null,
+        averageAchievement: achievementPct(acc.tally),
         lowestBandShare: acc.classified > 0 ? (acc.inLowestBand / acc.classified) * 100 : null,
       }))
       .sort((a, b) => (a.averageAchievement ?? 101) - (b.averageAchievement ?? 101));
