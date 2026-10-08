@@ -1,7 +1,7 @@
 name: CI
 
-# Gate de calidad en PRs. Los jobs viven en `checks.yml` para que los deploys corran
-# exactamente los mismos, sin copiarlos: ver la cabecera de ese archivo.
+# Gate de calidad en PRs. Los jobs viven en `checks.yml`; ver su cabecera para la
+# relación con la branch protection de `main` y por qué los deploys no los repiten.
 
 on:
   pull_request:
