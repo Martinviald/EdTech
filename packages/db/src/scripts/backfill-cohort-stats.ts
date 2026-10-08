@@ -168,6 +168,7 @@ type BackfillOutcome = {
   skillRows: number;
   orphanResponses: number;
   skillPctMismatches: number;
+  skillPctCleared: number;
   deletedItemResponses: number;
 };
 
@@ -192,14 +193,20 @@ async function loadTagsByItem(
 }
 
 /**
- * Escribe el tally recalculado en `skill_results` (sólo `score_sum` / `max_sum`) y cuenta los
+ * Escribe el tally recalculado en `skill_results` (`score_sum` / `max_sum`) y cuenta los
  * alumnos×nodo cuyo `percentage` guardado difiere del recalculado en más de 0,01 pp.
+ *
+ * El alumno×nodo sin ninguna pregunta corregida (tally en 0) queda sin %, sin nivel y sin
+ * banda, igual que al re-puntuar (D6 de docs/diseno-logro-unificado-y-cohorte.md): una
+ * versión anterior le guardaba 0 % y lo clasificaba en la banda más baja, y ese 0 % lo leen
+ * la ficha del alumno, los informes, el remedial y el análisis IA. Esos se cuentan aparte
+ * (`cleared`), no como diferencias.
  */
 async function writeSkillTallies(
   tx: Database,
   assessmentId: string,
   skills: readonly SkillAggregateResult[],
-): Promise<number> {
+): Promise<{ mismatches: number; cleared: number }> {
   const stored = await tx
     .select({
       studentId: skillResults.studentId,
@@ -216,11 +223,16 @@ async function writeSkillTallies(
   );
 
   let mismatches = 0;
+  let cleared = 0;
   for (const s of skills) {
     const key = `${s.studentId}__${s.nodeId}`;
     if (!storedPct.has(key)) continue;
     const before = storedPct.get(key) ?? null;
     const after = s.percentage === null ? null : Math.round(s.percentage * 10000) / 100;
+    if (!(s.maxSum > 0)) {
+      if (before !== null) cleared += 1;
+      continue;
+    }
     const differs =
       before === null || after === null ? before !== after : Math.abs(before - after) > 0.01;
     if (differs) mismatches += 1;
@@ -237,14 +249,19 @@ async function writeSkillTallies(
     );
     await tx.execute(sql`
       update ${skillResults} as sr
-      set score_sum = v.score_sum, max_sum = v.max_sum
+      set score_sum = v.score_sum,
+          max_sum = v.max_sum,
+          percentage = case when v.max_sum > 0 then sr.percentage end,
+          performance_level = case when v.max_sum > 0 then sr.performance_level end,
+          performance_band_id = case when v.max_sum > 0 then sr.performance_band_id end,
+          updated_at = case when v.max_sum > 0 then sr.updated_at else now() end
       from (values ${values}) as v(student_id, node_id, score_sum, max_sum)
       where sr.assessment_id = ${assessmentId}::uuid
         and sr.student_id = v.student_id
         and sr.node_id = v.node_id
     `);
   }
-  return mismatches;
+  return { mismatches, cleared };
 }
 
 async function backfillAssessment(tx: Database, assessmentId: string): Promise<BackfillOutcome> {
@@ -287,14 +304,18 @@ async function backfillAssessment(tx: Database, assessmentId: string): Promise<B
   }));
 
   const skills = aggregateSkillResults(calc);
-  const skillPctMismatches = await writeSkillTallies(tx, assessmentId, skills);
+  const { mismatches: skillPctMismatches, cleared: skillPctCleared } = await writeSkillTallies(
+    tx,
+    assessmentId,
+    skills,
+  );
 
   const written = await recomputeCohortStatsFromResponses(tx, {
     assessmentId,
     responses: calc,
     skillResults: skills.map(toSkillResultForCohort),
   });
-  return { ...written, skillPctMismatches, deletedItemResponses };
+  return { ...written, skillPctMismatches, skillPctCleared, deletedItemResponses };
 }
 
 async function backfillImportedAssessment(
@@ -302,7 +323,13 @@ async function backfillImportedAssessment(
   assessmentId: string,
 ): Promise<BackfillOutcome> {
   const written = await rederiveImportedSkillStats(tx, assessmentId);
-  return { ...written, orphanResponses: 0, skillPctMismatches: 0, deletedItemResponses: 0 };
+  return {
+    ...written,
+    orphanResponses: 0,
+    skillPctMismatches: 0,
+    skillPctCleared: 0,
+    deletedItemResponses: 0,
+  };
 }
 
 type Task = { orgId: string; assessmentId: string; name: string | null; imported: boolean };
@@ -406,6 +433,9 @@ async function main(): Promise<void> {
         (res.skillPctMismatches > 0
           ? ` — ${res.skillPctMismatches} alumno(s)×nodo con % guardado distinto del recalculado`
           : '') +
+        (res.skillPctCleared > 0
+          ? ` — ${res.skillPctCleared} alumno(s)×nodo sin preguntas corregidas pasan a "sin dato"`
+          : '') +
         (res.orphanResponses > 0
           ? ` — ⚠️ ${res.orphanResponses} respuesta(s) de alumnos sin curso, fuera del read-model`
           : ''),
@@ -417,6 +447,7 @@ async function main(): Promise<void> {
   const skillRowsTotal = outcome.results.reduce((n, r) => n + r.skillRows, 0);
   const orphanTotal = outcome.results.reduce((n, r) => n + r.orphanResponses, 0);
   const mismatchTotal = outcome.results.reduce((n, r) => n + r.skillPctMismatches, 0);
+  const clearedTotal = outcome.results.reduce((n, r) => n + r.skillPctCleared, 0);
 
   // ── Fallo: reportar TODO lo que quedó sin procesar y salir != 0. ──
   // Un backfill parcial que sale 0 haría que el deploy estampe como bueno un read-model
@@ -451,6 +482,12 @@ async function main(): Promise<void> {
       `[backfill-cohort-stats] ⚠️ ${withDeletedItems.length} evaluación(es) tienen respuestas en ` +
         `preguntas borradas. El read-model ya no las cuenta, pero assessment_results sí hasta ` +
         `re-puntuar: ${withDeletedItems.map((t) => `${t.assessmentId} (${t.name ?? 'sin nombre'})`).join(', ')}`,
+    );
+  }
+  if (clearedTotal > 0) {
+    console.log(
+      `[backfill-cohort-stats] ${clearedTotal} alumno(s)×nodo sin preguntas corregidas tenían un % ` +
+        `guardado (0 % de una versión anterior): quedan sin %, nivel ni banda (D6).`,
     );
   }
   if (mismatchTotal > 0) {
