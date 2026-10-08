@@ -1,0 +1,390 @@
+name: Deploy (backend · frontend · OMR)
+
+# Un solo workflow para todo el CD de `main` → stage demo. Reemplaza a deploy-backend.yml,
+# deploy-frontend.yml y deploy-omr.yml.
+#
+# ── Por qué uno solo ──
+# Eran tres workflows en el mismo grupo de `concurrency`, y un merge de dev→main dispara
+# casi siempre dos o tres. Corrían EN FILA (el segundo esperaba entero al primero, ~12 min
+# en cola medidos) y cada uno repetía los 6 jobs de checks.yml. Acá un job `changes`
+# decide qué desplegar y las tres ramas corren en paralelo.
+#
+# ── Por qué no corre checks.yml ──
+# Los checks corren en la PR (ci.yml) y la branch protection de `main` los exige y bloquea
+# el push directo (enforce_admins incluido). Todo lo que llega a `main` ya pasó por ellos;
+# repetirlos acá costaba ~5 min por deploy sin atrapar nada nuevo.
+#
+# ── Backend: la imagen se construye mientras se migra ──
+# `backend-image` construye y pushea SÓLO el tag `:sha`, que App Runner no mira, en
+# paralelo con `migrate`. Cuando ambos terminan, `backend-release` mueve `:latest` a ese
+# manifiesto (unos segundos) y App Runner (autoDeploymentsEnabled) redeploya. Se conserva
+# la garantía de antes: si la migración falla, `:latest` no se mueve y producción sigue
+# con la imagen anterior. Las migraciones son ADITIVAS, así que el código viejo convive
+# con el esquema nuevo mientras App Runner cambia de imagen.
+#
+# ── Frontend: cuándo espera al backend ──
+# `sst deploy` reconcilia también los servicios de App Runner. Si no hay diff en ellos
+# (el caso normal: sólo cambió apps/web) Pulumi no los toca y puede correr en paralelo
+# con el release de imágenes. Si cambió sst.config.ts, sí puede tocarlos y chocaría con el
+# auto-deploy en curso (OPERATION_IN_PROGRESS): en ese caso corre `frontend-infra`, que
+# espera a los releases y a que App Runner quede estable.
+#
+# Requiere los secrets AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY y DB_MASTER_PASSWORD
+# (= SST secret DbMasterPassword, stage demo).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: 'Backend: migrar + publicar imagen de la API'
+        type: boolean
+        default: false
+      frontend:
+        description: 'Frontend: sst deploy completo (espera al backend si también se marcó)'
+        type: boolean
+        default: false
+      omr:
+        description: 'OMR: publicar imagen (también es el primer deploy tras el bootstrap)'
+        type: boolean
+        default: false
+      force_backfill:
+        description: 'Correr el backfill de cohort-stats aunque el gate diga que no hace falta'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# MISMO grupo que backfill-cohort-stats.yml y refresh-benchmark.yml: todos escriben el
+# estado del stage (read-models, SST, App Runner). Nunca dos a la vez.
+concurrency:
+  group: sst-deploy-${{ github.ref }}
+  cancel-in-progress: false
+  # `queue: single` (el default) deja UN solo run esperando y CANCELA al que estaba en cola
+  # si llega un tercero (pasó con #237: el deploy del OMR se canceló sin ejecutar un job).
+  # `queue: max` encola hasta 100 y los procesa FIFO. Incompatible con cancel-in-progress.
+  queue: max
+
+env:
+  AWS_REGION: us-east-1
+  STAGE: demo
+  ECR_API_REPOSITORY: edtech-api-demo # = aws.ecr.Repository name en sst.config.ts (stage demo)
+  ECR_OMR_REPOSITORY: edtech-omr-demo
+  # Evaluaciones en paralelo dentro del backfill. El trabajo está dominado por la
+  # latencia (runner en Azure, RDS en us-east-1, por el túnel SSM), no por CPU ni por el
+  # RDS. Medido: la curva aplana en 6. Ver docs/plan-optimizar-backfill-cohort-stats.md §3.
+  BACKFILL_CONCURRENCY: '6'
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      # En workflow_dispatch mandan los inputs; `format` los vuelve 'true'/'false' para
+      # que el `&& ||` no caiga al filtro cuando el input es false.
+      backend: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.backend) || steps.filter.outputs.backend }}
+      frontend: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.frontend) || steps.filter.outputs.frontend }}
+      infra: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.frontend) || steps.filter.outputs.infra }}
+      omr: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.omr) || steps.filter.outputs.omr }}
+    steps:
+      - uses: actions/checkout@v4
+        if: github.event_name == 'push'
+
+      # Compara contra `github.event.before`: cubre todos los commits del push, no sólo el
+      # último. Explícito para no depender de que `main` siga siendo la rama por defecto.
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'push'
+        with:
+          base: ${{ github.event.before }}
+          filters: |
+            backend:
+              - "apps/api/**"
+              - "packages/db/**"
+              - "packages/types/**"
+              - "packages/decisions/**"
+              - "pnpm-lock.yaml"
+              - ".github/actions/rds-tunnel/**"
+              - ".github/workflows/deploy.yml"
+            frontend:
+              - "apps/web/**"
+              - "packages/types/**"
+              - "sst.config.ts"
+              - ".github/workflows/deploy.yml"
+            infra:
+              - "sst.config.ts"
+            omr:
+              - "services/omr/**"
+              - ".github/workflows/deploy.yml"
+
+  # ── Backend ────────────────────────────────────────────────────────────────────
+
+  # Migra el RDS privado. Se llega por un port-forward SSM a través del bastión (la NAT
+  # instance de SST, gestionada por SSM); no usa `sst tunnel` (evita sudo/TUN en el
+  # runner). `db:migrate` corre drizzle + re-aplica rls-policies.sql.
+  migrate:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # El backfill importa el calculador puro de `@soe/types`, que se consume compilado
+      # (`dist/`). Sin este build falla con "Cannot find module @soe/types/dist/index.js".
+      - name: Build @soe/types (lo consume el backfill)
+        run: pnpm --filter @soe/types build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Acción compuesta compartida con los jobs programados. Deja DATABASE_ADMIN_URL en
+      # el entorno del job.
+      - name: Open RDS tunnel (SSM port-forward via bastion)
+        uses: ./.github/actions/rds-tunnel
+        with:
+          stage: ${{ env.STAGE }}
+          db-password: ${{ secrets.DB_MASTER_PASSWORD }}
+
+      - name: Migrate RDS
+        run: pnpm --filter @soe/db db:migrate
+
+      # ── Read-model de cohorte ──
+      # Los lectores de la imagen nueva (item-analysis, dashboards, heatmap,
+      # official-reports) leen de acá. Si quedara sin poblar, la analítica saldría en
+      # blanco sin ningún error visible.
+      #
+      # `check` decide si hace falta el backfill (huella del código + última migración).
+      #  · `set -euo pipefail` + `&&` ⇒ si el backfill falla, NO se estampa y el próximo
+      #    deploy lo reintenta.
+      #  · Corre antes de `backend-release`, así que cuando App Runner levanta la imagen
+      #    nueva el read-model ya está al día.
+      #  · Es idempotente (delete+reinsert por assessment): correrlo de más es seguro.
+      - name: Cohort read-model (gate + backfill si hace falta)
+        env:
+          FORCE_BACKFILL: ${{ inputs.force_backfill }}
+        run: |
+          set -euo pipefail
+
+          FORCE_FLAG=""
+          [ "${FORCE_BACKFILL:-false}" = "true" ] && FORCE_FLAG="--force"
+
+          pnpm --filter @soe/db db:cohort-stamp check --out /tmp/run_backfill ${FORCE_FLAG}
+
+          if [ "$(cat /tmp/run_backfill)" = "true" ]; then
+            echo "::group::backfill de cohort-stats"
+            pnpm --filter @soe/db db:backfill:cohort-stats \
+              && pnpm --filter @soe/db db:cohort-stamp write
+            echo "::endgroup::"
+          else
+            echo "read-model al día — se omite el backfill"
+          fi
+
+      # Corre SIEMPRE: si el read-model quedó en blanco, el deploy falla acá en vez de
+      # publicar una imagen que muestra una analítica muda.
+      - name: Verify cohort read-model (smoke check)
+        run: pnpm --filter @soe/db db:cohort-stamp verify
+
+      # `benchmark_aggregates` es upsert idempotente y tarda segundos; el job diario
+      # (refresh-benchmark.yml) cubre lo cargado entre deploys.
+      - name: Benchmark read-model (refresh)
+        run: pnpm --filter @soe/db db:refresh:benchmark
+
+  # Construye en paralelo con `migrate`. Sólo pushea `:sha`: publicar todavía no.
+  backend-image:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image (:sha)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          platforms: linux/amd64 # arquitectura por defecto de App Runner
+          push: true
+          provenance: false
+          tags: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_API_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+  # Publica: mueve `:latest` al manifiesto de `:sha`. Sólo si migrar Y construir salieron
+  # bien. Es un PUT de manifiesto en ECR (lo mismo que hace un `docker push` de capas que
+  # ya existen), así que App Runner lo ve como un push normal y redeploya.
+  backend-release:
+    needs: [migrate, backend-image]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Retag :sha → :latest
+        run: |
+          set -euo pipefail
+          IMAGE=$(aws ecr batch-get-image --repository-name "${ECR_API_REPOSITORY}" \
+            --image-ids imageTag="${GITHUB_SHA}" --output json)
+          MANIFEST=$(jq -r '.images[0].imageManifest' <<<"${IMAGE}")
+          MEDIA_TYPE=$(jq -r '.images[0].imageManifestMediaType' <<<"${IMAGE}")
+
+          # Re-correr el job con `:latest` ya apuntando a este manifiesto no es un error.
+          if ! OUT=$(aws ecr put-image --repository-name "${ECR_API_REPOSITORY}" --image-tag latest \
+              --image-manifest "${MANIFEST}" --image-manifest-media-type "${MEDIA_TYPE}" 2>&1); then
+            grep -q ImageAlreadyExistsException <<<"${OUT}" || { echo "${OUT}"; exit 1; }
+            echo ":latest ya apuntaba a ${GITHUB_SHA}"
+          fi
+          echo "✓ ${ECR_API_REPOSITORY}:latest → ${GITHUB_SHA}. App Runner redeploya solo."
+
+  # ── OMR ────────────────────────────────────────────────────────────────────────
+  # Sin BDD ni migraciones (función pura sobre imagen + LayoutSpec): no depende de
+  # `migrate`, así que una migración rota no bloquea un arreglo de visión.
+  #
+  # Primer deploy (huevo y gallina): SST crea el servicio apuntando a `<repo>:latest`, que
+  # tiene que existir antes. Tras el bootstrap se corre este workflow a mano con `omr`
+  # marcado. Orden completo en docs/deploy/aws-sst-nivel1.md.
+  omr:
+    needs: changes
+    if: needs.changes.outputs.omr == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Sin el repo de ECR el push falla más adelante con un error de registry opaco.
+      - name: Verificar que el repo de ECR exista
+        run: |
+          set -euo pipefail
+          aws ecr describe-repositories --repository-names "${ECR_OMR_REPOSITORY}" >/dev/null 2>&1 || {
+            echo "::error::No existe el repo de ECR ${ECR_OMR_REPOSITORY}. Corre primero el bootstrap: SST_BOOTSTRAP=1 npx sst deploy --stage ${STAGE}"
+            exit 1
+          }
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          # Contexto = services/omr: la imagen no necesita nada del monorepo de Node.
+          context: services/omr
+          file: services/omr/Dockerfile
+          # Arquitectura de App Runner, y la misma para la que está resuelto
+          # services/omr/requirements.lock.txt (x86_64-unknown-linux-gnu).
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_OMR_REPOSITORY }}:latest
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_OMR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha,scope=omr
+          cache-to: type=gha,mode=max,scope=omr
+
+  # ── Frontend ───────────────────────────────────────────────────────────────────
+  # Los dos jobs corren los mismos pasos (ancla YAML); sólo cambia cuándo arrancan.
+
+  # Caso normal: sst.config.ts no cambió, así que `sst deploy` no tiene diff en App Runner
+  # y corre en paralelo con el backend.
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' && needs.changes.outputs.infra != 'true'
+    runs-on: ubuntu-latest
+    steps: &sst-deploy-steps
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages (needed for next build)
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Sólo si cambió la infra (job `frontend-infra`): el release de imagen recién dejó a
+      # App Runner redeployando y `sst deploy`, si modifica el servicio, choca con
+      # OPERATION_IN_PROGRESS. En `frontend` no hay diff en App Runner y esperar acá sólo
+      # retrasaría el deploy hasta que termine el del backend.
+      - name: Esperar a que App Runner esté estable
+        if: needs.changes.outputs.infra == 'true'
+        run: |
+          set -euo pipefail
+          sleep 20  # el auto-deploy arranca unos segundos después del push a ECR
+          for i in $(seq 1 60); do
+            BUSY=$(aws apprunner list-services --output json \
+              | jq -r '.ServiceSummaryList[] | select(.ServiceName | test("^edtech-[a-z]+-'"${STAGE}"'($|-)")) | select(.Status == "OPERATION_IN_PROGRESS") | .ServiceName')
+            [ -z "${BUSY}" ] && { echo "App Runner estable"; exit 0; }
+            echo "esperando a: ${BUSY}"
+            sleep 15
+          done
+          echo "::error::App Runner sigue en OPERATION_IN_PROGRESS después de 15 min"
+          exit 1
+
+      - name: Deploy with SST
+        # `sst deploy` a secas = deploy completo (App Runner + front). El bootstrap inicial
+        # de un stage (solo infra base) usa SST_BOOTSTRAP=1; el CD nunca bootstrapea.
+        run: npx sst deploy --stage ${{ env.STAGE }}
+
+  # Cambió sst.config.ts: el deploy puede modificar los servicios de App Runner, así que
+  # espera a que los releases de imagen terminen. Corre aunque backend/OMR se hayan
+  # saltado (no había cambios), pero no si algo falló. `migrate` y `backend-image` van en
+  # `needs` porque si fallan, `backend-release` queda `skipped` y no `failure`.
+  frontend-infra:
+    needs: [changes, migrate, backend-image, backend-release, omr]
+    if: >-
+      always() && !cancelled()
+      && !contains(needs.*.result, 'failure')
+      && needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    steps: *sst-deploy-steps
