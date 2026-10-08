@@ -315,7 +315,9 @@ async function runVerify(db: Database): Promise<void> {
   if (stale.skillResults > 0) {
     console.warn(
       `[cohort-stamp] ⚠️ ${stale.skillResults} fila(s) de skill_results con % pero sin tally. ` +
-        `Son nodos que ya no etiquetan esas preguntas; se limpian al re-puntuar la evaluación.`,
+        `El backfill no las alcanzó: son nodos que hoy no etiquetan ` +
+        `ninguna pregunta que el alumno respondió (se re-etiquetó el instrumento). Se limpian al ` +
+        `re-puntuar la evaluación.`,
     );
   }
 
