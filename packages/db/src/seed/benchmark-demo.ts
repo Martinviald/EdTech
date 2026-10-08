@@ -44,6 +44,12 @@ import {
   orgBenchmarkSettings,
 } from '../schema/benchmark';
 import type { BenchmarkBandCount, BenchmarkSkillAggregate } from '@soe/types';
+import {
+  DEMO_INST_LECT_ID,
+  DEMO_INST_MAT_ID,
+  demoInstrumentTally,
+  demoSkillTally,
+} from './benchmark-demo-fixture';
 
 config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -59,8 +65,8 @@ const ROBLES_ID = 'b3c00000-0000-0000-0000-000000000011';
 const AURORA_ID = 'b3c00000-0000-0000-0000-000000000012';
 const PACIFICO_ID = 'b3c00000-0000-0000-0000-000000000013'; // opt-out del pool global
 
-const INST_LECT_ID = 'b3c00000-0000-0000-0000-000000000101';
-const INST_MAT_ID = 'b3c00000-0000-0000-0000-000000000102';
+const INST_LECT_ID = DEMO_INST_LECT_ID;
+const INST_MAT_ID = DEMO_INST_MAT_ID;
 
 const FOCUS_USER_ID = 'b3c00000-0000-0000-0000-000000000201';
 const FOCUS_AY_ID = 'b3c00000-0000-0000-0000-000000000301';
@@ -209,10 +215,6 @@ function bandsFromAvg(n: number, avg: number): BenchmarkBandCount[] {
   ];
 }
 
-/** Puntos por alumno y nodo con que se fabrica el tally de los fixtures (sólo escala). */
-const DEMO_SKILL_POINTS_PER_STUDENT = 4;
-const DEMO_INSTRUMENT_POINTS_PER_STUDENT = 30;
-
 const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v * 100) / 100));
 
 /** perSkill: habilidades con logro alrededor del promedio del colegio. */
@@ -224,14 +226,12 @@ function buildPerSkill(
   const offsets = [-7, 2, 8] as const;
   return skills.map((s, i) => {
     const achievement = clamp(avg + (offsets[i % offsets.length] ?? 0));
-    const maxSum = studentCount * DEMO_SKILL_POINTS_PER_STUDENT;
     return {
       nodeId: s.nodeId,
       nodeName: s.nodeName,
       achievement,
       studentCount,
-      scoreSum: Math.round(maxSum * achievement) / 100,
-      maxSum,
+      ...demoSkillTally(studentCount, achievement),
     };
   });
 }
@@ -402,25 +402,28 @@ async function main() {
         s,
       },
     ];
-  }).map((r) => ({
-    orgId: r.s.id,
-    instrumentId: r.instrumentId,
-    gradeId: r.gradeId,
-    subjectId: r.subjectId,
-    dependence: r.s.dependence,
-    region: r.s.region,
-    commune: r.s.commune,
-    networkOrgId: r.networkOrgId,
-    studentCount: r.n,
-    scoreSum: ((r.n * DEMO_INSTRUMENT_POINTS_PER_STUDENT * r.avg) / 100).toFixed(2),
-    maxSum: (r.n * DEMO_INSTRUMENT_POINTS_PER_STUDENT).toFixed(2),
-    avgAchievement: r.avg.toFixed(2),
-    bandCounts: bandsFromAvg(r.n, r.avg),
-    perSkill: buildPerSkill(r.skills, r.avg, r.n),
-    optOutGlobalPool: r.s.optOut,
-    refreshedAt: now,
-    updatedAt: now,
-  }));
+  }).map((r) => {
+    const tally = demoInstrumentTally(r.n, r.avg);
+    return {
+      orgId: r.s.id,
+      instrumentId: r.instrumentId,
+      gradeId: r.gradeId,
+      subjectId: r.subjectId,
+      dependence: r.s.dependence,
+      region: r.s.region,
+      commune: r.s.commune,
+      networkOrgId: r.networkOrgId,
+      studentCount: r.n,
+      scoreSum: tally.scoreSum.toFixed(2),
+      maxSum: tally.maxSum.toFixed(2),
+      avgAchievement: r.avg.toFixed(2),
+      bandCounts: bandsFromAvg(r.n, r.avg),
+      perSkill: buildPerSkill(r.skills, r.avg, r.n),
+      optOutGlobalPool: r.s.optOut,
+      refreshedAt: now,
+      updatedAt: now,
+    };
+  });
   await db.insert(benchmarkAggregates).values(rows);
 
   console.log('\n✓ Seed de benchmarking listo.');

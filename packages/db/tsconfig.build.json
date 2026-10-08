@@ -13,6 +13,7 @@
     "src/migrate.ts",
     "src/seed/**/*",
     "src/scripts/migrate-elective-sections.ts",
+    "src/scripts/backfill-benchmark-demo-tallies.ts",
     "src/**/*.spec.ts"
   ]
 }
