@@ -187,16 +187,22 @@ Abrí la URL `web`. Con `AuthMode=mock` entrás con el dropdown del seed.
 ## 6. CI/CD (push a main)
 
 Un solo workflow, `.github/workflows/deploy.yml`. Un job `changes` (`dorny/paths-filter`)
-decide qué ramas corren, y las tres van en paralelo:
+decide qué ramas corren:
 
-| Rama     | Dispara con                                           | Hace                                                                                                                                                                  |
-| -------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| backend  | `apps/api`, `packages/{db,types,decisions}`, lockfile | `migrate` (RDS + read-models) **en paralelo con** `backend-image` (build → ECR `:sha`) → `backend-release` mueve `:latest` a ese `:sha` → App Runner **auto-deploya** |
-| OMR      | `services/omr`                                        | build → ECR `:latest` y `:sha` → App Runner **auto-deploya**                                                                                                          |
-| frontend | `apps/web`, `packages/types`, `sst.config.ts`         | `sst deploy` completo. Si cambió `sst.config.ts`, espera a los releases de imagen y a que App Runner quede estable (`frontend-infra`)                                 |
+| Rama     | Dispara con                                           | Hace                                                                                                                                                                          |
+| -------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| backend  | `apps/api`, `packages/{db,types,decisions}`, lockfile | `migrate` (RDS + read-models) **en paralelo con** `backend-image` (build → ECR `:sha`) → `backend-release` mueve `:latest` a ese `:sha` → App Runner **auto-deploya**         |
+| OMR      | `services/omr`                                        | build → ECR `:latest` y `:sha` → App Runner **auto-deploya**                                                                                                                  |
+| frontend | `apps/web`, `packages/types`, `sst.config.ts`         | `sst deploy` completo. Si el mismo push publica una imagen, espera a los releases (`frontend-after-images`); siempre espera a que App Runner salga de `OPERATION_IN_PROGRESS` |
+
+Backend y OMR corren en paralelo. El frontend sólo corre en paralelo con ellos si el push no
+publica ninguna imagen: hoy `sst deploy` actualiza el servicio `Api` de App Runner en **cada**
+corrida (un diff que no converge desde #247), y si coincide con el auto-deploy de una imagen
+nueva choca con `OPERATION_IN_PROGRESS`.
 
 **No corre los checks.** Los corre `ci.yml` en la PR, y la branch protection de `main` los
-exige y bloquea el push directo (también a admins). Si se renombra o agrega un job en
+exige con `strict` (la PR tiene que estar al día con `main`, así que lo que se mergea es lo
+que se probó) y bloquea el push directo (también a admins). Si se renombra o agrega un job en
 `checks.yml`, hay que actualizar la lista de required checks de `main`.
 
 Todo el workflow comparte el grupo de `concurrency` con `backfill-cohort-stats.yml` y

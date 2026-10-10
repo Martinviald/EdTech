@@ -28,8 +28,8 @@
  * ⚠️ Son DOS imágenes, no una. Los dos servicios de App Runner se crean apuntando a
  * `:latest` en su ECR, y App Runner exige que la imagen ya exista para poder crearse:
  * si sólo se pushea la del backend, el servicio Omr falla con CREATE_FAILED. El
- * workflow .github/workflows/deploy-omr.yml publica la del OMR (y sabe hacerlo a mano
- * con workflow_dispatch, que es como se resuelve el huevo y la gallina del bootstrap).
+ * workflow .github/workflows/deploy.yml publica la del OMR (a mano: workflow_dispatch con
+ * `omr` marcado, que es como se resuelve el huevo y la gallina del bootstrap).
  *
  * ⚠️ NO hay un `sst deploy` "destructivo": sin flag deploya TODO. El flag es el que hace el
  * deploy PARCIAL (solo base) y es solo para arrancar un stage nuevo. (Antes era al revés:

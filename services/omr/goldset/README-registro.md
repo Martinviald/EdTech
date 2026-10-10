@@ -225,7 +225,7 @@ Validación final **sin variable de entorno** (lo que corre en producción):
 
 **Lo que queda para el equipo (no se puede hacer desde el repo):**
 
-1. Desplegar a demo (`deploy-omr.yml`, disparo manual) y reprocesar el lote `5a6d5cd9`:
+1. Desplegar a demo (`deploy.yml` con disparo manual y `omr` marcado) y reprocesar el lote `5a6d5cd9`:
    esperado 44 marcas confiadas coincidentes con la adjudicación, ≤ 2 a revisión.
 2. Monitoreo por lote con el debug de página: `registration.offMedianPx` (alerta > 10 px),
    `registration.fallbackCount` (alerta > 10 % de las burbujas), `fieldContrast.markedMin` vs
