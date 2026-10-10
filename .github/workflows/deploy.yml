@@ -23,11 +23,17 @@ name: Deploy (backend · frontend · OMR)
 # con el esquema nuevo mientras App Runner cambia de imagen.
 #
 # ── Frontend: cuándo espera al backend ──
-# `sst deploy` reconcilia también los servicios de App Runner. Si no hay diff en ellos
-# (el caso normal: sólo cambió apps/web) Pulumi no los toca y puede correr en paralelo
-# con el release de imágenes. Si cambió sst.config.ts, sí puede tocarlos y chocaría con el
-# auto-deploy en curso (OPERATION_IN_PROGRESS): en ese caso corre `frontend-infra`, que
-# espera a los releases y a que App Runner quede estable.
+# `sst deploy` reconcilia también los servicios de App Runner, y HOY actualiza el servicio
+# `Api` en CADA corrida aunque sst.config.ts no cambie ("Updated Api aws:apprunner:Service"
+# en los logs desde #247: un diff que nunca converge). Si eso coincide con el auto-deploy
+# que dispara un push a ECR, App Runner responde OPERATION_IN_PROGRESS, o la imagen nueva
+# puede quedar sin desplegar. Por eso:
+#  · si este run publica una imagen (backend u OMR), el front corre en
+#    `frontend-after-images`, que espera a los releases;
+#  · en los dos jobs, `sst deploy` arranca recién cuando ningún servicio de App Runner del
+#    stage está en OPERATION_IN_PROGRESS (cubre también el auto-deploy que dejó el run
+#    anterior de la cola).
+# Un push que sólo toca el front sigue corriendo sin esperar a nadie.
 #
 # Requiere los secrets AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY y DB_MASTER_PASSWORD
 # (= SST secret DbMasterPassword, stage demo).
@@ -41,7 +47,7 @@ on:
         type: boolean
         default: false
       frontend:
-        description: 'Frontend: sst deploy completo (espera al backend si también se marcó)'
+        description: 'Frontend: sst deploy completo (espera a las imágenes si también se marcaron)'
         type: boolean
         default: false
       omr:
@@ -49,7 +55,7 @@ on:
         type: boolean
         default: false
       force_backfill:
-        description: 'Correr el backfill de cohort-stats aunque el gate diga que no hace falta'
+        description: 'Correr el backfill de cohort-stats aunque el gate diga que no hace falta (implica backend)'
         type: boolean
         default: false
 
@@ -82,11 +88,16 @@ jobs:
     outputs:
       # En workflow_dispatch mandan los inputs; `format` los vuelve 'true'/'false' para
       # que el `&& ||` no caiga al filtro cuando el input es false.
-      backend: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.backend) || steps.filter.outputs.backend }}
+      backend: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.backend || inputs.force_backfill) || steps.filter.outputs.backend }}
       frontend: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.frontend) || steps.filter.outputs.frontend }}
-      infra: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.frontend) || steps.filter.outputs.infra }}
       omr: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.omr) || steps.filter.outputs.omr }}
     steps:
+      - name: Avisar si el disparo manual no despliega nada
+        if: >-
+          github.event_name == 'workflow_dispatch'
+          && !inputs.backend && !inputs.frontend && !inputs.omr && !inputs.force_backfill
+        run: echo "::warning::No se marcó backend, frontend, omr ni force_backfill — este run no despliega nada."
+
       - uses: actions/checkout@v4
         if: github.event_name == 'push'
 
@@ -111,8 +122,6 @@ jobs:
               - "packages/types/**"
               - "sst.config.ts"
               - ".github/workflows/deploy.yml"
-            infra:
-              - "sst.config.ts"
             omr:
               - "services/omr/**"
               - ".github/workflows/deploy.yml"
@@ -322,13 +331,16 @@ jobs:
           cache-to: type=gha,mode=max,scope=omr
 
   # ── Frontend ───────────────────────────────────────────────────────────────────
-  # Los dos jobs corren los mismos pasos (ancla YAML); sólo cambia cuándo arrancan.
+  # Los dos jobs corren los mismos pasos (ancla YAML); sólo cambia cuándo arrancan. Ver
+  # "Frontend: cuándo espera al backend" en la cabecera.
 
-  # Caso normal: sst.config.ts no cambió, así que `sst deploy` no tiene diff en App Runner
-  # y corre en paralelo con el backend.
+  # Este run no publica imágenes: no hay release con el que chocar dentro del run.
   frontend:
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' && needs.changes.outputs.infra != 'true'
+    if: >-
+      needs.changes.outputs.frontend == 'true'
+      && needs.changes.outputs.backend != 'true'
+      && needs.changes.outputs.omr != 'true'
     runs-on: ubuntu-latest
     steps: &sst-deploy-steps
       - uses: actions/checkout@v4
@@ -352,15 +364,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Sólo si cambió la infra (job `frontend-infra`): el release de imagen recién dejó a
-      # App Runner redeployando y `sst deploy`, si modifica el servicio, choca con
-      # OPERATION_IN_PROGRESS. En `frontend` no hay diff en App Runner y esperar acá sólo
-      # retrasaría el deploy hasta que termine el del backend.
+      # `sst deploy` toca el servicio `Api` en cada corrida (ver cabecera). Si App Runner
+      # está desplegando una imagen (de este run o del anterior de la cola), se espera.
       - name: Esperar a que App Runner esté estable
-        if: needs.changes.outputs.infra == 'true'
+        env:
+          RELEASED_IN_THIS_RUN: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.omr == 'true' }}
         run: |
           set -euo pipefail
-          sleep 20  # el auto-deploy arranca unos segundos después del push a ECR
+          # El auto-deploy arranca unos segundos después del push a ECR.
+          if [ "${RELEASED_IN_THIS_RUN}" = "true" ]; then sleep 20; fi
           for i in $(seq 1 60); do
             BUSY=$(aws apprunner list-services --output json \
               | jq -r '.ServiceSummaryList[] | select(.ServiceName | test("^edtech-[a-z]+-'"${STAGE}"'($|-)")) | select(.Status == "OPERATION_IN_PROGRESS") | .ServiceName')
@@ -376,15 +388,15 @@ jobs:
         # de un stage (solo infra base) usa SST_BOOTSTRAP=1; el CD nunca bootstrapea.
         run: npx sst deploy --stage ${{ env.STAGE }}
 
-  # Cambió sst.config.ts: el deploy puede modificar los servicios de App Runner, así que
-  # espera a que los releases de imagen terminen. Corre aunque backend/OMR se hayan
-  # saltado (no había cambios), pero no si algo falló. `migrate` y `backend-image` van en
-  # `needs` porque si fallan, `backend-release` queda `skipped` y no `failure`.
-  frontend-infra:
+  # Este run publica una imagen: el front espera a que terminen los releases. Corre aunque
+  # backend u OMR se hayan saltado, pero no si algo falló. `migrate` y `backend-image` van
+  # en `needs` porque si fallan, `backend-release` queda `skipped` y no `failure`.
+  frontend-after-images:
     needs: [changes, migrate, backend-image, backend-release, omr]
     if: >-
       always() && !cancelled()
       && !contains(needs.*.result, 'failure')
-      && needs.changes.outputs.infra == 'true'
+      && needs.changes.outputs.frontend == 'true'
+      && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.omr == 'true')
     runs-on: ubuntu-latest
     steps: *sst-deploy-steps
