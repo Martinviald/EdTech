@@ -501,6 +501,83 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
       );
       expect(out.isCorrect).toBe(true);
     });
+    describe('multi_box: comparación y crédito por casilla', () => {
+      const tens = {
+        textWithGaps: 'Decenas: ___ Unidades: ___',
+        gaps: [
+          { position: 0, partId: 'tens', acceptedAnswers: ['3'] },
+          { position: 1, partId: 'units', acceptedAnswers: ['4'] },
+        ],
+        responseFormat: {
+          kind: 'multi_box',
+          boxes: [
+            { partId: 'tens', label: 'Decenas', kind: 'integer' },
+            { partId: 'units', label: 'Unidades', kind: 'integer' },
+          ],
+        },
+      } as unknown as ItemContent;
+      const score = (raw: unknown, config?: ScoringConfig) =>
+        getScoringStrategy('gap_fill').score(input('gap_fill', tens, raw, 2, config));
+
+      it('lee la respuesta por partId y compara números por valor', () => {
+        expect(score({ tens: '03', units: '4' }).isCorrect).toBe(true);
+      });
+
+      it('por defecto sigue siendo todo o nada', () => {
+        expect(score({ tens: '3', units: '5' })).toEqual({
+          isCorrect: false,
+          rawScore: 0,
+          requiresManualGrading: false,
+        });
+      });
+
+      it('crédito por casilla con partialCredit o componentCredit', () => {
+        expect(score({ tens: '3', units: '5' }, { partialCredit: true }).rawScore).toBe(1);
+        expect(
+          score(
+            { tens: '3', units: '5' },
+            { componentCredit: { mode: 'per_component', creditPerComponent: [0.75, 0.25] } },
+          ).rawScore,
+        ).toBe(1.5);
+        expect(
+          score({ tens: '3', units: '5' }, { partialCredit: false, componentCredit: undefined })
+            .rawScore,
+        ).toBe(0);
+      });
+
+      it('una casilla indecidible deja el ítem pendiente salvo que otra ya lo haga incorrecto', () => {
+        expect(score({ tens: '3', units: '4 1' }).requiresManualGrading).toBe(true);
+        expect(score({ tens: '9', units: '4 1' })).toEqual({
+          isCorrect: false,
+          rawScore: 0,
+          requiresManualGrading: false,
+        });
+        expect(
+          score({ tens: '9', units: '4 1' }, { partialCredit: true }).requiresManualGrading,
+        ).toBe(true);
+      });
+
+      it('una casilla con comparison declarada compara por estructura sin formato', () => {
+        const declared = {
+          textWithGaps: '___ y ___',
+          gaps: [
+            { position: 0, acceptedAnswers: ['2,5'], comparison: 'numeric' },
+            { position: 1, acceptedAnswers: ['perro'] },
+          ],
+        } as unknown as ItemContent;
+        const out = getScoringStrategy('gap_fill').score(
+          input('gap_fill', declared, ['2.50', 'Perro']),
+        );
+        expect(out.isCorrect).toBe(true);
+      });
+
+      it('sin comparison ni formato la casilla sigue siendo exacta', () => {
+        const out = getScoringStrategy('gap_fill').score(
+          input('gap_fill', content, ['perro ', 'gató']),
+        );
+        expect(out.isCorrect).toBe(false);
+      });
+    });
   });
 
   // ── No auto-scorables → corrección manual ────────────────────────────────────
@@ -632,6 +709,79 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
           input('short_answer', pair, '[2#-4]', 2, { points: 2, componentCredit }),
         );
         expect(out).toEqual({ isCorrect: true, rawScore: 2, requiresManualGrading: false });
+      });
+
+      it('DIA 7° P18: coordenadas invertidas no dan crédito aunque haya componentCredit', () => {
+        const inverted = {
+          prompt: '¿Coordenadas?',
+          acceptedAnswers: ['(7;3)'],
+        } as unknown as ItemContent;
+        const out = getScoringStrategy('short_answer').score(
+          input('short_answer', inverted, '[3#7]', 2, { points: 2, componentCredit }),
+        );
+        expect(out).toEqual({ isCorrect: false, rawScore: 0, requiresManualGrading: false });
+      });
+    });
+
+    describe('formatos de texto (F10a)', () => {
+      const wordList = {
+        prompt: 'Partes del cuerpo de un insecto',
+        acceptedAnswers: ['Cabeza, tórax, abdomen'],
+        responseFormat: { kind: 'word_list', count: 3 },
+      } as unknown as ItemContent;
+      const sentence = {
+        prompt: 'Write what Pedro is doing',
+        acceptedAnswers: ['Pedro is cooking.'],
+        responseFormat: { kind: 'short_text', maxWords: 5 },
+      } as unknown as ItemContent;
+      const score = (content: ItemContent, answer: string, config?: ScoringConfig) =>
+        getScoringStrategy('short_answer').score(input('short_answer', content, answer, 3, config));
+
+      it('lista de palabras: separadores, tildes y mayúsculas no importan', () => {
+        expect(score(wordList, 'cabeza; torax y ABDOMEN').isCorrect).toBe(true);
+      });
+
+      it('lista: el orden importa salvo unordered', () => {
+        expect(score(wordList, 'tórax, cabeza, abdomen').isCorrect).toBe(false);
+        expect(
+          score(wordList, 'tórax, cabeza, abdomen', { equivalences: { unordered: true } })
+            .isCorrect,
+        ).toBe(true);
+      });
+
+      it('lista: una falta pequeña va a revisión, otra palabra es incorrecta', () => {
+        expect(score(wordList, 'cabeza, tórax, abdomem').requiresManualGrading).toBe(true);
+        expect(score(wordList, 'cabeza, tórax, patas')).toEqual({
+          isCorrect: false,
+          rawScore: 0,
+          requiresManualGrading: false,
+        });
+      });
+
+      it('lista: crédito por palabra solo con componentCredit', () => {
+        const componentCredit = {
+          mode: 'per_component' as const,
+          creditPerComponent: [1 / 3, 1 / 3, 1 / 3],
+        };
+        expect(score(wordList, 'cabeza, tórax, patas').rawScore).toBe(0);
+        expect(score(wordList, 'cabeza, tórax, patas', { componentCredit }).rawScore).toBeCloseTo(
+          2,
+        );
+        expect(score(wordList, 'cabeza, tórax, patas', { partialCredit: true }).rawScore).toBe(0);
+      });
+
+      it('texto corto: exacto normalizado es correcto; otra redacción va a revisión', () => {
+        expect(score(sentence, '“pedro is cooking”').isCorrect).toBe(true);
+        expect(score(sentence, 'Pedro cooks')).toEqual({
+          isCorrect: null,
+          rawScore: null,
+          requiresManualGrading: true,
+        });
+      });
+
+      it('el formato de texto manda sobre comparison text', () => {
+        const declared = { ...sentence, comparison: 'text' } as unknown as ItemContent;
+        expect(score(declared, 'Pedro cooks').requiresManualGrading).toBe(true);
       });
     });
 
