@@ -39,10 +39,16 @@ export interface ConfirmedReadingLink {
   readonly consolidated: boolean;
 }
 
+export interface ConfirmedCropMark {
+  readonly markId: string;
+  readonly studentId: string;
+  readonly itemId: string | null;
+}
+
 export interface ConfirmedReadingsInput {
   readonly assessmentId: string;
   readonly links: readonly ConfirmedReadingLink[];
-  readonly cropMarkIds: readonly string[];
+  readonly cropMarks: readonly ConfirmedCropMark[];
 }
 
 export type HumanResolution =
@@ -186,20 +192,22 @@ export class AnswerReadingConsolidationService {
     orgId: string,
     input: ConfirmedReadingsInput,
   ): Promise<ConsolidationReport | null> {
-    if (input.cropMarkIds.length === 0) return null;
+    if (input.cropMarks.length === 0) return null;
+    const cropMarkIds = input.cropMarks.map((mark) => mark.markId);
     const { staleDecisionIds, currentDecisionIds } = await withOrgContext(
       this.db,
       orgId,
       async (tx) => {
         const links = await this.confirmedLinks(tx, input);
         await this.linkDecisions(tx, orgId, links);
+        await this.claimConfirmedResponses(tx, input);
         const current = await tx
           .select({ id: answerReadingDecisions.id })
           .from(answerReadingDecisions)
           .where(
             and(
               eq(answerReadingDecisions.orgId, orgId),
-              inArray(answerReadingDecisions.markId, [...input.cropMarkIds]),
+              inArray(answerReadingDecisions.markId, cropMarkIds),
               isNull(answerReadingDecisions.supersededById),
             ),
           );
@@ -499,15 +507,48 @@ export class AnswerReadingConsolidationService {
           inArray(answerReadingDecisions.id, [...decisionIds]),
         ),
       );
+    const supersededMarks = await this.supersededScanMarks(
+      tx,
+      orgId,
+      rows.map((row) => row.markId),
+    );
     const byId = new Map(rows.map((row) => [row.id, row]));
     const current: AnswerReadingDecision[] = [];
     const skipped: ConsolidationSkip[] = [];
     for (const decisionId of decisionIds) {
       const decision = byId.get(decisionId);
-      if (decision && decision.supersededById === null) current.push(decision);
-      else skipped.push({ decisionId, reason: 'not_current' });
+      if (decision && decision.supersededById === null && !supersededMarks.has(decision.markId)) {
+        current.push(decision);
+      } else skipped.push({ decisionId, reason: 'not_current' });
     }
     return { current, skipped };
+  }
+
+  private async supersededScanMarks(
+    tx: Database,
+    orgId: string,
+    markIds: readonly string[],
+  ): Promise<Set<string>> {
+    if (markIds.length === 0) return new Set();
+    const marks = await tx
+      .select({ id: sheetScanMarks.id, scanId: sheetScanMarks.scanId })
+      .from(sheetScanMarks)
+      .where(
+        and(eq(sheetScanMarks.orgId, orgId), inArray(sheetScanMarks.id, [...new Set(markIds)])),
+      );
+    if (marks.length === 0) return new Set();
+    const superseded = await tx
+      .select({ id: sheetScans.id })
+      .from(sheetScans)
+      .where(
+        and(
+          eq(sheetScans.orgId, orgId),
+          inArray(sheetScans.id, [...new Set(marks.map((mark) => mark.scanId))]),
+          eq(sheetScans.state, 'superseded'),
+        ),
+      );
+    const supersededScans = new Set(superseded.map((scan) => scan.id));
+    return new Set(marks.filter((mark) => supersededScans.has(mark.scanId)).map((mark) => mark.id));
   }
 
   private async loadScoringContext(
@@ -926,6 +967,7 @@ export class AnswerReadingConsolidationService {
         assessmentId: responses.assessmentId,
         studentId: responses.studentId,
         itemId: responses.itemId,
+        value: responses.value,
       })
       .from(responses)
       .where(
@@ -935,18 +977,58 @@ export class AnswerReadingConsolidationService {
           inArray(responses.itemId, [...new Set(decisions.map((decision) => decision.itemId))]),
         ),
       );
-    const responseIdByKey = new Map(
+    const responseByKey = new Map(
       responseRows.map((row) => [
         this.responseKey(row.assessmentId, row.studentId, row.itemId),
-        row.id,
+        row,
       ]),
     );
+    const markIdByDecision = new Map(decisions.map((decision) => [decision.id, decision.markId]));
     const found = new Map<string, string>();
     for (const [decisionId, key] of keyByDecision) {
-      const responseId = responseIdByKey.get(key);
-      if (responseId) found.set(decisionId, responseId);
+      const response = responseByKey.get(key);
+      if (!response) continue;
+      if (this.claimedMarkId(response.value) !== markIdByDecision.get(decisionId)) continue;
+      found.set(decisionId, response.id);
     }
     return found;
+  }
+
+  private claimedMarkId(value: unknown): string | null {
+    if (value === null || typeof value !== 'object') return null;
+    const reading = (value as { reading?: unknown }).reading;
+    if (reading === null || typeof reading !== 'object') return null;
+    const markId = (reading as { markId?: unknown }).markId;
+    return typeof markId === 'string' ? markId : null;
+  }
+
+  private async claimConfirmedResponses(
+    tx: Database,
+    input: ConfirmedReadingsInput,
+  ): Promise<void> {
+    const claims = input.cropMarks
+      .filter((mark) => mark.itemId !== null)
+      .map((mark) => ({ mark_id: mark.markId, student_id: mark.studentId, item_id: mark.itemId }));
+    if (claims.length === 0) return;
+    await tx.execute(sql`
+      UPDATE responses AS r
+      SET value = jsonb_set(
+            r.value,
+            '{reading}',
+            CASE WHEN jsonb_typeof(r.value -> 'reading') = 'object' THEN r.value -> 'reading' ELSE '{}'::jsonb END
+              || jsonb_build_object('markId', v.mark_id)
+          ),
+          updated_at = now()
+      FROM jsonb_to_recordset(${JSON.stringify(claims)}::jsonb) AS v(
+        mark_id uuid,
+        student_id uuid,
+        item_id uuid
+      )
+      WHERE r.assessment_id = ${input.assessmentId}
+        AND r.student_id = v.student_id
+        AND r.item_id = v.item_id
+        AND r.human_score IS NULL
+    `);
   }
 
   private async confirmedLinks(

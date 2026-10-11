@@ -364,7 +364,10 @@ describe('AnswerReadingConsolidationService.linkConfirmedResponses', () => {
         { decisionId: scored.id, studentId: STUDENT_ID, itemId: NUMBER_ITEM, consolidated: true },
         { decisionId: pending.id, studentId: STUDENT_ID, itemId: WORDS_ITEM, consolidated: false },
       ],
-      cropMarkIds: [MARK_A, MARK_B],
+      cropMarks: [
+        { markId: MARK_A, studentId: STUDENT_ID, itemId: NUMBER_ITEM },
+        { markId: MARK_B, studentId: STUDENT_ID, itemId: WORDS_ITEM },
+      ],
     });
 
     expect(report).toBeNull();
@@ -373,6 +376,35 @@ describe('AnswerReadingConsolidationService.linkConfirmedResponses', () => {
     expect(pending.responseId).toBe(pendingResponse.id);
     expect(pending.resolvedAt).toBeNull();
     expect(recalculate).not.toHaveBeenCalled();
+  });
+
+  it('reserva para cada marca confirmada la respuesta de su alumno e ítem, salvo las ya revisadas', async () => {
+    const { memory, service } = setup();
+    const pending = seedResponse(memory, { id: RESPONSE_A });
+    const reviewed = seedResponse(memory, {
+      id: RESPONSE_B,
+      itemId: WORDS_ITEM,
+      value: { answer: 'cabeza' },
+      finalScore: '2.00',
+      humanScore: { score: 2 },
+    });
+
+    await service.linkConfirmedResponses(ORG_ID, {
+      assessmentId: ASSESSMENT_ID,
+      links: [],
+      cropMarks: [
+        { markId: MARK_A, studentId: STUDENT_ID, itemId: NUMBER_ITEM },
+        { markId: MARK_B, studentId: STUDENT_ID, itemId: WORDS_ITEM },
+        { markId: MARK_C, studentId: STUDENT_ID, itemId: null },
+      ],
+    });
+
+    expect(pending.value).toEqual({
+      answer: null,
+      pendingReading: true,
+      reading: { markId: MARK_A },
+    });
+    expect(reviewed.value).toEqual({ answer: 'cabeza' });
   });
 
   it('consolida la decisión que reemplazó a la leída durante la confirmación', async () => {
@@ -390,7 +422,7 @@ describe('AnswerReadingConsolidationService.linkConfirmedResponses', () => {
       links: [
         { decisionId: read.id, studentId: STUDENT_ID, itemId: NUMBER_ITEM, consolidated: false },
       ],
-      cropMarkIds: [MARK_A],
+      cropMarks: [{ markId: MARK_A, studentId: STUDENT_ID, itemId: NUMBER_ITEM }],
     });
 
     expect(report?.scored).toEqual([newer.id]);
@@ -475,10 +507,13 @@ describe('AnswerReadingConsolidationService.consolidateDecisions', () => {
     expect(decision.responseId).toBe(RESPONSE_A);
   });
 
-  it('sin vínculos previos encuentra la respuesta por la hoja de un lote confirmado', async () => {
+  it('sin vínculos previos encuentra la respuesta que la confirmación del lote reservó para esa marca', async () => {
     const { memory, service } = setup();
     seedConfirmedBatch(memory);
-    const response = seedResponse(memory, { id: RESPONSE_A });
+    const response = seedResponse(memory, {
+      id: RESPONSE_A,
+      value: { answer: null, pendingReading: true, reading: { markId: MARK_A } },
+    });
     seedResponse(memory, { id: RESPONSE_B, assessmentId: OTHER_ASSESSMENT_ID });
     const decision = seedDecision(memory, { value: answer('7', INTEGER) });
 
@@ -487,6 +522,60 @@ describe('AnswerReadingConsolidationService.consolidateDecisions', () => {
     expect(report.scored).toEqual([decision.id]);
     expect(response.finalScore).toBe('1.00');
     expect(decision.responseId).toBe(RESPONSE_A);
+  });
+
+  it('una lectura tardía nunca escribe en la respuesta que confirmó otra hoja', async () => {
+    const { memory, service } = setup();
+    seedConfirmedBatch(memory);
+    const foreign = seedResponse(memory, {
+      id: RESPONSE_A,
+      value: { answer: null, pendingReading: true, reading: { markId: MARK_B } },
+    });
+    const decision = seedDecision(memory, { value: answer('7', INTEGER) });
+
+    const report = await service.consolidateDecisions(ORG_ID, [decision.id]);
+
+    expect(report.skipped).toEqual([{ decisionId: decision.id, reason: 'no_response' }]);
+    expect(foreign.finalScore).toBeNull();
+    expect(decision.responseId).toBeNull();
+  });
+
+  it('una lectura tardía no escribe en una respuesta sin reserva de ninguna hoja', async () => {
+    const { memory, service } = setup();
+    seedConfirmedBatch(memory);
+    const imported = seedResponse(memory, { id: RESPONSE_A, value: { answer: '3' } });
+    const decision = seedDecision(memory, { value: answer('7', INTEGER) });
+
+    const report = await service.consolidateDecisions(ORG_ID, [decision.id]);
+
+    expect(report.skipped).toEqual([{ decisionId: decision.id, reason: 'no_response' }]);
+    expect(imported.value).toEqual({ answer: '3' });
+  });
+
+  it('la decisión de un escaneo reemplazado no se consolida ni recibe revisiones', async () => {
+    const { memory, service } = setup();
+    seedConfirmedBatch(memory);
+    const scan = memory.rows<{ id: string; state: string }>(sheetScans)[0];
+    if (scan) scan.state = 'superseded';
+    const response = seedResponse(memory, { id: RESPONSE_A });
+    const decision = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+
+    const consolidated = await service.consolidateDecisions(ORG_ID, [decision.id]);
+    const reviewed = await service.applyHumanResolution(
+      ORG_ID,
+      decision.id,
+      { kind: 'grading', isCorrect: true },
+      REVIEWER_ID,
+    );
+
+    expect(consolidated.skipped).toEqual([{ decisionId: decision.id, reason: 'not_current' }]);
+    expect(reviewed.skipped).toEqual([{ decisionId: decision.id, reason: 'not_current' }]);
+    expect(response.finalScore).toBeNull();
+    expect(response.humanScore).toBeNull();
   });
 
   it('con el lote todavía en revisión no toca ninguna respuesta', async () => {

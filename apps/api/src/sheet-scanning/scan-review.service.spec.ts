@@ -1149,8 +1149,42 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(linkCalls).toEqual([
       {
         orgId: ORG_ID,
-        input: { assessmentId: ASSESSMENT_ID, links: [], cropMarkIds: ['m-crop'] },
+        input: {
+          assessmentId: ASSESSMENT_ID,
+          links: [],
+          cropMarks: [{ markId: 'm-crop', studentId: STUDENT_1, itemId: null }],
+        },
       },
+    ]);
+  });
+
+  it('informa el ítem de cada marca de recorte confirmada para reservar su respuesta', async () => {
+    const [batchRows, ...rest] = cropSelectResults();
+    const cropField = SPEC_WITH_CROP.fields.find((field) => field.fieldId === 'f_dev');
+    const specWithResponse: LayoutSpec = {
+      ...SPEC_WITH_CROP,
+      fields: [
+        ...SPEC_WITH_CROP.fields.filter((field) => field.fieldId !== 'f_dev'),
+        {
+          ...(cropField as LayoutSpec['fields'][number]),
+          response: {
+            itemId: 'item-4',
+            format: { kind: 'integer', maxChars: 3, allowNegative: false },
+            boxes: [],
+            cropProfileId: 'short-answer@1',
+          },
+        },
+      ],
+    };
+    const { service, linkCalls } = makeService([
+      [{ ...(batchRows?.[0] as object), spec: specWithResponse }],
+      ...rest,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(linkCalls[0].input.cropMarks).toEqual([
+      { markId: 'm-crop', studentId: STUDENT_1, itemId: 'item-4' },
     ]);
   });
 
@@ -1214,7 +1248,9 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(rows[0].pendingReadingLabels).toEqual(['4']);
     expect(rows[0].prescoredAnswers).toBeUndefined();
     expect(linkCalls[0].input.links).toEqual([]);
-    expect(linkCalls[0].input.cropMarkIds).toEqual(['m-crop']);
+    expect(linkCalls[0].input.cropMarks).toEqual([
+      { markId: 'm-crop', studentId: STUDENT_1, itemId: null },
+    ]);
   });
 
   it('un fallo al vincular las lecturas se reporta sin deshacer la confirmación', async () => {
@@ -1243,7 +1279,7 @@ describe('ScanReviewService.confirmBatch', () => {
     await service.confirmBatch(ORG_ID, USER, BATCH_ID);
 
     expect(readingCalls).toHaveLength(0);
-    expect(linkCalls[0].input).toEqual({ assessmentId: ASSESSMENT_ID, links: [], cropMarkIds: [] });
+    expect(linkCalls[0].input).toEqual({ assessmentId: ASSESSMENT_ID, links: [], cropMarks: [] });
   });
 
   it('agenda la corrección de desarrollo con los datos del lote tras confirmar', async () => {

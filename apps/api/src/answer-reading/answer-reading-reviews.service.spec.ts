@@ -263,7 +263,7 @@ describe('AnswerReadingReviewsService: revisión antes de confirmar el lote', ()
           consolidated: false,
         },
       ],
-      cropMarkIds: [decision.markId],
+      cropMarks: [{ markId: decision.markId, studentId: STUDENT_ID, itemId: decision.itemId }],
     });
 
     expect(report?.scored).toEqual([decision.id]);
@@ -297,7 +297,7 @@ describe('AnswerReadingReviewsService: revisión antes de confirmar el lote', ()
           consolidated: false,
         },
       ],
-      cropMarkIds: [decision.markId],
+      cropMarks: [{ markId: decision.markId, studentId: STUDENT_ID, itemId: decision.itemId }],
     });
 
     expect(response.finalScore).toBeNull();

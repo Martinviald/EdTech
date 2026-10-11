@@ -23,6 +23,30 @@ type ResponseUpdate = {
 
 type DecisionLinkUpdate = { id: string; response_id: string; resolved: boolean };
 
+type ResponseClaim = { mark_id: string; student_id: string; item_id: string };
+
+function applyResponseClaims(
+  memory: InMemoryDatabase,
+  claims: ResponseClaim[],
+  assessmentId: string,
+) {
+  for (const claim of claims) {
+    for (const row of memory.rows<Response>(responses)) {
+      if (
+        row.assessmentId !== assessmentId ||
+        row.studentId !== claim.student_id ||
+        row.itemId !== claim.item_id ||
+        row.humanScore !== null
+      ) {
+        continue;
+      }
+      const reading = row.value.reading;
+      const previous = reading !== null && typeof reading === 'object' ? reading : {};
+      row.value = { ...row.value, reading: { ...previous, markId: claim.mark_id } };
+    }
+  }
+}
+
 function applyResponseUpdates(memory: InMemoryDatabase, updates: ResponseUpdate[]) {
   const byId = new Map(memory.rows<Response>(responses).map((row) => [row.id, row]));
   const applied: Array<{ id: string }> = [];
@@ -67,6 +91,14 @@ export function consolidationDatabase(memory: InMemoryDatabase): {
   (db as unknown as { execute: (query: SQL) => Promise<unknown[]> }).execute = async (query) => {
     const rendered = dialect.sqlToQuery(query);
     statements.push(rendered.sql);
+    if (rendered.sql.includes("jsonb_build_object('markId'")) {
+      applyResponseClaims(
+        memory,
+        JSON.parse(String(rendered.params[0])),
+        String(rendered.params[1]),
+      );
+      return [];
+    }
     if (rendered.sql.includes('UPDATE responses')) {
       return applyResponseUpdates(memory, JSON.parse(String(rendered.params[0])));
     }

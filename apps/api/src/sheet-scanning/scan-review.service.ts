@@ -39,6 +39,7 @@ import type {
 import { autoAnnulMinConfidence, isQuickConfirmEnabled } from '@soe/types';
 import {
   AnswerReadingConsolidationService,
+  type ConfirmedCropMark,
   type ConfirmedReadingLink,
   type ConfirmedReadingsInput,
   type ReadingConfirmation,
@@ -656,13 +657,13 @@ export class ScanReviewService {
     });
 
     const pageCount = prepared.batch.spec.pageCount;
-    const cropPrintedNumbers = this.cropPrintedNumbersOf(prepared.batch.spec);
+    const cropItemByPrintedNumber = this.cropItemsByPrintedNumber(prepared.batch.spec);
     const readings =
-      cropPrintedNumbers.size > 0
+      cropItemByPrintedNumber.size > 0
         ? await this.readingConsolidation.readingsForConfirmation(orgId, batchId)
         : new Map<string, ReadingConfirmation>();
     const readingLinks: ConfirmedReadingLink[] = [];
-    const confirmedCropMarkIds: string[] = [];
+    const confirmedCropMarks: ConfirmedCropMark[] = [];
     const confirmedScans: ConfirmedScanInput[] = [];
     let incompleteSheets = 0;
     let unidentifiedSheets = 0;
@@ -680,9 +681,13 @@ export class ScanReviewService {
       }
       const marks: ConfirmedScanInput['marks'] = [];
       for (const mark of sheet.marks) {
-        if (cropPrintedNumbers.has(mark.printedNumber)) {
+        if (cropItemByPrintedNumber.has(mark.printedNumber)) {
           const reading = readings.get(mark.markId);
-          confirmedCropMarkIds.push(mark.markId);
+          confirmedCropMarks.push({
+            markId: mark.markId,
+            studentId: student.id,
+            itemId: cropItemByPrintedNumber.get(mark.printedNumber) ?? null,
+          });
           if (reading) {
             readingLinks.push({
               decisionId: reading.decisionId,
@@ -784,7 +789,7 @@ export class ScanReviewService {
     await this.linkConfirmedReadings(orgId, batchId, {
       assessmentId: prepared.batch.assessmentId,
       links: readingLinks,
-      cropMarkIds: confirmedCropMarkIds,
+      cropMarks: confirmedCropMarks,
     });
 
     await this.scheduleDevelopmentGrading({
@@ -1028,12 +1033,13 @@ export class ScanReviewService {
     return index;
   }
 
-  private cropPrintedNumbersOf(spec: LayoutSpec): Set<string> {
-    const printedNumbers = new Set<string>();
+  private cropItemsByPrintedNumber(spec: LayoutSpec): Map<string, string | null> {
+    const itemByPrintedNumber = new Map<string, string | null>();
     for (const field of spec.fields) {
-      if (field.kind === 'crop_region') printedNumbers.add(field.printedNumber);
+      if (field.kind !== 'crop_region') continue;
+      itemByPrintedNumber.set(field.printedNumber, field.response?.itemId ?? null);
     }
-    return printedNumbers;
+    return itemByPrintedNumber;
   }
 
   private buildOptionsIndex(spec: LayoutSpec): Map<string, string[]> {
