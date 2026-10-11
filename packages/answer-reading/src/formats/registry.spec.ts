@@ -10,6 +10,7 @@ import { toScoringOutcome } from '../consensus/scoring-outcome';
 import {
   ANSWER_FORMATS,
   formatLabelFor,
+  requiresRubricGrading,
   isSupportedFormat,
   normalizeTranscription,
   outputPartsSchemaFor,
@@ -53,10 +54,10 @@ describe('registro de formatos', () => {
     }
   });
 
-  it('los formatos sin definición se rechazan explícitamente', () => {
-    const freeText: ResponseFormat = { kind: 'free_text', lines: 4 };
-    expect(isSupportedFormat(freeText)).toBe(false);
-    expect(() => normalizeTranscription(fakeOutput('hola'), freeText)).toThrow(
+  it('los formatos sin definición (los de burbujas) se rechazan explícitamente', () => {
+    const bubbles: ResponseFormat = { kind: 'bubble_choice' };
+    expect(isSupportedFormat(bubbles)).toBe(false);
+    expect(() => normalizeTranscription(fakeOutput('hola'), bubbles)).toThrow(
       /no tiene definición/,
     );
   });
@@ -215,5 +216,183 @@ describe('toScoringInput → corrección existente', () => {
   it('un par ambiguo por comas conserva la ambigüedad hasta la corrección', () => {
     const tuple3: ResponseFormat = { kind: 'ordered_tuple', arity: 2, componentKind: 'decimal' };
     expect(scoreAgainst(tuple3, '(2,5,3)', ['(2,5;3)'])).toBe('undecidable');
+  });
+});
+
+const WORDS: ResponseFormat = { kind: 'word_list', count: 3 };
+const SENTENCE: ResponseFormat = { kind: 'short_text', maxWords: 6 };
+const BOXES: ResponseFormat = {
+  kind: 'multi_box',
+  boxes: [
+    { partId: 'tens', label: 'Decenas', kind: 'integer' },
+    { partId: 'units', label: 'Unidades', kind: 'decimal' },
+    { partId: 'name', label: 'Nombre', kind: 'short_text' },
+  ],
+};
+const FREE_TEXT: ResponseFormat = { kind: 'free_text', lines: 6 };
+const MATH_WORK: ResponseFormat = { kind: 'math_work', heightRatio: 0.4 };
+
+function scoreShortAnswer(
+  format: ResponseFormat,
+  literal: string,
+  accepted: string[],
+  scoringConfig?: ScoringConfig,
+) {
+  return scoreAgainst(format, literal, accepted, scoringConfig);
+}
+
+function scoreBoxes(literal: string, scoringConfig?: ScoringConfig) {
+  const normalized = normalizeTranscription(fakeOutput(literal), BOXES);
+  const output = getScoringStrategy('gap_fill').score({
+    item: {
+      id: 'item',
+      type: 'gap_fill',
+      content: {
+        textWithGaps: 'Decenas: ___ Unidades: ___ Nombre: ___',
+        gaps: [
+          { position: 0, partId: 'tens', acceptedAnswers: ['3'] },
+          { position: 1, partId: 'units', acceptedAnswers: ['4,5'] },
+          { position: 2, partId: 'name', acceptedAnswers: ['Ana'] },
+        ],
+        responseFormat: BOXES,
+      } as ItemContent,
+      maxScore: 3,
+      scoringConfig,
+    },
+    rawAnswer: toScoringInput(normalized),
+  });
+  return output;
+}
+
+describe('formatos de texto, casillas y desarrollo (F10a)', () => {
+  it('etiquetas, partes y modo de calificación', () => {
+    expect(formatLabelFor(WORDS)).toBe('lista de 3 palabras');
+    expect(formatLabelFor({ kind: 'word_list', count: 1 })).toBe('una palabra');
+    expect(formatLabelFor(SENTENCE)).toBe('texto corto');
+    expect(formatLabelFor(BOXES)).toBe('3 casillas: Decenas, Unidades, Nombre');
+    expect(formatLabelFor(FREE_TEXT)).toBe('respuesta de desarrollo');
+    expect(outputPartsSchemaFor(WORDS)?.required).toEqual(['w1', 'w2', 'w3']);
+    expect(outputPartsSchemaFor(SENTENCE)).toBeNull();
+    expect(outputPartsSchemaFor(BOXES)?.required).toEqual(['tens', 'units', 'name']);
+    expect(outputPartsSchemaFor(FREE_TEXT)).toBeNull();
+    for (const format of [WORDS, SENTENCE, BOXES, FREE_TEXT, MATH_WORK]) {
+      expect(promptGuideFor(format)).not.toMatch(/clave|correct[ao]/i);
+      expect(promptGuideFor(format)).not.toMatch(/\b(vos|tenés|podés|marcá|copiá|dejá)\b/);
+    }
+    expect(promptGuideFor(FREE_TEXT)).toMatch(/\[ilegible\]/);
+    expect(requiresRubricGrading(FREE_TEXT)).toBe(true);
+    expect(requiresRubricGrading(MATH_WORK)).toBe(true);
+    expect(requiresRubricGrading(WORDS)).toBe(false);
+    expect(requiresRubricGrading({ kind: 'bubble_choice' })).toBe(false);
+  });
+
+  it.each<[string, ResponseFormat, string, string | null, NormalizationIssue[]]>([
+    ['lista con comas', WORDS, 'Cabeza, tórax, abdomen', 'w:cabeza|torax|abdomen', []],
+    ['lista con "y" y punto', WORDS, 'cabeza; Tórax y abdomen.', 'w:cabeza|torax|abdomen', []],
+    ['lista con palabras de más', WORDS, 'a, b, c, d', 'w:a|b|c|d', ['extra_tokens']],
+    ['lista vacía', WORDS, ' , ', null, ['empty_part']],
+    ['texto corto', SENTENCE, '“Pedro is cooking.”', 'x:pedro is cooking', []],
+    ['casillas', BOXES, '3 | 4,5 | Ana', 'm:name=x:ana;tens=n:3;units=n:9/2', []],
+    ['casilla vacía', BOXES, '3 |  | Ana', 'm:name=x:ana;tens=n:3;units=x:', ['empty_part']],
+    [
+      'decimal en casilla entera',
+      BOXES,
+      '3,5 | 4 | Ana',
+      'm:name=x:ana;tens=n:7/2;units=n:4',
+      ['format_mismatch'],
+    ],
+    ['faltan casillas', BOXES, '3 | 4', null, ['format_mismatch']],
+    ['letra en casilla numérica', BOXES, 'x | 4 | Ana', null, ['non_numeric_in_numeric']],
+    [
+      'casilla ambigua',
+      BOXES,
+      '3 | 1.500 | Ana',
+      'amb:m:name=x:ana;tens=n:3;units=n:1500||m:name=x:ana;tens=n:3;units=n:3/2',
+      ['ambiguous_thousands_or_decimal'],
+    ],
+    [
+      'desarrollo',
+      FREE_TEXT,
+      '  El agua  se evapora\n\n\n\npor el calor ',
+      'x:El agua se evapora\n\npor el calor',
+      [],
+    ],
+    ['desarrollo vacío', FREE_TEXT, '   ', null, ['empty_part']],
+    ['procedimiento', MATH_WORK, '3 + 4 = 7', 'x:3 + 4 = 7', []],
+  ])('%s', (_name, format, literal, canonical, issues) => {
+    const normalized = normalizeTranscription(fakeOutput(literal), format);
+    expect(normalized.formatKind).toBe(format.kind);
+    expect(normalized.canonical).toBe(canonical);
+    expect([...normalized.issues].sort()).toEqual([...issues].sort());
+  });
+
+  it('las partes solo marcan discrepancias', () => {
+    const words = normalizeTranscription(
+      fakeOutput('cabeza, tórax, abdomen', { parts: { w1: 'cabeza', w2: 'tórax', w3: 'patas' } }),
+      WORDS,
+    );
+    expect(words.canonical).toBe('w:cabeza|torax|abdomen');
+    expect(words.issues).toContain('parts_disagree_with_literal');
+    const fewer = normalizeTranscription(
+      fakeOutput('cabeza, tórax', { parts: { w1: 'cabeza', w2: 'tórax', w3: '' } }),
+      WORDS,
+    );
+    expect(fewer.issues).toEqual([]);
+    const boxes = normalizeTranscription(
+      fakeOutput('3 | 4,5 | Ana', { parts: { tens: '3', units: '4.5', name: 'ana' } }),
+      BOXES,
+    );
+    expect(boxes.issues).toEqual([]);
+    const boxesDisagree = normalizeTranscription(
+      fakeOutput('3 | 4,5 | Ana', { parts: { tens: '8', units: '4,5', name: 'Ana' } }),
+      BOXES,
+    );
+    expect(boxesDisagree.issues).toContain('parts_disagree_with_literal');
+  });
+
+  it('lista de palabras → corrección de short_answer', () => {
+    expect(scoreShortAnswer(WORDS, 'cabeza, torax, abdomen', ['Cabeza, tórax, abdomen'])).toBe(
+      'correct',
+    );
+    expect(scoreShortAnswer(WORDS, 'cabeza, torax, abdomem', ['Cabeza, tórax, abdomen'])).toBe(
+      'undecidable',
+    );
+    expect(scoreShortAnswer(WORDS, 'cabeza, torax, patas', ['Cabeza, tórax, abdomen'])).toBe(
+      'incorrect',
+    );
+    expect(
+      scoreShortAnswer(WORDS, 'cabeza, torax, patas', ['Cabeza, tórax, abdomen'], {
+        componentCredit: { mode: 'per_component', creditPerComponent: [1 / 3, 1 / 3, 1 / 3] },
+      }),
+    ).toBe('partial');
+  });
+
+  it('texto corto → correcta solo si calza exacta; si no, indecidible', () => {
+    expect(scoreShortAnswer(SENTENCE, 'Pedro is cooking', ['Pedro is cooking.'])).toBe('correct');
+    expect(scoreShortAnswer(SENTENCE, 'Pedro cooks', ['Pedro is cooking.'])).toBe('undecidable');
+  });
+
+  it('casillas → gap_fill por casilla, con crédito solo si la pauta lo dice', () => {
+    expect(scoreBoxes('03 | 4.5 | ana').isCorrect).toBe(true);
+    expect(scoreBoxes('3 | 4,5 | Eva')).toEqual({
+      isCorrect: null,
+      rawScore: null,
+      requiresManualGrading: true,
+    });
+    expect(scoreBoxes('3 | 7 | Ana')).toEqual({
+      isCorrect: false,
+      rawScore: 0,
+      requiresManualGrading: false,
+    });
+    expect(scoreBoxes('3 | 7 | Ana', { partialCredit: true }).rawScore).toBe(2);
+  });
+
+  it('desarrollo: el texto pasa sin estructura', () => {
+    const normalized = normalizeTranscription(fakeOutput('El agua se evapora'), FREE_TEXT);
+    expect(normalized.value).toEqual({ type: 'text', text: 'El agua se evapora' });
+    expect(toScoringInput(normalized)).toBe('El agua se evapora');
+    expect(
+      toScoringInput(normalizeTranscription(fakeOutput('', { state: 'blank' }), FREE_TEXT)),
+    ).toBeNull();
   });
 });

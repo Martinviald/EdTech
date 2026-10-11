@@ -42,16 +42,25 @@ function partsProperty(parts: PartsJsonSchema | null): JsonSchema {
     : parts;
 }
 
+function schemaShape(format: ResponseFormat): string {
+  switch (format.kind) {
+    case 'ordered_tuple':
+      return `.${format.arity}`;
+    case 'sequence':
+      return `.${format.length}`;
+    case 'fraction':
+      return format.allowMixed ? '.mixed' : '';
+    case 'word_list':
+      return `.${format.count}`;
+    case 'multi_box':
+      return `.${format.boxes.map((box) => box.partId).join('+')}`;
+    default:
+      return '';
+  }
+}
+
 function schemaIdFor(format: ResponseFormat): string {
-  const shape =
-    format.kind === 'ordered_tuple'
-      ? `.${format.arity}`
-      : format.kind === 'sequence'
-        ? `.${format.length}`
-        : format.kind === 'fraction' && format.allowMixed
-          ? '.mixed'
-          : '';
-  return `transcription-output.${format.kind}${shape}@${TRANSCRIPTION_SCHEMA_VERSION}`;
+  return `transcription-output.${format.kind}${schemaShape(format)}@${TRANSCRIPTION_SCHEMA_VERSION}`;
 }
 
 /**

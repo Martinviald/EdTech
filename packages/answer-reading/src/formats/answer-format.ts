@@ -8,13 +8,21 @@ import type {
   TranscriptionOutput,
 } from '@soe/types';
 
-/** Formatos con definición en el registro (F2). Los demás los agrega F10a. */
+/**
+ * Formatos con definición en el registro. `bubble_choice` y `score_bubbles` se
+ * leen por OMR (burbujas) y no pasan por la lectura por visión.
+ */
 export const SUPPORTED_FORMAT_KINDS = [
   'integer',
   'decimal',
   'fraction',
   'ordered_tuple',
   'sequence',
+  'word_list',
+  'short_text',
+  'multi_box',
+  'free_text',
+  'math_work',
 ] as const satisfies readonly ResponseFormatKind[];
 export type SupportedFormatKind = (typeof SUPPORTED_FORMAT_KINDS)[number];
 
@@ -38,6 +46,11 @@ export interface AnswerFormatDefinition<K extends ResponseFormatKind> {
   readonly readBy: ReadBy;
   readonly compatibleItemTypes: readonly ItemType[];
   readonly defaultCropProfileId: CropProfileRef;
+  /**
+   * `key`: la corrige una estrategia contra la clave. `rubric`: solo se transcribe;
+   * la califica una persona con la rúbrica, así que el consenso nunca la autoacepta.
+   */
+  readonly gradedBy: 'key' | 'rubric';
   /** Nombre del formato en español, para el prompt (`formatLabel`) y la UI. */
   formatLabel(format: FormatOf<K>): string;
   /** Guía de escritura para el prompt (`formatGuide`). No menciona la clave. */
