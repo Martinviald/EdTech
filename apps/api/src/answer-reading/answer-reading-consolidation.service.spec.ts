@@ -46,6 +46,7 @@ const NUMBER_ITEM = 'aaaaaaaa-0000-4000-8000-000000000001';
 const WORDS_ITEM = 'aaaaaaaa-0000-4000-8000-000000000002';
 const OPEN_ITEM = 'aaaaaaaa-0000-4000-8000-000000000003';
 const TEXT_ITEM = 'aaaaaaaa-0000-4000-8000-000000000004';
+const RUBRIC_ITEM = 'aaaaaaaa-0000-4000-8000-000000000005';
 const MARK_A = 'bbbbbbbb-0000-4000-8000-000000000001';
 const MARK_B = 'bbbbbbbb-0000-4000-8000-000000000002';
 const MARK_C = 'bbbbbbbb-0000-4000-8000-000000000003';
@@ -85,6 +86,19 @@ function setup() {
       id: OPEN_ITEM,
       type: 'open_ended',
       content: { prompt: 'Explica' },
+      scoringConfig: { points: 2 },
+    },
+    {
+      id: RUBRIC_ITEM,
+      type: 'rubric_scored',
+      content: {
+        prompt: '¿Por qué se inundó el pueblo?',
+        levels: [
+          { code: '0', label: 'Incorrecta', descriptor: 'No da una causa.', creditFraction: 0 },
+          { code: '1', label: 'Parcial', descriptor: 'Da la causa.', creditFraction: 0.5 },
+          { code: '2', label: 'Completa', descriptor: 'Explica la causa.', creditFraction: 1 },
+        ],
+      },
       scoringConfig: { points: 2 },
     },
   ]);
@@ -965,6 +979,24 @@ describe('Revisión heredada al reprocesar una decisión revisada', () => {
     expect(report.scored).toEqual([current.id]);
     expect(response).toMatchObject({ isCorrect: false, finalScore: '0.00' });
     expect(response.humanScore).toMatchObject({ score: 0, scoredById: REVIEWER_ID });
+  });
+
+  it('una aprobación de rúbrica reaplicada conserva el puntaje parcial de su nivel', async () => {
+    const { memory, service } = setup();
+    const response = seedResponse(memory, { id: RESPONSE_A, itemId: RUBRIC_ITEM });
+    const current = seedDecision(memory, {
+      itemId: RUBRIC_ITEM,
+      outcome: 'needs_review',
+      responseId: RESPONSE_A,
+    });
+    seedReview(memory, { decisionId: current.id, action: 'mark_incorrect', editedLiteral: '1' });
+
+    const report = await service.applyRecordedReviews(ORG_ID, [current.id]);
+
+    expect(report.scored).toEqual([current.id]);
+    expect(response).toMatchObject({ finalScore: '1.00' });
+    expect(response.humanScore).toMatchObject({ score: 1, levelCode: '1' });
+    expect(response.value).toMatchObject({ rubricLevel: '1' });
   });
 
   it('un human_score que no escribió ninguna decisión de la marca sigue sin pisarse', async () => {

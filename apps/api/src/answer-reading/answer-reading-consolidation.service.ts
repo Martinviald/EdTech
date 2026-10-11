@@ -15,7 +15,7 @@ import {
   type AnswerReview,
 } from '@soe/db';
 import { isSupportedFormatKind, toScoringInput } from '@soe/answer-reading';
-import type { NormalizedAnswer } from '@soe/types';
+import { rubricScoredStrategy, type NormalizedAnswer } from '@soe/types';
 import type { PrescoredAnswer, ResponseAiScore } from '../answer-sheets/lib/parsers/parser.types';
 import { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import { InjectDb, type Database } from '../database/database.types';
@@ -254,7 +254,7 @@ export class AnswerReadingConsolidationService {
           links.push({ decisionId: decision.id, responseId: target.id, resolved: false });
           continue;
         }
-        const resolution = this.resolutionOfReview(review);
+        const resolution = this.resolutionOfReview(review, context.items.get(decision.itemId));
         const write =
           resolution === null
             ? null
@@ -460,8 +460,18 @@ export class AnswerReadingConsolidationService {
     };
   }
 
-  private resolutionOfReview(review: AnswerReview): HumanResolution | null {
+  private resolutionOfReview(
+    review: AnswerReview,
+    item: ReadingScoringItem | undefined,
+  ): HumanResolution | null {
     const reason = review.reason ?? undefined;
+    if (
+      (review.action === 'mark_correct' || review.action === 'mark_incorrect') &&
+      item?.type === 'rubric_scored' &&
+      review.editedLiteral !== null
+    ) {
+      return this.rubricResolution(item, review.editedLiteral, reason);
+    }
     switch (review.action) {
       case 'accept':
       case 'edit':
@@ -771,6 +781,31 @@ export class AnswerReadingConsolidationService {
       isCorrect: resolution.isCorrect,
       rawScore: score,
       humanScore: this.humanScoreOf(score, reviewerId, resolution.reason, levelCode),
+    };
+  }
+
+  private rubricResolution(
+    item: ReadingScoringItem,
+    levelCode: string,
+    reason: string | undefined,
+  ): HumanResolution | null {
+    const scored = rubricScoredStrategy.score({
+      item: {
+        id: item.id,
+        type: item.type,
+        content: item.content,
+        maxScore: item.maxScore,
+        scoringConfig: { points: item.maxScore },
+      },
+      rawAnswer: levelCode,
+    });
+    if (scored.rawScore === null || scored.isCorrect === null) return null;
+    return {
+      kind: 'rubric',
+      levelCode,
+      isCorrect: scored.isCorrect,
+      score: scored.rawScore,
+      ...(reason === undefined ? {} : { reason }),
     };
   }
 
