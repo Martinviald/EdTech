@@ -197,6 +197,21 @@ function seedConfirmedBatch(memory: InMemoryDatabase, status = 'confirmed') {
   memory.seed(sheetScanMarks, [{ id: MARK_A, orgId: ORG_ID, scanId: SCAN_ID }]);
 }
 
+function seedReview(memory: InMemoryDatabase, overrides: Partial<AnswerReview>) {
+  memory.seed(answerReviews, [
+    {
+      orgId: ORG_ID,
+      reviewerId: REVIEWER_ID,
+      mode: 'grading',
+      action: 'mark_correct',
+      groupSize: 1,
+      ...overrides,
+    },
+  ]);
+  const rows = memory.rows<AnswerReview>(answerReviews);
+  return rows[rows.length - 1] as AnswerReview;
+}
+
 function currentDecisionOf(memory: InMemoryDatabase, markId = MARK_A) {
   const current = memory
     .rows<AnswerReadingDecision>(answerReadingDecisions)
@@ -222,7 +237,10 @@ describe('AnswerReadingConsolidationService.readingsForConfirmation', () => {
       itemId: NUMBER_ITEM,
       prescored: {
         itemId: NUMBER_ITEM,
-        value: { answer: '7', reading: { canonical: decision.canonical, decisionId: decision.id } },
+        value: {
+          answer: '7',
+          reading: { canonical: decision.canonical, decisionId: decision.id, markId: MARK_A },
+        },
         isCorrect: true,
         rawScore: 1,
         scoredBy: 'ai',
@@ -264,7 +282,10 @@ describe('AnswerReadingConsolidationService.readingsForConfirmation', () => {
 
     expect(readings.get(MARK_A)?.prescored).toEqual({
       itemId: NUMBER_ITEM,
-      value: { answer: null, reading: { canonical: null, decisionId: decision.id } },
+      value: {
+        answer: null,
+        reading: { canonical: null, decisionId: decision.id, markId: MARK_A },
+      },
       isCorrect: false,
       rawScore: 0,
       scoredBy: 'auto',
@@ -883,21 +904,6 @@ describe('AnswerReadingConsolidationService.applyHumanResolution', () => {
 });
 
 describe('Revisión heredada al reprocesar una decisión revisada', () => {
-  function seedReview(memory: InMemoryDatabase, overrides: Partial<AnswerReview>) {
-    memory.seed(answerReviews, [
-      {
-        orgId: ORG_ID,
-        reviewerId: REVIEWER_ID,
-        mode: 'grading',
-        action: 'mark_correct',
-        groupSize: 1,
-        ...overrides,
-      },
-    ]);
-    const rows = memory.rows<AnswerReview>(answerReviews);
-    return rows[rows.length - 1] as AnswerReview;
-  }
-
   it('la decisión nueva hereda la revisión vigente y la anterior queda reemplazada', async () => {
     const { memory, decisions } = setup();
     const reviewed = seedDecision(memory, {
@@ -1020,5 +1026,153 @@ describe('Revisión heredada al reprocesar una decisión revisada', () => {
 
     expect(report.skipped).toEqual([{ decisionId: current.id, reason: 'human_scored' }]);
     expect(response.finalScore).toBe('1.00');
+  });
+});
+
+describe('Respuesta reclamada por otra hoja del mismo alumno', () => {
+  function seedReclaimedByReprint(memory: InMemoryDatabase) {
+    const original = seedDecision(memory, { value: answer('7', INTEGER), responseId: RESPONSE_A });
+    const response = seedResponse(memory, {
+      id: RESPONSE_A,
+      value: {
+        answer: '7',
+        reading: { canonical: original.canonical, decisionId: original.id, markId: MARK_A },
+      },
+      isCorrect: true,
+      rawScore: '1.00',
+      finalScore: '1.00',
+      scoredBy: 'ai',
+    });
+    return { original, response };
+  }
+
+  async function confirmReprint(service: AnswerReadingConsolidationService) {
+    await service.linkConfirmedResponses(ORG_ID, {
+      assessmentId: ASSESSMENT_ID,
+      links: [],
+      cropMarks: [{ markId: MARK_B, studentId: STUDENT_ID, itemId: NUMBER_ITEM }],
+    });
+  }
+
+  it('una relectura de la hoja vieja no escribe en la respuesta que reclamó la reimpresa', async () => {
+    const { memory, service, recalculate } = setup();
+    const { original, response } = seedReclaimedByReprint(memory);
+    await confirmReprint(service);
+    const reread = seedDecision(memory, { value: answer('9', INTEGER) });
+    original.supersededById = reread.id;
+
+    const report = await service.consolidateDecisions(ORG_ID, [reread.id]);
+
+    expect(report.skipped).toEqual([{ decisionId: reread.id, reason: 'response_reclaimed' }]);
+    expect(response).toMatchObject({ finalScore: '1.00', isCorrect: true });
+    expect(response.value).toMatchObject({ answer: '7', reading: { markId: MARK_B } });
+    expect(reread.resolvedAt).toBeNull();
+    expect(recalculate).not.toHaveBeenCalled();
+  });
+
+  it('una revisión humana de la hoja vieja no escribe en la respuesta que reclamó la reimpresa', async () => {
+    const { memory, service } = setup();
+    const { original, response } = seedReclaimedByReprint(memory);
+    await confirmReprint(service);
+
+    const report = await service.applyHumanResolution(
+      ORG_ID,
+      original.id,
+      { kind: 'grading', isCorrect: false },
+      REVIEWER_ID,
+    );
+
+    expect(report.skipped).toEqual([{ decisionId: original.id, reason: 'response_reclaimed' }]);
+    expect(response).toMatchObject({ finalScore: '1.00', humanScore: null });
+  });
+
+  it('una revisión registrada de la hoja vieja tampoco se reaplica sobre la reimpresa', async () => {
+    const { memory, service } = setup();
+    const { original, response } = seedReclaimedByReprint(memory);
+    await confirmReprint(service);
+    seedReview(memory, { decisionId: original.id, action: 'mark_incorrect' });
+
+    const report = await service.applyRecordedReviews(ORG_ID, [original.id]);
+
+    expect(report.skipped).toEqual([{ decisionId: original.id, reason: 'response_reclaimed' }]);
+    expect(response).toMatchObject({ finalScore: '1.00', humanScore: null });
+  });
+
+  it('la hoja que reclamó la respuesta sí la consolida', async () => {
+    const { memory, service } = setup();
+    const { response } = seedReclaimedByReprint(memory);
+    await confirmReprint(service);
+    const reprint = seedDecision(memory, {
+      markId: MARK_B,
+      value: answer('9', INTEGER),
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.consolidateDecisions(ORG_ID, [reprint.id]);
+
+    expect(report.scored).toEqual([reprint.id]);
+    expect(response).toMatchObject({ finalScore: '0.00', isCorrect: false });
+    expect(response.value).toMatchObject({ reading: { decisionId: reprint.id, markId: MARK_B } });
+  });
+
+  it('toda escritura deja la reserva de la marca: consolidada o pendiente', async () => {
+    const { memory, service } = setup();
+    const scoredResponse = seedResponse(memory, { id: RESPONSE_A });
+    const scored = seedDecision(memory, { value: answer('7', INTEGER), responseId: RESPONSE_A });
+    const pendingResponse = seedResponse(memory, {
+      id: RESPONSE_B,
+      itemId: WORDS_ITEM,
+      isCorrect: true,
+      rawScore: '2.00',
+      finalScore: '2.00',
+      scoredBy: 'ai',
+    });
+    const pending = seedDecision(memory, {
+      markId: MARK_B,
+      itemId: WORDS_ITEM,
+      outcome: 'needs_review',
+      value: answer('cabeza', WORDS),
+      responseId: RESPONSE_B,
+    });
+
+    await service.consolidateDecisions(ORG_ID, [scored.id, pending.id]);
+
+    expect(scoredResponse.value).toMatchObject({ reading: { markId: MARK_A } });
+    expect(pendingResponse.value).toEqual({
+      answer: null,
+      pendingReading: true,
+      reading: { markId: MARK_B },
+    });
+  });
+
+  it('una respuesta sin reserva vinculada a decisiones de dos hojas no la escribe ninguna', async () => {
+    const { memory, service } = setup();
+    const response = seedResponse(memory, { id: RESPONSE_A });
+    const first = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+    const second = seedDecision(memory, {
+      markId: MARK_B,
+      outcome: 'needs_review',
+      value: answer('9', INTEGER),
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.applyHumanResolutions(
+      ORG_ID,
+      [
+        { decisionId: first.id, resolution: { kind: 'grading', isCorrect: true } },
+        { decisionId: second.id, resolution: { kind: 'grading', isCorrect: false } },
+      ],
+      REVIEWER_ID,
+    );
+
+    expect(report.skipped).toEqual([
+      { decisionId: first.id, reason: 'response_reclaimed' },
+      { decisionId: second.id, reason: 'response_reclaimed' },
+    ]);
+    expect(response).toMatchObject({ finalScore: null, humanScore: null });
   });
 });

@@ -80,6 +80,7 @@ export const CONSOLIDATION_SKIP_REASONS = [
   'no_response',
   'human_scored',
   'undecidable',
+  'response_reclaimed',
 ] as const;
 export type ConsolidationSkipReason = (typeof CONSOLIDATION_SKIP_REASONS)[number];
 
@@ -114,6 +115,8 @@ interface TargetResponse {
   readonly hasHumanScore: boolean;
   readonly isPending: boolean;
   readonly writtenByMarkId: string | null;
+  readonly ownerMarkId: string | null;
+  readonly linkedMarkIds: ReadonlySet<string>;
 }
 
 interface ScoredValue {
@@ -249,6 +252,10 @@ export class AnswerReadingConsolidationService {
           skipped.push({ decisionId: decision.id, reason: 'no_response' });
           continue;
         }
+        if (this.isReclaimedByOtherMark(decision, target)) {
+          skipped.push({ decisionId: decision.id, reason: 'response_reclaimed' });
+          continue;
+        }
         if (this.hasForeignHumanScore(decision, target)) {
           skipped.push({ decisionId: decision.id, reason: 'human_scored' });
           links.push({ decisionId: decision.id, responseId: target.id, resolved: false });
@@ -302,6 +309,10 @@ export class AnswerReadingConsolidationService {
           skipped.push({ decisionId: decision.id, reason: 'no_response' });
           continue;
         }
+        if (this.isReclaimedByOtherMark(decision, target)) {
+          skipped.push({ decisionId: decision.id, reason: 'response_reclaimed' });
+          continue;
+        }
         if (this.hasForeignHumanScore(decision, target)) {
           skipped.push({ decisionId: decision.id, reason: 'human_scored' });
           continue;
@@ -351,6 +362,10 @@ export class AnswerReadingConsolidationService {
         const target = targets.get(decision.id);
         if (!target) {
           skipped.push({ decisionId: decision.id, reason: 'no_response' });
+          continue;
+        }
+        if (this.isReclaimedByOtherMark(decision, target)) {
+          skipped.push({ decisionId: decision.id, reason: 'response_reclaimed' });
           continue;
         }
         if (target.hasHumanScore) {
@@ -407,6 +422,10 @@ export class AnswerReadingConsolidationService {
         const resolution = resolutionById.get(decision.id);
         if (!target || !resolution) {
           skipped.push({ decisionId: decision.id, reason: 'no_response' });
+          continue;
+        }
+        if (this.isReclaimedByOtherMark(decision, target)) {
+          skipped.push({ decisionId: decision.id, reason: 'response_reclaimed' });
           continue;
         }
         const write = this.humanWrite(decision, target, resolution, reviewerId, context);
@@ -493,6 +512,12 @@ export class AnswerReadingConsolidationService {
 
   private hasForeignHumanScore(decision: AnswerReadingDecision, target: TargetResponse): boolean {
     return target.hasHumanScore && target.writtenByMarkId !== decision.markId;
+  }
+
+  private isReclaimedByOtherMark(decision: AnswerReadingDecision, target: TargetResponse): boolean {
+    if (target.ownerMarkId !== null) return target.ownerMarkId !== decision.markId;
+    for (const markId of target.linkedMarkIds) if (markId !== decision.markId) return true;
+    return false;
   }
 
   private writtenByDecisionId(value: unknown): string | null {
@@ -614,7 +639,7 @@ export class AnswerReadingConsolidationService {
     if (decision.outcome === 'auto_blank') {
       return {
         itemId: decision.itemId,
-        value: this.readingValue(null, null, decision.id),
+        value: this.readingValue(null, null, decision),
         isCorrect: false,
         rawScore: 0,
         scoredBy: 'auto',
@@ -628,7 +653,7 @@ export class AnswerReadingConsolidationService {
     if (!scored) return null;
     return {
       itemId: decision.itemId,
-      value: this.readingValue(scored.answer, decision.value.canonical, decision.id),
+      value: this.readingValue(scored.answer, decision.value.canonical, decision),
       isCorrect: scored.isCorrect,
       rawScore: scored.rawScore,
       scoredBy: 'ai',
@@ -680,9 +705,9 @@ export class AnswerReadingConsolidationService {
   private readingValue(
     answer: unknown,
     canonical: string | null,
-    decisionId: string,
+    decision: AnswerReadingDecision,
   ): Record<string, unknown> {
-    return { answer, reading: { canonical, decisionId } };
+    return { answer, reading: { canonical, decisionId: decision.id, markId: decision.markId } };
   }
 
   private automaticWrite(
@@ -709,7 +734,7 @@ export class AnswerReadingConsolidationService {
       decisionId: decision.id,
       responseId: target.id,
       assessmentId: target.assessmentId,
-      value: { ...PENDING_READING_VALUE },
+      value: { ...PENDING_READING_VALUE, reading: { markId: decision.markId } },
       isCorrect: null,
       rawScore: null,
       scoredBy: 'human',
@@ -744,7 +769,7 @@ export class AnswerReadingConsolidationService {
       const unanswered = UNANSWERED_RESOLUTIONS[resolution.kind];
       return {
         ...base,
-        value: { ...this.readingValue(null, null, decision.id), [unanswered.flag]: true },
+        value: { ...this.readingValue(null, null, decision), [unanswered.flag]: true },
         isCorrect: false,
         rawScore: 0,
         humanScore: {
@@ -759,7 +784,7 @@ export class AnswerReadingConsolidationService {
       if (!scored) return null;
       return {
         ...base,
-        value: this.readingValue(scored.answer, resolution.value.canonical, decision.id),
+        value: this.readingValue(scored.answer, resolution.value.canonical, decision),
         isCorrect: scored.isCorrect,
         rawScore: scored.rawScore,
         humanScore: this.humanScoreOf(scored.rawScore, reviewerId, resolution.reason),
@@ -774,7 +799,7 @@ export class AnswerReadingConsolidationService {
         ? toScoringInput(decision.value)
         : null;
     const levelCode = resolution.kind === 'rubric' ? resolution.levelCode : undefined;
-    const value = this.readingValue(answer, decision.canonical, decision.id);
+    const value = this.readingValue(answer, decision.canonical, decision);
     return {
       ...base,
       value: levelCode === undefined ? value : { ...value, rubricLevel: levelCode },
@@ -864,20 +889,65 @@ export class AnswerReadingConsolidationService {
       orgId,
       responseRows.map((row) => this.writtenByDecisionId(row.value)),
     );
+    const ownerMarkByResponse = new Map<string, string | null>();
+    const writerMarkByResponse = new Map<string, string | null>();
+    for (const row of responseRows) {
+      const writerId = this.writtenByDecisionId(row.value);
+      const writerMarkId = writerId === null ? null : (writerMarks.get(writerId) ?? null);
+      writerMarkByResponse.set(row.id, writerMarkId);
+      ownerMarkByResponse.set(row.id, this.claimedMarkId(row.value) ?? writerMarkId);
+    }
+    const linkedMarks = await this.linkedMarkIdsByResponse(
+      tx,
+      orgId,
+      responseRows.filter((row) => ownerMarkByResponse.get(row.id) === null).map((row) => row.id),
+    );
     const targets = new Map<string, TargetResponse>();
     for (const [decisionId, responseId] of responseIdByDecision) {
       const row = responseById.get(responseId);
       if (!row) continue;
-      const writerId = this.writtenByDecisionId(row.value);
       targets.set(decisionId, {
         id: row.id,
         assessmentId: row.assessmentId,
         hasHumanScore: row.humanScore !== null,
         isPending: row.finalScore === null,
-        writtenByMarkId: writerId === null ? null : (writerMarks.get(writerId) ?? null),
+        writtenByMarkId: writerMarkByResponse.get(row.id) ?? null,
+        ownerMarkId: ownerMarkByResponse.get(row.id) ?? null,
+        linkedMarkIds: linkedMarks.get(row.id) ?? new Set(),
       });
     }
     return targets;
+  }
+
+  private async linkedMarkIdsByResponse(
+    tx: Database,
+    orgId: string,
+    responseIds: readonly string[],
+  ): Promise<Map<string, Set<string>>> {
+    if (responseIds.length === 0) return new Map();
+    const rows = await tx
+      .select({
+        responseId: answerReadingDecisions.responseId,
+        markId: answerReadingDecisions.markId,
+      })
+      .from(answerReadingDecisions)
+      .where(
+        and(
+          eq(answerReadingDecisions.orgId, orgId),
+          inArray(answerReadingDecisions.responseId, [...responseIds]),
+        ),
+      );
+    const marksByResponse = new Map<string, Set<string>>();
+    for (const row of rows) {
+      if (row.responseId === null) continue;
+      let marks = marksByResponse.get(row.responseId);
+      if (!marks) {
+        marks = new Set();
+        marksByResponse.set(row.responseId, marks);
+      }
+      marks.add(row.markId);
+    }
+    return marksByResponse;
   }
 
   private async markIdsOfDecisions(
