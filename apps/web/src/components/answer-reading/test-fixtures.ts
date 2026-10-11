@@ -30,6 +30,7 @@ export function readingGroup(overrides: Partial<ReviewQueueGroup> = {}): ReviewQ
     itemId: ITEM_ID,
     printedNumber: '7',
     formatKind: 'fraction',
+    responseFormat: { kind: 'fraction', allowNegative: false, allowMixed: false },
     formatLabel: 'Fracción',
     mode: 'reading',
     canonical: '21/10',
@@ -83,6 +84,8 @@ export function summary(overrides: Partial<ReviewQueueSummary> = {}): ReviewQueu
     pendingAudit: 0,
     autoAccepted: 10,
     inProgress: 0,
+    reviewed: 0,
+    total: 13,
     byItem: [
       {
         itemId: ITEM_ID,

@@ -112,7 +112,9 @@ describe('WrittenAnswersReview', () => {
     });
 
     await waitFor(() =>
-      expect(postMock).toHaveBeenCalledWith(`/answer-reading/reviews/${REVIEW_A}/undo`, {}),
+      expect(postMock).toHaveBeenCalledWith('/answer-reading/reviews/undo', {
+        reviewIds: [REVIEW_A],
+      }),
     );
     await waitFor(() =>
       expect(screen.getByRole('status').textContent).toContain('Se deshizo: En blanco'),

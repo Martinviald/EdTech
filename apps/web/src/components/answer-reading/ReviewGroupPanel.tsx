@@ -119,7 +119,7 @@ export function ReviewGroupPanel({
   const [editParts, setEditParts] = useState<string[] | null>(null);
 
   const isReading = group.mode === 'reading';
-  const shape = useMemo(() => editShapeFor(group), [group]);
+  const shape = useMemo(() => editShapeFor(group.responseFormat), [group.responseFormat]);
   const options = useMemo(() => (isReading ? readingOptions(group) : []), [group, isReading]);
   const included = group.members.filter((member) => !excluded.has(member.decisionId));
   const focused = group.members[Math.min(focusedIndex, group.members.length - 1)];

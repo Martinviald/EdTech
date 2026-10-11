@@ -1,12 +1,14 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  ReviewMode,
-  ReviewQueuePage,
-  ReviewQueueSummary,
-  SubmitReviewDto,
-  SubmitReviewResult,
+import {
+  undoReviewsSchema,
+  type ReviewMode,
+  type ReviewQueuePage,
+  type ReviewQueueSummary,
+  type SubmitReviewDto,
+  type SubmitReviewResult,
+  type UndoReviewsDto,
 } from '@soe/types';
 import { apiClientGet, apiClientPost } from '@/lib/api-client';
 
@@ -44,15 +46,7 @@ export const writtenAnswersKeys = {
 
 export function hasWrittenAnswers(summary: ReviewQueueSummary | undefined): boolean {
   if (!summary) return false;
-  return (
-    summary.byItem.length > 0 ||
-    summary.pendingReading +
-      summary.pendingGrading +
-      summary.pendingAudit +
-      summary.autoAccepted +
-      summary.inProgress >
-      0
-  );
+  return summary.total > 0 || summary.inProgress > 0 || summary.byItem.length > 0;
 }
 
 export function pendingWrittenAnswers(summary: ReviewQueueSummary | undefined): number {
@@ -103,20 +97,17 @@ export function useSubmitReview(scope: WrittenAnswersScope) {
 }
 
 /**
- * Deshacer es por revisión (`POST /reviews/:id/undo`): una acción de grupo crea
- * una revisión por respuesta, así que se deshacen todas en orden.
+ * Deshace de una vez todas las revisiones de una acción de grupo
+ * (`POST /answer-reading/reviews/undo`). Una acción cuyas respuestas ya tenían
+ * corrección humana no creó revisiones: no hay nada que deshacer en la API.
  */
 export function useUndoReview(scope: WrittenAnswersScope) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (reviewIds: readonly string[]) => {
-      const results: SubmitReviewResult[] = [];
-      for (const reviewId of reviewIds) {
-        results.push(
-          await apiClientPost<SubmitReviewResult>(`/answer-reading/reviews/${reviewId}/undo`, {}),
-        );
-      }
-      return results;
+    mutationFn: async (reviewIds: readonly string[]): Promise<SubmitReviewResult | null> => {
+      if (reviewIds.length === 0) return null;
+      const dto: UndoReviewsDto = undoReviewsSchema.parse({ reviewIds });
+      return apiClientPost<SubmitReviewResult>('/answer-reading/reviews/undo', dto);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: writtenAnswersKeys.all(scope) }),
   });

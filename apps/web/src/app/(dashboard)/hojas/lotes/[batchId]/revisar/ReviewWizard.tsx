@@ -85,12 +85,8 @@ export function ReviewWizard({
   const showWritten = hasWrittenAnswers(writtenSummary);
   const writtenPending = pendingWrittenAnswers(writtenSummary);
   const writtenInProgress = writtenSummary?.inProgress ?? 0;
-  const writtenBaselineRef = useRef<number | null>(null);
-  if (writtenSummary && writtenBaselineRef.current === null) {
-    writtenBaselineRef.current = writtenPending;
-  }
-  const writtenTotal = Math.max(writtenBaselineRef.current ?? 0, writtenPending);
-  const writtenDone = writtenTotal - writtenPending;
+  const writtenDone = writtenSummary?.reviewed ?? 0;
+  const writtenTotal = writtenDone + writtenPending;
 
   const stepIds = visibleReviewStepIds(showWritten);
   const steps = reviewStepsFor(stepIds);

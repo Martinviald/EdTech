@@ -345,11 +345,12 @@ function SummaryStrip({ summary }: { summary: ReviewQueueSummary }) {
     { label: 'Por leer', value: summary.pendingReading },
     { label: 'Por corregir', value: summary.pendingGrading },
     { label: 'Auditoría', value: summary.pendingAudit },
+    { label: 'Revisadas', value: summary.reviewed },
     { label: 'Aceptadas solas', value: summary.autoAccepted },
     { label: 'En lectura', value: summary.inProgress },
   ];
   return (
-    <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+    <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
       {items.map((item) => (
         <div key={item.label} className="rounded-lg border p-3">
           <dt className="text-xs text-muted-foreground">{item.label}</dt>
@@ -405,8 +406,8 @@ function GroupList({
 export function WrittenAnswersSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        {Array.from({ length: 5 }, (_, i) => (
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {Array.from({ length: 6 }, (_, i) => (
           <Skeleton key={i} className="h-16 w-full" />
         ))}
       </div>

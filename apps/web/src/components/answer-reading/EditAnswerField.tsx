@@ -87,23 +87,36 @@ function EditInputs({
   setPart: (index: number, value: string) => void;
 }) {
   if (shape.kind === 'fraction') {
+    const offset = shape.mixed ? 1 : 0;
     return (
-      <div className="inline-flex flex-col items-center gap-1">
-        <Input
-          inputMode="numeric"
-          aria-label="Numerador"
-          className={NUMERIC_INPUT_CLASS}
-          value={parts[0] ?? ''}
-          onChange={(e) => setPart(0, e.target.value)}
-        />
-        <span aria-hidden className="h-0.5 w-24 rounded bg-foreground" />
-        <Input
-          inputMode="numeric"
-          aria-label="Denominador"
-          className={NUMERIC_INPUT_CLASS}
-          value={parts[1] ?? ''}
-          onChange={(e) => setPart(1, e.target.value)}
-        />
+      <div className="flex items-center gap-2">
+        {shape.mixed && (
+          <Input
+            inputMode="numeric"
+            aria-label="Parte entera (opcional)"
+            placeholder="Entero"
+            className={NUMERIC_INPUT_CLASS}
+            value={parts[0] ?? ''}
+            onChange={(e) => setPart(0, e.target.value)}
+          />
+        )}
+        <div className="inline-flex flex-col items-center gap-1">
+          <Input
+            inputMode="numeric"
+            aria-label="Numerador"
+            className={NUMERIC_INPUT_CLASS}
+            value={parts[offset] ?? ''}
+            onChange={(e) => setPart(offset, e.target.value)}
+          />
+          <span aria-hidden className="h-0.5 w-24 rounded bg-foreground" />
+          <Input
+            inputMode="numeric"
+            aria-label="Denominador"
+            className={NUMERIC_INPUT_CLASS}
+            value={parts[offset + 1] ?? ''}
+            onChange={(e) => setPart(offset + 1, e.target.value)}
+          />
+        </div>
       </div>
     );
   }
@@ -131,15 +144,17 @@ function EditInputs({
   if (shape.kind === 'multi_box') {
     return (
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {Array.from({ length: shape.boxes }, (_, index) => (
-          <Input
-            key={index}
-            aria-label={`Casilla ${index + 1}`}
-            placeholder={`Casilla ${index + 1}`}
-            className="h-11 font-mono"
-            value={parts[index] ?? ''}
-            onChange={(e) => setPart(index, e.target.value)}
-          />
+        {shape.boxes.map((box, index) => (
+          <label key={index} className="flex flex-col gap-1 text-xs text-muted-foreground">
+            <span>{box.label}</span>
+            <Input
+              aria-label={`Casilla ${box.label}`}
+              inputMode={box.kind === 'short_text' ? 'text' : 'decimal'}
+              className="h-11 font-mono"
+              value={parts[index] ?? ''}
+              onChange={(e) => setPart(index, e.target.value)}
+            />
+          </label>
         ))}
       </div>
     );

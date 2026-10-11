@@ -151,12 +151,39 @@ describe('ReviewGroupPanel en modo lectura', () => {
 
   it('edita un par con la forma ( ; )', () => {
     const { panel, onSubmit } = renderPanel({
-      group: readingGroup({ formatKind: 'ordered_tuple', displayValue: '(2;4)', readers: [] }),
+      group: readingGroup({
+        formatKind: 'ordered_tuple',
+        responseFormat: { kind: 'ordered_tuple', arity: 2, componentKind: 'integer' },
+        displayValue: '(2;4)',
+        readers: [],
+      }),
     });
     fireEvent.keyDown(panel, { key: 'e' });
     fireEvent.change(screen.getByLabelText('Componente 2 del par'), { target: { value: '-4' } });
     fireEvent.click(screen.getByRole('button', { name: /Guardar edición/ }));
     expect(submitted(onSubmit as jest.Mock).editedLiteral).toBe('(2;-4)');
+  });
+
+  it('edita una multicasilla con una caja por casilla del formato', () => {
+    const { panel, onSubmit } = renderPanel({
+      group: readingGroup({
+        formatKind: 'multi_box',
+        responseFormat: {
+          kind: 'multi_box',
+          boxes: [
+            { partId: 'x', label: 'x', kind: 'integer' },
+            { partId: 'y', label: 'y', kind: 'integer' },
+            { partId: 'z', label: 'z', kind: 'short_text' },
+          ],
+        },
+        displayValue: '1|2',
+        readers: [],
+      }),
+    });
+    fireEvent.keyDown(panel, { key: 'e' });
+    fireEvent.change(screen.getByLabelText('Casilla z'), { target: { value: 'par' } });
+    fireEvent.click(screen.getByRole('button', { name: /Guardar edición/ }));
+    expect(submitted(onSubmit as jest.Mock).editedLiteral).toBe('1|2|par');
   });
 });
 
