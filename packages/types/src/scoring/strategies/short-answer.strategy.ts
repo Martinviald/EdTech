@@ -7,7 +7,7 @@
 // Una respuesta INDECIDIBLE (trae más de un valor candidato, o admite dos lecturas
 // con resultados distintos) no se puntúa 0: se deja pendiente. Castigar una
 // ambigüedad de digitalización sería inventar un dato en contra del alumno.
-import { creditForAcceptedAnswer } from '../../utils/short-answer';
+import { comparisonForFormat, creditForAcceptedAnswer } from '../../utils/short-answer';
 import type { ShortAnswerContent } from '../../schemas/item-content.schema';
 import type { ScoringInput, ScoringOutput, ScoringStrategy } from '../scoring-strategy';
 import { asTrimmedString } from './scoring.helpers';
@@ -23,7 +23,7 @@ export const shortAnswerStrategy: ScoringStrategy = {
 
     const config = input.item.scoringConfig;
     const result = creditForAcceptedAnswer(answer, content.acceptedAnswers ?? [], {
-      comparison: content.comparison,
+      comparison: content.comparison ?? comparisonForFormat(content.responseFormat?.kind),
       unit: content.unit,
       caseSensitive: content.caseSensitive,
       formatKind: content.responseFormat?.kind,

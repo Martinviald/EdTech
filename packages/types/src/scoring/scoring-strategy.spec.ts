@@ -648,6 +648,21 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
       expect(out.isCorrect).toBe(false);
     });
 
+    it('un formato de secuencia declarado fija la comparación por secuencia', () => {
+      const out = getScoringStrategy('short_answer').score(
+        input(
+          'short_answer',
+          {
+            prompt: '¿Orden?',
+            acceptedAnswers: ['3-1-4-2'],
+            responseFormat: { kind: 'sequence', length: 4 },
+          } as unknown as ItemContent,
+          '3; 1; 4; 2',
+        ),
+      );
+      expect(out.isCorrect).toBe(true);
+    });
+
     it('un número ambiguo miles/decimal queda pendiente', () => {
       const out = getScoringStrategy('short_answer').score(
         input(

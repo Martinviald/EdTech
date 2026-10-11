@@ -91,6 +91,17 @@ function looksLikeTuple(value: string): boolean {
   return EXPLICIT_TUPLE.test(value) && isParsed(parseOrderedTupleText(value));
 }
 
+/**
+ * Modo de comparación que impone un formato de respuesta declarado. Solo los
+ * formatos estructurados lo fijan: los numéricos ya se infieren de la clave.
+ */
+export function comparisonForFormat(
+  formatKind: ResponseFormatKind | undefined,
+): ShortAnswerComparison | undefined {
+  if (formatKind === 'sequence' || formatKind === 'ordered_tuple') return formatKind;
+  return undefined;
+}
+
 /** Deriva el modo de comparación cuando el ítem no lo declara. */
 export function inferComparisonMode(
   accepted: readonly string[],
