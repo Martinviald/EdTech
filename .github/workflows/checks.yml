@@ -128,6 +128,31 @@ jobs:
       - name: Tests
         run: pnpm --filter @soe/decisions test
 
+  answer-reading:
+    name: Answer reading (typecheck · tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build workspace deps
+        run: pnpm --filter @soe/types build
+
+      - name: Typecheck
+        run: pnpm --filter @soe/answer-reading typecheck
+
+      # Tests puros: no llaman a proveedores de IA ni a la BDD.
+      - name: Tests
+        run: pnpm --filter @soe/answer-reading test
+
   api:
     name: API (typecheck · lint · tests)
     runs-on: ubuntu-latest
