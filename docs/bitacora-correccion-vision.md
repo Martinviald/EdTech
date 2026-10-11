@@ -68,3 +68,23 @@ Semánticas fijadas para todos los subagentes:
   `DEFAULT_ORG_ANSWER_READING_SETTINGS` (D3, D7).
 - El campo `response` del `LayoutSpec` (`omrFieldResponseSchema`) se conecta a `omrFieldSchema` en
   F5b.
+
+## 2026-10-11 · Cierre de la ola A
+
+- CI de la PR #296 verde: 6/6 checks, `mergeStateStatus: CLEAN`.
+
+## 2026-10-11 · Ola B · tanda 1 (F2 núcleo, F3 capa LLM y catálogo, F6 modelo de datos)
+
+- Worktrees `wt-cv-f2`, `wt-cv-f3`, `wt-cv-f6` desde `feat/correccion-vision` @ `68913424`.
+- El `.env` (ignorado por git) se copia a mano a los worktrees que hacen llamadas reales (F3).
+
+**Decisión F2-1 — Dónde viven los parsers canónicos.** El diseño (§5.5) decía que
+`matchesAcceptedAnswer` reutiliza "los parsers de `@soe/answer-reading`". Pero `@soe/answer-reading`
+depende de `@soe/types`, así que `@soe/types` no puede importarlos sin crear un ciclo. Decisión:
+los parsers a estructura canónica viven en `packages/types/src/utils/answer-canonical.ts` (puros) y
+el paquete nuevo los importa. Motivo: es la única ubicación sin ciclo y la corrección por CSV y la
+lectura por visión comparten exactamente el mismo código.
+
+**Decisión F3-1 — Catálogo de modelos.** Tabla global `llm_models` sin `org_id` ni RLS (no tiene
+datos de colegios); escribe solo `platform_admin` vía API. Los precios en código quedan solo como
+fallback para modelos que no estén en la tabla (costos históricos).
