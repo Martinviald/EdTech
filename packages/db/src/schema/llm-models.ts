@@ -30,6 +30,7 @@ export const llmModels = pgTable(
     supportsImages: boolean('supports_images').default(false).notNull(),
     supportsStructuredOutput: boolean('supports_structured_output').default(false).notNull(),
     supportsBatch: boolean('supports_batch').default(false).notNull(),
+    supportsSamplingParams: boolean('supports_sampling_params').default(true).notNull(),
     inputUsdPerMtok: decimal('input_usd_per_mtok', { precision: 12, scale: 6 }).notNull(),
     outputUsdPerMtok: decimal('output_usd_per_mtok', { precision: 12, scale: 6 }).notNull(),
     cachedInputUsdPerMtok: decimal('cached_input_usd_per_mtok', { precision: 12, scale: 6 }),

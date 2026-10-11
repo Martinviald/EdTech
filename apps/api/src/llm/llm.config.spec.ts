@@ -3,15 +3,22 @@ import { LlmConfigService } from './llm.config';
 import type { LlmModelsService } from './llm-models.service';
 import type { Database } from '../database/database.types';
 
-const CATALOG_MAX_TOKENS = new Map([
-  ['anthropic:claude-sonnet-4-6', 16384],
-  ['gemini:gemini-2.5-pro', 32768],
-  ['gemini:gemini-2.5-flash', 8192],
+interface CatalogEntry {
+  maxOutputTokens: number;
+  supportsSamplingParams: boolean;
+}
+
+const CATALOG = new Map<string, CatalogEntry>([
+  ['anthropic:claude-sonnet-4-6', { maxOutputTokens: 16384, supportsSamplingParams: true }],
+  ['anthropic:claude-haiku-5-5', { maxOutputTokens: 8192, supportsSamplingParams: false }],
+  ['gemini:gemini-2.5-pro', { maxOutputTokens: 32768, supportsSamplingParams: true }],
+  ['gemini:gemini-2.5-flash', { maxOutputTokens: 8192, supportsSamplingParams: true }],
+  ['openai:gpt-5.4-mini', { maxOutputTokens: 16384, supportsSamplingParams: false }],
 ]);
 
 const models = {
-  resolveMaxTokens: (provider: string, model: string) =>
-    Promise.resolve(CATALOG_MAX_TOKENS.get(`${provider}:${model}`) ?? 4096),
+  findModel: (provider: string, model: string) =>
+    Promise.resolve(CATALOG.get(`${provider}:${model}`)),
 } as unknown as LlmModelsService;
 
 function makeService(db: Database): LlmConfigService {
@@ -36,7 +43,24 @@ describe('LlmConfigService.resolve', () => {
     expect(cfg.provider).toBe('anthropic');
     expect(cfg.model).toBe('claude-sonnet-4-6');
     expect(cfg.maxTokens).toBe(16384);
+    expect(cfg.temperature).toBe(0);
+  });
+
+  it('omite la temperatura cuando el modelo del catálogo no acepta parámetros de muestreo', async () => {
+    const db = makeDb([{ provider: 'anthropic', model: 'claude-haiku-5-5', orgId: null }]);
+    const cfg = await makeService(db).resolve(null, 'answer_transcription');
+
+    expect(cfg.model).toBe('claude-haiku-5-5');
     expect(cfg).not.toHaveProperty('temperature');
+  });
+
+  it('envía la temperatura por defecto si el modelo no está en el catálogo', async () => {
+    const cfg = await makeService(makeDb([])).forChoice({
+      provider: 'anthropic',
+      model: 'claude-sin-catalogo',
+    });
+
+    expect(cfg.temperature).toBe(0);
   });
 
   it('conserva temperatura 0 para Gemini', async () => {
@@ -67,7 +91,12 @@ describe('LlmConfigService.resolve', () => {
       model: 'claude-sonnet-4-6',
     });
 
-    expect(cfg).toEqual({ provider: 'anthropic', model: 'claude-sonnet-4-6', maxTokens: 16384 });
+    expect(cfg).toEqual({
+      provider: 'anthropic',
+      model: 'claude-sonnet-4-6',
+      maxTokens: 16384,
+      temperature: 0,
+    });
   });
 
   it('usa el tope de respaldo cuando el modelo no está en el catálogo', async () => {

@@ -100,6 +100,7 @@ export class LlmModelsService implements OnModuleInit {
           supportsImages: dto.supportsImages,
           supportsStructuredOutput: dto.supportsStructuredOutput,
           supportsBatch: dto.supportsBatch,
+          supportsSamplingParams: dto.supportsSamplingParams,
           inputUsdPerMtok: this.toDecimal(dto.inputUsdPerMtok),
           outputUsdPerMtok: this.toDecimal(dto.outputUsdPerMtok),
           cachedInputUsdPerMtok: this.toNullableDecimal(dto.cachedInputUsdPerMtok),
@@ -140,6 +141,9 @@ export class LlmModelsService implements OnModuleInit {
       values.supportsStructuredOutput = dto.supportsStructuredOutput;
     }
     if (dto.supportsBatch !== undefined) values.supportsBatch = dto.supportsBatch;
+    if (dto.supportsSamplingParams !== undefined) {
+      values.supportsSamplingParams = dto.supportsSamplingParams;
+    }
     if (dto.inputUsdPerMtok !== undefined) {
       values.inputUsdPerMtok = this.toDecimal(dto.inputUsdPerMtok);
     }
@@ -226,6 +230,7 @@ export class LlmModelsService implements OnModuleInit {
       supportsImages: row.supportsImages,
       supportsStructuredOutput: row.supportsStructuredOutput,
       supportsBatch: row.supportsBatch,
+      supportsSamplingParams: row.supportsSamplingParams,
       inputUsdPerMtok: Number(row.inputUsdPerMtok),
       outputUsdPerMtok: Number(row.outputUsdPerMtok),
       cachedInputUsdPerMtok:

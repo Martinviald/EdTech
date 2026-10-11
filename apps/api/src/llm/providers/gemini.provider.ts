@@ -5,6 +5,7 @@ import type {
   LlmAgentEvent,
   LlmAgentRequest,
   LlmAgentStopReason,
+  LlmCompletionOptions,
   LlmCompletionRequest,
   LlmCompletionResult,
   LlmMediaResolution,
@@ -250,7 +251,7 @@ export class GeminiProvider implements LlmProvider {
     return {
       systemInstruction: request.system,
       maxOutputTokens: request.options.maxTokens,
-      temperature: request.options.temperature,
+      ...this.samplingParams(request.options),
       responseMimeType: 'application/json',
       ...(thinking ? { thinkingConfig: thinking } : {}),
     };
@@ -333,6 +334,10 @@ export class GeminiProvider implements LlmProvider {
       usage: this.toStructuredUsage(response.usageMetadata),
       providerRequestId: response.responseId ?? null,
     };
+  }
+
+  private samplingParams(options: LlmCompletionOptions): { temperature?: number } {
+    return options.temperature !== undefined ? { temperature: options.temperature } : {};
   }
 
   private structuredConfig(request: LlmStructuredRequest): Record<string, unknown> {
@@ -502,7 +507,7 @@ export class GeminiProvider implements LlmProvider {
         systemInstruction: request.system,
         tools: functionDeclarations.length > 0 ? [{ functionDeclarations }] : undefined,
         maxOutputTokens: request.options.maxTokens,
-        temperature: request.options.temperature,
+        ...this.samplingParams(request.options),
       },
     });
 

@@ -14,6 +14,7 @@ function makeRow(overrides: Partial<LlmModelRow> = {}): LlmModelRow {
     supportsImages: true,
     supportsStructuredOutput: true,
     supportsBatch: true,
+    supportsSamplingParams: true,
     inputUsdPerMtok: '0.100000',
     outputUsdPerMtok: '0.500000',
     cachedInputUsdPerMtok: null,
@@ -159,6 +160,19 @@ describe('LlmModelsService', () => {
     });
   });
 
+  it('expone y edita si el modelo acepta parámetros de muestreo', async () => {
+    const { db, set } = makeDb([makeRow({ supportsSamplingParams: false })]);
+    const service = new LlmModelsService(db);
+
+    await expect(service.findModel('anthropic', 'claude-haiku-5-5')).resolves.toMatchObject({
+      supportsSamplingParams: false,
+    });
+    await service.update('11111111-1111-4111-8111-111111111111', {
+      supportsSamplingParams: true,
+    });
+    expect(set.mock.calls[0]?.[0]).toMatchObject({ supportsSamplingParams: true });
+  });
+
   it('publica las tarifas del catálogo para la estimación de costo', async () => {
     await new LlmModelsService(makeDb([makeRow({ modelId: 'modelo-solo-bdd' })]).db).onModuleInit();
 
@@ -180,6 +194,7 @@ describe('LlmModelsService', () => {
       supportsImages: true,
       supportsStructuredOutput: true,
       supportsBatch: true,
+      supportsSamplingParams: true,
       inputUsdPerMtok: 0.75,
       outputUsdPerMtok: 3.75,
       cachedInputUsdPerMtok: null,
@@ -210,6 +225,7 @@ describe('LlmModelsService', () => {
         supportsImages: true,
         supportsStructuredOutput: true,
         supportsBatch: true,
+        supportsSamplingParams: false,
         inputUsdPerMtok: 0.1,
         outputUsdPerMtok: 0.5,
         cachedInputUsdPerMtok: null,

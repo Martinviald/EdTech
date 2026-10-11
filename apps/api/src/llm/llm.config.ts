@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { llmSettings } from '@soe/db';
-import { LLM_FEATURE_DEFAULTS, type LlmFeature, type LlmModelChoice } from '@soe/types';
+import {
+  LLM_FALLBACK_MAX_TOKENS,
+  LLM_FEATURE_DEFAULTS,
+  type LlmFeature,
+  type LlmModel,
+  type LlmModelChoice,
+} from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { LlmModelsService } from './llm-models.service';
 import { ACTIVE_LLM_PROVIDER, LLM_PROVIDER_DEFAULTS } from './llm.constants';
@@ -36,12 +42,18 @@ export class LlmConfigService {
   }
 
   async forChoice(choice: LlmModelChoice): Promise<LlmRuntimeConfig> {
+    const model = await this.models.findModel(choice.provider, choice.model);
+    return this.toRuntimeConfig(choice, model);
+  }
+
+  private toRuntimeConfig(choice: LlmModelChoice, model: LlmModel | undefined): LlmRuntimeConfig {
     const { temperature } = LLM_PROVIDER_DEFAULTS[choice.provider];
+    const sendsTemperature = temperature !== undefined && (model?.supportsSamplingParams ?? true);
     return {
       provider: choice.provider,
       model: choice.model,
-      maxTokens: await this.models.resolveMaxTokens(choice.provider, choice.model),
-      ...(temperature !== undefined ? { temperature } : {}),
+      maxTokens: model?.maxOutputTokens ?? LLM_FALLBACK_MAX_TOKENS,
+      ...(sendsTemperature ? { temperature } : {}),
     };
   }
 

@@ -258,6 +258,29 @@ describe('GeminiProvider.completeWithUsage', () => {
 
     expect(result.usage).toEqual({ inputTokens: 100, outputTokens: 50 });
   });
+
+  it('envía la temperatura sólo cuando la solicitud la define', async () => {
+    const provider = new GeminiProvider();
+    const fake = makeFakeClient([{ candidates: [{ content: { parts: [{ text: '{}' }] } }] }]);
+    (provider as unknown as { client: unknown }).client = fake;
+
+    await provider.completeWithUsage({
+      system: 's',
+      prompt: 'p',
+      options: { model: 'gemini-3.5-flash', maxTokens: 1024 },
+    });
+    await provider.completeWithUsage({
+      system: 's',
+      prompt: 'p',
+      options: { model: 'gemini-3.5-flash', maxTokens: 1024, temperature: 0 },
+    });
+
+    const calls = fake.models.generateContentStream.mock.calls as unknown as Array<
+      [{ config: Record<string, unknown> }]
+    >;
+    expect(calls[0]?.[0].config).not.toHaveProperty('temperature');
+    expect(calls[1]?.[0].config).toMatchObject({ temperature: 0 });
+  });
 });
 
 interface FakeStructuredResponse {
