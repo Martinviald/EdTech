@@ -252,3 +252,28 @@ recortes (pisa el `ai_score` de las respuestas cortas, paga doble e ignora `enab
 `allowExternalVision`). Robustez: el job en memoria pierde la cola si la API se reinicia (sin 0,
 pero sin decisión); el costo de una llamada que choca en el único de `answer_readings` no se
 registra.
+
+### F8-API integrada (`998af6fe`, `ce7c0757` → rama)
+
+- Controller con las 5 rutas del contrato (`SHEET_REVIEW_ROLES`), servicios de cola y revisiones.
+- **Revisión antes de confirmar:** cada revisión guarda su `resulting_value`; al confirmar, después
+  de vincular respuestas, `applyRecordedReviews` reaplica la última revisión vigente. Un solo camino
+  para la aplicación inmediata y la diferida.
+- **`human_score` ajeno:** si la respuesta tiene un `human_score` que no escribió esta decisión, no
+  se pisa y se informa en `skippedHumanScored`.
+- `undo` crea filas nuevas (`superseded_by_id`), marca `deleted_at` en sus muestras del dataset y
+  devuelve la respuesta a pendiente o a la corrección automática; nunca a 0.
+- Dataset: todas las revisiones de modo lectura; de modo corrección solo `mark_correct` con
+  `unparsed_format` (`needs_normalizer_case`). Reparto 70/15/15 fijo por hash.
+- Riesgos que pasan a `wip/cv-f7fix`: revisión huérfana al reprocesar una decisión revisada;
+  `inProgress` eterno para recortes que el pipeline saltó.
+
+### Ola D en curso
+
+- `wip/cv-f7fix`: bloqueantes B1–B3 de la revisión de F7 + lectura tardía en otra hoja + revisión
+  huérfana + `inProgress` eterno + costo perdido en choque + cola en memoria perdida al reiniciar.
+- `wip/cv-f11a`: transcripción de desarrollo y `RubricGradingService`; se le agregó el arreglo de
+  `DevelopmentGradingService` (solo ítems de rúbrica, respeta `enabled`/`allowExternalVision`, nunca
+  pisa un `ai_score` con `decisionId`).
+- `wip/cv-f10b`: layout de `word_list`/`short_text`/`multi_box`, burbujas de pareados, secuencias y
+  puntaje docente, sin tocar `apps/api/src/answer-reading/`.
