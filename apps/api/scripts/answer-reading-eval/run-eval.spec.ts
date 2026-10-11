@@ -1,6 +1,7 @@
 import { copyFile, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { inflateSync } from 'node:zlib';
 import { DEFAULT_CONSENSUS_POLICY } from '@soe/types';
 import { FIXTURES_DIR, FIXTURES_MANIFEST, renderAnswerBox } from './generar-fixtures';
 import {
@@ -14,6 +15,21 @@ import {
 } from './run-eval';
 
 const DEFAULT_ROUTE = join(__dirname, 'routes', 'default.json');
+
+function decodedPng(png: Buffer): { header: string; pixels: Buffer } {
+  let offset = 8;
+  let header = '';
+  const data: Buffer[] = [];
+  while (offset < png.length) {
+    const length = png.readUInt32BE(offset);
+    const type = png.toString('ascii', offset + 4, offset + 8);
+    const body = png.subarray(offset + 8, offset + 8 + length);
+    if (type === 'IHDR') header = body.toString('hex');
+    if (type === 'IDAT') data.push(body);
+    offset += length + 12;
+  }
+  return { header, pixels: inflateSync(Buffer.concat(data)) };
+}
 
 describe('arnés answer-reading:eval', () => {
   let outDir: string;
@@ -57,7 +73,7 @@ describe('arnés answer-reading:eval', () => {
     expect(onDisk).toEqual(FIXTURES_MANIFEST);
     for (const sample of FIXTURES_MANIFEST.samples) {
       const bytes = await readFile(join(FIXTURES_DIR, sample.image));
-      expect(bytes.equals(renderAnswerBox(sample.label.literal))).toBe(true);
+      expect(decodedPng(bytes)).toEqual(decodedPng(renderAnswerBox(sample.label.literal)));
     }
     const dataset = await loadDataset(FIXTURES_DIR);
     expect(dataset.inputs.every((input) => input.image?.mimeType === 'image/png')).toBe(true);
