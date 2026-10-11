@@ -11,3 +11,4 @@ export * from './consensus/evaluate-consensus';
 export * from './routes/resolve-route';
 export * from './transcriber';
 export * from './fake/fake-transcriber';
+export * from './eval';
