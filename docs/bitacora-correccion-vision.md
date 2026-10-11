@@ -10,6 +10,7 @@ costo de IA y estado de la PR.
 | ---------- | ---- | --------------------------------------------- | ----------- | --------- |
 | 2026-10-11 | —    | Experimentos previos al plan (fuera del tope) | 0,35        | 0,00      |
 | 2026-10-11 | F3   | Prueba de humo de salida estructurada (2 llamadas) | 0,0005 | 0,0005 |
+| 2026-10-11 | F9   | Línea base del arnés y 2 corridas de investigación | 0,1180 | 0,1185 |
 
 Tope del plan: US$5,00.
 
@@ -204,3 +205,23 @@ deshabilitados que dejan de usarse en ejecución.
 - CI: el job de API construye `@soe/answer-reading`; el Dockerfile ya lo incluía.
 - Riesgos anotados: dos lotes con la misma imagen en paralelo pueden chocar en el único de
   `answer_readings` (queda en revisión); un reproceso suma de nuevo `crops_total`.
+
+### F9 integrada (`e33ea625`, `49036547` → rama, + `e06618f2`, `245f227c`, `585fa68f`)
+
+- Comando `answer-reading:eval` con el mismo código que producción (`packages/answer-reading/src/eval/`
+  + `apps/api/scripts/answer-reading-eval.ts`); `--dry-run` con fixtures sintéticos en el repo; el
+  dataset de los 23 recortes queda fuera del repo con su `manifest.json`.
+- **Línea base real** (ruta por defecto, 17 de 23 recortes; las 6 expresiones algebraicas quedaron
+  fuera porque se corrió antes de F10a): precisión de lo autoaceptado 100 % (3/3), autoaceptación
+  17,6 %, acuerdo entre lectores 53 % y 100 % de exactitud cuando coinciden, sobrecorrección 0 %,
+  US$0,0013 por recorte. Haiku 64,7 % y Gemini 73,3 % (2 timeouts por un corte de red).
+- **Decisión C-1 — la ruta del arnés y la de producción deben ser idénticas.** El arnés usaba
+  `hints: format` y la ruta sembrada `hints: none`. Se alinea a `none`: además, sin la pista Haiku
+  subió de 70,6 % a 79,4 % en la corrida de investigación (señal con 17 muestras, no prueba).
+- **Decisión C-2 — `minConfidence` se mantiene en 0,85.** Explica la autoaceptación baja (el prompt
+  v2 pide confianza ≤ 0,7 cuando hay una alternativa plausible). Opciones: bajarla a ~0,6 para
+  acercar la autoaceptación al acuerdo entre lectores (53 %), o mantenerla. Decisión: mantenerla
+  hasta calibrar con hojas reales y la auditoría muestral, porque la meta es la precisión de lo
+  autoaceptado (≥ 99,5 %) y 17 fotos de un adulto no alcanzan para relajar un umbral.
+- **Aprendizaje C-3.** Hice un commit antes de ver los tests en verde (`245f227c`) y quedó un test
+  rojo que corregí en `585fa68f`. Regla para el orquestador: leer la salida antes de commitear.
