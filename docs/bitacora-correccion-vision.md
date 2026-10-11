@@ -9,6 +9,7 @@ costo de IA y estado de la PR.
 | Fecha      | Fase | Uso                                           | Costo (USD) | Acumulado |
 | ---------- | ---- | --------------------------------------------- | ----------- | --------- |
 | 2026-10-11 | —    | Experimentos previos al plan (fuera del tope) | 0,35        | 0,00      |
+| 2026-10-11 | F3   | Prueba de humo de salida estructurada (2 llamadas) | 0,0005 | 0,0005 |
 
 Tope del plan: US$5,00.
 
@@ -88,3 +89,28 @@ lectura por visión comparten exactamente el mismo código.
 **Decisión F3-1 — Catálogo de modelos.** Tabla global `llm_models` sin `org_id` ni RLS (no tiene
 datos de colegios); escribe solo `platform_admin` vía API. Los precios en código quedan solo como
 fallback para modelos que no estén en la tabla (costos históricos).
+
+### F6 integrada (`1f217ce0`, `7bd7e14f`, migración `0043_answer_reading`)
+
+- 6 tablas con RLS forzado (44 tablas con aislamiento en total). `answer_readings` es inmutable a
+  nivel de BDD (solo políticas SELECT e INSERT). `reading_routes` usa dos políticas (patrón
+  `test_tracks`): la API no puede escribir rutas globales; se siembran con el rol admin.
+- **Para F7:** `answer_reading_decisions.superseded_by_id` no tiene FK. Reemplazar una decisión =
+  generar el id nuevo en la app y, en una transacción, actualizar la vieja e insertar la nueva.
+- **Hallazgo fuera de alcance:** la política de `decision_settings` permite a cualquier org borrar
+  filas globales (mismo defecto que se evitó en `reading_routes`). No se cambia en esta PR; se
+  reporta en la descripción final.
+
+### F3 integrada (`d81eab99`…`440fab7d`, migración `0044_llm_models` con seed de 11 modelos)
+
+- `completeStructured` multimodal en Anthropic y Gemini; `@google/genai` 2.28.0.
+- **Semántica de `usage` (compartida):** `inputTokens` = toda la entrada (incluye caché);
+  `outputTokens` = toda la salida facturable (incluye razonamiento); `reasoningTokens` y
+  `cachedInputTokens` son subconjuntos. Anthropic reporta `reasoningTokens: 0`.
+- Si la salida no es JSON válido, `data` es `null` (no lanza): F7 valida con Zod y registra
+  `invalid_output`.
+- **Decisión F3-2 — versión del SDK de Gemini.** 2.28.0 se publicó 4 días antes; alternativa:
+  fijar 2.24.0 (más de dos semanas). Decisión: mantener 2.28.0 porque la prueba de humo real pasó
+  y es la que soporta `thinkingLevel`/`responseJsonSchema` sin trabas; se anota como riesgo.
+- Humo real: Haiku 5.5 leyó "2,5" (616 tokens de entrada, US$0,00007); Gemini 3.5 Flash-Lite leyó
+  "2,5" (1124 tokens, 1080 de imagen, US$0,00038).
