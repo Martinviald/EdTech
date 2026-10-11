@@ -73,7 +73,10 @@ describe('arnés answer-reading:eval', () => {
     expect(onDisk).toEqual(FIXTURES_MANIFEST);
     for (const sample of FIXTURES_MANIFEST.samples) {
       const bytes = await readFile(join(FIXTURES_DIR, sample.image));
-      expect(decodedPng(bytes)).toEqual(decodedPng(renderAnswerBox(sample.label.literal)));
+      const onDiskPng = decodedPng(bytes);
+      const generatedPng = decodedPng(renderAnswerBox(sample.label.literal));
+      expect(onDiskPng.header).toBe(generatedPng.header);
+      expect(onDiskPng.pixels.equals(generatedPng.pixels)).toBe(true);
     }
     const dataset = await loadDataset(FIXTURES_DIR);
     expect(dataset.inputs.every((input) => input.image?.mimeType === 'image/png')).toBe(true);
