@@ -1,5 +1,10 @@
 import { GeminiProvider } from './gemini.provider';
-import type { LlmAgentEvent, LlmAgentRequest, LlmCompletionRequest } from '../llm.types';
+import type {
+  LlmAgentEvent,
+  LlmAgentRequest,
+  LlmCompletionRequest,
+  LlmStructuredRequest,
+} from '../llm.types';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Fake del cliente @google/genai: scriptea `generateContentStream` con un async
@@ -17,7 +22,11 @@ interface FakeChunk {
       }>;
     };
   }>;
-  usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
+  };
 }
 
 function makeFakeClient(chunks: FakeChunk[]) {
@@ -227,5 +236,202 @@ describe('GeminiProvider.complete', () => {
     expect(cfg.responseMimeType).toBe('application/json');
     // Flash → thinking OFF (no truncar el JSON).
     expect(cfg.thinkingConfig).toEqual({ thinkingBudget: 0 });
+  });
+});
+
+describe('GeminiProvider.completeWithUsage', () => {
+  it('suma los tokens de razonamiento a la salida facturable', async () => {
+    const provider = new GeminiProvider();
+    const fake = makeFakeClient([
+      {
+        candidates: [{ finishReason: 'STOP', content: { parts: [{ text: '{}' }] } }],
+        usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 20, thoughtsTokenCount: 30 },
+      },
+    ]);
+    (provider as unknown as { client: unknown }).client = fake;
+
+    const result = await provider.completeWithUsage({
+      system: 's',
+      prompt: 'p',
+      options: { model: 'gemini-2.5-pro', maxTokens: 1024 },
+    });
+
+    expect(result.usage).toEqual({ inputTokens: 100, outputTokens: 50 });
+  });
+});
+
+interface FakeStructuredResponse {
+  responseId?: string;
+  promptFeedback?: { blockReason?: string };
+  candidates?: Array<{
+    finishReason?: string;
+    content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+  }>;
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
+    cachedContentTokenCount?: number;
+    promptTokensDetails?: Array<{ modality?: string; tokenCount?: number }>;
+  };
+}
+
+const STRUCTURED_SCHEMA = {
+  type: 'object',
+  properties: { literal: { type: 'string' }, confidence: { type: 'number' } },
+  required: ['literal', 'confidence'],
+};
+
+function makeStructuredProvider(response: FakeStructuredResponse) {
+  const provider = new GeminiProvider();
+  const generateContent = jest.fn((_req: Record<string, unknown>) => Promise.resolve(response));
+  (provider as unknown as { client: unknown }).client = { models: { generateContent } };
+  return { provider, generateContent };
+}
+
+function makeStructuredRequest(
+  overrides: Partial<LlmStructuredRequest['options']> = {},
+): LlmStructuredRequest {
+  return {
+    system: 'transcribe sin corregir',
+    prompt: 'lee la respuesta',
+    images: [{ mimeType: 'image/jpeg', data: 'QUJD' }],
+    jsonSchema: STRUCTURED_SCHEMA,
+    schemaName: 'transcription',
+    propertyOrder: ['literal', 'confidence'],
+    options: {
+      model: 'gemini-3.5-flash-lite',
+      maxTokens: 512,
+      reasoning: 'off',
+      timeoutMs: 15_000,
+      ...overrides,
+    },
+  };
+}
+
+const STRUCTURED_RESPONSE: FakeStructuredResponse = {
+  responseId: 'resp-1',
+  candidates: [
+    {
+      finishReason: 'STOP',
+      content: {
+        parts: [
+          { text: 'pensando…', thought: true },
+          { text: '{"literal":"2,5",' },
+          { text: '"confidence":0.9}' },
+        ],
+      },
+    },
+  ],
+  usageMetadata: {
+    promptTokenCount: 300,
+    candidatesTokenCount: 15,
+    thoughtsTokenCount: 5,
+    cachedContentTokenCount: 0,
+    promptTokensDetails: [
+      { modality: 'TEXT', tokenCount: 40 },
+      { modality: 'IMAGE', tokenCount: 260 },
+    ],
+  },
+};
+
+describe('GeminiProvider.completeStructured', () => {
+  it('arma la request con imagen antes del texto, JSON schema, resolución y thinking mínimo', async () => {
+    const { provider, generateContent } = makeStructuredProvider(STRUCTURED_RESPONSE);
+
+    await provider.completeStructured(makeStructuredRequest({ mediaResolution: 'high' }));
+
+    expect(generateContent.mock.calls[0]?.[0]).toEqual({
+      model: 'gemini-3.5-flash-lite',
+      contents: [
+        { inlineData: { mimeType: 'image/jpeg', data: 'QUJD' } },
+        { text: 'lee la respuesta' },
+      ],
+      config: {
+        systemInstruction: 'transcribe sin corregir',
+        maxOutputTokens: 512,
+        responseMimeType: 'application/json',
+        responseJsonSchema: STRUCTURED_SCHEMA,
+        httpOptions: { timeout: 15_000 },
+        mediaResolution: 'MEDIA_RESOLUTION_HIGH',
+        thinkingConfig: { thinkingLevel: 'MINIMAL' },
+      },
+    });
+  });
+
+  it.each([
+    ['gemini-3.5-flash-lite', 'medium', { thinkingLevel: 'MEDIUM' }],
+    ['gemini-3.1-pro', 'off', { thinkingLevel: 'LOW' }],
+    ['gemini-2.5-flash', 'off', { thinkingBudget: 0 }],
+    ['gemini-2.5-pro', 'off', { thinkingBudget: 128 }],
+    ['gemini-2.5-flash', 'low', { thinkingBudget: 1024 }],
+  ] as const)('traduce el razonamiento de %s (%s)', async (model, reasoning, thinkingConfig) => {
+    const { provider, generateContent } = makeStructuredProvider(STRUCTURED_RESPONSE);
+
+    await provider.completeStructured(makeStructuredRequest({ model, reasoning }));
+
+    const request = generateContent.mock.calls[0]?.[0] as { config: Record<string, unknown> };
+    expect(request.config.thinkingConfig).toEqual(thinkingConfig);
+  });
+
+  it('omite thinkingConfig y mediaResolution en modelos sin razonamiento configurable', async () => {
+    const { provider, generateContent } = makeStructuredProvider(STRUCTURED_RESPONSE);
+
+    await provider.completeStructured(makeStructuredRequest({ model: 'gemini-2.0-flash' }));
+
+    const request = generateContent.mock.calls[0]?.[0] as { config: Record<string, unknown> };
+    expect(request.config).not.toHaveProperty('thinkingConfig');
+    expect(request.config).not.toHaveProperty('mediaResolution');
+    expect(request.config).not.toHaveProperty('temperature');
+  });
+
+  it('parsea el texto sin las partes de pensamiento y reporta el uso con tokens de imagen', async () => {
+    const { provider } = makeStructuredProvider(STRUCTURED_RESPONSE);
+
+    const result = await provider.completeStructured(makeStructuredRequest());
+
+    expect(result).toEqual({
+      data: { literal: '2,5', confidence: 0.9 },
+      rawText: '{"literal":"2,5","confidence":0.9}',
+      model: 'gemini-3.5-flash-lite',
+      finishReason: 'stop',
+      usage: {
+        inputTokens: 300,
+        outputTokens: 20,
+        reasoningTokens: 5,
+        cachedInputTokens: 0,
+        imageTokens: 260,
+      },
+      providerRequestId: 'resp-1',
+    });
+  });
+
+  it.each([
+    [{ candidates: [{ finishReason: 'MAX_TOKENS' }] }, 'max_tokens'],
+    [{ candidates: [{ finishReason: 'SAFETY' }] }, 'safety'],
+    [{ promptFeedback: { blockReason: 'PROHIBITED_CONTENT' } }, 'safety'],
+    [{ candidates: [{ finishReason: 'RECITATION' }] }, 'other'],
+  ] as Array<[FakeStructuredResponse, string]>)(
+    'traduce el cierre %j a %s',
+    async (response, finishReason) => {
+      const { provider } = makeStructuredProvider(response);
+
+      const result = await provider.completeStructured(makeStructuredRequest());
+
+      expect(result.finishReason).toBe(finishReason);
+      expect(result.data).toBeNull();
+      expect(result.usage).toBeNull();
+    },
+  );
+
+  it('reporta imageTokens null si el proveedor no detalla modalidades', async () => {
+    const { provider } = makeStructuredProvider({
+      ...STRUCTURED_RESPONSE,
+      usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 2 },
+    });
+
+    const result = await provider.completeStructured(makeStructuredRequest());
+
+    expect(result.usage?.imageTokens).toBeNull();
   });
 });

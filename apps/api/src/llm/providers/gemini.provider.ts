@@ -7,10 +7,68 @@ import type {
   LlmAgentStopReason,
   LlmCompletionRequest,
   LlmCompletionResult,
+  LlmMediaResolution,
   LlmProvider,
   LlmProviderName,
+  LlmReasoningLevel,
+  LlmStructuredFinishReason,
+  LlmStructuredRequest,
+  LlmStructuredResult,
+  LlmStructuredUsage,
   LlmUsage,
 } from '../llm.types';
+
+type GeminiThinkingConfig = { thinkingBudget: number } | { thinkingLevel: string };
+
+interface GeminiUsageMetadata {
+  promptTokenCount?: number;
+  candidatesTokenCount?: number;
+  thoughtsTokenCount?: number;
+  cachedContentTokenCount?: number;
+  promptTokensDetails?: Array<{ modality?: string; tokenCount?: number }>;
+}
+
+interface GeminiStructuredResponse {
+  responseId?: string;
+  promptFeedback?: { blockReason?: string };
+  candidates?: Array<{
+    finishReason?: string;
+    content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+  }>;
+  usageMetadata?: GeminiUsageMetadata;
+}
+
+type GeminiStructuredClient = {
+  models: {
+    generateContent(req: {
+      model: string;
+      contents: GeminiPart[];
+      config: Record<string, unknown>;
+    }): Promise<GeminiStructuredResponse>;
+  };
+};
+
+const GEMINI_MEDIA_RESOLUTION: Record<LlmMediaResolution, string> = {
+  low: 'MEDIA_RESOLUTION_LOW',
+  medium: 'MEDIA_RESOLUTION_MEDIUM',
+  high: 'MEDIA_RESOLUTION_HIGH',
+};
+
+const GEMINI_THINKING_BUDGET: Record<Exclude<LlmReasoningLevel, 'off'>, number> = {
+  low: 1024,
+  medium: 8192,
+};
+
+const GEMINI_PRO_MIN_THINKING_BUDGET = 128;
+
+const GEMINI_SAFETY_FINISH_REASONS = new Set([
+  'SAFETY',
+  'PROHIBITED_CONTENT',
+  'BLOCKLIST',
+  'SPII',
+  'IMAGE_SAFETY',
+  'IMAGE_PROHIBITED_CONTENT',
+]);
 
 /**
  * Integración con la API de Google Gemini sobre `@google/genai`.
@@ -111,6 +169,7 @@ interface GeminiStreamChunk {
   usageMetadata?: {
     promptTokenCount?: number;
     candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
   };
 }
 
@@ -235,11 +294,114 @@ export class GeminiProvider implements LlmProvider {
       if (chunk.usageMetadata) {
         usage = {
           inputTokens: chunk.usageMetadata.promptTokenCount ?? 0,
-          outputTokens: chunk.usageMetadata.candidatesTokenCount ?? 0,
+          outputTokens:
+            (chunk.usageMetadata.candidatesTokenCount ?? 0) +
+            (chunk.usageMetadata.thoughtsTokenCount ?? 0),
         };
       }
     }
     return { text, usage };
+  }
+
+  async completeStructured(request: LlmStructuredRequest): Promise<LlmStructuredResult> {
+    if (!this.client) {
+      throw new Error('Gemini provider no está disponible');
+    }
+
+    const client = this.client as unknown as GeminiStructuredClient;
+    const response = await client.models.generateContent({
+      model: request.options.model,
+      contents: [
+        ...request.images.map((img) => ({
+          inlineData: { mimeType: img.mimeType, data: img.data },
+        })),
+        { text: request.prompt },
+      ],
+      config: this.structuredConfig(request),
+    });
+
+    const candidate = response.candidates?.[0];
+    const rawText = (candidate?.content?.parts ?? [])
+      .filter((part) => !part.thought && typeof part.text === 'string')
+      .map((part) => part.text)
+      .join('');
+    return {
+      data: this.parseStructuredText(rawText),
+      rawText,
+      model: request.options.model,
+      finishReason: this.toStructuredFinishReason(response),
+      usage: this.toStructuredUsage(response.usageMetadata),
+      providerRequestId: response.responseId ?? null,
+    };
+  }
+
+  private structuredConfig(request: LlmStructuredRequest): Record<string, unknown> {
+    const thinkingConfig = this.structuredThinkingConfig(
+      request.options.model,
+      request.options.reasoning,
+    );
+    return {
+      systemInstruction: request.system,
+      maxOutputTokens: request.options.maxTokens,
+      responseMimeType: 'application/json',
+      responseJsonSchema: request.jsonSchema,
+      httpOptions: { timeout: request.options.timeoutMs },
+      ...(request.options.mediaResolution
+        ? { mediaResolution: GEMINI_MEDIA_RESOLUTION[request.options.mediaResolution] }
+        : {}),
+      ...(thinkingConfig ? { thinkingConfig } : {}),
+    };
+  }
+
+  private structuredThinkingConfig(
+    model: string,
+    reasoning: LlmReasoningLevel,
+  ): GeminiThinkingConfig | undefined {
+    const isPro = /pro/i.test(model);
+    if (/^gemini-2\.5/i.test(model)) {
+      if (reasoning !== 'off') return { thinkingBudget: GEMINI_THINKING_BUDGET[reasoning] };
+      return { thinkingBudget: isPro ? GEMINI_PRO_MIN_THINKING_BUDGET : 0 };
+    }
+    if (/^gemini-[3-9]/i.test(model)) {
+      if (reasoning === 'off') return { thinkingLevel: isPro ? 'LOW' : 'MINIMAL' };
+      return { thinkingLevel: reasoning.toUpperCase() };
+    }
+    return undefined;
+  }
+
+  private parseStructuredText(rawText: string): unknown {
+    try {
+      return JSON.parse(rawText);
+    } catch {
+      return null;
+    }
+  }
+
+  private toStructuredFinishReason(response: GeminiStructuredResponse): LlmStructuredFinishReason {
+    if (response.promptFeedback?.blockReason) return 'safety';
+    const reason = response.candidates?.[0]?.finishReason;
+    if (reason === 'STOP') return 'stop';
+    if (reason === 'MAX_TOKENS') return 'max_tokens';
+    if (reason !== undefined && GEMINI_SAFETY_FINISH_REASONS.has(reason)) return 'safety';
+    return 'other';
+  }
+
+  private toStructuredUsage(metadata: GeminiUsageMetadata | undefined): LlmStructuredUsage | null {
+    if (!metadata) return null;
+    const reasoningTokens = metadata.thoughtsTokenCount ?? 0;
+    const imageDetails = (metadata.promptTokensDetails ?? []).filter(
+      (detail) => detail.modality === 'IMAGE',
+    );
+    return {
+      inputTokens: metadata.promptTokenCount ?? 0,
+      outputTokens: (metadata.candidatesTokenCount ?? 0) + reasoningTokens,
+      reasoningTokens,
+      cachedInputTokens: metadata.cachedContentTokenCount ?? 0,
+      imageTokens:
+        metadata.promptTokensDetails === undefined
+          ? null
+          : imageDetails.reduce((sum, detail) => sum + (detail.tokenCount ?? 0), 0),
+    };
   }
 
   /**

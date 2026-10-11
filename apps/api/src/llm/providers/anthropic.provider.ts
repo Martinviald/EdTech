@@ -10,6 +10,10 @@ import type {
   LlmCompletionResult,
   LlmProvider,
   LlmProviderName,
+  LlmStructuredFinishReason,
+  LlmStructuredRequest,
+  LlmStructuredResult,
+  LlmStructuredUsage,
 } from '../llm.types';
 
 // ── Tipado estructural mínimo de los eventos de streaming de la Messages API ──
@@ -29,9 +33,25 @@ interface AnthropicStreamEvent {
 }
 
 interface AnthropicMessageResponse {
+  id?: string;
   content: Array<{ type: string; text?: string }>;
-  usage?: { input_tokens?: number; output_tokens?: number };
+  stop_reason?: string | null;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    cache_read_input_tokens?: number | null;
+    cache_creation_input_tokens?: number | null;
+  };
 }
+
+type AnthropicStructuredClient = {
+  messages: {
+    create(
+      req: Record<string, unknown>,
+      options?: { timeout?: number },
+    ): Promise<AnthropicMessageResponse>;
+  };
+};
 
 /**
  * Integración con la API de Anthropic (Claude) sobre `@anthropic-ai/sdk`.
@@ -151,6 +171,92 @@ export class AnthropicProvider implements LlmProvider {
             outputTokens: response.usage.output_tokens ?? 0,
           }
         : null,
+    };
+  }
+
+  async completeStructured(request: LlmStructuredRequest): Promise<LlmStructuredResult> {
+    if (!this.client) {
+      throw new Error('Anthropic provider no está disponible');
+    }
+
+    const client = this.client as unknown as AnthropicStructuredClient;
+    const response = await client.messages.create(
+      {
+        model: request.options.model,
+        max_tokens: request.options.maxTokens,
+        system: request.system,
+        messages: [{ role: 'user', content: this.structuredContent(request) }],
+        ...this.reasoningParams(request),
+      },
+      { timeout: request.options.timeoutMs },
+    );
+
+    const rawText = response.content.find((b) => b.type === 'text')?.text ?? '';
+    return {
+      data: this.parseStructuredText(rawText),
+      rawText,
+      model: request.options.model,
+      finishReason: this.toStructuredFinishReason(response.stop_reason),
+      usage: this.toStructuredUsage(response.usage),
+      providerRequestId: response.id ?? null,
+    };
+  }
+
+  private structuredContent(request: LlmStructuredRequest): unknown[] {
+    return [
+      ...request.images.map((img) => ({
+        type: 'image',
+        source: { type: 'base64', media_type: img.mimeType, data: img.data },
+      })),
+      { type: 'text', text: request.prompt },
+    ];
+  }
+
+  private reasoningParams(request: LlmStructuredRequest): Record<string, unknown> {
+    const format = { type: 'json_schema', schema: request.jsonSchema };
+    if (request.options.reasoning === 'off') {
+      return { thinking: { type: 'disabled' }, output_config: { format } };
+    }
+    return {
+      thinking: { type: 'adaptive' },
+      output_config: { format, effort: request.options.reasoning },
+    };
+  }
+
+  private parseStructuredText(rawText: string): unknown {
+    try {
+      return JSON.parse(rawText);
+    } catch {
+      return null;
+    }
+  }
+
+  private toStructuredFinishReason(
+    stopReason: string | null | undefined,
+  ): LlmStructuredFinishReason {
+    switch (stopReason) {
+      case 'end_turn':
+      case 'stop_sequence':
+        return 'stop';
+      case 'max_tokens':
+        return 'max_tokens';
+      case 'refusal':
+        return 'refusal';
+      default:
+        return 'other';
+    }
+  }
+
+  private toStructuredUsage(usage: AnthropicMessageResponse['usage']): LlmStructuredUsage | null {
+    if (!usage) return null;
+    const cachedInputTokens = usage.cache_read_input_tokens ?? 0;
+    return {
+      inputTokens:
+        (usage.input_tokens ?? 0) + cachedInputTokens + (usage.cache_creation_input_tokens ?? 0),
+      outputTokens: usage.output_tokens ?? 0,
+      reasoningTokens: 0,
+      cachedInputTokens,
+      imageTokens: null,
     };
   }
 
