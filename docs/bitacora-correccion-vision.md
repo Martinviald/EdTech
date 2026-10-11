@@ -386,3 +386,37 @@ costo registrado, decisiones idempotentes).
 - Riesgos que quedan: la aprobación y su fila en `answer_reviews` van en transacciones separadas
   (si falla el insert queda el `human_score` sin historial); lógica duplicada con la cola de F8
   (alcance por lote, URLs de recortes).
+
+### F12 — revisión final (dos revisores independientes)
+
+**Backend y BD: sin bloqueantes.** 0042–0049 aplican limpio sobre `dev` y `drizzle-kit check` pasa;
+backfill de 0042 sin huérfanos; RLS probado como `soe_app` con dos orgs (0 filas sin contexto,
+inserts cruzados fallan, `answer_readings` inmutable, decisiones y revisiones no se borran, rutas
+globales de solo lectura); ningún dato del alumno al proveedor; `store: false` en OpenAI; la IA de
+rúbrica solo escribe `ai_score`.
+
+**Contratos, web y OMR: un bloqueante condicional.** Diferencial `dev` vs rama sobre 212.916
+combinaciones de `short_answer`: ninguna regresión de correcta a incorrecta salvo el caso artificial
+de `x=3` en modo secuencia contra `−3` (ahora correcto: es −3 ≠ 3); 84 pasan de correcta a revisión
+por la ambigüedad miles/decimal ya conocida (nunca a 0); 388 pasan de incorrecta a correcta (por
+ejemplo `(5,6)` acepta `5,6`, `2 1/2` acepta `2,5`, `−3` acepta `-3`). Modo lectura sin clave,
+corrección ciega, aprobación explícita, sin voseo. OMR: 282 tests en verde.
+
+**Corregido por el orquestador:**
+- **Bloqueante `gap_fill`:** el importador guarda `partialCredit: true` en todo `gap_fill` y la
+  estrategia nueva lo leía como pesos iguales; al recorregir, ítems todo-o-nada daban crédito
+  parcial. Ahora el crédito por casilla exige `componentCredit` explícito (D6), con pesos del mismo
+  largo que las casillas, e `isDichotomousItem` cuadra con la estrategia.
+- **M1:** un blanco se autoaceptaba sin mirar `autoAcceptOutcomes` (con una política "solo
+  correctas", dos blancos daban 0 automático). Ahora pasa por el mismo filtro; un blanco indecidible
+  va a revisión.
+
+**En `wip/cv-f12fix`:** lectura vieja escrita en una respuesta reasignada a otra hoja (M2), chequeo
+de `human_score` ajeno dentro de la transacción de escritura (M3), presupuesto mensual que sume la
+rúbrica y tope 0 con `orgConfig` inválido (M4), `allowedProviders` en el servicio viejo (M5),
+política de muestras sin DELETE (M6), comentarios nuevos en `apps/api/src/llm` (M7) y test de
+contrato del modo lectura.
+
+**Para el deploy (no se corrige en código):** el backfill de 0042 necesita el rol de migración con
+BYPASSRLS (`DATABASE_ADMIN_URL`); con un rol sin él aborta de forma segura. `llm_models` no tiene RLS
+(decisión F3-1): su protección es solo la API (`LLM_MODELS_ADMIN_ROLES`).
