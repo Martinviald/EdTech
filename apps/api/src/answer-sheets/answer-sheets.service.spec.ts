@@ -657,19 +657,24 @@ describe('AnswerSheetsService', () => {
       const renderSet = (key: string) =>
         dialect.sqlToQuery(configs[0].set[key] as Parameters<PgDialect['sqlToQuery']>[0]).sql;
 
-      for (const key of ['finalScore', 'scoredBy', 'scoredAt']) {
+      const columns: Record<string, string> = {
+        value: 'value',
+        isCorrect: 'is_correct',
+        rawScore: 'raw_score',
+        finalScore: 'final_score',
+        scoredBy: 'scored_by',
+        scoredAt: 'scored_at',
+      };
+      for (const [key, column] of Object.entries(columns)) {
         const rendered = renderSet(key);
-        expect(rendered).toContain('CASE WHEN excluded.final_score IS NULL AND');
-        expect(rendered).toContain('"final_score" IS NOT NULL');
+        expect(rendered).toContain('(excluded.final_score IS NULL AND');
+        expect(rendered).toContain('"final_score" IS NOT NULL)');
+        expect(rendered).toContain(`THEN "responses"."${column}" ELSE excluded.${column} END`);
       }
-      expect(renderSet('finalScore')).toContain('ELSE excluded.final_score');
-      expect(renderSet('scoredBy')).toContain('ELSE excluded.scored_by');
-      expect(renderSet('scoredAt')).toContain('ELSE excluded.scored_at');
-      expect(renderSet('value')).toContain('ELSE excluded.value');
       expect(renderSet('aiScore')).toContain('COALESCE(excluded.ai_score');
     });
 
-    it('el upsert no pisa una respuesta con human_score con una corrección de la IA', async () => {
+    it('el upsert no toca el puntaje ni la evidencia de una respuesta con human_score, venga de donde venga', async () => {
       const db = setupConfirmDb();
       const service = new AnswerSheetsService(db, store);
 
@@ -690,8 +695,11 @@ describe('AnswerSheetsService', () => {
       const renderSet = (key: string) =>
         dialect.sqlToQuery(configs[0].set[key] as Parameters<PgDialect['sqlToQuery']>[0]).sql;
       for (const key of ['value', 'isCorrect', 'rawScore', 'finalScore', 'scoredBy', 'scoredAt']) {
-        expect(renderSet(key)).toContain(`"human_score" IS NOT NULL AND excluded.scored_by = 'ai'`);
+        const rendered = renderSet(key);
+        expect(rendered).toContain('CASE WHEN "responses"."human_score" IS NOT NULL OR');
+        expect(rendered).not.toContain('excluded.scored_by =');
       }
+      expect(renderSet('aiScore')).toContain('COALESCE(excluded.ai_score');
     });
 
     it('puntúa MCQ por estrategia y NO contamina el % con un ítem open_ended pendiente', async () => {

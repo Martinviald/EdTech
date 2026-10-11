@@ -7,6 +7,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import {
   assessments,
   gradingScales,
@@ -549,24 +550,12 @@ export class AnswerSheetsService {
       }));
 
       // Batch insert con upsert (assessmentId, studentId, itemId).
-      const keepsExistingScore = sql`excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL`;
-      const keepsHumanScore = sql`${responses.humanScore} IS NOT NULL AND excluded.scored_by = 'ai'`;
       await tx
         .insert(responses)
         .values(responsesWithAssessment)
         .onConflictDoUpdate({
           target: [responses.assessmentId, responses.studentId, responses.itemId],
-          set: {
-            value: sql`CASE WHEN ${keepsHumanScore} THEN ${responses.value} ELSE excluded.value END`,
-            isCorrect: sql`CASE WHEN ${keepsHumanScore} THEN ${responses.isCorrect} ELSE excluded.is_correct END`,
-            rawScore: sql`CASE WHEN ${keepsHumanScore} THEN ${responses.rawScore} ELSE excluded.raw_score END`,
-            maxScore: sql`excluded.max_score`,
-            finalScore: sql`CASE WHEN ${keepsExistingScore} OR ${keepsHumanScore} THEN ${responses.finalScore} ELSE excluded.final_score END`,
-            scoredBy: sql`CASE WHEN ${keepsExistingScore} OR ${keepsHumanScore} THEN ${responses.scoredBy} ELSE excluded.scored_by END`,
-            scoredAt: sql`CASE WHEN ${keepsExistingScore} OR ${keepsHumanScore} THEN ${responses.scoredAt} ELSE excluded.scored_at END`,
-            aiScore: sql`COALESCE(excluded.ai_score, ${responses.aiScore})`,
-            updatedAt: now,
-          },
+          set: this.responseUpsertSet(now),
         });
 
       // Delete + reinsert de assessment_results / skill_results / read-model de
@@ -676,6 +665,23 @@ export class AnswerSheetsService {
   }
 
   // ---------- helpers ----------
+
+  private responseUpsertSet(now: Date) {
+    const keepsScore = sql`${responses.humanScore} IS NOT NULL OR (excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL)`;
+    const kept = (column: AnyPgColumn, incoming: string) =>
+      sql`CASE WHEN ${keepsScore} THEN ${column} ELSE ${sql.raw(`excluded.${incoming}`)} END`;
+    return {
+      value: kept(responses.value, 'value'),
+      isCorrect: kept(responses.isCorrect, 'is_correct'),
+      rawScore: kept(responses.rawScore, 'raw_score'),
+      maxScore: sql`excluded.max_score`,
+      finalScore: kept(responses.finalScore, 'final_score'),
+      scoredBy: kept(responses.scoredBy, 'scored_by'),
+      scoredAt: kept(responses.scoredAt, 'scored_at'),
+      aiScore: sql`COALESCE(excluded.ai_score, ${responses.aiScore})`,
+      updatedAt: now,
+    };
+  }
 
   private pendingResponseRow(
     studentId: string,
