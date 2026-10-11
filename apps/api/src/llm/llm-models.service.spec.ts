@@ -81,7 +81,35 @@ describe('LlmModelsService', () => {
           multimodal: true,
         },
       ],
+      openai: [],
     });
+  });
+
+  it('toma de la tabla los modelos, el tope de tokens y las tarifas de OpenAI', async () => {
+    const openAiRow = makeRow({
+      id: 'e',
+      provider: 'openai',
+      modelId: 'gpt-6-luna',
+      label: 'GPT-6 Luna',
+      maxOutputTokens: 32768,
+      cachedInputUsdPerMtok: '0.010000',
+    });
+    const service = new LlmModelsService(makeDb([openAiRow]).db);
+    await service.onModuleInit();
+
+    const byProvider = await service.listEnabledByProvider();
+
+    expect(byProvider.openai).toEqual([
+      { id: 'gpt-6-luna', label: 'GPT-6 Luna', maxTokens: 32768, multimodal: true },
+    ]);
+    await expect(service.resolveMaxTokens('openai', 'gpt-6-luna')).resolves.toBe(32768);
+    expect(
+      estimateLlmCostUsd('gpt-6-luna', {
+        inputTokens: 1_000_000,
+        outputTokens: 1_000_000,
+        cachedInputTokens: 500_000,
+      }),
+    ).toBe('0.555000');
   });
 
   it('listAll devuelve todo el catálogo paginado con precios numéricos', async () => {

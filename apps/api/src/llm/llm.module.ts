@@ -9,6 +9,7 @@ import { LlmSettingsController } from './llm-settings.controller';
 import { LlmSettingsService } from './llm-settings.service';
 import { AnthropicProvider } from './providers/anthropic.provider';
 import { GeminiProvider } from './providers/gemini.provider';
+import { OpenAiProvider } from './providers/openai.provider';
 
 /**
  * Módulo LLM provider-agnóstico.
@@ -25,10 +26,15 @@ import { GeminiProvider } from './providers/gemini.provider';
     LlmConfigService,
     AnthropicProvider,
     GeminiProvider,
+    OpenAiProvider,
     {
       provide: LLM_PROVIDERS,
-      useFactory: (anthropic: AnthropicProvider, gemini: GeminiProvider) => [anthropic, gemini],
-      inject: [AnthropicProvider, GeminiProvider],
+      useFactory: (
+        anthropic: AnthropicProvider,
+        gemini: GeminiProvider,
+        openai: OpenAiProvider,
+      ) => [anthropic, gemini, openai],
+      inject: [AnthropicProvider, GeminiProvider, OpenAiProvider],
     },
     LlmService,
     LlmAgentService,

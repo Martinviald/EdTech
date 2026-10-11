@@ -3,6 +3,7 @@ import { LLM_FEATURES } from '@soe/types';
 import { LlmSettingsService } from './llm-settings.service';
 import type { LlmModelsService } from './llm-models.service';
 import type { Database } from '../database/database.types';
+import type { LlmProvider } from './llm.types';
 
 interface FakeCatalogModel {
   provider: string;
@@ -24,6 +25,7 @@ function makeModels(): LlmModelsService {
           { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', maxTokens: 8192, multimodal: true },
         ],
         anthropic: [],
+        openai: [],
       }),
     findSelectableModel: (provider: string, modelId: string) =>
       Promise.resolve(
@@ -32,8 +34,16 @@ function makeModels(): LlmModelsService {
   } as unknown as LlmModelsService;
 }
 
+function makeRegistry(): LlmProvider[] {
+  return [
+    { name: 'gemini', isAvailable: () => true },
+    { name: 'anthropic', isAvailable: () => true },
+    { name: 'openai', isAvailable: () => false },
+  ] as unknown as LlmProvider[];
+}
+
 function makeService(db: Database): LlmSettingsService {
-  return new LlmSettingsService(db, makeModels());
+  return new LlmSettingsService(db, makeModels(), makeRegistry());
 }
 
 interface GlobalRow {
@@ -66,9 +76,27 @@ describe('LlmSettingsService', () => {
 
       expect(res.features).toHaveLength(LLM_FEATURES.length);
       expect(res.features.every((f) => f.source === 'default')).toBe(true);
-      expect(res.providers.map((p) => p.id).sort()).toEqual(['anthropic', 'gemini']);
+      expect(res.providers.map((p) => p.id).sort()).toEqual(['anthropic', 'gemini', 'openai']);
       expect(res.catalog.gemini?.map((m) => m.id)).toEqual(['gemini-2.5-flash']);
       expect(res.catalog.anthropic).toEqual([]);
+    });
+
+    it('marca como no disponible al proveedor sin API key configurada', async () => {
+      const { db } = makeDb([]);
+      const res = await makeService(db).getSettings();
+
+      expect(res.providers).toEqual([
+        { id: 'gemini', label: 'Google Gemini', available: true },
+        { id: 'anthropic', label: 'Anthropic Claude', available: true },
+        { id: 'openai', label: 'OpenAI', available: false },
+      ]);
+    });
+
+    it('ninguna funcionalidad usa OpenAI por defecto', async () => {
+      const { db } = makeDb([]);
+      const res = await makeService(db).getSettings();
+
+      expect(res.features.some((f) => f.provider === 'openai')).toBe(false);
     });
 
     it('marca como "global" la funcionalidad con fila persistida', async () => {

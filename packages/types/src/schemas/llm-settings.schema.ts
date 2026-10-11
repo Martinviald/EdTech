@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Configuración de modelos de IA por funcionalidad (panel /configuracion/modelos-ia).
  *
  * Cada "funcionalidad" (`LlmFeature`) es un punto de llamada al LLM. Un
- * `platform_admin` elige, por funcionalidad, el PROVEEDOR (Gemini/Claude) y el
+ * `platform_admin` elige, por funcionalidad, el PROVEEDOR (Gemini/Claude/OpenAI) y el
  * MODELO. La elección se persiste en la tabla `llm_settings` (global por ahora,
  * `org_id = NULL`; per-org en el futuro) y `LlmConfigService.resolve` la consulta
  * en runtime. Este archivo es la fuente ÚNICA compartida FE/BE de funcionalidades,
@@ -94,20 +94,25 @@ export const LLM_FEATURE_LABELS: Record<LlmFeature, { label: string; description
 
 // ── Proveedores configurables ────────────────────────────────────────────────
 // Subconjunto de `LlmProviderName` (apps/api) con provider implementado y
-// seleccionable hoy. Para agregar un proveedor nuevo (p. ej. `openai`):
+// seleccionable hoy. Para agregar un proveedor nuevo (p. ej. `deepseek`):
 //  1. Sumar su id aquí y su etiqueta en `LLM_PROVIDER_LABELS`.
 //  2. Implementar `providers/<id>.provider.ts` (interfaz `LlmProvider`, incluido
 //     `completeStructured`) y registrarlo en la factory `LLM_PROVIDERS` de `LlmModule`.
 //  3. Declarar su API key en `LLM_PROVIDER_DEFAULTS` (apps/api/src/llm/llm.constants.ts).
 //  4. Dar de alta sus modelos y precios como filas de `llm_models` (seed o panel
 //     de administración del catálogo). Los modelos NO viven en código.
-export const LLM_PROVIDERS = ['gemini', 'anthropic'] as const;
+//
+// Privacidad: el Batch API de OpenAI no es compatible con cero retención de datos
+// (Zero Data Retention). No uses batch de OpenAI para datos de estudiantes si el
+// contrato exige cero retención.
+export const LLM_PROVIDERS = ['gemini', 'anthropic', 'openai'] as const;
 export type LlmProviderId = (typeof LLM_PROVIDERS)[number];
 export const llmProviderSchema = z.enum(LLM_PROVIDERS);
 
 export const LLM_PROVIDER_LABELS: Record<LlmProviderId, string> = {
   gemini: 'Google Gemini',
   anthropic: 'Anthropic Claude',
+  openai: 'OpenAI',
 };
 
 // ── Modelos seleccionables ───────────────────────────────────────────────────
@@ -205,7 +210,14 @@ export const llmModelOptionSchema = z.object({
 /** GET /api/llm-settings — config efectiva + modelos habilitados para poblar los selects. */
 export const llmSettingsResponseSchema = z.object({
   features: z.array(llmFeatureConfigSchema),
-  providers: z.array(z.object({ id: llmProviderSchema, label: z.string() })),
+  providers: z.array(
+    z.object({
+      id: llmProviderSchema,
+      label: z.string(),
+      /** `false` si el proveedor no tiene API key configurada en el servidor. */
+      available: z.boolean(),
+    }),
+  ),
   catalog: z.record(llmProviderSchema, z.array(llmModelOptionSchema)),
 });
 export type LlmSettingsResponse = z.infer<typeof llmSettingsResponseSchema>;

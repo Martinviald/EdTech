@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { and, eq, isNull } from 'drizzle-orm';
 import { llmSettings } from '@soe/db';
 import {
@@ -15,6 +15,8 @@ import {
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 import { LlmModelsService } from './llm-models.service';
+import { LLM_PROVIDERS as LLM_PROVIDER_REGISTRY } from './llm.constants';
+import type { LlmProvider } from './llm.types';
 
 /**
  * Lectura/escritura de la configuración de modelos de IA por funcionalidad
@@ -29,6 +31,7 @@ export class LlmSettingsService {
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly models: LlmModelsService,
+    @Inject(LLM_PROVIDER_REGISTRY) private readonly registry: LlmProvider[],
   ) {}
 
   /**
@@ -77,7 +80,7 @@ export class LlmSettingsService {
 
     return {
       features,
-      providers: LLM_PROVIDERS.map((id) => ({ id, label: LLM_PROVIDER_LABELS[id] })),
+      providers: this.providerOptions(),
       catalog,
     };
   }
@@ -124,5 +127,16 @@ export class LlmSettingsService {
     }
 
     return this.getSettings();
+  }
+
+  private providerOptions(): LlmSettingsResponse['providers'] {
+    const available = new Set<string>(
+      this.registry.filter((provider) => provider.isAvailable()).map((provider) => provider.name),
+    );
+    return LLM_PROVIDERS.map((id) => ({
+      id,
+      label: LLM_PROVIDER_LABELS[id],
+      available: available.has(id),
+    }));
   }
 }
