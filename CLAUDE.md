@@ -241,10 +241,11 @@ Cada módulo contiene: `*.module.ts`, `*.controller.ts`, `*.service.ts`, `dto/` 
 - Dashboards de directivo y profesor
 - Exportación Excel/PDF
 - Design system base (H17.1)
+- Lector de hojas de respuesta (OMR) y lectura por visión de respuestas abiertas: el modelo de visión solo transcribe, el código corrige y lo dudoso va a revisión humana (`docs/diseno-correccion-vision-preguntas-abiertas.md`)
+- Calificación asistida de preguntas de desarrollo con rúbrica: la IA propone, el docente aprueba
 
 **Está FUERA de F1 (no implementar):**
 - Escaneo con cámara en tiempo real → F3
-- Corrección IA de preguntas de desarrollo → F4
 - Benchmarking inter-colegios → F2
 - Predicción ML → F3
 - Generación de contenido IA → F2
