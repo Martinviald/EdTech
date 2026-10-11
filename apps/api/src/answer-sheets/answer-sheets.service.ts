@@ -56,7 +56,7 @@ import { parseZipgradeCsv } from './lib/parsers/zipgrade-parser';
 import { parseDiaOfficialCsv } from './lib/parsers/dia-official-parser';
 import { parseGenericCsv } from './lib/parsers/generic-csv-parser';
 import { getTemplate, listTemplates } from './lib/templates';
-import type { ParserResult } from './lib/parsers/parser.types';
+import type { ParserResult, PrescoredAnswer } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
 import {
   annulmentEvidence,
@@ -64,6 +64,7 @@ import {
   resolveRowAnswers,
   resolveAnnulledAnswers,
   resolvePendingReadingPositions,
+  resolvePrescoredAnswers,
   toScoringAnswer,
 } from './lib/composite-answers';
 
@@ -423,12 +424,19 @@ export class AnswerSheetsService {
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
       const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
       const pendingReading = resolvePendingReadingPositions(labelIndex, row.pendingReadingLabels);
+      const prescored = resolvePrescoredAnswers(labelIndex, row.prescoredAnswers);
 
       for (const item of scopedItems) {
-        if (pendingReading.has(item.position)) {
+        if (pendingReading.has(item.position) || prescored.pendingPositions.has(item.position)) {
           responseRows.push(
             this.pendingResponseRow(studentId, item, { answer: null, pendingReading: true }),
           );
+          continue;
+        }
+
+        const prescoredAnswer = prescored.byPosition.get(item.position);
+        if (prescoredAnswer) {
+          responseRows.push(this.prescoredResponseRow(studentId, item, prescoredAnswer, now));
           continue;
         }
 
@@ -542,19 +550,21 @@ export class AnswerSheetsService {
 
       // Batch insert con upsert (assessmentId, studentId, itemId).
       const keepsExistingScore = sql`excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL`;
+      const keepsHumanScore = sql`${responses.humanScore} IS NOT NULL AND excluded.scored_by = 'ai'`;
       await tx
         .insert(responses)
         .values(responsesWithAssessment)
         .onConflictDoUpdate({
           target: [responses.assessmentId, responses.studentId, responses.itemId],
           set: {
-            value: sql`excluded.value`,
-            isCorrect: sql`excluded.is_correct`,
-            rawScore: sql`excluded.raw_score`,
+            value: sql`CASE WHEN ${keepsHumanScore} THEN ${responses.value} ELSE excluded.value END`,
+            isCorrect: sql`CASE WHEN ${keepsHumanScore} THEN ${responses.isCorrect} ELSE excluded.is_correct END`,
+            rawScore: sql`CASE WHEN ${keepsHumanScore} THEN ${responses.rawScore} ELSE excluded.raw_score END`,
             maxScore: sql`excluded.max_score`,
-            finalScore: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.finalScore} ELSE excluded.final_score END`,
-            scoredBy: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredBy} ELSE excluded.scored_by END`,
-            scoredAt: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredAt} ELSE excluded.scored_at END`,
+            finalScore: sql`CASE WHEN ${keepsExistingScore} OR ${keepsHumanScore} THEN ${responses.finalScore} ELSE excluded.final_score END`,
+            scoredBy: sql`CASE WHEN ${keepsExistingScore} OR ${keepsHumanScore} THEN ${responses.scoredBy} ELSE excluded.scored_by END`,
+            scoredAt: sql`CASE WHEN ${keepsExistingScore} OR ${keepsHumanScore} THEN ${responses.scoredAt} ELSE excluded.scored_at END`,
+            aiScore: sql`COALESCE(excluded.ai_score, ${responses.aiScore})`,
             updatedAt: now,
           },
         });
@@ -683,6 +693,28 @@ export class AnswerSheetsService {
       finalScore: null,
       scoredBy: 'human',
       scoredAt: null,
+    };
+  }
+
+  private prescoredResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    prescored: PrescoredAnswer,
+    now: Date,
+  ): typeof responses.$inferInsert {
+    const score = prescored.rawScore.toFixed(2);
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value: prescored.value,
+      isCorrect: prescored.isCorrect,
+      rawScore: score,
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: score,
+      aiScore: prescored.aiScore,
+      scoredBy: prescored.scoredBy,
+      scoredAt: now,
     };
   }
 

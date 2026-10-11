@@ -4,6 +4,7 @@ import {
   buildPrintedLabelIndex,
   resolveAnnulledAnswers,
   resolveRowAnswers,
+  resolvePrescoredAnswers,
   resolveScanLabel,
   toScoringAnswer,
   type ResolvableItem,
@@ -254,5 +255,50 @@ describe('resolveAnnulledAnswers + annulmentEvidence', () => {
     expect(annulmentEvidence(resolveAnnulledAnswers(index, ['7B1']), 7)).toEqual({
       annulledParts: ['B1'],
     });
+  });
+});
+
+describe('resolvePrescoredAnswers', () => {
+  const prescored = (itemId: string) => ({
+    itemId,
+    value: { answer: '7' },
+    isCorrect: true,
+    rawScore: 1,
+    scoredBy: 'ai' as const,
+    aiScore: null,
+  });
+  const items: ResolvableItem[] = [
+    { ...mcq(1), id: 'item-1' },
+    { ...mcq(2, '14.1'), id: 'item-2' },
+    { ...matchingItemAt(7), id: 'item-7' },
+  ];
+  const index = buildPrintedLabelIndex(items);
+
+  it('asigna la corrección a la posición del ítem cuya etiqueta impresa coincide', () => {
+    const resolved = resolvePrescoredAnswers(index, { '14.1': prescored('item-2') });
+
+    expect(resolved.byPosition.get(2)).toEqual(prescored('item-2'));
+    expect(resolved.pendingPositions.size).toBe(0);
+  });
+
+  it('una sub-etiqueta de un ítem compuesto deja el ítem entero pendiente', () => {
+    const resolved = resolvePrescoredAnswers(index, { '7B1': prescored('item-7') });
+
+    expect(resolved.byPosition.size).toBe(0);
+    expect([...resolved.pendingPositions]).toEqual([7]);
+  });
+
+  it('si el ítem de la etiqueta no es el de la lectura, la posición queda pendiente', () => {
+    const resolved = resolvePrescoredAnswers(index, { '1': prescored('otro-item') });
+
+    expect(resolved.byPosition.size).toBe(0);
+    expect([...resolved.pendingPositions]).toEqual([1]);
+  });
+
+  it('ignora etiquetas que no existen en el instrumento', () => {
+    const resolved = resolvePrescoredAnswers(index, { '99': prescored('item-1') });
+
+    expect(resolved.byPosition.size).toBe(0);
+    expect(resolved.pendingPositions.size).toBe(0);
   });
 });

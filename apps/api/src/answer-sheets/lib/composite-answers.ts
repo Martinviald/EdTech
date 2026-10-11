@@ -19,9 +19,11 @@
 // sub-respuesta de la pregunta 14 y se perderían 4 de cada 5 respuestas.
 
 import type { ItemContent, ItemType, MatchingContent } from '@soe/types';
+import type { PrescoredAnswer } from './parsers/parser.types';
 
 /** El ítem del instrumento, tal como lo necesita la resolución. */
 export interface ResolvableItem {
+  id?: string;
   position: number;
   type: ItemType;
   content: ItemContent;
@@ -190,6 +192,35 @@ export function resolvePendingReadingPositions(
     if (resolved.kind !== 'unmatched') positions.add(resolved.item.position);
   }
   return positions;
+}
+
+export interface ResolvedPrescoredAnswers {
+  byPosition: Map<number, PrescoredAnswer>;
+  pendingPositions: Set<number>;
+}
+
+export function resolvePrescoredAnswers(
+  index: Map<string, ResolvableItem>,
+  prescoredAnswers: Readonly<Record<string, PrescoredAnswer>> | undefined,
+): ResolvedPrescoredAnswers {
+  const byPosition = new Map<number, PrescoredAnswer>();
+  const pendingPositions = new Set<number>();
+  for (const [label, prescored] of Object.entries(prescoredAnswers ?? {})) {
+    const resolved = resolveScanLabel(index, label, null);
+    if (resolved.kind === 'unmatched') continue;
+    const position = resolved.item.position;
+    const usable =
+      resolved.kind === 'item' &&
+      resolved.item.id === prescored.itemId &&
+      !byPosition.has(position);
+    if (usable && !pendingPositions.has(position)) {
+      byPosition.set(position, prescored);
+      continue;
+    }
+    byPosition.delete(position);
+    pendingPositions.add(position);
+  }
+  return { byPosition, pendingPositions };
 }
 
 /**

@@ -665,7 +665,33 @@ describe('AnswerSheetsService', () => {
       expect(renderSet('finalScore')).toContain('ELSE excluded.final_score');
       expect(renderSet('scoredBy')).toContain('ELSE excluded.scored_by');
       expect(renderSet('scoredAt')).toContain('ELSE excluded.scored_at');
-      expect(renderSet('value')).toBe('excluded.value');
+      expect(renderSet('value')).toContain('ELSE excluded.value');
+      expect(renderSet('aiScore')).toContain('COALESCE(excluded.ai_score');
+    });
+
+    it('el upsert no pisa una respuesta con human_score con una corrección de la IA', async () => {
+      const db = setupConfirmDb();
+      const service = new AnswerSheetsService(db, store);
+
+      const upload = await service.upload(
+        makeJwt(),
+        { buffer: gradecamCsv, originalname: 'g.csv' },
+        { format: 'gradecam_csv', instrumentId: INSTRUMENT_ID },
+      );
+      await service.confirm(makeJwt(), {
+        previewToken: upload.previewToken,
+        createAssessment: true,
+        skipErrorRows: true,
+      });
+
+      const configs = (db as unknown as { __upsertConfigs: Array<{ set: Record<string, unknown> }> })
+        .__upsertConfigs;
+      const dialect = new PgDialect();
+      const renderSet = (key: string) =>
+        dialect.sqlToQuery(configs[0].set[key] as Parameters<PgDialect['sqlToQuery']>[0]).sql;
+      for (const key of ['value', 'isCorrect', 'rawScore', 'finalScore', 'scoredBy', 'scoredAt']) {
+        expect(renderSet(key)).toContain(`"human_score" IS NOT NULL AND excluded.scored_by = 'ai'`);
+      }
     });
 
     it('puntúa MCQ por estrategia y NO contamina el % con un ítem open_ended pendiente', async () => {
@@ -812,6 +838,104 @@ describe('AnswerSheetsService', () => {
         rawScore: null,
         finalScore: null,
         scoredBy: 'human',
+      });
+    });
+
+    describe('respuestas leídas por recorte ya corregidas', () => {
+      const prescored = {
+        itemId: ITEM_3,
+        value: { answer: '21/10', reading: { canonical: 'q:21/10', decisionId: 'dec-1' } },
+        isCorrect: true,
+        rawScore: 1,
+        scoredBy: 'ai' as const,
+        aiScore: { score: 1, confidence: 0.88, decisionId: 'dec-1' },
+      };
+
+      async function confirmWithPrescored(prescoredAnswers: Record<string, typeof prescored>) {
+        const captured = { responses: [] as unknown[][], assessmentResults: [] as unknown[][] };
+        const db = buildCapturingDb(captured, {
+          items: [
+            {
+              id: ITEM_1,
+              position: 1,
+              type: 'multiple_choice',
+              content: { correctKey: 'A', alternatives: mcqAlternatives('A') },
+              scoringConfig: { points: 1 },
+            },
+            {
+              id: ITEM_3,
+              position: 2,
+              type: 'short_answer',
+              content: { prompt: '¿Cuánto es?', acceptedAnswers: ['21/10'] },
+              scoringConfig: { points: 1 },
+            },
+          ],
+        });
+        const service = new AnswerSheetsService(db, store);
+        const entry = store.set({
+          orgId: ORG_A,
+          userId: USER_A_ID,
+          format: 'generic_csv',
+          instrumentId: INSTRUMENT_ID,
+          classGroupId: null,
+          assessmentId: null,
+          assessmentName: null,
+          columnMapping: null,
+          rows: [
+            {
+              rowNumber: 1,
+              studentRut: '12345678-5',
+              studentFullName: 'Juan Pérez',
+              answers: { '1': 'A' },
+              prescoredAnswers,
+              errors: [],
+            },
+          ],
+          detectedColumns: ['1', '2'],
+          warnings: [],
+        });
+        await service.confirm(makeJwt(), {
+          previewToken: entry.previewToken,
+          createAssessment: true,
+          skipErrorRows: true,
+        });
+        return new Map(
+          (
+            captured.responses.flat() as Array<{
+              itemId: string;
+              value: Record<string, unknown>;
+              isCorrect: boolean | null;
+              scoredBy: string | null;
+              finalScore: string | null;
+              rawScore: string | null;
+              aiScore: Record<string, unknown> | null | undefined;
+            }>
+          ).map((r) => [r.itemId, r]),
+        );
+      }
+
+      it('persiste la corrección de la lectura con ai_score y scored_by ai', async () => {
+        const byItem = await confirmWithPrescored({ '2': prescored });
+
+        expect(byItem.get(ITEM_3)).toMatchObject({
+          value: prescored.value,
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          scoredBy: 'ai',
+          aiScore: prescored.aiScore,
+        });
+        expect(byItem.get(ITEM_1)).toMatchObject({ isCorrect: true, scoredBy: 'auto' });
+      });
+
+      it('si la etiqueta no corresponde al ítem de la lectura, queda pendiente', async () => {
+        const byItem = await confirmWithPrescored({ '2': { ...prescored, itemId: ITEM_2 } });
+
+        expect(byItem.get(ITEM_3)).toMatchObject({
+          value: { answer: null, pendingReading: true },
+          isCorrect: null,
+          finalScore: null,
+        });
       });
     });
 
