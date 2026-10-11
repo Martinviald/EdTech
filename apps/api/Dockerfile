@@ -3,8 +3,9 @@
 # Backend NestJS (@soe/api) para Fargate ARM.
 # IMPORTANTE: el contexto de build es la RAÍZ del monorepo (ver sst.config.ts:
 # image.context = "."), porque la API depende de los workspace packages
-# @soe/db, @soe/types y @soe/decisions, que se consumen desde su `dist` compilado.
-# Orden de build obligatorio: types -> db -> decisions -> api.
+# @soe/db, @soe/types, @soe/decisions y @soe/answer-reading, que se consumen desde
+# su `dist` compilado.
+# Orden de build obligatorio: types -> db -> decisions -> answer-reading -> api.
 # ============================================================================
 
 FROM node:20-bookworm-slim AS base
@@ -23,21 +24,25 @@ COPY apps/api/package.json apps/api/
 COPY packages/db/package.json packages/db/
 COPY packages/types/package.json packages/types/
 COPY packages/decisions/package.json packages/decisions/
+COPY packages/answer-reading/package.json packages/answer-reading/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
-# ── Stage 2: build (types -> db -> decisions -> api) ───────────────────────
+# ── Stage 2: build (types -> db -> decisions -> answer-reading -> api) ──────
 FROM deps AS build
 COPY packages/types packages/types
 COPY packages/db packages/db
 COPY packages/decisions packages/decisions
+COPY packages/answer-reading packages/answer-reading
 COPY apps/api apps/api
 RUN pnpm --filter @soe/types build \
  && pnpm --filter @soe/db build \
  && pnpm --filter @soe/decisions build \
+ && pnpm --filter @soe/answer-reading build \
  && pnpm --filter @soe/api build
 # Poda a un bundle self-contained con solo las deps de PRODUCCIÓN de la API
-# (incluye el dist ya compilado de @soe/db, @soe/types y @soe/decisions como deps
+# (incluye el dist ya compilado de @soe/db, @soe/types, @soe/decisions y
+# @soe/answer-reading como deps
 # inyectadas, junto con sus dependencias de producción, p. ej. @typesafe-ai/sdk).
 # --legacy es necesario porque .npmrc no usa inject-workspace-packages.
 RUN pnpm --filter @soe/api deploy --prod --legacy /app
