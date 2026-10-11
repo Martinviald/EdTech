@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { and, eq, inArray, isNull, ne } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import {
   answerReadingDecisions,
+  answerReviews,
   sheetScanMarks,
   sheetScans,
   withOrgContext,
   type AnswerReadingDecision,
+  type AnswerReview,
 } from '@soe/db';
 import type { ConsensusResult } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
@@ -129,6 +131,31 @@ export class AnswerReadingDecisionsService {
         ),
     );
     return new Map(rows.map(({ decision }) => [decision.markId, decision]));
+  }
+
+  async activeReviewsByDecision(
+    tx: Database,
+    orgId: string,
+    decisionIds: readonly string[],
+  ): Promise<Map<string, AnswerReview>> {
+    if (decisionIds.length === 0) return new Map();
+    const rows = await tx
+      .select()
+      .from(answerReviews)
+      .where(
+        and(
+          eq(answerReviews.orgId, orgId),
+          inArray(answerReviews.decisionId, [...decisionIds]),
+          isNull(answerReviews.supersededById),
+          ne(answerReviews.action, 'undo'),
+        ),
+      )
+      .orderBy(desc(answerReviews.createdAt));
+    const byDecision = new Map<string, AnswerReview>();
+    for (const row of rows) {
+      if (!byDecision.has(row.decisionId)) byDecision.set(row.decisionId, row);
+    }
+    return byDecision;
   }
 
   private isSameDecision(current: AnswerReadingDecision, input: ReadingDecisionInput): boolean {

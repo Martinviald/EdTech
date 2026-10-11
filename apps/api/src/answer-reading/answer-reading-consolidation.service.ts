@@ -12,20 +12,19 @@ import {
   sheetScans,
   withOrgContext,
   type AnswerReadingDecision,
+  type AnswerReview,
 } from '@soe/db';
-import { ANSWER_FORMATS, isSupportedFormatKind, toScoringInput } from '@soe/answer-reading';
-import {
-  getScoringStrategy,
-  resolveResponseFormat,
-  type ItemContent,
-  type ItemType,
-  type NormalizedAnswer,
-  type ScoringConfig,
-} from '@soe/types';
+import { isSupportedFormatKind, toScoringInput } from '@soe/answer-reading';
+import type { NormalizedAnswer } from '@soe/types';
 import type { PrescoredAnswer, ResponseAiScore } from '../answer-sheets/lib/parsers/parser.types';
 import { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import { InjectDb, type Database } from '../database/database.types';
 import { AnswerReadingDecisionsService } from './answer-reading-decisions.service';
+import {
+  scoreReadingValue,
+  toReadingScoringItem,
+  type ReadingScoringItem,
+} from './answer-reading-scoring.helpers';
 
 export interface ReadingConfirmation {
   readonly decisionId: string;
@@ -54,7 +53,9 @@ export type HumanResolution =
       readonly score?: number;
       readonly reason?: string;
     }
-  | { readonly kind: 'illegible' };
+  | { readonly kind: UnansweredKind };
+
+export type UnansweredKind = 'illegible' | 'blank' | 'crossed_out';
 
 export interface HumanResolutionEntry {
   readonly decisionId: string;
@@ -83,14 +84,6 @@ export interface ConsolidationReport {
 
 type ResponseHumanScore = NonNullable<(typeof responses.$inferInsert)['humanScore']>;
 
-interface ConsolidationItem {
-  readonly id: string;
-  readonly type: ItemType;
-  readonly content: ItemContent;
-  readonly scoringConfig: ScoringConfig;
-  readonly maxScore: number;
-}
-
 interface ReadingSummary {
   readonly confidence: number | null;
   readonly model: string;
@@ -98,7 +91,7 @@ interface ReadingSummary {
 }
 
 interface ScoringContext {
-  readonly items: ReadonlyMap<string, ConsolidationItem>;
+  readonly items: ReadonlyMap<string, ReadingScoringItem>;
   readonly readings: ReadonlyMap<string, ReadingSummary>;
 }
 
@@ -107,6 +100,7 @@ interface TargetResponse {
   readonly assessmentId: string;
   readonly hasHumanScore: boolean;
   readonly isPending: boolean;
+  readonly writtenByDecisionId: string | null;
 }
 
 interface ScoredValue {
@@ -126,6 +120,7 @@ interface ResponseWrite {
   readonly aiScore: ResponseAiScore | null;
   readonly humanScore: ResponseHumanScore | null;
   readonly respectHuman: boolean;
+  readonly clearHuman?: boolean;
 }
 
 interface DecisionLink {
@@ -142,7 +137,11 @@ interface WriteOutcome {
 }
 
 const PENDING_READING_VALUE = { answer: null, pendingReading: true } as const;
-const ILLEGIBLE_OVERRIDE_REASON = 'ilegible';
+const UNANSWERED_RESOLUTIONS: Record<UnansweredKind, { flag: string; overrideReason: string }> = {
+  illegible: { flag: 'illegible', overrideReason: 'ilegible' },
+  blank: { flag: 'blank', overrideReason: 'en blanco' },
+  crossed_out: { flag: 'crossedOut', overrideReason: 'tachada' },
+};
 
 @Injectable()
 export class AnswerReadingConsolidationService {
@@ -178,24 +177,142 @@ export class AnswerReadingConsolidationService {
     input: ConfirmedReadingsInput,
   ): Promise<ConsolidationReport | null> {
     if (input.cropMarkIds.length === 0) return null;
-    const staleDecisionIds = await withOrgContext(this.db, orgId, async (tx) => {
-      const links = await this.confirmedLinks(tx, input);
-      await this.linkDecisions(tx, orgId, links);
-      const current = await tx
-        .select({ id: answerReadingDecisions.id })
-        .from(answerReadingDecisions)
-        .where(
-          and(
-            eq(answerReadingDecisions.orgId, orgId),
-            inArray(answerReadingDecisions.markId, [...input.cropMarkIds]),
-            isNull(answerReadingDecisions.supersededById),
-          ),
-        );
-      const linked = new Set(input.links.map((link) => link.decisionId));
-      return current.filter((row) => !linked.has(row.id)).map((row) => row.id);
+    const { staleDecisionIds, currentDecisionIds } = await withOrgContext(
+      this.db,
+      orgId,
+      async (tx) => {
+        const links = await this.confirmedLinks(tx, input);
+        await this.linkDecisions(tx, orgId, links);
+        const current = await tx
+          .select({ id: answerReadingDecisions.id })
+          .from(answerReadingDecisions)
+          .where(
+            and(
+              eq(answerReadingDecisions.orgId, orgId),
+              inArray(answerReadingDecisions.markId, [...input.cropMarkIds]),
+              isNull(answerReadingDecisions.supersededById),
+            ),
+          );
+        const linked = new Set(input.links.map((link) => link.decisionId));
+        return {
+          staleDecisionIds: current.filter((row) => !linked.has(row.id)).map((row) => row.id),
+          currentDecisionIds: current.map((row) => row.id),
+        };
+      },
+    );
+    const stale =
+      staleDecisionIds.length === 0
+        ? null
+        : await this.consolidateDecisions(orgId, staleDecisionIds);
+    const reviewed = await this.applyRecordedReviews(orgId, currentDecisionIds);
+    if (this.isEmptyReport(reviewed)) return stale;
+    return stale === null ? reviewed : this.mergeReports(stale, reviewed);
+  }
+
+  async applyRecordedReviews(
+    orgId: string,
+    decisionIds: readonly string[],
+  ): Promise<ConsolidationReport> {
+    const ids = [...new Set(decisionIds)];
+    if (ids.length === 0) return this.emptyReport();
+    const outcome = await withOrgContext(this.db, orgId, async (tx) => {
+      const reviews = await this.decisions.activeReviewsByDecision(tx, orgId, ids);
+      if (reviews.size === 0) return this.emptyOutcome();
+      const { current, skipped } = await this.loadCurrentDecisions(tx, orgId, [...reviews.keys()]);
+      const targets = await this.resolveTargets(tx, orgId, current);
+      const context = await this.loadScoringContext(tx, current);
+      const writes: ResponseWrite[] = [];
+      const links: DecisionLink[] = [];
+      const pending: string[] = [];
+      for (const decision of current) {
+        const review = reviews.get(decision.id);
+        const target = targets.get(decision.id);
+        if (!review || !target) {
+          skipped.push({ decisionId: decision.id, reason: 'no_response' });
+          continue;
+        }
+        if (this.hasForeignHumanScore(decision, target)) {
+          skipped.push({ decisionId: decision.id, reason: 'human_scored' });
+          links.push({ decisionId: decision.id, responseId: target.id, resolved: false });
+          continue;
+        }
+        const resolution = this.resolutionOfReview(review);
+        const write =
+          resolution === null
+            ? null
+            : this.humanWrite(decision, target, resolution, review.reviewerId, context);
+        if (write) {
+          writes.push(write);
+          continue;
+        }
+        pending.push(decision.id);
+        links.push({ decisionId: decision.id, responseId: target.id, resolved: false });
+        if (!target.isPending || target.hasHumanScore) {
+          writes.push({
+            ...this.pendingWrite(decision, target),
+            respectHuman: false,
+            clearHuman: true,
+          });
+        }
+      }
+      const written = await this.applyWrites(tx, orgId, writes, links);
+      return {
+        scored: written.scored,
+        pending,
+        skipped: [...skipped, ...written.skipped],
+        assessmentIds: written.assessmentIds,
+      };
     });
-    if (staleDecisionIds.length === 0) return null;
-    return this.consolidateDecisions(orgId, staleDecisionIds);
+    return this.finish(orgId, outcome);
+  }
+
+  async revertHumanResolutions(
+    orgId: string,
+    decisionIds: readonly string[],
+  ): Promise<ConsolidationReport> {
+    const ids = [...new Set(decisionIds)];
+    if (ids.length === 0) return this.emptyReport();
+    const outcome = await withOrgContext(this.db, orgId, async (tx) => {
+      const { current, skipped } = await this.loadCurrentDecisions(tx, orgId, ids);
+      const targets = await this.resolveTargets(tx, orgId, current);
+      const context = await this.loadScoringContext(tx, current);
+      const writes: ResponseWrite[] = [];
+      const pending: string[] = [];
+      for (const decision of current) {
+        const target = targets.get(decision.id);
+        if (!target) {
+          skipped.push({ decisionId: decision.id, reason: 'no_response' });
+          continue;
+        }
+        if (this.hasForeignHumanScore(decision, target)) {
+          skipped.push({ decisionId: decision.id, reason: 'human_scored' });
+          continue;
+        }
+        const prescored = this.prescore(decision, context);
+        if (prescored) {
+          writes.push({
+            ...this.automaticWrite(decision, target, prescored),
+            respectHuman: false,
+            clearHuman: true,
+          });
+          continue;
+        }
+        pending.push(decision.id);
+        writes.push({
+          ...this.pendingWrite(decision, target),
+          respectHuman: false,
+          clearHuman: true,
+        });
+      }
+      const written = await this.applyWrites(tx, orgId, writes, []);
+      return {
+        scored: written.scored,
+        pending,
+        skipped: [...skipped, ...written.skipped],
+        assessmentIds: written.assessmentIds,
+      };
+    });
+    return this.finish(orgId, outcome);
   }
 
   async consolidateDecisions(
@@ -304,6 +421,58 @@ export class AnswerReadingConsolidationService {
     return { scored: [], pending: [], skipped: [], recalculatedAssessmentIds: [] };
   }
 
+  private emptyOutcome(): WriteOutcome {
+    return { scored: [], pending: [], skipped: [], assessmentIds: [] };
+  }
+
+  private isEmptyReport(report: ConsolidationReport): boolean {
+    return report.scored.length === 0 && report.pending.length === 0 && report.skipped.length === 0;
+  }
+
+  private mergeReports(left: ConsolidationReport, right: ConsolidationReport): ConsolidationReport {
+    return {
+      scored: [...left.scored, ...right.scored],
+      pending: [...left.pending, ...right.pending],
+      skipped: [...left.skipped, ...right.skipped],
+      recalculatedAssessmentIds: [
+        ...new Set([...left.recalculatedAssessmentIds, ...right.recalculatedAssessmentIds]),
+      ],
+    };
+  }
+
+  private resolutionOfReview(review: AnswerReview): HumanResolution | null {
+    const reason = review.reason ?? undefined;
+    switch (review.action) {
+      case 'accept':
+      case 'edit':
+        return review.resultingValue !== null && review.resultingValue.canonical !== null
+          ? { kind: 'reading', value: review.resultingValue, reason }
+          : null;
+      case 'illegible':
+      case 'blank':
+      case 'crossed_out':
+        return { kind: review.action };
+      case 'mark_correct':
+        return { kind: 'grading', isCorrect: true, reason };
+      case 'mark_incorrect':
+        return { kind: 'grading', isCorrect: false, reason };
+      case 'undo':
+        return null;
+    }
+  }
+
+  private hasForeignHumanScore(decision: AnswerReadingDecision, target: TargetResponse): boolean {
+    return target.hasHumanScore && target.writtenByDecisionId !== decision.id;
+  }
+
+  private writtenByDecisionId(value: unknown): string | null {
+    if (value === null || typeof value !== 'object') return null;
+    const reading = (value as { reading?: unknown }).reading;
+    if (reading === null || typeof reading !== 'object') return null;
+    const decisionId = (reading as { decisionId?: unknown }).decisionId;
+    return typeof decisionId === 'string' ? decisionId : null;
+  }
+
   private async loadCurrentDecisions(
     tx: Database,
     orgId: string,
@@ -361,7 +530,7 @@ export class AnswerReadingConsolidationService {
             .from(answerReadings)
             .where(inArray(answerReadings.id, [...readingIds]));
     return {
-      items: new Map(itemRows.map((row) => [row.id, this.toConsolidationItem(row)])),
+      items: new Map(itemRows.map((row) => [row.id, toReadingScoringItem(row)])),
       readings: new Map(
         readingRows.map((row) => [
           row.id,
@@ -372,22 +541,6 @@ export class AnswerReadingConsolidationService {
           },
         ]),
       ),
-    };
-  }
-
-  private toConsolidationItem(row: {
-    id: string;
-    type: string;
-    content: ItemContent | null;
-    scoringConfig: Record<string, unknown> | null;
-  }): ConsolidationItem {
-    const scoringConfig = (row.scoringConfig ?? {}) as ScoringConfig;
-    return {
-      id: row.id,
-      type: row.type as ItemType,
-      content: (row.content ?? {}) as ItemContent,
-      scoringConfig,
-      maxScore: scoringConfig?.points ?? 1,
     };
   }
 
@@ -420,31 +573,12 @@ export class AnswerReadingConsolidationService {
     };
   }
 
-  private scoreValue(item: ConsolidationItem, value: NormalizedAnswer): ScoredValue | null {
-    if (!isSupportedFormatKind(value.formatKind)) return null;
-    if (ANSWER_FORMATS[value.formatKind].gradedBy === 'rubric') return null;
-    const answer = toScoringInput(value);
-    const result = getScoringStrategy(item.type).score({
-      item: {
-        id: item.id,
-        type: item.type,
-        content: this.withResponseFormat(item),
-        maxScore: item.maxScore,
-        scoringConfig: item.scoringConfig,
-      },
-      rawAnswer: answer,
-    });
-    if (result.requiresManualGrading || result.isCorrect === null) return null;
-    return { answer, isCorrect: result.isCorrect, rawScore: result.rawScore ?? 0 };
-  }
-
-  private withResponseFormat(item: ConsolidationItem): ItemContent {
-    if ((item.content as { responseFormat?: unknown }).responseFormat !== undefined) {
-      return item.content;
-    }
-    const responseFormat = resolveResponseFormat({ type: item.type, content: item.content });
-    if (responseFormat === null) return item.content;
-    return { ...item.content, responseFormat } as ItemContent;
+  private scoreValue(item: ReadingScoringItem, value: NormalizedAnswer): ScoredValue | null {
+    const scored = scoreReadingValue(item, value);
+    if (!scored) return null;
+    const { output } = scored;
+    if (output.requiresManualGrading || output.isCorrect === null) return null;
+    return { answer: scored.answer, isCorrect: output.isCorrect, rawScore: output.rawScore ?? 0 };
   }
 
   private aiScoreOf(
@@ -530,13 +664,18 @@ export class AnswerReadingConsolidationService {
       aiScore: null,
       respectHuman: false,
     };
-    if (resolution.kind === 'illegible') {
+    if (resolution.kind !== 'reading' && resolution.kind !== 'grading') {
+      const unanswered = UNANSWERED_RESOLUTIONS[resolution.kind];
       return {
         ...base,
-        value: { ...this.readingValue(null, null, decision.id), illegible: true },
+        value: { ...this.readingValue(null, null, decision.id), [unanswered.flag]: true },
         isCorrect: false,
         rawScore: 0,
-        humanScore: { score: 0, scoredById: reviewerId, overrideReason: ILLEGIBLE_OVERRIDE_REASON },
+        humanScore: {
+          score: 0,
+          scoredById: reviewerId,
+          overrideReason: unanswered.overrideReason,
+        },
       };
     }
     if (resolution.kind === 'reading') {
@@ -610,6 +749,7 @@ export class AnswerReadingConsolidationService {
         assessmentId: responses.assessmentId,
         humanScore: responses.humanScore,
         finalScore: responses.finalScore,
+        value: responses.value,
       })
       .from(responses)
       .where(inArray(responses.id, [...new Set(responseIdByDecision.values())]));
@@ -623,6 +763,7 @@ export class AnswerReadingConsolidationService {
         assessmentId: row.assessmentId,
         hasHumanScore: row.humanScore !== null,
         isPending: row.finalScore === null,
+        writtenByDecisionId: this.writtenByDecisionId(row.value),
       });
     }
     return targets;
@@ -873,6 +1014,7 @@ export class AnswerReadingConsolidationService {
       ai_score: write.aiScore,
       human_score: write.humanScore,
       respect_human: write.respectHuman,
+      clear_human: write.clearHuman === true,
     }));
     const rows = (await tx.execute(sql`
       UPDATE responses AS r
@@ -883,7 +1025,7 @@ export class AnswerReadingConsolidationService {
           scored_by = v.scored_by,
           scored_at = CASE WHEN v.scored THEN now() ELSE NULL END,
           ai_score = COALESCE(v.ai_score, r.ai_score),
-          human_score = COALESCE(v.human_score, r.human_score),
+          human_score = CASE WHEN v.clear_human THEN NULL ELSE COALESCE(v.human_score, r.human_score) END,
           updated_at = now()
       FROM jsonb_to_recordset(${JSON.stringify(payload)}::jsonb) AS v(
         id uuid,
@@ -894,7 +1036,8 @@ export class AnswerReadingConsolidationService {
         scored boolean,
         ai_score jsonb,
         human_score jsonb,
-        respect_human boolean
+        respect_human boolean,
+        clear_human boolean
       )
       WHERE r.id = v.id AND (NOT v.respect_human OR r.human_score IS NULL)
       RETURNING r.id

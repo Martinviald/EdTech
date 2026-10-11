@@ -33,6 +33,7 @@ import { InjectDb, type Database } from '../database/database.types';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { AnswerReadingBudgetService } from './answer-reading-budget.service';
 import { AnswerReadingConsolidationService } from './answer-reading-consolidation.service';
+import { visionResponsesByField } from './answer-reading-layout.helpers';
 import {
   AnswerReadingDecisionsService,
   type SavedReadingDecision,
@@ -40,7 +41,6 @@ import {
 import {
   ANSWER_READING_JOB_KIND,
   ANSWER_READING_OPTIONS,
-  VISION_SHORT_ANSWER_FORMAT_KINDS,
   type AnswerReadingOptions,
 } from './answer-reading.constants';
 import {
@@ -315,16 +315,11 @@ export class AnswerReadingPipelineService {
       cropEvidence: CropEvidence | null;
     }>,
   ): LayoutCrop[] {
-    const visionKinds: ReadonlySet<string> = new Set(VISION_SHORT_ANSWER_FORMAT_KINDS);
-    const responseByField = new Map(
-      fields
-        .filter((field) => field.kind === 'crop_region' && field.response !== undefined)
-        .map((field) => [field.fieldId, field.response]),
-    );
+    const responseByField = visionResponsesByField(fields);
     const crops: LayoutCrop[] = [];
     for (const mark of markRows) {
       const response = responseByField.get(mark.fieldId);
-      if (!response || !visionKinds.has(response.format.kind)) continue;
+      if (!response) continue;
       crops.push({
         markId: mark.id,
         cropFileId: mark.cropFileId,
