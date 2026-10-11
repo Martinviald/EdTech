@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { responseFormatSchema } from './answer-reading/response-format.schema';
 import type { ItemType } from '../enums';
 // `multiple_choice` ya tiene su schema canónico en item.schema.ts. Lo reutilizamos
 // para no duplicar la definición ni colisionar en el re-export del índice.
@@ -33,6 +34,7 @@ const baseContent = {
   imageUrl: z.string().url().optional(),
   audioUrl: z.string().url().optional(),
   explanation: z.string().optional(),
+  responseFormat: responseFormatSchema.optional(),
 };
 
 // ── Schemas de content por tipo ──────────────────────────────────────────────

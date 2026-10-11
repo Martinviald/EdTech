@@ -59,3 +59,4 @@ export * from './decisions.schema';
 export * from './test-track.schema';
 export * from './assessment-comparison.schema';
 export * from './material-library.schema';
+export * from './answer-reading';
