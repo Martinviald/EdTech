@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import {
   promptVersionSchema,
   type PromptVariable,
@@ -7,7 +8,7 @@ import {
   type RenderedPrompt,
   type ResponseFormat,
 } from '@soe/types';
-import { formatLabelFor, promptGuideFor } from '../formats/registry';
+import { formatLabelFor, isSupportedFormatKind, promptGuideFor } from '../formats/registry';
 import {
   baseTranscriptionJsonSchema,
   transcriptionJsonSchema,
@@ -35,6 +36,68 @@ export function templateHash(prompt: PromptVersion): string {
     prompt.outputSchemaId,
     baseTranscriptionJsonSchema().schema,
   );
+}
+
+/**
+ * Formatos de muestra para el lock: cubren cada variante que cambia lo que se
+ * envía al lector (número mixto, aridad, largo). Agregar una muestra exige
+ * regenerar `prompts.lock.json`.
+ */
+export const PROMPT_LOCK_SAMPLE_FORMATS: readonly ResponseFormat[] = [
+  { kind: 'integer', maxChars: 6, allowNegative: true },
+  { kind: 'decimal', maxChars: 8, allowNegative: true },
+  { kind: 'fraction', allowNegative: true, allowMixed: true },
+  { kind: 'fraction', allowNegative: true, allowMixed: false },
+  { kind: 'ordered_tuple', arity: 2, componentKind: 'integer' },
+  { kind: 'ordered_tuple', arity: 3, componentKind: 'decimal' },
+  { kind: 'sequence', length: 2 },
+  { kind: 'sequence', length: 4 },
+];
+
+/** Lo que el formato agrega a lo enviado: etiqueta, guía y esquema de salida (con `parts`). */
+export interface FormatLockParts {
+  readonly label: string;
+  readonly guide: string;
+  readonly outputSchemaId: string;
+  readonly outputSchema: unknown;
+}
+
+export function formatLockParts(format: ResponseFormat): FormatLockParts {
+  const output = transcriptionJsonSchema(format);
+  return {
+    label: formatLabelFor(format),
+    guide: promptGuideFor(format),
+    outputSchemaId: output.schemaId,
+    outputSchema: output.schema,
+  };
+}
+
+/** Hash de un par prompt × formato: la plantilla más lo que aporta cada muestra del formato. */
+export function promptFormatLockHash(
+  prompt: PromptVersion,
+  formats: readonly FormatLockParts[],
+): string {
+  return createHash('sha256')
+    .update(JSON.stringify([templateHash(prompt), formats]), 'utf8')
+    .digest('hex');
+}
+
+/**
+ * Lo que congela `prompts.lock.json`: por cada versión publicada, el hash de la
+ * plantilla y uno por cada formato que atiende. Cambiar la guía, la etiqueta o
+ * las `parts` de un formato cambia el texto enviado y hace fallar el lock.
+ */
+export function promptLock(): Record<string, string> {
+  const lock: Record<string, string> = {};
+  for (const prompt of PROMPT_VERSIONS.filter((p) => p.status === 'published')) {
+    const ref = promptRef(prompt);
+    lock[ref] = templateHash(prompt);
+    for (const kind of prompt.formatKinds.filter(isSupportedFormatKind)) {
+      const samples = PROMPT_LOCK_SAMPLE_FORMATS.filter((format) => format.kind === kind);
+      lock[`${ref} × ${kind}`] = promptFormatLockHash(prompt, samples.map(formatLockParts));
+    }
+  }
+  return lock;
 }
 
 export interface TranscriptionPromptContext {

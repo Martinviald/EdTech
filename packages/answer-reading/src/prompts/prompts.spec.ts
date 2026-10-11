@@ -5,7 +5,15 @@ import {
   type ResponseFormat,
 } from '@soe/types';
 import lock from './prompts.lock.json';
-import { PROMPT_VERSIONS, getPrompt, renderTranscriptionPrompt, templateHash } from './registry';
+import {
+  PROMPT_LOCK_SAMPLE_FORMATS,
+  PROMPT_VERSIONS,
+  formatLockParts,
+  getPrompt,
+  promptLock,
+  promptFormatLockHash,
+  renderTranscriptionPrompt,
+} from './registry';
 import { promptRef, renderPrompt, renderTemplate, templateVariables } from './render';
 
 const FRACTION: ResponseFormat = { kind: 'fraction', allowNegative: false, allowMixed: false };
@@ -26,9 +34,32 @@ describe('registro de prompts', () => {
   });
 
   it('una versión publicada no cambia: su hash coincide con prompts.lock.json', () => {
+    expect(promptLock()).toEqual(lock);
+  });
+
+  it('el lock cubre cada par prompt × formato, con la guía, la etiqueta y las partes', () => {
     const published = PROMPT_VERSIONS.filter((prompt) => prompt.status === 'published');
-    const current = Object.fromEntries(published.map((p) => [promptRef(p), templateHash(p)]));
-    expect(current).toEqual(lock);
+    const pairs = published.flatMap((prompt) =>
+      prompt.formatKinds
+        .filter((kind) => PROMPT_LOCK_SAMPLE_FORMATS.some((format) => format.kind === kind))
+        .map((kind) => `${promptRef(prompt)} × ${kind}`),
+    );
+    expect(Object.keys(lock)).toEqual(expect.arrayContaining(pairs));
+    const v2 = getPrompt('transcribe.short-answer@2');
+    if (!v2) throw new Error('falta v2');
+    const parts = PROMPT_LOCK_SAMPLE_FORMATS.filter((f) => f.kind === 'fraction').map(
+      formatLockParts,
+    );
+    const base = promptFormatLockHash(v2, parts);
+    const [first, ...rest] = parts;
+    if (!first) throw new Error('sin muestras de fracción');
+    for (const change of [
+      { ...first, guide: `${first.guide} ` },
+      { ...first, label: `${first.label}.` },
+      { ...first, outputSchema: { ...first.outputSchema, extra: true } },
+    ]) {
+      expect(promptFormatLockHash(v2, [change, ...rest])).not.toBe(base);
+    }
   });
 
   it('un prompt de transcripción no declara variables de clave ni de respuesta modelo', () => {

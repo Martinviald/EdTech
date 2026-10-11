@@ -1,4 +1,14 @@
 {
   "transcribe.short-answer@1": "afedc8ceba8bf9f67c65c62658c8f271a7ad864752739ead3fb16c03712fac2d",
-  "transcribe.short-answer@2": "6e1c05aa9449e987e7ad3e288b405dda9e18fb76f46e8569b45935ea2f914aa4"
+  "transcribe.short-answer@1 × integer": "b30622f1c0f9b1895713fef915813dc05509869e179cb55d7f5aeb017c430fd1",
+  "transcribe.short-answer@1 × decimal": "c367ce551326f08d2a63d08a21674adc43baa00c5c14c6ae9bbc7ba906e6fad2",
+  "transcribe.short-answer@1 × fraction": "5527d299a4c783bc4e390b427184b1d4cff90512f70f89156651eb3be910d560",
+  "transcribe.short-answer@1 × ordered_tuple": "fa28c361086d6fd58160a7d15d93107a328b0a2ab6250ca6722d5d7941c9ab36",
+  "transcribe.short-answer@1 × sequence": "3d4b8058486a9a7cbb4fa07684d11def3b0d8b341ee000d6b36441a2054f5715",
+  "transcribe.short-answer@2": "6e1c05aa9449e987e7ad3e288b405dda9e18fb76f46e8569b45935ea2f914aa4",
+  "transcribe.short-answer@2 × integer": "d8496c12f5d1d456863ba4d9a6644b79592d9c8c894e51272bce4a3a142b2d21",
+  "transcribe.short-answer@2 × decimal": "5b62a63a2822d35fe1f08df3461def477023b6becaa938476f22c9734f88ecad",
+  "transcribe.short-answer@2 × fraction": "0d8ce66f972902a3039f455fdb248f8f8f2babb50267eb7545a273d9a1fe70e1",
+  "transcribe.short-answer@2 × ordered_tuple": "dbd2a9ed25e01222185d2b306b53bf77390fe0ca9740e97c176d188e6459a669",
+  "transcribe.short-answer@2 × sequence": "92a6d10b335b6f6f3bd62ecc1ee9023c79b56b59c5e39af3b0386f0957ac6b60"
 }
