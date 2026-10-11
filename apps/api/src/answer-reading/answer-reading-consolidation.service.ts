@@ -53,6 +53,13 @@ export type HumanResolution =
       readonly score?: number;
       readonly reason?: string;
     }
+  | {
+      readonly kind: 'rubric';
+      readonly levelCode: string;
+      readonly isCorrect: boolean;
+      readonly score: number;
+      readonly reason?: string;
+    }
   | { readonly kind: UnansweredKind };
 
 export type UnansweredKind = 'illegible' | 'blank' | 'crossed_out';
@@ -664,7 +671,11 @@ export class AnswerReadingConsolidationService {
       aiScore: null,
       respectHuman: false,
     };
-    if (resolution.kind !== 'reading' && resolution.kind !== 'grading') {
+    if (
+      resolution.kind !== 'reading' &&
+      resolution.kind !== 'grading' &&
+      resolution.kind !== 'rubric'
+    ) {
       const unanswered = UNANSWERED_RESOLUTIONS[resolution.kind];
       return {
         ...base,
@@ -697,12 +708,14 @@ export class AnswerReadingConsolidationService {
       decision.value !== null && isSupportedFormatKind(decision.value.formatKind)
         ? toScoringInput(decision.value)
         : null;
+    const levelCode = resolution.kind === 'rubric' ? resolution.levelCode : undefined;
+    const value = this.readingValue(answer, decision.canonical, decision.id);
     return {
       ...base,
-      value: this.readingValue(answer, decision.canonical, decision.id),
+      value: levelCode === undefined ? value : { ...value, rubricLevel: levelCode },
       isCorrect: resolution.isCorrect,
       rawScore: score,
-      humanScore: this.humanScoreOf(score, reviewerId, resolution.reason),
+      humanScore: this.humanScoreOf(score, reviewerId, resolution.reason, levelCode),
     };
   }
 
@@ -710,11 +723,13 @@ export class AnswerReadingConsolidationService {
     score: number,
     reviewerId: string,
     reason: string | undefined,
+    levelCode?: string,
   ): ResponseHumanScore {
     return {
       score,
       scoredById: reviewerId,
       ...(reason !== undefined && reason.trim().length > 0 ? { overrideReason: reason } : {}),
+      ...(levelCode !== undefined ? { levelCode } : {}),
     };
   }
 

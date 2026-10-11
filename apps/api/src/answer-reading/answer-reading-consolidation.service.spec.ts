@@ -3,8 +3,6 @@ jest.mock('drizzle-orm', () => ({
   ...jest.requireActual('./testing/drizzle-predicates').DRIZZLE_PREDICATES,
 }));
 
-import type { SQL } from 'drizzle-orm';
-import { PgDialect } from 'drizzle-orm/pg-core';
 import { fakeOutput, normalizeTranscription } from '@soe/answer-reading';
 import {
   answerReadingDecisions,
@@ -28,6 +26,7 @@ import {
 import type { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import { AnswerReadingConsolidationService } from './answer-reading-consolidation.service';
 import { AnswerReadingDecisionsService } from './answer-reading-decisions.service';
+import { consolidationDatabase } from './testing/consolidation-sql';
 import { InMemoryDatabase } from './testing/in-memory-database';
 
 const ORG_ID = '11111111-1111-4111-8111-111111111111';
@@ -53,20 +52,6 @@ const RESPONSE_B = 'dddddddd-0000-4000-8000-000000000002';
 
 const INTEGER: ResponseFormat = { kind: 'integer', maxChars: 3, allowNegative: false };
 const WORDS: ResponseFormat = { kind: 'word_list', count: 3 };
-
-type ResponseUpdate = {
-  id: string;
-  value: Record<string, unknown>;
-  is_correct: boolean | null;
-  raw_score: string | null;
-  scored_by: Response['scoredBy'];
-  scored: boolean;
-  ai_score: Response['aiScore'];
-  human_score: Response['humanScore'];
-  respect_human: boolean;
-};
-
-type DecisionLinkUpdate = { id: string; response_id: string; resolved: boolean };
 
 function answer(literal: string, format: ResponseFormat): NormalizedAnswer {
   return normalizeTranscription(fakeOutput(literal), format);
@@ -115,20 +100,7 @@ function setup() {
     },
   ]);
 
-  const dialect = new PgDialect();
-  const statements: string[] = [];
-  const db = memory.asDatabase();
-  (db as unknown as { execute: (query: SQL) => Promise<unknown[]> }).execute = async (query) => {
-    const rendered = dialect.sqlToQuery(query);
-    statements.push(rendered.sql);
-    if (rendered.sql.includes('UPDATE responses')) {
-      return applyResponseUpdates(memory, JSON.parse(String(rendered.params[0])));
-    }
-    if (rendered.sql.includes('UPDATE answer_reading_decisions')) {
-      applyDecisionLinks(memory, JSON.parse(String(rendered.params[0])));
-    }
-    return [];
-  };
+  const { db, statements } = consolidationDatabase(memory);
 
   const decisions = new AnswerReadingDecisionsService(db);
   const recalculate = jest.fn(async (_orgId: string, assessmentIds: readonly string[]) => [
@@ -139,40 +111,6 @@ function setup() {
   } as unknown as AssessmentResultsService;
   const service = new AnswerReadingConsolidationService(db, decisions, results);
   return { memory, service, decisions, recalculate, statements };
-}
-
-function applyResponseUpdates(memory: InMemoryDatabase, updates: ResponseUpdate[]) {
-  const byId = new Map(memory.rows<Response>(responses).map((row) => [row.id, row]));
-  const applied: Array<{ id: string }> = [];
-  for (const update of updates) {
-    const row = byId.get(update.id);
-    if (!row) continue;
-    if (update.respect_human && row.humanScore !== null) continue;
-    Object.assign(row, {
-      value: update.value,
-      isCorrect: update.is_correct,
-      rawScore: update.raw_score,
-      finalScore: update.raw_score,
-      scoredBy: update.scored_by,
-      scoredAt: update.scored ? new Date() : null,
-      aiScore: update.ai_score ?? row.aiScore,
-      humanScore: update.human_score ?? row.humanScore,
-    });
-    applied.push({ id: row.id });
-  }
-  return applied;
-}
-
-function applyDecisionLinks(memory: InMemoryDatabase, links: DecisionLinkUpdate[]) {
-  const byId = new Map(
-    memory.rows<AnswerReadingDecision>(answerReadingDecisions).map((row) => [row.id, row]),
-  );
-  for (const link of links) {
-    const row = byId.get(link.id);
-    if (!row) continue;
-    row.responseId = link.response_id;
-    if (link.resolved) row.resolvedAt = new Date();
-  }
 }
 
 function seedDecision(memory: InMemoryDatabase, overrides: Partial<AnswerReadingDecision>) {

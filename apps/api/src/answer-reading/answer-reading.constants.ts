@@ -4,6 +4,14 @@ export const ANSWER_READING_JOB_KIND = 'answer_reading';
 
 export const ANSWER_READING_LLM_FEATURE = 'answer_transcription' satisfies LlmFeature;
 
+export const RUBRIC_GRADING_JOB_KIND = 'rubric_grading';
+
+export const RUBRIC_GRADING_LLM_FEATURE = 'rubric_grading' satisfies LlmFeature;
+
+export const RUBRIC_GRADING_JOB_TYPE = 'rubric_level';
+
+export const RUBRIC_GRADING_PROMPT_REF = 'grade.rubric@1';
+
 export const VISION_SHORT_ANSWER_FORMAT_KINDS = [
   'integer',
   'decimal',
@@ -29,6 +37,9 @@ export interface AnswerReadingOptions {
   readonly cropConcurrency: number;
   readonly retryDelayMs: number;
   readonly defaultEstimatedReadingCostUsd: number;
+  readonly maxRubricGradingsPerRun: number;
+  readonly rubricGradingMaxOutputTokens: number;
+  readonly rubricGradingTimeoutMs: number;
 }
 
 export const DEFAULT_ANSWER_READING_OPTIONS: AnswerReadingOptions = {
@@ -36,4 +47,7 @@ export const DEFAULT_ANSWER_READING_OPTIONS: AnswerReadingOptions = {
   cropConcurrency: 4,
   retryDelayMs: 500,
   defaultEstimatedReadingCostUsd: 0.001,
+  maxRubricGradingsPerRun: 500,
+  rubricGradingMaxOutputTokens: 1024,
+  rubricGradingTimeoutMs: 30000,
 };

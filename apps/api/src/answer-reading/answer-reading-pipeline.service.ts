@@ -51,6 +51,7 @@ import {
   type ScorableItem,
 } from './crop-reading.service';
 import { ReadingRoutesService, type ReadingRouteCatalog } from './reading-routes.service';
+import { RubricGradingService } from './rubric-grading.service';
 
 export interface ScheduleScanReadingParams {
   readonly orgId: string;
@@ -117,6 +118,7 @@ export class AnswerReadingPipelineService {
     private readonly decisions: AnswerReadingDecisionsService,
     private readonly budget: AnswerReadingBudgetService,
     private readonly consolidation: AnswerReadingConsolidationService,
+    private readonly rubricGrading: RubricGradingService,
     @Inject(ANSWER_READING_OPTIONS) private readonly options: AnswerReadingOptions,
   ) {}
 
@@ -606,6 +608,7 @@ export class AnswerReadingPipelineService {
       );
       if (batch?.status !== 'confirmed') return;
       await this.consolidation.consolidateDecisions(orgId, decisionIds);
+      this.rubricGrading.scheduleForDecisions(orgId, decisionIds);
     } catch (error) {
       reportServerError(error, { orgId, batchId, stage: 'answer_reading_consolidation' });
     }

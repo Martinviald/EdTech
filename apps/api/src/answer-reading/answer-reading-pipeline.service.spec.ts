@@ -43,6 +43,7 @@ import {
 } from './answer-reading.constants';
 import { CropReadingService } from './crop-reading.service';
 import { ReadingRoutesService } from './reading-routes.service';
+import type { RubricGradingService } from './rubric-grading.service';
 import { InMemoryDatabase } from './testing/in-memory-database';
 import { VisionTranscriberRegistry } from './transcribers/vision-transcriber.registry';
 
@@ -279,6 +280,10 @@ function setup(setupOptions: SetupOptions = {}) {
     recalculatedAssessmentIds: [],
   });
   const consolidation = { consolidateDecisions } as unknown as AnswerReadingConsolidationService;
+  const scheduleRubricGrading = jest.fn();
+  const rubricGrading = {
+    scheduleForDecisions: scheduleRubricGrading,
+  } as unknown as RubricGradingService;
   const pipeline = new AnswerReadingPipelineService(
     db,
     dispatcher,
@@ -287,6 +292,7 @@ function setup(setupOptions: SetupOptions = {}) {
     new AnswerReadingDecisionsService(db),
     budget,
     consolidation,
+    rubricGrading,
     options,
   );
   const runScan = async (scanId = SCAN_1) => {
@@ -302,6 +308,7 @@ function setup(setupOptions: SetupOptions = {}) {
     isExceeded,
     runScan,
     consolidateDecisions,
+    scheduleRubricGrading,
   };
 }
 
@@ -808,12 +815,24 @@ describe('AnswerReadingPipelineService — lectura tardía', () => {
     expect(consolidateDecisions).toHaveBeenCalledWith(ORG_ID, [currentDecision(memory).id]);
   });
 
+  it('con el lote ya confirmado agenda la calificación con rúbrica de las decisiones nuevas', async () => {
+    const { memory, runScan, scheduleRubricGrading } = setup({
+      readings: agree,
+      batchStatus: 'confirmed',
+    });
+
+    await runScan();
+
+    expect(scheduleRubricGrading).toHaveBeenCalledWith(ORG_ID, [currentDecision(memory).id]);
+  });
+
   it('con el lote en revisión no consolida: la confirmación se encarga', async () => {
-    const { runScan, consolidateDecisions } = setup({ readings: agree });
+    const { runScan, consolidateDecisions, scheduleRubricGrading } = setup({ readings: agree });
 
     await runScan();
 
     expect(consolidateDecisions).not.toHaveBeenCalled();
+    expect(scheduleRubricGrading).not.toHaveBeenCalled();
   });
 
   it('reprocesar sin cambios en la decisión no vuelve a consolidar', async () => {
