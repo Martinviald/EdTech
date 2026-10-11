@@ -501,6 +501,24 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
       );
       expect(out.isCorrect).toBe(true);
     });
+    it('un gap_fill importado con partialCredit: true sigue siendo todo o nada', () => {
+      const legacy = {
+        textWithGaps: '___ y ___',
+        gaps: [
+          { position: 0, acceptedAnswers: ['casa'] },
+          { position: 1, acceptedAnswers: ['perro'] },
+        ],
+      } as unknown as ItemContent;
+      const strategy = getScoringStrategy('gap_fill');
+      const config: ScoringConfig = { points: 2, partialCredit: true };
+      expect(strategy.score(input('gap_fill', legacy, ['casa', 'gato'], 2, config))).toEqual({
+        isCorrect: false,
+        rawScore: 0,
+        requiresManualGrading: false,
+      });
+      expect(strategy.score(input('gap_fill', legacy, ['casa'], 2, config)).rawScore).toBe(0);
+    });
+
     describe('multi_box: comparación y crédito por casilla', () => {
       const tens = {
         textWithGaps: 'Decenas: ___ Unidades: ___',
@@ -531,8 +549,8 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
         });
       });
 
-      it('crédito por casilla con partialCredit o componentCredit', () => {
-        expect(score({ tens: '3', units: '5' }, { partialCredit: true }).rawScore).toBe(1);
+      it('crédito por casilla solo con componentCredit explícito', () => {
+        expect(score({ tens: '3', units: '5' }, { partialCredit: true }).rawScore).toBe(0);
         expect(
           score(
             { tens: '3', units: '5' },
@@ -552,9 +570,10 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
           rawScore: 0,
           requiresManualGrading: false,
         });
-        expect(
-          score({ tens: '9', units: '4 1' }, { partialCredit: true }).requiresManualGrading,
-        ).toBe(true);
+        const perBox = {
+          componentCredit: { mode: 'per_component' as const, creditPerComponent: [0.5, 0.5] },
+        };
+        expect(score({ tens: '9', units: '4 1' }, perBox).requiresManualGrading).toBe(true);
       });
 
       it('una casilla con comparison declarada compara por estructura sin formato', () => {

@@ -384,7 +384,12 @@ describe('formatos de texto, casillas y desarrollo (F10a)', () => {
       rawScore: 0,
       requiresManualGrading: false,
     });
-    expect(scoreBoxes('3 | 7 | Ana', { partialCredit: true }).rawScore).toBe(2);
+    expect(scoreBoxes('3 | 7 | Ana', { partialCredit: true }).rawScore).toBe(0);
+    expect(
+      scoreBoxes('3 | 7 | Ana', {
+        componentCredit: { mode: 'per_component', creditPerComponent: [1 / 3, 1 / 3, 1 / 3] },
+      }).rawScore,
+    ).toBeCloseTo(2);
   });
 
   it('desarrollo: el texto pasa sin estructura', () => {

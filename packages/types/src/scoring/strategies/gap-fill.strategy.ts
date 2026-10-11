@@ -9,8 +9,10 @@
 //     fracción → numérica; texto → texto corto), se compara como `short_answer`.
 //     Una casilla indecidible deja el ítem pendiente, salvo que otra casilla ya
 //     lo haga incorrecto en todo o nada;
-//   · crédito por casilla: `scoring_config.componentCredit` (peso por casilla) o
-//     `partialCredit: true` (pesos iguales). `partialCredit: false` lo apaga.
+//   · crédito por casilla: solo con `scoring_config.componentCredit` explícito
+//     (peso por casilla; decisión D6). `partialCredit: true` NO lo activa: el
+//     importador lo guarda por defecto en todo `gap_fill` y esos ítems son todo
+//     o nada. `partialCredit: false` apaga incluso `componentCredit`.
 //
 // La respuesta del alumno puede venir como:
 //   - array ordenado por posición de gap: ["casa", "perro"]
@@ -87,9 +89,8 @@ function scoreGap(
 function creditWeights(input: ScoringInput, gapCount: number): readonly number[] | null {
   const config = input.item.scoringConfig;
   if (config?.partialCredit === false) return null;
-  if (config?.componentCredit) return config.componentCredit.creditPerComponent;
-  if (config?.partialCredit === true) return Array.from({ length: gapCount }, () => 1 / gapCount);
-  return null;
+  const weights = config?.componentCredit?.creditPerComponent;
+  return weights && weights.length === gapCount ? weights : null;
 }
 
 export const gapFillStrategy: ScoringStrategy = {
