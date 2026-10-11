@@ -2,6 +2,7 @@ import {
   reviewModeFor,
   type ConsensusPolicy,
   type ConsensusResult,
+  type NormalizationIssue,
   type NormalizedAnswer,
   type ReadingOutcome,
   type ReadingState,
@@ -34,8 +35,8 @@ export interface ConsensusOptions {
   readonly format: ResponseFormat;
   /** Tinta medida en el recorte tras restar la plantilla (paso 1). */
   readonly inkRatio?: number | null;
-  /** Identificador estable de la casilla leída; habilita la auditoría muestral. */
-  readonly readingKey?: string;
+  /** Identificador estable de la casilla leída; decide la auditoría muestral. */
+  readonly readingKey: string;
   /** Motivo cuando no hubo lectores (por ejemplo, la org no permite enviar imágenes). */
   readonly notReadReason?: Extract<
     ReviewReason,
@@ -48,6 +49,24 @@ type ValidReading = ConsensusReading & { readonly output: TranscriptionOutput };
 interface Normalized {
   readonly reading: ValidReading;
   readonly answer: NormalizedAnswer;
+}
+
+/**
+ * Problemas del normalizador que mandan a revisión de lectura aunque haya valor:
+ * el literal no calza con el formato o con las partes que reportó el lector.
+ * La ambigüedad miles/decimal no está: la decide la corrección (paso 9).
+ */
+const FORMAT_ISSUES: ReadonlySet<NormalizationIssue> = new Set<NormalizationIssue>([
+  'format_mismatch',
+  'parts_disagree_with_literal',
+  'empty_part',
+  'non_numeric_in_numeric',
+  'unexpected_unit',
+  'extra_tokens',
+]);
+
+function hasFormatIssue(answer: NormalizedAnswer): boolean {
+  return answer.issues.some((issue) => FORMAT_ISSUES.has(issue));
 }
 
 const STATE_REASONS: Partial<Record<ReadingState, ReviewReason>> = {
@@ -73,16 +92,20 @@ function distinctFamilies(readings: readonly ConsensusReading[]): number {
  *  1. tinta bajo el umbral → auto_blank (sin modelos);
  *  2. lecturas válidas < minReaders → revisión [reader_failed | insufficient_readers];
  *  3. familias repetidas cuando se exigen distintas → revisión [insufficient_readers];
- *  4. algún estado ≠ answered: todas en blanco → auto_blank (o revisión si la política
- *     no autoacepta); ilegible / varias respuestas / tachado → revisión;
+ *  4. algún estado ≠ answered: todas en blanco → auto_blank, pero antes pasa por
+ *     4b, 7, 10 y 11 (petición de revisión, confianza, política y auditoría);
+ *     ilegible / varias respuestas / tachado → revisión;
  *  4b. algún lector pidió revisión → revisión [reader_requested_review];
  *  5. no se pudo convertir al formato → revisión [unparsed_format] (nunca incorrecta);
  *  6. desacuerdo → desempate (si está configurado y llegó) o revisión [readers_disagree];
+ *  6b. el valor acordado no calza con el formato o con sus partes (issues del
+ *     normalizador) → revisión [format_mismatch];
  *  7. confianza baja → revisión [low_confidence];
  *  8. alternativa plausible que cambia el resultado → revisión [alternative_flips_outcome];
  *  9. corrección indecidible → revisión [undecidable];
  * 10. la política no autoacepta ese resultado → revisión [policy_requires_review];
- * 11. auto_accepted, salvo que caiga en la muestra de auditoría → revisión [audit_sample].
+ * 11. auto_accepted (o auto_blank), salvo que caiga en la muestra de auditoría →
+ *     revisión [audit_sample].
  */
 export function evaluateConsensus(
   readings: readonly ConsensusReading[],
@@ -115,6 +138,22 @@ export function evaluateConsensus(
     value: NormalizedAnswer | null,
     used: readonly ConsensusReading[],
   ) => decide('needs_review', value, reasons, used);
+  const audited = isAuditSample(options.readingKey, policy.auditSampleRate);
+  const acceptBlank = (used: readonly ValidReading[]): ConsensusResult => {
+    const blank = blankAnswer(format);
+    const blankScore = scoreOf(blank);
+    const reviewBlank = (reason: ReviewReason) =>
+      decide('needs_review', blank, [reason], used, blankScore);
+    if (used.some((reading) => reading.output.reviewRequested)) {
+      return reviewBlank('reader_requested_review');
+    }
+    if (used.some((reading) => reading.output.confidence < policy.minConfidence)) {
+      return reviewBlank('low_confidence');
+    }
+    if (!policy.autoAccept) return reviewBlank('policy_requires_review');
+    if (audited) return reviewBlank('audit_sample');
+    return decide('auto_blank', blank, [], used, blankScore);
+  };
 
   if (
     policy.blankByInkBelow !== null &&
@@ -122,8 +161,7 @@ export function evaluateConsensus(
     options.inkRatio !== null &&
     options.inkRatio < policy.blankByInkBelow
   ) {
-    const blank = blankAnswer(format);
-    return decide('auto_blank', blank, [], [], scoreOf(blank));
+    return acceptBlank([]);
   }
 
   const primaries = readings.filter((reading) => (reading.role ?? 'primary') === 'primary');
@@ -148,12 +186,7 @@ export function evaluateConsensus(
 
   const states = valid.map((reading) => reading.output.state);
   if (states.some((state) => state !== 'answered')) {
-    if (states.every((state) => state === 'blank')) {
-      const blank = blankAnswer(format);
-      return policy.autoAccept
-        ? decide('auto_blank', blank, [], valid, scoreOf(blank))
-        : decide('needs_review', blank, ['policy_requires_review'], valid, scoreOf(blank));
-    }
+    if (states.every((state) => state === 'blank')) return acceptBlank(valid);
     const reasons = new Set<ReviewReason>();
     for (const state of states) {
       const reason = STATE_REASONS[state];
@@ -182,6 +215,10 @@ export function evaluateConsensus(
   const usedReadings = used.map((entry) => entry.reading);
   const agreed = used[0]?.answer ?? null;
   if (agreed === null) return review(['readers_disagree'], null, valid);
+
+  if (used.some((entry) => hasFormatIssue(entry.answer))) {
+    return review(['format_mismatch'], agreed, usedReadings);
+  }
 
   if (usedReadings.some((reading) => reading.output.confidence < policy.minConfidence)) {
     return review(['low_confidence'], agreed, usedReadings);
@@ -214,12 +251,7 @@ export function evaluateConsensus(
     return review(['policy_requires_review'], agreed, usedReadings);
   }
 
-  if (
-    options.readingKey !== undefined &&
-    isAuditSample(options.readingKey, policy.auditSampleRate)
-  ) {
-    return review(['audit_sample'], agreed, usedReadings);
-  }
+  if (audited) return review(['audit_sample'], agreed, usedReadings);
 
   return decide('auto_accepted', agreed, [], usedReadings, agreedOutcome);
 }

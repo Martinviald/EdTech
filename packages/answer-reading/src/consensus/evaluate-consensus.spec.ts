@@ -18,19 +18,26 @@ import { toScoringOutcome } from './scoring-outcome';
 const FORMAT: ResponseFormat = { kind: 'decimal', maxChars: 6, allowNegative: false };
 const KEY = '2,5';
 
-function scoreOf(answer: NormalizedAnswer) {
-  return toScoringOutcome(
-    getScoringStrategy('short_answer').score({
-      item: {
-        id: 'item',
-        type: 'short_answer',
-        content: { prompt: '¿?', acceptedAnswers: [KEY] } as ItemContent,
-        maxScore: 1,
-      },
-      rawAnswer: toScoringInput(answer),
-    }),
-  );
+function scorer(key: string, format?: ResponseFormat) {
+  return (answer: NormalizedAnswer) =>
+    toScoringOutcome(
+      getScoringStrategy('short_answer').score({
+        item: {
+          id: 'item',
+          type: 'short_answer',
+          content: {
+            prompt: '¿?',
+            acceptedAnswers: [key],
+            ...(format ? { responseFormat: format } : {}),
+          } as ItemContent,
+          maxScore: 1,
+        },
+        rawAnswer: toScoringInput(answer),
+      }),
+    );
 }
+
+const scoreOf = scorer(KEY);
 
 const POLICY: ConsensusPolicy = { ...DEFAULT_CONSENSUS_POLICY, auditSampleRate: 0 };
 
@@ -53,7 +60,11 @@ function evaluate(
   policy: ConsensusPolicy = POLICY,
   options: { inkRatio?: number | null; readingKey?: string } = {},
 ) {
-  const result = evaluateConsensus(readings, policy, scoreOf, { format: FORMAT, ...options });
+  const result = evaluateConsensus(readings, policy, scoreOf, {
+    format: FORMAT,
+    readingKey: 'casilla',
+    ...options,
+  });
   expect(consensusResultSchema.safeParse(result).success).toBe(true);
   return result;
 }
@@ -98,6 +109,7 @@ describe('evaluateConsensus (diseño §8.2)', () => {
     });
     const disabled = evaluateConsensus([], POLICY, scoreOf, {
       format: FORMAT,
+      readingKey: 'casilla',
       notReadReason: 'external_vision_disabled',
     });
     expect(disabled.reasons).toEqual(['external_vision_disabled']);
@@ -287,5 +299,85 @@ describe('evaluateConsensus (diseño §8.2)', () => {
     expect(evaluate([claude('2,5'), gemini('2,5')], policy, { readingKey: kept }).outcome).toBe(
       'auto_accepted',
     );
+  });
+
+  describe('revisión F2', () => {
+    const blanks = (overrides: Partial<TranscriptionOutput> = {}) => [
+      claude('', { state: 'blank', ...overrides }),
+      gemini('', { state: 'blank' }),
+    ];
+    const always = { ...POLICY, auditSampleRate: 1 };
+
+    it('hallazgo 1: un blanco con petición de revisión o confianza baja no se autoacepta', () => {
+      expect(evaluate(blanks({ reviewRequested: true }))).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['reader_requested_review'],
+        scoringOutcome: 'incorrect',
+      });
+      expect(evaluate(blanks({ confidence: 0.2 }))).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['low_confidence'],
+      });
+    });
+
+    it('hallazgo 1: auto_blank también pasa por la auditoría muestral', () => {
+      const audited = evaluate(blanks(), always);
+      expect(audited).toMatchObject({ outcome: 'needs_review', reasons: ['audit_sample'] });
+      expect(audited.value?.state).toBe('blank');
+      expect(evaluate([], { ...always, blankByInkBelow: 0.01 }, { inkRatio: 0.001 })).toMatchObject(
+        { outcome: 'needs_review', reasons: ['audit_sample'] },
+      );
+    });
+
+    const evaluateFor = (
+      format: ResponseFormat,
+      key: string,
+      readings: ConsensusReading[],
+      policy: ConsensusPolicy = POLICY,
+    ) => {
+      const result = evaluateConsensus(readings, policy, scorer(key, format), {
+        format,
+        readingKey: 'casilla',
+      });
+      expect(consensusResultSchema.safeParse(result).success).toBe(true);
+      return result;
+    };
+
+    it('hallazgo 2: partes que contradicen el literal → revisión [format_mismatch]', () => {
+      const pair: ResponseFormat = { kind: 'ordered_tuple', arity: 2, componentKind: 'integer' };
+      const parts = { c1: '3', c2: '7' };
+      expect(
+        evaluateFor(pair, '(7;3)', [claude('(7;3)', { parts }), gemini('(7;3)', { parts })]),
+      ).toMatchObject({ outcome: 'needs_review', reasons: ['format_mismatch'] });
+    });
+
+    it('hallazgo 2: un valor fuera del formato → revisión [format_mismatch]', () => {
+      const integer: ResponseFormat = { kind: 'integer', maxChars: 6, allowNegative: false };
+      expect(evaluateFor(integer, '35', [claude('-35'), gemini('-35')])).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['format_mismatch'],
+        reviewMode: 'reading',
+      });
+      expect(evaluateFor(integer, '35', [claude('3,5'), gemini('3,5')]).reasons).toEqual([
+        'format_mismatch',
+      ]);
+    });
+
+    it('hallazgo 2: miles/decimal sin resolver → [undecidable]; resuelto por formato o clave → se acepta', () => {
+      const decimal: ResponseFormat = { kind: 'decimal', maxChars: 6, allowNegative: false };
+      const integer: ResponseFormat = { kind: 'integer', maxChars: 6, allowNegative: false };
+      expect(evaluateFor(decimal, '1,5', [claude('1.500'), gemini('1.500')])).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['undecidable'],
+      });
+      expect(evaluateFor(decimal, '1,500', [claude('1.500'), gemini('1.500')])).toMatchObject({
+        outcome: 'auto_accepted',
+        scoringOutcome: 'correct',
+      });
+      expect(evaluateFor(integer, '1500', [claude('1.500'), gemini('1.500')])).toMatchObject({
+        outcome: 'auto_accepted',
+        scoringOutcome: 'correct',
+      });
+    });
   });
 });
