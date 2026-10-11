@@ -1,4 +1,8 @@
-import { inferComparisonMode, matchesAcceptedAnswer } from './short-answer';
+import {
+  creditForAcceptedAnswer,
+  inferComparisonMode,
+  matchesAcceptedAnswer,
+} from './short-answer';
 
 describe('inferComparisonMode', () => {
   it('es numérico cuando todas las claves parsean como número o fracción', () => {
@@ -133,5 +137,94 @@ describe('matchesAcceptedAnswer — secuencias (comparison: sequence)', () => {
 
   it('sin números es incorrecto', () => {
     expect(matchesAcceptedAnswer('no sé', ['3-1-4-2'], opts)).toBe('mismatch');
+  });
+});
+
+// Casos reales de la DIA: clave como la escribe la ficha técnica y respuesta como
+// la entrega la digitalización de GradeCam, que concatena las casillas.
+describe('inferComparisonMode — pares ordenados', () => {
+  it('reconoce el par por su envoltura o su separador explícito', () => {
+    expect(inferComparisonMode(['(7;3)'])).toBe('ordered_tuple');
+    expect(inferComparisonMode(['(2, -4)'])).toBe('ordered_tuple');
+    expect(inferComparisonMode(['7;3'])).toBe('ordered_tuple');
+  });
+
+  it('un negativo entre paréntesis sigue siendo una cantidad', () => {
+    expect(inferComparisonMode(['(-5)'])).toBe('numeric');
+    expect(inferComparisonMode(['-12'])).toBe('numeric');
+  });
+
+  it('un texto con espacios no es un par', () => {
+    expect(inferComparisonMode(['Santiago de Chile'])).toBe('text');
+  });
+});
+
+describe('creditForAcceptedAnswer — par ordenado', () => {
+  it('acierta con la clave escrita distinto que la respuesta', () => {
+    expect(matchesAcceptedAnswer('[7#3]', ['(7;3)'])).toBe('match');
+    expect(matchesAcceptedAnswer('[2#-4]', ['(2, -4)'])).toBe('match');
+    expect(matchesAcceptedAnswer('[0#-2]', ['(0;-2)'])).toBe('match');
+    expect(matchesAcceptedAnswer('7 3', ['(7;3)'])).toBe('match');
+    expect(matchesAcceptedAnswer('[7,0#3]', ['(7;3)'])).toBe('match');
+    expect(matchesAcceptedAnswer('[2,5#3]', ['(2,5; 3)'])).toBe('match');
+  });
+
+  it('invertir las coordenadas es incorrecto', () => {
+    expect(creditForAcceptedAnswer('[3#7]', ['(7;3)'])).toEqual({
+      outcome: 'incorrect',
+      credit: 0,
+    });
+  });
+
+  it('media coordenada bien: crédito solo si la pauta declara componentCredit', () => {
+    expect(creditForAcceptedAnswer('[2#4]', ['(2, -4)'])).toEqual({
+      outcome: 'incorrect',
+      credit: 0,
+    });
+    const componentCredit = { mode: 'per_component' as const, creditPerComponent: [0.5, 0.5] };
+    expect(creditForAcceptedAnswer('[2#4]', ['(2, -4)'], { componentCredit })).toEqual({
+      outcome: 'partial',
+      credit: 0.5,
+    });
+    expect(matchesAcceptedAnswer('[2#4]', ['(2, -4)'], { componentCredit })).toBe('mismatch');
+  });
+
+  it('distinta aridad o un valor pegado no aciertan', () => {
+    expect(matchesAcceptedAnswer('[7#3#1]', ['(7;3)'])).toBe('mismatch');
+    expect(matchesAcceptedAnswer('73', ['(7;3)'])).toBe('mismatch');
+  });
+
+  it('una clave que no se entiende como par deja la respuesta indecidible', () => {
+    expect(matchesAcceptedAnswer('(7;3)', ['siete'], { comparison: 'ordered_tuple' })).toBe(
+      'undecidable',
+    );
+  });
+});
+
+describe('matchesAcceptedAnswer — equivalencias de §5.5', () => {
+  it('miles, signos y números mixtos', () => {
+    expect(matchesAcceptedAnswer('1 500', ['1500'])).toBe('match');
+    expect(matchesAcceptedAnswer('−5', ['-5'])).toBe('match');
+    expect(matchesAcceptedAnswer('(-5)', ['-5'])).toBe('match');
+    expect(matchesAcceptedAnswer('1 1/2', ['3/2'])).toBe('match');
+  });
+
+  it('un número ambiguo miles/decimal queda indecidible si cambia el resultado', () => {
+    expect(matchesAcceptedAnswer('1.500', ['1500'])).toBe('undecidable');
+    expect(matchesAcceptedAnswer('1.500', ['1,5'])).toBe('undecidable');
+    expect(matchesAcceptedAnswer('1.500', ['8'])).toBe('mismatch');
+  });
+
+  it('la pauta del ítem manda: formato fracción sin decimal equivalente', () => {
+    expect(matchesAcceptedAnswer('0,75', ['3/4'], { formatKind: 'fraction' })).toBe('mismatch');
+    expect(
+      matchesAcceptedAnswer('0,75', ['3/4'], {
+        formatKind: 'fraction',
+        equivalences: { acceptDecimalEquivalent: true },
+      }),
+    ).toBe('match');
+    expect(
+      matchesAcceptedAnswer('6/8', ['3/4'], { equivalences: { requireSimplified: true } }),
+    ).toBe('mismatch');
   });
 });

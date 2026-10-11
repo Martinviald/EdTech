@@ -594,6 +594,70 @@ describe('SCORING_STRATEGIES (registro de estrategias por tipo)', () => {
       );
       expect(out.rawScore).toBe(4);
     });
+
+    describe('par ordenado con crédito por componente', () => {
+      const pair = {
+        prompt: '¿Coordenadas?',
+        acceptedAnswers: ['(2, -4)'],
+      } as unknown as ItemContent;
+      const componentCredit = { mode: 'per_component' as const, creditPerComponent: [0.5, 0.5] };
+
+      it('sin componentCredit es todo o nada', () => {
+        const out = getScoringStrategy('short_answer').score(
+          input('short_answer', pair, '[2#4]', 2),
+        );
+        expect(out).toEqual({ isCorrect: false, rawScore: 0, requiresManualGrading: false });
+      });
+
+      it('con componentCredit da puntaje parcial', () => {
+        const out = getScoringStrategy('short_answer').score(
+          input('short_answer', pair, '[2#4]', 2, { points: 2, componentCredit }),
+        );
+        expect(out).toEqual({ isCorrect: false, rawScore: 1, requiresManualGrading: false });
+      });
+
+      it('partialCredit: false lo apaga', () => {
+        const out = getScoringStrategy('short_answer').score(
+          input('short_answer', pair, '[2#4]', 2, {
+            points: 2,
+            partialCredit: false,
+            componentCredit,
+          }),
+        );
+        expect(out.rawScore).toBe(0);
+      });
+
+      it('el par completo vale el puntaje total', () => {
+        const out = getScoringStrategy('short_answer').score(
+          input('short_answer', pair, '[2#-4]', 2, { points: 2, componentCredit }),
+        );
+        expect(out).toEqual({ isCorrect: true, rawScore: 2, requiresManualGrading: false });
+      });
+    });
+
+    it('lee las equivalencias de scoring_config', () => {
+      const out = getScoringStrategy('short_answer').score(
+        input(
+          'short_answer',
+          { prompt: '¿?', acceptedAnswers: ['3/4'] } as unknown as ItemContent,
+          '6/8',
+          1,
+          { equivalences: { requireSimplified: true } },
+        ),
+      );
+      expect(out.isCorrect).toBe(false);
+    });
+
+    it('un número ambiguo miles/decimal queda pendiente', () => {
+      const out = getScoringStrategy('short_answer').score(
+        input(
+          'short_answer',
+          { prompt: '¿?', acceptedAnswers: ['1500'] } as unknown as ItemContent,
+          '1.500',
+        ),
+      );
+      expect(out).toEqual({ isCorrect: null, rawScore: null, requiresManualGrading: true });
+    });
   });
 
   // ── rubric_scored ──────────────────────────────────────────────────────────
