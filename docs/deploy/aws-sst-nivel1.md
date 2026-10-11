@@ -36,9 +36,9 @@ se define con el provider crudo `aws.*`). Stage: `production`. Región: `us-east
 > principal del repo suele estar en la rama de trabajo de alguien más; ejecutar el comando desde
 > ahí despliega esa rama.
 >
-> **Usa el CD:** `deploy-frontend.yml`, `deploy-backend.yml` y `deploy-omr.yml` despliegan desde
-> `main` con la configuración correcta, y se pueden lanzar a mano con **Run workflow**
-> (`gh workflow run <archivo> --ref main`). Si necesitas correr SST localmente para inspeccionar
+> **Usa el CD:** `deploy.yml` despliega desde `main` con la configuración correcta, y se puede
+> lanzar a mano con **Run workflow** marcando qué desplegar
+> (`gh workflow run deploy.yml --ref main -f frontend=true`). Si necesitas correr SST localmente para inspeccionar
 > —`sst state export`, `sst diff`—, hazlo desde un árbol que sea **exactamente** la rama
 > desplegada, y nunca con un subcomando que mute.
 
@@ -116,8 +116,8 @@ docker buildx build --platform linux/amd64 \
 `:latest`, así que si esta imagen no existe el paso 5 falla con `CREATE_FAILED` en `Omr`
 (el backend sí levanta: son servicios independientes).
 
-La forma recomendada es no construirla a mano: correr el workflow **`deploy-omr.yml`** con
-**Run workflow** (`workflow_dispatch`) desde la pestaña Actions. Usa el mismo Dockerfile y
+La forma recomendada es no construirla a mano: correr el workflow **`deploy.yml`** con
+**Run workflow** (`workflow_dispatch`) marcando sólo **`omr`**, desde la pestaña Actions. Usa el mismo Dockerfile y
 la misma plataforma que usará el CI de ahí en adelante, así que lo que se despliega es
 exactamente lo que el pipeline va a reproducir.
 
@@ -186,20 +186,30 @@ Abrí la URL `web`. Con `AuthMode=mock` entrás con el dropdown del seed.
 
 ## 6. CI/CD (push a main)
 
-Tres workflows en `.github/workflows/`:
+Un solo workflow, `.github/workflows/deploy.yml`. Un job `changes` (`dorny/paths-filter`)
+decide qué ramas corren:
 
-| Workflow              | Dispara con                                                      | Hace                                                                                                                                                       |
-| --------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `deploy-backend.yml`  | cambios en `apps/api`, `packages/db`, `packages/types`, lockfile | **(1) migra el RDS** (port-forward SSM por el bastión — gatea el deploy) → **(2)** build de la imagen → push a ECR `:latest` → App Runner **auto-deploya** |
-| `deploy-omr.yml`      | cambios en `services/omr` (o **Run workflow** a mano)            | build de la imagen del OMR → push a ECR `:latest` → App Runner **auto-deploya**                                                                            |
-| `deploy-frontend.yml` | cambios en `apps/web`, `packages`, `sst.config.ts`               | `sst deploy` (deploy completo idempotente)                                                                                                                 |
+| Rama     | Dispara con                                           | Hace                                                                                                                                                                          |
+| -------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| backend  | `apps/api`, `packages/{db,types,decisions}`, lockfile | `migrate` (RDS + read-models) **en paralelo con** `backend-image` (build → ECR `:sha`) → `backend-release` mueve `:latest` a ese `:sha` → App Runner **auto-deploya**         |
+| OMR      | `services/omr`                                        | build → ECR `:latest` y `:sha` → App Runner **auto-deploya**                                                                                                                  |
+| frontend | `apps/web`, `packages/types`, `sst.config.ts`         | `sst deploy` completo. Si el mismo push publica una imagen, espera a los releases (`frontend-after-images`); siempre espera a que App Runner salga de `OPERATION_IN_PROGRESS` |
 
-Los tres comparten el grupo de `concurrency`: nunca corren a la vez, porque el `sst deploy`
-del front reconcilia también los servicios de App Runner y chocaría con un auto-deploy.
+Backend y OMR corren en paralelo. El frontend sólo corre en paralelo con ellos si el push no
+publica ninguna imagen: hoy `sst deploy` actualiza el servicio `Api` de App Runner en **cada**
+corrida (un diff que no converge desde #247), y si coincide con el auto-deploy de una imagen
+nueva choca con `OPERATION_IN_PROGRESS`.
 
-El OMR va en su propio workflow y no como un job de `deploy-backend.yml` porque no tiene
-base de datos ni migraciones: colgarlo del job `migrate` haría que una migración rota
-bloquee un arreglo de visión que no toca la BDD.
+**No corre los checks.** Los corre `ci.yml` en la PR, y la branch protection de `main` los
+exige con `strict` (la PR tiene que estar al día con `main`, así que lo que se mergea es lo
+que se probó) y bloquea el push directo (también a admins). Si se renombra o agrega un job en
+`checks.yml`, hay que actualizar la lista de required checks de `main`.
+
+Todo el workflow comparte el grupo de `concurrency` con `backfill-cohort-stats.yml` y
+`refresh-benchmark.yml`: dos pushes seguidos se encolan, nunca corren a la vez.
+
+El OMR no cuelga del job `migrate` porque no tiene base de datos ni migraciones: una migración
+rota no bloquea un arreglo de visión que no toca la BDD.
 
 **Secrets de GitHub** (Settings → Secrets and variables → Actions):
 
@@ -209,12 +219,12 @@ AWS_SECRET_ACCESS_KEY
 DB_MASTER_PASSWORD      # = SST secret DbMasterPassword (stage demo). Lo usa el job `migrate`.
 ```
 
-> **Migración automática (job `migrate` en `deploy-backend.yml`):** corre `db:migrate` contra el
+> **Migración automática (job `migrate` en `deploy.yml`):** corre `db:migrate` contra el
 > RDS privado **antes** del build/push, vía un **port-forward SSM** por el bastión (la NAT
 > instance de SST, gestionada por SSM — no usa `sst tunnel`, evita sudo/TUN en el runner).
 > Las migraciones son **aditivas** → el código viejo no se rompe mientras corre; cuando App Runner
-> levanta la imagen nueva la BDD ya está a la par. Si la migración falla, el build/push **no**
-> ocurre (`needs: migrate`). Descubre el RDS y el bastión por tags; requiere el secret
+> levanta la imagen nueva la BDD ya está a la par. Si la migración falla, `:latest` **no**
+> se mueve (`backend-release` necesita a `migrate`) y producción sigue con la imagen anterior. Descubre el RDS y el bastión por tags; requiere el secret
 > `DB_MASTER_PASSWORD` (= `DbMasterPassword` de SST) y que las AWS keys tengan permisos SSM
 > `StartSession` (`EdTech-deployer` con `AdministratorAccess` los tiene). Para migrar a mano
 > fuera de CI, seguí usando `sst tunnel` (§4). **Esto cierra el bug de "column … does not exist"**

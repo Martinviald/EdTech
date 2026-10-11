@@ -17,11 +17,11 @@
 ## 2. Promoción `dev → main`
 
 - [ ] Abrir PR **`dev → main`**.
-- [ ] Merge → dispara `deploy-backend.yml` y `deploy-frontend.yml`.
+- [ ] Merge → dispara `deploy.yml` (backend y frontend).
 
 ## 3. Qué corre el deploy AUTOMÁTICAMENTE (no hacer a mano)
 
-`deploy-backend.yml` (push a `main` que toca backend), vía SSM port-forward por el bastión, como admin (`DATABASE_ADMIN_URL` → `soe_admin`):
+Job `migrate` de `deploy.yml` (push a `main` que toca backend), vía SSM port-forward por el bastión, como admin (`DATABASE_ADMIN_URL` → `soe_admin`):
 
 1. **Migra el RDS** — `db:migrate`: aplica `0015`/`0016`/`0017` y **re-aplica `rls-policies.sql`**.
 2. **Backfill del read-model de cohorte** — `db:backfill:cohort-stats`: puebla `assessment_item_stats` / `assessment_skill_stats`. **Resuelve B2**: sin esto, Dimensiones / Mapa de calor / heatmap / skills / informe salen en blanco. Idempotente.
@@ -33,7 +33,7 @@
 (§4.1). Son scripts de datos y quedan manuales. En el demo actual ya están aplicados; la advertencia
 vale para **cualquier ambiente nuevo o re-seedeado**.
 
-📌 **`main` despliega al stage `demo`** (`STAGE: demo` en `deploy-backend.yml`) — no hay un stage
+📌 **`main` despliega al stage `demo`** (`STAGE: demo` en `deploy.yml`) — no hay un stage
 `prod` separado hoy. Cuando lo haya, todo el §4 hay que repetirlo ahí.
 
 ## 4. Acciones MANUALES sobre el demo desplegado (lo que el deploy NO cubre)

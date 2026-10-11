@@ -71,7 +71,7 @@ Contexto y decisiones: `docs/diseno-tablero-procesos-pruebas.md`. Detalle de cad
 
 ## 1. Merge y deploy
 
-El push a `main` corre `deploy-backend.yml`: **siete** migraciones, re-aplica `rls-policies.sql` y corre el gate+backfill de cohort stats y el refresco del read-model de benchmarking.
+El push a `main` corre el job `migrate` de `deploy.yml`: **siete** migraciones, re-aplica `rls-policies.sql` y corre el gate+backfill de cohort stats y el refresco del read-model de benchmarking.
 
 | Migración                                       | Qué trae                                                                                                          |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
