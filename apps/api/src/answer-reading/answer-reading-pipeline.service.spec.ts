@@ -45,6 +45,7 @@ import { CropReadingService } from './crop-reading.service';
 import { ReadingRoutesService } from './reading-routes.service';
 import type { RubricGradingService } from './rubric-grading.service';
 import { InMemoryDatabase } from './testing/in-memory-database';
+import type { VisionTranscriber } from './transcribers/vision-transcriber';
 import { VisionTranscriberRegistry } from './transcribers/vision-transcriber.registry';
 
 const ORG_ID = '11111111-1111-4111-8111-111111111111';
@@ -177,6 +178,7 @@ interface SetupOptions {
   readonly batchStatus?: string;
   readonly budgetExceeded?: boolean;
   readonly options?: Partial<AnswerReadingOptions>;
+  readonly wrapTranscriber?: (fake: FakeTranscriber, memory: InMemoryDatabase) => VisionTranscriber;
   readonly marks?: Array<{
     id: string;
     fieldId: string;
@@ -264,8 +266,10 @@ function setup(setupOptions: SetupOptions = {}) {
     },
   ]);
 
+  memory.unique(answerReadings, ['orgId', 'readingKey', 'readerKey', 'mode', 'attempt']);
   const db = memory.asDatabase();
   const transcriber = new FakeTranscriber({ byReader: setupOptions.readings ?? {} });
+  const activeTranscriber = setupOptions.wrapTranscriber?.(transcriber, memory) ?? transcriber;
   const files = {
     getById: jest.fn(async (_orgId: string, fileId: string) => ({
       id: fileId,
@@ -308,7 +312,7 @@ function setup(setupOptions: SetupOptions = {}) {
     db,
     dispatcher,
     new ReadingRoutesService(db),
-    new CropReadingService(db, files, new VisionTranscriberRegistry([transcriber]), options),
+    new CropReadingService(db, files, new VisionTranscriberRegistry([activeTranscriber]), options),
     new AnswerReadingDecisionsService(db),
     budget,
     consolidation,
@@ -826,6 +830,51 @@ describe('AnswerReadingPipelineService — lectores que fallan', () => {
       reviewMode: 'reading',
     });
     expect(reportSpy).toHaveBeenCalled();
+  });
+
+  it('si otra corrida guardó la misma lectura mientras se leía, la llamada pagada se registra como el intento siguiente con su costo', async () => {
+    let collided = false;
+    const { memory, runScan } = setup({
+      readings: agree,
+      wrapTranscriber: (fake, store) => ({
+        id: fake.id,
+        supports: (spec) => fake.supports(spec),
+        transcribe: async (request) => {
+          const result = await fake.transcribe(request);
+          if (!collided && request.reader.key === 'haiku') {
+            collided = true;
+            store.seed(answerReadings, [
+              {
+                orgId: ORG_ID,
+                readingKey: request.readingKey,
+                readerKey: 'haiku',
+                mode: 'primary',
+                attempt: 1,
+                status: 'ok',
+                output: result.output,
+                family: 'anthropic-haiku',
+                costUsd: '0.002000',
+              },
+            ]);
+          }
+          return { ...result, costUsd: 0.002 };
+        },
+      }),
+    });
+
+    await runScan();
+
+    const haiku = readingsOf(memory)
+      .filter((row) => row.readerKey === 'haiku')
+      .map((row) => [row.attempt, row.costUsd, row.status]);
+    expect(haiku).toEqual(
+      expect.arrayContaining([
+        [1, '0.002000', 'ok'],
+        [2, '0.002000', 'ok'],
+      ]),
+    );
+    expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted' });
+    expect(Number(runOf(memory).costUsd)).toBeCloseTo(0.004, 6);
   });
 
   it('una salida inválida no se reintenta con el mismo lector', async () => {

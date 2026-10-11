@@ -16,6 +16,7 @@ interface SelectState {
 export class InMemoryDatabase {
   private readonly store = new Map<Table, Row[]>();
   private readonly keysByTable = new Map<Table, Map<unknown, string>>();
+  private readonly uniqueKeys = new Map<Table, Array<readonly string[]>>();
 
   seed(table: Table, rows: Row[]): void {
     this.rowsOf(table).push(...rows.map((row) => this.withDefaults(table, row)));
@@ -79,22 +80,60 @@ export class InMemoryDatabase {
     return rows.map((row) => this.project(table, row, projection));
   }
 
+  unique(table: Table, keys: readonly string[]): void {
+    let constraints = this.uniqueKeys.get(table);
+    if (!constraints) {
+      constraints = [];
+      this.uniqueKeys.set(table, constraints);
+    }
+    constraints.push(keys);
+  }
+
   private insertBuilder(table: Table) {
-    let inserted: Row[] = [];
+    let pending: Row[] = [];
+    let ignoreConflicts = false;
+    let inserted: Row[] | null = null;
+    const commit = (): Row[] => {
+      if (inserted !== null) return inserted;
+      const accepted: Row[] = [];
+      for (const row of pending) {
+        if (this.conflicts(table, row)) {
+          if (ignoreConflicts) continue;
+          throw Object.assign(new Error('duplicate key value violates unique constraint'), {
+            code: '23505',
+          });
+        }
+        this.rowsOf(table).push(row);
+        accepted.push(row);
+      }
+      inserted = accepted;
+      return accepted;
+    };
     const builder = {
       values: (values: Row | Row[]) => {
         const list = Array.isArray(values) ? values : [values];
-        inserted = list.map((row) => this.withDefaults(table, row));
-        this.rowsOf(table).push(...inserted);
+        pending = list.map((row) => this.withDefaults(table, row));
         return builder;
       },
-      onConflictDoNothing: () => builder,
+      onConflictDoNothing: () => {
+        ignoreConflicts = true;
+        return builder;
+      },
       returning: (projection?: Record<string, unknown>) =>
-        Promise.resolve(inserted.map((row) => this.project(table, row, projection))),
+        Promise.resolve().then(() => commit().map((row) => this.project(table, row, projection))),
       then: <T>(resolve: (rows: Row[]) => T, reject?: (error: unknown) => unknown) =>
-        Promise.resolve(inserted).then(resolve, reject),
+        Promise.resolve()
+          .then(() => commit())
+          .then(resolve, reject),
     };
     return builder;
+  }
+
+  private conflicts(table: Table, row: Row): boolean {
+    const constraints = this.uniqueKeys.get(table) ?? [];
+    return constraints.some((keys) =>
+      this.rowsOf(table).some((existing) => keys.every((key) => existing[key] === row[key])),
+    );
   }
 
   private updateBuilder(table: Table) {

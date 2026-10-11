@@ -14,7 +14,7 @@ import {
   type TranscriptionImage,
   type TranscriptionResult,
 } from '@soe/answer-reading';
-import { answerReadings, withOrgContext } from '@soe/db';
+import { answerReadings, withOrgContext, type NewAnswerReadingRow } from '@soe/db';
 import {
   DEFAULT_CONSENSUS_POLICY,
   reviewModeFor,
@@ -119,6 +119,10 @@ interface ReadingScope {
   readonly cropSha256: string;
   readonly image: () => Promise<TranscriptionImage>;
 }
+
+type ReadingInsert = NewAnswerReadingRow & { readonly attempt: number; readonly mode: ReadingMode };
+
+const MAX_READING_INSERT_TRIES = 3;
 
 @Injectable()
 export class CropReadingService {
@@ -384,50 +388,88 @@ export class CropReadingService {
     const usage = result.usage;
     const costUsd = result.costUsd ?? 0;
     const id = randomUUID();
-    await withOrgContext(this.db, task.orgId, (tx) =>
-      tx.insert(answerReadings).values({
-        id,
-        orgId: task.orgId,
-        runId: task.runId,
-        markId: task.markId,
-        itemId: task.item.id,
-        cropFileId: task.cropFileId,
-        cropSha256: scope.cropSha256,
-        cropProfileId: task.cropProfileId,
-        responseFormat: task.format,
-        readingKey: plan.readingKey,
-        mode: plan.mode,
-        attempt,
-        routeId: scope.route.route.routeId,
-        routeVersion: scope.route.route.routeVersion,
-        readerKey: plan.reader.key,
-        transcriberId: plan.reader.transcriberId,
-        provider: plan.reader.provider,
-        family: plan.reader.family,
-        model: plan.reader.model,
-        providerModel: result.providerModel,
-        promptRef: plan.prompt.ref,
-        promptHash: plan.prompt.hash,
-        outputSchemaId: plan.prompt.outputSchemaId,
-        params: plan.reader.params,
-        status: result.status,
-        output,
-        readingState: output?.state ?? null,
-        literal: output?.literal ?? null,
-        confidence: output === null ? null : output.confidence.toFixed(3),
-        rawText: result.status === 'invalid_output' ? result.rawText : null,
-        normalized: output === null ? null : normalizeTranscription(output, task.format),
-        inputTokens: usage?.inputTokens ?? 0,
-        outputTokens: usage?.outputTokens ?? 0,
-        reasoningTokens: usage?.reasoningTokens ?? 0,
-        cachedInputTokens: usage?.cachedInputTokens ?? 0,
-        imageTokens: usage?.imageTokens ?? null,
-        costUsd: costUsd.toFixed(6),
-        latencyMs: result.latencyMs,
-        errorCode: result.errorCode,
-      }),
-    );
+    const reading: ReadingInsert = {
+      id,
+      orgId: task.orgId,
+      runId: task.runId,
+      markId: task.markId,
+      itemId: task.item.id,
+      cropFileId: task.cropFileId,
+      cropSha256: scope.cropSha256,
+      cropProfileId: task.cropProfileId,
+      responseFormat: task.format,
+      readingKey: plan.readingKey,
+      mode: plan.mode,
+      attempt,
+      routeId: scope.route.route.routeId,
+      routeVersion: scope.route.route.routeVersion,
+      readerKey: plan.reader.key,
+      transcriberId: plan.reader.transcriberId,
+      provider: plan.reader.provider,
+      family: plan.reader.family,
+      model: plan.reader.model,
+      providerModel: result.providerModel,
+      promptRef: plan.prompt.ref,
+      promptHash: plan.prompt.hash,
+      outputSchemaId: plan.prompt.outputSchemaId,
+      params: plan.reader.params,
+      status: result.status,
+      output,
+      readingState: output?.state ?? null,
+      literal: output?.literal ?? null,
+      confidence: output === null ? null : output.confidence.toFixed(3),
+      rawText: result.status === 'invalid_output' ? result.rawText : null,
+      normalized: output === null ? null : normalizeTranscription(output, task.format),
+      inputTokens: usage?.inputTokens ?? 0,
+      outputTokens: usage?.outputTokens ?? 0,
+      reasoningTokens: usage?.reasoningTokens ?? 0,
+      cachedInputTokens: usage?.cachedInputTokens ?? 0,
+      imageTokens: usage?.imageTokens ?? null,
+      costUsd: costUsd.toFixed(6),
+      latencyMs: result.latencyMs,
+      errorCode: result.errorCode,
+    };
+    await this.insertReading(task.orgId, reading);
     return { id, status: result.status, output, errorCode: result.errorCode, costUsd };
+  }
+
+  private async insertReading(orgId: string, reading: ReadingInsert): Promise<void> {
+    await withOrgContext(this.db, orgId, async (tx) => {
+      let attempt = reading.attempt;
+      for (let tries = 0; tries < MAX_READING_INSERT_TRIES; tries++) {
+        const inserted = await tx
+          .insert(answerReadings)
+          .values({ ...reading, attempt })
+          .onConflictDoNothing()
+          .returning({ id: answerReadings.id });
+        if (inserted.length > 0) return;
+        attempt = (await this.lastAttemptOf(tx, orgId, reading)) + 1;
+      }
+      throw new Error(
+        'No se pudo registrar la lectura por visión: el intento choca con otra corrida',
+      );
+    });
+  }
+
+  private async lastAttemptOf(
+    tx: Database,
+    orgId: string,
+    reading: ReadingInsert,
+  ): Promise<number> {
+    const rows = await tx
+      .select({ attempt: answerReadings.attempt })
+      .from(answerReadings)
+      .where(
+        and(
+          eq(answerReadings.orgId, orgId),
+          eq(answerReadings.readingKey, reading.readingKey),
+          eq(answerReadings.readerKey, reading.readerKey),
+          eq(answerReadings.mode, reading.mode),
+        ),
+      );
+    let last = reading.attempt;
+    for (const row of rows) last = Math.max(last, row.attempt);
+    return last;
   }
 
   private async transcribe(
