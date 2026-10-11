@@ -299,3 +299,27 @@ registra.
 - El agente se detuvo antes de entregar su informe por el límite de uso: la prueba real autorizada
   de `grade.rubric@1` (tope US$0,05) no quedó registrada; se cuenta el tope en el gasto.
   Gasto acumulado: ≤ US$0,17.
+
+### F10b (rama `wip/cv-f10b`, sin integrar)
+
+- **Burbujas por fila (`bubble_choice`):** se derivan por TIPO (`matching`, `ordering`, como ya
+  hacía `resolveResponseFormat`) o si el ítem lo declara (`short_answer` con clave de secuencia).
+  Un grupo de burbujas por término (pareado) o por posición (orden/secuencia), en la grilla de
+  burbujas, con número impreso `<n>.<subclave>` (`16.A1`, `17.3`). La subclave sale de la
+  etiqueta del término (o su ordinal) y el layout verifica contra `resolveScanLabel` que la fila
+  vuelva a su ítem: si choca con otro número impreso, el ítem se excluye con motivo. Valor de
+  cada burbuja: etiqueta corta de la opción (≤ 2 caracteres), si no el id corto, si no letras
+  A, B, C…; la ingesta (`toScoringAnswer`) traduce el valor al id (id exacto primero, así las
+  ingestas CSV previas no cambian). Máximo 6 opciones por fila.
+- **Puntaje docente (`score_bubbles`):** solo si el ítem `rubric_scored` lo declara; los de
+  rúbrica sin declaración siguen en `free_text`. Fila de burbujas por nivel en el área de
+  respuestas escritas, `fieldId` con sufijo `_puntaje` (así la hoja imprime "Puntaje (lo marca el
+  docente)" sin datos fuera del spec); el valor es el código del nivel y va directo a
+  `rubricScoredStrategy`. Los niveles deben existir en la rúbrica del ítem.
+- **`multi_box` con signos:** campo opcional `operatorBefore` por casilla (`+ - × ÷ = < >`, contrato
+  de `response-format.schema.ts`). Con algún signo, las casillas van en fila con rótulo a la
+  izquierda y el signo entre casillas, siempre fuera; sin signos, la geometría es la de F5b
+  (hash sin cambios). La hoja achica o recorta un rótulo que no cabe antes de su casilla.
+- **Riesgo anotado:** los glifos impresos dentro de la región (rótulos, signos, paréntesis,
+  unidad) cuentan como tinta en el `inkRatio` total del OMR (`ink.py` solo descuenta los
+  bordes de las casillas); `inkRatioByPart` no se ve afectado.
