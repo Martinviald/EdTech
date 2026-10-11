@@ -83,7 +83,7 @@ describe('arnés answer-reading:eval', () => {
     expect(written).toEqual(JSON.parse(JSON.stringify(result.report)));
     const summary = await readFile(join(outDir, SUMMARY_FILE), 'utf8');
     expect(summary).toContain('Precisión de lo autoaceptado');
-    expect(summary).toContain('omitida (unsupported_format)');
+    expect(summary).toContain('omitida (prompt_unsupported_format)');
   });
 
   it('--compare contra la misma ruta no muestra cambios', async () => {
