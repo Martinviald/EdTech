@@ -10,11 +10,8 @@ import type { LlmUsage } from './llm.types';
  * ⚠️ El orden importa: `find` devuelve el primer prefijo que haga `startsWith`,
  * así que las variantes más específicas (`-lite`, `-pro`) van ANTES que el prefijo
  * más corto que las contendría (`gemini-2.5-flash` contiene a `gemini-2.5-flash-lite`).
- *
- * Respaldo de las tarifas del catálogo `llm_models` (BDD): sólo se usa si el
- * modelo no está en la tabla, para no perder el costo histórico de modelos viejos.
  */
-const MODEL_PRICING_PER_MTOK: ReadonlyArray<{
+const FALLBACK_MODEL_PRICING_PER_MTOK: ReadonlyArray<{
   prefix: string;
   inputUsd: number;
   outputUsd: number;
@@ -62,7 +59,7 @@ export function setCatalogTariffs(tariffs: ReadonlyMap<string, LlmModelTariff>):
 function resolveTariff(model: string): LlmModelTariff | null {
   const fromCatalog = catalogTariffs.get(model);
   if (fromCatalog) return fromCatalog;
-  const fallback = MODEL_PRICING_PER_MTOK.find((t) => model.startsWith(t.prefix));
+  const fallback = FALLBACK_MODEL_PRICING_PER_MTOK.find((t) => model.startsWith(t.prefix));
   if (!fallback) return null;
   return {
     inputUsdPerMtok: fallback.inputUsd,

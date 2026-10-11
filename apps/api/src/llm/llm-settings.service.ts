@@ -35,11 +35,6 @@ export class LlmSettingsService {
     @Inject(LLM_PROVIDER_REGISTRY) private readonly registry: LlmProvider[],
   ) {}
 
-  /**
-   * Config efectiva de cada funcionalidad + modelos habilitados (`llm_models`) para el panel.
-   * Para cada feature: fila global si existe (`source: 'global'`), si no el default
-   * de código (`source: 'default'`).
-   */
   async getSettings(): Promise<LlmSettingsResponse> {
     const [globals, catalog] = await Promise.all([
       this.db
@@ -86,11 +81,6 @@ export class LlmSettingsService {
     };
   }
 
-  /**
-   * Upsert de la fila GLOBAL de una funcionalidad. `dto` trae sólo la forma validada
-   * por Zod; aquí se valida contra `llm_models` que el modelo exista, esté habilitado
-   * y sea multimodal cuando la funcionalidad envía imágenes.
-   */
   async upsertGlobal(
     feature: LlmFeature,
     dto: UpdateLlmSettingDto,

@@ -25,8 +25,6 @@ import type { LlmRuntimeConfig } from './llm.types';
  *     son visibles dentro de `withOrgContext`; las globales se leen sin contexto.)
  *  2. Fila global (`org_id IS NULL`).
  *  3. Default de código `LLM_FEATURE_DEFAULTS[feature]` (fallback).
- * El `maxTokens` se deriva del catálogo `llm_models` (`LlmModelsService`); el
- * panel sólo configura proveedor + modelo.
  */
 @Injectable()
 export class LlmConfigService {
