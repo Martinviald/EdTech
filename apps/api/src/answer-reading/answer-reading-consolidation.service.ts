@@ -113,7 +113,7 @@ interface TargetResponse {
   readonly assessmentId: string;
   readonly hasHumanScore: boolean;
   readonly isPending: boolean;
-  readonly writtenByDecisionId: string | null;
+  readonly writtenByMarkId: string | null;
 }
 
 interface ScoredValue {
@@ -482,7 +482,7 @@ export class AnswerReadingConsolidationService {
   }
 
   private hasForeignHumanScore(decision: AnswerReadingDecision, target: TargetResponse): boolean {
-    return target.hasHumanScore && target.writtenByDecisionId !== decision.id;
+    return target.hasHumanScore && target.writtenByMarkId !== decision.markId;
   }
 
   private writtenByDecisionId(value: unknown): string | null {
@@ -824,19 +824,42 @@ export class AnswerReadingConsolidationService {
       .from(responses)
       .where(inArray(responses.id, [...new Set(responseIdByDecision.values())]));
     const responseById = new Map(responseRows.map((row) => [row.id, row]));
+    const writerMarks = await this.markIdsOfDecisions(
+      tx,
+      orgId,
+      responseRows.map((row) => this.writtenByDecisionId(row.value)),
+    );
     const targets = new Map<string, TargetResponse>();
     for (const [decisionId, responseId] of responseIdByDecision) {
       const row = responseById.get(responseId);
       if (!row) continue;
+      const writerId = this.writtenByDecisionId(row.value);
       targets.set(decisionId, {
         id: row.id,
         assessmentId: row.assessmentId,
         hasHumanScore: row.humanScore !== null,
         isPending: row.finalScore === null,
-        writtenByDecisionId: this.writtenByDecisionId(row.value),
+        writtenByMarkId: writerId === null ? null : (writerMarks.get(writerId) ?? null),
       });
     }
     return targets;
+  }
+
+  private async markIdsOfDecisions(
+    tx: Database,
+    orgId: string,
+    decisionIds: ReadonlyArray<string | null>,
+  ): Promise<Map<string, string>> {
+    const ids = new Set<string>();
+    for (const decisionId of decisionIds) if (decisionId !== null) ids.add(decisionId);
+    if (ids.size === 0) return new Map();
+    const rows = await tx
+      .select({ id: answerReadingDecisions.id, markId: answerReadingDecisions.markId })
+      .from(answerReadingDecisions)
+      .where(
+        and(eq(answerReadingDecisions.orgId, orgId), inArray(answerReadingDecisions.id, [...ids])),
+      );
+    return new Map(rows.map((row) => [row.id, row.markId]));
   }
 
   private async inheritedResponseIds(

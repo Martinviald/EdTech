@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import {
   answerReadingDecisions,
+  answerReadingSamples,
   answerReviews,
   sheetScanMarks,
   sheetScans,
@@ -192,6 +193,48 @@ export class AnswerReadingDecisionsService {
         ),
       );
     await tx.insert(answerReadingDecisions).values(next);
+    await this.inheritActiveReview(tx, orgId, currentId, next.id);
+  }
+
+  private async inheritActiveReview(
+    tx: Database,
+    orgId: string,
+    fromDecisionId: string,
+    toDecisionId: string,
+  ): Promise<void> {
+    const active = (await this.activeReviewsByDecision(tx, orgId, [fromDecisionId])).get(
+      fromDecisionId,
+    );
+    if (!active) return;
+    const inheritedId = randomUUID();
+    const now = new Date();
+    await tx.insert(answerReviews).values({
+      ...active,
+      id: inheritedId,
+      decisionId: toDecisionId,
+      supersededById: null,
+      createdAt: now,
+    });
+    await tx
+      .update(answerReviews)
+      .set({ supersededById: inheritedId })
+      .where(
+        and(
+          eq(answerReviews.orgId, orgId),
+          eq(answerReviews.id, active.id),
+          isNull(answerReviews.supersededById),
+        ),
+      );
+    await tx
+      .update(answerReadingSamples)
+      .set({ reviewId: inheritedId, decisionId: toDecisionId, updatedAt: now })
+      .where(
+        and(
+          eq(answerReadingSamples.orgId, orgId),
+          eq(answerReadingSamples.reviewId, active.id),
+          isNull(answerReadingSamples.deletedAt),
+        ),
+      );
   }
 
   private isSameDecision(current: AnswerReadingDecision, input: ReadingDecisionInput): boolean {

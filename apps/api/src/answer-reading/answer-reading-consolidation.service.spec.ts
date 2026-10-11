@@ -6,7 +6,9 @@ jest.mock('drizzle-orm', () => ({
 import { fakeOutput, normalizeTranscription } from '@soe/answer-reading';
 import {
   answerReadingDecisions,
+  answerReadingSamples,
   answerReadings,
+  answerReviews,
   items,
   printedSheets,
   responses,
@@ -15,6 +17,7 @@ import {
   sheetScanMarks,
   sheetScans,
   type AnswerReadingDecision,
+  type AnswerReview,
   type Response,
 } from '@soe/db';
 import {
@@ -810,5 +813,128 @@ describe('AnswerReadingConsolidationService.applyHumanResolution', () => {
 
     expect(report.skipped).toEqual([{ decisionId: decision.id, reason: 'undecidable' }]);
     expect(response.finalScore).toBeNull();
+  });
+});
+
+describe('Revisión heredada al reprocesar una decisión revisada', () => {
+  function seedReview(memory: InMemoryDatabase, overrides: Partial<AnswerReview>) {
+    memory.seed(answerReviews, [
+      {
+        orgId: ORG_ID,
+        reviewerId: REVIEWER_ID,
+        mode: 'grading',
+        action: 'mark_correct',
+        groupSize: 1,
+        ...overrides,
+      },
+    ]);
+    const rows = memory.rows<AnswerReview>(answerReviews);
+    return rows[rows.length - 1] as AnswerReview;
+  }
+
+  it('la decisión nueva hereda la revisión vigente y la anterior queda reemplazada', async () => {
+    const { memory, decisions } = setup();
+    const reviewed = seedDecision(memory, {
+      outcome: 'needs_review',
+      reasons: ['undecidable'],
+      reviewMode: 'grading',
+      value: answer('7', INTEGER),
+    });
+    const review = seedReview(memory, { decisionId: reviewed.id });
+    memory.seed(answerReadingSamples, [
+      { orgId: ORG_ID, decisionId: reviewed.id, reviewId: review.id, itemId: NUMBER_ITEM },
+    ]);
+
+    const saved = await decisions.save(ORG_ID, {
+      runId: RUN_ID,
+      markId: MARK_A,
+      itemId: NUMBER_ITEM,
+      assessmentId: ASSESSMENT_ID,
+      studentId: STUDENT_ID,
+      routeId: null,
+      routeVersion: null,
+      result: {
+        outcome: 'needs_review',
+        value: answer('7', INTEGER),
+        scoringOutcome: 'undecidable',
+        reasons: ['low_confidence'],
+        reviewMode: 'reading',
+        usedReadingIds: [READING_HAIKU],
+        policyId: 'short-answer-default',
+        policyVersion: 2,
+      },
+    });
+
+    const inherited = memory
+      .rows<AnswerReview>(answerReviews)
+      .filter((row) => row.decisionId === saved.decisionId);
+    expect(inherited).toHaveLength(1);
+    expect(inherited[0]).toMatchObject({
+      action: 'mark_correct',
+      reviewerId: REVIEWER_ID,
+      supersededById: null,
+    });
+    expect(review.supersededById).toBe(inherited[0]?.id);
+    const active = await decisions.activeReviewsByDecision(memory.asDatabase(), ORG_ID, [
+      saved.decisionId,
+    ]);
+    expect(active.get(saved.decisionId)?.id).toBe(inherited[0]?.id);
+    expect(memory.rows(answerReadingSamples)[0]).toMatchObject({
+      reviewId: inherited[0]?.id,
+      decisionId: saved.decisionId,
+    });
+  });
+
+  it('la revisión heredada se aplica sobre la respuesta que escribió la decisión anterior de la marca', async () => {
+    const { memory, service } = setup();
+    const previous = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+    const response = seedResponse(memory, {
+      id: RESPONSE_A,
+      value: { answer: '7', reading: { canonical: 'n:7', decisionId: previous.id } },
+      isCorrect: true,
+      rawScore: '1.00',
+      finalScore: '1.00',
+      humanScore: { score: 1, scoredById: REVIEWER_ID },
+    });
+    const current = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+    previous.supersededById = current.id;
+    seedReview(memory, { decisionId: current.id, action: 'mark_incorrect' });
+
+    const report = await service.applyRecordedReviews(ORG_ID, [current.id]);
+
+    expect(report.scored).toEqual([current.id]);
+    expect(response).toMatchObject({ isCorrect: false, finalScore: '0.00' });
+    expect(response.humanScore).toMatchObject({ score: 0, scoredById: REVIEWER_ID });
+  });
+
+  it('un human_score que no escribió ninguna decisión de la marca sigue sin pisarse', async () => {
+    const { memory, service } = setup();
+    const response = seedResponse(memory, {
+      id: RESPONSE_A,
+      value: { answer: '7' },
+      isCorrect: true,
+      rawScore: '1.00',
+      finalScore: '1.00',
+      humanScore: { score: 1, scoredById: REVIEWER_ID },
+    });
+    const current = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+    seedReview(memory, { decisionId: current.id, action: 'mark_incorrect' });
+
+    const report = await service.applyRecordedReviews(ORG_ID, [current.id]);
+
+    expect(report.skipped).toEqual([{ decisionId: current.id, reason: 'human_scored' }]);
+    expect(response.finalScore).toBe('1.00');
   });
 });
