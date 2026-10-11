@@ -9,8 +9,9 @@ import {
   withOrgContext,
   type AnswerReadingDecision,
   type AnswerReview,
+  type NewAnswerReadingDecision,
 } from '@soe/db';
-import type { ConsensusResult } from '@soe/types';
+import { reviewModeFor, type ConsensusResult, type ReviewReason } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
 
 export interface ReadingDecisionInput {
@@ -52,20 +53,8 @@ export class AnswerReadingDecisionsService {
       }
       const decisionId = randomUUID();
       const now = new Date();
-      if (current) {
-        await tx
-          .update(answerReadingDecisions)
-          .set({ supersededById: decisionId, updatedAt: now })
-          .where(
-            and(
-              eq(answerReadingDecisions.orgId, orgId),
-              eq(answerReadingDecisions.id, current.id),
-              isNull(answerReadingDecisions.supersededById),
-            ),
-          );
-      }
       const { result } = input;
-      await tx.insert(answerReadingDecisions).values({
+      const next: NewAnswerReadingDecision & { id: string } = {
         id: decisionId,
         orgId,
         runId: input.runId,
@@ -86,9 +75,37 @@ export class AnswerReadingDecisionsService {
         usedReadingIds: [...result.usedReadingIds],
         createdAt: now,
         updatedAt: now,
-      });
+      };
+      if (current) await this.supersede(tx, orgId, current.id, next);
+      else await tx.insert(answerReadingDecisions).values(next);
       return { decisionId, supersededId: current?.id ?? null, unchanged: false };
     });
+  }
+
+  async escalateToReview(
+    tx: Database,
+    orgId: string,
+    decision: AnswerReadingDecision,
+    reason: ReviewReason,
+  ): Promise<AnswerReadingDecision> {
+    const reasons = decision.reasons.includes(reason)
+      ? decision.reasons
+      : [...decision.reasons, reason];
+    const now = new Date();
+    const next: AnswerReadingDecision = {
+      ...decision,
+      id: randomUUID(),
+      outcome: 'needs_review',
+      reasons,
+      reviewMode: reviewModeFor(reasons),
+      scoringOutcome: 'undecidable',
+      supersededById: null,
+      resolvedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await this.supersede(tx, orgId, decision.id, next);
+    return next;
   }
 
   async findCurrentByMarkIds(
@@ -156,6 +173,25 @@ export class AnswerReadingDecisionsService {
       if (!byDecision.has(row.decisionId)) byDecision.set(row.decisionId, row);
     }
     return byDecision;
+  }
+
+  private async supersede(
+    tx: Database,
+    orgId: string,
+    currentId: string,
+    next: NewAnswerReadingDecision & { id: string },
+  ): Promise<void> {
+    await tx
+      .update(answerReadingDecisions)
+      .set({ supersededById: next.id, updatedAt: next.updatedAt ?? new Date() })
+      .where(
+        and(
+          eq(answerReadingDecisions.orgId, orgId),
+          eq(answerReadingDecisions.id, currentId),
+          isNull(answerReadingDecisions.supersededById),
+        ),
+      );
+    await tx.insert(answerReadingDecisions).values(next);
   }
 
   private isSameDecision(current: AnswerReadingDecision, input: ReadingDecisionInput): boolean {

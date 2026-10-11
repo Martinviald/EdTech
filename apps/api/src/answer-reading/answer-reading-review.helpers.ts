@@ -1,9 +1,4 @@
-import {
-  formatLabelFor,
-  isSupportedFormat,
-  normalizeTranscription,
-  toScoringOutcome,
-} from '@soe/answer-reading';
+import { formatLabelFor, isSupportedFormat, normalizeTranscription } from '@soe/answer-reading';
 import type { AnswerReadingDecision, AnswerReview } from '@soe/db';
 import {
   reviewModeFor,
@@ -15,7 +10,7 @@ import {
 } from '@soe/types';
 import {
   itemResponseFormat,
-  scoreReadingValue,
+  readingScoringOutcome,
   type ReadingScoringItem,
 } from './answer-reading-scoring.helpers';
 
@@ -36,9 +31,8 @@ export function scoringOutcomeOf(
   item: ReadingScoringItem | undefined,
   value: NormalizedAnswer | null,
 ): ScoringOutcome {
-  if (!item || value === null || value.canonical === null) return 'undecidable';
-  const scored = scoreReadingValue(item, value);
-  return scored === null ? 'undecidable' : toScoringOutcome(scored.output);
+  if (value === null || value.canonical === null) return 'undecidable';
+  return readingScoringOutcome(item, value);
 }
 
 export function pendingReviewOf(

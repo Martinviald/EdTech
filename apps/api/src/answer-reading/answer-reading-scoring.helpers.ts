@@ -1,4 +1,9 @@
-import { ANSWER_FORMATS, isSupportedFormatKind, toScoringInput } from '@soe/answer-reading';
+import {
+  ANSWER_FORMATS,
+  isSupportedFormatKind,
+  toScoringInput,
+  toScoringOutcome,
+} from '@soe/answer-reading';
 import {
   getScoringStrategy,
   resolveResponseFormat,
@@ -7,6 +12,7 @@ import {
   type NormalizedAnswer,
   type ResponseFormat,
   type ScoringConfig,
+  type ScoringOutcome,
   type ScoringOutput,
 } from '@soe/types';
 
@@ -72,4 +78,13 @@ export function scoreReadingValue(
     rawAnswer: answer,
   });
   return { answer, output };
+}
+
+export function readingScoringOutcome(
+  item: ReadingScoringItem | undefined,
+  value: NormalizedAnswer,
+): ScoringOutcome {
+  if (!item) return 'undecidable';
+  const scored = scoreReadingValue(item, value);
+  return scored === null ? 'undecidable' : toScoringOutcome(scored.output);
 }

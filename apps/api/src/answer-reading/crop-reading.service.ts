@@ -8,8 +8,6 @@ import {
   needsTiebreak,
   normalizeTranscription,
   renderTranscriptionPrompt,
-  toScoringInput,
-  toScoringOutcome,
   transcriptionZodSchema,
   type ConsensusReading,
   type ScoreOf,
@@ -19,19 +17,15 @@ import {
 import { answerReadings, withOrgContext } from '@soe/db';
 import {
   DEFAULT_CONSENSUS_POLICY,
-  getScoringStrategy,
   reviewModeFor,
   type ConsensusPolicy,
   type ConsensusResult,
   type CropEvidence,
-  type ItemContent,
-  type ItemType,
   type ReaderSpec,
   type ReadingMode,
   type RenderedPrompt,
   type ResponseFormat,
   type ReviewReason,
-  type ScoringConfig,
   type TranscriptionOutput,
   type TranscriptionStatus,
 } from '@soe/types';
@@ -39,6 +33,7 @@ import type { ZodTypeAny } from 'zod';
 import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
 import { FilesService } from '../files/files.service';
+import { readingScoringOutcome, type ReadingScoringItem } from './answer-reading-scoring.helpers';
 import { ANSWER_READING_OPTIONS, type AnswerReadingOptions } from './answer-reading.constants';
 import type { RouteForCrop } from './reading-routes.service';
 import {
@@ -58,19 +53,11 @@ export type NotReadReason = Extract<
   | 'reader_failed'
 >;
 
-export interface ScorableItem {
-  readonly id: string;
-  readonly type: ItemType;
-  readonly content: ItemContent;
-  readonly maxScore: number;
-  readonly scoringConfig: ScoringConfig;
-}
-
 export interface CropReadingTask {
   readonly orgId: string;
   readonly runId: string;
   readonly markId: string;
-  readonly item: ScorableItem;
+  readonly item: ReadingScoringItem;
   readonly format: ResponseFormat;
   readonly cropProfileId: string;
   readonly cropFileId: string | null;
@@ -493,21 +480,8 @@ export class CropReadingService {
     );
   }
 
-  private scoreOf(item: ScorableItem): ScoreOf {
-    const strategy = getScoringStrategy(item.type);
-    return (answer) =>
-      toScoringOutcome(
-        strategy.score({
-          item: {
-            id: item.id,
-            type: item.type,
-            content: item.content,
-            maxScore: item.maxScore,
-            scoringConfig: item.scoringConfig,
-          },
-          rawAnswer: toScoringInput(answer),
-        }),
-      );
+  private scoreOf(item: ReadingScoringItem): ScoreOf {
+    return (answer) => readingScoringOutcome(item, answer);
   }
 
   private lazyImage(orgId: string, cropFileId: string): () => Promise<TranscriptionImage> {

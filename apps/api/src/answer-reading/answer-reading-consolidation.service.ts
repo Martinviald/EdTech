@@ -164,19 +164,22 @@ export class AnswerReadingConsolidationService {
   ): Promise<Map<string, ReadingConfirmation>> {
     const current = await this.decisions.findCurrentByBatch(orgId, batchId);
     if (current.size === 0) return new Map();
-    const decisions = [...current.values()];
-    const context = await withOrgContext(this.db, orgId, (tx) =>
-      this.loadScoringContext(tx, decisions),
-    );
-    const confirmations = new Map<string, ReadingConfirmation>();
-    for (const decision of decisions) {
-      confirmations.set(decision.markId, {
-        decisionId: decision.id,
-        itemId: decision.itemId,
-        prescored: this.prescore(decision, context),
-      });
-    }
-    return confirmations;
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const decisions = [...current.values()];
+      const context = await this.loadScoringContext(tx, decisions);
+      const confirmations = new Map<string, ReadingConfirmation>();
+      for (const decision of decisions) {
+        const prescored = this.prescore(decision, context);
+        const confirmed =
+          prescored === null ? await this.escalateIfUndecidable(tx, orgId, decision) : decision;
+        confirmations.set(decision.markId, {
+          decisionId: confirmed.id,
+          itemId: decision.itemId,
+          prescored,
+        });
+      }
+      return confirmations;
+    });
   }
 
   async linkConfirmedResponses(
@@ -304,9 +307,10 @@ export class AnswerReadingConsolidationService {
           });
           continue;
         }
-        pending.push(decision.id);
+        const reviewable = await this.escalateIfUndecidable(tx, orgId, decision);
+        pending.push(reviewable.id);
         writes.push({
-          ...this.pendingWrite(decision, target),
+          ...this.pendingWrite(reviewable, target),
           respectHuman: false,
           clearHuman: true,
         });
@@ -351,9 +355,10 @@ export class AnswerReadingConsolidationService {
           writes.push(this.automaticWrite(decision, target, prescored));
           continue;
         }
-        pending.push(decision.id);
-        links.push({ decisionId: decision.id, responseId: target.id, resolved: false });
-        if (!target.isPending) writes.push(this.pendingWrite(decision, target));
+        const reviewable = await this.escalateIfUndecidable(tx, orgId, decision);
+        pending.push(reviewable.id);
+        links.push({ decisionId: reviewable.id, responseId: target.id, resolved: false });
+        if (!target.isPending) writes.push(this.pendingWrite(reviewable, target));
       }
       const written = await this.applyWrites(tx, orgId, writes, links);
       return {
@@ -578,6 +583,15 @@ export class AnswerReadingConsolidationService {
       scoredBy: 'ai',
       aiScore: this.aiScoreOf(decision, scored.rawScore, context.readings),
     };
+  }
+
+  private async escalateIfUndecidable(
+    tx: Database,
+    orgId: string,
+    decision: AnswerReadingDecision,
+  ): Promise<AnswerReadingDecision> {
+    if (decision.outcome !== 'auto_accepted') return decision;
+    return this.decisions.escalateToReview(tx, orgId, decision, 'undecidable');
   }
 
   private scoreValue(item: ReadingScoringItem, value: NormalizedAnswer): ScoredValue | null {

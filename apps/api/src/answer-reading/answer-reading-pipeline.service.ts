@@ -19,13 +19,10 @@ import {
 import {
   resolveAnswerReadingSettings,
   type CropEvidence,
-  type ItemContent,
-  type ItemType,
   type LayoutField,
   type ReadingOutcome,
   type ResolvedOrgAnswerReadingSettings,
   type ResponseFormat,
-  type ScoringConfig,
 } from '@soe/types';
 import { ConcurrencyLimiter } from '../common/concurrency/concurrency-limiter';
 import { reportServerError } from '../common/observability/report-error';
@@ -34,6 +31,7 @@ import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { AnswerReadingBudgetService } from './answer-reading-budget.service';
 import { AnswerReadingConsolidationService } from './answer-reading-consolidation.service';
 import { visionResponsesByField } from './answer-reading-layout.helpers';
+import { toReadingScoringItem, type ReadingScoringItem } from './answer-reading-scoring.helpers';
 import {
   AnswerReadingDecisionsService,
   type SavedReadingDecision,
@@ -48,7 +46,6 @@ import {
   type CropReadingOutcome,
   type CropReadingTask,
   type NotReadReason,
-  type ScorableItem,
 } from './crop-reading.service';
 import { ReadingRoutesService, type ReadingRouteCatalog } from './reading-routes.service';
 import { RubricGradingService } from './rubric-grading.service';
@@ -69,7 +66,7 @@ interface LayoutCrop {
 }
 
 interface ScanCrop extends LayoutCrop {
-  readonly item: ScorableItem;
+  readonly item: ReadingScoringItem;
 }
 
 interface ScanWork {
@@ -262,7 +259,7 @@ export class AnswerReadingPipelineService {
         orgId,
         scanId,
         layoutCrops,
-        new Map(itemRows.map((row) => [row.id, this.toScorableItem(row)])),
+        new Map(itemRows.map((row) => [row.id, toReadingScoringItem(row)])),
       );
       if (crops.length === 0) return null;
       const [instrument] = await tx
@@ -338,7 +335,7 @@ export class AnswerReadingPipelineService {
     orgId: string,
     scanId: string,
     layoutCrops: readonly LayoutCrop[],
-    itemsById: ReadonlyMap<string, ScorableItem>,
+    itemsById: ReadonlyMap<string, ReadingScoringItem>,
   ): ScanCrop[] {
     const crops: ScanCrop[] = [];
     for (const crop of layoutCrops) {
@@ -354,22 +351,6 @@ export class AnswerReadingPipelineService {
       });
     }
     return crops;
-  }
-
-  private toScorableItem(row: {
-    id: string;
-    type: string;
-    content: ItemContent | null;
-    scoringConfig: Record<string, unknown> | null;
-  }): ScorableItem {
-    const scoringConfig = (row.scoringConfig ?? {}) as ScoringConfig;
-    return {
-      id: row.id,
-      type: row.type as ItemType,
-      content: (row.content ?? {}) as ItemContent,
-      maxScore: scoringConfig?.points ?? 1,
-      scoringConfig,
-    };
   }
 
   private async ensureRun(orgId: string, batchId: string, work: ScanWork): Promise<RunState> {

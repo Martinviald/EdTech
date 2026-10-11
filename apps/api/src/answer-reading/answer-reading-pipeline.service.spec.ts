@@ -66,6 +66,8 @@ const CROP_2 = 'f2222222-2222-4222-8222-222222222222';
 const RUBRIC_ITEM_ID = '7a7a7a7a-7a7a-4a7a-8a7a-7a7a7a7a7a7a';
 const RUBRIC_ROUTE_ID = 'abababab-abab-4bab-8bab-abababababab';
 const RUBRIC_FIELD = 'f_desarrollo';
+const SEQUENCE_ITEM_ID = '7b7b7b7b-7b7b-4b7b-8b7b-7b7b7b7b7b7b';
+const SEQUENCE_FIELD = 'f_secuencia';
 const FIELD_1 = 'f_001';
 const FIELD_2 = 'f_002';
 
@@ -130,12 +132,23 @@ const RUBRIC_FIELD_SPEC = {
   },
 };
 
+const SEQUENCE_FIELD_SPEC = {
+  ...field(SEQUENCE_FIELD),
+  response: {
+    itemId: SEQUENCE_ITEM_ID,
+    format: { kind: 'sequence', length: 4 },
+    boxes: [],
+    cropProfileId: 'short-answer@1',
+  },
+};
+
 const SPEC = {
   fields: [
     field(FIELD_1),
     field(FIELD_2),
     { ...field('f_rubric'), response: undefined },
     RUBRIC_FIELD_SPEC,
+    SEQUENCE_FIELD_SPEC,
   ],
 } as unknown as LayoutSpec;
 
@@ -210,6 +223,13 @@ function setup(setupOptions: SetupOptions = {}) {
       instrumentId: INSTRUMENT_ID,
       type: 'short_answer',
       content: { prompt: '¿Cuánto mide?', acceptedAnswers: ['7,3'] },
+      scoringConfig: { points: 1 },
+    },
+    {
+      id: SEQUENCE_ITEM_ID,
+      instrumentId: INSTRUMENT_ID,
+      type: 'short_answer',
+      content: { prompt: 'Completa la secuencia', acceptedAnswers: ['2, 4, 6, 8'] },
       scoringConfig: { points: 1 },
     },
     {
@@ -334,6 +354,18 @@ function runOf(memory: InMemoryDatabase): AnswerReadingRun {
   return runs[0] as AnswerReadingRun;
 }
 
+function sequenceParts(literal: string): Record<string, string> {
+  const parts: Record<string, string> = {};
+  for (const [index, element] of literal.split(',').entries()) {
+    parts[`e${index + 1}`] = element.trim();
+  }
+  return parts;
+}
+
+function sequenceOutput(literal: string) {
+  return fakeOutput(literal, { parts: sequenceParts(literal) });
+}
+
 const agree = {
   haiku: { [SHA_1]: fakeOutput('7,3') },
   flash: { [SHA_1]: fakeOutput('7.3') },
@@ -418,6 +450,47 @@ describe('AnswerReadingPipelineService — punta a punta del job', () => {
       value: null,
     });
     expect(runOf(memory)).toMatchObject({ status: 'completed', autoAccepted: 0, needsReview: 1 });
+  });
+
+  it('el consenso corrige con el formato derivado del ítem: una alternativa que cambia el resultado va a revisión', async () => {
+    const withAlternative = {
+      ...sequenceOutput('2, 4, 6, 8'),
+      alternativeReadings: [
+        { literal: '2, 4, 6, 9', parts: sequenceParts('2, 4, 6, 9'), plausibility: 0.4 },
+      ],
+    };
+    const { memory, runScan } = setup({
+      readings: {
+        haiku: { [SHA_1]: withAlternative },
+        flash: { [SHA_1]: sequenceOutput('2, 4, 6, 8') },
+      },
+      marks: [{ id: MARK_1, fieldId: SEQUENCE_FIELD, cropFileId: CROP_1 }],
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['alternative_flips_outcome'],
+      scoringOutcome: 'correct',
+    });
+  });
+
+  it('una secuencia bien leída sale correcta en la decisión, igual que en la consolidación', async () => {
+    const { memory, runScan } = setup({
+      readings: {
+        haiku: { [SHA_1]: sequenceOutput('2, 4, 6, 8') },
+        flash: { [SHA_1]: sequenceOutput('2,4,6,8') },
+      },
+      marks: [{ id: MARK_1, fieldId: SEQUENCE_FIELD, cropFileId: CROP_1 }],
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'correct',
+    });
   });
 
   it('ignora los campos de recorte sin formato de lectura por visión de respuesta corta', async () => {

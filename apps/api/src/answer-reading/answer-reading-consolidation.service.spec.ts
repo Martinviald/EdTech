@@ -178,6 +178,14 @@ function seedConfirmedBatch(memory: InMemoryDatabase, status = 'confirmed') {
   memory.seed(sheetScanMarks, [{ id: MARK_A, orgId: ORG_ID, scanId: SCAN_ID }]);
 }
 
+function currentDecisionOf(memory: InMemoryDatabase, markId = MARK_A) {
+  const current = memory
+    .rows<AnswerReadingDecision>(answerReadingDecisions)
+    .filter((row) => row.markId === markId && row.supersededById === null);
+  expect(current).toHaveLength(1);
+  return current[0] as AnswerReadingDecision;
+}
+
 function batchDecisions(rows: AnswerReadingDecision[]) {
   return new Map(rows.map((row) => [row.markId, row]));
 }
@@ -262,14 +270,26 @@ describe('AnswerReadingConsolidationService.readingsForConfirmation', () => {
     },
   );
 
-  it('si la estrategia no puede decidir, la respuesta queda pendiente', async () => {
+  it('si la estrategia no puede decidir, la autoaceptada pasa a revisión con una decisión nueva', async () => {
     const { memory, service, decisions } = setup();
     const decision = seedDecision(memory, { itemId: OPEN_ITEM, value: answer('7', INTEGER) });
     jest.spyOn(decisions, 'findCurrentByBatch').mockResolvedValue(batchDecisions([decision]));
 
     const readings = await service.readingsForConfirmation(ORG_ID, BATCH_ID);
 
-    expect(readings.get(MARK_A)?.prescored).toBeNull();
+    const confirmation = readings.get(MARK_A);
+    expect(confirmation?.prescored).toBeNull();
+    expect(confirmation?.decisionId).not.toBe(decision.id);
+    expect(decision.supersededById).toBe(confirmation?.decisionId);
+    expect(currentDecisionOf(memory)).toMatchObject({
+      id: confirmation?.decisionId,
+      outcome: 'needs_review',
+      reasons: ['undecidable'],
+      reviewMode: 'grading',
+      scoringOutcome: 'undecidable',
+      canonical: decision.canonical,
+      usedReadingIds: decision.usedReadingIds,
+    });
   });
 
   it('aplica el formato derivado del ítem: una lista con falta de ortografía va a revisión, no a incorrecta', async () => {
@@ -294,6 +314,10 @@ describe('AnswerReadingConsolidationService.readingsForConfirmation', () => {
     const readings = await service.readingsForConfirmation(ORG_ID, BATCH_ID);
 
     expect(readings.get(MARK_A)?.prescored).toBeNull();
+    expect(currentDecisionOf(memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['undecidable'],
+    });
   });
 
   it('con el formato derivado una lista bien escrita sale correcta con el puntaje del ítem', async () => {
@@ -519,6 +543,29 @@ describe('AnswerReadingConsolidationService.consolidateDecisions', () => {
       aiScore,
     });
     expect(report.recalculatedAssessmentIds).toEqual([ASSESSMENT_ID]);
+  });
+
+  it('una autoaceptada que la estrategia no puede decidir entra a la cola en vez de quedar pendiente sin revisión', async () => {
+    const { memory, service } = setup();
+    const response = seedResponse(memory, { id: RESPONSE_A, itemId: OPEN_ITEM });
+    const decision = seedDecision(memory, {
+      itemId: OPEN_ITEM,
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.consolidateDecisions(ORG_ID, [decision.id]);
+
+    const reviewable = currentDecisionOf(memory);
+    expect(reviewable).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['undecidable'],
+      reviewMode: 'grading',
+      responseId: RESPONSE_A,
+    });
+    expect(decision.supersededById).toBe(reviewable.id);
+    expect(report.pending).toEqual([reviewable.id]);
+    expect(response.finalScore).toBeNull();
   });
 
   it('una respuesta que ya estaba pendiente no se reescribe ni recalcula', async () => {
