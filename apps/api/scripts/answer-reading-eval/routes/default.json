@@ -1,0 +1,57 @@
+{
+  "id": "5a1f0e2c-9d3b-4c7a-8e61-0f2b7c4d9a01",
+  "version": 1,
+  "orgId": null,
+  "status": "shadow",
+  "level": "default",
+  "itemId": null,
+  "instrumentId": null,
+  "formatKind": null,
+  "subjectId": null,
+  "gradeId": null,
+  "readers": [
+    {
+      "key": "claude-haiku-5-5",
+      "transcriberId": "llm",
+      "provider": "anthropic",
+      "family": "claude",
+      "model": "claude-haiku-5-5",
+      "promptRef": "transcribe.short-answer@2",
+      "hints": "format",
+      "params": { "maxOutputTokens": 2048, "reasoning": "off", "timeoutMs": 60000 }
+    },
+    {
+      "key": "gemini-3.5-flash-lite",
+      "transcriberId": "llm",
+      "provider": "gemini",
+      "family": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "promptRef": "transcribe.short-answer@2",
+      "hints": "format",
+      "params": {
+        "maxOutputTokens": 2048,
+        "reasoning": "off",
+        "mediaResolution": "medium",
+        "timeoutMs": 60000
+      }
+    }
+  ],
+  "fallbackReaders": [],
+  "shadowReaders": [],
+  "shadowSampleRate": 0,
+  "policy": {
+    "id": "short-answer-default",
+    "version": 1,
+    "minReaders": 2,
+    "requireDistinctFamilies": true,
+    "agreeOn": "canonical",
+    "minConfidence": 0.85,
+    "alternativePlausibilityFloor": 0.2,
+    "blankByInkBelow": null,
+    "onDisagreement": "review",
+    "tiebreakReader": null,
+    "autoAccept": true,
+    "autoAcceptOutcomes": ["correct", "incorrect"],
+    "auditSampleRate": 0.1
+  }
+}

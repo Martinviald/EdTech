@@ -1,0 +1,105 @@
+{
+  "manifestVersion": 1,
+  "name": "fixtures-sinteticos",
+  "datasetVersion": "1",
+  "description": "Casillas dibujadas por código, sin datos personales. Para probar el arnés.",
+  "samples": [
+    {
+      "id": "entero-48",
+      "image": "entero-48.png",
+      "format": {
+        "kind": "integer",
+        "maxChars": 4,
+        "allowNegative": false
+      },
+      "label": {
+        "state": "answered",
+        "literal": "48"
+      },
+      "acceptedAnswers": ["48"],
+      "tags": {
+        "origen": "sintetico"
+      }
+    },
+    {
+      "id": "decimal-3-75",
+      "image": "decimal-3-75.png",
+      "format": {
+        "kind": "decimal",
+        "maxChars": 6,
+        "allowNegative": false
+      },
+      "label": {
+        "state": "answered",
+        "literal": "3,75"
+      },
+      "acceptedAnswers": ["3,8"],
+      "tags": {
+        "origen": "sintetico"
+      }
+    },
+    {
+      "id": "fraccion-5-8",
+      "image": "fraccion-5-8.png",
+      "format": {
+        "kind": "fraction",
+        "allowNegative": false,
+        "allowMixed": false
+      },
+      "label": {
+        "state": "answered",
+        "literal": "5/8"
+      },
+      "tags": {
+        "origen": "sintetico"
+      }
+    },
+    {
+      "id": "par-2-menos-3",
+      "image": "par-2-menos-3.png",
+      "format": {
+        "kind": "ordered_tuple",
+        "arity": 2,
+        "componentKind": "integer"
+      },
+      "label": {
+        "state": "answered",
+        "literal": "(2;-3)"
+      },
+      "tags": {
+        "origen": "sintetico"
+      }
+    },
+    {
+      "id": "en-blanco",
+      "image": "en-blanco.png",
+      "format": {
+        "kind": "integer",
+        "maxChars": 4,
+        "allowNegative": false
+      },
+      "label": {
+        "state": "blank",
+        "literal": ""
+      },
+      "tags": {
+        "origen": "sintetico"
+      }
+    },
+    {
+      "id": "expresion-x-mas-1",
+      "image": "expresion-x-mas-1.png",
+      "format": {
+        "kind": "short_text",
+        "maxWords": 3
+      },
+      "label": {
+        "state": "answered",
+        "literal": "x+1"
+      },
+      "tags": {
+        "origen": "sintetico"
+      }
+    }
+  ]
+}

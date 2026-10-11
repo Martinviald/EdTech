@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "retention:sheet-scans": "tsx scripts/retention-sheet-scans.ts",
     "golden:master-board:check": "tsx scripts/check-golden-master-board.ts",
+    "answer-reading:eval": "tsx scripts/answer-reading-eval.ts",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
@@ -76,6 +77,10 @@
       "ts"
     ],
     "rootDir": "src",
+    "roots": [
+      "<rootDir>",
+      "<rootDir>/../scripts"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
