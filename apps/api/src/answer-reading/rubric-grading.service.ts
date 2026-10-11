@@ -100,6 +100,25 @@ interface PlannedGrading {
   readonly skipReason: RubricGradingSkipReason | null;
 }
 
+export interface RubricLevelRequest {
+  readonly decisionId: string;
+  readonly levelCode: string;
+  readonly reason?: string;
+}
+
+export interface RubricLevelApproval {
+  readonly decisionId: string;
+  readonly levelCode: string;
+  readonly isCorrect: boolean;
+  readonly score: number;
+  readonly reason?: string;
+}
+
+export interface RubricLevelApprovals {
+  readonly report: ConsolidationReport;
+  readonly approved: RubricLevelApproval[];
+}
+
 interface OrgSnapshot {
   readonly config: Record<string, unknown> | null;
   readonly settings: ResolvedOrgAnswerReadingSettings;
@@ -158,46 +177,100 @@ export class RubricGradingService {
     levelCode: string,
     reviewerId: string,
   ): Promise<ConsolidationReport> {
-    const { decision, item } = await withOrgContext(this.db, orgId, async (tx) => {
-      const [found] = await tx
+    const { report } = await this.approveRubricLevels(
+      orgId,
+      [{ decisionId, levelCode }],
+      reviewerId,
+    );
+    return report;
+  }
+
+  async approveRubricLevels(
+    orgId: string,
+    requests: readonly RubricLevelRequest[],
+    reviewerId: string,
+  ): Promise<RubricLevelApprovals> {
+    if (requests.length === 0) {
+      return {
+        report: { scored: [], pending: [], skipped: [], recalculatedAssessmentIds: [] },
+        approved: [],
+      };
+    }
+    const decisionIds = [...new Set(requests.map((request) => request.decisionId))];
+    const { decisions, itemsById } = await withOrgContext(this.db, orgId, async (tx) => {
+      const found = await tx
         .select()
         .from(answerReadingDecisions)
         .where(
-          and(eq(answerReadingDecisions.orgId, orgId), eq(answerReadingDecisions.id, decisionId)),
-        )
-        .limit(1);
-      if (!found) return { decision: null, item: null };
-      const loaded = await this.loadItems(tx, [found.itemId]);
-      return { decision: found, item: loaded.get(found.itemId) ?? null };
+          and(
+            eq(answerReadingDecisions.orgId, orgId),
+            inArray(answerReadingDecisions.id, decisionIds),
+          ),
+        );
+      const loaded =
+        found.length === 0
+          ? new Map<string, RubricItem>()
+          : await this.loadItems(
+              tx,
+              found.map((decision) => decision.itemId),
+            );
+      return {
+        decisions: new Map(found.map((decision) => [decision.id, decision])),
+        itemsById: loaded,
+      };
     });
-    if (decision === null) throw new NotFoundException('La respuesta a revisar no existe.');
-    if (decision.supersededById !== null) {
-      throw new ConflictException(
-        'La lectura de esta respuesta cambió. Vuelve a cargar la revisión e inténtalo de nuevo.',
+    const approved: RubricLevelApproval[] = [];
+    for (const request of requests) {
+      const decision = decisions.get(request.decisionId);
+      if (!decision) throw new NotFoundException('La respuesta a revisar no existe.');
+      if (decision.supersededById !== null) {
+        throw new ConflictException(
+          'La lectura de esta respuesta cambió. Vuelve a cargar la revisión e inténtalo de nuevo.',
+        );
+      }
+      const item = itemsById.get(decision.itemId);
+      if (!item) {
+        throw new BadRequestException(
+          'El ítem de esta respuesta no tiene una rúbrica con niveles.',
+        );
+      }
+      const level = item.levels.find((candidate) =>
+        sameRubricCode(candidate.code, request.levelCode),
       );
-    }
-    if (item === null) {
-      throw new BadRequestException('El ítem de esta respuesta no tiene una rúbrica con niveles.');
-    }
-    const level = item.levels.find((candidate) => sameRubricCode(candidate.code, levelCode));
-    if (!level) {
-      throw new BadRequestException(`El nivel "${levelCode}" no existe en la rúbrica del ítem.`);
-    }
-    const scored = this.scoreLevel(item, level.code);
-    if (scored.rawScore === null || scored.isCorrect === null) {
-      throw new BadRequestException(`El nivel "${levelCode}" no tiene puntaje en la rúbrica.`);
-    }
-    return this.consolidation.applyHumanResolution(
-      orgId,
-      decisionId,
-      {
-        kind: 'rubric',
+      if (!level) {
+        throw new BadRequestException(
+          `El nivel "${request.levelCode}" no existe en la rúbrica del ítem.`,
+        );
+      }
+      const scored = this.scoreLevel(item, level.code);
+      if (scored.rawScore === null || scored.isCorrect === null) {
+        throw new BadRequestException(
+          `El nivel "${request.levelCode}" no tiene puntaje en la rúbrica.`,
+        );
+      }
+      approved.push({
+        decisionId: decision.id,
         levelCode: level.code,
         isCorrect: scored.isCorrect,
         score: scored.rawScore,
-      },
+        reason: request.reason,
+      });
+    }
+    const report = await this.consolidation.applyHumanResolutions(
+      orgId,
+      approved.map((approval) => ({
+        decisionId: approval.decisionId,
+        resolution: {
+          kind: 'rubric',
+          levelCode: approval.levelCode,
+          isCorrect: approval.isCorrect,
+          score: approval.score,
+          ...(approval.reason === undefined ? {} : { reason: approval.reason }),
+        },
+      })),
       reviewerId,
     );
+    return { report, approved };
   }
 
   private enqueue(orgId: string, jobId: string, run: () => Promise<void>): void {
