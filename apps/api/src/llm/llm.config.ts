@@ -9,6 +9,8 @@ import {
   type LlmModelChoice,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { reportServerError } from '../common/observability/report-error';
+import { LlmModelUnavailableError } from './llm.errors';
 import { LlmModelsService } from './llm-models.service';
 import { ACTIVE_LLM_PROVIDER, LLM_PROVIDER_DEFAULTS } from './llm.constants';
 import type { LlmRuntimeConfig } from './llm.types';
@@ -28,6 +30,8 @@ import type { LlmRuntimeConfig } from './llm.types';
  */
 @Injectable()
 export class LlmConfigService {
+  private readonly reportedRetiredModels = new Set<string>();
+
   constructor(
     @InjectDb() private readonly db: Database,
     private readonly models: LlmModelsService,
@@ -38,12 +42,49 @@ export class LlmConfigService {
     feature: LlmFeature,
   ): Promise<LlmRuntimeConfig> {
     const choice = await this.resolveChoice(orgId, feature);
-    return this.forChoice(choice);
+    const model = await this.models.findModel(choice.provider, choice.model);
+    if (model && !this.isSelectable(model)) {
+      this.reportRetiredModelOnce(feature, choice);
+      return this.forChoice(LLM_FEATURE_DEFAULTS[feature]);
+    }
+    return this.toRuntimeConfig(choice, model);
+  }
+
+  async forTarget(choice: LlmModelChoice): Promise<LlmRuntimeConfig> {
+    const model = await this.models.findModel(choice.provider, choice.model);
+    if (!model || !model.enabled) {
+      throw new LlmModelUnavailableError(choice);
+    }
+    return this.toRuntimeConfig(choice, model);
   }
 
   async forChoice(choice: LlmModelChoice): Promise<LlmRuntimeConfig> {
     const model = await this.models.findModel(choice.provider, choice.model);
     return this.toRuntimeConfig(choice, model);
+  }
+
+  private isSelectable(model: LlmModel): boolean {
+    return model.enabled && model.deprecatedAt === null;
+  }
+
+  private reportRetiredModelOnce(feature: LlmFeature, choice: LlmModelChoice): void {
+    const key = `${choice.provider}:${choice.model}`;
+    if (this.reportedRetiredModels.has(key)) return;
+    this.reportedRetiredModels.add(key);
+    const fallback = LLM_FEATURE_DEFAULTS[feature];
+    reportServerError(
+      new Error(
+        `El modelo "${choice.model}" de ${choice.provider} está deshabilitado o deprecado; se usa el default de la funcionalidad`,
+      ),
+      {
+        scope: 'LlmConfigService.resolve',
+        feature,
+        provider: choice.provider,
+        model: choice.model,
+        fallbackProvider: fallback.provider,
+        fallbackModel: fallback.model,
+      },
+    );
   }
 
   private toRuntimeConfig(choice: LlmModelChoice, model: LlmModel | undefined): LlmRuntimeConfig {

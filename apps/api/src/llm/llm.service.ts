@@ -211,7 +211,7 @@ export class LlmService {
     feature: LlmFeature,
   ): Promise<LlmStructuredResult> {
     const cfg = call.target
-      ? await this.config.forChoice(call.target)
+      ? await this.config.forTarget(call.target)
       : await this.config.resolve(orgId, feature);
     const provider = this.registry.get(cfg.provider);
 

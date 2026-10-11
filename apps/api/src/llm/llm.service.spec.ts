@@ -1,6 +1,7 @@
 import { ServiceUnavailableException } from '@nestjs/common';
 import { LlmService } from './llm.service';
 import type { LlmConfigService } from './llm.config';
+import { LlmModelUnavailableError } from './llm.errors';
 import type {
   LlmProvider,
   LlmRuntimeConfig,
@@ -21,17 +22,17 @@ const RESULT: LlmStructuredResult = {
 function makeConfig(): {
   config: LlmConfigService;
   resolve: jest.Mock;
-  forChoice: jest.Mock;
+  forTarget: jest.Mock;
 } {
   const resolve = jest.fn(
     (): Promise<LlmRuntimeConfig> =>
       Promise.resolve({ provider: 'anthropic', model: 'claude-haiku-5-5', maxTokens: 8192 }),
   );
-  const forChoice = jest.fn(
+  const forTarget = jest.fn(
     (choice: { provider: 'gemini' | 'anthropic'; model: string }): Promise<LlmRuntimeConfig> =>
       Promise.resolve({ ...choice, maxTokens: 65536 }),
   );
-  return { config: { resolve, forChoice } as unknown as LlmConfigService, resolve, forChoice };
+  return { config: { resolve, forTarget } as unknown as LlmConfigService, resolve, forTarget };
 }
 
 function makeProvider(name: 'anthropic' | 'gemini', structured = true) {
@@ -87,7 +88,7 @@ describe('LlmService.completeStructured', () => {
   });
 
   it('usa el modelo fijado por la ruta y respeta las opciones explícitas', async () => {
-    const { config, resolve, forChoice } = makeConfig();
+    const { config, resolve, forTarget } = makeConfig();
     const { provider, completeStructured } = makeProvider('gemini');
 
     await new LlmService(config, [provider]).completeStructured(
@@ -103,7 +104,7 @@ describe('LlmService.completeStructured', () => {
     );
 
     expect(resolve).not.toHaveBeenCalled();
-    expect(forChoice).toHaveBeenCalledWith({ provider: 'gemini', model: 'gemini-3.5-flash-lite' });
+    expect(forTarget).toHaveBeenCalledWith({ provider: 'gemini', model: 'gemini-3.5-flash-lite' });
     expect(completeStructured.mock.calls[0]?.[0].options).toEqual({
       model: 'gemini-3.5-flash-lite',
       maxTokens: 256,
@@ -111,6 +112,23 @@ describe('LlmService.completeStructured', () => {
       mediaResolution: 'high',
       timeoutMs: 5_000,
     });
+  });
+
+  it('propaga el error si el modelo fijado por la ruta no está disponible', async () => {
+    const { config, forTarget } = makeConfig();
+    forTarget.mockRejectedValueOnce(
+      new LlmModelUnavailableError({ provider: 'gemini', model: 'gemini-apagado' }),
+    );
+    const { provider, completeStructured } = makeProvider('gemini');
+
+    await expect(
+      new LlmService(config, [provider]).completeStructured(
+        makeCall({ target: { provider: 'gemini', model: 'gemini-apagado' } }),
+        'org-1',
+        'answer_transcription',
+      ),
+    ).rejects.toBeInstanceOf(LlmModelUnavailableError);
+    expect(completeStructured).not.toHaveBeenCalled();
   });
 
   it('responde 503 si el proveedor no soporta salida estructurada', async () => {
