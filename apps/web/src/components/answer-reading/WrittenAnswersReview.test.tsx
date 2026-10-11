@@ -9,7 +9,10 @@ import {
   DECISION_B,
   DECISION_C,
   REVIEW_A,
+  RUBRIC_DECISION,
   readingGroup,
+  rubricDetail,
+  rubricGroup,
   summary,
 } from './test-fixtures';
 
@@ -132,5 +135,34 @@ describe('WrittenAnswersReview', () => {
     renderReview();
     expect(await screen.findByText('Todavía se están leyendo respuestas')).toBeTruthy();
     expect(await screen.findByText('Las respuestas se están leyendo')).toBeTruthy();
+  });
+
+  it('los grupos de rúbrica abren el panel de rúbrica y aprueban por la ruta nueva', async () => {
+    getMock.mockImplementation((path: string) => {
+      if (path.startsWith('/answer-reading/queue/summary')) return Promise.resolve(summary());
+      if (path.startsWith('/answer-reading/rubric-queue/')) return Promise.resolve(rubricDetail());
+      return Promise.resolve(queuePage([rubricGroup()]));
+    });
+    postMock.mockResolvedValueOnce({
+      reviewIds: [REVIEW_A],
+      approvedDecisionIds: [RUBRIC_DECISION],
+      skipped: [],
+    });
+    renderReview();
+    const panel = await screen.findByRole('group', { name: /calificación con rúbrica/ });
+    await screen.findByText('Transcripción');
+
+    fireEvent.keyDown(panel, { key: '1' });
+    fireEvent.keyDown(panel, { key: 'Enter' });
+
+    await waitFor(() =>
+      expect(postMock).toHaveBeenCalledWith('/answer-reading/rubric-approvals', {
+        decisionId: RUBRIC_DECISION,
+        levelCode: '1',
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('status').textContent).toContain('Pregunta 12: nivel 1 · Parcial'),
+    );
   });
 });

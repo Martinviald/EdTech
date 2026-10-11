@@ -1,4 +1,9 @@
-import type { ReaderReadingSummary, ReviewQueueGroup, ReviewQueueSummary } from '@soe/types';
+import type {
+  ReaderReadingSummary,
+  ReviewQueueGroup,
+  ReviewQueueSummary,
+  RubricReviewDetail,
+} from '@soe/types';
 
 export const ITEM_ID = '11111111-1111-4111-8111-111111111111';
 export const DECISION_A = '22222222-2222-4222-8222-222222222221';
@@ -95,6 +100,73 @@ export function summary(overrides: Partial<ReviewQueueSummary> = {}): ReviewQueu
         pendingGrading: 0,
       },
     ],
+    ...overrides,
+  };
+}
+
+export const RUBRIC_ITEM_ID = '11111111-1111-4111-8111-111111111119';
+export const RUBRIC_DECISION = '22222222-2222-4222-8222-222222222229';
+export const RUBRIC_TRANSCRIPTION = 'Porque el río se desbordó y tapó las calles';
+
+export function rubricGroup(overrides: Partial<ReviewQueueGroup> = {}): ReviewQueueGroup {
+  return readingGroup({
+    groupKey: 'item-12:rubric',
+    itemId: RUBRIC_ITEM_ID,
+    printedNumber: '12',
+    formatKind: 'free_text',
+    responseFormat: { kind: 'free_text', lines: 6 },
+    formatLabel: 'Texto libre',
+    mode: 'grading',
+    canonical: RUBRIC_TRANSCRIPTION,
+    displayValue: RUBRIC_TRANSCRIPTION,
+    reasons: ['rubric_item'],
+    size: 1,
+    members: [{ decisionId: RUBRIC_DECISION, cropUrl: null, isAudit: false }],
+    readers: [],
+    grading: null,
+    ...overrides,
+  });
+}
+
+export function rubricDetail(overrides: Partial<RubricReviewDetail> = {}): RubricReviewDetail {
+  return {
+    decisionId: RUBRIC_DECISION,
+    itemId: RUBRIC_ITEM_ID,
+    printedNumber: '12',
+    formatKind: 'free_text',
+    stem: '¿Por qué se inundó el pueblo?',
+    transcription: RUBRIC_TRANSCRIPTION,
+    cropUrl: 'https://example.com/rubrica.png',
+    maxScore: 2,
+    levels: [
+      {
+        code: '0',
+        label: 'Incorrecta',
+        descriptor: 'No da una causa.',
+        creditFraction: 0,
+        score: 0,
+      },
+      { code: '1', label: 'Parcial', descriptor: 'Da la causa.', creditFraction: 0.5, score: 1 },
+      {
+        code: '2',
+        label: 'Completa',
+        descriptor: 'Explica la causa.',
+        creditFraction: 1,
+        score: 2,
+      },
+    ],
+    proposal: {
+      levelCode: '1',
+      score: 1,
+      confidence: 0.8,
+      rationale: 'Da la causa, pero no explica cómo provocó la inundación.',
+      evidenceQuotes: ['el río se desbordó'],
+      model: 'gemini-3.5-flash-lite',
+      promptVersion: 'grade.rubric@1',
+    },
+    approval: null,
+    pending: true,
+    awaitingConfirmation: false,
     ...overrides,
   };
 }

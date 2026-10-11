@@ -7,6 +7,8 @@ import type {
   ReviewMode,
   ReviewQueueGroup,
   ReviewQueueSummary,
+  RubricApprovalDto,
+  RubricApprovalResult,
   SubmitReviewDto,
   SubmitReviewResult,
 } from '@soe/types';
@@ -25,6 +27,8 @@ import { TopProgressBar } from '@/components/shared/TopProgressBar';
 import { cn } from '@/lib/utils';
 import { ReviewGroupPanel } from './ReviewGroupPanel';
 import { REVIEW_MODE_LABELS } from './review-labels';
+import { RubricReviewPanel } from './RubricReviewPanel';
+import { useApproveRubricLevel } from './use-rubric-review';
 import {
   useSubmitReview,
   useUndoReview,
@@ -84,6 +88,20 @@ function notifySkipped(result: SubmitReviewResult) {
   );
 }
 
+export function isRubricGroup(group: ReviewQueueGroup): boolean {
+  return group.reasons.includes('rubric_item');
+}
+
+function notifyRubricSkipped(result: RubricApprovalResult) {
+  for (const skip of result.skipped) {
+    toast.warning(
+      skip.reason === 'human_scored'
+        ? 'Esta respuesta ya tenía una corrección humana; no se cambió.'
+        : 'No se pudo aplicar el nivel a esta respuesta. Recarga la revisión.',
+    );
+  }
+}
+
 function addIds(set: ReadonlySet<string>, ids: readonly string[]): Set<string> {
   const next = new Set(set);
   for (const id of ids) next.add(id);
@@ -118,6 +136,7 @@ export function WrittenAnswersReview({ scope }: { scope: WrittenAnswersScope }) 
   );
   const submitReview = useSubmitReview(scope);
   const undoReview = useUndoReview(scope);
+  const approveRubric = useApproveRubricLevel(scope);
 
   const groups = useMemo(
     () => withoutResolved(sortGroupsBySize(queueQuery.data?.data ?? []), resolved),
@@ -150,6 +169,29 @@ export function WrittenAnswersReview({ scope }: { scope: WrittenAnswersScope }) 
       });
     },
     [submitReview],
+  );
+
+  const handleRubricApprove = useCallback(
+    (dto: RubricApprovalDto, label: string) => {
+      setResolved((prev) => addIds(prev, [dto.decisionId]));
+      approveRubric.mutate(dto, {
+        onSuccess: (result) => {
+          if (result.approvedDecisionIds.length === 0) {
+            setResolved((prev) => removeIds(prev, [dto.decisionId]));
+          }
+          if (result.reviewIds.length > 0) {
+            setUndoStack((prev) => [
+              ...prev,
+              { reviewIds: result.reviewIds, decisionIds: result.approvedDecisionIds, label },
+            ]);
+            setLastAction(label);
+          }
+          notifyRubricSkipped(result);
+        },
+        onError: () => setResolved((prev) => removeIds(prev, [dto.decisionId])),
+      });
+    },
+    [approveRubric],
   );
 
   const handleUndo = useCallback(() => {
@@ -266,18 +308,34 @@ export function WrittenAnswersReview({ scope }: { scope: WrittenAnswersScope }) 
       ) : current ? (
         <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
           <GroupList groups={groups} activeIndex={safeIndex} onSelect={setIndex} />
-          <ReviewGroupPanel
-            key={`${current.groupKey}:${current.members.length}`}
-            group={current}
-            position={safeIndex + 1}
-            total={groups.length}
-            pending={submitReview.isPending || undoReview.isPending}
-            canUndo={undoStack.length > 0}
-            onSubmit={handleSubmit}
-            onNext={() => setIndex(Math.min(safeIndex + 1, groups.length - 1))}
-            onPrev={() => setIndex(Math.max(0, safeIndex - 1))}
-            onUndo={handleUndo}
-          />
+          {isRubricGroup(current) ? (
+            <RubricReviewPanel
+              key={`${current.groupKey}:${current.members.length}`}
+              scope={scope}
+              group={current}
+              position={safeIndex + 1}
+              total={groups.length}
+              pending={approveRubric.isPending || undoReview.isPending}
+              canUndo={undoStack.length > 0}
+              onApprove={handleRubricApprove}
+              onNext={() => setIndex(Math.min(safeIndex + 1, groups.length - 1))}
+              onPrev={() => setIndex(Math.max(0, safeIndex - 1))}
+              onUndo={handleUndo}
+            />
+          ) : (
+            <ReviewGroupPanel
+              key={`${current.groupKey}:${current.members.length}`}
+              group={current}
+              position={safeIndex + 1}
+              total={groups.length}
+              pending={submitReview.isPending || undoReview.isPending}
+              canUndo={undoStack.length > 0}
+              onSubmit={handleSubmit}
+              onNext={() => setIndex(Math.min(safeIndex + 1, groups.length - 1))}
+              onPrev={() => setIndex(Math.max(0, safeIndex - 1))}
+              onUndo={handleUndo}
+            />
+          )}
         </div>
       ) : (
         <EmptyState
