@@ -337,3 +337,30 @@ registra.
   editó para sembrar la v2; los hashes de la v1 en el lock no cambiaron.
 - CI de `df015d82` 7/7 verde tras corregir el test de fixtures del arnés (comparaba PNG byte a
   byte; zlib comprime distinto en macOS y Linux, ahora compara píxeles).
+
+### Corrección de la revisión de F7 integrada (`e6c901be`…`7f12c593` → rama)
+
+Cada hallazgo con test previo que fallaba con el código viejo; B2/B3, la lectura tardía y el choque
+de costo también probados en PG14 con `soe_app` (sin BYPASSRLS).
+- **B1:** una sola función de corrección con el formato derivado (`answer-reading-scoring.helpers.ts`)
+  para consenso, consolidación y cola. Una decisión `auto_accepted` que la consolidación no puede
+  decidir se reemplaza por `needs_review` con motivo `undecidable`.
+- **B2/B3:** si la respuesta tiene `human_score` o se conserva su `final_score`, el upsert de la
+  ingesta no toca `value`, `is_correct`, `raw_score`, `final_score`, `scored_by` ni `scored_at`;
+  solo actualiza `ai_score`.
+- **Lectura tardía:** al confirmar, cada marca de recorte reserva su respuesta escribiendo
+  `value.reading.markId`; una decisión sin vínculo solo consolida en la respuesta con su marca.
+  Las decisiones de escaneos `superseded` se descartan en toda consolidación. Contrato interno:
+  `ConfirmedReadingsInput.cropMarks: { markId, studentId, itemId }[]`.
+- **Revisión huérfana:** al reemplazar una decisión, la nueva copia la revisión vigente.
+- **"En lectura" eterno:** el pipeline deja `not_read`/`reader_failed` para todo recorte que no
+  decide; la cola solo cuenta "en lectura" con una corrida `running`.
+- **Costo en choque:** `ON CONFLICT DO NOTHING`; la lectura pagada se guarda como intento siguiente.
+- **Reinicio:** `resumeStalledRuns()` en `onModuleInit` reencola sin duplicar y cierra las corridas
+  sin pendientes.
+- **Formatos de texto:** el pipeline lee `word_list`, `short_text` y `multi_box` con su ruta de 0049.
+
+Riesgos que quedan: las respuestas confirmadas antes de este arreglo no tienen reserva `markId`, así
+que una lectura tardía sobre ellas queda sin consolidar (más seguro que escribir en otra hoja); con
+varias instancias de la API, cada una reanuda las mismas corridas al arrancar (lecturas repetidas,
+costo registrado, decisiones idempotentes).
