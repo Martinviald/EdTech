@@ -144,3 +144,22 @@ regresión real en secuencias con letras. Se despachó un agente de corrección 
 
 **Decisión B-1 — casilla de signo.** La hoja imprime la casilla de signo sin rótulo. Se deja así
 en esta PR (la hoja oficial DIA tampoco la rotula) y se anota para la UX de la hoja.
+
+**Revisión de F3 (independiente).** Sin bloqueantes; permisos correctos y costo sin doble conteo.
+Recomendaciones que se encargaron a `wip/cv-f3fix`: columna `supports_sampling_params` en
+`llm_models` (Claude 4.x vuelve a recibir `temperature: 0`), `thoughtSignature` de Gemini 3 en el
+asistente, exigir salida estructurada al guardar las features que la usan, catálogo resiliente ante
+caída de la BDD, presupuesto de razonamiento de Gemini 2.5 acotado, `maxRetries: 1` en Anthropic
+estructurado, uso de tokens del asistente con Gemini (bug previo: sumaba acumulados) y modelos
+deshabilitados que dejan de usarse en ejecución.
+
+### F4 integrada (`afe64ab8`…`181cc497` → rama, migración `0046_llm_models_openai`)
+
+- `openai@6.49.0` fijo: la línea 7.x exige Node ≥ 22 y el Dockerfile y el CI usan Node 20.
+- Responses API con `store: false`; salida estructurada `json_schema` estricta (el provider adapta
+  opcionales a `anyOf [T, null]` y los limpia al parsear); escalera de razonamiento
+  `none → minimal → low → sin reasoning` ante 400, recordada por modelo.
+- Modelos `gpt-6-luna`, `gpt-5.6-luna`, `gpt-5.4-mini` sembrados y habilitados; ninguna feature los
+  usa por defecto. El panel muestra "OpenAI (no configurado)" sin clave.
+- **Privacidad:** el Batch API de OpenAI no es compatible con cero retención de datos (ZDR); no usar
+  batch de OpenAI con datos de estudiantes si el contrato exige cero retención.
