@@ -8,6 +8,9 @@ import { AnswerReadingBudgetService } from './answer-reading-budget.service';
 import { AnswerReadingConsolidationService } from './answer-reading-consolidation.service';
 import { AnswerReadingDecisionsService } from './answer-reading-decisions.service';
 import { AnswerReadingPipelineService } from './answer-reading-pipeline.service';
+import { AnswerReadingReviewQueueService } from './answer-reading-review-queue.service';
+import { AnswerReadingReviewController } from './answer-reading-review.controller';
+import { AnswerReadingReviewsService } from './answer-reading-reviews.service';
 import {
   ANSWER_READING_OPTIONS,
   DEFAULT_ANSWER_READING_OPTIONS,
@@ -40,6 +43,7 @@ function answerReadingOptionsFromEnv(): AnswerReadingOptions {
 
 @Module({
   imports: [FilesModule, JobsModule, LlmModule, AiObservabilityModule, AssessmentResultsModule],
+  controllers: [AnswerReadingReviewController],
   providers: [
     { provide: ANSWER_READING_OPTIONS, useFactory: answerReadingOptionsFromEnv },
     LlmVisionTranscriber,
@@ -55,6 +59,8 @@ function answerReadingOptionsFromEnv(): AnswerReadingOptions {
     CropReadingService,
     AnswerReadingConsolidationService,
     AnswerReadingPipelineService,
+    AnswerReadingReviewQueueService,
+    AnswerReadingReviewsService,
   ],
   exports: [
     AnswerReadingPipelineService,
