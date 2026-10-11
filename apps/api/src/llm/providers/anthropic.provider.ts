@@ -44,11 +44,13 @@ interface AnthropicMessageResponse {
   };
 }
 
+const STRUCTURED_MAX_RETRIES = 1;
+
 type AnthropicStructuredClient = {
   messages: {
     create(
       req: Record<string, unknown>,
-      options?: { timeout?: number },
+      options?: { timeout?: number; maxRetries?: number },
     ): Promise<AnthropicMessageResponse>;
   };
 };
@@ -188,7 +190,7 @@ export class AnthropicProvider implements LlmProvider {
         messages: [{ role: 'user', content: this.structuredContent(request) }],
         ...this.reasoningParams(request),
       },
-      { timeout: request.options.timeoutMs },
+      { timeout: request.options.timeoutMs, maxRetries: STRUCTURED_MAX_RETRIES },
     );
 
     const rawText = response.content.find((b) => b.type === 'text')?.text ?? '';

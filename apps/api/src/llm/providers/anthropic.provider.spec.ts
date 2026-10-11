@@ -15,8 +15,9 @@ interface FakeMessageResponse {
 
 function makeProvider(response: FakeMessageResponse) {
   const provider = new AnthropicProvider();
-  const create = jest.fn((_req: Record<string, unknown>, _opts?: { timeout?: number }) =>
-    Promise.resolve(response),
+  const create = jest.fn(
+    (_req: Record<string, unknown>, _opts?: { timeout?: number; maxRetries?: number }) =>
+      Promise.resolve(response),
   );
   (provider as unknown as { client: unknown }).client = { messages: { create } };
   return { provider, create };
@@ -173,7 +174,7 @@ describe('AnthropicProvider.completeStructured', () => {
       output_config: { format: { type: 'json_schema', schema: STRUCTURED_SCHEMA } },
     });
     expect(body).not.toHaveProperty('temperature');
-    expect(requestOptions).toEqual({ timeout: 15_000 });
+    expect(requestOptions).toEqual({ timeout: 15_000, maxRetries: 1 });
   });
 
   it('con razonamiento usa thinking adaptativo y el esfuerzo pedido', async () => {
