@@ -7,3 +7,4 @@ export * from './route.schema';
 export * from './crop.schema';
 export * from './review.schema';
 export * from './settings.schema';
+export * from './persistence.schema';

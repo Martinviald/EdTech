@@ -2,6 +2,8 @@ import {
   AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE,
   autoAnnulMinConfidence,
   isQuickConfirmEnabled,
+  orgConfigSchema,
+  resolveAnswerReadingSettings,
 } from './feature.schema';
 
 // El default de `quickConfirm` se invirtió: nació apagado "para el primer ciclo",
@@ -50,5 +52,57 @@ describe('autoAnnulMinConfidence', () => {
         review: { autoAnnulMinConfidence: AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE },
       }),
     ).toBe(0.9);
+  });
+});
+
+describe('resolveAnswerReadingSettings', () => {
+  it('sin config rigen los defaults decididos (D3: se envían recortes; D7: dataset interno)', () => {
+    for (const config of [undefined, null, {}]) {
+      expect(resolveAnswerReadingSettings(config)).toEqual({
+        enabled: true,
+        allowExternalVision: true,
+        rubricAssistEnabled: false,
+        datasetConsent: 'org_internal',
+        reviewAll: false,
+      });
+    }
+  });
+
+  it('lo guardado por la org gana sobre el default', () => {
+    const resolved = resolveAnswerReadingSettings({
+      answerReading: { allowExternalVision: false, allowedProviders: ['anthropic'] },
+    });
+    expect(resolved.allowExternalVision).toBe(false);
+    expect(resolved.allowedProviders).toEqual(['anthropic']);
+    expect(resolved.enabled).toBe(true);
+    expect(resolved.datasetConsent).toBe('org_internal');
+  });
+
+  it('un answerReading corrupto no envía imágenes a terceros', () => {
+    const resolved = resolveAnswerReadingSettings({
+      answerReading: { allowExternalVision: 'no', claveDesconocida: true },
+    });
+    expect(resolved.allowExternalVision).toBe(false);
+  });
+
+  it('una clave corrupta de otro dominio no afecta la lectura', () => {
+    const resolved = resolveAnswerReadingSettings({
+      review: { quickConfirm: 'sí' },
+      answerReading: { reviewAll: true },
+    });
+    expect(resolved.reviewAll).toBe(true);
+    expect(resolved.allowExternalVision).toBe(true);
+  });
+
+  it('orgConfigSchema valida answerReading y conserva las demás claves', () => {
+    const parsed = orgConfigSchema.parse({
+      answerReading: { datasetConsent: 'none' },
+      otraCosa: 1,
+    });
+    expect(parsed.answerReading?.datasetConsent).toBe('none');
+    expect(parsed).toHaveProperty('otraCosa', 1);
+    expect(
+      orgConfigSchema.safeParse({ answerReading: { allowedProviders: ['otro'] } }).success,
+    ).toBe(false);
   });
 });
