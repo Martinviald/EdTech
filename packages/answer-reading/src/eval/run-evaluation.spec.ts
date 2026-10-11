@@ -225,7 +225,7 @@ describe('runEvaluation', () => {
     expect(metrics.grading?.autoAcceptedResultError.rate).toBe(0);
   });
 
-  it('omite formatos sin registro y corta antes de superar el presupuesto', async () => {
+  it('omite formatos que el prompt de la ruta no cubre y corta antes de superar el presupuesto', async () => {
     const text = sample('t', { kind: 'short_text', maxWords: 4 }, 'a^2');
     const numbers = [
       sample('a', DECIMAL, '1'),
@@ -252,7 +252,7 @@ describe('runEvaluation', () => {
     expect(result.unitsRun).toBe(2);
     expect(result.spentUsd).toBeCloseTo(0.08);
     expect(result.samples.map((s) => s.skipped)).toEqual([
-      'unsupported_format',
+      'prompt_unsupported_format',
       null,
       null,
       'budget_exceeded',

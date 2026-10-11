@@ -17,7 +17,7 @@
       "family": "claude",
       "model": "claude-haiku-5-5",
       "promptRef": "transcribe.short-answer@2",
-      "hints": "format",
+      "hints": "none",
       "params": { "maxOutputTokens": 2048, "reasoning": "off", "timeoutMs": 60000 }
     },
     {
@@ -27,7 +27,7 @@
       "family": "gemini",
       "model": "gemini-3.5-flash-lite",
       "promptRef": "transcribe.short-answer@2",
-      "hints": "format",
+      "hints": "none",
       "params": {
         "maxOutputTokens": 2048,
         "reasoning": "off",
