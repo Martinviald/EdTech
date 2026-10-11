@@ -62,6 +62,8 @@ const GEMINI_THINKING_BUDGET: Record<Exclude<LlmReasoningLevel, 'off'>, number> 
 
 const GEMINI_PRO_MIN_THINKING_BUDGET = 128;
 
+const GEMINI_MAX_THINKING_SHARE = 0.5;
+
 const GEMINI_SAFETY_FINISH_REASONS = new Set([
   'SAFETY',
   'PROHIBITED_CONTENT',
@@ -348,6 +350,7 @@ export class GeminiProvider implements LlmProvider {
     const thinkingConfig = this.structuredThinkingConfig(
       request.options.model,
       request.options.reasoning,
+      request.options.maxTokens,
     );
     return {
       systemInstruction: request.system,
@@ -365,11 +368,17 @@ export class GeminiProvider implements LlmProvider {
   private structuredThinkingConfig(
     model: string,
     reasoning: LlmReasoningLevel,
+    maxTokens: number,
   ): GeminiThinkingConfig | undefined {
     const isPro = /pro/i.test(model);
     if (/^gemini-2\.5/i.test(model)) {
-      if (reasoning !== 'off') return { thinkingBudget: GEMINI_THINKING_BUDGET[reasoning] };
-      return { thinkingBudget: isPro ? GEMINI_PRO_MIN_THINKING_BUDGET : 0 };
+      const minBudget = isPro ? GEMINI_PRO_MIN_THINKING_BUDGET : 0;
+      if (reasoning === 'off') return { thinkingBudget: minBudget };
+      const budget = Math.min(
+        GEMINI_THINKING_BUDGET[reasoning],
+        Math.floor(maxTokens * GEMINI_MAX_THINKING_SHARE),
+      );
+      return { thinkingBudget: Math.max(budget, minBudget) };
     }
     if (/^gemini-[3-9]/i.test(model)) {
       if (reasoning === 'off') return { thinkingLevel: isPro ? 'LOW' : 'MINIMAL' };

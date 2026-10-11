@@ -418,11 +418,30 @@ describe('GeminiProvider.completeStructured', () => {
   ] as const)('traduce el razonamiento de %s (%s)', async (model, reasoning, thinkingConfig) => {
     const { provider, generateContent } = makeStructuredProvider(STRUCTURED_RESPONSE);
 
-    await provider.completeStructured(makeStructuredRequest({ model, reasoning }));
+    await provider.completeStructured(makeStructuredRequest({ model, reasoning, maxTokens: 4096 }));
 
     const request = generateContent.mock.calls[0]?.[0] as { config: Record<string, unknown> };
     expect(request.config.thinkingConfig).toEqual(thinkingConfig);
   });
+
+  it.each([
+    ['gemini-2.5-flash', 8192, { thinkingBudget: 4096 }],
+    ['gemini-2.5-flash', 16384, { thinkingBudget: 8192 }],
+    ['gemini-2.5-pro', 2048, { thinkingBudget: 1024 }],
+    ['gemini-2.5-pro', 200, { thinkingBudget: 128 }],
+  ] as const)(
+    'deja al menos la mitad del tope para la respuesta en %s con %i tokens (medium)',
+    async (model, maxTokens, thinkingConfig) => {
+      const { provider, generateContent } = makeStructuredProvider(STRUCTURED_RESPONSE);
+
+      await provider.completeStructured(
+        makeStructuredRequest({ model, reasoning: 'medium', maxTokens }),
+      );
+
+      const request = generateContent.mock.calls[0]?.[0] as { config: Record<string, unknown> };
+      expect(request.config.thinkingConfig).toEqual(thinkingConfig);
+    },
+  );
 
   it('omite thinkingConfig y mediaResolution en modelos sin razonamiento configurable', async () => {
     const { provider, generateContent } = makeStructuredProvider(STRUCTURED_RESPONSE);
