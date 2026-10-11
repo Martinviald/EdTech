@@ -180,6 +180,18 @@ export function annulmentEvidence(
   return { annulledParts: [...keys].sort() };
 }
 
+export function resolvePendingReadingPositions(
+  index: Map<string, ResolvableItem>,
+  pendingReadingLabels: readonly string[] | undefined,
+): Set<number> {
+  const positions = new Set<number>();
+  for (const label of pendingReadingLabels ?? []) {
+    const resolved = resolveScanLabel(index, label, null);
+    if (resolved.kind !== 'unmatched') positions.add(resolved.item.position);
+  }
+  return positions;
+}
+
 /**
  * Traduce las sub-respuestas de un pareado a `{ leftId: rightId }`.
  *

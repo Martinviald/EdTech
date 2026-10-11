@@ -7,6 +7,7 @@ export interface ConfirmedScanMarkInput {
   value: string | null;
   reviewedValue?: string | null;
   reviewDecision?: MarkReviewDecision | null;
+  pendingReading?: true;
 }
 
 export interface ConfirmedScanInput {
@@ -24,12 +25,18 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
   for (const scan of scans) {
     const answers: Record<string, string | null> = {};
     const annulledLabels: string[] = [];
+    const pendingReadingLabels: string[] = [];
     const errors: AnswerSheetRowError[] = [];
 
     for (const mark of scan.marks) {
       if (!seenColumns.has(mark.printedNumber)) {
         seenColumns.add(mark.printedNumber);
         detectedColumns.push(mark.printedNumber);
+      }
+
+      if (mark.pendingReading) {
+        pendingReadingLabels.push(mark.printedNumber);
+        continue;
       }
 
       if (mark.reviewedValue !== undefined) {
@@ -56,6 +63,7 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
       studentFullName: scan.studentFullName,
       answers,
       ...(annulledLabels.length > 0 ? { annulledLabels } : {}),
+      ...(pendingReadingLabels.length > 0 ? { pendingReadingLabels } : {}),
       errors,
     });
   }

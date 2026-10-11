@@ -660,7 +660,15 @@ export class ScanReviewService {
       }
       const marks: ConfirmedScanInput['marks'] = [];
       for (const mark of sheet.marks) {
-        if (cropPrintedNumbers.has(mark.printedNumber)) continue;
+        if (cropPrintedNumbers.has(mark.printedNumber)) {
+          marks.push({
+            printedNumber: mark.printedNumber,
+            state: mark.state,
+            value: null,
+            pendingReading: true,
+          });
+          continue;
+        }
         const reviewed = mark.reviewedAt !== null;
         if (!reviewed && (mark.state === 'multiple' || mark.state === 'ambiguous')) {
           assumedPending++;

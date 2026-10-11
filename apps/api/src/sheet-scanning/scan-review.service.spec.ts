@@ -1044,7 +1044,7 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(confirmCalls).toHaveLength(0);
   });
 
-  it('excluye las marcas crop_region del ParserResult (CD-9: el recorte no es una alternativa)', async () => {
+  it('manda las marcas crop_region como pendientes de lectura, nunca como respuesta en blanco', async () => {
     const specWithCrop: LayoutSpec = {
       ...SPEC,
       fields: [
@@ -1081,6 +1081,7 @@ describe('ScanReviewService.confirmBatch', () => {
     const rows = confirmCalls[0].input.parserResult.rows;
     expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
     expect(rows[0].answers).not.toHaveProperty('4');
+    expect(rows[0].pendingReadingLabels).toEqual(['4']);
     expect(result.summary.assumedPending).toBe(1);
   });
 

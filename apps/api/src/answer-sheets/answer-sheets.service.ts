@@ -63,6 +63,7 @@ import {
   buildPrintedLabelIndex,
   resolveRowAnswers,
   resolveAnnulledAnswers,
+  resolvePendingReadingPositions,
   toScoringAnswer,
 } from './lib/composite-answers';
 
@@ -421,8 +422,16 @@ export class AnswerSheetsService {
       // contra los ítems del instrumento antes de corregir.
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
       const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
+      const pendingReading = resolvePendingReadingPositions(labelIndex, row.pendingReadingLabels);
 
       for (const item of scopedItems) {
+        if (pendingReading.has(item.position)) {
+          responseRows.push(
+            this.pendingResponseRow(studentId, item, { answer: null, pendingReading: true }),
+          );
+          continue;
+        }
+
         const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
         const evidence = annulmentEvidence(annulled, item.position);
         const answerValue =
@@ -439,21 +448,7 @@ export class AnswerSheetsService {
         });
 
         if (result.requiresManualGrading) {
-          // Pendiente de corrección humana/IA (F4). NUNCA puntuar 0/incorrecto:
-          // scores en null → el calculador puro excluye `isCorrect === null` del
-          // denominador, así no contaminan el % de los autocorregidos.
-          responseRows.push({
-            assessmentId: '', // se completa una vez creado el assessment
-            studentId,
-            itemId: item.id,
-            value: answerValue,
-            isCorrect: null,
-            rawScore: null,
-            maxScore: item.maxScore.toFixed(2),
-            finalScore: null,
-            scoredBy: 'human',
-            scoredAt: null,
-          });
+          responseRows.push(this.pendingResponseRow(studentId, item, answerValue));
           continue;
         }
 
@@ -671,6 +666,25 @@ export class AnswerSheetsService {
   }
 
   // ---------- helpers ----------
+
+  private pendingResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    value: Record<string, unknown>,
+  ): typeof responses.$inferInsert {
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value,
+      isCorrect: null,
+      rawScore: null,
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: null,
+      scoredBy: 'human',
+      scoredAt: null,
+    };
+  }
 
   private requireOrgId(user: JwtPayload): string {
     if (!user.orgId) {

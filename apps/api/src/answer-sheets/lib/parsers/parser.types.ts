@@ -23,6 +23,7 @@ export interface ParsedAnswerSheetRow {
   studentFullName: string | null;
   answers: Record<string, string | null>;
   annulledLabels?: string[];
+  pendingReadingLabels?: string[];
   errors: AnswerSheetRowError[];
 }
 

@@ -300,6 +300,13 @@ function buildCapturingDb(
     students?: Array<{ id: string; rut: string; firstName: string; lastName: string }>;
     enrollments?: Array<{ studentId: string; classGroupId: string }>;
     assessmentRow?: { id: string; orgId: string; dataGranularity: 'item_level' | 'aggregate_only' };
+    items?: Array<{
+      id: string;
+      position: number;
+      type: string;
+      content: Record<string, unknown>;
+      scoringConfig: Record<string, unknown>;
+    }>;
   } = {},
 ): Database {
   const detect = (table: unknown): string => {
@@ -313,7 +320,7 @@ function buildCapturingDb(
   // `alternatives` no es decorativo: de ahí sale `hasAlternatives`, que distingue un
   // MCQ en blanco de un ítem de desarrollo en el read-model. En la BDD real el 100%
   // de los multiple_choice lo trae y ningún open_ended lo tiene.
-  const itemRows = [
+  const itemRows = existing.items ?? [
     {
       id: ITEM_1,
       position: 1,
@@ -721,6 +728,91 @@ describe('AnswerSheetsService', () => {
       )[0]!;
       expect(Number(studentResult.percentage)).toBeCloseTo(100, 5);
       expect(studentResult.isComplete).toBe(false);
+    });
+
+    it('deja pendiente de corrección, nunca en 0, un ítem cuya respuesta se lee por recorte', async () => {
+      const captured = { responses: [] as unknown[][], assessmentResults: [] as unknown[][] };
+      const db = buildCapturingDb(captured, {
+        items: [
+          {
+            id: ITEM_1,
+            position: 1,
+            type: 'multiple_choice',
+            content: { correctKey: 'A', alternatives: mcqAlternatives('A') },
+            scoringConfig: { points: 1 },
+          },
+          {
+            id: ITEM_2,
+            position: 2,
+            type: 'multiple_choice',
+            content: { correctKey: 'B', alternatives: mcqAlternatives('B') },
+            scoringConfig: { points: 1 },
+          },
+          {
+            id: ITEM_3,
+            position: 3,
+            type: 'short_answer',
+            content: { prompt: '¿Cuánto es?', acceptedAnswers: ['21/10'] },
+            scoringConfig: { points: 1 },
+          },
+        ],
+      });
+      const service = new AnswerSheetsService(db, store);
+      const entry = store.set({
+        orgId: ORG_A,
+        userId: USER_A_ID,
+        format: 'generic_csv',
+        instrumentId: INSTRUMENT_ID,
+        classGroupId: null,
+        assessmentId: null,
+        assessmentName: null,
+        columnMapping: null,
+        rows: [
+          {
+            rowNumber: 1,
+            studentRut: '12345678-5',
+            studentFullName: 'Juan Pérez',
+            answers: { '1': 'A', '2': null },
+            pendingReadingLabels: ['3'],
+            errors: [],
+          },
+        ],
+        detectedColumns: ['1', '2', '3'],
+        warnings: [],
+      });
+
+      const result = await service.confirm(makeJwt(), {
+        previewToken: entry.previewToken,
+        createAssessment: true,
+        skipErrorRows: true,
+      });
+
+      expect(result.responsesCreated).toBe(3);
+      const byItem = new Map(
+        (
+          captured.responses.flat() as Array<{
+            itemId: string;
+            value: Record<string, unknown>;
+            isCorrect: boolean | null;
+            scoredBy: string | null;
+            finalScore: string | null;
+            rawScore: string | null;
+          }>
+        ).map((r) => [r.itemId, r]),
+      );
+      expect(byItem.get(ITEM_1)).toMatchObject({ isCorrect: true, scoredBy: 'auto' });
+      expect(byItem.get(ITEM_2)).toMatchObject({
+        isCorrect: false,
+        rawScore: '0.00',
+        scoredBy: 'auto',
+      });
+      expect(byItem.get(ITEM_3)).toMatchObject({
+        value: { answer: null, pendingReading: true },
+        isCorrect: null,
+        rawScore: null,
+        finalScore: null,
+        scoredBy: 'human',
+      });
     });
 
     // El fork inline que este service tenía NO pasaba por computeAndPersist. Si el

@@ -50,6 +50,22 @@ describe('toParserResult', () => {
     expect(result.warnings).toEqual([]);
   });
 
+  it('un campo leído por recorte queda pendiente de lectura, sin respuesta ni error', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({ printedNumber: '1', value: 'B' }),
+          mark({ printedNumber: '2', state: 'marked', value: null, pendingReading: true }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '1': 'B' });
+    expect(result.rows[0]?.pendingReadingLabels).toEqual(['2']);
+    expect(result.rows[0]?.errors).toEqual([]);
+    expect(result.detectedColumns).toEqual(['1', '2']);
+  });
+
   it('blank produce null sin error de fila', () => {
     const result = toParserResult([
       scan({ marks: [mark({ printedNumber: '4', state: 'blank', value: null })] }),
