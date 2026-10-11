@@ -16,10 +16,13 @@ import {
 } from '../formats/transcription-json-schema';
 import { promptHash, promptRef, renderPrompt } from './render';
 import { TRANSCRIBE_SHORT_ANSWER_V1, TRANSCRIBE_SHORT_ANSWER_V2 } from './transcribe-short-answer';
+import { TRANSCRIBE_FREE_TEXT_V1, TRANSCRIBE_SHORT_TEXT_V1 } from './transcribe-text';
 
 export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_SHORT_ANSWER_V1,
   TRANSCRIBE_SHORT_ANSWER_V2,
+  TRANSCRIBE_SHORT_TEXT_V1,
+  TRANSCRIBE_FREE_TEXT_V1,
 ].map((prompt) => promptVersionSchema.parse(prompt));
 
 const BY_REF = new Map(PROMPT_VERSIONS.map((prompt) => [promptRef(prompt), prompt]));
@@ -52,6 +55,26 @@ export const PROMPT_LOCK_SAMPLE_FORMATS: readonly ResponseFormat[] = [
   { kind: 'ordered_tuple', arity: 3, componentKind: 'decimal' },
   { kind: 'sequence', length: 2 },
   { kind: 'sequence', length: 4 },
+  { kind: 'word_list', count: 1 },
+  { kind: 'word_list', count: 3 },
+  { kind: 'short_text', maxWords: 8 },
+  {
+    kind: 'multi_box',
+    boxes: [
+      { partId: 'tens', label: 'Decenas', kind: 'integer' },
+      { partId: 'units', label: 'Unidades', kind: 'integer' },
+    ],
+  },
+  {
+    kind: 'multi_box',
+    boxes: [
+      { partId: 'a', label: 'Primer sumando', kind: 'fraction' },
+      { partId: 'b', label: 'Segundo sumando', kind: 'decimal' },
+      { partId: 'word', label: 'Palabra', kind: 'short_text' },
+    ],
+  },
+  { kind: 'free_text', lines: 6 },
+  { kind: 'math_work', heightRatio: 0.4 },
 ];
 
 /** Lo que el formato agrega a lo enviado: etiqueta, guía y esquema de salida (con `parts`). */

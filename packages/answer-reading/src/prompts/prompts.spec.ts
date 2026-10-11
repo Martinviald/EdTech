@@ -86,6 +86,58 @@ describe('registro de prompts', () => {
   });
 });
 
+describe('prompts de texto (F10a)', () => {
+  it('short-text atiende listas, texto corto y casillas; free-text atiende el desarrollo', () => {
+    expect(getPrompt('transcribe.short-text@1')?.formatKinds).toEqual([
+      'word_list',
+      'short_text',
+      'multi_box',
+    ]);
+    expect(getPrompt('transcribe.free-text@1')?.formatKinds).toEqual(['free_text', 'math_work']);
+  });
+
+  it('free-text conserva las faltas y marca [ilegible]; textos en tuteo', () => {
+    for (const ref of ['transcribe.short-text@1', 'transcribe.free-text@1']) {
+      const prompt = getPrompt(ref);
+      expect(prompt?.system).toMatch(/"characters"/);
+      expect(prompt?.system).toMatch(/ESTADOS \("state"\)/);
+      expect(`${prompt?.system}${prompt?.user}`).not.toMatch(
+        /\b(vos|tenés|podés|marcá|copiá|dejá|escribí)\b/,
+      );
+    }
+    expect(getPrompt('transcribe.free-text@1')?.system).toMatch(/\[ilegible\]/);
+    expect(getPrompt('transcribe.free-text@1')?.system).toMatch(/faltas de ortografía/);
+  });
+
+  it('renderiza el formato de casillas con sus partes', () => {
+    const boxes: ResponseFormat = {
+      kind: 'multi_box',
+      boxes: [
+        { partId: 'tens', label: 'Decenas', kind: 'integer' },
+        { partId: 'units', label: 'Unidades', kind: 'integer' },
+      ],
+    };
+    const { prompt, outputSchema } = renderTranscriptionPrompt(
+      reader('transcribe.short-text@1', 'format'),
+      boxes,
+    );
+    expect(prompt.user).toMatch(/2 casillas: Decenas, Unidades/);
+    expect(prompt.system).toMatch(/"Decenas" \(número entero\)/);
+    expect(outputSchema.schemaId).toBe('transcription-output.multi_box.tens+units@1');
+    expect(() =>
+      renderTranscriptionPrompt(reader('transcribe.short-answer@2', 'format'), boxes),
+    ).toThrow(/no sirve/);
+  });
+
+  it('free-text no pide partes', () => {
+    const { outputSchema } = renderTranscriptionPrompt(reader('transcribe.free-text@1', 'format'), {
+      kind: 'free_text',
+      lines: 6,
+    });
+    expect(outputSchema.schema.properties.parts).toMatchObject({ type: 'null' });
+  });
+});
+
 describe('renderTemplate', () => {
   it('sustituye variables y secciones opcionales sin lógica', () => {
     expect(renderTemplate('Hola{{#gradeName}} de {{gradeName}}{{/gradeName}}.', {})).toBe('Hola.');

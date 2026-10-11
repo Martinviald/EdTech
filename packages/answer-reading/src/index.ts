@@ -4,6 +4,7 @@ export * from './formats/transcription-json-schema';
 export * from './prompts/render';
 export * from './prompts/registry';
 export * from './prompts/transcribe-short-answer';
+export * from './prompts/transcribe-text';
 export * from './consensus/audit-sample';
 export * from './consensus/scoring-outcome';
 export * from './consensus/evaluate-consensus';
