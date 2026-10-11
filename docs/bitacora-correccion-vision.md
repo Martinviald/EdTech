@@ -114,3 +114,33 @@ fallback para modelos que no estén en la tabla (costos históricos).
   y es la que soporta `thinkingLevel`/`responseJsonSchema` sin trabas; se anota como riesgo.
 - Humo real: Haiku 5.5 leyó "2,5" (616 tokens de entrada, US$0,00007); Gemini 3.5 Flash-Lite leyó
   "2,5" (1124 tokens, 1080 de imagen, US$0,00038).
+
+### Ola B · tanda 2 e integración (F2, F5a, F5b)
+
+- F5a integrada (`492591b8`, `d76188c6`): perfiles de recorte, `inkRatio` descontando casillas,
+  evidencia `crop` en el contrato v2. Sin perfil, el recorte es idéntico byte a byte al histórico.
+- F2 integrada (`6c44409f`…`18c8111e`): `answer-canonical.ts`, `matchesAcceptedAnswer` canónico,
+  paquete `@soe/answer-reading`, job de CI `answer-reading` (`9fd5a691`). Lockfile resuelto
+  tomando el de la rama y regenerando con `pnpm install`.
+- F5b integrada (`c042ecdf`…`7e673a41`): `resolveResponseFormat` en `packages/types`, campo
+  `response` en el `LayoutSpec` (hash de layouts existentes verificado sin cambios), casillas de
+  9 mm (mínimo 8 mm), invariante 8. Hoja de prueba revisada visualmente por el orquestador.
+- Gates de integración: pytest 303 ok; `@soe/types` 868 ok; `@soe/answer-reading` 99 ok; api
+  typecheck ok; jest api acotado 571 ok.
+
+**Revisión de F6 (independiente).** Sin fugas entre colegios; backfill de 0042 confirmado con
+datos y fallo seguro con huérfanos. Bloqueantes corregidos en `31bff2e4` + migración
+`0045_answer_reading_evidence`: (1) decisiones y revisiones ya no se pueden borrar desde la API;
+(2) borrar una marca ya no arrastra la evidencia en cascada; (3) `answerReading` corrupto ya no
+invalida el resto de `orgConfig` (habilitaba features pagas y quitaba el tope de IA). Mejora
+agregada: índice de cola por evaluación. Quedan como mejoras no bloqueantes: FK compuesta
+`(org_id, mark_id)`, CHECK en columnas de texto tipadas, scripts de recarga DIA que borran
+`responses`/`assessments` fallarán por FK cuando existan decisiones (protege la evidencia).
+
+**Revisión de F2 (independiente).** Sin regresión de correcta→incorrecta en números, fracciones y
+pares por CSV. Hallazgos bloqueantes en la lectura (blank autoaceptado pese a `reviewRequested`,
+`issues` del normalizador ignoradas, desempate que salta restricciones de proveedor) y una
+regresión real en secuencias con letras. Se despachó un agente de corrección (`wip/cv-f2fix`).
+
+**Decisión B-1 — casilla de signo.** La hoja imprime la casilla de signo sin rótulo. Se deja así
+en esta PR (la hoja oficial DIA tampoco la rotula) y se anota para la UX de la hoja.
