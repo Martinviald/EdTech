@@ -9,6 +9,7 @@ export * from './level-stats';
 export * from './taxonomy-kind';
 export * from './true-false';
 export * from './multi-select';
+export * from './answer-canonical';
 export * from './short-answer';
 export * from './matching-answer';
 export * from './rubric-code';
