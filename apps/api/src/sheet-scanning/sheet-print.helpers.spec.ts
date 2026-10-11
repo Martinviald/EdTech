@@ -659,3 +659,121 @@ describe('la cabecera NO entra al LayoutSpec (candado del layoutHash)', () => {
     expect(plan.qr).toEqual(computeDrawPlan(spec, 0).qr);
   });
 });
+
+function responseItem(
+  position: number,
+  type: DerivableItem['type'],
+  content: object,
+): DerivableItem {
+  return {
+    id: `00000000-0000-4000-8000-${String(position).padStart(12, '0')}`,
+    position,
+    printedNumber: null,
+    type,
+    content: content as ItemContent,
+  };
+}
+
+function responseSpec(): LayoutSpec {
+  return deriveLayoutDraft(INSTRUMENT_ID, [
+    mcItem(1),
+    responseItem(2, 'short_answer', { prompt: 'x', acceptedAnswers: ['-135'], unit: 'cm' }),
+    responseItem(3, 'short_answer', { prompt: 'x', acceptedAnswers: ['10,962'] }),
+    responseItem(4, 'short_answer', { prompt: 'x', acceptedAnswers: ['21/10', '2 1/10'] }),
+    responseItem(5, 'short_answer', { prompt: 'x', acceptedAnswers: ['(7;3)'] }),
+    responseItem(6, 'rubric_scored', {
+      prompt: 'x',
+      levels: [
+        { code: '0', creditFraction: 0 },
+        { code: '1', creditFraction: 1 },
+      ],
+    }),
+  ]).spec;
+}
+
+function insideRect(
+  x: number,
+  y: number,
+  rect: { x: number; y: number; width: number; height: number },
+) {
+  return x > rect.x && x < rect.x + rect.width && y > rect.y && y < rect.y + rect.height;
+}
+
+describe('computeDrawPlan — casillas por formato de respuesta', () => {
+  const spec = responseSpec();
+  const units = new Map([[spec.fields[1]!.response!.itemId, 'cm']]);
+  const plan = computeDrawPlan(spec, 0, { unitsByItemId: units });
+  const byNumber = new Map(plan.responseFields.map((field) => [field.printedNumber, field]));
+
+  it('un crop_region con response se dibuja por casillas y no como rectángulo único', () => {
+    expect(plan.cropRegions).toEqual([]);
+    expect(plan.responseFields.map((f) => f.printedNumber)).toEqual(['2', '3', '4', '5', '6']);
+    expect(byNumber.get('2')!.boxes).toHaveLength(6);
+  });
+
+  it('la raya de la fracción queda entre el numerador y el denominador, fuera de ambas casillas', () => {
+    const fraction = byNumber.get('4')!;
+    const numerator = fraction.boxes.find((b) => b.role === 'numerator')!.rect;
+    const denominator = fraction.boxes.find((b) => b.role === 'denominator')!.rect;
+    expect(fraction.segments).toHaveLength(1);
+    const bar = fraction.segments[0]!;
+    expect(bar.y1).toBeLessThan(numerator.y);
+    expect(bar.y1).toBeGreaterThan(denominator.y + denominator.height);
+  });
+
+  it('el par ordenado imprime paréntesis y punto y coma fuera de las casillas', () => {
+    const tuple = byNumber.get('5')!;
+    expect(tuple.glyphs.map((g) => g.text)).toEqual(['(', ')', ';']);
+    for (const glyph of tuple.glyphs) {
+      for (const box of tuple.boxes) {
+        expect(insideRect(glyph.centerX, glyph.centerY, box.rect)).toBe(false);
+      }
+    }
+  });
+
+  it('la coma decimal se imprime sólo dentro de su casilla propia', () => {
+    const decimal = byNumber.get('3')!;
+    const comma = decimal.glyphs.find((g) => g.text === ',')!;
+    const separator = decimal.boxes.find((b) => b.role === 'decimal_separator')!;
+    expect(insideRect(comma.centerX, comma.centerY, separator.rect)).toBe(true);
+    for (const box of decimal.boxes.filter((b) => b.role === 'char')) {
+      expect(insideRect(comma.centerX, comma.centerY, box.rect)).toBe(false);
+    }
+  });
+
+  it('la unidad se imprime a la derecha de las casillas, dentro de la región', () => {
+    const integer = byNumber.get('2')!;
+    const unit = integer.glyphs.find((g) => g.text === 'cm')!;
+    const rightmost = Math.max(...integer.boxes.map((b) => b.rect.x + b.rect.width));
+    expect(unit.centerX).toBeGreaterThan(rightmost);
+    expect(unit.centerX).toBeLessThan(integer.rect.x + integer.rect.width);
+  });
+
+  it('el texto libre se dibuja como renglones', () => {
+    const freeText = byNumber.get('6')!;
+    expect(freeText.boxes.every((b) => b.role === 'line')).toBe(true);
+    expect(freeText.segments).toHaveLength(freeText.boxes.length);
+  });
+
+  it('renderiza el PDF con casillas por formato', async () => {
+    const bytes = await renderSheetsPdf(
+      spec,
+      SPEC_HASH,
+      [
+        {
+          printedSheetId: '22222222-2222-4222-8222-222222222222',
+          sequence: 1,
+          shortCode: null,
+          studentName: null,
+          classGroupName: null,
+          listNumber: null,
+          instrumentLabel: null,
+          administeredAt: null,
+        },
+      ],
+      { unitsByItemId: units },
+    );
+    const doc = await PDFDocument.load(bytes);
+    expect(doc.getPageCount()).toBe(spec.pageCount);
+  });
+});

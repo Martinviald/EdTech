@@ -1,19 +1,18 @@
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import * as QRCode from 'qrcode';
 import {
   buildOmrQrPayload,
   buildOmrShortQrPayload,
   formatSheetDayMonthYear,
   formatShortCode,
+  type LayoutField,
   type LayoutSpec,
+  type OmrFieldResponse,
+  type OmrRegion,
 } from '@soe/types';
-import { identityModeOf, SHEET_QR_IDENTITY_REGION } from './sheet-layout.helpers';
+import { identityModeOf, PAPER_SIZES_PT, SHEET_QR_IDENTITY_REGION } from './sheet-layout.helpers';
 
-export const PAPER_SIZES_PT: Record<LayoutSpec['paper'], { width: number; height: number }> = {
-  letter: { width: 612, height: 792 },
-  a4: { width: 595.28, height: 841.89 },
-  legal: { width: 612, height: 1008 },
-};
+export { PAPER_SIZES_PT };
 
 export interface DrawPlanRect {
   x: number;
@@ -43,6 +42,41 @@ export interface DrawPlanCropRegion {
   rect: DrawPlanRect;
 }
 
+export interface DrawPlanResponseBox {
+  partId: string;
+  role: OmrFieldResponse['boxes'][number]['role'];
+  rect: DrawPlanRect;
+}
+
+export interface DrawPlanSegment {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface DrawPlanGlyph {
+  text: string;
+  centerX: number;
+  centerY: number;
+  size: number;
+  align: 'center' | 'left' | 'right';
+}
+
+export interface DrawPlanResponseField {
+  printedNumber: string;
+  rect: DrawPlanRect;
+  label: DrawPlanLabel;
+  boxes: DrawPlanResponseBox[];
+  segments: DrawPlanSegment[];
+  glyphs: DrawPlanGlyph[];
+}
+
+export interface DrawPlanOptions {
+  reserveShortCodeStrip?: boolean;
+  unitsByItemId?: ReadonlyMap<string, string>;
+}
+
 export interface SheetDrawPlan {
   pageWidth: number;
   pageHeight: number;
@@ -57,6 +91,7 @@ export interface SheetDrawPlan {
   rutGridBubbles: DrawPlanBubble[];
   instructions: DrawPlanLabel[];
   cropRegions: DrawPlanCropRegion[];
+  responseFields: DrawPlanResponseField[];
 }
 
 export interface PrintableSheetInfo {
@@ -224,16 +259,193 @@ const SHORT_CODE_STRIP_PT = 11;
 const HEADER_QR_GAP = 8;
 const BLANK_NAME_LINE = '________________________________';
 const RUT_MODE_NAME_LINE = 'Nombre: ____________________________';
+const UNIT_GAP_PT = 5;
+const RESPONSE_LABEL_TOP_OFFSET = 17;
+const UNIT_FONT_SIZE = 11;
+const COMPONENT_GLYPH_SCALE = 1.25;
+const SEPARATOR_GLYPH_SCALE = 0.9;
+const MULTI_BOX_LABEL_FONT_SIZE = 8;
 const RUT_INSTRUCTION_LINES = [
   'RUT: rellena UN círculo por columna, de izquierda a derecha.',
   'La última columna es el dígito verificador (marca K si corresponde).',
   'Si tu RUT tiene 7 dígitos, marca 0 en la primera columna.',
 ] as const;
 
+interface FrameMapper {
+  toX: (nx: number) => number;
+  toY: (ny: number) => number;
+}
+
+function rectOf(region: OmrRegion, frame: FrameMapper): DrawPlanRect {
+  const left = frame.toX(region.topLeft.x);
+  const top = frame.toY(region.topLeft.y);
+  const right = frame.toX(region.bottomRight.x);
+  const bottom = frame.toY(region.bottomRight.y);
+  return { x: left, y: bottom, width: right - left, height: top - bottom };
+}
+
+function componentIndexOf(partId: string): number | null {
+  const match = /^components\.(\d+)(\.|$)/.exec(partId);
+  return match ? Number(match[1]) : null;
+}
+
+function spanOf(boxes: readonly DrawPlanResponseBox[]): DrawPlanRect {
+  let left = Number.POSITIVE_INFINITY;
+  let bottom = Number.POSITIVE_INFINITY;
+  let right = Number.NEGATIVE_INFINITY;
+  let top = Number.NEGATIVE_INFINITY;
+  for (const box of boxes) {
+    left = Math.min(left, box.rect.x);
+    bottom = Math.min(bottom, box.rect.y);
+    right = Math.max(right, box.rect.x + box.rect.width);
+    top = Math.max(top, box.rect.y + box.rect.height);
+  }
+  return { x: left, y: bottom, width: right - left, height: top - bottom };
+}
+
+function fractionBars(boxes: readonly DrawPlanResponseBox[]): DrawPlanSegment[] {
+  const denominators = new Map<string, DrawPlanResponseBox>();
+  for (const box of boxes) {
+    if (box.role === 'denominator') {
+      denominators.set(box.partId.slice(0, -'denominator'.length), box);
+    }
+  }
+  const segments: DrawPlanSegment[] = [];
+  for (const numerator of boxes) {
+    if (numerator.role !== 'numerator') continue;
+    const denominator = denominators.get(numerator.partId.slice(0, -'numerator'.length));
+    if (!denominator) continue;
+    const y = (numerator.rect.y + denominator.rect.y + denominator.rect.height) / 2;
+    segments.push({
+      x1: numerator.rect.x,
+      y1: y,
+      x2: numerator.rect.x + numerator.rect.width,
+      y2: y,
+    });
+  }
+  return segments;
+}
+
+function tupleGlyphs(boxes: readonly DrawPlanResponseBox[]): DrawPlanGlyph[] {
+  const byComponent = new Map<number, DrawPlanResponseBox[]>();
+  for (const box of boxes) {
+    const component = componentIndexOf(box.partId);
+    if (component === null) continue;
+    (byComponent.get(component) ?? byComponent.set(component, []).get(component)!).push(box);
+  }
+  const spans = Array.from(byComponent.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([, componentBoxes]) => spanOf(componentBoxes));
+  if (spans.length === 0) return [];
+  const block = spanOf(boxes);
+  const centerY = block.y + block.height / 2;
+  const size = Math.min(block.height, spans[0]!.height * 2) * COMPONENT_GLYPH_SCALE;
+  const first = spans[0]!;
+  const last = spans[spans.length - 1]!;
+  const glyphs: DrawPlanGlyph[] = [
+    { text: '(', centerX: first.x - size * 0.25, centerY, size, align: 'right' },
+    { text: ')', centerX: last.x + last.width + size * 0.25, centerY, size, align: 'left' },
+  ];
+  for (let index = 1; index < spans.length; index++) {
+    const previous = spans[index - 1]!;
+    const current = spans[index]!;
+    glyphs.push({
+      text: ';',
+      centerX: (previous.x + previous.width + current.x) / 2,
+      centerY,
+      size: size * SEPARATOR_GLYPH_SCALE,
+      align: 'center',
+    });
+  }
+  return glyphs;
+}
+
+function multiBoxLabels(
+  response: OmrFieldResponse,
+  boxes: readonly DrawPlanResponseBox[],
+  regionLeft: number,
+): DrawPlanGlyph[] {
+  if (response.format.kind !== 'multi_box') return [];
+  const glyphs: DrawPlanGlyph[] = [];
+  for (const part of response.format.boxes) {
+    const partBoxes = boxes.filter(
+      (box) => box.partId === part.partId || box.partId.startsWith(`${part.partId}.`),
+    );
+    if (partBoxes.length === 0) continue;
+    const span = spanOf(partBoxes);
+    glyphs.push({
+      text: part.label,
+      centerX: regionLeft + LABEL_GAP,
+      centerY: span.y + span.height / 2,
+      size: MULTI_BOX_LABEL_FONT_SIZE,
+      align: 'left',
+    });
+  }
+  return glyphs;
+}
+
+function buildResponseField(
+  field: LayoutField & { region: OmrRegion; response: OmrFieldResponse },
+  frame: FrameMapper,
+  unit: string | null,
+): DrawPlanResponseField {
+  const rect = rectOf(field.region, frame);
+  const boxes = field.response.boxes.map((box) => ({
+    partId: box.partId,
+    role: box.role,
+    rect: rectOf(box.region, frame),
+  }));
+  const segments = fractionBars(boxes);
+  const glyphs: DrawPlanGlyph[] = [];
+  for (const box of boxes) {
+    if (box.role === 'line') {
+      segments.push({
+        x1: box.rect.x,
+        y1: box.rect.y,
+        x2: box.rect.x + box.rect.width,
+        y2: box.rect.y,
+      });
+    }
+    if (box.role === 'decimal_separator') {
+      glyphs.push({
+        text: ',',
+        centerX: box.rect.x + box.rect.width / 2,
+        centerY: box.rect.y + box.rect.height * 0.3,
+        size: box.rect.height * COMPONENT_GLYPH_SCALE,
+        align: 'center',
+      });
+    }
+  }
+  if (field.response.format.kind === 'ordered_tuple') glyphs.push(...tupleGlyphs(boxes));
+  glyphs.push(...multiBoxLabels(field.response, boxes, rect.x));
+  if (unit !== null && boxes.length > 0) {
+    const span = spanOf(boxes);
+    glyphs.push({
+      text: unit,
+      centerX: span.x + span.width + UNIT_GAP_PT,
+      centerY: span.y + span.height / 2,
+      size: UNIT_FONT_SIZE,
+      align: 'left',
+    });
+  }
+  return {
+    printedNumber: field.printedNumber,
+    rect,
+    label: {
+      text: field.printedNumber,
+      x: rect.x - LABEL_GAP - LABEL_FONT_SIZE * 0.6 * field.printedNumber.length,
+      y: rect.y + rect.height - RESPONSE_LABEL_TOP_OFFSET,
+    },
+    boxes,
+    segments,
+    glyphs,
+  };
+}
+
 export function computeDrawPlan(
   spec: LayoutSpec,
   pageIndex: number,
-  options: { reserveShortCodeStrip?: boolean } = {},
+  options: DrawPlanOptions = {},
 ): SheetDrawPlan {
   const { width: pageWidth, height: pageHeight } = PAPER_SIZES_PT[spec.paper];
   const fiducialSide = spec.fiducials.sizeRatio * pageWidth;
@@ -308,8 +520,20 @@ export function computeDrawPlan(
   }
 
   const cropRegions: DrawPlanCropRegion[] = [];
+  const responseFields: DrawPlanResponseField[] = [];
   for (const field of spec.fields) {
     if (field.pageIndex !== pageIndex || field.kind !== 'crop_region' || field.region === null) {
+      continue;
+    }
+    if (field.response) {
+      const unit = options.unitsByItemId?.get(field.response.itemId) ?? null;
+      responseFields.push(
+        buildResponseField(
+          { ...field, region: field.region, response: field.response },
+          { toX, toY },
+          unit,
+        ),
+      );
       continue;
     }
     const left = toX(field.region.topLeft.x);
@@ -386,13 +610,59 @@ export function computeDrawPlan(
     rutGridBubbles,
     instructions,
     cropRegions,
+    responseFields,
   };
+}
+
+function drawResponseField(
+  page: PDFPage,
+  response: DrawPlanResponseField,
+  font: PDFFont,
+  boldFont: PDFFont,
+): void {
+  const black = rgb(0, 0, 0);
+  page.drawText(response.label.text, {
+    x: response.label.x,
+    y: response.label.y,
+    size: LABEL_FONT_SIZE,
+    font: boldFont,
+    color: black,
+  });
+  for (const box of response.boxes) {
+    if (box.role === 'line' || box.role === 'decimal_separator') continue;
+    page.drawRectangle({ ...box.rect, borderColor: black, borderWidth: 0.8 });
+  }
+  for (const segment of response.segments) {
+    page.drawLine({
+      start: { x: segment.x1, y: segment.y1 },
+      end: { x: segment.x2, y: segment.y2 },
+      thickness: 0.8,
+      color: black,
+    });
+  }
+  for (const glyph of response.glyphs) {
+    const width = font.widthOfTextAtSize(glyph.text, glyph.size);
+    const x =
+      glyph.align === 'center'
+        ? glyph.centerX - width / 2
+        : glyph.align === 'right'
+          ? glyph.centerX - width
+          : glyph.centerX;
+    page.drawText(glyph.text, {
+      x,
+      y: glyph.centerY - glyph.size * 0.35,
+      size: glyph.size,
+      font,
+      color: black,
+    });
+  }
 }
 
 export async function renderSheetsPdf(
   spec: LayoutSpec,
   specHash: string,
   sheets: readonly PrintableSheetInfo[],
+  options: Pick<DrawPlanOptions, 'unitsByItemId'> = {},
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -401,7 +671,12 @@ export async function renderSheetsPdf(
   const reserveShortCodeStrip = sheets.some((sheet) => sheet.shortCode !== null);
   const plans: SheetDrawPlan[] = [];
   for (let pageIndex = 0; pageIndex < spec.pageCount; pageIndex++) {
-    plans.push(computeDrawPlan(spec, pageIndex, { reserveShortCodeStrip }));
+    plans.push(
+      computeDrawPlan(spec, pageIndex, {
+        reserveShortCodeStrip,
+        unitsByItemId: options.unitsByItemId,
+      }),
+    );
   }
 
   const black = rgb(0, 0, 0);
@@ -480,6 +755,10 @@ export async function renderSheetsPdf(
           font: boldFont,
           color: black,
         });
+      }
+
+      for (const response of plan.responseFields) {
+        drawResponseField(page, response, font, boldFont);
       }
 
       for (const instruction of plan.instructions) {

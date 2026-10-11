@@ -14,6 +14,7 @@ import {
   classGroups,
   grades,
   instruments,
+  items,
   subjects,
   printedSheets,
   sheetLayouts,
@@ -23,7 +24,7 @@ import {
   students,
   withOrgContext,
 } from '@soe/db';
-import { parseSheetDate, todaySheetDate } from '@soe/types';
+import { parseSheetDate, todaySheetDate, type LayoutSpec } from '@soe/types';
 import type {
   AssessmentFormListResponse,
   CreatePrintRunDto,
@@ -34,7 +35,7 @@ import type {
   UpdatePrintRunDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
-import { identityModeOf } from './sheet-layout.helpers';
+import { identityModeOf, itemUnitOf } from './sheet-layout.helpers';
 import {
   buildClassGroupLabel,
   buildInstrumentLabel,
@@ -561,8 +562,27 @@ export class SheetPrintService {
       throw new BadRequestException('La tirada no tiene hojas registradas para imprimir.');
     }
 
-    const bytes = await renderSheetsPdf(spec, specHash, sheets);
+    const unitsByItemId = await this.loadPrintedUnits(spec);
+    const bytes = await renderSheetsPdf(spec, specHash, sheets, { unitsByItemId });
     return Buffer.from(bytes);
+  }
+
+  private async loadPrintedUnits(spec: LayoutSpec): Promise<Map<string, string>> {
+    const itemIds = new Set<string>();
+    for (const field of spec.fields) {
+      if (field.response) itemIds.add(field.response.itemId);
+    }
+    const units = new Map<string, string>();
+    if (itemIds.size === 0) return units;
+    const rows = await this.db
+      .select({ id: items.id, content: items.content })
+      .from(items)
+      .where(inArray(items.id, [...itemIds]));
+    for (const row of rows) {
+      const unit = itemUnitOf(row.content);
+      if (unit !== null) units.set(row.id, unit);
+    }
+    return units;
   }
 
   private async pickShortCodes(tx: Database, orgId: string, count: number): Promise<number[]> {

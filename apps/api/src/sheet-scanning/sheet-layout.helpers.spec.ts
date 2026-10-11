@@ -1,10 +1,12 @@
 import { layoutHash, layoutSpecSchema, type ItemContent } from '@soe/types';
 import {
+  RESPONSE_MIN_BOX_MM,
   RUT_DV_GROUP_INDEX,
   SHEET_FIELDS_PER_PAGE,
   collectInvariantViolations,
   deriveLayoutDraft,
   partitionDerivableItems,
+  sheetFrameSizeMm,
   type DerivableItem,
 } from './sheet-layout.helpers';
 
@@ -42,8 +44,8 @@ function openItem(position: number): DerivableItem {
     id: `item-${position}`,
     position,
     printedNumber: null,
-    type: 'open_ended',
-    content: { prompt: 'Explica' } as ItemContent,
+    type: 'oral_reading',
+    content: { passage: 'Lee en voz alta' } as ItemContent,
   };
 }
 
@@ -69,7 +71,7 @@ describe('deriveLayoutDraft', () => {
     expect(draft.spec.fields.map((f) => f.printedNumber)).toEqual(['1', '3']);
     expect(draft.excludedItems).toHaveLength(1);
     expect(draft.excludedItems[0]).toMatchObject({ itemId: 'item-2', printedNumber: '2' });
-    expect(draft.excludedItems[0]!.reason).toContain('open_ended');
+    expect(draft.excludedItems[0]!.reason).toContain('oral_reading');
   });
 
   it('crece a más de una página cuando los ítems no caben en una (G4)', () => {
@@ -300,5 +302,213 @@ describe('deriveLayoutDraft — identidad rut_bubbles (CD-10)', () => {
     expect(collectInvariantViolations(qrConGrilla, items).map((v) => v.message).join(' ')).toContain(
       'no lleva grilla',
     );
+  });
+});
+
+function uuidFor(position: number): string {
+  return `00000000-0000-4000-8000-${String(position).padStart(12, '0')}`;
+}
+
+function shortAnswerItem(position: number, acceptedAnswers: string[], extra: Record<string, unknown> = {}): DerivableItem {
+  return {
+    id: uuidFor(position),
+    position,
+    printedNumber: null,
+    type: 'short_answer',
+    content: { prompt: `Pregunta ${position}`, acceptedAnswers, ...extra } as ItemContent,
+  };
+}
+
+function rubricItem(position: number): DerivableItem {
+  return {
+    id: uuidFor(position),
+    position,
+    printedNumber: null,
+    type: 'rubric_scored',
+    content: {
+      prompt: 'Explica tu procedimiento',
+      levels: [
+        { code: '0', creditFraction: 0 },
+        { code: '1', creditFraction: 1 },
+      ],
+    } as ItemContent,
+  };
+}
+
+function formatItems(): DerivableItem[] {
+  return [
+    mcItem(1),
+    shortAnswerItem(2, ['-135']),
+    shortAnswerItem(3, ['10,962']),
+    shortAnswerItem(4, ['21/10', '2 1/10']),
+    shortAnswerItem(5, ['(7;3)']),
+    shortAnswerItem(6, ['3-1-4-2']),
+    shortAnswerItem(7, ['Cabeza, tórax, abdomen']),
+    rubricItem(8),
+  ];
+}
+
+describe('deriveLayoutDraft — campos de respuesta escrita por formato', () => {
+  it('deriva un crop_region con response para cada formato de visión, en orden de posición', () => {
+    const draft = deriveLayoutDraft(INSTRUMENT_ID, formatItems());
+
+    expect(draft.excludedItems).toEqual([]);
+    expect(() => layoutSpecSchema.parse(draft.spec)).not.toThrow();
+    expect(draft.spec.fields.map((f) => f.printedNumber)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8']);
+    expect(draft.spec.fields[0]!.kind).toBe('bubble_group');
+    expect(draft.spec.fields[0]!.response).toBeUndefined();
+
+    const formats = draft.spec.fields.slice(1).map((f) => f.response?.format.kind);
+    expect(formats).toEqual([
+      'integer',
+      'decimal',
+      'fraction',
+      'ordered_tuple',
+      'sequence',
+      'short_text',
+      'free_text',
+    ]);
+    for (const field of draft.spec.fields.slice(1)) {
+      expect(field.kind).toBe('crop_region');
+      expect(field.response!.itemId).toBe(uuidFor(Number(field.printedNumber)));
+    }
+  });
+
+  it('asigna partId y role por formato y el perfil de recorte según el largo de la respuesta', () => {
+    const fields = deriveLayoutDraft(INSTRUMENT_ID, formatItems()).spec.fields;
+    const rolesOf = (index: number) => fields[index]!.response!.boxes.map((b) => `${b.partId}:${b.role}`);
+
+    expect(rolesOf(1)).toEqual(['sign:sign', ...Array.from({ length: 5 }, (_, i) => `char.${i}:char`)]);
+    expect(rolesOf(2)).toEqual([
+      'char.0:char',
+      'char.1:char',
+      'char.2:char',
+      'char.3:char',
+      'decimal_separator:decimal_separator',
+      'char.4:char',
+      'char.5:char',
+      'char.6:char',
+    ]);
+    expect(rolesOf(3)).toEqual(['whole:whole', 'numerator:numerator', 'denominator:denominator']);
+    expect(rolesOf(4)).toEqual(['components.0:tuple_component', 'components.1:tuple_component']);
+    expect(rolesOf(5)).toEqual(Array.from({ length: 4 }, (_, i) => `elements.${i}:sequence_element`));
+    expect(rolesOf(6)).toEqual(['lines.0:line']);
+    expect(rolesOf(7)).toEqual(Array.from({ length: 6 }, (_, i) => `lines.${i}:line`));
+
+    expect(fields.slice(1, 7).every((f) => f.response!.cropProfileId === 'short-answer@1')).toBe(true);
+    expect(fields[7]!.response!.cropProfileId).toBe('free-text@1');
+  });
+
+  it('las casillas de caracteres son cuadradas y de al menos 8 mm', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, formatItems()).spec;
+    const frame = sheetFrameSizeMm(spec.paper, spec.fiducials);
+    for (const box of spec.fields[1]!.response!.boxes) {
+      const widthMm = (box.region.bottomRight.x - box.region.topLeft.x) * frame.width;
+      const heightMm = (box.region.bottomRight.y - box.region.topLeft.y) * frame.height;
+      expect(widthMm).toBeCloseTo(heightMm, 2);
+      expect(widthMm).toBeGreaterThanOrEqual(RESPONSE_MIN_BOX_MM);
+    }
+  });
+
+  it('la fracción pone el numerador sobre el denominador con espacio para la raya', () => {
+    const boxes = deriveLayoutDraft(INSTRUMENT_ID, formatItems()).spec.fields[3]!.response!.boxes;
+    const numerator = boxes.find((b) => b.role === 'numerator')!;
+    const denominator = boxes.find((b) => b.role === 'denominator')!;
+    expect(numerator.region.topLeft.x).toBe(denominator.region.topLeft.x);
+    expect(denominator.region.topLeft.y).toBeGreaterThan(numerator.region.bottomRight.y);
+  });
+
+  it('el layout derivado no viola ningún invariante y no toca la identidad', () => {
+    for (const mode of ['qr', 'rut_bubbles'] as const) {
+      const items = formatItems();
+      const spec = deriveLayoutDraft(INSTRUMENT_ID, items, mode).spec;
+      expect(collectInvariantViolations(spec, items)).toEqual([]);
+    }
+  });
+
+  it('los campos de respuesta se ubican debajo de las burbujas y pasan de página cuando no caben', () => {
+    const items = [
+      ...Array.from({ length: 10 }, (_, i) => mcItem(i + 1)),
+      ...Array.from({ length: 6 }, (_, i) => rubricItem(11 + i)),
+    ];
+    const draft = deriveLayoutDraft(INSTRUMENT_ID, items);
+    const responses = draft.spec.fields.filter((f) => f.response);
+
+    expect(draft.spec.pageCount).toBeGreaterThan(1);
+    expect(responses.some((f) => f.pageIndex === 0)).toBe(true);
+    expect(responses.some((f) => f.pageIndex > 0)).toBe(true);
+    expect(collectInvariantViolations(draft.spec, items)).toEqual([]);
+  });
+
+  it('matching y ordering siguen excluidos en esta fase con su motivo', () => {
+    const matching: DerivableItem = {
+      id: uuidFor(2),
+      position: 2,
+      printedNumber: null,
+      type: 'matching',
+      content: {} as ItemContent,
+    };
+    const draft = deriveLayoutDraft(INSTRUMENT_ID, [mcItem(1), matching]);
+    expect(draft.spec.fields).toHaveLength(1);
+    expect(draft.excludedItems[0]!.reason).toContain('bubble_choice');
+  });
+
+  it('un instrumento sólo de burbujas deriva el mismo hash que antes de F5b', () => {
+    const items = [mcItem(1, { id: 'item-1' }), mcItem(2, { id: 'item-2' }), mcItem(3, { id: 'item-3' }), tfItem(4)];
+    expect(layoutHash(deriveLayoutDraft(INSTRUMENT_ID, items, 'qr').spec)).toBe('f2ce4d77592b2762');
+    expect(layoutHash(deriveLayoutDraft(INSTRUMENT_ID, items, 'rut_bubbles').spec)).toBe('7626aeb869d0b89e');
+  });
+
+  it('un instrumento sin ítems abiertos no materializa la clave response', () => {
+    const items = [mcItem(1), tfItem(2)];
+    expect(partitionDerivableItems(items).correctable.every((e) => e.responseFormat === null)).toBe(true);
+    expect(deriveLayoutDraft(INSTRUMENT_ID, items).spec.fields.every((f) => !('response' in f))).toBe(true);
+  });
+});
+
+describe('collectInvariantViolations — invariante 8 (campos de respuesta)', () => {
+  it('rechaza un campo de respuesta superpuesto a la región de identidad', () => {
+    const items = formatItems();
+    const spec = structuredClone(deriveLayoutDraft(INSTRUMENT_ID, items).spec);
+    spec.fields[1]!.region = { topLeft: { x: 0.7, y: 0.05 }, bottomRight: { x: 0.95, y: 0.15 } };
+    const messages = collectInvariantViolations(spec, items).map((v) => `${v.invariant}:${v.message}`);
+    expect(messages.some((m) => m.startsWith('8:') && m.includes('región de identidad'))).toBe(true);
+  });
+
+  it('rechaza un campo de respuesta superpuesto a otro campo', () => {
+    const items = formatItems();
+    const spec = structuredClone(deriveLayoutDraft(INSTRUMENT_ID, items).spec);
+    spec.fields[2]!.region = structuredClone(spec.fields[1]!.region);
+    spec.fields[2]!.response!.boxes = [];
+    const messages = collectInvariantViolations(spec, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('"2" se superpone a la pregunta "3"'))).toBe(true);
+  });
+
+  it('rechaza un campo de respuesta que pisa una fila de burbujas', () => {
+    const items = formatItems();
+    const spec = structuredClone(deriveLayoutDraft(INSTRUMENT_ID, items).spec);
+    const bubble = spec.fields[0]!.bubbles[0]!;
+    spec.fields[1]!.region = {
+      topLeft: { x: bubble.center.x - 0.02, y: bubble.center.y - 0.01 },
+      bottomRight: { x: bubble.center.x + 0.3, y: bubble.center.y + 0.05 },
+    };
+    const messages = collectInvariantViolations(spec, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('se superpone a la pregunta "1"'))).toBe(true);
+  });
+
+  it('rechaza una casilla fuera de la región del campo', () => {
+    const items = formatItems();
+    const spec = structuredClone(deriveLayoutDraft(INSTRUMENT_ID, items).spec);
+    spec.fields[1]!.response!.boxes[0]!.region.bottomRight.x = 0.99;
+    const messages = collectInvariantViolations(spec, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('casilla "sign"') && m.includes('fuera de la región'))).toBe(true);
+  });
+
+  it('rechaza casillas que declaran un ítem distinto al del número impreso', () => {
+    const items = formatItems();
+    const spec = structuredClone(deriveLayoutDraft(INSTRUMENT_ID, items).spec);
+    spec.fields[1]!.response!.itemId = uuidFor(99);
+    const messages = collectInvariantViolations(spec, items).map((v) => v.message);
+    expect(messages.some((m) => m.includes('ítem distinto'))).toBe(true);
   });
 });
