@@ -6,24 +6,38 @@ import { DEFAULT_ANSWER_READING_OPTIONS } from './answer-reading.constants';
 
 const ORG_ID = '11111111-1111-4111-8111-111111111111';
 
-function makeDb(statsRow: Record<string, unknown>): Database {
-  const chain = {
-    from: () => chain,
-    where: () => Promise.resolve([statsRow]),
-  };
+const NO_GRADING_SPEND = { monthSpendUsd: '0', averageCostUsd: null };
+
+function makeDb(
+  statsRow: Record<string, unknown>,
+  gradingRow: Record<string, unknown> = NO_GRADING_SPEND,
+): Database {
+  const rows = [statsRow, gradingRow];
+  let selectIndex = 0;
   const db = {
-    select: () => chain,
+    select: () => {
+      const row = rows[selectIndex++] ?? {};
+      const chain = {
+        from: () => chain,
+        where: () => Promise.resolve([row]),
+      };
+      return chain;
+    },
     execute: async () => [],
     transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => fn(db),
   };
   return db as unknown as Database;
 }
 
-function makeService(statsRow: Record<string, unknown>, monthSpendUsd = 0) {
+function makeService(
+  statsRow: Record<string, unknown>,
+  monthSpendUsd = 0,
+  gradingRow: Record<string, unknown> = NO_GRADING_SPEND,
+) {
   const monthSpend = jest.fn().mockResolvedValue(monthSpendUsd);
   const observability = { monthSpendUsd: monthSpend } as unknown as AiObservabilityService;
   const service = new AnswerReadingBudgetService(
-    makeDb(statsRow),
+    makeDb(statsRow, gradingRow),
     observability,
     DEFAULT_ANSWER_READING_OPTIONS,
   );
@@ -94,5 +108,51 @@ describe('AnswerReadingBudgetService.isExceeded', () => {
       }),
     ).resolves.toBe(false);
     expect(monthSpend).not.toHaveBeenCalled();
+  });
+
+  it('el gasto del mes suma las calificaciones con rúbrica además de las lecturas', async () => {
+    const { service } = makeService({ monthSpendUsd: '0.50', averageCostUsd: '0.01' }, 0, {
+      monthSpendUsd: '0.45',
+      averageCostUsd: '0.02',
+    });
+
+    const exceeded = await service.isExceeded({
+      orgId: ORG_ID,
+      orgConfig: {},
+      settings: { ...SETTINGS, monthlyBudgetUsd: 1 },
+      plannedReadings: 10,
+    });
+
+    expect(exceeded).toBe(true);
+  });
+
+  it('estima una calificación con rúbrica con el costo medio de las calificaciones', async () => {
+    const { service } = makeService({ monthSpendUsd: '0', averageCostUsd: '0.001' }, 0, {
+      monthSpendUsd: '0',
+      averageCostUsd: '0.2',
+    });
+
+    const exceeded = await service.isExceeded({
+      orgId: ORG_ID,
+      orgConfig: {},
+      settings: { ...SETTINGS, monthlyBudgetUsd: 1 },
+      plannedReadings: 10,
+      workload: 'rubric_grading',
+    });
+
+    expect(exceeded).toBe(true);
+  });
+
+  it('un orgConfig que no valida deja el tope de IA en 0, no ilimitado', async () => {
+    const { service } = makeService({ monthSpendUsd: '0', averageCostUsd: '0.01' });
+
+    const exceeded = await service.isExceeded({
+      orgId: ORG_ID,
+      orgConfig: { aiBudgetUsd: 'sin límite' },
+      settings: SETTINGS,
+      plannedReadings: 1,
+    });
+
+    expect(exceeded).toBe(true);
   });
 });

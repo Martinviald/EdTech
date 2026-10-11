@@ -1,19 +1,37 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, gte, sql } from 'drizzle-orm';
-import { answerReadings, withOrgContext } from '@soe/db';
+import { aiGradingJobs, answerReadings, withOrgContext } from '@soe/db';
 import { orgConfigSchema, type ResolvedOrgAnswerReadingSettings } from '@soe/types';
 import { AiObservabilityService } from '../ai-observability/ai-observability.service';
 import { InjectDb, type Database } from '../database/database.types';
-import { ANSWER_READING_OPTIONS, type AnswerReadingOptions } from './answer-reading.constants';
+import {
+  ANSWER_READING_OPTIONS,
+  RUBRIC_GRADING_JOB_TYPE,
+  type AnswerReadingOptions,
+} from './answer-reading.constants';
 
 const COST_SAMPLE_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+export type BudgetWorkload = 'reading' | 'rubric_grading';
+
+interface SpendStats {
+  readonly monthSpendUsd: number;
+  readonly averageCostUsd: number | null;
+}
+
+interface SpendWindow {
+  readonly monthStart: Date;
+  readonly sampleStart: Date;
+  readonly since: Date;
+}
 
 export interface BudgetCheckInput {
   readonly orgId: string;
   readonly orgConfig: unknown;
   readonly settings: ResolvedOrgAnswerReadingSettings;
   readonly plannedReadings: number;
+  readonly workload?: BudgetWorkload;
   readonly now?: Date;
 }
 
@@ -32,10 +50,13 @@ export class AnswerReadingBudgetService {
       return false;
     }
     const now = input.now ?? new Date();
-    const stats = await this.readingStats(input.orgId, now);
-    const estimateUsd =
-      input.plannedReadings * (stats.averageCostUsd ?? this.options.defaultEstimatedReadingCostUsd);
-    if (readingBudgetUsd !== null && stats.monthSpendUsd + estimateUsd > readingBudgetUsd) {
+    const { reading, rubricGrading } = await this.spendStats(input.orgId, now);
+    const averageCostUsd =
+      (input.workload === 'rubric_grading' ? rubricGrading : reading).averageCostUsd ??
+      this.options.defaultEstimatedReadingCostUsd;
+    const estimateUsd = input.plannedReadings * averageCostUsd;
+    const monthReadingSpendUsd = reading.monthSpendUsd + rubricGrading.monthSpendUsd;
+    if (readingBudgetUsd !== null && monthReadingSpendUsd + estimateUsd > readingBudgetUsd) {
       return true;
     }
     if (aiBudgetUsd === null) return false;
@@ -43,26 +64,70 @@ export class AnswerReadingBudgetService {
     return monthSpendUsd + estimateUsd > aiBudgetUsd;
   }
 
-  private async readingStats(
+  private async spendStats(
     orgId: string,
     now: Date,
-  ): Promise<{ monthSpendUsd: number; averageCostUsd: number | null }> {
+  ): Promise<{ reading: SpendStats; rubricGrading: SpendStats }> {
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const sampleStart = new Date(now.getTime() - COST_SAMPLE_DAYS * DAY_MS);
-    const since = monthStart < sampleStart ? monthStart : sampleStart;
-    const [row] = await withOrgContext(this.db, orgId, (tx) =>
-      tx
-        .select({
-          monthSpendUsd: sql<
-            string | null
-          >`coalesce(sum(${answerReadings.costUsd}) filter (where ${answerReadings.createdAt} >= ${monthStart.toISOString()}::timestamp), 0)`,
-          averageCostUsd: sql<
-            string | null
-          >`avg(${answerReadings.costUsd}) filter (where ${answerReadings.status} = 'ok' and ${answerReadings.createdAt} >= ${sampleStart.toISOString()}::timestamp)`,
-        })
-        .from(answerReadings)
-        .where(and(eq(answerReadings.orgId, orgId), gte(answerReadings.createdAt, since))),
-    );
+    const window: SpendWindow = {
+      monthStart,
+      sampleStart,
+      since: monthStart < sampleStart ? monthStart : sampleStart,
+    };
+    return withOrgContext(this.db, orgId, async (tx) => ({
+      reading: await this.readingStats(tx, orgId, window),
+      rubricGrading: await this.rubricGradingStats(tx, orgId, window),
+    }));
+  }
+
+  private async readingStats(
+    tx: Database,
+    orgId: string,
+    window: SpendWindow,
+  ): Promise<SpendStats> {
+    const [row] = await tx
+      .select({
+        monthSpendUsd: sql<
+          string | null
+        >`coalesce(sum(${answerReadings.costUsd}) filter (where ${answerReadings.createdAt} >= ${window.monthStart.toISOString()}::timestamp), 0)`,
+        averageCostUsd: sql<
+          string | null
+        >`avg(${answerReadings.costUsd}) filter (where ${answerReadings.status} = 'ok' and ${answerReadings.createdAt} >= ${window.sampleStart.toISOString()}::timestamp)`,
+      })
+      .from(answerReadings)
+      .where(and(eq(answerReadings.orgId, orgId), gte(answerReadings.createdAt, window.since)));
+    return this.toSpendStats(row);
+  }
+
+  private async rubricGradingStats(
+    tx: Database,
+    orgId: string,
+    window: SpendWindow,
+  ): Promise<SpendStats> {
+    const [row] = await tx
+      .select({
+        monthSpendUsd: sql<
+          string | null
+        >`coalesce(sum(${aiGradingJobs.costUsd}) filter (where ${aiGradingJobs.createdAt} >= ${window.monthStart.toISOString()}::timestamp), 0)`,
+        averageCostUsd: sql<
+          string | null
+        >`avg(${aiGradingJobs.costUsd}) filter (where ${aiGradingJobs.status} = 'completed' and ${aiGradingJobs.createdAt} >= ${window.sampleStart.toISOString()}::timestamp)`,
+      })
+      .from(aiGradingJobs)
+      .where(
+        and(
+          eq(aiGradingJobs.orgId, orgId),
+          eq(aiGradingJobs.type, RUBRIC_GRADING_JOB_TYPE),
+          gte(aiGradingJobs.createdAt, window.since),
+        ),
+      );
+    return this.toSpendStats(row);
+  }
+
+  private toSpendStats(
+    row: { monthSpendUsd: string | null; averageCostUsd: string | null } | undefined,
+  ): SpendStats {
     const average = row?.averageCostUsd == null ? null : Number(row.averageCostUsd);
     return {
       monthSpendUsd: Number(row?.monthSpendUsd ?? 0),
@@ -72,7 +137,7 @@ export class AnswerReadingBudgetService {
 
   private aiBudgetOf(orgConfig: unknown): number | null {
     const parsed = orgConfigSchema.safeParse(orgConfig ?? {});
-    if (!parsed.success) return null;
+    if (!parsed.success) return 0;
     const budget = parsed.data.aiBudgetUsd;
     return typeof budget === 'number' && budget > 0 ? budget : null;
   }

@@ -365,7 +365,7 @@ describe('RubricGradingService — interruptores, motor y presupuesto', () => {
     await service.gradeDecisions(ORG_ID, [decision.id]);
 
     expect(isExceeded).toHaveBeenCalledWith(
-      expect.objectContaining({ orgId: ORG_ID, plannedReadings: 1 }),
+      expect.objectContaining({ orgId: ORG_ID, plannedReadings: 1, workload: 'rubric_grading' }),
     );
     expect(completeStructured).not.toHaveBeenCalled();
     expect(jobs()[0]).toMatchObject({ status: 'skipped', output: { reason: 'budget_exceeded' } });

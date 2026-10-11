@@ -565,6 +565,7 @@ export class RubricGradingService {
       orgConfig: org.config,
       settings: org.settings,
       plannedReadings: plannedGradings,
+      workload: 'rubric_grading',
     });
     return exceeded ? 'budget_exceeded' : null;
   }
