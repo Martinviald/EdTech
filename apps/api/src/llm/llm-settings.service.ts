@@ -8,6 +8,7 @@ import {
   LLM_PROVIDER_LABELS,
   LLM_PROVIDERS,
   MULTIMODAL_FEATURES,
+  STRUCTURED_OUTPUT_FEATURES,
   type LlmFeature,
   type LlmFeatureConfig,
   type LlmSettingsResponse,
@@ -101,6 +102,11 @@ export class LlmSettingsService {
     if (MULTIMODAL_FEATURES.includes(feature) && !model.supportsImages) {
       throw new BadRequestException(
         `La funcionalidad "${feature}" envía imágenes al modelo y requiere un modelo multimodal`,
+      );
+    }
+    if (STRUCTURED_OUTPUT_FEATURES.includes(feature) && !model.supportsStructuredOutput) {
+      throw new BadRequestException(
+        `La funcionalidad "${feature}" requiere un modelo con salida estructurada`,
       );
     }
 

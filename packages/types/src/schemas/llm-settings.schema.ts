@@ -168,6 +168,12 @@ export const MULTIMODAL_FEATURES: readonly LlmFeature[] = [
   'rubric_grading',
 ];
 
+/** Funcionalidades que exigen un modelo con salida estructurada (JSON Schema). */
+export const STRUCTURED_OUTPUT_FEATURES: readonly LlmFeature[] = [
+  'answer_transcription',
+  'rubric_grading',
+];
+
 // ── Request / Response models ────────────────────────────────────────────────
 
 /**

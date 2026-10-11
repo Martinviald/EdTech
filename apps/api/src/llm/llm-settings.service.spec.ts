@@ -9,12 +9,34 @@ interface FakeCatalogModel {
   provider: string;
   modelId: string;
   supportsImages: boolean;
+  supportsStructuredOutput: boolean;
 }
 
 const SELECTABLE_MODELS: FakeCatalogModel[] = [
-  { provider: 'gemini', modelId: 'gemini-2.5-flash', supportsImages: true },
-  { provider: 'anthropic', modelId: 'claude-haiku-4-5-20251001', supportsImages: true },
-  { provider: 'gemini', modelId: 'gemini-texto', supportsImages: false },
+  {
+    provider: 'gemini',
+    modelId: 'gemini-2.5-flash',
+    supportsImages: true,
+    supportsStructuredOutput: true,
+  },
+  {
+    provider: 'anthropic',
+    modelId: 'claude-haiku-4-5-20251001',
+    supportsImages: true,
+    supportsStructuredOutput: true,
+  },
+  {
+    provider: 'gemini',
+    modelId: 'gemini-texto',
+    supportsImages: false,
+    supportsStructuredOutput: true,
+  },
+  {
+    provider: 'gemini',
+    modelId: 'gemini-sin-esquema',
+    supportsImages: true,
+    supportsStructuredOutput: false,
+  },
 ];
 
 function makeModels(): LlmModelsService {
@@ -143,6 +165,30 @@ describe('LlmSettingsService', () => {
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(insert).not.toHaveBeenCalled();
+    });
+
+    it.each(['answer_transcription', 'rubric_grading'] as const)(
+      'rechaza un modelo sin salida estructurada para %s',
+      async (feature) => {
+        const { db, insert } = makeDb([]);
+        await expect(
+          makeService(db).upsertGlobal(feature, {
+            provider: 'gemini',
+            model: 'gemini-sin-esquema',
+          }),
+        ).rejects.toThrow('requiere un modelo con salida estructurada');
+        expect(insert).not.toHaveBeenCalled();
+      },
+    );
+
+    it('acepta un modelo sin salida estructurada para una funcionalidad que no la usa', async () => {
+      const { db, insert } = makeDb([]);
+      await makeService(db).upsertGlobal('item_insight', {
+        provider: 'gemini',
+        model: 'gemini-sin-esquema',
+      });
+
+      expect(insert).toHaveBeenCalledTimes(1);
     });
   });
 });
