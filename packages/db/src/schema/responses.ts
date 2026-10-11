@@ -40,6 +40,7 @@ export const responses = pgTable(
       justification?: string;
       model?: string;
       promptVersion?: string;
+      decisionId?: string;
     }>(),
     humanScore: jsonb('human_score').$type<{
       score?: number;

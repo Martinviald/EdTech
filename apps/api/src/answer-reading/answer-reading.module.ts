@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AiObservabilityModule } from '../ai-observability/ai-observability.module';
+import { AssessmentResultsModule } from '../assessment-results/assessment-results.module';
 import { FilesModule } from '../files/files.module';
 import { JobsModule } from '../jobs/jobs.module';
 import { LlmModule } from '../llm/llm.module';
 import { AnswerReadingBudgetService } from './answer-reading-budget.service';
+import { AnswerReadingConsolidationService } from './answer-reading-consolidation.service';
 import { AnswerReadingDecisionsService } from './answer-reading-decisions.service';
 import { AnswerReadingPipelineService } from './answer-reading-pipeline.service';
 import {
@@ -37,7 +39,7 @@ function answerReadingOptionsFromEnv(): AnswerReadingOptions {
 }
 
 @Module({
-  imports: [FilesModule, JobsModule, LlmModule, AiObservabilityModule],
+  imports: [FilesModule, JobsModule, LlmModule, AiObservabilityModule, AssessmentResultsModule],
   providers: [
     { provide: ANSWER_READING_OPTIONS, useFactory: answerReadingOptionsFromEnv },
     LlmVisionTranscriber,
@@ -51,8 +53,13 @@ function answerReadingOptionsFromEnv(): AnswerReadingOptions {
     AnswerReadingDecisionsService,
     AnswerReadingBudgetService,
     CropReadingService,
+    AnswerReadingConsolidationService,
     AnswerReadingPipelineService,
   ],
-  exports: [AnswerReadingPipelineService, AnswerReadingDecisionsService],
+  exports: [
+    AnswerReadingPipelineService,
+    AnswerReadingDecisionsService,
+    AnswerReadingConsolidationService,
+  ],
 })
 export class AnswerReadingModule {}

@@ -36,7 +36,14 @@ import type {
   SheetScanState,
 } from '@soe/types';
 import { autoAnnulMinConfidence, isQuickConfirmEnabled } from '@soe/types';
+import {
+  AnswerReadingConsolidationService,
+  type ConfirmedReadingLink,
+  type ConfirmedReadingsInput,
+  type ReadingConfirmation,
+} from '../answer-reading/answer-reading-consolidation.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
@@ -166,6 +173,7 @@ export class ScanReviewService {
     @Inject(ANSWER_SHEET_CONFIRMER) private readonly answerSheetConfirmer: AnswerSheetConfirmer,
     private readonly filesService: FilesService,
     private readonly developmentGrading: DevelopmentGradingService,
+    private readonly readingConsolidation: AnswerReadingConsolidationService,
   ) {}
 
   async getQueue(orgId: string, batchId: string): Promise<ReviewQueueModel> {
@@ -643,6 +651,12 @@ export class ScanReviewService {
 
     const pageCount = prepared.batch.spec.pageCount;
     const cropPrintedNumbers = this.cropPrintedNumbersOf(prepared.batch.spec);
+    const readings =
+      cropPrintedNumbers.size > 0
+        ? await this.readingConsolidation.readingsForConfirmation(orgId, batchId)
+        : new Map<string, ReadingConfirmation>();
+    const readingLinks: ConfirmedReadingLink[] = [];
+    const confirmedCropMarkIds: string[] = [];
     const confirmedScans: ConfirmedScanInput[] = [];
     let incompleteSheets = 0;
     let unidentifiedSheets = 0;
@@ -661,12 +675,31 @@ export class ScanReviewService {
       const marks: ConfirmedScanInput['marks'] = [];
       for (const mark of sheet.marks) {
         if (cropPrintedNumbers.has(mark.printedNumber)) {
-          marks.push({
-            printedNumber: mark.printedNumber,
-            state: mark.state,
-            value: null,
-            pendingReading: true,
-          });
+          const reading = readings.get(mark.markId);
+          confirmedCropMarkIds.push(mark.markId);
+          if (reading) {
+            readingLinks.push({
+              decisionId: reading.decisionId,
+              studentId: student.id,
+              itemId: reading.itemId,
+              consolidated: reading.prescored !== null,
+            });
+          }
+          marks.push(
+            reading?.prescored
+              ? {
+                  printedNumber: mark.printedNumber,
+                  state: mark.state,
+                  value: null,
+                  prescored: reading.prescored,
+                }
+              : {
+                  printedNumber: mark.printedNumber,
+                  state: mark.state,
+                  value: null,
+                  pendingReading: true,
+                },
+          );
           continue;
         }
         const reviewed = mark.reviewedAt !== null;
@@ -742,6 +775,12 @@ export class ScanReviewService {
         .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)));
     });
 
+    await this.linkConfirmedReadings(orgId, batchId, {
+      assessmentId: prepared.batch.assessmentId,
+      links: readingLinks,
+      cropMarkIds: confirmedCropMarkIds,
+    });
+
     this.developmentGrading.scheduleConfirmedBatch({
       orgId,
       batchId,
@@ -760,6 +799,18 @@ export class ScanReviewService {
         assumedPending,
       },
     };
+  }
+
+  private async linkConfirmedReadings(
+    orgId: string,
+    batchId: string,
+    input: ConfirmedReadingsInput,
+  ): Promise<void> {
+    try {
+      await this.readingConsolidation.linkConfirmedResponses(orgId, input);
+    } catch (error) {
+      reportServerError(error, { orgId, batchId, stage: 'link_answer_readings' });
+    }
   }
 
   private async selectBatchScans(

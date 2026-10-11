@@ -1,7 +1,13 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import type { Database } from '@soe/db';
 import type { LayoutSpec, PageQuality } from '@soe/types';
+import type {
+  AnswerReadingConsolidationService,
+  ConfirmedReadingsInput,
+  ReadingConfirmation,
+} from '../answer-reading/answer-reading-consolidation.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import * as observability from '../common/observability/report-error';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { FilesService } from '../files/files.service';
@@ -96,7 +102,31 @@ const filesServiceFake = {
   buildDownloadUrl: (row: { id: string }) => `https://signed/${row.id}`,
 } as unknown as FilesService;
 
-function makeService(selectResults: unknown[][]) {
+function makeReadingConsolidation(
+  readings: Map<string, ReadingConfirmation> = new Map(),
+  linkError: Error | null = null,
+) {
+  const linkCalls: Array<{ orgId: string; input: ConfirmedReadingsInput }> = [];
+  const readingCalls: Array<{ orgId: string; batchId: string }> = [];
+  const consolidation = {
+    readingsForConfirmation: async (orgId: string, batchId: string) => {
+      readingCalls.push({ orgId, batchId });
+      return readings;
+    },
+    linkConfirmedResponses: async (orgId: string, input: ConfirmedReadingsInput) => {
+      linkCalls.push({ orgId, input });
+      if (linkError) throw linkError;
+      return null;
+    },
+  } as unknown as AnswerReadingConsolidationService;
+  return { consolidation, linkCalls, readingCalls };
+}
+
+function makeService(
+  selectResults: unknown[][],
+  readings?: Map<string, ReadingConfirmation>,
+  linkError: Error | null = null,
+) {
   const { db, updates } = makeDb(selectResults);
   const { confirmer, calls: confirmCalls } = makeConfirmer();
   const gradingCalls: ScheduleConfirmedBatchParams[] = [];
@@ -105,8 +135,15 @@ function makeService(selectResults: unknown[][]) {
       gradingCalls.push(params);
     },
   } as unknown as DevelopmentGradingService;
-  const service = new ScanReviewService(db, confirmer, filesServiceFake, developmentGradingFake);
-  return { service, updates, confirmCalls, gradingCalls };
+  const { consolidation, linkCalls, readingCalls } = makeReadingConsolidation(readings, linkError);
+  const service = new ScanReviewService(
+    db,
+    confirmer,
+    filesServiceFake,
+    developmentGradingFake,
+    consolidation,
+  );
+  return { service, updates, confirmCalls, gradingCalls, linkCalls, readingCalls };
 }
 
 function bubbleField(fieldId: string, printedNumber: string, pageIndex: number, values: string[]) {
@@ -798,10 +835,46 @@ const CONFIRM_MARKS = [
   },
 ];
 
+const SPEC_WITH_CROP: LayoutSpec = {
+  ...SPEC,
+  fields: [
+    ...SPEC.fields,
+    {
+      fieldId: 'f_dev',
+      kind: 'crop_region',
+      printedNumber: '4',
+      pageIndex: 1,
+      selectMode: 'single',
+      bubbles: [],
+      region: { topLeft: { x: 0.1, y: 0.5 }, bottomRight: { x: 0.9, y: 0.8 } },
+    },
+  ],
+};
+
+const CROP_MARK = {
+  markId: 'm-crop',
+  scanId: 'scan-1b',
+  printedNumber: '4',
+  state: 'marked',
+  value: null,
+  reviewedValue: null,
+  reviewDecision: null,
+  reviewedAt: null,
+};
+
 const CONFIRM_STUDENTS = [
   { id: STUDENT_1, rut: '12345678-5', firstName: 'Ana', lastName: 'Pérez' },
   { id: STUDENT_2, rut: '87654321-4', firstName: 'Benjamín', lastName: 'Soto' },
 ];
+
+function cropSelectResults(): unknown[][] {
+  return [
+    [{ ...CONFIRM_BATCH_ROW, spec: SPEC_WITH_CROP }],
+    CONFIRM_SCANS,
+    [...CONFIRM_MARKS, CROP_MARK],
+    CONFIRM_STUDENTS,
+  ];
+}
 
 describe('ScanReviewService.confirmBatch', () => {
   it('confirma el lote por el camino de answer-sheets con el ParserResult del adaptador', async () => {
@@ -1044,37 +1117,8 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(confirmCalls).toHaveLength(0);
   });
 
-  it('manda las marcas crop_region como pendientes de lectura, nunca como respuesta en blanco', async () => {
-    const specWithCrop: LayoutSpec = {
-      ...SPEC,
-      fields: [
-        ...SPEC.fields,
-        {
-          fieldId: 'f_dev',
-          kind: 'crop_region',
-          printedNumber: '4',
-          pageIndex: 1,
-          selectMode: 'single',
-          bubbles: [],
-          region: { topLeft: { x: 0.1, y: 0.5 }, bottomRight: { x: 0.9, y: 0.8 } },
-        },
-      ],
-    };
-    const cropMark = {
-      markId: 'm-crop',
-      scanId: 'scan-1b',
-      printedNumber: '4',
-      state: 'marked',
-      value: null,
-      reviewedValue: null,
-      reviewedAt: null,
-    };
-    const { service, confirmCalls } = makeService([
-      [{ ...CONFIRM_BATCH_ROW, spec: specWithCrop }],
-      CONFIRM_SCANS,
-      [...CONFIRM_MARKS, cropMark],
-      CONFIRM_STUDENTS,
-    ]);
+  it('sin decisión de lectura todavía, la marca de recorte queda pendiente, nunca en blanco', async () => {
+    const { service, confirmCalls, linkCalls } = makeService(cropSelectResults());
 
     const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
 
@@ -1082,7 +1126,106 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
     expect(rows[0].answers).not.toHaveProperty('4');
     expect(rows[0].pendingReadingLabels).toEqual(['4']);
+    expect(rows[0].prescoredAnswers).toBeUndefined();
     expect(result.summary.assumedPending).toBe(1);
+    expect(linkCalls).toEqual([
+      {
+        orgId: ORG_ID,
+        input: { assessmentId: ASSESSMENT_ID, links: [], cropMarkIds: ['m-crop'] },
+      },
+    ]);
+  });
+
+  it('una lectura autoaceptada llega corregida al parser y se vincula a la respuesta', async () => {
+    const prescored = {
+      itemId: 'item-4',
+      value: { answer: '21/10', reading: { canonical: 'q:21/10', decisionId: 'dec-1' } },
+      isCorrect: true,
+      rawScore: 1,
+      scoredBy: 'ai' as const,
+      aiScore: { score: 1, confidence: 0.91, decisionId: 'dec-1' },
+    };
+    const { service, confirmCalls, linkCalls } = makeService(
+      cropSelectResults(),
+      new Map([['m-crop', { decisionId: 'dec-1', itemId: 'item-4', prescored }]]),
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].prescoredAnswers).toEqual({ '4': prescored });
+    expect(rows[0].pendingReadingLabels).toBeUndefined();
+    expect(linkCalls[0].input.links).toEqual([
+      { decisionId: 'dec-1', studentId: STUDENT_1, itemId: 'item-4', consolidated: true },
+    ]);
+  });
+
+  it('una lectura que espera revisión queda pendiente y se vincula sin consolidar', async () => {
+    const { service, confirmCalls, linkCalls } = makeService(
+      cropSelectResults(),
+      new Map([['m-crop', { decisionId: 'dec-2', itemId: 'item-4', prescored: null }]]),
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].pendingReadingLabels).toEqual(['4']);
+    expect(rows[0].prescoredAnswers).toBeUndefined();
+    expect(linkCalls[0].input.links).toEqual([
+      { decisionId: 'dec-2', studentId: STUDENT_1, itemId: 'item-4', consolidated: false },
+    ]);
+  });
+
+  it('ignora la decisión de una marca de hoja reemplazada (no viene entre las marcas vigentes)', async () => {
+    const prescored = {
+      itemId: 'item-4',
+      value: { answer: '7', reading: { canonical: 'n:7', decisionId: 'dec-old' } },
+      isCorrect: false,
+      rawScore: 0,
+      scoredBy: 'ai' as const,
+      aiScore: null,
+    };
+    const { service, confirmCalls, linkCalls } = makeService(
+      cropSelectResults(),
+      new Map([['m-crop-superseded', { decisionId: 'dec-old', itemId: 'item-4', prescored }]]),
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].pendingReadingLabels).toEqual(['4']);
+    expect(rows[0].prescoredAnswers).toBeUndefined();
+    expect(linkCalls[0].input.links).toEqual([]);
+    expect(linkCalls[0].input.cropMarkIds).toEqual(['m-crop']);
+  });
+
+  it('un fallo al vincular las lecturas se reporta sin deshacer la confirmación', async () => {
+    const reportSpy = jest.spyOn(observability, 'reportServerError').mockImplementation(() => {});
+    const { service } = makeService(cropSelectResults(), new Map(), new Error('sin conexión'));
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(result.status).toBe('confirmed');
+    expect(reportSpy).toHaveBeenCalledWith(expect.any(Error), {
+      orgId: ORG_ID,
+      batchId: BATCH_ID,
+      stage: 'link_answer_readings',
+    });
+    reportSpy.mockRestore();
+  });
+
+  it('sin campos de recorte no consulta lecturas', async () => {
+    const { service, readingCalls, linkCalls } = makeService([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(readingCalls).toHaveLength(0);
+    expect(linkCalls[0].input).toEqual({ assessmentId: ASSESSMENT_ID, links: [], cropMarkIds: [] });
   });
 
   it('agenda la corrección de desarrollo con los datos del lote tras confirmar', async () => {
@@ -1124,6 +1267,7 @@ describe('ScanReviewService.confirmBatch', () => {
       failingConfirmer,
       filesServiceFake,
       developmentGradingFake,
+      makeReadingConsolidation().consolidation,
     );
 
     await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toThrow('falló la ingesta');

@@ -34,6 +34,7 @@ import * as observability from '../common/observability/report-error';
 import type { FilesService } from '../files/files.service';
 import type { EnqueuedJob, JobDispatcher } from '../jobs/job-dispatcher';
 import type { AnswerReadingBudgetService } from './answer-reading-budget.service';
+import type { AnswerReadingConsolidationService } from './answer-reading-consolidation.service';
 import { AnswerReadingDecisionsService } from './answer-reading-decisions.service';
 import { AnswerReadingPipelineService } from './answer-reading-pipeline.service';
 import {
@@ -141,6 +142,7 @@ interface SetupOptions {
   readonly shadowReaders?: ReaderSpec[];
   readonly shadowSampleRate?: string;
   readonly orgConfig?: Record<string, unknown>;
+  readonly batchStatus?: string;
   readonly budgetExceeded?: boolean;
   readonly options?: Partial<AnswerReadingOptions>;
   readonly marks?: Array<{
@@ -156,7 +158,14 @@ function setup(setupOptions: SetupOptions = {}) {
   memory.seed(organizations, [
     { id: ORG_ID, name: 'Colegio', config: setupOptions.orgConfig ?? {} },
   ]);
-  memory.seed(sheetScanBatches, [{ id: BATCH_ID, orgId: ORG_ID, printRunId: PRINT_RUN_ID }]);
+  memory.seed(sheetScanBatches, [
+    {
+      id: BATCH_ID,
+      orgId: ORG_ID,
+      printRunId: PRINT_RUN_ID,
+      status: setupOptions.batchStatus ?? 'needs_review',
+    },
+  ]);
   memory.seed(sheetPrintRuns, [
     { id: PRINT_RUN_ID, orgId: ORG_ID, layoutId: LAYOUT_ID, assessmentId: ASSESSMENT_ID },
   ]);
@@ -231,6 +240,13 @@ function setup(setupOptions: SetupOptions = {}) {
     ...setupOptions.options,
   };
   const dispatcher = new FakeDispatcher();
+  const consolidateDecisions = jest.fn().mockResolvedValue({
+    scored: [],
+    pending: [],
+    skipped: [],
+    recalculatedAssessmentIds: [],
+  });
+  const consolidation = { consolidateDecisions } as unknown as AnswerReadingConsolidationService;
   const pipeline = new AnswerReadingPipelineService(
     db,
     dispatcher,
@@ -238,13 +254,23 @@ function setup(setupOptions: SetupOptions = {}) {
     new CropReadingService(db, files, new VisionTranscriberRegistry([transcriber]), options),
     new AnswerReadingDecisionsService(db),
     budget,
+    consolidation,
     options,
   );
   const runScan = async (scanId = SCAN_1) => {
     pipeline.scheduleForScan({ orgId: ORG_ID, batchId: BATCH_ID, scanId });
     await dispatcher.runAll();
   };
-  return { memory, pipeline, transcriber, dispatcher, fetchSpy, isExceeded, runScan };
+  return {
+    memory,
+    pipeline,
+    transcriber,
+    dispatcher,
+    fetchSpy,
+    isExceeded,
+    runScan,
+    consolidateDecisions,
+  };
 }
 
 function readingsOf(memory: InMemoryDatabase): AnswerReadingRow[] {
@@ -663,6 +689,40 @@ describe('AnswerReadingPipelineService — lectores que fallan', () => {
       outcome: 'not_read',
       reasons: ['crop_unavailable'],
     });
+  });
+});
+
+describe('AnswerReadingPipelineService — lectura tardía', () => {
+  it('con el lote ya confirmado consolida en responses las decisiones nuevas', async () => {
+    const { memory, runScan, consolidateDecisions } = setup({
+      readings: agree,
+      batchStatus: 'confirmed',
+    });
+
+    await runScan();
+
+    expect(consolidateDecisions).toHaveBeenCalledTimes(1);
+    expect(consolidateDecisions).toHaveBeenCalledWith(ORG_ID, [currentDecision(memory).id]);
+  });
+
+  it('con el lote en revisión no consolida: la confirmación se encarga', async () => {
+    const { runScan, consolidateDecisions } = setup({ readings: agree });
+
+    await runScan();
+
+    expect(consolidateDecisions).not.toHaveBeenCalled();
+  });
+
+  it('reprocesar sin cambios en la decisión no vuelve a consolidar', async () => {
+    const { runScan, consolidateDecisions } = setup({
+      readings: agree,
+      batchStatus: 'confirmed',
+    });
+
+    await runScan();
+    await runScan();
+
+    expect(consolidateDecisions).toHaveBeenCalledTimes(1);
   });
 });
 

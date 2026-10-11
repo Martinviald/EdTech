@@ -32,7 +32,11 @@ import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { AnswerReadingBudgetService } from './answer-reading-budget.service';
-import { AnswerReadingDecisionsService } from './answer-reading-decisions.service';
+import { AnswerReadingConsolidationService } from './answer-reading-consolidation.service';
+import {
+  AnswerReadingDecisionsService,
+  type SavedReadingDecision,
+} from './answer-reading-decisions.service';
 import {
   ANSWER_READING_JOB_KIND,
   ANSWER_READING_OPTIONS,
@@ -93,6 +97,7 @@ interface ScanTally {
   autoAccepted: number;
   needsReview: number;
   costUsd: number;
+  readonly changedDecisionIds: string[];
 }
 
 const AUTO_OUTCOMES: ReadonlySet<ReadingOutcome> = new Set(['auto_accepted', 'auto_blank']);
@@ -111,6 +116,7 @@ export class AnswerReadingPipelineService {
     private readonly cropReader: CropReadingService,
     private readonly decisions: AnswerReadingDecisionsService,
     private readonly budget: AnswerReadingBudgetService,
+    private readonly consolidation: AnswerReadingConsolidationService,
     @Inject(ANSWER_READING_OPTIONS) private readonly options: AnswerReadingOptions,
   ) {}
 
@@ -168,6 +174,7 @@ export class AnswerReadingPipelineService {
         budgetExceeded ? this.blockedByBudget(planned) : planned,
       );
       await this.finishRun(orgId, state, tally, budgetExceeded);
+      await this.consolidateIfConfirmed(orgId, batchId, tally.changedDecisionIds);
     } catch (error) {
       reportServerError(error, { orgId, batchId, scanId, runId, stage: 'answer_reading' });
       if (runId !== null) await this.failRun(orgId, runId);
@@ -507,13 +514,20 @@ export class AnswerReadingPipelineService {
     planned: readonly PlannedCrop[],
   ): Promise<ScanTally> {
     const limiter = new ConcurrencyLimiter(this.options.cropConcurrency);
-    const tally: ScanTally = { cropsDone: 0, autoAccepted: 0, needsReview: 0, costUsd: 0 };
+    const tally: ScanTally = {
+      cropsDone: 0,
+      autoAccepted: 0,
+      needsReview: 0,
+      costUsd: 0,
+      changedDecisionIds: [],
+    };
     await Promise.all(
       planned.map(({ crop, task }) =>
         limiter.run(async () => {
           const outcome = await this.readCrop(task);
           try {
-            await this.saveDecision(orgId, runId, work, crop, outcome);
+            const saved = await this.saveDecision(orgId, runId, work, crop, outcome);
+            if (!saved.unchanged) tally.changedDecisionIds.push(saved.decisionId);
           } catch (error) {
             reportServerError(error, { orgId, runId, markId: crop.markId, stage: 'save_decision' });
             return;
@@ -543,8 +557,8 @@ export class AnswerReadingPipelineService {
     work: ScanWork,
     crop: ScanCrop,
     outcome: CropReadingOutcome,
-  ): Promise<void> {
-    await this.decisions.save(orgId, {
+  ): Promise<SavedReadingDecision> {
+    return this.decisions.save(orgId, {
       runId,
       markId: crop.markId,
       itemId: crop.itemId,
@@ -579,6 +593,27 @@ export class AnswerReadingPipelineService {
         })
         .where(and(eq(answerReadingRuns.orgId, orgId), eq(answerReadingRuns.id, run.id))),
     );
+  }
+
+  private async consolidateIfConfirmed(
+    orgId: string,
+    batchId: string,
+    decisionIds: readonly string[],
+  ): Promise<void> {
+    if (decisionIds.length === 0) return;
+    try {
+      const [batch] = await withOrgContext(this.db, orgId, (tx) =>
+        tx
+          .select({ status: sheetScanBatches.status })
+          .from(sheetScanBatches)
+          .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)))
+          .limit(1),
+      );
+      if (batch?.status !== 'confirmed') return;
+      await this.consolidation.consolidateDecisions(orgId, decisionIds);
+    } catch (error) {
+      reportServerError(error, { orgId, batchId, stage: 'answer_reading_consolidation' });
+    }
   }
 
   private async failRun(orgId: string, runId: string): Promise<void> {
