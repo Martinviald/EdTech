@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { CROP_PROFILES } from '../src/schemas/answer-reading/crop.schema';
 import { layoutSpecSchema } from '../src/schemas/omr-layout.schema';
 import {
   omrAssessRequestSchema,
@@ -31,3 +32,9 @@ for (const { name, schema } of contracts) {
   writeFileSync(path, `${JSON.stringify(jsonSchema, null, 2)}\n`);
   process.stdout.write(`escrito ${path}\n`);
 }
+
+// Los perfiles de recorte (S2) no son un schema sino datos: el servicio los
+// replica como constante y un test de pytest compara ambos lados contra este JSON.
+const cropProfilesPath = resolve(outDir, 'crop-profiles.json');
+writeFileSync(cropProfilesPath, `${JSON.stringify(CROP_PROFILES, null, 2)}\n`);
+process.stdout.write(`escrito ${cropProfilesPath}\n`);

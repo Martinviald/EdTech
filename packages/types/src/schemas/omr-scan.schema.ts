@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { cropEvidenceSchema } from './answer-reading/crop.schema';
 import { captureProfileSchema, layoutSpecSchema, SHEET_IDENTITY_MODES } from './omr-layout.schema';
 
 // ── Lector de marcas (E22) — ScanResult, la salida del servicio de visión ────
@@ -51,6 +52,13 @@ export const markReadingSchema = z.object({
   suggestedValue: z.string().nullable().optional(),
   doubtReason: z.enum(DOUBT_REASONS).nullable().optional(),
   nullConfidence: z.number().min(0).max(1).nullable().optional(),
+  /**
+   * Contrato v2, sólo en campos `crop_region`: perfil de recorte aplicado,
+   * tinta medida descontando la plantilla impresa (`inkRatio`, y por casilla
+   * en `inkRatioByPart` si el campo trae `response.boxes`), tamaño y sha256 del
+   * JPEG. Opcional: un motor v1 no lo trae.
+   */
+  crop: cropEvidenceSchema.nullable().optional(),
 });
 
 export const PAGE_REJECT_REASONS = [

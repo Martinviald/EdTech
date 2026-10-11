@@ -51,6 +51,27 @@
           "suggestedValue": null,
           "doubtReason": "multiple",
           "nullConfidence": 0.88
+        },
+        {
+          "fieldId": "f_020",
+          "printedNumber": "20",
+          "state": "marked",
+          "value": null,
+          "fill": 0.0,
+          "threshold": 0.5,
+          "margin": 1.0,
+          "cropJpegBase64": "/9j/4AAQSkZJRgABAQAAAQ==",
+          "suggestedValue": null,
+          "doubtReason": null,
+          "nullConfidence": null,
+          "crop": {
+            "cropProfileId": "short-answer@1",
+            "inkRatio": 0.0123,
+            "inkRatioByPart": { "c1": 0.0, "c2": 0.0367, "c3": 0.0 },
+            "widthPx": 1000,
+            "heightPx": 550,
+            "sha256": "3f1c9a0e5b7d2468ace013579bdf2468ace013579bdf2468ace013579bdf2468"
+          }
         }
       ],
       "pageThumbJpegBase64": null
