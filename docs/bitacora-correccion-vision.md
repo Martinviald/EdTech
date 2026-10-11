@@ -163,3 +163,21 @@ deshabilitados que dejan de usarse en ejecución.
   usa por defecto. El panel muestra "OpenAI (no configurado)" sin clave.
 - **Privacidad:** el Batch API de OpenAI no es compatible con cero retención de datos (ZDR); no usar
   batch de OpenAI con datos de estudiantes si el contrato exige cero retención.
+
+### Cierre de la ola B
+
+- Corrección de F2 integrada (`b864ee45`…`f0a3cdf2` → rama): los 14 hallazgos con test previo.
+  Diferencial contra la versión previa a F2: 0 casos de correcta→incorrecta; 10 correcta→revisión
+  (miles/decimal ambiguo sin formato que lo resuelva). Regla final de ambigüedad en el JSDoc de
+  `compareCanonical` (formato → otra clave → misma escritura). `readingKey` obligatorio en el
+  consenso; blancos pasan por petición de revisión, confianza y auditoría.
+- Corrección de F3 integrada (8 commits) + migración `0047_llm_models_sampling`: Claude 4.x vuelve a
+  recibir `temperature: 0`; los modelos sin muestreo (Claude 5.5 y OpenAI) no la reciben; firma de
+  pensamiento de Gemini 3 en el asistente; costo del asistente con Gemini corregido (antes sumaba
+  acumulados: US$2,10 → US$1,55 en el caso de prueba); `LlmModelUnavailableError` para el pipeline.
+- Gates: `@soe/types` 892, `@soe/answer-reading` 112, jest de llm y asistente 211, typecheck api ok.
+
+## Ola C (F4 ya integrada; F7, F9, F10a)
+
+- F7-A (pipeline) y F10a (normalizadores) despachados sobre la rama con F2 corregida; F9 (arnés)
+  despachado tras la corrección de F3, con tope de US$0,50 para la línea base real.
