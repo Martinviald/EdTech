@@ -364,3 +364,25 @@ Riesgos que quedan: las respuestas confirmadas antes de este arreglo no tienen r
 que una lectura tardía sobre ellas queda sin consolidar (más seguro que escribir en otra hoja); con
 varias instancias de la API, cada una reanuda las mismas corridas al arrancar (lecturas repetidas,
 costo registrado, decisiones idempotentes).
+
+### F11b integrada (`3269ccc0`…`3df126fa` → rama)
+
+- Contrato `rubric-review.schema.ts`; rutas `GET /answer-reading/rubric-queue`,
+  `GET /answer-reading/rubric-queue/:decisionId`, `POST /answer-reading/rubric-approvals` y
+  `POST /answer-reading/rubric-approvals/accept-proposals` (`SHEET_REVIEW_ROLES`, corrección ciega).
+- La aprobación exige el lote confirmado (409 si la decisión no tiene respuesta), no pisa un
+  `human_score` ajeno y queda en `answer_reviews` (modo `grading`, `mark_correct` si el nivel da
+  puntaje completo, `mark_incorrect` si no, nivel en `edited_literal`): el historial y el deshacer
+  de F8 la ven.
+- Panel web de rúbrica: teclas 0–9 eligen nivel, Enter aprueba, A aprueba la propuesta, U deshace;
+  las citas de la IA se resaltan en la transcripción. Nunca se aprueba sin acción explícita.
+- **Decisión:** la aprobación por lote es "aceptar la propuesta de cada respuesta", nunca un nivel
+  común. La UI no la ofrece todavía: el diseño §11.3 la condiciona a la medición de acuerdo por
+  ítem (QWK ≥ 0,80), que no existe aún.
+- **Arreglo del orquestador:** `resolutionOfReview` traducía `mark_*` a una corrección sin puntaje;
+  reaplicar una aprobación de nivel parcial (al reconfirmar) daba puntaje completo o 0. Ahora, si el
+  ítem es de rúbrica y la revisión trae el nivel, se recalcula con `rubricScoredStrategy`. Test que
+  fallaba antes del arreglo.
+- Riesgos que quedan: la aprobación y su fila en `answer_reviews` van en transacciones separadas
+  (si falla el insert queda el `human_score` sin historial); lógica duplicada con la cola de F8
+  (alcance por lote, URLs de recortes).
