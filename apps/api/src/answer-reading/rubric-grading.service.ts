@@ -8,6 +8,7 @@ import {
 import { randomUUID } from 'node:crypto';
 import { and, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
+  isProviderAllowedByOrg,
   renderRubricGradingPrompt,
   rubricGradeOutputSchema,
   type RubricGradeOutput,
@@ -555,12 +556,9 @@ export class RubricGradingService {
     org: OrgSnapshot,
     plannedGradings: number,
   ): Promise<RubricGradingSkipReason | null> {
-    const allowedProviders = org.settings.allowedProviders;
-    if (allowedProviders !== undefined) {
+    if (org.settings.allowedProviders !== undefined) {
       const runtime = await this.llmConfig.resolve(orgId, RUBRIC_GRADING_LLM_FEATURE);
-      if (!(allowedProviders as readonly string[]).includes(runtime.provider)) {
-        return 'provider_not_allowed';
-      }
+      if (!isProviderAllowedByOrg(org.settings, runtime.provider)) return 'provider_not_allowed';
     }
     const exceeded = await this.budget.isExceeded({
       orgId,

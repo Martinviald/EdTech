@@ -1,7 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { ANSWER_FORMATS, isSupportedFormat, requiresRubricGrading } from '@soe/answer-reading';
+import {
+  ANSWER_FORMATS,
+  isProviderAllowedByOrg,
+  isSupportedFormat,
+  requiresRubricGrading,
+} from '@soe/answer-reading';
 import {
   aiGradingJobs,
   items,
@@ -19,6 +24,7 @@ import {
   type ItemType,
   type LayoutSpec,
   type LlmFeature,
+  type OrgAnswerReadingSettings,
   type RubricLevel,
 } from '@soe/types';
 import {
@@ -30,12 +36,14 @@ import { InjectDb, type Database } from '../database/database.types';
 import { FilesService } from '../files/files.service';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
 import { estimateLlmCostUsd } from '../llm/llm.pricing';
+import { LlmConfigService } from '../llm/llm.config';
 import { LlmService } from '../llm/llm.service';
 import type { LlmImagePart } from '../llm/llm.types';
 
 export const DEVELOPMENT_GRADING_JOB_TYPE = 'development_crop';
 export const DEVELOPMENT_GRADING_PROMPT_VERSION = 'dev-grading-v1';
 export const DEVELOPMENT_GRADING_BATCH_LIMIT = 200;
+export const DEVELOPMENT_GRADING_PROVIDER_NOT_ALLOWED = 'provider_not_allowed';
 const DEVELOPMENT_GRADING_LLM_FEATURE = 'ai_grading' satisfies LlmFeature;
 
 export interface ScheduleConfirmedBatchParams {
@@ -81,6 +89,7 @@ export class DevelopmentGradingService {
     @Inject(JOB_DISPATCHER) private readonly dispatcher: JobDispatcher,
     private readonly llm: LlmService,
     private readonly filesService: FilesService,
+    private readonly llmConfig: LlmConfigService,
   ) {}
 
   scheduleConfirmedBatch(params: ScheduleConfirmedBatchParams): void {
@@ -118,6 +127,7 @@ export class DevelopmentGradingService {
         .limit(1);
       const settings = resolveAnswerReadingSettings(org?.config ?? null);
       if (!settings.enabled || !settings.allowExternalVision) return [];
+      const providerAllowed = await this.isConfiguredProviderAllowed(params.orgId, settings);
 
       const cropRows = await tx
         .select({
@@ -242,7 +252,9 @@ export class DevelopmentGradingService {
             ),
           );
         for (const job of existingJobs) {
-          if (job.status !== 'failed') alreadyEnqueued.add(job.responseId);
+          if (job.status !== 'failed' && job.status !== 'skipped') {
+            alreadyEnqueued.add(job.responseId);
+          }
         }
       }
 
@@ -274,6 +286,11 @@ export class DevelopmentGradingService {
         );
       }
 
+      if (!providerAllowed) {
+        this.logger.warn(
+          `El proveedor configurado para la corrección de desarrollo no está permitido por la organización: ${capped.length} recorte(s) del lote ${params.batchId} quedan pendientes de corrección docente`,
+        );
+      }
       const insertedJobs = await tx
         .insert(aiGradingJobs)
         .values(
@@ -281,7 +298,6 @@ export class DevelopmentGradingService {
             orgId: params.orgId,
             responseId: entry.responseId,
             type: DEVELOPMENT_GRADING_JOB_TYPE,
-            status: 'pending',
             promptVersion: DEVELOPMENT_GRADING_PROMPT_VERSION,
             input: {
               batchId: params.batchId,
@@ -289,9 +305,17 @@ export class DevelopmentGradingService {
               cropFileId: entry.cropFileId,
               printedNumber: entry.printedNumber,
             },
+            ...(providerAllowed
+              ? { status: 'pending' }
+              : {
+                  status: 'skipped',
+                  output: { reason: DEVELOPMENT_GRADING_PROVIDER_NOT_ALLOWED },
+                  completedAt: new Date(),
+                }),
           })),
         )
         .returning({ id: aiGradingJobs.id, responseId: aiGradingJobs.responseId });
+      if (!providerAllowed) return [];
       const jobIdByResponseId = new Map(insertedJobs.map((job) => [job.responseId, job.id]));
 
       const work: GradingWork[] = [];
@@ -366,6 +390,15 @@ export class DevelopmentGradingService {
         completedAt: new Date(),
       });
     }
+  }
+
+  private async isConfiguredProviderAllowed(
+    orgId: string,
+    settings: OrgAnswerReadingSettings,
+  ): Promise<boolean> {
+    if (settings.allowedProviders === undefined) return true;
+    const runtime = await this.llmConfig.resolve(orgId, DEVELOPMENT_GRADING_LLM_FEATURE);
+    return isProviderAllowedByOrg(settings, runtime.provider);
   }
 
   private isLegacyGradable(item: GradableItem): boolean {

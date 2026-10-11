@@ -107,6 +107,17 @@ function completeWithFallback(
  * `reviewAll` endurece la política (nada se autoacepta). Nunca la relaja. Un lector
  * de desempate no permitido se quita y el desacuerdo pasa a revisión.
  */
+export function isProviderAllowedByOrg(
+  settings: OrgAnswerReadingSettings,
+  provider: string,
+): boolean {
+  const allowExternalVision =
+    settings.allowExternalVision ?? DEFAULT_ORG_ANSWER_READING_SETTINGS.allowExternalVision;
+  if (!allowExternalVision) return false;
+  const allowedProviders: readonly string[] | undefined = settings.allowedProviders;
+  return allowedProviders === undefined || allowedProviders.includes(provider);
+}
+
 export function applyOrgRestrictions(
   route: ResolvedRouteWithFallback,
   settings: OrgAnswerReadingSettings,
@@ -114,10 +125,7 @@ export function applyOrgRestrictions(
   const { fallbackReaders, ...resolved } = route;
   const allowExternalVision =
     settings.allowExternalVision ?? DEFAULT_ORG_ANSWER_READING_SETTINGS.allowExternalVision;
-  const allowed = (reader: ReaderSpec) =>
-    allowExternalVision &&
-    (settings.allowedProviders === undefined ||
-      settings.allowedProviders.includes(reader.provider));
+  const allowed = (reader: ReaderSpec) => isProviderAllowedByOrg(settings, reader.provider);
   const tiebreak = resolved.policy.tiebreakReader;
   const withoutTiebreak =
     tiebreak !== null && !allowed(tiebreak)

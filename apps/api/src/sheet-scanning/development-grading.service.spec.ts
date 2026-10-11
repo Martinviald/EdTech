@@ -4,6 +4,7 @@ import { aiGradingJobs, responses, type Database } from '@soe/db';
 import type { LayoutSpec } from '@soe/types';
 import type { FilesService } from '../files/files.service';
 import type { EnqueuedJob, JobDispatcher } from '../jobs/job-dispatcher';
+import type { LlmConfigService } from '../llm/llm.config';
 import type { LlmService } from '../llm/llm.service';
 import type { LlmImagePart } from '../llm/llm.types';
 import {
@@ -140,11 +141,23 @@ const filesServiceFake = {
   buildDownloadUrl: (row: { id: string }) => `https://signed/${row.id}`,
 } as unknown as FilesService;
 
-function makeService(selects: unknown[][], llmText = DEFAULT_LLM_JSON) {
+function makeLlmConfig(provider = 'gemini'): LlmConfigService {
+  return {
+    resolve: async () => ({ provider, model: 'gemini-2.5-pro', maxTokens: 1024 }),
+  } as unknown as LlmConfigService;
+}
+
+function makeService(selects: unknown[][], llmText = DEFAULT_LLM_JSON, provider = 'gemini') {
   const { db, updates, inserts, selectWheres, responseWheres } = makeDb(selects);
   const { dispatcher, jobs } = makeDispatcher();
   const { llm, calls: llmCalls } = makeLlm(llmText);
-  const service = new DevelopmentGradingService(db, dispatcher, llm, filesServiceFake);
+  const service = new DevelopmentGradingService(
+    db,
+    dispatcher,
+    llm,
+    filesServiceFake,
+    makeLlmConfig(provider),
+  );
   return { service, updates, inserts, jobs, llmCalls, selectWheres, responseWheres };
 }
 
@@ -257,8 +270,12 @@ afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
-async function runScheduledJob(selects: unknown[][], llmText = DEFAULT_LLM_JSON) {
-  const ctx = makeService(selects, llmText);
+async function runScheduledJob(
+  selects: unknown[][],
+  llmText = DEFAULT_LLM_JSON,
+  provider = 'gemini',
+) {
+  const ctx = makeService(selects, llmText, provider);
   ctx.service.scheduleConfirmedBatch(PARAMS);
   await ctx.jobs[0].run();
   return ctx;
@@ -547,5 +564,59 @@ describe('DevelopmentGradingService — convivencia con la lectura por visión',
       responseWheres[0] as Parameters<PgDialect['sqlToQuery']>[0],
     );
     expect(where.sql).toContain(`->> 'decisionId') is null`);
+  });
+
+  it('con allowedProviders que excluye al proveedor configurado no llama al modelo y deja el job omitido con motivo', async () => {
+    const { inserts, llmCalls, updates } = await runScheduledJob(
+      [
+        [{ config: { answerReading: { allowedProviders: ['anthropic'] } } }],
+        [CROP_ROW],
+        [RUBRIC_ITEM],
+        [RESPONSE_ROW],
+        [],
+      ],
+      DEFAULT_LLM_JSON,
+      'gemini',
+    );
+
+    expect(llmCalls).toHaveLength(0);
+    expect(updates.some((u) => u.table === responses)).toBe(false);
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0].rows).toEqual([
+      expect.objectContaining({
+        responseId: RESPONSE_ID,
+        status: 'skipped',
+        output: { reason: 'provider_not_allowed' },
+      }),
+    ]);
+  });
+
+  it('con allowedProviders que incluye al proveedor configurado corrige normalmente', async () => {
+    const { llmCalls, inserts } = await runScheduledJob(
+      [
+        [{ config: { answerReading: { allowedProviders: ['gemini'] } } }],
+        [CROP_ROW],
+        [RUBRIC_ITEM],
+        [RESPONSE_ROW],
+        [],
+      ],
+      DEFAULT_LLM_JSON,
+      'gemini',
+    );
+
+    expect(llmCalls).toHaveLength(1);
+    expect(inserts[0].rows[0]).toMatchObject({ status: 'pending' });
+  });
+
+  it('un job omitido por proveedor no bloquea la corrección cuando la org lo vuelve a permitir', async () => {
+    const { llmCalls } = await runScheduledJob([
+      [ORG_ROW],
+      [CROP_ROW],
+      [RUBRIC_ITEM],
+      [RESPONSE_ROW],
+      [{ responseId: RESPONSE_ID, status: 'skipped' }],
+    ]);
+
+    expect(llmCalls).toHaveLength(1);
   });
 });

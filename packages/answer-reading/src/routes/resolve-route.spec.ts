@@ -4,7 +4,7 @@ import {
   type ReadingContext,
   type ReadingRoute,
 } from '@soe/types';
-import { applyOrgRestrictions, resolveReadingRoute } from './resolve-route';
+import { applyOrgRestrictions, isProviderAllowedByOrg, resolveReadingRoute } from './resolve-route';
 
 const ORG = '00000000-0000-4000-8000-000000000001';
 const OTHER_ORG = '00000000-0000-4000-8000-000000000002';
@@ -224,5 +224,17 @@ describe('revisión F2 — rutas', () => {
           .route.policy,
       ).toMatchObject({ tiebreakReader: GPT, onDisagreement: 'tiebreak_reader' });
     });
+  });
+});
+
+describe('isProviderAllowedByOrg', () => {
+  it('sin lista de proveedores permite cualquiera mientras la visión externa esté permitida', () => {
+    expect(isProviderAllowedByOrg({}, 'gemini')).toBe(true);
+    expect(isProviderAllowedByOrg({ allowExternalVision: false }, 'gemini')).toBe(false);
+  });
+
+  it('con lista de proveedores solo permite los de la lista', () => {
+    expect(isProviderAllowedByOrg({ allowedProviders: ['anthropic'] }, 'anthropic')).toBe(true);
+    expect(isProviderAllowedByOrg({ allowedProviders: ['anthropic'] }, 'gemini')).toBe(false);
   });
 });
