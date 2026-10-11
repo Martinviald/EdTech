@@ -214,6 +214,7 @@ export class DevelopmentGradingService {
           .from(aiGradingJobs)
           .where(
             and(
+              eq(aiGradingJobs.orgId, params.orgId),
               inArray(aiGradingJobs.responseId, responseIds),
               eq(aiGradingJobs.type, DEVELOPMENT_GRADING_JOB_TYPE),
             ),
@@ -255,6 +256,7 @@ export class DevelopmentGradingService {
         .insert(aiGradingJobs)
         .values(
           capped.map((entry) => ({
+            orgId: params.orgId,
             responseId: entry.responseId,
             type: DEVELOPMENT_GRADING_JOB_TYPE,
             status: 'pending',
@@ -310,7 +312,7 @@ export class DevelopmentGradingService {
             costUsd: estimateLlmCostUsd(completion.model, completion.usage),
             completedAt: new Date(),
           })
-          .where(eq(aiGradingJobs.id, work.jobId));
+          .where(and(eq(aiGradingJobs.orgId, orgId), eq(aiGradingJobs.id, work.jobId)));
 
         await tx
           .update(responses)
@@ -345,7 +347,10 @@ export class DevelopmentGradingService {
     values: Partial<typeof aiGradingJobs.$inferInsert>,
   ): Promise<void> {
     await withOrgContext(this.db, orgId, async (tx) => {
-      await tx.update(aiGradingJobs).set(values).where(eq(aiGradingJobs.id, jobId));
+      await tx
+        .update(aiGradingJobs)
+        .set(values)
+        .where(and(eq(aiGradingJobs.orgId, orgId), eq(aiGradingJobs.id, jobId)));
     });
   }
 

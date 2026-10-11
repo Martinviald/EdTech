@@ -46,6 +46,8 @@ tenants y legibles sin contexto de org). En `llm_settings` la config global la
 escribe la API (panel /configuracion/modelos-ia); la autorización es el role guard
 `platform_admin`, no el RLS.
 
+`ai_grading_jobs` usa `org_id` directo (log de correcciones asistidas por IA).
+
 `decision_settings` sigue el mismo patrón que `llm_settings` (org_id NULLABLE) y
 `decision_calls` usa `org_id` directo (log del motor de decisiones).
 

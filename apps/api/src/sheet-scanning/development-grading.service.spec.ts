@@ -282,13 +282,14 @@ describe('DevelopmentGradingService.processConfirmedBatch', () => {
     expect(cropsWhere.sql).toContain('"sheet_scans"."printed_sheet_id" is not null');
   });
 
-  it('crea el ai_grading_job pending con el responseId y el input del recorte', async () => {
+  it('crea el ai_grading_job pending con la org, el responseId y el input del recorte', async () => {
     const { inserts } = await runScheduledJob(HAPPY_SELECTS);
 
     expect(inserts).toHaveLength(1);
     expect(inserts[0].table).toBe(aiGradingJobs);
     expect(inserts[0].rows).toEqual([
       {
+        orgId: ORG_ID,
         responseId: RESPONSE_ID,
         type: DEVELOPMENT_GRADING_JOB_TYPE,
         status: 'pending',
@@ -301,6 +302,16 @@ describe('DevelopmentGradingService.processConfirmedBatch', () => {
         },
       },
     ]);
+  });
+
+  it('busca los jobs ya encolados filtrando por la org del lote', async () => {
+    const { selectWheres } = await runScheduledJob(HAPPY_SELECTS);
+
+    const jobsWhere = new PgDialect().sqlToQuery(
+      selectWheres[3] as Parameters<PgDialect['sqlToQuery']>[0],
+    );
+    expect(jobsWhere.sql).toContain('"ai_grading_jobs"."org_id" =');
+    expect(jobsWhere.params).toContain(ORG_ID);
   });
 
   it('arma el prompt con el enunciado y la pauta del ítem, y adjunta el recorte como imagen', async () => {

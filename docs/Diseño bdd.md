@@ -870,6 +870,7 @@ Jobs de corrección asíncrona con IA (para desarrollo, escritura, oralidad).
 
 ```
 id              uuid        PK
+org_id          uuid        FK → organizations.id  NOT NULL (RLS: ai_grading_jobs_tenant_isolation)
 response_id     uuid        FK → responses.id
 type            enum        'open_ended' | 'oral_reading' | 'oral_expression' | 'writing'
 status          enum        'pending' | 'processing' | 'completed' | 'failed'

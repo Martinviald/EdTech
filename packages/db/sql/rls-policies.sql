@@ -529,3 +529,15 @@ DROP POLICY IF EXISTS "test_tracks_official_read" ON "test_tracks";
 CREATE POLICY "test_tracks_official_read" ON "test_tracks"
   AS PERMISSIVE FOR SELECT
   USING (org_id IS NULL);
+
+-- ── Corrección IA de respuestas ──────────────────────────────────────────────
+-- `ai_grading_jobs` registra cada corrección asistida por IA (recorte, modelo,
+-- puntaje propuesto y costo). Lleva org_id propio para filtrar la cola y el costo
+-- sin join a responses → assessments.
+ALTER TABLE "ai_grading_jobs" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ai_grading_jobs" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "ai_grading_jobs_tenant_isolation" ON "ai_grading_jobs";
+CREATE POLICY "ai_grading_jobs_tenant_isolation" ON "ai_grading_jobs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
