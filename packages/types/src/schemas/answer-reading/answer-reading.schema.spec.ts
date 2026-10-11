@@ -10,6 +10,7 @@ import {
   orgAnswerReadingSettingsSchema,
   responseFormatSchema,
   reviewModeFor,
+  reviewQueueQuerySchema,
   submitReviewSchema,
   transcriptionOutputSchema,
 } from './index';
@@ -109,5 +110,21 @@ describe('contratos de lectura por visión', () => {
     expect(scoringConfigSchema.safeParse({ equivalences: { desconocida: true } }).success).toBe(
       false,
     );
+  });
+});
+
+describe('contrato de la cola de revisión', () => {
+  const id = '00000000-0000-4000-8000-000000000001';
+
+  it('exige una evaluación o un lote, no ambos', () => {
+    expect(reviewQueueQuerySchema.safeParse({ assessmentId: id }).success).toBe(true);
+    expect(reviewQueueQuerySchema.safeParse({}).success).toBe(false);
+    expect(reviewQueueQuerySchema.safeParse({ assessmentId: id, batchId: id }).success).toBe(false);
+  });
+
+  it('lee includeAudit=false como falso y rechaza claves desconocidas', () => {
+    const parsed = reviewQueueQuerySchema.parse({ batchId: id, includeAudit: 'false' });
+    expect(parsed.includeAudit).toBe(false);
+    expect(reviewQueueQuerySchema.safeParse({ batchId: id, limit: '10' }).success).toBe(false);
   });
 });
