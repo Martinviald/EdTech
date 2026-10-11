@@ -209,6 +209,8 @@ export function setupReviewWorld(options: { consent?: DatasetConsent } = {}) {
 
   return {
     memory,
+    db,
+    decisions,
     queue,
     reviews,
     consolidation,

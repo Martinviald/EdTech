@@ -19,6 +19,8 @@ import {
 import { CropReadingService } from './crop-reading.service';
 import { ReadingRoutesService } from './reading-routes.service';
 import { RubricGradingService } from './rubric-grading.service';
+import { RubricReviewController } from './rubric-review.controller';
+import { RubricReviewService } from './rubric-review.service';
 import { LlmVisionTranscriber } from './transcribers/llm-vision-transcriber';
 import { VISION_TRANSCRIBERS, type VisionTranscriber } from './transcribers/vision-transcriber';
 import { VisionTranscriberRegistry } from './transcribers/vision-transcriber.registry';
@@ -44,7 +46,7 @@ function answerReadingOptionsFromEnv(): AnswerReadingOptions {
 
 @Module({
   imports: [FilesModule, JobsModule, LlmModule, AiObservabilityModule, AssessmentResultsModule],
-  controllers: [AnswerReadingReviewController],
+  controllers: [AnswerReadingReviewController, RubricReviewController],
   providers: [
     { provide: ANSWER_READING_OPTIONS, useFactory: answerReadingOptionsFromEnv },
     LlmVisionTranscriber,
@@ -63,6 +65,7 @@ function answerReadingOptionsFromEnv(): AnswerReadingOptions {
     AnswerReadingPipelineService,
     AnswerReadingReviewQueueService,
     AnswerReadingReviewsService,
+    RubricReviewService,
   ],
   exports: [
     AnswerReadingPipelineService,
