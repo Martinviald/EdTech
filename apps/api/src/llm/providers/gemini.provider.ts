@@ -114,6 +114,11 @@ interface GeminiStreamChunk {
   };
 }
 
+const GEMINI_UNSUPPORTED_SCHEMA_KEYWORDS: ReadonlySet<string> = new Set([
+  '$schema',
+  'additionalProperties',
+]);
+
 @Injectable()
 export class GeminiProvider implements LlmProvider {
   readonly name: LlmProviderName = 'gemini';
@@ -405,7 +410,36 @@ export class GeminiProvider implements LlmProvider {
       properties !== null &&
       typeof properties === 'object' &&
       Object.keys(properties as Record<string, unknown>).length > 0;
-    return hasProps ? inputSchema : undefined;
+    return hasProps ? this.withoutUnsupportedKeywords(inputSchema) : undefined;
+  }
+
+  private withoutUnsupportedKeywords(schema: Record<string, unknown>): Record<string, unknown> {
+    const supported: Record<string, unknown> = {};
+    for (const [keyword, value] of Object.entries(schema)) {
+      if (GEMINI_UNSUPPORTED_SCHEMA_KEYWORDS.has(keyword)) continue;
+      supported[keyword] =
+        keyword === 'properties' && this.isSchemaObject(value)
+          ? this.mapSchemaValues(value)
+          : this.cleanSchemaNode(value);
+    }
+    return supported;
+  }
+
+  private mapSchemaValues(properties: Record<string, unknown>): Record<string, unknown> {
+    const mapped: Record<string, unknown> = {};
+    for (const [name, propertySchema] of Object.entries(properties)) {
+      mapped[name] = this.cleanSchemaNode(propertySchema);
+    }
+    return mapped;
+  }
+
+  private cleanSchemaNode(node: unknown): unknown {
+    if (Array.isArray(node)) return node.map((entry) => this.cleanSchemaNode(entry));
+    return this.isSchemaObject(node) ? this.withoutUnsupportedKeywords(node) : node;
+  }
+
+  private isSchemaObject(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
   }
 
   /**

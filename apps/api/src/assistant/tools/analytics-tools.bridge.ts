@@ -10,7 +10,7 @@ import type { AssistantTool } from './assistant-tool.types';
 
 const convertZodSchema = zodToJsonSchema as unknown as (
   schema: AnyZodObject,
-  options: { $refStrategy: 'none' },
+  options: { $refStrategy: 'none'; pipeStrategy: 'output' },
 ) => Record<string, unknown>;
 
 @Injectable()
@@ -40,7 +40,10 @@ export class AnalyticsAssistantBridge {
       definition: {
         name: descriptor.name,
         description: descriptor.description,
-        inputSchema: convertZodSchema(descriptor.inputSchema, { $refStrategy: 'none' }),
+        inputSchema: convertZodSchema(descriptor.inputSchema, {
+          $refStrategy: 'none',
+          pipeStrategy: 'output',
+        }),
       },
       async execute(input) {
         try {
