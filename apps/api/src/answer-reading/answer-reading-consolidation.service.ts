@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import {
   answerReadingDecisions,
   answerReadings,
@@ -426,6 +426,10 @@ export class AnswerReadingConsolidationService {
         }
         if (this.isReclaimedByOtherMark(decision, target)) {
           skipped.push({ decisionId: decision.id, reason: 'response_reclaimed' });
+          continue;
+        }
+        if (this.hasForeignHumanScore(decision, target)) {
+          skipped.push({ decisionId: decision.id, reason: 'human_scored' });
           continue;
         }
         const write = this.humanWrite(decision, target, resolution, reviewerId, context);
@@ -882,7 +886,9 @@ export class AnswerReadingConsolidationService {
         value: responses.value,
       })
       .from(responses)
-      .where(inArray(responses.id, [...new Set(responseIdByDecision.values())]));
+      .where(inArray(responses.id, [...new Set(responseIdByDecision.values())]))
+      .orderBy(asc(responses.id))
+      .for('update');
     const responseById = new Map(responseRows.map((row) => [row.id, row]));
     const writerMarks = await this.markIdsOfDecisions(
       tx,

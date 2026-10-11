@@ -11,12 +11,14 @@ interface SelectState {
   predicate: Predicate | undefined;
   orders: OrderSpec[];
   limit: number | null;
+  lock: string | null;
 }
 
 export class InMemoryDatabase {
   private readonly store = new Map<Table, Row[]>();
   private readonly keysByTable = new Map<Table, Map<unknown, string>>();
   private readonly uniqueKeys = new Map<Table, Array<readonly string[]>>();
+  readonly lockedSelects: Array<{ table: Table; strength: string }> = [];
 
   seed(table: Table, rows: Row[]): void {
     this.rowsOf(table).push(...rows.map((row) => this.withDefaults(table, row)));
@@ -38,7 +40,13 @@ export class InMemoryDatabase {
   }
 
   private selectBuilder(projection: Projection) {
-    const state: SelectState = { table: null, predicate: undefined, orders: [], limit: null };
+    const state: SelectState = {
+      table: null,
+      predicate: undefined,
+      orders: [],
+      limit: null,
+      lock: null,
+    };
     const builder = {
       from: (table: Table) => {
         state.table = table;
@@ -56,6 +64,10 @@ export class InMemoryDatabase {
         state.limit = limit;
         return builder;
       },
+      for: (strength: string) => {
+        state.lock = strength;
+        return builder;
+      },
       innerJoin: () => {
         throw new Error('InMemoryDatabase no soporta joins');
       },
@@ -70,6 +82,7 @@ export class InMemoryDatabase {
   private runSelect(state: SelectState, projection: Projection): Row[] {
     const table = state.table;
     if (table === null) throw new Error('select sin from');
+    if (state.lock !== null) this.lockedSelects.push({ table, strength: state.lock });
     let rows = this.rowsOf(table).filter((row) => this.matches(table, row, state.predicate));
     for (const order of [...state.orders].reverse()) {
       const key = this.keyOf(table, order.col);

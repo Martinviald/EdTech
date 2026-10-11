@@ -871,9 +871,13 @@ describe('AnswerReadingConsolidationService.applyHumanResolution', () => {
     });
   });
 
-  it('una revisión humana posterior reemplaza a la anterior', async () => {
+  it('una revisión humana posterior reemplaza a la anterior de la misma decisión', async () => {
     const { memory, service } = setup();
     const { response, decision } = seedReviewed(memory);
+    response.value = {
+      answer: '1',
+      reading: { canonical: '1', decisionId: decision.id, markId: MARK_A },
+    };
     response.humanScore = { score: 0, scoredById: 'otra-persona' };
 
     await service.applyHumanResolution(
@@ -1174,5 +1178,83 @@ describe('Respuesta reclamada por otra hoja del mismo alumno', () => {
       { decisionId: second.id, reason: 'response_reclaimed' },
     ]);
     expect(response).toMatchObject({ finalScore: null, humanScore: null });
+  });
+});
+
+describe('human_score ajeno dentro de la transacción de escritura', () => {
+  it('una resolución humana no pisa un human_score que escribió otra persona entre la lectura y la escritura', async () => {
+    const { memory, service, recalculate } = setup();
+    const foreign = { score: 1, scoredById: REVIEWER_ID, overrideReason: 'corrección manual' };
+    const response = seedResponse(memory, {
+      id: RESPONSE_A,
+      value: { answer: '7' },
+      isCorrect: true,
+      rawScore: '1.00',
+      finalScore: '1.00',
+      humanScore: foreign,
+    });
+    const decision = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.applyHumanResolution(
+      ORG_ID,
+      decision.id,
+      { kind: 'grading', isCorrect: false },
+      REVIEWER_ID,
+    );
+
+    expect(report.skipped).toEqual([{ decisionId: decision.id, reason: 'human_scored' }]);
+    expect(report.scored).toEqual([]);
+    expect(response).toMatchObject({ humanScore: foreign, finalScore: '1.00', isCorrect: true });
+    expect(recalculate).not.toHaveBeenCalled();
+  });
+
+  it('el human_score que escribió la misma decisión se puede reemplazar', async () => {
+    const { memory, service } = setup();
+    const decision = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+    const response = seedResponse(memory, {
+      id: RESPONSE_A,
+      value: { answer: '7', reading: { canonical: '7', decisionId: decision.id, markId: MARK_A } },
+      isCorrect: true,
+      rawScore: '1.00',
+      finalScore: '1.00',
+      humanScore: { score: 1, scoredById: REVIEWER_ID },
+    });
+
+    const report = await service.applyHumanResolution(
+      ORG_ID,
+      decision.id,
+      { kind: 'grading', isCorrect: false },
+      REVIEWER_ID,
+    );
+
+    expect(report.scored).toEqual([decision.id]);
+    expect(response).toMatchObject({ finalScore: '0.00', humanScore: { score: 0 } });
+  });
+
+  it('bloquea las respuestas que va a escribir antes de revisar su human_score', async () => {
+    const { memory, service } = setup();
+    seedResponse(memory, { id: RESPONSE_A });
+    const decision = seedDecision(memory, {
+      outcome: 'needs_review',
+      value: answer('7', INTEGER),
+      responseId: RESPONSE_A,
+    });
+
+    await service.applyHumanResolution(
+      ORG_ID,
+      decision.id,
+      { kind: 'grading', isCorrect: true },
+      REVIEWER_ID,
+    );
+
+    expect(memory.lockedSelects).toContainEqual({ table: responses, strength: 'update' });
   });
 });
