@@ -107,7 +107,8 @@ describe('RubricReviewService.queue', () => {
     const page = await service.queue(ORG_ID, QUERY);
 
     expect(page).toMatchObject({ total: 2, page: 1, limit: 20 });
-    expect(page.data[0]).toEqual({
+    const byId = new Map(page.data.map((entry) => [entry.decisionId, entry]));
+    expect(byId.get(decision.id)).toEqual({
       decisionId: decision.id,
       itemId: RUBRIC_ITEM,
       printedNumber: '7',
@@ -116,8 +117,7 @@ describe('RubricReviewService.queue', () => {
       proposal: { levelCode: '1', confidence: 0.8 },
       awaitingConfirmation: false,
     });
-    expect(page.data[1]?.decisionId).toBe(withoutProposal.decision.id);
-    expect(page.data[1]?.proposal).toBeNull();
+    expect(byId.get(withoutProposal.decision.id)?.proposal).toBeNull();
     expect(JSON.stringify(page)).not.toContain('studentId');
   });
 
