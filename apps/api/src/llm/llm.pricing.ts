@@ -21,12 +21,24 @@ const MODEL_PRICING_PER_MTOK: ReadonlyArray<{
   outputUsd: number;
 }> = [
   // Anthropic Claude.
+  { prefix: 'claude-sonnet-5', inputUsd: 2, outputUsd: 10 },
+  { prefix: 'claude-sonnet-4-6', inputUsd: 3, outputUsd: 15 },
   { prefix: 'claude-sonnet', inputUsd: 3, outputUsd: 15 },
+  { prefix: 'claude-opus-5-5', inputUsd: 4, outputUsd: 20 },
+  { prefix: 'claude-opus-5', inputUsd: 5, outputUsd: 25 },
+  { prefix: 'claude-opus-4-8', inputUsd: 5, outputUsd: 25 },
+  { prefix: 'claude-opus-4-7', inputUsd: 5, outputUsd: 25 },
+  { prefix: 'claude-opus-4-6', inputUsd: 5, outputUsd: 25 },
   { prefix: 'claude-opus', inputUsd: 15, outputUsd: 75 },
+  { prefix: 'claude-haiku-5', inputUsd: 0.1, outputUsd: 0.5 },
+  { prefix: 'claude-haiku-4-5', inputUsd: 1, outputUsd: 5 },
   { prefix: 'claude-haiku', inputUsd: 0.8, outputUsd: 4 },
   { prefix: 'claude-3-5-haiku', inputUsd: 0.8, outputUsd: 4 },
   { prefix: 'claude-3-haiku', inputUsd: 0.25, outputUsd: 1.25 },
   // Google Gemini — variantes específicas primero (ver nota de orden arriba).
+  { prefix: 'gemini-3.8-flash', inputUsd: 0.75, outputUsd: 3.75 },
+  { prefix: 'gemini-3.5-flash-lite', inputUsd: 0.3, outputUsd: 2.5 },
+  { prefix: 'gemini-3.1-flash-lite', inputUsd: 0.25, outputUsd: 1.5 },
   { prefix: 'gemini-2.5-flash-lite', inputUsd: 0.1, outputUsd: 0.4 },
   { prefix: 'gemini-2.5-flash', inputUsd: 0.3, outputUsd: 2.5 },
   { prefix: 'gemini-2.5-pro', inputUsd: 1.25, outputUsd: 10 },

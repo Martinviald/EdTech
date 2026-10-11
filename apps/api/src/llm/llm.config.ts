@@ -8,11 +8,8 @@ import {
   type LlmModelChoice,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
-import { ACTIVE_LLM_PROVIDER } from './llm.constants';
+import { ACTIVE_LLM_PROVIDER, LLM_PROVIDER_DEFAULTS } from './llm.constants';
 import type { LlmRuntimeConfig } from './llm.types';
-
-/** Temperatura determinista para todas las funcionalidades (salida estructurada). */
-const DEFAULT_TEMPERATURE = 0;
 
 /**
  * Resuelve la configuración LLM efectiva (proveedor + modelo + parámetros) POR
@@ -36,11 +33,12 @@ export class LlmConfigService {
     feature: LlmFeature,
   ): Promise<LlmRuntimeConfig> {
     const choice = await this.resolveChoice(orgId, feature);
+    const { temperature } = LLM_PROVIDER_DEFAULTS[choice.provider];
     return {
       provider: choice.provider,
       model: choice.model,
       maxTokens: resolveModelMaxTokens(choice.provider, choice.model),
-      temperature: DEFAULT_TEMPERATURE,
+      ...(temperature !== undefined ? { temperature } : {}),
     };
   }
 

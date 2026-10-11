@@ -5,7 +5,9 @@ import type {
   LlmAgentEvent,
   LlmAgentRequest,
   LlmAgentStopReason,
+  LlmCompletionOptions,
   LlmCompletionRequest,
+  LlmCompletionResult,
   LlmProvider,
   LlmProviderName,
 } from '../llm.types';
@@ -24,6 +26,11 @@ interface AnthropicStreamEvent {
     stop_reason?: string;
   };
   usage?: { output_tokens?: number };
+}
+
+interface AnthropicMessageResponse {
+  content: Array<{ type: string; text?: string }>;
+  usage?: { input_tokens?: number; output_tokens?: number };
 }
 
 /**
@@ -78,38 +85,25 @@ export class AnthropicProvider implements LlmProvider {
   }
 
   async complete(request: LlmCompletionRequest): Promise<string> {
-    if (!this.client) {
-      throw new Error('Anthropic provider no está disponible');
-    }
-
-    const response = await this.client.messages.create({
-      model: request.options.model,
-      max_tokens: request.options.maxTokens,
-      temperature: request.options.temperature,
-      system: request.system,
-      messages: [{ role: 'user', content: request.prompt }],
-    });
-
-    const textBlock = response.content.find(
-      (b: { type: string }) => b.type === 'text',
-    );
-    return (textBlock as { type: 'text'; text: string } | undefined)?.text ?? '';
+    return (await this.completeWithUsage(request)).text;
   }
 
-  /**
-   * Completion MULTIMODAL: la Messages API de Anthropic acepta bloques `image`
-   * con `source: { type: 'base64', media_type, data }` junto al bloque `text`.
-   * Sin imágenes → delega en `complete`. Tipado estructural local para no romper
-   * si el SDK aún no está instalado (mismo patrón tolerante).
-   */
-  async completeMultimodal(request: LlmCompletionRequest): Promise<string> {
-    if (!this.client) {
-      throw new Error('Anthropic provider no está disponible');
-    }
+  async completeWithUsage(
+    request: LlmCompletionRequest,
+  ): Promise<LlmCompletionResult> {
+    return this.createMessage(request, request.prompt);
+  }
 
+  async completeMultimodal(request: LlmCompletionRequest): Promise<string> {
+    return (await this.completeMultimodalWithUsage(request)).text;
+  }
+
+  async completeMultimodalWithUsage(
+    request: LlmCompletionRequest,
+  ): Promise<LlmCompletionResult> {
     const images = request.images ?? [];
     if (images.length === 0) {
-      return this.complete(request);
+      return this.completeWithUsage(request);
     }
 
     const content = [
@@ -123,24 +117,49 @@ export class AnthropicProvider implements LlmProvider {
         },
       })),
     ];
+    return this.createMessage(request, content);
+  }
 
-    // El cliente está tipado por el SDK; el array `content` mixto es válido en la
-    // API real pero su unión exacta varía por versión → narrowing local.
+  private async createMessage(
+    request: LlmCompletionRequest,
+    content: unknown,
+  ): Promise<LlmCompletionResult> {
+    if (!this.client) {
+      throw new Error('Anthropic provider no está disponible');
+    }
+
     const client = this.client as unknown as {
       messages: {
-        create(req: unknown): Promise<{ content: Array<{ type: string }> }>;
+        create(req: unknown): Promise<AnthropicMessageResponse>;
       };
     };
     const response = await client.messages.create({
       model: request.options.model,
       max_tokens: request.options.maxTokens,
-      temperature: request.options.temperature,
+      ...this.samplingParams(request.options),
       system: request.system,
       messages: [{ role: 'user', content }],
     });
 
     const textBlock = response.content.find((b) => b.type === 'text');
-    return (textBlock as { type: 'text'; text: string } | undefined)?.text ?? '';
+    return {
+      text: textBlock?.text ?? '',
+      model: request.options.model,
+      usage: response.usage
+        ? {
+            inputTokens: response.usage.input_tokens ?? 0,
+            outputTokens: response.usage.output_tokens ?? 0,
+          }
+        : null,
+    };
+  }
+
+  private samplingParams(
+    options: LlmCompletionOptions,
+  ): { temperature: number } | Record<string, never> {
+    return options.temperature !== undefined
+      ? { temperature: options.temperature }
+      : {};
   }
 
   /**
@@ -180,7 +199,7 @@ export class AnthropicProvider implements LlmProvider {
     const stream = await client.messages.create({
       model: request.options.model,
       max_tokens: request.options.maxTokens,
-      temperature: request.options.temperature,
+      ...this.samplingParams(request.options),
       system: request.system,
       tools,
       messages,

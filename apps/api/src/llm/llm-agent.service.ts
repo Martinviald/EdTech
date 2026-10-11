@@ -129,7 +129,7 @@ export class LlmAgentService {
         options: {
           model: cfg.model,
           maxTokens: cfg.maxTokens,
-          temperature: cfg.temperature,
+          ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
         },
       })) {
         switch (event.type) {

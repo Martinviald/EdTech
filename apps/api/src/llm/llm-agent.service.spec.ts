@@ -41,7 +41,6 @@ function makeConfig(provider = 'anthropic'): LlmConfigService {
         provider: provider as 'anthropic',
         model: 'claude-test',
         maxTokens: 1024,
-        temperature: 0,
       }),
   } as unknown as LlmConfigService;
 }
@@ -55,6 +54,32 @@ async function collect(
 }
 
 describe('LlmAgentService', () => {
+  it('no envía temperatura al proveedor cuando la configuración no la define', async () => {
+    const requests: LlmAgentRequest[] = [];
+    const provider = makeProvider([], {
+      streamWithTools(req: LlmAgentRequest): AsyncIterable<LlmAgentEvent> {
+        requests.push(req);
+        return (async function* (): AsyncGenerator<LlmAgentEvent> {
+          yield { type: 'done', stopReason: 'end_turn' };
+        })();
+      },
+    });
+    const service = new LlmAgentService(makeConfig(), [provider]);
+
+    await collect(
+      service.runAgent({
+        system: 'eres un asistente',
+        messages: [{ role: 'user', content: [{ type: 'text', text: 'hola' }] }],
+        tools: [],
+        executeTool: jest.fn(),
+        maxSteps: 1,
+      }),
+    );
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.options).toEqual({ model: 'claude-test', maxTokens: 1024 });
+  });
+
   it('conduce el loop modelo→tool→modelo y cierra en prosa', async () => {
     const provider = makeProvider([
       // Vuelta 1: el modelo dice algo y pide una tool.

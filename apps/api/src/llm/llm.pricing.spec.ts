@@ -24,4 +24,25 @@ describe('estimateLlmCostUsd', () => {
       '0.000004200',
     );
   });
+
+  it.each([
+    ['claude-haiku-5-5', '0.600000'],
+    ['claude-haiku-4-5-20251001', '6.000000'],
+    ['claude-sonnet-5-5', '12.000000'],
+    ['claude-sonnet-5', '12.000000'],
+    ['claude-sonnet-4-6', '18.000000'],
+    ['claude-opus-5-5', '24.000000'],
+    ['claude-opus-5', '30.000000'],
+    ['claude-opus-4-8', '30.000000'],
+    ['claude-opus-4-7', '30.000000'],
+    ['claude-opus-4-6', '30.000000'],
+    ['gemini-3.1-flash-lite', '1.750000'],
+    ['gemini-3.5-flash-lite', '2.800000'],
+    ['gemini-3.8-flash', '4.500000'],
+    ['gemini-2.5-flash-lite', '0.500000'],
+  ])('aplica la tarifa vigente de %s (1M de entrada + 1M de salida = %s USD)', (model, cost) => {
+    expect(estimateLlmCostUsd(model, { inputTokens: 1_000_000, outputTokens: 1_000_000 })).toBe(
+      cost,
+    );
+  });
 });

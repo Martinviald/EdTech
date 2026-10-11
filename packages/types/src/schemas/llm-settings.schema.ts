@@ -110,12 +110,6 @@ export const LLM_MODEL_CATALOG: Record<LlmProviderId, readonly LlmModelOption[]>
   gemini: [
     { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', maxTokens: 8192, multimodal: true },
     { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', maxTokens: 32768, multimodal: true },
-    {
-      id: 'gemini-2.5-flash-lite',
-      label: 'Gemini 2.5 Flash-Lite',
-      maxTokens: 8192,
-      multimodal: true,
-    },
   ],
   anthropic: [
     {

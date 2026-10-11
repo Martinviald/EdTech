@@ -21,6 +21,13 @@ describe('LlmConfigService.resolve', () => {
     expect(cfg.provider).toBe('anthropic');
     expect(cfg.model).toBe('claude-sonnet-4-6');
     expect(cfg.maxTokens).toBe(16384); // derivado del catálogo
+    expect(cfg).not.toHaveProperty('temperature');
+  });
+
+  it('conserva temperatura 0 para Gemini', async () => {
+    const cfg = await new LlmConfigService(makeDb([])).resolve(null, 'remedial');
+
+    expect(cfg.provider).toBe('gemini');
     expect(cfg.temperature).toBe(0);
   });
 

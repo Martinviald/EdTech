@@ -3,11 +3,13 @@ import { LlmConfigService } from './llm.config';
 import { LLM_PROVIDERS } from './llm.constants';
 import type { LlmFeature } from '@soe/types';
 import type {
+  LlmCompletionOptions,
   LlmCompletionRequest,
   LlmCompletionResult,
   LlmImagePart,
   LlmProvider,
   LlmProviderName,
+  LlmRuntimeConfig,
 } from './llm.types';
 
 /**
@@ -69,11 +71,7 @@ export class LlmService {
     return provider.complete({
       system,
       prompt,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     });
   }
 
@@ -104,11 +102,7 @@ export class LlmService {
     const request: LlmCompletionRequest = {
       system,
       prompt,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     };
 
     if (provider.completeWithUsage) {
@@ -156,11 +150,7 @@ export class LlmService {
       system,
       prompt,
       images,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     };
 
     // Sin imágenes o sin soporte multimodal → solo texto (degradación elegante).
@@ -199,11 +189,7 @@ export class LlmService {
       system,
       prompt,
       images,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     };
 
     const hasImages = !!images && images.length > 0;
@@ -213,5 +199,13 @@ export class LlmService {
     }
     // Sin imágenes (o sin multimodal-con-uso): la ruta de solo-texto con uso.
     return this.completeWithUsage(system, prompt, orgId, feature);
+  }
+
+  private toCompletionOptions(cfg: LlmRuntimeConfig): LlmCompletionOptions {
+    return {
+      model: cfg.model,
+      maxTokens: cfg.maxTokens,
+      ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
+    };
   }
 }
