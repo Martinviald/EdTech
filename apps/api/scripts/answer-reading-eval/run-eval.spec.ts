@@ -63,14 +63,14 @@ describe('arnés answer-reading:eval', () => {
     expect(dataset.inputs.every((input) => input.image?.mimeType === 'image/png')).toBe(true);
   });
 
-  it('--dry-run corre sin APIs, escribe el informe y omite los formatos sin registro', async () => {
+  it('--dry-run corre sin APIs, escribe el informe y omite los formatos que el prompt no cubre', async () => {
     const result = await runEvalCommand(options());
     const { metrics } = result.report;
     expect(result.report.meta.dryRun).toBe(true);
     expect(metrics.samples).toEqual({
       total: 6,
       evaluated: 5,
-      skipped: { unsupported_format: 1 },
+      skipped: { prompt_unsupported_format: 1 },
     });
     expect(metrics.decisions).toBe(10);
     expect(metrics.autoAcceptedPrecision.rate).toBe(1);
