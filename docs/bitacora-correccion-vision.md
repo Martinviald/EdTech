@@ -277,3 +277,25 @@ registra.
   pisa un `ai_score` con `decisionId`).
 - `wip/cv-f10b`: layout de `word_list`/`short_text`/`multi_box`, burbujas de pareados, secuencias y
   puntaje docente, sin tocar `apps/api/src/answer-reading/`.
+
+### F11a integrada (`58034e42`…`303acb19`) y migración 0049
+
+- Transcripción de desarrollo en el pipeline (`free_text`/`math_work`), siempre `needs_review` con
+  `rubric_item`. `RubricGradingService` propone el nivel con `grade.rubric@1` solo si la org tiene
+  `rubricAssistEnabled`; escribe únicamente `ai_score` (nivel, confianza, justificación, citas) y el
+  puntaje sale de `rubricScoredStrategy`, nunca del número del modelo. `approveRubricLevel` aplica
+  una resolución humana nueva `kind: 'rubric'`.
+- Ajuste `rubricEngine: 'legacy' | 'rubric_grading'` (default legacy). `DevelopmentGradingService`
+  queda acotado a ítems de rúbrica, respeta `enabled`/`allowExternalVision` y nunca pisa un
+  `ai_score` con `decisionId` (hallazgo de la revisión de F7).
+- **Mezcla con F8-API:** `visionResponsesByField` recibe la lista de formatos y usa por defecto
+  todos los de visión (respuesta corta + texto + desarrollo); la rama "sin respuesta" de la
+  consolidación excluye explícitamente `rubric` (si no, la resolución nueva caía en la tabla de
+  ilegible/blanco/tachado y fallaba).
+- **0049:** rutas globales `format` para `word_list`, `short_text` y `multi_box`
+  (`transcribe.short-text@1`, Haiku + Gemini, misma política que la por defecto) y para `free_text`
+  y `math_work` (`transcribe.free-text@1`, un lector, `minReaders 1`, sin autoaceptación ni
+  auditoría). `hints: none` por la decisión C-1. Verificada en PG14 desechable.
+- El agente se detuvo antes de entregar su informe por el límite de uso: la prueba real autorizada
+  de `grade.rubric@1` (tope US$0,05) no quedó registrada; se cuenta el tope en el gasto.
+  Gasto acumulado: ≤ US$0,17.
