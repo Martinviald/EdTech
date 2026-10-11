@@ -1,16 +1,26 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { ANSWER_FORMATS, isSupportedFormat, requiresRubricGrading } from '@soe/answer-reading';
 import {
   aiGradingJobs,
   items,
+  organizations,
   printedSheets,
   responses,
   sheetScanMarks,
   sheetScans,
   withOrgContext,
 } from '@soe/db';
-import type { ItemContent, ItemType, LayoutSpec, LlmFeature, RubricLevel } from '@soe/types';
+import {
+  resolveAnswerReadingSettings,
+  resolveResponseFormat,
+  type ItemContent,
+  type ItemType,
+  type LayoutSpec,
+  type LlmFeature,
+  type RubricLevel,
+} from '@soe/types';
 import {
   buildPrintedLabelIndex,
   resolveScanLabel,
@@ -101,6 +111,14 @@ export class DevelopmentGradingService {
     cropFieldIds: string[],
   ): Promise<GradingWork[]> {
     return withOrgContext(this.db, params.orgId, async (tx) => {
+      const [org] = await tx
+        .select({ config: organizations.config })
+        .from(organizations)
+        .where(eq(organizations.id, params.orgId))
+        .limit(1);
+      const settings = resolveAnswerReadingSettings(org?.config ?? null);
+      if (!settings.enabled || !settings.allowExternalVision) return [];
+
       const cropRows = await tx
         .select({
           markId: sheetScanMarks.id,
@@ -176,6 +194,7 @@ export class DevelopmentGradingService {
           );
           continue;
         }
+        if (!this.isLegacyGradable(resolved.item as GradableItem)) continue;
         candidates.push({
           markId: crop.markId,
           cropFileId: crop.cropFileId,
@@ -193,6 +212,7 @@ export class DevelopmentGradingService {
           id: responses.id,
           studentId: responses.studentId,
           itemId: responses.itemId,
+          aiScore: responses.aiScore,
         })
         .from(responses)
         .where(
@@ -203,7 +223,9 @@ export class DevelopmentGradingService {
           ),
         );
       const responseIdByKey = new Map(
-        responseRows.map((row) => [`${row.studentId}:${row.itemId}`, row.id]),
+        responseRows
+          .filter((row) => typeof row.aiScore?.decisionId !== 'string')
+          .map((row) => [`${row.studentId}:${row.itemId}`, row.id]),
       );
 
       const responseIds = responseRows.map((row) => row.id);
@@ -326,7 +348,12 @@ export class DevelopmentGradingService {
             },
             updatedAt: new Date(),
           })
-          .where(eq(responses.id, work.responseId));
+          .where(
+            and(
+              eq(responses.id, work.responseId),
+              sql`(${responses.aiScore} ->> 'decisionId') is null`,
+            ),
+          );
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -339,6 +366,12 @@ export class DevelopmentGradingService {
         completedAt: new Date(),
       });
     }
+  }
+
+  private isLegacyGradable(item: GradableItem): boolean {
+    const format = resolveResponseFormat({ type: item.type, content: item.content });
+    if (format === null || requiresRubricGrading(format)) return true;
+    return !isSupportedFormat(format) || ANSWER_FORMATS[format.kind].readBy !== 'vision';
   }
 
   private async updateJob(
