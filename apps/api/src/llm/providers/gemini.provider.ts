@@ -530,6 +530,7 @@ export class GeminiProvider implements LlmProvider {
     let sawFunctionCall = false;
     // Último finishReason visto (Gemini lo entrega en el último chunk).
     let finishReason: string | undefined;
+    let lastUsage: GeminiStreamChunk['usageMetadata'];
 
     for await (const chunk of stream) {
       // Recorremos las parts del primer candidate: cada chunk trae texto
@@ -552,19 +553,22 @@ export class GeminiProvider implements LlmProvider {
         }
       }
 
-      // Uso de tokens: Gemini lo reporta acumulado en `usageMetadata`.
       if (chunk.usageMetadata) {
-        yield {
-          type: 'usage',
-          inputTokens: chunk.usageMetadata.promptTokenCount ?? 0,
-          outputTokens: chunk.usageMetadata.candidatesTokenCount ?? 0,
-        };
+        lastUsage = chunk.usageMetadata;
       }
 
       const reason = chunk.candidates?.[0]?.finishReason;
       if (reason) {
         finishReason = reason;
       }
+    }
+
+    if (lastUsage) {
+      yield {
+        type: 'usage',
+        inputTokens: lastUsage.promptTokenCount ?? 0,
+        outputTokens: (lastUsage.candidatesTokenCount ?? 0) + (lastUsage.thoughtsTokenCount ?? 0),
+      };
     }
 
     yield {

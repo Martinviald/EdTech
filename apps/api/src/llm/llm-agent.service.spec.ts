@@ -2,6 +2,7 @@ import { ServiceUnavailableException } from '@nestjs/common';
 import { LlmAgentService, type AgentStreamEvent } from './llm-agent.service';
 import type { LlmConfigService } from './llm.config';
 import { GeminiProvider } from './providers/gemini.provider';
+import { estimateLlmCostUsd } from './llm.pricing';
 import type {
   LlmAgentEvent,
   LlmAgentRequest,
@@ -144,6 +145,51 @@ describe('LlmAgentService con Gemini', () => {
         { role: 'assistant' },
       ],
     });
+  });
+});
+
+describe('LlmAgentService con Gemini: uso de tokens', () => {
+  it('cuenta una sola vez el uso acumulado de un turno con varios chunks, con razonamiento', async () => {
+    const { provider } = makeGeminiProvider([
+      [
+        {
+          candidates: [{ content: { parts: [{ text: 'El 8°B ' }] } }],
+          usageMetadata: { promptTokenCount: 1_000_000, candidatesTokenCount: 100_000 },
+        },
+        {
+          candidates: [{ content: { parts: [{ text: 'bajó.' }] } }],
+          usageMetadata: {
+            promptTokenCount: 1_000_000,
+            candidatesTokenCount: 300_000,
+            thoughtsTokenCount: 200_000,
+          },
+        },
+        {
+          candidates: [{ finishReason: 'STOP' }],
+          usageMetadata: {
+            promptTokenCount: 1_000_000,
+            candidatesTokenCount: 300_000,
+            thoughtsTokenCount: 200_000,
+          },
+        },
+      ],
+    ]);
+    const service = new LlmAgentService(makeGeminiConfig(), [provider]);
+
+    const events = await collect(
+      service.runAgent({
+        system: 's',
+        messages: [{ role: 'user', content: [{ type: 'text', text: 'x' }] }],
+        tools: [],
+        executeTool: jest.fn(),
+      }),
+    );
+
+    const final = events.find(
+      (e): e is Extract<AgentStreamEvent, { type: 'final' }> => e.type === 'final',
+    );
+    expect(final?.usage).toEqual({ inputTokens: 1_000_000, outputTokens: 500_000 });
+    expect(estimateLlmCostUsd('gemini-2.5-flash', final?.usage)).toBe('1.550000');
   });
 });
 
