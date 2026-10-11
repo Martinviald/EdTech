@@ -7,6 +7,7 @@ import {
   type ReaderSpec,
   type RenderedPrompt,
   type ResponseFormat,
+  type ResponseFormatKind,
 } from '@soe/types';
 import { formatLabelFor, isSupportedFormatKind, promptGuideFor } from '../formats/registry';
 import {
@@ -14,6 +15,8 @@ import {
   transcriptionJsonSchema,
   type TranscriptionJsonSchema,
 } from '../formats/transcription-json-schema';
+import { rubricGradeJsonSchema } from '../grading/rubric-grade-schema';
+import { GRADE_RUBRIC_V1 } from './grade-rubric';
 import { promptHash, promptRef, renderPrompt } from './render';
 import { TRANSCRIBE_SHORT_ANSWER_V1, TRANSCRIBE_SHORT_ANSWER_V2 } from './transcribe-short-answer';
 import { TRANSCRIBE_FREE_TEXT_V1, TRANSCRIBE_SHORT_TEXT_V1 } from './transcribe-text';
@@ -23,6 +26,7 @@ export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_SHORT_ANSWER_V2,
   TRANSCRIBE_SHORT_TEXT_V1,
   TRANSCRIBE_FREE_TEXT_V1,
+  GRADE_RUBRIC_V1,
 ].map((prompt) => promptVersionSchema.parse(prompt));
 
 const BY_REF = new Map(PROMPT_VERSIONS.map((prompt) => [promptRef(prompt), prompt]));
@@ -31,14 +35,22 @@ export function getPrompt(ref: string): PromptVersion | null {
   return BY_REF.get(ref) ?? null;
 }
 
-/** Hash de la plantilla sin renderizar (lo que congela `prompts.lock.json`). */
+/** ¿El prompt transcribe el formato? Una ruta con otro prompt no puede leer esa casilla. */
+export function isTranscriptionPromptFor(ref: string, kind: ResponseFormatKind): boolean {
+  const prompt = getPrompt(ref);
+  return prompt !== null && prompt.purpose === 'transcription' && prompt.formatKinds.includes(kind);
+}
+
+/**
+ * Hash de la plantilla sin renderizar (lo que congela `prompts.lock.json`), con el
+ * esquema base de su propósito: transcripción o calificación con rúbrica.
+ */
 export function templateHash(prompt: PromptVersion): string {
-  return promptHash(
-    prompt.system,
-    prompt.user,
-    prompt.outputSchemaId,
-    baseTranscriptionJsonSchema().schema,
-  );
+  const outputSchema =
+    prompt.purpose === 'rubric_grading'
+      ? rubricGradeJsonSchema().schema
+      : baseTranscriptionJsonSchema().schema;
+  return promptHash(prompt.system, prompt.user, prompt.outputSchemaId, outputSchema);
 }
 
 /**
@@ -115,6 +127,7 @@ export function promptLock(): Record<string, string> {
   for (const prompt of PROMPT_VERSIONS.filter((p) => p.status === 'published')) {
     const ref = promptRef(prompt);
     lock[ref] = templateHash(prompt);
+    if (prompt.purpose !== 'transcription') continue;
     for (const kind of prompt.formatKinds.filter(isSupportedFormatKind)) {
       const samples = PROMPT_LOCK_SAMPLE_FORMATS.filter((format) => format.kind === kind);
       lock[`${ref} × ${kind}`] = promptFormatLockHash(prompt, samples.map(formatLockParts));

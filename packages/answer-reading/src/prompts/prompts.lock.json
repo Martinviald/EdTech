@@ -17,5 +17,6 @@
   "transcribe.short-text@1 × multi_box": "a0045e81fe2bcbc4d39bb96196df9934beef40c373f3d1515287d20fe0c6465c",
   "transcribe.free-text@1": "4b9a26b3c3d1ba8b54e5c5487b4a0d2b6c6d5c675a8113aeeea14d17ba3b87ea",
   "transcribe.free-text@1 × free_text": "61de1fae22d029a262b6be14abfff140c6f35a60523ce6c1f4688b5d8f06c7a8",
-  "transcribe.free-text@1 × math_work": "5487df0878dba1d1333d8eb349c0c0ee89557ef9c9ab1dda4ee94abdef450f8e"
+  "transcribe.free-text@1 × math_work": "5487df0878dba1d1333d8eb349c0c0ee89557ef9c9ab1dda4ee94abdef450f8e",
+  "grade.rubric@1": "0c9432a7a68e3211a7d46043a2f4c2ebe853a70a2c492ff0e153d74e7d9dc4ff"
 }

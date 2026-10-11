@@ -24,7 +24,7 @@ import {
   transcriptionZodSchema,
   type TranscriptionJsonSchema,
 } from '../formats/transcription-json-schema';
-import { getPrompt, renderTranscriptionPrompt } from '../prompts/registry';
+import { isTranscriptionPromptFor, renderTranscriptionPrompt } from '../prompts/registry';
 import type { TranscriptionImage, TranscriptionRequest, TranscriptionResult } from '../transcriber';
 import {
   expectedScoringOutcome,
@@ -140,8 +140,7 @@ export function skipReasonFor(
     };
   }
   for (const reader of readers) {
-    const prompt = getPrompt(reader.promptRef);
-    if (!prompt || !prompt.formatKinds.includes(sample.format.kind)) {
+    if (!isTranscriptionPromptFor(reader.promptRef, sample.format.kind)) {
       return {
         reason: 'prompt_unsupported_format',
         detail: `El prompt ${reader.promptRef} no atiende el formato ${sample.format.kind}`,

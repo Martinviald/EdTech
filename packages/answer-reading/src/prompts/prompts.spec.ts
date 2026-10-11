@@ -38,7 +38,9 @@ describe('registro de prompts', () => {
   });
 
   it('el lock cubre cada par prompt × formato, con la guía, la etiqueta y las partes', () => {
-    const published = PROMPT_VERSIONS.filter((prompt) => prompt.status === 'published');
+    const published = PROMPT_VERSIONS.filter(
+      (prompt) => prompt.status === 'published' && prompt.purpose === 'transcription',
+    );
     const pairs = published.flatMap((prompt) =>
       prompt.formatKinds
         .filter((kind) => PROMPT_LOCK_SAMPLE_FORMATS.some((format) => format.kind === kind))
