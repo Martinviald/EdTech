@@ -3,7 +3,7 @@ description: >-
   Abre un port-forward SSM al RDS privado del stage a través del bastión (la NAT
   instance de SST) y deja DATABASE_ADMIN_URL listo en el entorno del job.
 
-# Extraído de deploy-backend.yml para que el backfill programado semanal use EXACTAMENTE
+# Extraído del deploy del backend (hoy deploy.yml) para que el backfill programado semanal use EXACTAMENTE
 # el mismo camino que el deploy, sin copiar 60 líneas de descubrimiento y espera.
 #
 # No usa `sst tunnel` (evita sudo/TUN en el runner). El proceso del port-forward queda en
