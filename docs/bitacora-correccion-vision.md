@@ -225,3 +225,30 @@ deshabilitados que dejan de usarse en ejecución.
   autoaceptado (≥ 99,5 %) y 17 fotos de un adulto no alcanzan para relajar un umbral.
 - **Aprendizaje C-3.** Hice un commit antes de ver los tests en verde (`245f227c`) y quedó un test
   rojo que corregí en `585fa68f`. Regla para el orquestador: leer la salida antes de commitear.
+
+### F7-B y F8-UI integradas; contrato de revisión fijado
+
+- F7-B (`72c9c3d8`…`cc7fc9b3` → rama): consolidación §10.2 al confirmar y tardía;
+  `recalculateAnswerSheetResults` (recálculo sin usuario JWT).
+- Contrato de la API de revisión (`3f21447c`, ajustado en `172d7572` tras la UI): `responseFormat` en
+  grupo y detalle, `reviewed`/`total` en el resumen, deshacer por lote, semántica de `accept` con y
+  sin `editedLiteral`. **`total`** = decisiones del alcance que fueron o van a revisión humana
+  (revisadas + pendientes), sin autoaceptadas ni en lectura.
+- F8-UI (`ccb5a0ed`…`2a7f1e43`, `d3088ef4` → rama): paso "Respuestas escritas" en el asistente del
+  lote y pestaña en el hub de la evaluación, cola por grupos en dos modos, teclado, `Kbd` compartido.
+
+**Revisión de F7 (independiente).** Sin fuga entre orgs ni datos del alumno al proveedor; SQL por
+lote verificado en PG14 con RLS. **Tres bloqueantes de nota incorrecta**, a corregir apenas
+terminen F8-API y F11a (tocan los mismos archivos):
+- B1: `CropReadingService.scoreOf` corrige sin el formato derivado y la consolidación sí → la
+  decisión dice "incorrecta" y la respuesta queda "correcta" (o se salta "alternativa que cambia el
+  resultado"). Arreglo: una sola función compartida que inyecta el formato derivado.
+- B2: el upsert de la ingesta deja que un `auto_blank` pise una respuesta con `human_score`.
+- B3: una fila pendiente re-ingerida sobre una respuesta revisada deja `is_correct`/`value` en null y
+  la saca del puntaje para siempre.
+Alta prioridad: la lectura tardía puede escribir en la respuesta de otra hoja (búsqueda por alumno
++ evaluación + ítem sin verificar la hoja); `DevelopmentGradingService` sigue procesando todos los
+recortes (pisa el `ai_score` de las respuestas cortas, paga doble e ignora `enabled` y
+`allowExternalVision`). Robustez: el job en memoria pierde la cola si la API se reinicia (sin 0,
+pero sin decisión); el costo de una llamada que choca en el único de `answer_readings` no se
+registra.
