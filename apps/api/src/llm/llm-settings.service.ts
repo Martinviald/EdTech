@@ -2,11 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { and, eq, isNull } from 'drizzle-orm';
 import { llmSettings } from '@soe/db';
 import {
-  findModelOption,
   LLM_FEATURE_DEFAULTS,
   LLM_FEATURE_LABELS,
   LLM_FEATURES,
-  LLM_MODEL_CATALOG,
   LLM_PROVIDER_LABELS,
   LLM_PROVIDERS,
   MULTIMODAL_FEATURES,
@@ -16,6 +14,7 @@ import {
   type UpdateLlmSettingDto,
 } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { LlmModelsService } from './llm-models.service';
 
 /**
  * Lectura/escritura de la configuración de modelos de IA por funcionalidad
@@ -27,22 +26,28 @@ import { InjectDb, type Database } from '../database/database.types';
  */
 @Injectable()
 export class LlmSettingsService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly models: LlmModelsService,
+  ) {}
 
   /**
-   * Config efectiva de las 5 funcionalidades + catálogo de modelos para el panel.
+   * Config efectiva de cada funcionalidad + modelos habilitados (`llm_models`) para el panel.
    * Para cada feature: fila global si existe (`source: 'global'`), si no el default
    * de código (`source: 'default'`).
    */
   async getSettings(): Promise<LlmSettingsResponse> {
-    const globals = await this.db
-      .select({
-        feature: llmSettings.feature,
-        provider: llmSettings.provider,
-        model: llmSettings.model,
-      })
-      .from(llmSettings)
-      .where(isNull(llmSettings.orgId));
+    const [globals, catalog] = await Promise.all([
+      this.db
+        .select({
+          feature: llmSettings.feature,
+          provider: llmSettings.provider,
+          model: llmSettings.model,
+        })
+        .from(llmSettings)
+        .where(isNull(llmSettings.orgId)),
+      this.models.listEnabledByProvider(),
+    ]);
 
     const byFeature = new Map(globals.map((r) => [r.feature, r]));
 
@@ -73,23 +78,24 @@ export class LlmSettingsService {
     return {
       features,
       providers: LLM_PROVIDERS.map((id) => ({ id, label: LLM_PROVIDER_LABELS[id] })),
-      catalog: LLM_MODEL_CATALOG as LlmSettingsResponse['catalog'],
+      catalog,
     };
   }
 
   /**
-   * Upsert de la fila GLOBAL de una funcionalidad. `dto` ya viene validado por Zod
-   * (modelo ∈ catálogo del proveedor); aquí se valida la regla extra de multimodal.
+   * Upsert de la fila GLOBAL de una funcionalidad. `dto` trae sólo la forma validada
+   * por Zod; aquí se valida contra `llm_models` que el modelo exista, esté habilitado
+   * y sea multimodal cuando la funcionalidad envía imágenes.
    */
   async upsertGlobal(
     feature: LlmFeature,
     dto: UpdateLlmSettingDto,
   ): Promise<LlmSettingsResponse> {
-    const option = findModelOption(dto.provider, dto.model);
-    if (!option) {
+    const model = await this.models.findSelectableModel(dto.provider, dto.model);
+    if (!model) {
       throw new BadRequestException('Modelo no disponible para el proveedor seleccionado');
     }
-    if (MULTIMODAL_FEATURES.includes(feature) && !option.multimodal) {
+    if (MULTIMODAL_FEATURES.includes(feature) && !model.supportsImages) {
       throw new BadRequestException(
         `La funcionalidad "${feature}" envía imágenes al modelo y requiere un modelo multimodal`,
       );

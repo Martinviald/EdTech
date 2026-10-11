@@ -1,4 +1,4 @@
-import { estimateLlmCostUsd } from './llm.pricing';
+import { estimateLlmCostUsd, setCatalogTariffs } from './llm.pricing';
 
 describe('estimateLlmCostUsd', () => {
   it('estima con 6 decimales por defecto', () => {
@@ -44,5 +44,64 @@ describe('estimateLlmCostUsd', () => {
     expect(estimateLlmCostUsd(model, { inputTokens: 1_000_000, outputTokens: 1_000_000 })).toBe(
       cost,
     );
+  });
+
+  describe('con el catálogo de la BDD cargado', () => {
+    beforeEach(() => {
+      setCatalogTariffs(
+        new Map([
+          [
+            'claude-haiku-5-5',
+            { inputUsdPerMtok: 0.2, outputUsdPerMtok: 1, cachedInputUsdPerMtok: 0.02 },
+          ],
+          [
+            'modelo-nuevo',
+            { inputUsdPerMtok: 1, outputUsdPerMtok: 2, cachedInputUsdPerMtok: null },
+          ],
+        ]),
+      );
+    });
+
+    afterEach(() => {
+      setCatalogTariffs(new Map());
+    });
+
+    it('la tarifa del catálogo gana sobre la tarifa de respaldo en código', () => {
+      expect(
+        estimateLlmCostUsd('claude-haiku-5-5', { inputTokens: 1_000_000, outputTokens: 1_000_000 }),
+      ).toBe('1.200000');
+    });
+
+    it('cobra un modelo que sólo existe en el catálogo', () => {
+      expect(
+        estimateLlmCostUsd('modelo-nuevo', { inputTokens: 1_000_000, outputTokens: 1_000_000 }),
+      ).toBe('3.000000');
+    });
+
+    it('cobra la entrada en caché con su tarifa propia', () => {
+      expect(
+        estimateLlmCostUsd('claude-haiku-5-5', {
+          inputTokens: 1_000_000,
+          outputTokens: 0,
+          cachedInputTokens: 500_000,
+        }),
+      ).toBe('0.110000');
+    });
+
+    it('sin tarifa de caché cobra la entrada en caché como entrada normal', () => {
+      expect(
+        estimateLlmCostUsd('modelo-nuevo', {
+          inputTokens: 1_000_000,
+          outputTokens: 0,
+          cachedInputTokens: 500_000,
+        }),
+      ).toBe('1.000000');
+    });
+
+    it('cae a la tarifa en código si el modelo no está en el catálogo', () => {
+      expect(
+        estimateLlmCostUsd('gemini-2.5-flash', { inputTokens: 1_000_000, outputTokens: 1_000_000 }),
+      ).toBe('2.800000');
+    });
   });
 });

@@ -11,9 +11,8 @@ import type { LlmUsage } from './llm.types';
  * así que las variantes más específicas (`-lite`, `-pro`) van ANTES que el prefijo
  * más corto que las contendría (`gemini-2.5-flash` contiene a `gemini-2.5-flash-lite`).
  *
- * Fuente única de verdad de costos LLM: la usan el asistente conversacional
- * (`assistant.service`), el informe IA (`ai-analysis.runner`) y los generadores
- * remediales (`remedial/generators/*`). No duplicar tarifas fuera de aquí (DRY).
+ * Respaldo de las tarifas del catálogo `llm_models` (BDD): sólo se usa si el
+ * modelo no está en la tabla, para no perder el costo histórico de modelos viejos.
  */
 const MODEL_PRICING_PER_MTOK: ReadonlyArray<{
   prefix: string;
@@ -48,25 +47,47 @@ const MODEL_PRICING_PER_MTOK: ReadonlyArray<{
   { prefix: 'jev-', inputUsd: 0.042, outputUsd: 0 },
 ];
 
-/**
- * Estima el costo en USD de una llamada al LLM a partir del modelo y el uso de
- * tokens. Devuelve un string decimal (6 decimales) listo para la columna
- * `cost_usd` (`decimal(10,6)`), o `null` si el modelo es desconocido o no hay uso
- * de tokens: NO inventamos una tarifa — el costo queda sin registrar antes que
- * guardar un número falso.
- */
+export interface LlmModelTariff {
+  inputUsdPerMtok: number;
+  outputUsdPerMtok: number;
+  cachedInputUsdPerMtok: number | null;
+}
+
+let catalogTariffs: ReadonlyMap<string, LlmModelTariff> = new Map();
+
+export function setCatalogTariffs(tariffs: ReadonlyMap<string, LlmModelTariff>): void {
+  catalogTariffs = tariffs;
+}
+
+function resolveTariff(model: string): LlmModelTariff | null {
+  const fromCatalog = catalogTariffs.get(model);
+  if (fromCatalog) return fromCatalog;
+  const fallback = MODEL_PRICING_PER_MTOK.find((t) => model.startsWith(t.prefix));
+  if (!fallback) return null;
+  return {
+    inputUsdPerMtok: fallback.inputUsd,
+    outputUsdPerMtok: fallback.outputUsd,
+    cachedInputUsdPerMtok: null,
+  };
+}
+
 export function estimateLlmCostUsd(
   model: string | null | undefined,
   usage: LlmUsage | null | undefined,
   decimals = 6,
 ): string | null {
   if (!model || !usage) return null;
-  const tariff = MODEL_PRICING_PER_MTOK.find((t) => model.startsWith(t.prefix));
+  const tariff = resolveTariff(model);
   if (!tariff) return null;
 
+  const cachedInputTokens = Math.min(usage.cachedInputTokens ?? 0, usage.inputTokens);
+  const freshInputTokens = usage.inputTokens - cachedInputTokens;
+  const cachedInputUsdPerMtok = tariff.cachedInputUsdPerMtok ?? tariff.inputUsdPerMtok;
+
   const cost =
-    (usage.inputTokens / 1_000_000) * tariff.inputUsd +
-    (usage.outputTokens / 1_000_000) * tariff.outputUsd;
+    (freshInputTokens / 1_000_000) * tariff.inputUsdPerMtok +
+    (cachedInputTokens / 1_000_000) * cachedInputUsdPerMtok +
+    (usage.outputTokens / 1_000_000) * tariff.outputUsdPerMtok;
 
   return cost.toFixed(decimals);
 }

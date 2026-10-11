@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { llmSettings } from '@soe/db';
-import {
-  LLM_FEATURE_DEFAULTS,
-  resolveModelMaxTokens,
-  type LlmFeature,
-  type LlmModelChoice,
-} from '@soe/types';
+import { LLM_FEATURE_DEFAULTS, type LlmFeature, type LlmModelChoice } from '@soe/types';
 import { InjectDb, type Database } from '../database/database.types';
+import { LlmModelsService } from './llm-models.service';
 import { ACTIVE_LLM_PROVIDER, LLM_PROVIDER_DEFAULTS } from './llm.constants';
 import type { LlmRuntimeConfig } from './llm.types';
 
@@ -21,23 +17,30 @@ import type { LlmRuntimeConfig } from './llm.types';
  *     son visibles dentro de `withOrgContext`; las globales se leen sin contexto.)
  *  2. Fila global (`org_id IS NULL`).
  *  3. Default de código `LLM_FEATURE_DEFAULTS[feature]` (fallback).
- * El `maxTokens` se deriva del catálogo de modelos (`resolveModelMaxTokens`); el
+ * El `maxTokens` se deriva del catálogo `llm_models` (`LlmModelsService`); el
  * panel sólo configura proveedor + modelo.
  */
 @Injectable()
 export class LlmConfigService {
-  constructor(@InjectDb() private readonly db: Database) {}
+  constructor(
+    @InjectDb() private readonly db: Database,
+    private readonly models: LlmModelsService,
+  ) {}
 
   async resolve(
     orgId: string | null | undefined,
     feature: LlmFeature,
   ): Promise<LlmRuntimeConfig> {
     const choice = await this.resolveChoice(orgId, feature);
+    return this.forChoice(choice);
+  }
+
+  async forChoice(choice: LlmModelChoice): Promise<LlmRuntimeConfig> {
     const { temperature } = LLM_PROVIDER_DEFAULTS[choice.provider];
     return {
       provider: choice.provider,
       model: choice.model,
-      maxTokens: resolveModelMaxTokens(choice.provider, choice.model),
+      maxTokens: await this.models.resolveMaxTokens(choice.provider, choice.model),
       ...(temperature !== undefined ? { temperature } : {}),
     };
   }

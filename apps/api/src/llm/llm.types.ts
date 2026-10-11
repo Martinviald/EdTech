@@ -1,3 +1,5 @@
+import type { LlmModelChoice } from '@soe/types';
+
 /**
  * Contratos del módulo LLM provider-agnóstico.
  *
@@ -28,6 +30,7 @@ export interface LlmCompletionOptions {
 export interface LlmUsage {
   inputTokens: number;
   outputTokens: number;
+  cachedInputTokens?: number;
 }
 
 /**
@@ -106,6 +109,62 @@ export interface LlmProvider {
    * conversacional requiere tool-use nativo). Ver `LlmAgentRequest`/`LlmAgentEvent`.
    */
   streamWithTools?(request: LlmAgentRequest): AsyncIterable<LlmAgentEvent>;
+  completeStructured?(request: LlmStructuredRequest): Promise<LlmStructuredResult>;
+}
+
+export type LlmReasoningLevel = 'off' | 'low' | 'medium';
+
+export type LlmMediaResolution = 'low' | 'medium' | 'high';
+
+export interface LlmStructuredOptions {
+  model: string;
+  maxTokens: number;
+  reasoning: LlmReasoningLevel;
+  mediaResolution?: LlmMediaResolution;
+  timeoutMs: number;
+}
+
+export interface LlmStructuredRequest {
+  system: string;
+  prompt: string;
+  images: LlmImagePart[];
+  jsonSchema: Record<string, unknown>;
+  schemaName: string;
+  propertyOrder: string[];
+  options: LlmStructuredOptions;
+}
+
+export interface LlmStructuredCall {
+  system: string;
+  prompt: string;
+  images: LlmImagePart[];
+  jsonSchema: Record<string, unknown>;
+  schemaName: string;
+  propertyOrder: string[];
+  reasoning?: LlmReasoningLevel;
+  mediaResolution?: LlmMediaResolution;
+  maxTokens?: number;
+  timeoutMs?: number;
+  target?: LlmModelChoice;
+}
+
+export type LlmStructuredFinishReason = 'stop' | 'max_tokens' | 'refusal' | 'safety' | 'other';
+
+export interface LlmStructuredUsage {
+  inputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  cachedInputTokens: number;
+  imageTokens: number | null;
+}
+
+export interface LlmStructuredResult {
+  data: unknown;
+  rawText: string;
+  model: string;
+  finishReason: LlmStructuredFinishReason;
+  usage: LlmStructuredUsage | null;
+  providerRequestId: string | null;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
