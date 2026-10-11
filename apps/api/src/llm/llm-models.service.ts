@@ -32,8 +32,10 @@ interface CatalogSnapshot {
 @Injectable()
 export class LlmModelsService implements OnModuleInit {
   private snapshot: CatalogSnapshot | null = null;
+  private lastValid: CatalogSnapshot | null = null;
   private pending: Promise<CatalogSnapshot> | null = null;
   private generation = 0;
+  private degradedReported = false;
 
   constructor(@InjectDb() private readonly db: Database) {}
 
@@ -165,7 +167,27 @@ export class LlmModelsService implements OnModuleInit {
     if (this.snapshot && Date.now() - this.snapshot.loadedAt < CACHE_TTL_MS) {
       return this.snapshot;
     }
-    return this.loadSnapshot();
+    try {
+      const snapshot = await this.loadSnapshot();
+      this.degradedReported = false;
+      return snapshot;
+    } catch (error) {
+      this.reportDegradedOnce(error);
+      return this.lastValid ?? this.emptySnapshot();
+    }
+  }
+
+  private reportDegradedOnce(error: unknown): void {
+    if (this.degradedReported) return;
+    this.degradedReported = true;
+    reportServerError(error, {
+      scope: 'LlmModelsService.freshSnapshot',
+      fallback: this.lastValid ? 'last_valid_snapshot' : 'code_defaults',
+    });
+  }
+
+  private emptySnapshot(): CatalogSnapshot {
+    return { loadedAt: 0, rows: [], byKey: new Map() };
   }
 
   private loadSnapshot(): Promise<CatalogSnapshot> {
@@ -190,6 +212,7 @@ export class LlmModelsService implements OnModuleInit {
     if (generation === this.generation) {
       setCatalogTariffs(tariffs);
       this.snapshot = snapshot;
+      this.lastValid = snapshot;
     }
     return snapshot;
   }

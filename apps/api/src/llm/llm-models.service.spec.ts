@@ -3,6 +3,9 @@ import type { LlmModelRow } from '@soe/db';
 import { LlmModelsService } from './llm-models.service';
 import { estimateLlmCostUsd, setCatalogTariffs } from './llm.pricing';
 import type { Database } from '../database/database.types';
+import { reportServerError } from '../common/observability/report-error';
+
+jest.mock('../common/observability/report-error', () => ({ reportServerError: jest.fn() }));
 
 function makeRow(overrides: Partial<LlmModelRow> = {}): LlmModelRow {
   return {
@@ -48,6 +51,57 @@ function makeDb(rows: LlmModelRow[], options: { insertError?: unknown } = {}) {
   const db = { select, insert, update } as unknown as Database;
   return { db, select, values, set };
 }
+
+function makeFlakyDb(rows: LlmModelRow[], failFromCall: number) {
+  let calls = 0;
+  const select = jest.fn(() => ({
+    from: () => ({
+      orderBy: () => {
+        calls += 1;
+        return calls >= failFromCall
+          ? Promise.reject(new Error('BDD caída'))
+          : Promise.resolve(rows);
+      },
+    }),
+  }));
+  return { db: { select } as unknown as Database, select };
+}
+
+describe('LlmModelsService con la BDD caída', () => {
+  afterEach(() => {
+    setCatalogTariffs(new Map());
+    jest.restoreAllMocks();
+    jest.mocked(reportServerError).mockClear();
+  });
+
+  it('sigue usando el último catálogo válido si el refresco falla tras vencer el TTL', async () => {
+    const now = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    const { db } = makeFlakyDb([makeRow({ maxOutputTokens: 12345 })], 2);
+    const service = new LlmModelsService(db);
+    await service.onModuleInit();
+
+    now.mockReturnValue(1_000_000 + 61_000);
+    await expect(service.findModel('anthropic', 'claude-haiku-5-5')).resolves.toMatchObject({
+      maxOutputTokens: 12345,
+    });
+    await expect(service.resolveMaxTokens('anthropic', 'claude-haiku-5-5')).resolves.toBe(12345);
+
+    expect(reportServerError).toHaveBeenCalledTimes(1);
+  });
+
+  it('usa el respaldo en código si nunca hubo catálogo y la BDD falla', async () => {
+    const { db } = makeFlakyDb([], 1);
+    const service = new LlmModelsService(db);
+
+    await expect(service.resolveMaxTokens('anthropic', 'claude-haiku-5-5')).resolves.toBe(4096);
+    await expect(service.findSelectableModel('anthropic', 'claude-haiku-5-5')).resolves.toBe(
+      undefined,
+    );
+    expect(
+      estimateLlmCostUsd('claude-haiku-5-5', { inputTokens: 1_000_000, outputTokens: 1_000_000 }),
+    ).toBe('0.600000');
+  });
+});
 
 describe('LlmModelsService', () => {
   afterEach(() => {
