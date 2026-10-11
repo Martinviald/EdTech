@@ -9,12 +9,20 @@ import { visionProviderSchema } from './reader.schema';
 export const DATASET_CONSENT = ['none', 'org_internal', 'platform_eval'] as const;
 export type DatasetConsent = (typeof DATASET_CONSENT)[number];
 
+// Motor que propone el puntaje de las respuestas de desarrollo (F11):
+// 'legacy'         → DevelopmentGradingService: puntaje desde la imagen al confirmar.
+// 'rubric_grading' → RubricGradingService: nivel de rúbrica sobre la transcripción,
+//                    solo con rubricAssistEnabled. El docente siempre aprueba.
+export const RUBRIC_ENGINES = ['legacy', 'rubric_grading'] as const;
+export type RubricEngine = (typeof RUBRIC_ENGINES)[number];
+
 export const orgAnswerReadingSettingsSchema = z
   .object({
     enabled: z.boolean().optional(),
     allowExternalVision: z.boolean().optional(),
     allowedProviders: z.array(visionProviderSchema).optional(),
     rubricAssistEnabled: z.boolean().optional(),
+    rubricEngine: z.enum(RUBRIC_ENGINES).optional(),
     datasetConsent: z.enum(DATASET_CONSENT).optional(),
     reviewAll: z.boolean().optional(),
     monthlyBudgetUsd: z.number().nonnegative().optional(),
@@ -28,6 +36,7 @@ export const DEFAULT_ORG_ANSWER_READING_SETTINGS: Required<
   enabled: true,
   allowExternalVision: true,
   rubricAssistEnabled: false,
+  rubricEngine: 'legacy',
   datasetConsent: 'org_internal',
   reviewAll: false,
 };

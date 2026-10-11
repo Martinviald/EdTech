@@ -62,6 +62,7 @@ describe('resolveAnswerReadingSettings', () => {
         enabled: true,
         allowExternalVision: true,
         rubricAssistEnabled: false,
+        rubricEngine: 'legacy',
         datasetConsent: 'org_internal',
         reviewAll: false,
       });
@@ -76,6 +77,17 @@ describe('resolveAnswerReadingSettings', () => {
     expect(resolved.allowedProviders).toEqual(['anthropic']);
     expect(resolved.enabled).toBe(true);
     expect(resolved.datasetConsent).toBe('org_internal');
+  });
+
+  it('el motor de calificación de desarrollo es legacy salvo que la org elija el nuevo', () => {
+    expect(resolveAnswerReadingSettings({}).rubricEngine).toBe('legacy');
+    expect(
+      resolveAnswerReadingSettings({ answerReading: { rubricEngine: 'rubric_grading' } })
+        .rubricEngine,
+    ).toBe('rubric_grading');
+    expect(
+      resolveAnswerReadingSettings({ answerReading: { rubricEngine: 'otro' } }).rubricEngine,
+    ).toBe('legacy');
   });
 
   it('un answerReading corrupto no envía imágenes a terceros', () => {
