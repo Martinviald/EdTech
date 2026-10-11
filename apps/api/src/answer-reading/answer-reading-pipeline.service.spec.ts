@@ -1043,6 +1043,80 @@ describe('AnswerReadingPipelineService.scheduleForScan', () => {
   });
 });
 
+describe('AnswerReadingPipelineService.resumeStalledRuns', () => {
+  function seedRunningRun(memory: InMemoryDatabase): AnswerReadingRun {
+    memory.seed(answerReadingRuns, [
+      {
+        orgId: ORG_ID,
+        batchId: BATCH_ID,
+        assessmentId: ASSESSMENT_ID,
+        trigger: 'scan_processed',
+        status: 'running',
+        cropsTotal: 1,
+      },
+    ]);
+    return runOf(memory);
+  }
+
+  it('al arrancar vuelve a encolar las hojas con recortes sin decisión de una corrida running', async () => {
+    const { memory, pipeline, dispatcher } = setup({ readings: agree });
+    seedRunningRun(memory);
+
+    const scheduled = await pipeline.resumeStalledRuns();
+    await pipeline.resumeStalledRuns();
+
+    expect(scheduled).toBe(1);
+    expect(dispatcher.jobs).toHaveLength(1);
+    await dispatcher.runAll();
+    expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted' });
+    expect(runOf(memory)).toMatchObject({ status: 'completed' });
+  });
+
+  it('una corrida running sin recortes pendientes se cierra sin encolar nada', async () => {
+    const { memory, pipeline, dispatcher, runScan } = setup({ readings: agree });
+    await runScan();
+    const run = runOf(memory);
+    run.status = 'running';
+
+    const scheduled = await pipeline.resumeStalledRuns();
+
+    expect(scheduled).toBe(0);
+    expect(dispatcher.jobs).toHaveLength(0);
+    expect(runOf(memory)).toMatchObject({ status: 'completed' });
+  });
+
+  it('no encola corridas terminadas', async () => {
+    const { memory, pipeline, dispatcher } = setup({ readings: agree });
+    seedRunningRun(memory).status = 'failed';
+
+    await expect(pipeline.resumeStalledRuns()).resolves.toBe(0);
+    expect(dispatcher.jobs).toHaveLength(0);
+  });
+
+  it('un error al reanudar se reporta y no rompe el arranque', async () => {
+    const failing = new AnswerReadingPipelineService(
+      {
+        select: () => {
+          throw new Error('sin conexión');
+        },
+      } as never,
+      new FakeDispatcher(),
+      null as never,
+      null as never,
+      null as never,
+      null as never,
+      null as never,
+      null as never,
+      DEFAULT_ANSWER_READING_OPTIONS,
+    );
+
+    await expect(failing.resumeStalledRuns()).resolves.toBe(0);
+    expect(reportSpy).toHaveBeenCalledWith(expect.any(Error), {
+      stage: 'resume_answer_reading',
+    });
+  });
+});
+
 describe('AnswerReadingPipelineService — consulta para la confirmación', () => {
   it('devuelve la decisión vigente por marca', async () => {
     const { pipeline, runScan } = setup({ readings: agree });

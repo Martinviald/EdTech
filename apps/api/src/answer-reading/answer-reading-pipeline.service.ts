@@ -1,6 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
+import { and, desc, eq, inArray, isNotNull, isNull, ne } from 'drizzle-orm';
 import {
+  answerReadingDecisions,
   answerReadingRuns,
   grades,
   instruments,
@@ -104,7 +105,7 @@ const RUN_FAILURE_MESSAGE =
   'La lectura de las respuestas escritas se interrumpió por un error inesperado. Las respuestas que no se alcanzaron a leer quedan pendientes de revisión.';
 
 @Injectable()
-export class AnswerReadingPipelineService {
+export class AnswerReadingPipelineService implements OnModuleInit {
   private readonly pendingScansByBatch = new Map<string, { orgId: string; scanIds: string[] }>();
 
   constructor(
@@ -119,11 +120,30 @@ export class AnswerReadingPipelineService {
     @Inject(ANSWER_READING_OPTIONS) private readonly options: AnswerReadingOptions,
   ) {}
 
+  onModuleInit(): void {
+    void this.resumeStalledRuns();
+  }
+
+  async resumeStalledRuns(): Promise<number> {
+    try {
+      const orgs = await this.db
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(isNull(organizations.deletedAt));
+      let scheduled = 0;
+      for (const org of orgs) scheduled += await this.resumeOrgRuns(org.id);
+      return scheduled;
+    } catch (error) {
+      reportServerError(error, { stage: 'resume_answer_reading' });
+      return 0;
+    }
+  }
+
   scheduleForScan(params: ScheduleScanReadingParams): void {
     try {
       const pending = this.pendingScansByBatch.get(params.batchId);
       if (pending) {
-        pending.scanIds.push(params.scanId);
+        if (!pending.scanIds.includes(params.scanId)) pending.scanIds.push(params.scanId);
         return;
       }
       this.pendingScansByBatch.set(params.batchId, {
@@ -185,6 +205,163 @@ export class AnswerReadingPipelineService {
       }
       if (runId !== null) await this.failRun(orgId, runId);
     }
+  }
+
+  private async resumeOrgRuns(orgId: string): Promise<number> {
+    try {
+      const { pending, finishedRunIds } = await withOrgContext(this.db, orgId, async (tx) => {
+        const runs = await tx
+          .select({ id: answerReadingRuns.id, batchId: answerReadingRuns.batchId })
+          .from(answerReadingRuns)
+          .where(
+            and(
+              eq(answerReadingRuns.orgId, orgId),
+              eq(answerReadingRuns.status, 'running'),
+              eq(answerReadingRuns.trigger, 'scan_processed'),
+              isNotNull(answerReadingRuns.batchId),
+            ),
+          );
+        if (runs.length === 0) return { pending: new Map<string, string[]>(), finishedRunIds: [] };
+        const pendingByBatch = await this.undecidedScansByBatch(
+          tx,
+          orgId,
+          runs.map((run) => run.batchId as string),
+        );
+        return {
+          pending: pendingByBatch,
+          finishedRunIds: runs
+            .filter((run) => !pendingByBatch.has(run.batchId as string))
+            .map((run) => run.id),
+        };
+      });
+      await this.completeRuns(orgId, finishedRunIds);
+      let scheduled = 0;
+      for (const [batchId, scanIds] of pending) {
+        for (const scanId of scanIds) {
+          this.scheduleForScan({ orgId, batchId, scanId });
+          scheduled += 1;
+        }
+      }
+      return scheduled;
+    } catch (error) {
+      reportServerError(error, { orgId, stage: 'resume_answer_reading' });
+      return 0;
+    }
+  }
+
+  private async undecidedScansByBatch(
+    tx: Database,
+    orgId: string,
+    batchIds: readonly string[],
+  ): Promise<Map<string, string[]>> {
+    const batches = await tx
+      .select({ id: sheetScanBatches.id, printRunId: sheetScanBatches.printRunId })
+      .from(sheetScanBatches)
+      .where(and(eq(sheetScanBatches.orgId, orgId), inArray(sheetScanBatches.id, [...batchIds])));
+    if (batches.length === 0) return new Map();
+    const printRuns = await tx
+      .select({ id: sheetPrintRuns.id, layoutId: sheetPrintRuns.layoutId })
+      .from(sheetPrintRuns)
+      .where(
+        and(
+          eq(sheetPrintRuns.orgId, orgId),
+          inArray(sheetPrintRuns.id, [...new Set(batches.map((batch) => batch.printRunId))]),
+        ),
+      );
+    const layouts =
+      printRuns.length === 0
+        ? []
+        : await tx
+            .select({ id: sheetLayouts.id, spec: sheetLayouts.spec })
+            .from(sheetLayouts)
+            .where(inArray(sheetLayouts.id, [...new Set(printRuns.map((run) => run.layoutId))]));
+    const visionFieldsByLayout = new Map(
+      layouts.map((layout) => [
+        layout.id,
+        new Set(visionResponsesByField(layout.spec.fields).keys()),
+      ]),
+    );
+    const layoutByPrintRun = new Map(printRuns.map((run) => [run.id, run.layoutId]));
+    const visionFieldsByBatch = new Map<string, ReadonlySet<string>>();
+    for (const batch of batches) {
+      const layoutId = layoutByPrintRun.get(batch.printRunId);
+      const fields = layoutId === undefined ? undefined : visionFieldsByLayout.get(layoutId);
+      if (fields && fields.size > 0) visionFieldsByBatch.set(batch.id, fields);
+    }
+    if (visionFieldsByBatch.size === 0) return new Map();
+    const scans = await tx
+      .select({ id: sheetScans.id, batchId: sheetScans.batchId })
+      .from(sheetScans)
+      .where(
+        and(
+          eq(sheetScans.orgId, orgId),
+          inArray(sheetScans.batchId, [...visionFieldsByBatch.keys()]),
+          ne(sheetScans.state, 'superseded'),
+        ),
+      );
+    if (scans.length === 0) return new Map();
+    const batchByScan = new Map(scans.map((scan) => [scan.id, scan.batchId]));
+    const marks = await tx
+      .select({
+        id: sheetScanMarks.id,
+        scanId: sheetScanMarks.scanId,
+        fieldId: sheetScanMarks.fieldId,
+      })
+      .from(sheetScanMarks)
+      .where(
+        and(
+          eq(sheetScanMarks.orgId, orgId),
+          inArray(sheetScanMarks.scanId, [...batchByScan.keys()]),
+        ),
+      );
+    const visionMarks = marks.filter((mark) => {
+      const batchId = batchByScan.get(mark.scanId);
+      return batchId !== undefined && visionFieldsByBatch.get(batchId)?.has(mark.fieldId) === true;
+    });
+    if (visionMarks.length === 0) return new Map();
+    const decided = await tx
+      .select({ markId: answerReadingDecisions.markId })
+      .from(answerReadingDecisions)
+      .where(
+        and(
+          eq(answerReadingDecisions.orgId, orgId),
+          inArray(
+            answerReadingDecisions.markId,
+            visionMarks.map((mark) => mark.id),
+          ),
+          isNull(answerReadingDecisions.supersededById),
+        ),
+      );
+    const decidedMarks = new Set(decided.map((row) => row.markId));
+    const pending = new Map<string, Set<string>>();
+    for (const mark of visionMarks) {
+      if (decidedMarks.has(mark.id)) continue;
+      const batchId = batchByScan.get(mark.scanId) as string;
+      let scanIds = pending.get(batchId);
+      if (!scanIds) {
+        scanIds = new Set();
+        pending.set(batchId, scanIds);
+      }
+      scanIds.add(mark.scanId);
+    }
+    return new Map([...pending].map(([batchId, scanIds]) => [batchId, [...scanIds]]));
+  }
+
+  private async completeRuns(orgId: string, runIds: readonly string[]): Promise<void> {
+    if (runIds.length === 0) return;
+    const now = new Date();
+    await withOrgContext(this.db, orgId, (tx) =>
+      tx
+        .update(answerReadingRuns)
+        .set({ status: 'completed', completedAt: now, updatedAt: now })
+        .where(
+          and(
+            eq(answerReadingRuns.orgId, orgId),
+            inArray(answerReadingRuns.id, [...runIds]),
+            eq(answerReadingRuns.status, 'running'),
+          ),
+        ),
+    );
   }
 
   private async drainBatch(batchId: string): Promise<void> {
