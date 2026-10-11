@@ -1,4 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
+import { uuidCsvSchema } from '@soe/types';
 import type { AnalyticsToolsFacade } from '../../mcp/core/analytics-tools.facade';
 import type { ToolDescriptor } from '../../mcp/core/analytics-tool';
 import type { McpPrincipalResolver } from '../../mcp/auth/mcp-principal.resolver';
@@ -21,7 +22,12 @@ const LIST_ASSESSMENTS: ToolDescriptor = {
   piiLevel: 'aggregate',
 };
 
-const jwtUser = { userId: 'u1', orgId: 'org-1', roles: ['teacher'], isPlatformAdmin: false } as never;
+const jwtUser = {
+  userId: 'u1',
+  orgId: 'org-1',
+  roles: ['teacher'],
+  isPlatformAdmin: false,
+} as never;
 
 function makeBridge(descriptors: ToolDescriptor[], execute = jest.fn()) {
   const facade = {
@@ -45,6 +51,20 @@ describe('AnalyticsAssistantBridge', () => {
     expect(tools).toHaveLength(1);
     expect(tools[0].definition.name).toBe('get_instrument_blueprint');
     expect(tools[0].definition.inputSchema).toMatchObject({ type: 'object' });
+  });
+
+  it('describe los filtros CSV con la forma ya parseada: un array tipado, sin allOf ni not', async () => {
+    const { bridge } = makeBridge([
+      { ...LIST_ASSESSMENTS, inputSchema: z.object({ subjectId: uuidCsvSchema }) },
+    ]);
+
+    const [tool] = await bridge.assistantTools(jwtUser, new Set());
+
+    expect(tool.definition.inputSchema).toMatchObject({
+      properties: {
+        subjectId: { type: 'array', items: { type: 'string', format: 'uuid' } },
+      },
+    });
   });
 
   it('omite las tools cuyo nombre ya existe en el asistente (collision-safe)', async () => {

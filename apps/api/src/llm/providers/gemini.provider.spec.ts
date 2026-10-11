@@ -193,6 +193,53 @@ describe('GeminiProvider.streamWithTools', () => {
       required: [],
     });
   });
+
+  it('quita $schema y additionalProperties en todos los niveles sin tocar una propiedad con ese nombre', async () => {
+    const provider = new GeminiProvider();
+    const fake = makeFakeClient([{ candidates: [{ finishReason: 'STOP' }] }]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (provider as any).client = fake;
+
+    const request: LlmAgentRequest = {
+      system: 's',
+      messages: [{ role: 'user', content: [{ type: 'text', text: 'hola' }] }],
+      tools: [
+        {
+          name: 'list_assessments',
+          description: 'con esquema de zod-to-json-schema',
+          inputSchema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              subjectId: { type: 'array', items: { type: 'string', format: 'uuid' } },
+              q: {
+                anyOf: [
+                  { type: 'string' },
+                  { type: 'object', additionalProperties: false, properties: {} },
+                ],
+              },
+              additionalProperties: { type: 'boolean' },
+            },
+          },
+        },
+      ],
+      options: { model: 'gemini-2.5-flash', maxTokens: 1024, temperature: 0 },
+    };
+
+    await collect(provider.streamWithTools(request));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callArg = (fake.models.generateContentStream as jest.Mock).mock.calls[0][0] as any;
+    expect(callArg.config.tools[0].functionDeclarations[0].parameters).toEqual({
+      type: 'object',
+      properties: {
+        subjectId: { type: 'array', items: { type: 'string', format: 'uuid' } },
+        q: { anyOf: [{ type: 'string' }, { type: 'object', properties: {} }] },
+        additionalProperties: { type: 'boolean' },
+      },
+    });
+  });
 });
 
 describe('GeminiProvider.complete', () => {
