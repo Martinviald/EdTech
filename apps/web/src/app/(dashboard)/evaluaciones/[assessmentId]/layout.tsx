@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { BarChart3, BookOpen, FileText, LayoutDashboard, ListChecks, Sparkles } from 'lucide-react';
+import {
+  BarChart3,
+  BookOpen,
+  FileText,
+  LayoutDashboard,
+  ListChecks,
+  PenLine,
+  Sparkles,
+} from 'lucide-react';
 import { auth } from '@/auth';
 import { apiGet } from '@/lib/api';
 import { ROUTES } from '@/lib/routes';
@@ -14,6 +22,7 @@ import {
   REMEDIAL_VIEWER_ROLES,
   OFFICIAL_REPORT_VIEWER_ROLES,
   COMPARE_RESULTS_VIEWER_ROLES,
+  SHEET_REVIEW_ROLES,
   type AssessmentComparisonCandidatesResponse,
   type AssessmentReportResponse,
   type InstrumentAttachmentModel,
@@ -132,6 +141,15 @@ export default async function EvaluacionLayout({
             href: ROUTES.evaluacionInformeOficial(assessmentId),
             label: 'Informe oficial',
             icon: <FileText />,
+          },
+        ]
+      : []),
+    ...(canAccess(roles, SHEET_REVIEW_ROLES)
+      ? [
+          {
+            href: ROUTES.evaluacionRespuestasEscritas(assessmentId),
+            label: 'Respuestas escritas',
+            icon: <PenLine />,
           },
         ]
       : []),
