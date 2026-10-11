@@ -6,7 +6,8 @@
 //
 // El criterio, tomado de las respuestas reales digitalizadas:
 //   · se tolera la FORMA (separador decimal, espacios, fracción equivalente, la
-//     unidad declarada) — el alumno no debe perder puntaje por cómo se escribió;
+//     unidad declarada escrita o no) — el alumno no debe perder puntaje por cómo
+//     se escribió; una unidad DISTINTA a la declarada va a revisión;
 //   · se marca incorrecto lo que es otra cantidad (`56` cuando la clave es `5,6`);
 //   · se marca INDECIDIBLE lo que trae más de un valor candidato (`0=16.5`, `1 4`)
 //     o lo que admite dos lecturas con resultados distintos (`1.500`: ¿1500 o 1,5?)
@@ -22,10 +23,13 @@ import type {
 } from '../schemas/answer-reading/response-format.schema';
 import {
   compareCanonical,
+  isNumericSequenceText,
   isParsed,
+  normalizeText,
   parseOrderedTupleText,
   parseScalarText,
   parseSequenceText,
+  resolveEquivalences,
   type CanonicalComparison,
   type CanonicalParse,
   type CanonicalSequence,
@@ -59,6 +63,8 @@ export type ShortAnswerCredit = CanonicalComparison;
 const INCORRECT: ShortAnswerCredit = { outcome: 'incorrect', credit: 0 };
 const UNDECIDABLE: ShortAnswerCredit = { outcome: 'undecidable', credit: 0 };
 const EXPLICIT_TUPLE = /^\s*[([{].*[)\]}]\s*$|[;#]/;
+const WRITTEN_UNIT = /^(.*\d)\s*([\p{L}]+[²³]?)\.?$/u;
+const NON_PAIR_SEPARATOR = /\d\s*[/.,]\s*\d/;
 
 function collapseWhitespace(value: string): string {
   return value.trim().replace(/\s+/g, ' ');
@@ -69,7 +75,25 @@ function stripUnit(value: string, unit: string | undefined): string {
   const normalized = value.toLowerCase();
   const suffix = unit.trim().toLowerCase();
   if (!suffix || !normalized.endsWith(suffix)) return value;
-  return value.slice(0, value.length - suffix.length).trim();
+  const body = value.slice(0, value.length - suffix.length);
+  return /\p{L}$/u.test(body) ? value : body.trim();
+}
+
+type UnitCheck = { kind: 'ok' | 'missing' | 'unexpected'; value: string };
+
+/**
+ * Unidad de una respuesta numérica (§5.5). La declarada se acepta escrita o no
+ * (`ignoreUnit`, por defecto); con `ignoreUnit: false` es obligatoria (`missing`).
+ * Una unidad distinta a la declarada, o una unidad donde no se declaró ninguna, es
+ * `unexpected`. `value` es el número sin la unidad.
+ */
+function checkUnit(value: string, unit: string | undefined, ignoreUnit: boolean): UnitCheck {
+  const stripped = collapseWhitespace(stripUnit(value, unit));
+  if (unit && stripped !== value) return { kind: 'ok', value: stripped };
+  const written = WRITTEN_UNIT.exec(value);
+  const number = written?.[1]?.trim() ?? '';
+  if (written && isParsed(parseScalarText(number))) return { kind: 'unexpected', value: number };
+  return { kind: unit && !ignoreUnit ? 'missing' : 'ok', value };
 }
 
 /**
@@ -91,6 +115,11 @@ function looksLikeTuple(value: string): boolean {
   return EXPLICIT_TUPLE.test(value) && isParsed(parseOrderedTupleText(value));
 }
 
+/** `(-3,2)` es un par, no el número -3,2 entre paréntesis: dos componentes envueltos. */
+function looksOnlyNumeric(value: string): boolean {
+  return looksNumeric(value) && !looksLikeTuple(value);
+}
+
 /**
  * Modo de comparación que impone un formato de respuesta declarado. Solo los
  * formatos estructurados lo fijan: los numéricos ya se infieren de la clave.
@@ -108,7 +137,7 @@ export function inferComparisonMode(
 ): Exclude<ShortAnswerComparison, 'sequence'> {
   const cleaned = accepted.map((a) => collapseWhitespace(a)).filter(Boolean);
   if (cleaned.length === 0) return 'text';
-  if (cleaned.every(looksNumeric)) return 'numeric';
+  if (cleaned.every(looksOnlyNumeric)) return 'numeric';
   if (cleaned.every(looksLikeTuple)) return 'ordered_tuple';
   return 'text';
 }
@@ -142,17 +171,24 @@ function compareSequence(
   keys: string[],
   options: ShortAnswerOptions,
 ): ShortAnswerCredit {
-  const parsedKeys = keys.map((key) => parseSequenceText(key)).filter(isParsed);
+  const parsedKeys = keys
+    .map((key) => ({
+      numericOnly: isNumericSequenceText(key),
+      parse: parseSequenceText(key, { numericOnly: isNumericSequenceText(key) }),
+    }))
+    .filter(({ parse }) => isParsed(parse));
   if (parsedKeys.length === 0) return INCORRECT;
   return bestOf(
-    parsedKeys.map((key) => {
+    parsedKeys.map(({ numericOnly, parse: key }) => {
       const elements = firstElements(key);
       // Un escáner pega las casillas de un orden (`3142`): se separa sólo si la
       // clave es un orden de 3+ elementos de un carácter y trae esa cantidad.
-      // Un par (`56` contra `(5,6)`) no: podría ser el número 56.
+      // Un par (`56` contra `(5,6)`) no: podría ser el número 56. Una clave con
+      // números compara solo los números (`R: 3-1-4-2`, `P3-P1-P4-P2`).
       const given = parseSequenceText(answer, {
         expectedLength: elements.length,
         allowPasted: elements.length >= 3 && elements.every((e) => [...e].length === 1),
+        numericOnly,
       });
       if (!isParsed(given)) return INCORRECT;
       return compareCanonical(given, [key], options.formatKind ?? null, options.equivalences);
@@ -160,8 +196,13 @@ function compareSequence(
   );
 }
 
-/** Respaldo para un par sin separador reconocible (`7-3`): un token por componente. */
+/**
+ * Respaldo para un par sin separador de par reconocible (`7-3`): un token por
+ * componente. La barra, el punto y la coma entre dígitos no separan componentes:
+ * `3/2` es una fracción y `7.3` un decimal, no pares.
+ */
 function tupleFromTokens(answer: string, arity: number): CanonicalParse<CanonicalTuple> | null {
+  if (NON_PAIR_SEPARATOR.test(answer)) return null;
   const tokens = firstElements(parseSequenceText(answer));
   return tokens.length === arity ? parseOrderedTupleText(`(${tokens.join(';')})`, arity) : null;
 }
@@ -225,10 +266,17 @@ export function creditForAcceptedAnswer(
 
   if (mode === 'sequence') return compareSequence(withoutUnit, keys, options);
   if (mode === 'ordered_tuple') return compareTuple(withoutUnit, keys, options);
-  if (mode === 'numeric') return compareNumeric(withoutUnit, keys, options);
+  if (mode === 'numeric') {
+    const { ignoreUnit } = resolveEquivalences(options.formatKind ?? null, options.equivalences);
+    const unit = checkUnit(cleaned, options.unit, ignoreUnit);
+    const result = compareNumeric(unit.value, keys, options);
+    if (result.outcome !== 'correct' || unit.kind === 'ok') return result;
+    // El número calza, pero la unidad no: otra unidad va a revisión; la que falta
+    // (con `ignoreUnit: false`) es incorrecta.
+    return unit.kind === 'unexpected' ? UNDECIDABLE : INCORRECT;
+  }
 
-  const normalize = (value: string) =>
-    options.caseSensitive ? value : value.toLocaleLowerCase('es');
+  const normalize = (value: string) => (options.caseSensitive ? value : normalizeText(value));
   const given = normalize(withoutUnit);
   return keys.some((key) => normalize(key) === given)
     ? { outcome: 'correct', credit: 1 }

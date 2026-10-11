@@ -2,7 +2,10 @@
 // canónica (F2, diseño §5.5). `before` es el resultado de la implementación anterior
 // y `after` el actual. Regla del gate: nada que antes era `match` puede volverse
 // `mismatch`. Los cambios permitidos están justificados por §5.5:
-//   · número ambiguo miles/decimal (`1.500`, `250.000`) → `undecidable` (revisión);
+//   · número ambiguo miles/decimal (`1.500`, `250.000`) → `undecidable` (revisión),
+//     salvo que el formato, otra clave o la misma escritura lo resuelvan;
+//   · una unidad no declarada con el número correcto (`119m`) → `undecidable`;
+//   · texto sin tildes (`telefono` = `Teléfono`) → `match`;
 //   · miles con espacio (`1 500`), número mixto (`1 1/2`), signo tipográfico o entre
 //     paréntesis (`−5`, `(-5)`) y pares ordenados con cualquier separador → `match`.
 // Fuentes: short-answer.spec, scoring-strategy.spec, formatos de GradeCam y los 23
@@ -41,7 +44,7 @@ const ROWS: Row[] = [
   ['short-answer.spec', 'santiago', ['Santiago'], {}, 'match', 'match'],
   ['short-answer.spec', '119m', ['119'], { unit: 'm' }, 'match', 'match'],
   ['short-answer.spec', '119 m', ['119'], { unit: 'm' }, 'match', 'match'],
-  ['short-answer.spec', '119m', ['119'], {}, 'mismatch', 'mismatch'],
+  ['short-answer.spec', '119m', ['119'], {}, 'mismatch', 'undecidable'],
   ['short-answer.spec', 'santiago', ['Santiago'], { caseSensitive: true }, 'mismatch', 'mismatch'],
   ['short-answer.spec', null, ['24'], {}, 'undecidable', 'undecidable'],
   ['short-answer.spec', 42, ['42'], {}, 'undecidable', 'undecidable'],
@@ -159,8 +162,8 @@ const ROWS: Row[] = [
   ['gradecam', '56', ['(5;6)'], { comparison: 'sequence' }, 'mismatch', 'mismatch'],
   ['experimento', '68', ['68'], {}, 'match', 'match'],
   ['experimento', '250.000', ['250.000'], {}, 'match', 'match'],
-  ['experimento', '250,000', ['250.000'], {}, 'match', 'undecidable'],
-  ['experimento', '250.000', ['250,000'], {}, 'match', 'undecidable'],
+  ['experimento', '250,000', ['250.000'], {}, 'match', 'match'],
+  ['experimento', '250.000', ['250,000'], {}, 'match', 'match'],
   ['experimento', '3/4', ['3/4'], {}, 'match', 'match'],
   ['experimento', '1.82', ['1.82'], {}, 'match', 'match'],
   ['experimento', '1,82', ['1.82'], {}, 'match', 'match'],
@@ -216,6 +219,16 @@ const ROWS: Row[] = [
   ['5.5', '[3#7]', ['(7;3)'], {}, 'mismatch', 'mismatch'],
   ['5.5', '7 3', ['(7;3)'], {}, 'mismatch', 'match'],
   ['5.5', '[2#4]', ['(2, -4)'], {}, 'mismatch', 'mismatch'],
+  ['revisión F2', 'R: 3-1-4-2', ['3-1-4-2'], { comparison: 'sequence' }, 'match', 'match'],
+  ['revisión F2', '3-1-4-2', ['P3-P1-P4-P2'], { comparison: 'sequence' }, 'match', 'match'],
+  ['revisión F2', '3142', ['P3-P1-P4-P2'], { comparison: 'sequence' }, 'match', 'match'],
+  ['revisión F2', '2,125', ['2.125'], {}, 'match', 'match'],
+  ['revisión F2', '2.125', ['2,125'], {}, 'match', 'match'],
+  ['revisión F2', '1', ['1.000'], {}, 'match', 'undecidable'],
+  ['revisión F2', '3/2', ['(3,2)'], {}, 'mismatch', 'mismatch'],
+  ['revisión F2', '7.3', ['(7;3)'], {}, 'mismatch', 'mismatch'],
+  ['revisión F2', '(-3;2)', ['(-3,2)'], {}, 'mismatch', 'match'],
+  ['revisión F2', 'telefono', ['Teléfono'], {}, 'mismatch', 'match'],
 ];
 
 describe('matchesAcceptedAnswer — tabla de regresión (gate F2)', () => {
@@ -231,6 +244,6 @@ describe('matchesAcceptedAnswer — tabla de regresión (gate F2)', () => {
   });
 
   it('los únicos cambios son los justificados por §5.5', () => {
-    expect(ROWS.filter(([, , , , before, after]) => before !== after)).toHaveLength(15);
+    expect(ROWS.filter(([, , , , before, after]) => before !== after)).toHaveLength(17);
   });
 });

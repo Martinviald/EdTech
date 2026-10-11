@@ -9,7 +9,9 @@
 //   · los números son racionales exactos con enteros en string (sin flotantes);
 //   · `written` conserva lo escrito, sin tocar dígitos ni separadores;
 //   · lo ambiguo NO se adivina: `1.500` puede ser 1500 o 1,5, y la comparación
-//     devuelve `undecidable` si las dos lecturas dan resultados distintos.
+//     devuelve `undecidable` si las dos lecturas dan resultados distintos;
+//   · pero tampoco se inventa ambigüedad: el formato declarado y las otras claves
+//     aceptadas la resuelven cuando pueden (ver `compareCanonical`).
 
 import type {
   CanonicalScalar,
@@ -335,6 +337,9 @@ export function parseOrderedTupleText(
 
 // Un guion es signo solo cuando abre el elemento (`(-3,2)`); entre dígitos separa.
 const SEQUENCE_TOKEN = /(?:(?<![\p{L}\p{N}])[-−])?[\p{L}\p{N}]+/gu;
+// Solo los números, como en la corrección previa a F2: `R: 3-1-4-2` y
+// `P3-P1-P4-P2` son el orden 3, 1, 4, 2.
+const NUMERIC_SEQUENCE_TOKEN = /(?<!\d)[-−]?\d+/g;
 
 function normalizeElement(token: string): string {
   const numeric = /^([-−]?)(\d+)$/.exec(token);
@@ -353,6 +358,16 @@ export interface SequenceParseOptions {
    * Solo vale si cada elemento es de un carácter (lo decide quien llama).
    */
   allowPasted?: boolean;
+  /**
+   * Toma solo los números y descarta letras y rótulos (`R:`, `P3`). Lo usa quien
+   * compara contra una clave numérica; una clave de palabras compara palabras.
+   */
+  numericOnly?: boolean;
+}
+
+/** `true` si el texto trae algún dígito: su secuencia se compara por números. */
+export function isNumericSequenceText(text: string): boolean {
+  return /\d/.test(text);
 }
 
 /** Secuencia con cualquier separador no alfanumérico: `3-1-4-2`, `3,1,4,2`, `2 – 4 – 3 – 1`. */
@@ -360,8 +375,9 @@ export function parseSequenceText(
   text: string,
   options: SequenceParseOptions = {},
 ): CanonicalParse<CanonicalSequence> {
-  const tokens = collapseWhitespace(text).match(SEQUENCE_TOKEN) ?? [];
-  const { expectedLength, allowPasted } = options;
+  const { expectedLength, allowPasted, numericOnly } = options;
+  const tokens =
+    collapseWhitespace(text).match(numericOnly ? NUMERIC_SEQUENCE_TOKEN : SEQUENCE_TOKEN) ?? [];
   const only = tokens.length === 1 ? (tokens[0] ?? '') : null;
   const pasted =
     only !== null &&
@@ -497,11 +513,27 @@ function improperPair(value: CanonicalFraction): [bigint, bigint] {
   return [whole * denominator + numerator, denominator];
 }
 
+type ScalarMatch = 'same' | 'different' | 'contradictory';
+
+/**
+ * La clave no es del tipo que pide el formato declarado: un decimal (`0,5`) en un
+ * ítem de formato fracción, o una fracción en uno entero o decimal.
+ */
+function keyContradictsFormat(
+  key: CanonicalScalar,
+  formatKind: ResponseFormatKind | null,
+): boolean {
+  if (formatKind === 'fraction') return key.type === 'number';
+  if (formatKind === 'integer' || formatKind === 'decimal') return key.type === 'fraction';
+  return false;
+}
+
 function sameScalar(
   given: CanonicalScalar,
   key: CanonicalScalar,
   equivalences: Required<Equivalences>,
-): boolean {
+  formatKind: ResponseFormatKind | null,
+): ScalarMatch {
   const sameValue =
     equivalences.tolerance > 0
       ? compareRationals(
@@ -509,23 +541,28 @@ function sameScalar(
           toleranceRational(equivalences.tolerance),
         ) <= 0
       : compareRationals(given.value, key.value) === 0;
-  if (!sameValue) return false;
-  if (given.type !== key.type && !equivalences.acceptDecimalEquivalent) return false;
+  if (!sameValue) return 'different';
+  if (given.type !== key.type && !equivalences.acceptDecimalEquivalent) {
+    // La clave contradice el formato y el alumno respondió en el formato pedido:
+    // no se puede decidir si la pauta quería aceptar el equivalente.
+    return keyContradictsFormat(key, formatKind) ? 'contradictory' : 'different';
+  }
   if (given.type === 'fraction') {
-    if (equivalences.requireSimplified && !given.isSimplified) return false;
+    if (equivalences.requireSimplified && !given.isSimplified) return 'different';
     if (key.type === 'fraction' && !equivalences.acceptEquivalentFractions) {
       const [gn, gd] = improperPair(given);
       const [kn, kd] = improperPair(key);
-      if (gn !== kn || gd !== kd) return false;
+      if (gn !== kn || gd !== kd) return 'different';
     }
   }
   if (given.type === 'number' && key.type === 'number' && equivalences.requireExactDecimals) {
-    return given.decimalPlaces === key.decimalPlaces;
+    return given.decimalPlaces === key.decimalPlaces ? 'same' : 'different';
   }
-  return true;
+  return 'same';
 }
 
-function normalizeWord(value: string): string {
+/** Texto sin tildes, sin mayúsculas y sin espacios en los bordes. */
+export function normalizeText(value: string): string {
   return value.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('es').trim();
 }
 
@@ -541,21 +578,37 @@ const CORRECT: CanonicalComparison = { outcome: 'correct', credit: 1 };
 const INCORRECT: CanonicalComparison = { outcome: 'incorrect', credit: 0 };
 const UNDECIDABLE: CanonicalComparison = { outcome: 'undecidable', credit: 0 };
 
+interface CompareContext {
+  readonly equivalences: Required<Equivalences>;
+  readonly formatKind: ResponseFormatKind | null;
+  readonly componentCredit: ComponentCredit | undefined;
+}
+
+function scalarComparison(match: ScalarMatch): CanonicalComparison {
+  if (match === 'same') return CORRECT;
+  return match === 'contradictory' ? UNDECIDABLE : INCORRECT;
+}
+
 function compareTuples(
   given: CanonicalTuple,
   key: CanonicalTuple,
-  equivalences: Required<Equivalences>,
-  componentCredit: ComponentCredit | undefined,
+  context: CompareContext,
 ): CanonicalComparison {
   if (given.components.length !== key.components.length) return INCORRECT;
-  const hits = key.components.map((component, index) => {
+  const matches = key.components.map((component, index) => {
     const answered = given.components[index];
-    return answered !== undefined && sameScalar(answered, component, equivalences);
+    return answered === undefined
+      ? 'different'
+      : sameScalar(answered, component, context.equivalences, context.formatKind);
   });
-  if (hits.every(Boolean)) return CORRECT;
-  if (!componentCredit) return INCORRECT;
-  const credit = hits.reduce(
-    (sum, hit, index) => sum + (hit ? (componentCredit.creditPerComponent[index] ?? 0) : 0),
+  if (matches.every((match) => match === 'same')) return CORRECT;
+  const { componentCredit } = context;
+  if (!componentCredit) {
+    return matches.includes('different') ? INCORRECT : UNDECIDABLE;
+  }
+  const credit = matches.reduce(
+    (sum, match, index) =>
+      sum + (match === 'same' ? (componentCredit.creditPerComponent[index] ?? 0) : 0),
     0,
   );
   return credit > 0 ? { outcome: 'partial', credit: Math.min(credit, 1) } : INCORRECT;
@@ -564,38 +617,40 @@ function compareTuples(
 function compareOne(
   given: CanonicalValue,
   key: CanonicalValue,
-  equivalences: Required<Equivalences>,
-  componentCredit: ComponentCredit | undefined,
+  context: CompareContext,
 ): CanonicalComparison {
+  const { equivalences } = context;
   if (
     (given.type === 'number' || given.type === 'fraction') &&
     (key.type === 'number' || key.type === 'fraction')
   ) {
-    return sameScalar(given, key, equivalences) ? CORRECT : INCORRECT;
+    return scalarComparison(sameScalar(given, key, equivalences, context.formatKind));
   }
   if (given.type === 'tuple' && key.type === 'tuple') {
-    return compareTuples(given, key, equivalences, componentCredit);
+    return compareTuples(given, key, context);
   }
   if (given.type === 'sequence' && key.type === 'sequence') {
     return sameElements(given.elements, key.elements, equivalences.unordered) ? CORRECT : INCORRECT;
   }
   if (given.type === 'word_list' && key.type === 'word_list') {
     return sameElements(
-      given.words.map(normalizeWord),
-      key.words.map(normalizeWord),
+      given.words.map(normalizeText),
+      key.words.map(normalizeText),
       equivalences.unordered,
     )
       ? CORRECT
       : INCORRECT;
   }
   if (given.type === 'text' && key.type === 'text') {
-    return normalizeWord(given.text) === normalizeWord(key.text) ? CORRECT : INCORRECT;
+    return normalizeText(given.text) === normalizeText(key.text) ? CORRECT : INCORRECT;
   }
   return INCORRECT;
 }
 
+/** Mejor resultado entre claves: correcta > indecidible > parcial > incorrecta. */
 function best(results: CanonicalComparison[]): CanonicalComparison {
   if (results.some((result) => result.outcome === 'correct')) return CORRECT;
+  if (results.some((result) => result.outcome === 'undecidable')) return UNDECIDABLE;
   const partials = results.filter((result) => result.outcome === 'partial');
   if (partials.length === 0) return INCORRECT;
   return partials.reduce((top, result) => (result.credit > top.credit ? result : top));
@@ -607,10 +662,101 @@ function asParse(value: CanonicalValue | CanonicalParse): CanonicalParse {
     : { readings: { decimal: [value], thousands: [value] }, issues: [] };
 }
 
+function isAmbiguousNumber(parse: CanonicalParse): boolean {
+  return (
+    parse.issues.includes('ambiguous_thousands_or_decimal') &&
+    [...parse.readings.decimal, ...parse.readings.thousands].every(
+      (value) => value.type === 'number',
+    )
+  );
+}
+
+function withConvention<T extends CanonicalValue>(
+  parse: CanonicalParse<T>,
+  convention: NumberConvention,
+): CanonicalParse<T> {
+  const readings = parse.readings[convention];
+  return {
+    readings: { decimal: readings, thousands: readings },
+    issues: parse.issues.filter((issue) => issue !== 'ambiguous_thousands_or_decimal'),
+  };
+}
+
+/**
+ * Resuelve la ambigüedad miles/decimal (`1.500`) con el formato declarado:
+ *  · `integer`: el punto separa miles, en la respuesta y en la clave (`1.500` = 1500);
+ *  · `decimal`: la CLAVE con tres decimales se lee como decimal (`2.125` = 2,125);
+ *    la respuesta del alumno sigue siendo ambigua.
+ * Sin formato que la resuelva, devuelve la interpretación sin cambios.
+ */
+export function resolveNumberConvention<T extends CanonicalValue>(
+  parse: CanonicalParse<T>,
+  formatKind: ResponseFormatKind | null,
+  role: 'answer' | 'key',
+): CanonicalParse<T> {
+  if (!isAmbiguousNumber(parse)) return parse;
+  if (formatKind === 'integer') return withConvention(parse, 'thousands');
+  if (formatKind === 'decimal' && role === 'key') return withConvention(parse, 'decimal');
+  return parse;
+}
+
+/** Una clave ambigua se resuelve si una de sus lecturas es otra clave aceptada inequívoca. */
+function disambiguateKeys(keys: readonly CanonicalParse[]): CanonicalParse[] {
+  const unambiguous = new Set(
+    keys
+      .filter((parse) => !isAmbiguousNumber(parse))
+      .flatMap((parse) => distinctReadings(parse).map(canonicalKey)),
+  );
+  return keys.map((parse) => {
+    if (!isAmbiguousNumber(parse)) return parse;
+    const matching = NUMBER_CONVENTIONS.filter((convention) =>
+      parse.readings[convention].some((value) => unambiguous.has(canonicalKey(value))),
+    );
+    const [only] = matching;
+    return matching.length === 1 && only ? withConvention(parse, only) : parse;
+  });
+}
+
+/** Signo, dígitos y posición del separador, con la coma y el punto como el mismo signo. */
+function writtenShape(parse: CanonicalParse): string | null {
+  const value = primaryReading(parse);
+  if (value === null || value.type !== 'number') return null;
+  return value.written.replace(/[−–]/g, '-').replace(/,/g, '.').replace(/\s/g, '');
+}
+
+/**
+ * La respuesta repite la escritura de la clave y solo cambia la coma por el punto
+ * (`2,125` contra `2.125`). Si alguna de las dos es ambigua, con cualquier
+ * convención que se aplique igual a ambas dicen lo mismo: no hay ambigüedad real.
+ */
+function sameWritingAsAmbiguousKey(
+  given: CanonicalParse,
+  keys: readonly CanonicalParse[],
+): boolean {
+  const shape = writtenShape(given);
+  if (shape === null) return false;
+  return keys.some(
+    (key) => (isAmbiguousNumber(given) || isAmbiguousNumber(key)) && writtenShape(key) === shape,
+  );
+}
+
 /**
  * Compara la respuesta con las claves aceptadas. Cada convención del punto se
  * evalúa por separado (clave y respuesta con la MISMA convención); si las
  * lecturas posibles no llevan todas al mismo resultado → `undecidable`.
+ *
+ * Ambigüedad miles/decimal: solo existe con un punto seguido de exactamente tres
+ * dígitos y sin otro separador (`1.500`, `2.125`; no `1.234.567` ni `0.500`). Antes
+ * de declararla indecidible se resuelve con, en orden:
+ *  1. el formato declarado (`resolveNumberConvention`);
+ *  2. las otras claves aceptadas (`['2.125', '2,125']` fija la lectura decimal);
+ *  3. la misma escritura: `2,125` contra la clave `2.125` coincide.
+ * Lo que sigue ambiguo y cambia el resultado (`1` contra la clave `1.000` sin
+ * formato) va a revisión.
+ *
+ * Fracción ↔ decimal: si el valor coincide pero el tipo no y la pauta no acepta el
+ * equivalente, es incorrecta; salvo que sea la CLAVE la que contradice el formato
+ * (`0,5` en un ítem de formato fracción): eso es indecidible.
  *
  * Crédito por componente en pares ordenados solo si se pasa `componentCredit`;
  * sin él, todo o nada. Sin claves interpretables → `undecidable`.
@@ -622,9 +768,16 @@ export function compareCanonical(
   equivalences?: Equivalences,
   componentCredit?: ComponentCredit,
 ): CanonicalComparison {
-  const resolved = resolveEquivalences(formatKind, equivalences);
-  const givenParse = asParse(given);
-  const keyParses = accepted.map(asParse);
+  const context: CompareContext = {
+    equivalences: resolveEquivalences(formatKind, equivalences),
+    formatKind,
+    componentCredit,
+  };
+  const givenParse = resolveNumberConvention(asParse(given), formatKind, 'answer');
+  const keyParses = disambiguateKeys(
+    accepted.map((key) => resolveNumberConvention(asParse(key), formatKind, 'key')),
+  );
+  if (sameWritingAsAmbiguousKey(givenParse, keyParses)) return CORRECT;
   const results: CanonicalComparison[] = [];
   for (const convention of NUMBER_CONVENTIONS) {
     const keys = keyParses.flatMap((parse) => parse.readings[convention]);
@@ -632,7 +785,7 @@ export function compareCanonical(
     const candidates = givenParse.readings[convention];
     if (candidates.length === 0) return INCORRECT;
     for (const candidate of candidates) {
-      results.push(best(keys.map((key) => compareOne(candidate, key, resolved, componentCredit))));
+      results.push(best(keys.map((key) => compareOne(candidate, key, context))));
     }
   }
   const [first, ...rest] = results;

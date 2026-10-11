@@ -10,6 +10,7 @@ import {
   parseSequenceText,
   primaryReading,
   resolveEquivalences,
+  resolveNumberConvention,
   uniqueReading,
   type CanonicalParse,
 } from './answer-canonical';
@@ -219,9 +220,8 @@ describe('compareCanonical', () => {
   });
 
   it('ambigüedad miles/decimal: indecidible solo si las lecturas cambian el resultado', () => {
-    expect(compareCanonical(scalar('1.500'), [scalar('1500')], 'integer').outcome).toBe(
-      'undecidable',
-    );
+    expect(compareCanonical(scalar('1.500'), [scalar('1500')], null).outcome).toBe('undecidable');
+    expect(compareCanonical(scalar('1.500'), [scalar('1500')], 'integer').outcome).toBe('correct');
     expect(compareCanonical(scalar('1.500'), [scalar('7')], 'integer').outcome).toBe('incorrect');
     expect(compareCanonical(scalar('250.000'), [scalar('250.000')], 'integer').outcome).toBe(
       'correct',
@@ -325,6 +325,19 @@ describe('compareCanonical', () => {
     expect(
       compareCanonical(scalar('7'), [parseOrderedTupleText('(7;3)')], 'ordered_tuple').outcome,
     ).toBe('incorrect');
+  });
+});
+
+describe('resolveNumberConvention', () => {
+  it('el formato entero lee el punto como miles; el decimal solo fija la clave', () => {
+    const ambiguous = parseNumberText('2.125');
+    expect(keyOf(resolveNumberConvention(ambiguous, 'integer', 'answer'))).toBe('n:2125');
+    expect(keyOf(resolveNumberConvention(ambiguous, 'decimal', 'key'))).toBe('n:17/8');
+    expect(resolveNumberConvention(ambiguous, 'decimal', 'answer')).toBe(ambiguous);
+    expect(resolveNumberConvention(ambiguous, null, 'key')).toBe(ambiguous);
+    expect(resolveNumberConvention(ambiguous, 'integer', 'answer').issues).not.toContain(
+      'ambiguous_thousands_or_decimal',
+    );
   });
 });
 
