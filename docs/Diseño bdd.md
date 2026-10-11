@@ -891,6 +891,248 @@ INDEX(status)
 
 ---
 
+### 9b. Lectura por visión de respuestas abiertas
+
+Diseño en `docs/diseno-correccion-vision-preguntas-abiertas.md` §9. Schema en
+`packages/db/src/schema/answer-reading.ts`. El modelo de visión **solo transcribe** el
+recorte; el código normaliza, decide por consenso y corrige; lo dudoso va a revisión
+humana y queda pendiente (`final_score` NULL), nunca 0. Los enums se construyen con las
+listas de `@soe/types` (`schemas/answer-reading/`). Las cinco tablas de datos llevan
+`org_id NOT NULL` + RLS; `reading_routes` es catálogo con `org_id` NULLABLE.
+
+#### `answer_reading_runs`
+
+Una corrida del pipeline por lote o reproceso (polling desde el frontend). Arranca al
+procesar cada hoja, antes de confirmar el lote (D2).
+
+```
+id              uuid        PK
+org_id          uuid        FK → organizations.id  NOT NULL (RLS: answer_reading_runs_tenant_isolation)
+batch_id        uuid        FK → sheet_scan_batches.id  NULLABLE (reprocesos manuales)
+assessment_id   uuid        FK → assessments.id  NULLABLE
+trigger         enum        'scan_processed' | 'manual_rerun' | 'route_change' | 'backfill'
+status          enum        'pending' | 'running' | 'waiting_provider' | 'completed' | 'failed' | 'budget_exceeded'
+crops_total     integer     NOT NULL DEFAULT 0
+crops_done      integer     NOT NULL DEFAULT 0
+auto_accepted   integer     NOT NULL DEFAULT 0
+needs_review    integer     NOT NULL DEFAULT 0
+cost_usd        decimal(10,6) NOT NULL DEFAULT 0   Suma de las lecturas
+failure_reason  text        NULLABLE
+created_by_id   uuid        FK → users.id  NULLABLE
+started_at      timestamp
+completed_at    timestamp
+created_at      timestamp   NOT NULL DEFAULT now()
+updated_at      timestamp   NOT NULL DEFAULT now()
+
+INDEX(org_id, batch_id)
+INDEX(org_id, assessment_id, created_at)
+INDEX(org_id, status)
+```
+
+#### `answer_readings`
+
+**Evidencia inmutable**: una fila por (recorte × lector × modo × intento). El RLS solo
+tiene políticas de SELECT e INSERT: la API no puede actualizarla ni borrarla. Un
+reintento es una fila nueva con `attempt + 1`.
+
+```
+id                  uuid        PK
+org_id              uuid        FK → organizations.id  NOT NULL (RLS: answer_readings_tenant_isolation / _tenant_insert)
+run_id              uuid        FK → answer_reading_runs.id  NOT NULL
+mark_id             uuid        FK → sheet_scan_marks.id  NOT NULL  ON DELETE CASCADE
+item_id             uuid        FK → items.id  NOT NULL
+crop_file_id        uuid        FK → files.id  NULLABLE
+crop_sha256         text        NULLABLE
+crop_profile_id     text        NOT NULL   p. ej. 'short-answer@1'
+response_format     jsonb       NOT NULL   Snapshot del formato del layout (ResponseFormat)
+reading_key         text        NOT NULL   Hash opaco para idempotencia; lo único que identifica el recorte ante el proveedor
+mode                enum        'primary' | 'shadow' | 'tiebreak'
+attempt             integer     NOT NULL DEFAULT 1  CHECK (>= 1)
+route_id            uuid        FK → reading_routes.id  NULLABLE
+route_version       integer     NULLABLE
+reader_key          text        NOT NULL
+transcriber_id      text        NOT NULL
+provider            text        NOT NULL   VisionProvider
+family              text        NOT NULL
+model               text        NOT NULL   Modelo pedido
+provider_model      text        NULLABLE   Modelo que reportó el proveedor
+prompt_ref          text        NOT NULL   p. ej. 'transcribe.short-answer@2'
+prompt_hash         text        NOT NULL
+output_schema_id    text        NOT NULL
+params              jsonb       NOT NULL   ReaderSpec['params']
+status              enum        'ok' | 'invalid_output' | 'refused' | 'truncated' | 'error' | 'timeout'
+output              jsonb       NULLABLE   TranscriptionOutput validada
+reading_state       enum        NULLABLE   'answered' | 'blank' | 'illegible' | 'crossed_out_only' | 'multiple_answers'
+literal             text        NULLABLE
+confidence          decimal(4,3) NULLABLE
+raw_text            text        NULLABLE   Solo con status 'invalid_output', para depurar
+normalized          jsonb       NULLABLE   NormalizedAnswer
+input_tokens        integer     NOT NULL DEFAULT 0
+output_tokens       integer     NOT NULL DEFAULT 0
+reasoning_tokens    integer     NOT NULL DEFAULT 0
+cached_input_tokens integer     NOT NULL DEFAULT 0
+image_tokens        integer     NULLABLE
+cost_usd            decimal(10,6) NOT NULL DEFAULT 0
+latency_ms          integer     NULLABLE
+error_code          text        NULLABLE
+provider_batch_id   text        NULLABLE
+created_at          timestamp   NOT NULL DEFAULT now()
+
+UNIQUE(org_id, reading_key, reader_key, mode, attempt)
+INDEX(org_id, run_id)
+INDEX(org_id, mark_id)
+INDEX(org_id, prompt_ref, created_at)
+```
+
+#### `answer_reading_decisions`
+
+Resultado de aplicar la política de consenso a un recorte. Una **vigente** por marca;
+reevaluar crea otra y la anterior queda con `superseded_by_id` (nunca se borra).
+`superseded_by_id` no tiene FK a propósito: el reemplazo genera el id nuevo en la app y,
+en una transacción, primero apunta la anterior y después inserta la nueva (con FK ese
+orden falla, y el inverso choca con el único de la vigente).
+
+```
+id                uuid        PK
+org_id            uuid        FK → organizations.id  NOT NULL (RLS: answer_reading_decisions_tenant_isolation)
+run_id            uuid        FK → answer_reading_runs.id  NOT NULL
+mark_id           uuid        FK → sheet_scan_marks.id  NOT NULL  ON DELETE CASCADE
+item_id           uuid        FK → items.id  NOT NULL
+assessment_id     uuid        FK → assessments.id  NULLABLE
+student_id        uuid        FK → students.id  NULLABLE   Para consolidar; nunca viaja al proveedor
+response_id       uuid        FK → responses.id  NULLABLE  Se llena al consolidar
+outcome           enum        'auto_accepted' | 'auto_blank' | 'needs_review' | 'not_read'
+canonical         text        NULLABLE   Valor canónico de consenso; agrupa la cola
+value             jsonb       NULLABLE   NormalizedAnswer
+scoring_outcome   enum        NULLABLE   'correct' | 'incorrect' | 'partial' | 'undecidable'
+reasons           jsonb       NOT NULL DEFAULT '[]'   ReviewReason[]
+review_mode       enum        NULLABLE   'reading' | 'grading'
+route_id          uuid        FK → reading_routes.id  NULLABLE
+route_version     integer     NULLABLE
+policy_id         text        NOT NULL
+policy_version    integer     NOT NULL
+used_reading_ids  uuid[]      NOT NULL DEFAULT '{}'
+superseded_by_id  uuid        NULLABLE (sin FK)
+resolved_at       timestamp   NULLABLE
+created_at        timestamp   NOT NULL DEFAULT now()
+updated_at        timestamp   NOT NULL DEFAULT now()
+
+UNIQUE(org_id, mark_id) WHERE superseded_by_id IS NULL
+INDEX(org_id, assessment_id, outcome, item_id) WHERE superseded_by_id IS NULL   -- cola
+INDEX(org_id, item_id, canonical) WHERE superseded_by_id IS NULL                -- grupos
+INDEX(org_id, run_id)
+INDEX(response_id)
+```
+
+#### `answer_reviews`
+
+Decisiones humanas. **Solo se agregan filas**: deshacer o corregir crea una revisión
+nueva y la anterior queda con `superseded_by_id`. Una acción de grupo escribe una fila
+por decisión, todas con el mismo `group_operation_id`.
+
+```
+id                  uuid        PK
+org_id              uuid        FK → organizations.id  NOT NULL (RLS: answer_reviews_tenant_isolation)
+decision_id         uuid        FK → answer_reading_decisions.id  NOT NULL
+reviewer_id         uuid        FK → users.id  NOT NULL
+mode                enum        'reading' | 'grading'
+action              enum        'accept' | 'edit' | 'illegible' | 'blank' | 'crossed_out' | 'mark_correct' | 'mark_incorrect' | 'undo'
+edited_literal      text        NULLABLE
+resulting_canonical text        NULLABLE
+resulting_value     jsonb       NULLABLE   NormalizedAnswer
+reason              text        NULLABLE
+group_operation_id  uuid        NULLABLE
+group_size          integer     NOT NULL DEFAULT 1  CHECK (>= 1)
+superseded_by_id    uuid        FK → answer_reviews.id  NULLABLE
+created_at          timestamp   NOT NULL DEFAULT now()
+
+INDEX(org_id, decision_id)
+INDEX(org_id, group_operation_id) WHERE group_operation_id IS NOT NULL
+INDEX(org_id, reviewer_id, created_at)
+```
+
+#### `reading_routes`
+
+Qué lectores, con qué prompt y qué política. `org_id` NULL = ruta global. Precedencia
+`item` → `instrument` → `format_subject_grade` → `format_subject` → `format` →
+`default`; en el mismo nivel la ruta de la org gana a la global. Editar = fila nueva con
+`version + 1` y `supersedes_id`. RLS con dos políticas (patrón `test_tracks`): la API
+lee las globales y solo escribe o borra las propias.
+
+```
+id                 uuid        PK
+org_id             uuid        FK → organizations.id  NULLABLE  ON DELETE CASCADE
+status             enum        'shadow' | 'active' | 'retired'   DEFAULT 'shadow'
+level              enum        'item' | 'instrument' | 'format_subject_grade' | 'format_subject' | 'format' | 'default'
+item_id            uuid        FK → items.id  NULLABLE
+instrument_id      uuid        FK → instruments.id  NULLABLE
+format_kind        text        NULLABLE   ResponseFormatKind
+subject_id         uuid        FK → subjects.id  NULLABLE
+grade_id           uuid        FK → grades.id  NULLABLE
+readers            jsonb       NOT NULL   ReaderSpec[]
+fallback_readers   jsonb       NOT NULL DEFAULT '[]'
+shadow_readers     jsonb       NOT NULL DEFAULT '[]'
+shadow_sample_rate decimal(4,3) NOT NULL DEFAULT 0  CHECK (0..1)
+policy             jsonb       NOT NULL   ConsensusPolicy
+version            integer     NOT NULL DEFAULT 1  CHECK (>= 1)
+supersedes_id      uuid        FK → reading_routes.id  NULLABLE
+notes              text        NULLABLE   Informe del arnés que respaldó la promoción
+created_by_id      uuid        FK → users.id  NULLABLE
+activated_by_id    uuid        FK → users.id  NULLABLE
+activated_at       timestamp
+retired_at         timestamp
+created_at         timestamp   NOT NULL DEFAULT now()
+updated_at         timestamp   NOT NULL DEFAULT now()
+
+CHECK reading_routes_scope_matches_level   -- cada nivel exige exactamente sus columnas de alcance
+UNIQUE(coalesce(org_id), level, coalesce(item_id), coalesce(instrument_id), coalesce(format_kind),
+       coalesce(subject_id), coalesce(grade_id)) WHERE status = 'active'   -- una activa por alcance
+INDEX(item_id, org_id) WHERE level = 'item' AND status <> 'retired'
+INDEX(instrument_id, org_id) WHERE level = 'instrument' AND status <> 'retired'
+INDEX(format_kind, subject_id, grade_id, org_id) WHERE level IN (format_*) AND status <> 'retired'
+INDEX(org_id) WHERE level = 'default' AND status <> 'retired'
+```
+
+#### `answer_reading_samples`
+
+Dataset de evaluación del arnés offline. `crop_file_id` es una **copia** del recorte con
+retención propia. Por ahora solo `org_internal` (D7).
+
+```
+id                    uuid        PK
+org_id                uuid        FK → organizations.id  NOT NULL (RLS: answer_reading_samples_tenant_isolation)
+decision_id           uuid        FK → answer_reading_decisions.id  NULLABLE
+review_id             uuid        FK → answer_reviews.id  NULLABLE
+item_id               uuid        FK → items.id  NOT NULL
+format_kind           text        NOT NULL   ResponseFormatKind
+subject_id            uuid        FK → subjects.id  NULLABLE   Estrato
+grade_id              uuid        FK → grades.id  NULLABLE     Estrato
+crop_file_id          uuid        FK → files.id  NOT NULL
+crop_sha256           text        NULLABLE
+crop_profile_id       text        NULLABLE
+label_state           enum        reading_state
+label_literal         text        NOT NULL
+label_canonical       text        NULLABLE
+label_source          enum        'review_reading' | 'review_grading' | 'double_annotation' | 'import'
+annotator_count       integer     NOT NULL DEFAULT 1
+split                 enum        'train' | 'validation' | 'test'   (test nunca ajusta prompts)
+consent_scope         enum        'org_internal' | 'platform_eval'   DEFAULT 'org_internal'
+needs_normalizer_case boolean     NOT NULL DEFAULT false   El código no supo interpretar y el revisor la marcó correcta
+deleted_at            timestamp   NULLABLE (soft delete)
+created_at            timestamp   NOT NULL DEFAULT now()
+updated_at            timestamp   NOT NULL DEFAULT now()
+
+UNIQUE(org_id, review_id) WHERE review_id IS NOT NULL   -- una muestra por revisión
+INDEX(org_id, split, format_kind) WHERE deleted_at IS NULL
+INDEX(org_id, format_kind) WHERE needs_normalizer_case AND deleted_at IS NULL
+```
+
+Ajustes por organización en `organizations.config.answerReading`
+(`orgAnswerReadingSettingsSchema`); los efectivos se leen con
+`resolveAnswerReadingSettings` (`@soe/types`).
+
+---
+
 ### 10. Resultados y métricas
 
 #### `assessment_results`

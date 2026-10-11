@@ -51,6 +51,15 @@ escribe la API (panel /configuracion/modelos-ia); la autorización es el role gu
 `decision_settings` sigue el mismo patrón que `llm_settings` (org_id NULLABLE) y
 `decision_calls` usa `org_id` directo (log del motor de decisiones).
 
+Lectura por visión de respuestas abiertas (`schema/answer-reading.ts`):
+`answer_reading_runs`, `answer_reading_decisions`, `answer_reviews` y
+`answer_reading_samples` usan `org_id` directo. `answer_readings` también, pero es
+evidencia inmutable: solo tiene políticas de SELECT e INSERT, así que un UPDATE o
+DELETE de la API no afecta ninguna fila. `reading_routes` usa `org_id` NULLABLE con el
+patrón de `test_tracks`: las rutas globales se leen desde cualquier org, pero la API
+solo crea, edita o borra rutas de su propia org (las globales se siembran con el rol
+admin).
+
 ### Forma de la comparación en una política nueva
 
 Al agregar una tabla sensible, copia **exactamente** esta forma:

@@ -28,3 +28,4 @@ export * from './mcp';
 export * from './sheet-scanning';
 export * from './telemetry-events';
 export * from './feedback';
+export * from './answer-reading';

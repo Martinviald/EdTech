@@ -1,4 +1,20 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
+import {
+  ANSWER_READING_RUN_STATUSES,
+  ANSWER_READING_RUN_TRIGGERS,
+  READING_MODES,
+  READING_OUTCOMES,
+  READING_STATES,
+  REVIEW_ACTIONS,
+  REVIEW_MODES,
+  ROUTE_MATCH_LEVELS,
+  ROUTE_STATUSES,
+  SAMPLE_CONSENT_SCOPES,
+  SAMPLE_LABEL_SOURCES,
+  SAMPLE_SPLITS,
+  SCORING_OUTCOMES,
+  TRANSCRIPTION_STATUSES,
+} from '@soe/types';
 
 export const orgTypeEnum = pgEnum('org_type', ['platform', 'foundation', 'school']);
 
@@ -398,3 +414,33 @@ export const decisionModeEnum = pgEnum('decision_mode', ['off', 'shadow', 'live'
 
 // Resultado de una llamada registrada en decision_calls.
 export const decisionCallStatusEnum = pgEnum('decision_call_status', ['ok', 'error']);
+
+// ── Lectura por visión de respuestas abiertas — docs/diseno-correccion-vision-preguntas-abiertas.md §9 ──
+// Se construyen con las listas de @soe/types (contratos de answer-reading): agregar un
+// valor allá exige una migración (`ALTER TYPE … ADD VALUE`) que genera db:generate.
+export const answerReadingRunStatusEnum = pgEnum(
+  'answer_reading_run_status',
+  ANSWER_READING_RUN_STATUSES,
+);
+export const answerReadingRunTriggerEnum = pgEnum(
+  'answer_reading_run_trigger',
+  ANSWER_READING_RUN_TRIGGERS,
+);
+export const answerReadingModeEnum = pgEnum('answer_reading_mode', READING_MODES);
+export const transcriptionStatusEnum = pgEnum('transcription_status', TRANSCRIPTION_STATUSES);
+export const readingStateEnum = pgEnum('reading_state', READING_STATES);
+export const readingOutcomeEnum = pgEnum('reading_outcome', READING_OUTCOMES);
+export const scoringOutcomeEnum = pgEnum('scoring_outcome', SCORING_OUTCOMES);
+export const answerReviewModeEnum = pgEnum('answer_review_mode', REVIEW_MODES);
+export const answerReviewActionEnum = pgEnum('answer_review_action', REVIEW_ACTIONS);
+export const readingRouteStatusEnum = pgEnum('reading_route_status', ROUTE_STATUSES);
+export const readingRouteLevelEnum = pgEnum('reading_route_level', ROUTE_MATCH_LEVELS);
+export const answerReadingLabelSourceEnum = pgEnum(
+  'answer_reading_label_source',
+  SAMPLE_LABEL_SOURCES,
+);
+export const answerReadingSplitEnum = pgEnum('answer_reading_split', SAMPLE_SPLITS);
+export const answerReadingConsentScopeEnum = pgEnum(
+  'answer_reading_consent_scope',
+  SAMPLE_CONSENT_SCOPES,
+);
