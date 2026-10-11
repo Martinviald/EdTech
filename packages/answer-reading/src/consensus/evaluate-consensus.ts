@@ -12,7 +12,7 @@ import {
   type TranscriptionOutput,
   type TranscriptionStatus,
 } from '@soe/types';
-import { normalizeTranscription } from '../formats/registry';
+import { normalizeTranscription, requiresRubricGrading } from '../formats/registry';
 import { isAuditSample } from './audit-sample';
 
 /**
@@ -106,6 +106,11 @@ function distinctFamilies(readings: readonly ConsensusReading[]): number {
  * 10. la política no autoacepta ese resultado → revisión [policy_requires_review];
  * 11. auto_accepted (o auto_blank), salvo que caiga en la muestra de auditoría →
  *     revisión [audit_sample].
+ *
+ * Formatos de rúbrica (`free_text`, `math_work`): solo se transcriben. Nunca se
+ * autoaceptan ni se corrigen contra una clave (`scoringOutcome` null): toda
+ * decisión es revisión y lleva el motivo `rubric_item`, junto con los de lectura
+ * (desacuerdo, confianza baja, ilegible…), que se resuelven primero.
  */
 export function evaluateConsensus(
   readings: readonly ConsensusReading[],
@@ -114,8 +119,9 @@ export function evaluateConsensus(
   options: ConsensusOptions,
 ): ConsensusResult {
   const { format } = options;
+  const rubric = requiresRubricGrading(format);
   const scoreIfParsed = (answer: NormalizedAnswer | null): ScoringOutcome | null =>
-    answer !== null && answer.canonical !== null ? scoreOf(answer) : null;
+    !rubric && answer !== null && answer.canonical !== null ? scoreOf(answer) : null;
   const decide = (
     outcome: ReadingOutcome,
     value: NormalizedAnswer | null,
@@ -125,8 +131,11 @@ export function evaluateConsensus(
   ): ConsensusResult => ({
     outcome,
     value,
-    scoringOutcome,
-    reasons,
+    scoringOutcome: rubric ? null : scoringOutcome,
+    reasons:
+      rubric && outcome === 'needs_review' && !reasons.includes('rubric_item')
+        ? [...reasons, 'rubric_item']
+        : reasons,
     reviewMode:
       outcome === 'needs_review' || outcome === 'not_read' ? reviewModeFor(reasons) : null,
     usedReadingIds: used.map((reading) => reading.readingId),
@@ -141,7 +150,7 @@ export function evaluateConsensus(
   const audited = isAuditSample(options.readingKey, policy.auditSampleRate);
   const acceptBlank = (used: readonly ValidReading[]): ConsensusResult => {
     const blank = blankAnswer(format);
-    const blankScore = scoreOf(blank);
+    const blankScore = rubric ? null : scoreOf(blank);
     const reviewBlank = (reason: ReviewReason) =>
       decide('needs_review', blank, [reason], used, blankScore);
     if (used.some((reading) => reading.output.reviewRequested)) {
@@ -150,6 +159,7 @@ export function evaluateConsensus(
     if (used.some((reading) => reading.output.confidence < policy.minConfidence)) {
       return reviewBlank('low_confidence');
     }
+    if (rubric) return reviewBlank('rubric_item');
     if (!policy.autoAccept) return reviewBlank('policy_requires_review');
     if (audited) return reviewBlank('audit_sample');
     return decide('auto_blank', blank, [], used, blankScore);
@@ -206,6 +216,16 @@ export function evaluateConsensus(
   }));
   const unparsed = normalized.find((entry) => entry.answer.canonical === null);
   if (unparsed) return review(['unparsed_format'], unparsed.answer, valid);
+
+  if (rubric) {
+    const first = normalized[0]?.answer ?? null;
+    const agree = new Set(normalized.map((entry) => entry.answer.canonical)).size === 1;
+    const reasons: ReviewReason[] = agree ? [] : ['readers_disagree'];
+    if (valid.some((reading) => reading.output.confidence < policy.minConfidence)) {
+      reasons.push('low_confidence');
+    }
+    return review(reasons, first, valid);
+  }
 
   const agreementKey = (entry: Normalized): string =>
     policy.agreeOn === 'canonical' ? (entry.answer.canonical ?? '') : scoreOf(entry.answer);

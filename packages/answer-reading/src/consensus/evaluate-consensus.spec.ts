@@ -381,3 +381,63 @@ describe('evaluateConsensus (diseño §8.2)', () => {
     });
   });
 });
+
+describe('formatos de rúbrica: nunca se autoaceptan', () => {
+  const FREE_TEXT: ResponseFormat = { kind: 'free_text', lines: 6 };
+  const neverScored = () => {
+    throw new Error('un ítem de rúbrica no se corrige contra una clave');
+  };
+  const evaluateText = (readings: ConsensusReading[], options: { inkRatio?: number } = {}) => {
+    const result = evaluateConsensus(readings, { ...POLICY, blankByInkBelow: 0.01 }, neverScored, {
+      format: FREE_TEXT,
+      readingKey: 'desarrollo',
+      ...options,
+    });
+    expect(consensusResultSchema.safeParse(result).success).toBe(true);
+    return result;
+  };
+
+  it('lecturas que coinciden van a revisión con motivo rubric_item, sin resultado', () => {
+    const result = evaluateText([claude('El agua se evapora'), gemini('El agua  se evapora')]);
+    expect(result.outcome).toBe('needs_review');
+    expect(result.reasons).toEqual(['rubric_item']);
+    expect(result.reviewMode).toBe('grading');
+    expect(result.scoringOutcome).toBeNull();
+    expect(result.value?.canonical).toBe('x:El agua se evapora');
+  });
+
+  it('un desacuerdo de transcripción se revisa primero como lectura', () => {
+    const result = evaluateText([claude('El agua se evapora'), gemini('El agua se evaporó')]);
+    expect(result.reasons).toEqual(['readers_disagree', 'rubric_item']);
+    expect(result.reviewMode).toBe('reading');
+  });
+
+  it('confianza baja se suma a los motivos', () => {
+    const result = evaluateText([
+      claude('El agua [ilegible]', { confidence: 0.6 }),
+      gemini('El agua [ilegible]'),
+    ]);
+    expect(result.reasons).toEqual(['low_confidence', 'rubric_item']);
+  });
+
+  it('en blanco tampoco se autoacepta: ni por tinta ni por los lectores', () => {
+    const byInk = evaluateText([], { inkRatio: 0 });
+    expect(byInk.outcome).toBe('needs_review');
+    expect(byInk.reasons).toEqual(['rubric_item']);
+    const byReaders = evaluateText([
+      claude('', { state: 'blank' }),
+      gemini('', { state: 'blank' }),
+    ]);
+    expect(byReaders.outcome).toBe('needs_review');
+    expect(byReaders.value?.state).toBe('blank');
+    expect(byReaders.scoringOutcome).toBeNull();
+  });
+
+  it('ilegible sigue siendo un motivo de lectura', () => {
+    const result = evaluateText([claude('', { state: 'illegible' }), gemini('x')]);
+    expect(result.reasons).toEqual(
+      expect.arrayContaining(['illegible', 'readers_disagree', 'rubric_item']),
+    );
+    expect(result.reviewMode).toBe('reading');
+  });
+});
