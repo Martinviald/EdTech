@@ -420,3 +420,37 @@ contrato del modo lectura.
 **Para el deploy (no se corrige en código):** el backfill de 0042 necesita el rol de migración con
 BYPASSRLS (`DATABASE_ADMIN_URL`); con un rol sin él aborta de forma segura. `llm_models` no tiene RLS
 (decisión F3-1): su protección es solo la API (`LLM_MODELS_ADMIN_ROLES`).
+
+### Corrección de la revisión final (F12) (`wip/cv-f12fix`)
+
+Cada defecto de comportamiento con test previo que fallaba con el código anterior.
+- **M2 — respuesta reclamada por otra hoja:** toda consolidación (automática, revisión
+  registrada, resolución humana y deshacer) solo escribe en la respuesta si su dueña es la marca
+  de la decisión (las decisiones de una cadena `superseded_by_id` comparten marca). Si no, se
+  salta con el motivo nuevo `response_reclaimed` y la decisión queda sin consolidar. Toda
+  escritura conserva `value.reading.markId` (antes la consolidación lo borraba).
+- **Decisión F12-1 — respuestas sin reserva (confirmadas antes de F7):** la dueña es
+  `value.reading.markId`; si falta, la marca de la decisión que la escribió
+  (`value.reading.decisionId`); si tampoco hay, solo se escribe cuando ninguna decisión de otra
+  marca está vinculada a la respuesta. Así una respuesta vieja vinculada a dos hojas no la escribe
+  ninguna (queda para revisión manual), y una vinculada a una sola hoja sigue funcionando.
+- **M3 — `human_score` ajeno:** la consolidación bloquea las respuestas con
+  `SELECT ... FOR UPDATE` (en orden de id, para no generar interbloqueos) y
+  `applyHumanResolutions` repite el chequeo dentro de esa transacción (`human_scored`).
+- **M5:** `isProviderAllowedByOrg` en `@soe/answer-reading`, compartido por
+  `applyOrgRestrictions`, `RubricGradingService` y `DevelopmentGradingService`. Si el proveedor de
+  `ai_grading` no está permitido, la corrección de desarrollo deja los jobs `skipped`
+  (`provider_not_allowed`) y las respuestas pendientes; un job omitido no bloquea un reintento.
+- **M4:** `monthlyBudgetUsd` suma `answer_readings` y los `ai_grading_jobs` de tipo
+  `rubric_level`; la calificación estima con su propio costo medio. `aiBudgetUsd` sigue saliendo de
+  `AiObservabilityService` (que ya suma ambas tablas). Un `orgConfig` que no valida deja el tope de
+  IA en 0.
+- **M6:** `answer_reading_samples` con políticas SELECT/INSERT/UPDATE, sin DELETE. Verificado en
+  PG14 desechable con un rol sin BYPASSRLS: con la política vieja el DELETE borraba la fila; tras
+  re-aplicar `rls-policies.sql`, DELETE 0 y el resto sigue funcionando.
+- **M7:** sin comentarios agregados por la PR en `apps/api/src`.
+- Test de contrato del modo lectura en la cola y el detalle, con control positivo en corrección.
+
+Riesgos que quedan: `response_reclaimed` no tiene campo propio en `SubmitReviewResult` (no cae en
+`skippedHumanScored` ni en `pendingConsolidation`); el costo de la corrección de desarrollo
+heredada (`development_crop`) no cuenta para `monthlyBudgetUsd`.
