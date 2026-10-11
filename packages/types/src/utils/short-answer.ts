@@ -23,12 +23,14 @@ import type {
 } from '../schemas/answer-reading/response-format.schema';
 import {
   compareCanonical,
+  compareShortText,
   isNumericSequenceText,
   isParsed,
   normalizeText,
   parseOrderedTupleText,
   parseScalarText,
   parseSequenceText,
+  parseWordListText,
   resolveEquivalences,
   type CanonicalComparison,
   type CanonicalParse,
@@ -41,9 +43,17 @@ export type ShortAnswerMatch = 'match' | 'mismatch' | 'undecidable';
 
 /**
  * Modo de comparación. `numeric` y `text` comparan UN valor; `sequence` compara un
- * orden (`3-1-4-2`); `ordered_tuple` un par o terna ordenada (`(7;3)`).
+ * orden (`3-1-4-2`); `ordered_tuple` un par o terna ordenada (`(7;3)`);
+ * `word_list` una lista de palabras (`Cabeza, tórax, abdomen`); `short_text` una
+ * oración corta, que solo se da por correcta si calza exacta (si no, revisión).
  */
-export type ShortAnswerComparison = 'numeric' | 'text' | 'sequence' | 'ordered_tuple';
+export type ShortAnswerComparison =
+  | 'numeric'
+  | 'text'
+  | 'sequence'
+  | 'ordered_tuple'
+  | 'word_list'
+  | 'short_text';
 
 export type ShortAnswerOptions = {
   comparison?: ShortAnswerComparison;
@@ -53,11 +63,11 @@ export type ShortAnswerOptions = {
   formatKind?: ResponseFormatKind;
   /** Equivalencias de la pauta (`scoring_config.equivalences`). */
   equivalences?: Equivalences;
-  /** Crédito por componente en pares ordenados (`scoring_config.componentCredit`). */
+  /** Crédito por componente en pares ordenados o por palabra (`scoring_config.componentCredit`). */
   componentCredit?: ComponentCredit;
 };
 
-/** Comparación con crédito: `partial` solo existe en pares con `componentCredit`. */
+/** Comparación con crédito: `partial` solo existe con `componentCredit` (pares y listas). */
 export type ShortAnswerCredit = CanonicalComparison;
 
 const INCORRECT: ShortAnswerCredit = { outcome: 'incorrect', credit: 0 };
@@ -127,14 +137,21 @@ function looksOnlyNumeric(value: string): boolean {
 export function comparisonForFormat(
   formatKind: ResponseFormatKind | undefined,
 ): ShortAnswerComparison | undefined {
-  if (formatKind === 'sequence' || formatKind === 'ordered_tuple') return formatKind;
+  if (
+    formatKind === 'sequence' ||
+    formatKind === 'ordered_tuple' ||
+    formatKind === 'word_list' ||
+    formatKind === 'short_text'
+  ) {
+    return formatKind;
+  }
   return undefined;
 }
 
 /** Deriva el modo de comparación cuando el ítem no lo declara. */
 export function inferComparisonMode(
   accepted: readonly string[],
-): Exclude<ShortAnswerComparison, 'sequence'> {
+): Extract<ShortAnswerComparison, 'numeric' | 'text' | 'ordered_tuple'> {
   const cleaned = accepted.map((a) => collapseWhitespace(a)).filter(Boolean);
   if (cleaned.length === 0) return 'text';
   if (cleaned.every(looksOnlyNumeric)) return 'numeric';
@@ -232,6 +249,24 @@ function compareTuple(
   );
 }
 
+function compareWordList(
+  answer: string,
+  keys: string[],
+  options: ShortAnswerOptions,
+): ShortAnswerCredit {
+  const given = parseWordListText(answer);
+  const parsedKeys = keys.map((key) => parseWordListText(key)).filter(isParsed);
+  if (parsedKeys.length === 0) return UNDECIDABLE;
+  if (!isParsed(given)) return INCORRECT;
+  return compareCanonical(
+    given,
+    parsedKeys,
+    options.formatKind ?? 'word_list',
+    options.equivalences,
+    options.componentCredit,
+  );
+}
+
 function compareNumeric(
   answer: string,
   keys: string[],
@@ -266,6 +301,8 @@ export function creditForAcceptedAnswer(
 
   if (mode === 'sequence') return compareSequence(withoutUnit, keys, options);
   if (mode === 'ordered_tuple') return compareTuple(withoutUnit, keys, options);
+  if (mode === 'word_list') return compareWordList(withoutUnit, keys, options);
+  if (mode === 'short_text') return compareShortText(cleaned, accepted, options.caseSensitive);
   if (mode === 'numeric') {
     const { ignoreUnit } = resolveEquivalences(options.formatKind ?? null, options.equivalences);
     const unit = checkUnit(cleaned, options.unit, ignoreUnit);

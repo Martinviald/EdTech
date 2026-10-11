@@ -1,6 +1,11 @@
 import {
   canonicalKey,
   compareCanonical,
+  compareShortText,
+  compareWordLists,
+  normalizeShortText,
+  parseShortText,
+  parseWordListText,
   isParsed,
   parseCanonicalKey,
   parseFractionText,
@@ -352,5 +357,115 @@ describe('resolveEquivalences', () => {
     expect(resolveEquivalences('fraction', { acceptDecimalEquivalent: true })).toMatchObject({
       acceptDecimalEquivalent: true,
     });
+  });
+});
+
+describe('parseWordListText', () => {
+  it.each([
+    ['Cabeza, tórax, abdomen', 'w:cabeza|torax|abdomen'],
+    ['cabeza; TÓRAX y abdomen.', 'w:cabeza|torax|abdomen'],
+    ['- cabeza\n- tórax\n- abdomen', 'w:cabeza|torax|abdomen'],
+    ['cabeza\ntórax\nabdomen', 'w:cabeza|torax|abdomen'],
+    ['cabeza - tórax - abdomen', 'w:cabeza|torax|abdomen'],
+    ['ex-presidente, “ciudad”', 'w:ex-presidente|ciudad'],
+    ['Abdomen / vientre', 'w:abdomen/vientre'],
+  ])('%j → %s', (text, key) => {
+    expect(keyOf(parseWordListText(text))).toBe(key);
+  });
+
+  it('vacío no se interpreta; palabras de más se marcan', () => {
+    expect(isParsed(parseWordListText(' , ; '))).toBe(false);
+    expect(parseWordListText(' , ').issues).toContain('empty_part');
+    expect(parseWordListText('a, b, c, d', { expectedCount: 3 }).issues).toContain('extra_tokens');
+  });
+});
+
+describe('compareWordLists', () => {
+  const list = (text: string) => {
+    const value = primaryReading(parseWordListText(text));
+    if (value === null || value.type !== 'word_list') throw new Error(text);
+    return value;
+  };
+  const key = list('Cabeza, tórax, abdomen');
+  const thirds = { mode: 'per_component' as const, creditPerComponent: [1 / 3, 1 / 3, 1 / 3] };
+
+  it('igual en orden es correcta; el orden importa salvo unordered', () => {
+    expect(compareWordLists(list('cabeza, torax, abdomen'), key, false).outcome).toBe('correct');
+    expect(compareWordLists(list('torax, cabeza, abdomen'), key, false).outcome).toBe('incorrect');
+    expect(compareWordLists(list('torax, cabeza, abdomen'), key, true).outcome).toBe('correct');
+  });
+
+  it('alternativas de la clave valen; una palabra con barra del alumno va a revisión', () => {
+    const withSynonym = list('cabeza, tórax, abdomen/vientre');
+    expect(compareWordLists(list('cabeza, torax, vientre'), withSynonym, false).outcome).toBe(
+      'correct',
+    );
+    expect(compareWordLists(list('cabeza, torax, abdomen/panza'), key, false).outcome).toBe(
+      'undecidable',
+    );
+  });
+
+  it('falta pequeña en palabra de 5+ letras → revisión; en palabra corta → incorrecta', () => {
+    expect(compareWordLists(list('cabeza, torax, abdomem'), key, false).outcome).toBe(
+      'undecidable',
+    );
+    expect(compareWordLists(list('cabeza, torax, abdmen'), key, false).outcome).toBe('undecidable');
+    expect(compareWordLists(list('cabeza, torax, abdomenes'), key, false).outcome).toBe(
+      'incorrect',
+    );
+    const short = list('sol, mar');
+    expect(compareWordLists(list('sol, mal'), short, false).outcome).toBe('incorrect');
+  });
+
+  it('todas las palabras y otras de más va a revisión; faltar una es incorrecta', () => {
+    expect(compareWordLists(list('cabeza, torax, abdomen, patas'), key, false).outcome).toBe(
+      'undecidable',
+    );
+    expect(compareWordLists(list('cabeza, torax'), key, false).outcome).toBe('incorrect');
+  });
+
+  it('crédito por palabra solo con componentCredit', () => {
+    expect(compareWordLists(list('cabeza, torax, patas'), key, false).outcome).toBe('incorrect');
+    const partial = compareWordLists(list('cabeza, torax, patas'), key, false, thirds);
+    expect(partial.outcome).toBe('partial');
+    expect(partial.credit).toBeCloseTo(2 / 3);
+    const unordered = compareWordLists(list('patas, cabeza, torax'), key, true, thirds);
+    expect(unordered.credit).toBeCloseTo(2 / 3);
+    expect(compareWordLists(list('cabeza, torax, abdomem'), key, false, thirds).outcome).toBe(
+      'undecidable',
+    );
+    expect(compareWordLists(list('ala, pata, ojo'), key, false, thirds).outcome).toBe('incorrect');
+  });
+
+  it('pesos distintos por palabra eligen la asignación de mayor crédito', () => {
+    const weighted = { mode: 'per_component' as const, creditPerComponent: [0.2, 0.2, 0.6] };
+    const result = compareWordLists(list('abdomen, ala'), key, true, weighted);
+    expect(result.credit).toBeCloseTo(0.6);
+  });
+
+  it('compareCanonical usa unordered y componentCredit de la pauta', () => {
+    expect(
+      compareCanonical(parseWordListText('torax, cabeza, abdomen'), [key], 'word_list', {
+        unordered: true,
+      }).outcome,
+    ).toBe('correct');
+  });
+});
+
+describe('texto corto', () => {
+  it('normaliza espacios, comillas, mayúsculas y puntuación final; conserva tildes', () => {
+    expect(normalizeShortText('  “Pedro   is cooking.” ')).toBe('pedro is cooking');
+    expect(normalizeShortText('¿Dónde está?')).toBe('dónde está');
+    expect(normalizeShortText('Pedro’s car')).toBe("pedro's car");
+    expect(normalizeShortText('Pedro', true)).toBe('Pedro');
+    expect(keyOf(parseShortText('Pedro is cooking.'))).toBe('x:pedro is cooking');
+    expect(isParsed(parseShortText(' ... '))).toBe(false);
+  });
+
+  it('exacto normalizado es correcto; cualquier otra diferencia es indecidible', () => {
+    expect(compareShortText('pedro is cooking', ['Pedro is cooking.']).outcome).toBe('correct');
+    expect(compareShortText('Pedro cooks', ['Pedro is cooking.']).outcome).toBe('undecidable');
+    expect(compareShortText('esta', ['está']).outcome).toBe('undecidable');
+    expect(compareShortText('   ', ['está']).outcome).toBe('incorrect');
   });
 });

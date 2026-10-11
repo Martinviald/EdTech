@@ -1,8 +1,12 @@
 // Estrategia determinística para `short_answer`: el alumno escribe un valor y se
 // compara contra las claves de la pauta con tolerancia de forma (ver
-// `utils/short-answer`). Corrección binaria salvo un caso: un par ordenado cuya
-// pauta declara `componentCredit` da crédito por coordenada (diseño §10.1, D6).
-// `partialCredit: false` lo apaga explícitamente.
+// `utils/short-answer`). Corrección binaria salvo cuando la pauta declara
+// `componentCredit`: un par ordenado da crédito por coordenada y una lista de
+// palabras por palabra (diseño §10.1, D6). `partialCredit: false` lo apaga.
+//
+// Un formato declarado `word_list` o `short_text` fija cómo se compara, por
+// encima de la comparación genérica `text`: un texto corto que no calza exacto
+// va a revisión, nunca a incorrecta.
 //
 // Una respuesta INDECIDIBLE (trae más de un valor candidato, o admite dos lecturas
 // con resultados distintos) no se puntúa 0: se deja pendiente. Castigar una
@@ -22,8 +26,14 @@ export const shortAnswerStrategy: ScoringStrategy = {
     }
 
     const config = input.item.scoringConfig;
+    const byFormat = comparisonForFormat(content.responseFormat?.kind);
+    const textFormat = byFormat === 'word_list' || byFormat === 'short_text';
+    const comparison =
+      textFormat && (content.comparison === undefined || content.comparison === 'text')
+        ? byFormat
+        : (content.comparison ?? byFormat);
     const result = creditForAcceptedAnswer(answer, content.acceptedAnswers ?? [], {
-      comparison: content.comparison ?? comparisonForFormat(content.responseFormat?.kind),
+      comparison,
       unit: content.unit,
       caseSensitive: content.caseSensitive,
       formatKind: content.responseFormat?.kind,

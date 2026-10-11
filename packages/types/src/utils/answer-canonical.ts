@@ -30,6 +30,8 @@ export type CanonicalNumber = Extract<CanonicalValue, { type: 'number' }>;
 export type CanonicalFraction = Extract<CanonicalValue, { type: 'fraction' }>;
 export type CanonicalTuple = Extract<CanonicalValue, { type: 'tuple' }>;
 export type CanonicalSequence = Extract<CanonicalValue, { type: 'sequence' }>;
+export type CanonicalWordList = Extract<CanonicalValue, { type: 'word_list' }>;
+export type CanonicalText = Extract<CanonicalValue, { type: 'text' }>;
 
 /**
  * Convención del punto. `decimal`: `1.500` es 1,5. `thousands`: `1.500` es 1500.
@@ -397,6 +399,221 @@ export function parseSequenceText(
   return parse;
 }
 
+// ── Texto corto y listas de palabras ─────────────────────────────────────────
+
+const SINGLE_QUOTES = /[‘’‚‛′`´]/g;
+const DOUBLE_QUOTES = /[“”„‟«»"″]/g;
+const LEADING_PUNCTUATION = /^[¿¡\s]+/;
+const TRAILING_PUNCTUATION = /[\s.,;:!?…]+$/;
+
+/**
+ * Texto corto normalizado para comparar (`short_text`): espacios colapsados,
+ * comillas tipográficas unificadas (las dobles se quitan), sin `¿¡` iniciales ni
+ * puntuación final y, salvo `caseSensitive`, sin mayúsculas. Las tildes se
+ * conservan: `esta` y `está` son respuestas distintas (y van a revisión).
+ */
+export function normalizeShortText(value: string, caseSensitive = false): string {
+  const text = value
+    .normalize('NFC')
+    .replace(SINGLE_QUOTES, "'")
+    .replace(DOUBLE_QUOTES, '')
+    .replace(/\s+/g, ' ')
+    .replace(LEADING_PUNCTUATION, '')
+    .replace(TRAILING_PUNCTUATION, '')
+    .trim();
+  return caseSensitive ? text : text.toLocaleLowerCase('es');
+}
+
+/** Texto corto: un solo valor de texto normalizado; vacío = no interpretable. */
+export function parseShortText(text: string): CanonicalParse<CanonicalText> {
+  const normalized = normalizeShortText(text);
+  return buildParse<CanonicalText>(
+    () => (normalized.length > 0 ? [{ type: 'text', text: normalized }] : []),
+    ['empty_part'],
+  );
+}
+
+const WORD_SEPARATORS = /[,;\n]|\s[-–—]\s|\s(?:y|e)\s/giu;
+const LIST_BULLET = /^\s*[-–—•*·]\s+/gmu;
+/** Separa alternativas de una palabra en la CLAVE: `abdomen/vientre`. */
+export const WORD_ALTERNATIVE_SEPARATOR = '/';
+
+/** Palabra normalizada: sin mayúsculas, sin tildes y sin puntuación en los bordes. */
+export function normalizeWord(value: string): string {
+  return normalizeText(value)
+    .replace(SINGLE_QUOTES, "'")
+    .replace(DOUBLE_QUOTES, '')
+    .replace(/^[\s¿¡.,;:!?…()]+|[\s.,;:!?…()]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*\/\s*/g, WORD_ALTERNATIVE_SEPARATOR);
+}
+
+export interface WordListParseOptions {
+  /** Cantidad de palabras esperada (del formato). */
+  expectedCount?: number;
+}
+
+/**
+ * Lista de palabras: `Cabeza, tórax, abdomen`, `cabeza; tórax y abdomen`, una por
+ * renglón o con guiones de lista. Cada palabra se normaliza (`normalizeWord`).
+ */
+export function parseWordListText(
+  text: string,
+  options: WordListParseOptions = {},
+): CanonicalParse<CanonicalWordList> {
+  const words = ` ${text.replace(LIST_BULLET, '\n')} `
+    .split(WORD_SEPARATORS)
+    .map(normalizeWord)
+    .filter((word) => word.length > 0);
+  const parse = buildParse<CanonicalWordList>(
+    () => (words.length > 0 ? [{ type: 'word_list', words }] : []),
+    ['empty_part'],
+  );
+  if (
+    words.length > 0 &&
+    options.expectedCount !== undefined &&
+    words.length > options.expectedCount
+  ) {
+    parse.issues.push('extra_tokens');
+  }
+  return parse;
+}
+
+/** Distancia de edición ≤ 1 (una letra cambiada, sobrante o faltante). */
+function withinOneEdit(a: string, b: string): boolean {
+  const left = [...a];
+  const right = [...b];
+  if (Math.abs(left.length - right.length) > 1) return false;
+  let i = 0;
+  let j = 0;
+  let edits = 0;
+  while (i < left.length && j < right.length) {
+    if (left[i] === right[j]) {
+      i++;
+      j++;
+      continue;
+    }
+    if (++edits > 1) return false;
+    if (left.length > right.length) i++;
+    else if (right.length > left.length) j++;
+    else {
+      i++;
+      j++;
+    }
+  }
+  return edits + (left.length - i) + (right.length - j) <= 1;
+}
+
+/** Largo mínimo de la palabra de la clave para considerar una falta ortográfica pequeña. */
+export const NEAR_MISS_MIN_LETTERS = 5;
+
+type WordMatch = 'same' | 'near' | 'different';
+
+const isSame = (match: WordMatch) => match === 'same';
+const isClose = (match: WordMatch) => match !== 'different';
+
+function matchWord(given: string, key: string): WordMatch {
+  const alternatives = key.split(WORD_ALTERNATIVE_SEPARATOR).filter(Boolean);
+  if (alternatives.includes(given)) return 'same';
+  const near = alternatives.some(
+    (alternative) =>
+      [...alternative].length >= NEAR_MISS_MIN_LETTERS && withinOneEdit(given, alternative),
+  );
+  return near ? 'near' : 'different';
+}
+
+/**
+ * Asignación palabra respondida → posición de la clave que maximiza el crédito
+ * (caminos de aumento procesando las posiciones de mayor peso primero: óptimo en
+ * un matroide transversal). `accepts` decide si una palabra puede ocupar una posición.
+ */
+function bestAssignmentCredit(
+  given: readonly string[],
+  key: readonly string[],
+  weights: readonly number[],
+  unordered: boolean,
+  accepts: (match: WordMatch) => boolean,
+): { credit: number; matched: number } {
+  const canTake = (g: number, k: number) => {
+    const word = given[g];
+    const keyWord = key[k];
+    if (word === undefined || keyWord === undefined) return false;
+    if (!unordered && g !== k) return false;
+    return accepts(matchWord(word, keyWord));
+  };
+  const ownerOfGiven = new Map<number, number>();
+  const tryAssign = (k: number, visited: Set<number>): boolean => {
+    for (let g = 0; g < given.length; g++) {
+      if (visited.has(g) || !canTake(g, k)) continue;
+      visited.add(g);
+      const owner = ownerOfGiven.get(g);
+      if (owner === undefined || tryAssign(owner, visited)) {
+        ownerOfGiven.set(g, k);
+        return true;
+      }
+    }
+    return false;
+  };
+  const order = key.map((_, index) => index).sort((a, b) => (weights[b] ?? 0) - (weights[a] ?? 0));
+  for (const k of order) tryAssign(k, new Set());
+  let credit = 0;
+  for (const k of ownerOfGiven.values()) credit += weights[k] ?? 0;
+  return { credit, matched: ownerOfGiven.size };
+}
+
+/**
+ * Compara listas de palabras (§5.5). Sin mayúsculas ni tildes; el orden importa
+ * salvo `unordered`. Sinónimos y faltas valen solo si están en la clave (como
+ * alternativas `abdomen/vientre` o como otra clave aceptada): no hay corrección
+ * difusa. Lo que no calza va a revisión (`undecidable`) cuando la única diferencia
+ * es una falta pequeña (distancia de edición 1 en una palabra de 5 o más letras) o
+ * cuando la respuesta trae todas las palabras y otras de más; si no, es incorrecta.
+ * Crédito por palabra solo con `componentCredit`.
+ */
+export function compareWordLists(
+  given: CanonicalWordList,
+  key: CanonicalWordList,
+  unordered: boolean,
+  componentCredit?: ComponentCredit,
+): CanonicalComparison {
+  const answered = given.words.map(normalizeWord);
+  const expected = key.words.map(normalizeWord);
+  if (answered.some((word) => word.includes(WORD_ALTERNATIVE_SEPARATOR))) return UNDECIDABLE;
+  const unit = expected.map(() => 1);
+  const strict = bestAssignmentCredit(answered, expected, unit, unordered, isSame);
+  const allKeyWords = strict.matched === expected.length;
+  if (allKeyWords && answered.length === expected.length) return CORRECT;
+  if (allKeyWords) return UNDECIDABLE;
+  const loose = bestAssignmentCredit(answered, expected, unit, unordered, isClose);
+  const weights = componentCredit?.creditPerComponent ?? null;
+  if (weights === null) {
+    const fixableBySpelling =
+      loose.matched === expected.length && answered.length === expected.length;
+    return fixableBySpelling ? UNDECIDABLE : INCORRECT;
+  }
+  const strictCredit = bestAssignmentCredit(answered, expected, weights, unordered, isSame).credit;
+  const looseCredit = bestAssignmentCredit(answered, expected, weights, unordered, isClose).credit;
+  if (looseCredit > strictCredit) return UNDECIDABLE;
+  return strictCredit > 0 ? { outcome: 'partial', credit: Math.min(strictCredit, 1) } : INCORRECT;
+}
+
+/**
+ * Texto corto: coincidencia exacta normalizada con alguna clave = correcta; si
+ * no, indecidible. En texto libre corto la corrección automática nunca marca
+ * incorrecta por una diferencia de redacción.
+ */
+export function compareShortText(
+  given: string,
+  keys: readonly string[],
+  caseSensitive = false,
+): CanonicalComparison {
+  const answer = normalizeShortText(given, caseSensitive);
+  if (answer.length === 0) return INCORRECT;
+  return keys.some((key) => normalizeShortText(key, caseSensitive) === answer)
+    ? CORRECT
+    : UNDECIDABLE;
+}
+
 // ── Utilidades sobre el resultado de interpretar ─────────────────────────────
 
 export function isParsed(parse: CanonicalParse): boolean {
@@ -633,16 +850,10 @@ function compareOne(
     return sameElements(given.elements, key.elements, equivalences.unordered) ? CORRECT : INCORRECT;
   }
   if (given.type === 'word_list' && key.type === 'word_list') {
-    return sameElements(
-      given.words.map(normalizeText),
-      key.words.map(normalizeText),
-      equivalences.unordered,
-    )
-      ? CORRECT
-      : INCORRECT;
+    return compareWordLists(given, key, equivalences.unordered, context.componentCredit);
   }
   if (given.type === 'text' && key.type === 'text') {
-    return normalizeText(given.text) === normalizeText(key.text) ? CORRECT : INCORRECT;
+    return compareShortText(given.text, [key.text]);
   }
   return INCORRECT;
 }

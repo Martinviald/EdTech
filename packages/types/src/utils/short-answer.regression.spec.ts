@@ -8,6 +8,11 @@
 //   · texto sin tildes (`telefono` = `Teléfono`) → `match`;
 //   · miles con espacio (`1 500`), número mixto (`1 1/2`), signo tipográfico o entre
 //     paréntesis (`−5`, `(-5)`) y pares ordenados con cualquier separador → `match`.
+// F10a agrega los modos `word_list` y `short_text` (antes caían a texto exacto):
+//   · lista: separadores, orden con `unordered`, alternativas `a/b` → `match`; una
+//     falta pequeña o palabras de más → `undecidable`;
+//   · texto corto: comillas, mayúsculas y puntuación final → `match`; cualquier otra
+//     diferencia, también de tildes (`esta`/`está`) → `undecidable`, nunca `mismatch`.
 // Fuentes: short-answer.spec, scoring-strategy.spec, formatos de GradeCam y los 23
 // literales del experimento de visión (pruebas-vlm-manuscrito/fotos/esperado.json).
 import {
@@ -229,6 +234,161 @@ const ROWS: Row[] = [
   ['revisión F2', '7.3', ['(7;3)'], {}, 'mismatch', 'mismatch'],
   ['revisión F2', '(-3;2)', ['(-3,2)'], {}, 'mismatch', 'match'],
   ['revisión F2', 'telefono', ['Teléfono'], {}, 'mismatch', 'match'],
+  [
+    'F10a lista',
+    'cabeza, torax, abdomen',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'match',
+    'match',
+  ],
+  [
+    'F10a lista',
+    'Cabeza; tórax y abdomen.',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a lista',
+    '- cabeza\n- tórax\n- abdomen',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a lista',
+    'tórax, cabeza, abdomen',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'mismatch',
+  ],
+  [
+    'F10a lista',
+    'tórax, cabeza, abdomen',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list', equivalences: { unordered: true } },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a lista',
+    'cabeza, torax, abdomem',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'undecidable',
+  ],
+  [
+    'F10a lista',
+    'cabeza, torax, patas',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'mismatch',
+  ],
+  [
+    'F10a lista',
+    'cabeza, torax, vientre',
+    ['Cabeza, tórax, abdomen/vientre'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a lista',
+    'cabeza, torax',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'mismatch',
+  ],
+  [
+    'F10a lista',
+    'cabeza, torax, abdomen, patas',
+    ['Cabeza, tórax, abdomen'],
+    { comparison: 'word_list' },
+    'mismatch',
+    'undecidable',
+  ],
+  ['F10a lista', 'cabeza, torax, abdomen', ['Cabeza, tórax, abdomen'], {}, 'match', 'match'],
+  ['F10a lista', 'cabeza torax abdomen', ['Cabeza, tórax, abdomen'], {}, 'mismatch', 'mismatch'],
+  [
+    'F10a texto',
+    'Pedro is cooking',
+    ['Pedro is cooking.'],
+    { comparison: 'short_text' },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a texto',
+    '“Pedro is cooking.”',
+    ['Pedro is cooking.'],
+    { comparison: 'short_text' },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a texto',
+    'pedro  is   COOKING!',
+    ['Pedro is cooking.'],
+    { comparison: 'short_text' },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a texto',
+    'Pedro cooks',
+    ['Pedro is cooking.'],
+    { comparison: 'short_text' },
+    'mismatch',
+    'undecidable',
+  ],
+  [
+    'F10a texto',
+    'Peter is cooking',
+    ['Pedro is cooking.'],
+    { comparison: 'short_text' },
+    'mismatch',
+    'undecidable',
+  ],
+  ['F10a texto', 'esta', ['está'], { comparison: 'short_text' }, 'match', 'undecidable'],
+  [
+    'F10a texto',
+    'Pedro’s cooking',
+    ["Pedro's cooking"],
+    { comparison: 'short_text' },
+    'mismatch',
+    'match',
+  ],
+  [
+    'F10a par',
+    '[2#4]',
+    ['(2,-4)'],
+    { componentCredit: { mode: 'per_component', creditPerComponent: [0.5, 0.5] } },
+    'mismatch',
+    'mismatch',
+  ],
+  [
+    'F10a par',
+    '[3#7]',
+    ['(7;3)'],
+    { componentCredit: { mode: 'per_component', creditPerComponent: [0.5, 0.5] } },
+    'mismatch',
+    'mismatch',
+  ],
+  [
+    'F10a par',
+    '[2#-4]',
+    ['(2,-4)'],
+    { componentCredit: { mode: 'per_component', creditPerComponent: [0.5, 0.5] } },
+    'match',
+    'match',
+  ],
 ];
 
 describe('matchesAcceptedAnswer — tabla de regresión (gate F2)', () => {
@@ -244,6 +404,6 @@ describe('matchesAcceptedAnswer — tabla de regresión (gate F2)', () => {
   });
 
   it('los únicos cambios son los justificados por §5.5', () => {
-    expect(ROWS.filter(([, , , , before, after]) => before !== after)).toHaveLength(17);
+    expect(ROWS.filter(([, , , , before, after]) => before !== after)).toHaveLength(30);
   });
 });
