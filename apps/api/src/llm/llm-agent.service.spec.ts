@@ -1,6 +1,7 @@
 import { ServiceUnavailableException } from '@nestjs/common';
 import { LlmAgentService, type AgentStreamEvent } from './llm-agent.service';
 import type { LlmConfigService } from './llm.config';
+import { GeminiProvider } from './providers/gemini.provider';
 import type {
   LlmAgentEvent,
   LlmAgentRequest,
@@ -52,6 +53,99 @@ async function collect(
   for await (const e of gen) out.push(e);
   return out;
 }
+
+interface GeminiTurnRequest {
+  contents: Array<{ role: string; parts: Array<Record<string, unknown>> }>;
+}
+
+function makeGeminiProvider(turns: unknown[][]) {
+  const provider = new GeminiProvider();
+  const requests: GeminiTurnRequest[] = [];
+  let turn = 0;
+  const generateContentStream = jest.fn((req: GeminiTurnRequest) => {
+    requests.push(req);
+    const chunks = turns[turn] ?? [];
+    turn += 1;
+    return Promise.resolve(
+      (async function* () {
+        for (const chunk of chunks) yield chunk;
+      })(),
+    );
+  });
+  (provider as unknown as { client: unknown }).client = { models: { generateContentStream } };
+  return { provider, requests };
+}
+
+function makeGeminiConfig(): LlmConfigService {
+  return {
+    resolve: () =>
+      Promise.resolve({ provider: 'gemini', model: 'gemini-3.5-flash', maxTokens: 1024 }),
+  } as unknown as LlmConfigService;
+}
+
+describe('LlmAgentService con Gemini', () => {
+  it('reinyecta la thoughtSignature de la function call en el turno siguiente', async () => {
+    const { provider, requests } = makeGeminiProvider([
+      [
+        {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    functionCall: { name: 'get_heatmap', args: { classGroupId: 'cg-1' } },
+                    thoughtSignature: 'firma-opaca',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        { candidates: [{ finishReason: 'STOP' }] },
+      ],
+      [{ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'Listo.' }] } }] }],
+    ]);
+    const service = new LlmAgentService(makeGeminiConfig(), [provider]);
+    const executeTool = jest.fn().mockResolvedValue({ content: '{"ok":true}' });
+
+    const events = await collect(
+      service.runAgent({
+        system: 's',
+        messages: [{ role: 'user', content: [{ type: 'text', text: 'x' }] }],
+        tools: [{ name: 'get_heatmap', description: 'd', inputSchema: { type: 'object' } }],
+        executeTool,
+      }),
+    );
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1]?.contents[1]).toEqual({
+      role: 'model',
+      parts: [
+        {
+          functionCall: { name: 'get_heatmap', args: { classGroupId: 'cg-1' } },
+          thoughtSignature: 'firma-opaca',
+        },
+      ],
+    });
+    expect(executeTool).toHaveBeenCalledWith({
+      id: 'get_heatmap-0',
+      name: 'get_heatmap',
+      input: { classGroupId: 'cg-1' },
+    });
+    const final = events.find((e) => e.type === 'final');
+    expect(final).toMatchObject({
+      messages: [
+        { role: 'user' },
+        {
+          role: 'assistant',
+          content: [{ type: 'tool_use', providerMetadata: { thoughtSignature: 'firma-opaca' } }],
+        },
+        { role: 'user' },
+        { role: 'assistant' },
+      ],
+    });
+  });
+});
 
 describe('LlmAgentService', () => {
   it('no envía temperatura al proveedor cuando la configuración no la define', async () => {

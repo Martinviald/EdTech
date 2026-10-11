@@ -19,6 +19,7 @@ interface FakeChunk {
       parts?: Array<{
         text?: string;
         functionCall?: { name?: string; args?: Record<string, unknown> };
+        thoughtSignature?: string;
       }>;
     };
   }>;
@@ -126,6 +127,32 @@ describe('GeminiProvider.streamWithTools', () => {
     const order = events.map((e) => e.type);
     expect(order.indexOf('text_delta')).toBeLessThan(order.indexOf('tool_call'));
     expect(order.indexOf('tool_call')).toBeLessThan(order.indexOf('done'));
+  });
+
+  it('transporta la thoughtSignature de la function call en providerMetadata', async () => {
+    const provider = new GeminiProvider();
+    const fake = makeFakeClient([
+      {
+        candidates: [
+          {
+            content: {
+              parts: [{ functionCall: { name: 'get_heatmap', args: {} }, thoughtSignature: 'sig' }],
+            },
+          },
+        ],
+      },
+    ]);
+    (provider as unknown as { client: unknown }).client = fake;
+
+    const events = await collect(provider.streamWithTools(makeRequest()));
+
+    expect(events).toContainEqual({
+      type: 'tool_call',
+      id: 'get_heatmap-0',
+      name: 'get_heatmap',
+      input: {},
+      providerMetadata: { thoughtSignature: 'sig' },
+    });
   });
 
   it('cierra con end_turn cuando no hay function calls (STOP puro)', async () => {

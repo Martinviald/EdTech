@@ -141,7 +141,7 @@ interface GeminiFunctionResponse {
 /** Una "part" de contenido en el historial agéntico de Gemini. */
 type GeminiAgentPart =
   | { text: string }
-  | { functionCall: { name: string; args: unknown } }
+  | { functionCall: { name: string; args: unknown }; thoughtSignature?: string }
   | { functionResponse: GeminiFunctionResponse };
 /** Un mensaje del historial: rol 'user' o 'model' (Gemini NO usa 'assistant'). */
 interface GeminiContent {
@@ -164,7 +164,11 @@ interface GeminiStreamChunk {
   candidates?: Array<{
     finishReason?: string;
     content?: {
-      parts?: Array<{ text?: string; functionCall?: GeminiFunctionCall }>;
+      parts?: Array<{
+        text?: string;
+        functionCall?: GeminiFunctionCall;
+        thoughtSignature?: string;
+      }>;
     };
   }>;
   usageMetadata?: {
@@ -532,6 +536,9 @@ export class GeminiProvider implements LlmProvider {
             id: `${part.functionCall.name ?? 'tool'}-${callIndex++}`,
             name: part.functionCall.name ?? '',
             input: part.functionCall.args ?? {},
+            ...(part.thoughtSignature
+              ? { providerMetadata: { thoughtSignature: part.thoughtSignature } }
+              : {}),
           };
         }
       }
@@ -602,9 +609,7 @@ export class GeminiProvider implements LlmProvider {
         case 'text':
           return { text: block.text };
         case 'tool_use':
-          return {
-            functionCall: { name: block.name, args: block.input },
-          };
+          return this.toFunctionCallPart(block);
         case 'tool_result':
           return {
             functionResponse: {
@@ -616,6 +621,16 @@ export class GeminiProvider implements LlmProvider {
           };
       }
     });
+  }
+
+  private toFunctionCallPart(
+    block: Extract<LlmAgentContent, { type: 'tool_use' }>,
+  ): GeminiAgentPart {
+    const thoughtSignature = block.providerMetadata?.thoughtSignature;
+    return {
+      functionCall: { name: block.name, args: block.input },
+      ...(typeof thoughtSignature === 'string' ? { thoughtSignature } : {}),
+    };
   }
 
   /**

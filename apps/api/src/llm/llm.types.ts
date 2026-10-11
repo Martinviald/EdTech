@@ -196,7 +196,13 @@ export type LlmAgentRole = 'user' | 'assistant';
  */
 export type LlmAgentContent =
   | { type: 'text'; text: string }
-  | { type: 'tool_use'; id: string; name: string; input: unknown }
+  | {
+      type: 'tool_use';
+      id: string;
+      name: string;
+      input: unknown;
+      providerMetadata?: Record<string, unknown>;
+    }
   | {
       type: 'tool_result';
       /** Referencia al `id` del `tool_use` que originó este resultado. */
@@ -223,7 +229,13 @@ export type LlmAgentStopReason = 'end_turn' | 'tool_use' | 'max_tokens' | 'other
  */
 export type LlmAgentEvent =
   | { type: 'text_delta'; text: string }
-  | { type: 'tool_call'; id: string; name: string; input: unknown }
+  | {
+      type: 'tool_call';
+      id: string;
+      name: string;
+      input: unknown;
+      providerMetadata?: Record<string, unknown>;
+    }
   | { type: 'usage'; inputTokens: number; outputTokens: number }
   | { type: 'done'; stopReason: LlmAgentStopReason };
 
