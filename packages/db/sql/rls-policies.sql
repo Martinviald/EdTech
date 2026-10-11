@@ -579,15 +579,38 @@ CREATE POLICY "answer_readings_tenant_insert" ON "answer_readings"
   AS PERMISSIVE FOR INSERT
   WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
+-- answer_reading_decisions y answer_reviews nunca se borran (§8.3: la decisión y el
+-- override humano son evidencia). Necesitan UPDATE para encadenar `superseded_by_id`,
+-- pero no tienen política de DELETE: un DELETE desde la API no afecta ninguna fila.
 DROP POLICY IF EXISTS "answer_reading_decisions_tenant_isolation" ON "answer_reading_decisions";
 CREATE POLICY "answer_reading_decisions_tenant_isolation" ON "answer_reading_decisions"
-  AS PERMISSIVE FOR ALL
+  AS PERMISSIVE FOR SELECT
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reading_decisions_tenant_insert" ON "answer_reading_decisions";
+CREATE POLICY "answer_reading_decisions_tenant_insert" ON "answer_reading_decisions"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reading_decisions_tenant_update" ON "answer_reading_decisions";
+CREATE POLICY "answer_reading_decisions_tenant_update" ON "answer_reading_decisions"
+  AS PERMISSIVE FOR UPDATE
   USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
   WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 
 DROP POLICY IF EXISTS "answer_reviews_tenant_isolation" ON "answer_reviews";
 CREATE POLICY "answer_reviews_tenant_isolation" ON "answer_reviews"
-  AS PERMISSIVE FOR ALL
+  AS PERMISSIVE FOR SELECT
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reviews_tenant_insert" ON "answer_reviews";
+CREATE POLICY "answer_reviews_tenant_insert" ON "answer_reviews"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reviews_tenant_update" ON "answer_reviews";
+CREATE POLICY "answer_reviews_tenant_update" ON "answer_reviews"
+  AS PERMISSIVE FOR UPDATE
   USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
   WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
 

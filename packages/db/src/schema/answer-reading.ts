@@ -204,7 +204,7 @@ export const answerReadings = pgTable(
       .references(() => answerReadingRuns.id),
     markId: uuid('mark_id')
       .notNull()
-      .references(() => sheetScanMarks.id, { onDelete: 'cascade' }),
+      .references(() => sheetScanMarks.id, { onDelete: 'no action' }),
     itemId: uuid('item_id')
       .notNull()
       .references(() => items.id),
@@ -281,7 +281,7 @@ export const answerReadingDecisions = pgTable(
       .references(() => answerReadingRuns.id),
     markId: uuid('mark_id')
       .notNull()
-      .references(() => sheetScanMarks.id, { onDelete: 'cascade' }),
+      .references(() => sheetScanMarks.id, { onDelete: 'no action' }),
     itemId: uuid('item_id')
       .notNull()
       .references(() => items.id),
@@ -326,8 +326,9 @@ export const answerReadingDecisions = pgTable(
       .where(sql`${t.supersededById} IS NULL`),
     // Agrupación por (ítem, valor canónico) en la vista por grupo (§11.2).
     index('answer_reading_decisions_group_idx')
-      .on(t.orgId, t.itemId, t.canonical)
-      .where(sql`${t.supersededById} IS NULL`),
+      .on(t.orgId, t.assessmentId, t.itemId, t.canonical)
+      .where(sql`${t.supersededById} IS NULL AND ${t.outcome} = 'needs_review'`),
+    index('answer_reading_decisions_mark_history_idx').on(t.orgId, t.markId, t.createdAt),
     index('answer_reading_decisions_run_idx').on(t.orgId, t.runId),
     index('answer_reading_decisions_response_idx').on(t.responseId),
   ],

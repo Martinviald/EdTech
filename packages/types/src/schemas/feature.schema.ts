@@ -82,8 +82,12 @@ export const orgConfigSchema = z
     omrRetentionDays: z.number().int().positive().optional(),
     /** Cola de revisión de hojas (B1). Ver orgReviewSettingsSchema. */
     review: orgReviewSettingsSchema.optional(),
-    /** Lectura por visión de respuestas abiertas (D3, D7). Ver resolveAnswerReadingSettings. */
-    answerReading: orgAnswerReadingSettingsSchema.optional(),
+    /**
+     * Lectura por visión de respuestas abiertas (D3, D7). Se valida SOLO dentro de
+     * resolveAnswerReadingSettings: un bloque corrupto no debe invalidar el resto de
+     * la configuración de la org (features pagas, presupuesto de IA, retención).
+     */
+    answerReading: z.unknown().optional(),
   })
   .passthrough();
 export type OrgConfig = z.infer<typeof orgConfigSchema>;

@@ -94,15 +94,36 @@ describe('resolveAnswerReadingSettings', () => {
     expect(resolved.allowExternalVision).toBe(true);
   });
 
-  it('orgConfigSchema valida answerReading y conserva las demás claves', () => {
+  it('orgConfigSchema deja answerReading sin validar y resolveAnswerReadingSettings lo valida', () => {
     const parsed = orgConfigSchema.parse({
       answerReading: { datasetConsent: 'none' },
       otraCosa: 1,
     });
-    expect(parsed.answerReading?.datasetConsent).toBe('none');
     expect(parsed).toHaveProperty('otraCosa', 1);
+    expect(resolveAnswerReadingSettings(parsed).datasetConsent).toBe('none');
     expect(
       orgConfigSchema.safeParse({ answerReading: { allowedProviders: ['otro'] } }).success,
+    ).toBe(true);
+    expect(
+      resolveAnswerReadingSettings({ answerReading: { allowedProviders: ['otro'] } })
+        .allowExternalVision,
+    ).toBe(false);
+  });
+});
+
+describe('answerReading corrupto no invalida el resto de la configuración', () => {
+  it('conserva features, presupuesto y anulación automática', () => {
+    const parsed = orgConfigSchema.safeParse({
+      allowedFeatures: ['remedial'],
+      aiBudgetUsd: 25,
+      answerReading: { allowExternalVision: false, comentario: 'x' },
+    });
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.aiBudgetUsd).toBe(25);
+    expect(
+      resolveAnswerReadingSettings({
+        answerReading: { allowExternalVision: false, comentario: 'x' },
+      }).allowExternalVision,
     ).toBe(false);
   });
 });
