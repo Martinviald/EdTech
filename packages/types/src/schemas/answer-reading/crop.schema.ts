@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { omrRegionSchema } from '../omr-layout.schema';
+import { omrRegionSchema } from '../omr-geometry.schema';
 import { responseFormatSchema } from './response-format.schema';
 
 // Recorte y preprocesamiento (diseño §4 S0–S2). Los perfiles se declaran aquí y se

@@ -149,3 +149,56 @@ describe('layoutHash — estabilidad de specs MVP tras las enmiendas v1 (CD-8/CD
     expect(layoutHash(moved)).not.toBe(layoutHash(v1Spec));
   });
 });
+
+describe('layoutHash — campo response opcional (F5b, corrección por visión)', () => {
+  const cropSpec: LayoutSpec = {
+    ...structuredClone(baseSpec),
+    pageCount: 1,
+    fields: [
+      ...structuredClone(baseSpec.fields),
+      {
+        fieldId: 'f_020',
+        kind: 'crop_region',
+        printedNumber: '20',
+        pageIndex: 0,
+        selectMode: 'single',
+        bubbles: [],
+        region: { topLeft: { x: 0.08, y: 0.55 }, bottomRight: { x: 0.92, y: 0.9 } },
+      },
+    ],
+  };
+  const CROP_REFERENCE_HASH = 'b89de1939043b0bc';
+
+  it('el hash de un layout con crop_region es el calculado antes de existir response', () => {
+    expect(layoutHash(cropSpec)).toBe(CROP_REFERENCE_HASH);
+  });
+
+  it('un layout con crop_region sin response conserva su hash al parsearlo', () => {
+    const parsed = layoutSpecSchema.parse(cropSpec);
+    expect('response' in parsed.fields[1]!).toBe(false);
+    expect(layoutHash(parsed)).toBe(CROP_REFERENCE_HASH);
+    expect(layoutHash(layoutSpecSchema.parse(baseSpec))).toBe('a9718c3cc1e24e82');
+  });
+
+  it('response: undefined no entra al hash; un response real sí lo cambia', () => {
+    const withUndefined = structuredClone(cropSpec);
+    withUndefined.fields[1]!.response = undefined;
+    expect(layoutHash(withUndefined)).toBe(CROP_REFERENCE_HASH);
+
+    const withResponse = structuredClone(cropSpec);
+    withResponse.fields[1]!.response = {
+      itemId: '9f2c1a44-3b7e-4c11-9a0d-5e8f7b2c1d34',
+      format: { kind: 'free_text', lines: 4 },
+      boxes: [
+        {
+          partId: 'lines.0',
+          role: 'line',
+          region: { topLeft: { x: 0.1, y: 0.56 }, bottomRight: { x: 0.9, y: 0.6 } },
+        },
+      ],
+      cropProfileId: 'free-text@1',
+    };
+    expect(layoutSpecSchema.safeParse(withResponse).success).toBe(true);
+    expect(layoutHash(withResponse)).not.toBe(CROP_REFERENCE_HASH);
+  });
+});
