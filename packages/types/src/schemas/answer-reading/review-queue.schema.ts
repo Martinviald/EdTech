@@ -5,7 +5,7 @@ import {
   reviewReasonSchema,
   scoringOutcomeSchema,
 } from './consensus.schema';
-import { responseFormatKindSchema } from './response-format.schema';
+import { responseFormatKindSchema, responseFormatSchema } from './response-format.schema';
 import { readingStateSchema } from './transcription.schema';
 
 // Contrato de la API de revisión de lecturas (F8, diseño §11). Fijado por el
@@ -16,7 +16,12 @@ import { readingStateSchema } from './transcription.schema';
 //   GET  /answer-reading/queue          → reviewQueuePageSchema (grupos)
 //   GET  /answer-reading/decisions/:id  → reviewDecisionDetailSchema
 //   POST /answer-reading/reviews        → submitReviewSchema → submitReviewResultSchema
-//   POST /answer-reading/reviews/:id/undo → submitReviewResultSchema
+//   POST /answer-reading/reviews/undo   → undoReviewsSchema → submitReviewResultSchema
+//
+// Semántica de `accept` (modo lectura): con `editedLiteral` se acepta ESA lectura
+// (por ejemplo la alternativa elegida con 1..9); sin `editedLiteral` se acepta la
+// propuesta del grupo (`canonical`). En modo corrección, `mark_correct` /
+// `mark_incorrect` juzgan la propuesta; `edit` corrige el valor y se recalifica.
 //
 // Reglas de modo (D8): en modo 'reading' la respuesta NO trae la clave ni el
 // resultado propuesto (correcta/incorrecta); en modo 'grading' sí.
@@ -89,6 +94,7 @@ export const reviewQueueGroupSchema = z.object({
   itemId: z.string().uuid(),
   printedNumber: z.string(),
   formatKind: responseFormatKindSchema,
+  responseFormat: responseFormatSchema,
   formatLabel: z.string(),
   mode: reviewModeSchema,
   canonical: z.string().nullable(),
@@ -115,6 +121,8 @@ export const reviewQueueSummarySchema = z.object({
   pendingAudit: z.number().int().nonnegative(),
   autoAccepted: z.number().int().nonnegative(),
   inProgress: z.number().int().nonnegative(),
+  reviewed: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
   byItem: z.array(
     z.object({
       itemId: z.string().uuid(),
@@ -132,6 +140,7 @@ export const reviewDecisionDetailSchema = z.object({
   itemId: z.string().uuid(),
   printedNumber: z.string(),
   formatKind: responseFormatKindSchema,
+  responseFormat: responseFormatSchema,
   formatLabel: z.string(),
   outcome: readingOutcomeSchema,
   mode: reviewModeSchema.nullable(),
@@ -161,3 +170,8 @@ export const submitReviewResultSchema = z.object({
   pendingConsolidation: z.array(z.string().uuid()),
 });
 export type SubmitReviewResult = z.infer<typeof submitReviewResultSchema>;
+
+export const undoReviewsSchema = z
+  .object({ reviewIds: z.array(z.string().uuid()).min(1).max(500) })
+  .strict();
+export type UndoReviewsDto = z.infer<typeof undoReviewsSchema>;
