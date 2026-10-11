@@ -2,11 +2,13 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { and, eq, gte, isNull, lte } from 'drizzle-orm';
 import {
   aiAnalyses,
+  aiGradingJobs,
   assistantMessages,
   organizations,
   remedialMaterials,
   withOrgContext,
   type AiAnalysis,
+  type AiGradingJob,
   type AssistantMessage,
   type RemedialMaterial,
 } from '@soe/db';
@@ -37,7 +39,7 @@ const REMEDIAL_COMPLETED: ReadonlySet<string> = new Set(['ready', 'approved', 'd
 
 /** Una fila normalizada de gasto IA, independiente de la tabla de origen. */
 interface NormalizedRow {
-  source: 'ai_analysis' | 'remedial' | 'assistant';
+  source: 'ai_analysis' | 'remedial' | 'assistant' | 'ai_grading';
   type: string;
   model: string | null;
   status: string;
@@ -78,6 +80,13 @@ const SOURCE_LABELS: Record<NormalizedRow['source'], string> = {
   ai_analysis: 'Análisis IA',
   remedial: 'Material remedial',
   assistant: 'Asistente IA',
+  ai_grading: 'Corrección IA',
+};
+
+const AI_GRADING_COMPLETED = 'completed';
+
+const AI_GRADING_TYPE_LABELS: Record<string, string> = {
+  development_crop: 'Corrección de respuestas de desarrollo',
 };
 
 /** Etiqueta única de tipo para los turnos del asistente conversacional. */
@@ -220,10 +229,22 @@ export class AiObservabilityService {
           ),
         )) as AssistantMessage[];
 
+      const gradingRows = (await tx
+        .select()
+        .from(aiGradingJobs)
+        .where(
+          and(
+            eq(aiGradingJobs.orgId, orgId),
+            gte(aiGradingJobs.createdAt, start),
+            lte(aiGradingJobs.createdAt, end),
+          ),
+        )) as AiGradingJob[];
+
       return [
         ...analysisRows.map((r) => normalizeAnalysis(r)),
         ...remedialRows.map((r) => normalizeRemedial(r)),
         ...assistantRows.map((r) => normalizeAssistant(r)),
+        ...gradingRows.map((r) => normalizeGradingJob(r)),
       ];
     });
   }
@@ -384,6 +405,21 @@ function normalizeAssistant(row: AssistantMessage): NormalizedRow {
   };
 }
 
+function normalizeGradingJob(row: AiGradingJob): NormalizedRow {
+  return {
+    source: 'ai_grading',
+    type: row.type,
+    model: row.model,
+    status: row.status,
+    costUsd: parseCost(row.costUsd),
+    inputTokens: 0,
+    outputTokens: 0,
+    latencyMs: computeLatency(row.status === AI_GRADING_COMPLETED, row.createdAt, row.completedAt),
+    createdAt: row.createdAt,
+    isFailed: row.status === 'failed',
+  };
+}
+
 /** `costUsd` viene como decimal (string) o null → Number, null→0. */
 function parseCost(value: string | null): number {
   if (value === null) return 0;
@@ -412,6 +448,9 @@ function typeLabel(row: NormalizedRow): string {
   }
   if (row.source === 'assistant') {
     return ASSISTANT_TYPE_LABEL;
+  }
+  if (row.source === 'ai_grading') {
+    return AI_GRADING_TYPE_LABELS[row.type] ?? row.type;
   }
   return REMEDIAL_TYPE_LABELS[row.type] ?? row.type;
 }

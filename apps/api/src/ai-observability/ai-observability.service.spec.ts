@@ -115,7 +115,77 @@ function assistantRow(overrides: Record<string, unknown> = {}): Record<string, u
   };
 }
 
+function gradingJobRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: 'g-1',
+    orgId: 'org-1',
+    responseId: 'resp-1',
+    type: 'development_crop',
+    status: 'completed',
+    model: 'gemini-2.5-pro',
+    promptVersion: 'dev-grading-v1',
+    input: {},
+    output: {},
+    score: '1.50',
+    confidence: '0.80',
+    justification: 'Respuesta casi completa',
+    costUsd: '0.002250',
+    createdAt: new Date('2026-06-04T10:00:00Z'),
+    completedAt: new Date('2026-06-04T10:00:03Z'),
+    ...overrides,
+  };
+}
+
 describe('AiObservabilityService', () => {
+  describe('getSummary — corrección IA (ai_grading_jobs)', () => {
+    it('suma el costo de las correcciones IA en totals, bySource y byType', async () => {
+      const db = makeDb([[analysisRow()], [], [], [gradingJobRow(), gradingJobRow({ id: 'g-2' })]]);
+      const service = makeService(db);
+
+      const result = await service.getSummary(makeUser(), '2026-06-01', '2026-06-30');
+
+      expect(result.totals.count).toBe(3);
+      expect(result.totals.totalCostUsd).toBeCloseTo(0.012345 + 0.0045, 6);
+      const gradingBucket = result.bySource.find((b) => b.key === 'ai_grading');
+      expect(gradingBucket).toMatchObject({ label: 'Corrección IA', count: 2, avgLatencyMs: 3000 });
+      expect(gradingBucket?.totalCostUsd).toBeCloseTo(0.0045, 6);
+      const typeBucket = result.byType.find((b) => b.key === 'ai_grading:development_crop');
+      expect(typeBucket?.label).toBe('Corrección de respuestas de desarrollo');
+    });
+
+    it('cuenta como fallidas las correcciones con status failed y sin costo', async () => {
+      const db = makeDb([
+        [],
+        [],
+        [],
+        [gradingJobRow({ status: 'failed', costUsd: null, completedAt: null })],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getSummary(makeUser(), '2026-06-01', '2026-06-30');
+
+      expect(result.totals.failedCount).toBe(1);
+      expect(result.totals.totalCostUsd).toBe(0);
+      expect(result.totals.avgLatencyMs).toBeNull();
+    });
+
+    it('incluye las correcciones IA en el gasto del mes', async () => {
+      const db = makeDb([
+        [],
+        [],
+        [],
+        [gradingJobRow({ costUsd: '90' })],
+        [{ config: { aiBudgetUsd: 100 } }],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getBudget(makeUser());
+
+      expect(result.monthSpendUsd).toBeCloseTo(90, 6);
+      expect(result.alertLevel).toBe('warning');
+    });
+  });
+
   describe('getSummary — agregación de costo y tokens', () => {
     it('agrega costo y tokens de ambas tablas en totals', async () => {
       const db = makeDb([[analysisRow()], [remedialRow()]]);
@@ -257,7 +327,7 @@ describe('AiObservabilityService', () => {
 
   describe('getBudget', () => {
     it('sin tope (config sin aiBudgetUsd) → budgetUsd null, pctUsed null, alertLevel ok', async () => {
-      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [], [{ config: {} }]]);
+      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [], [], [{ config: {} }]]);
       const service = makeService(db);
 
       const result = await service.getBudget(makeUser());
@@ -272,6 +342,7 @@ describe('AiObservabilityService', () => {
     it('gasto en zona warning (80-100%) → alertLevel warning', async () => {
       const db = makeDb([
         [analysisRow({ costUsd: '85' })],
+        [],
         [],
         [],
         [{ config: { aiBudgetUsd: 100 } }],
@@ -289,6 +360,7 @@ describe('AiObservabilityService', () => {
       const db = makeDb([
         [analysisRow({ costUsd: '60' })],
         [remedialRow({ costUsd: '60' })],
+        [],
         [],
         [{ config: { aiBudgetUsd: 100 } }],
       ]);
