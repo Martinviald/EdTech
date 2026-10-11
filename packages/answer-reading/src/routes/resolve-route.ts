@@ -17,11 +17,12 @@ export type ResolvedRouteWithFallback = ResolvedRoute & {
 
 function matchesLevel(route: ReadingRoute, context: ReadingContext): boolean {
   const sameFormat = route.formatKind === context.responseFormat.kind;
+  const formatAllowed = route.formatKind === null || sameFormat;
   const sameSubject = context.subjectId !== null && route.subjectId === context.subjectId;
   const sameGrade = context.gradeId !== null && route.gradeId === context.gradeId;
   const byLevel: Record<RouteMatchLevel, () => boolean> = {
-    item: () => route.itemId === context.itemId,
-    instrument: () => route.instrumentId === context.instrumentId,
+    item: () => formatAllowed && route.itemId === context.itemId,
+    instrument: () => formatAllowed && route.instrumentId === context.instrumentId,
     format_subject_grade: () => sameFormat && sameSubject && sameGrade,
     format_subject: () => sameFormat && sameSubject,
     format: () => sameFormat,
@@ -42,7 +43,9 @@ function compareRoutes(a: ReadingRoute, b: ReadingRoute): number {
 /**
  * Elige la ruta de lectura (diseño §6.4): solo rutas `active` de la org o globales;
  * precedencia item > instrument > format+subject+grade > format+subject > format >
- * default; en el mismo nivel la org gana a la global. `null` si ninguna aplica.
+ * default; en el mismo nivel la org gana a la global. Una ruta de ítem o de
+ * instrumento con `formatKind` solo aplica si coincide con el formato del ítem.
+ * `null` si ninguna aplica.
  */
 export function resolveReadingRoute(
   context: ReadingContext,
@@ -101,7 +104,8 @@ function completeWithFallback(
  * Restricciones de la organización (diseño §6.4 y §14.3). No son rutas: se aplican
  * después. `allowExternalVision: false` deja la ruta sin lectores; los proveedores
  * no permitidos se quitan y, si no alcanzan, se completan con `fallbackReaders`.
- * `reviewAll` endurece la política (nada se autoacepta). Nunca la relaja.
+ * `reviewAll` endurece la política (nada se autoacepta). Nunca la relaja. Un lector
+ * de desempate no permitido se quita y el desacuerdo pasa a revisión.
  */
 export function applyOrgRestrictions(
   route: ResolvedRouteWithFallback,
@@ -110,7 +114,16 @@ export function applyOrgRestrictions(
   const { fallbackReaders, ...resolved } = route;
   const allowExternalVision =
     settings.allowExternalVision ?? DEFAULT_ORG_ANSWER_READING_SETTINGS.allowExternalVision;
-  const policy = settings.reviewAll ? { ...resolved.policy, autoAccept: false } : resolved.policy;
+  const allowed = (reader: ReaderSpec) =>
+    allowExternalVision &&
+    (settings.allowedProviders === undefined ||
+      settings.allowedProviders.includes(reader.provider));
+  const tiebreak = resolved.policy.tiebreakReader;
+  const withoutTiebreak =
+    tiebreak !== null && !allowed(tiebreak)
+      ? { ...resolved.policy, tiebreakReader: null, onDisagreement: 'review' as const }
+      : resolved.policy;
+  const policy = settings.reviewAll ? { ...withoutTiebreak, autoAccept: false } : withoutTiebreak;
   const strict: ResolvedRoute = { ...resolved, policy };
   if (!allowExternalVision) {
     return {
@@ -118,8 +131,6 @@ export function applyOrgRestrictions(
       notReadReason: 'external_vision_disabled',
     };
   }
-  const allowed = (reader: ReaderSpec) =>
-    settings.allowedProviders === undefined || settings.allowedProviders.includes(reader.provider);
   const readers = completeWithFallback(
     strict.readers.filter(allowed),
     fallbackReaders.filter(allowed),

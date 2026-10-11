@@ -180,3 +180,49 @@ describe('applyOrgRestrictions', () => {
     expect(applyOrgRestrictions(resolved, { reviewAll: true }).route.policy.autoAccept).toBe(false);
   });
 });
+
+describe('revisión F2 — rutas', () => {
+  it('hallazgo 12: una ruta de ítem o instrumento con formato exige el mismo formato', () => {
+    const decimalItem = route({ level: 'item', itemId: ITEM, formatKind: 'decimal' });
+    const decimalInstrument = route({
+      level: 'instrument',
+      instrumentId: INSTRUMENT,
+      formatKind: 'decimal',
+    });
+    const fallback = route({ level: 'format', formatKind: 'integer' });
+    expect(resolveReadingRoute(CONTEXT, [decimalItem, decimalInstrument, fallback])?.routeId).toBe(
+      fallback.id,
+    );
+    const integerItem = route({ level: 'item', itemId: ITEM, formatKind: 'integer' });
+    expect(resolveReadingRoute(CONTEXT, [integerItem, fallback])?.routeId).toBe(integerItem.id);
+  });
+
+  describe('hallazgo 3: el lector de desempate respeta las restricciones de la org', () => {
+    const policy = {
+      ...DEFAULT_CONSENSUS_POLICY,
+      onDisagreement: 'tiebreak_reader' as const,
+      tiebreakReader: GPT,
+    };
+    const resolved = resolveReadingRoute(CONTEXT, [route({ level: 'default', policy })]);
+    if (!resolved) throw new Error('sin ruta');
+
+    it('proveedor no permitido → sin desempate, desacuerdo a revisión', () => {
+      expect(
+        applyOrgRestrictions(resolved, { allowedProviders: ['anthropic', 'gemini'] }).route.policy,
+      ).toMatchObject({ tiebreakReader: null, onDisagreement: 'review' });
+    });
+
+    it('sin visión externa → sin desempate', () => {
+      expect(
+        applyOrgRestrictions(resolved, { allowExternalVision: false }).route.policy,
+      ).toMatchObject({ tiebreakReader: null, onDisagreement: 'review' });
+    });
+
+    it('proveedor permitido → el desempate se conserva', () => {
+      expect(
+        applyOrgRestrictions(resolved, { allowedProviders: ['anthropic', 'gemini', 'openai'] })
+          .route.policy,
+      ).toMatchObject({ tiebreakReader: GPT, onDisagreement: 'tiebreak_reader' });
+    });
+  });
+});
