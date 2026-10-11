@@ -142,6 +142,16 @@ describe('evaluateConsensus (diseño §8.2)', () => {
     });
   });
 
+  it('10. un blanco tampoco se autoacepta si la política no autoacepta incorrectas', () => {
+    const onlyCorrect = { ...POLICY, autoAcceptOutcomes: ['correct' as const] };
+    const blanks = [claude('', { state: 'blank' }), gemini('', { state: 'blank' })];
+    expect(evaluate(blanks, onlyCorrect)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['policy_requires_review'],
+      scoringOutcome: 'incorrect',
+    });
+  });
+
   it('4. ilegible, varias respuestas o tachado → revisión de lectura', () => {
     expect(evaluate([claude('', { state: 'illegible' }), gemini('2,5')])).toMatchObject({
       outcome: 'needs_review',

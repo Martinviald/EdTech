@@ -160,7 +160,10 @@ export function evaluateConsensus(
       return reviewBlank('low_confidence');
     }
     if (rubric) return reviewBlank('rubric_item');
-    if (!policy.autoAccept) return reviewBlank('policy_requires_review');
+    const blankAcceptable =
+      blankScore !== null &&
+      (policy.autoAcceptOutcomes as readonly ScoringOutcome[]).includes(blankScore);
+    if (!policy.autoAccept || !blankAcceptable) return reviewBlank('policy_requires_review');
     if (audited) return reviewBlank('audit_sample');
     return decide('auto_blank', blank, [], used, blankScore);
   };
