@@ -171,7 +171,7 @@ jobs:
       # apps/api importa @soe/types, @soe/db y @soe/decisions por su `dist`; sin
       # estos builds el typecheck no resuelve los paquetes del workspace.
       - name: Build workspace deps
-        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build && pnpm --filter @soe/decisions build
+        run: pnpm --filter @soe/types build && pnpm --filter @soe/db build && pnpm --filter @soe/decisions build && pnpm --filter @soe/answer-reading build
 
       - name: Typecheck
         run: pnpm --filter @soe/api typecheck
