@@ -41,11 +41,15 @@ export const responses = pgTable(
       model?: string;
       promptVersion?: string;
       decisionId?: string;
+      levelCode?: string;
+      rationale?: string;
+      evidenceQuotes?: string[];
     }>(),
     humanScore: jsonb('human_score').$type<{
       score?: number;
       overrideReason?: string;
       scoredById?: string;
+      levelCode?: string;
     }>(),
     finalScore: decimal('final_score', { precision: 7, scale: 2 }),
     scoredBy: scoredByEnum('scored_by'),
