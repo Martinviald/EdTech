@@ -6,6 +6,7 @@ jest.mock('drizzle-orm', () => ({
 import { NotFoundException } from '@nestjs/common';
 import {
   answerReadingRuns,
+  items,
   sheetLayouts,
   sheetPrintRuns,
   sheetScanBatches,
@@ -25,6 +26,48 @@ import {
 } from './testing/review-fixtures';
 
 const QUERY = { assessmentId: ASSESSMENT_ID, page: 1, pageSize: 20 } as const;
+
+const SECRET_ITEM = 'aaaaaaaa-0000-4000-8000-0000000000f1';
+const SECRET_ANSWERS = ['4815', '4.815', 'cuatro mil ochocientos quince'];
+const GRADING_KEYS = new Set(['grading', 'proposedOutcome', 'optionOutcomes', 'acceptedAnswers']);
+
+interface Leak {
+  readonly path: string;
+  readonly value: unknown;
+}
+
+function gradingLeaks(serialized: unknown, path = '$'): Leak[] {
+  if (serialized === null || serialized === undefined) return [];
+  if (typeof serialized === 'string' || typeof serialized === 'number') {
+    const text = String(serialized).trim().toLowerCase();
+    return SECRET_ANSWERS.includes(text) ? [{ path, value: serialized }] : [];
+  }
+  if (typeof serialized !== 'object') return [];
+  const leaks: Leak[] = [];
+  for (const [key, child] of Object.entries(serialized)) {
+    const childPath = `${path}.${key}`;
+    if (GRADING_KEYS.has(key) && child !== null && child !== undefined) {
+      leaks.push({ path: childPath, value: child });
+    }
+    leaks.push(...gradingLeaks(child, childPath));
+  }
+  return leaks;
+}
+
+function seedSecretItem(world: ReturnType<typeof setupReviewWorld>) {
+  world.memory.seed(items, [
+    {
+      id: SECRET_ITEM,
+      type: 'short_answer',
+      content: { prompt: '¿Cuántos pasos?', acceptedAnswers: SECRET_ANSWERS, unit: 'pasos' },
+      scoringConfig: { points: 1 },
+    },
+  ]);
+}
+
+function serialized(value: unknown): unknown {
+  return JSON.parse(JSON.stringify(value));
+}
 
 describe('AnswerReadingReviewQueueService.queue', () => {
   it('modo lectura: agrupa por valor propuesto y nunca expone la clave ni el resultado', async () => {
@@ -108,6 +151,48 @@ describe('AnswerReadingReviewQueueService.queue', () => {
     const page = await world.queue.queue(ORG_ID, QUERY);
 
     expect(page.total).toBe(0);
+  });
+});
+
+describe('Contrato del modo lectura: nunca expone la corrección', () => {
+  it('la cola en modo lectura no trae la clave ni el resultado en ningún nivel', async () => {
+    const world = setupReviewWorld();
+    seedSecretItem(world);
+    world.seedDecision({ itemId: SECRET_ITEM, literal: '23' });
+    world.seedDecision({ itemId: SECRET_ITEM, literal: '23' });
+    world.seedDecision({ itemId: SECRET_ITEM, value: null });
+
+    const page = await world.queue.queue(ORG_ID, { ...QUERY, mode: 'reading' });
+
+    expect(page.data.length).toBeGreaterThan(0);
+    expect(page.data.every((group) => group.mode === 'reading')).toBe(true);
+    expect(gradingLeaks(serialized(page))).toEqual([]);
+  });
+
+  it('el detalle de una decisión en modo lectura no trae la clave ni el resultado', async () => {
+    const world = setupReviewWorld();
+    seedSecretItem(world);
+    const decision = world.seedDecision({ itemId: SECRET_ITEM, literal: '23' });
+
+    const detail = await world.queue.detail(ORG_ID, decision.id);
+
+    expect(detail.mode).toBe('reading');
+    expect(gradingLeaks(serialized(detail))).toEqual([]);
+  });
+
+  it('el detector sí encuentra la clave en el modo corrección', async () => {
+    const world = setupReviewWorld();
+    seedSecretItem(world);
+    world.seedDecision({
+      itemId: SECRET_ITEM,
+      literal: '23',
+      reasons: ['undecidable'],
+      reviewMode: 'grading',
+    });
+
+    const page = await world.queue.queue(ORG_ID, { ...QUERY, mode: 'grading' });
+
+    expect(gradingLeaks(serialized(page)).length).toBeGreaterThan(0);
   });
 });
 
