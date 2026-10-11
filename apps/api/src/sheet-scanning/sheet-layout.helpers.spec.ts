@@ -343,7 +343,7 @@ function formatItems(): DerivableItem[] {
     shortAnswerItem(4, ['21/10', '2 1/10']),
     shortAnswerItem(5, ['(7;3)']),
     shortAnswerItem(6, ['3-1-4-2']),
-    shortAnswerItem(7, ['Cabeza, tórax, abdomen']),
+    shortAnswerItem(7, ['Pedro is cooking.']),
     rubricItem(8),
   ];
 }
