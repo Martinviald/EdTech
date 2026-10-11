@@ -157,8 +157,9 @@ export class AnswerReadingPipelineService {
 
   async processScan(orgId: string, batchId: string, scanId: string): Promise<void> {
     let runId: string | null = null;
+    let work: ScanWork | null = null;
     try {
-      const work = await this.loadScanWork(orgId, batchId, scanId);
+      work = await this.loadScanWork(orgId, batchId, scanId);
       if (work === null) return;
       const state = await this.ensureRun(orgId, batchId, work);
       runId = state.run.id;
@@ -172,10 +173,16 @@ export class AnswerReadingPipelineService {
         work,
         budgetExceeded ? this.blockedByBudget(planned) : planned,
       );
+      if (tally.cropsDone < planned.length) {
+        await this.leaveUnreadDecisions(orgId, state.run.id, work, tally.changedDecisionIds);
+      }
       await this.finishRun(orgId, state, tally, budgetExceeded);
       await this.consolidateIfConfirmed(orgId, batchId, tally.changedDecisionIds);
     } catch (error) {
       reportServerError(error, { orgId, batchId, scanId, runId, stage: 'answer_reading' });
+      if (runId !== null && work !== null) {
+        await this.leaveUnreadDecisions(orgId, runId, work, []);
+      }
       if (runId !== null) await this.failRun(orgId, runId);
     }
   }
@@ -431,22 +438,64 @@ export class AnswerReadingPipelineService {
             );
       planned.push({
         crop,
-        task: {
+        task: this.taskFor(
           orgId,
-          runId: state.run.id,
-          markId: crop.markId,
-          item,
-          format: crop.format,
-          cropProfileId: crop.cropProfileId,
-          cropFileId: crop.cropFileId,
-          cropEvidence: crop.cropEvidence,
-          gradeName: work.gradeName,
+          state.run.id,
+          work,
+          crop,
           route,
-          blockedReason: this.blockedReasonOf(settings, state.previousCropsTotal + index),
-        },
+          this.blockedReasonOf(settings, state.previousCropsTotal + index),
+        ),
       });
     }
     return planned;
+  }
+
+  private taskFor(
+    orgId: string,
+    runId: string,
+    work: ScanWork,
+    crop: ScanCrop,
+    route: CropReadingTask['route'],
+    blockedReason: NotReadReason | null,
+  ): CropReadingTask {
+    return {
+      orgId,
+      runId,
+      markId: crop.markId,
+      item: crop.item,
+      format: crop.format,
+      cropProfileId: crop.cropProfileId,
+      cropFileId: crop.cropFileId,
+      cropEvidence: crop.cropEvidence,
+      gradeName: work.gradeName,
+      route,
+      blockedReason,
+    };
+  }
+
+  private async leaveUnreadDecisions(
+    orgId: string,
+    runId: string,
+    work: ScanWork,
+    changedDecisionIds: string[],
+  ): Promise<void> {
+    try {
+      const current = await this.decisions.findCurrentByMarkIds(
+        orgId,
+        work.crops.map((crop) => crop.markId),
+      );
+      for (const crop of work.crops) {
+        if (current.has(crop.markId)) continue;
+        const outcome = await this.cropReader.read(
+          this.taskFor(orgId, runId, work, crop, null, 'reader_failed'),
+        );
+        const saved = await this.saveDecision(orgId, runId, work, crop, outcome);
+        if (!saved.unchanged) changedDecisionIds.push(saved.decisionId);
+      }
+    } catch (error) {
+      reportServerError(error, { orgId, runId, stage: 'answer_reading_unread_decisions' });
+    }
   }
 
   private blockedReasonOf(

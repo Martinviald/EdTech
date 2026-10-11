@@ -962,6 +962,36 @@ describe('AnswerReadingPipelineService.scheduleForScan', () => {
     expect(runOf(memory)).toMatchObject({ status: 'failed' });
     expect(reportSpy).toHaveBeenCalled();
   });
+
+  it('si el job falla, cada recorte sin decisión queda not_read con motivo explícito', async () => {
+    const { memory, pipeline, transcriber } = setup({ readings: agree });
+    jest.spyOn(ReadingRoutesService.prototype, 'loadCatalog').mockRejectedValue(new Error('rutas'));
+
+    await pipeline.processScan(ORG_ID, BATCH_ID, SCAN_1);
+
+    expect(transcriber.calls).toHaveLength(0);
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'not_read',
+      reasons: ['reader_failed'],
+      reviewMode: 'reading',
+    });
+    expect(runOf(memory)).toMatchObject({ status: 'failed' });
+  });
+
+  it('si no se pudo guardar la decisión leída, el recorte igual queda con una decisión not_read', async () => {
+    const { memory, runScan } = setup({ readings: agree });
+    jest
+      .spyOn(AnswerReadingDecisionsService.prototype, 'save')
+      .mockRejectedValueOnce(new Error('bd'));
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'not_read',
+      reasons: ['reader_failed'],
+    });
+    expect(runOf(memory)).toMatchObject({ status: 'completed' });
+  });
 });
 
 describe('AnswerReadingPipelineService — consulta para la confirmación', () => {

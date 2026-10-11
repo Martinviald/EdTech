@@ -5,6 +5,7 @@ jest.mock('drizzle-orm', () => ({
 
 import { NotFoundException } from '@nestjs/common';
 import {
+  answerReadingRuns,
   sheetLayouts,
   sheetPrintRuns,
   sheetScanBatches,
@@ -146,49 +147,62 @@ describe('AnswerReadingReviewQueueService.summary', () => {
     ]);
   });
 
-  it('en progreso = recortes del lote que todavía no tienen decisión vigente', async () => {
-    const world = setupReviewWorld();
-    const batchId = '22222222-2222-4222-8222-222222222222';
-    const printRunId = '33333333-3333-4333-8333-333333333333';
-    const layoutId = '99999999-9999-4999-8999-999999999999';
-    const scanId = '88888888-8888-4888-8888-888888888888';
-    world.memory.seed(sheetLayouts, [
-      {
-        id: layoutId,
-        spec: {
-          fields: [
-            {
-              fieldId: 'q7',
-              kind: 'crop_region',
-              printedNumber: '7',
-              response: { itemId: NUMBER_ITEM, format: INTEGER },
-            },
-            { fieldId: 'q1', kind: 'bubble_group', printedNumber: '1' },
-          ],
+  it.each([
+    ['running', 1],
+    ['completed', 0],
+    ['failed', 0],
+    [null, 0],
+  ] as const)(
+    'en progreso = recortes sin decisión vigente solo si la corrida del lote está en curso (%s → %d)',
+    async (runStatus, expected) => {
+      const world = setupReviewWorld();
+      const batchId = '22222222-2222-4222-8222-222222222222';
+      const printRunId = '33333333-3333-4333-8333-333333333333';
+      const layoutId = '99999999-9999-4999-8999-999999999999';
+      const scanId = '88888888-8888-4888-8888-888888888888';
+      world.memory.seed(sheetLayouts, [
+        {
+          id: layoutId,
+          spec: {
+            fields: [
+              {
+                fieldId: 'q7',
+                kind: 'crop_region',
+                printedNumber: '7',
+                response: { itemId: NUMBER_ITEM, format: INTEGER },
+              },
+              { fieldId: 'q1', kind: 'bubble_group', printedNumber: '1' },
+            ],
+          },
         },
-      },
-    ]);
-    world.memory.seed(sheetPrintRuns, [
-      { id: printRunId, orgId: ORG_ID, layoutId, assessmentId: ASSESSMENT_ID },
-    ]);
-    world.memory.seed(sheetScanBatches, [{ id: batchId, orgId: ORG_ID, printRunId }]);
-    world.memory.seed(sheetScans, [{ id: scanId, orgId: ORG_ID, batchId, state: 'read' }]);
-    const decided = world.seedDecision({ literal: '7' });
-    world.memory.rows<{ id: string; scanId: string | null }>(sheetScanMarks).forEach((mark) => {
-      mark.scanId = scanId;
-    });
-    world.memory.seed(sheetScanMarks, [
-      { orgId: ORG_ID, scanId, fieldId: 'q7', printedNumber: '7' },
-      { orgId: ORG_ID, scanId, fieldId: 'q1', printedNumber: '1' },
-    ]);
+      ]);
+      world.memory.seed(sheetPrintRuns, [
+        { id: printRunId, orgId: ORG_ID, layoutId, assessmentId: ASSESSMENT_ID },
+      ]);
+      world.memory.seed(sheetScanBatches, [{ id: batchId, orgId: ORG_ID, printRunId }]);
+      world.memory.seed(sheetScans, [{ id: scanId, orgId: ORG_ID, batchId, state: 'read' }]);
+      if (runStatus !== null) {
+        world.memory.seed(answerReadingRuns, [
+          { orgId: ORG_ID, batchId, trigger: 'scan_processed', status: runStatus },
+        ]);
+      }
+      const decided = world.seedDecision({ literal: '7' });
+      world.memory.rows<{ id: string; scanId: string | null }>(sheetScanMarks).forEach((mark) => {
+        mark.scanId = scanId;
+      });
+      world.memory.seed(sheetScanMarks, [
+        { orgId: ORG_ID, scanId, fieldId: 'q7', printedNumber: '7' },
+        { orgId: ORG_ID, scanId, fieldId: 'q1', printedNumber: '1' },
+      ]);
 
-    const byBatch = await world.queue.summary(ORG_ID, { batchId });
-    const page = await world.queue.queue(ORG_ID, { batchId, page: 1, pageSize: 20 });
+      const byBatch = await world.queue.summary(ORG_ID, { batchId });
+      const page = await world.queue.queue(ORG_ID, { batchId, page: 1, pageSize: 20 });
 
-    expect(byBatch.inProgress).toBe(1);
-    expect(byBatch.pendingReading).toBe(1);
-    expect(page.data[0]?.members[0]?.decisionId).toBe(decided.id);
-  });
+      expect(byBatch.inProgress).toBe(expected);
+      expect(byBatch.pendingReading).toBe(1);
+      expect(page.data[0]?.members[0]?.decisionId).toBe(decided.id);
+    },
+  );
 });
 
 describe('AnswerReadingReviewQueueService.detail', () => {

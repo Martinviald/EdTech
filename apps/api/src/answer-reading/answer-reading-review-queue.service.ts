@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import {
   answerReadingDecisions,
+  answerReadingRuns,
   answerReadings,
   answerReviews,
   files,
@@ -285,7 +286,11 @@ export class AnswerReadingReviewQueueService {
     orgId: string,
     scope: ReviewQueueScope,
   ): Promise<number> {
-    const batches = await this.scopeBatches(tx, orgId, scope);
+    const batches = await this.batchesWithRunningReading(
+      tx,
+      orgId,
+      await this.scopeBatches(tx, orgId, scope),
+    );
     if (batches.length === 0) return 0;
     const printRuns = await tx
       .select({ id: sheetPrintRuns.id, layoutId: sheetPrintRuns.layoutId })
@@ -332,6 +337,29 @@ export class AnswerReadingReviewQueueService {
       );
     const decidedMarks = new Set(decided.map((row) => row.markId));
     return cropMarkIds.filter((markId) => !decidedMarks.has(markId)).length;
+  }
+
+  private async batchesWithRunningReading(
+    tx: Database,
+    orgId: string,
+    batches: ReadonlyArray<{ id: string; printRunId: string }>,
+  ): Promise<Array<{ id: string; printRunId: string }>> {
+    if (batches.length === 0) return [];
+    const running = await tx
+      .select({ batchId: answerReadingRuns.batchId })
+      .from(answerReadingRuns)
+      .where(
+        and(
+          eq(answerReadingRuns.orgId, orgId),
+          inArray(
+            answerReadingRuns.batchId,
+            batches.map((batch) => batch.id),
+          ),
+          eq(answerReadingRuns.status, 'running'),
+        ),
+      );
+    const runningBatchIds = new Set(running.map((run) => run.batchId));
+    return batches.filter((batch) => runningBatchIds.has(batch.id));
   }
 
   private async scopeBatches(
