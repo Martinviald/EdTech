@@ -18,7 +18,13 @@
 // parte en base + sub-etiqueta. Sin ese orden, `14.2` se leería como
 // sub-respuesta de la pregunta 14 y se perderían 4 de cada 5 respuestas.
 
-import type { ItemContent, ItemType, MatchingContent } from '@soe/types';
+import {
+  resolveResponseFormat,
+  type ItemContent,
+  type ItemType,
+  type MatchingContent,
+  type OrderingContent,
+} from '@soe/types';
 import type { PrescoredAnswer } from './parsers/parser.types';
 
 /** El ítem del instrumento, tal como lo necesita la resolución. */
@@ -32,7 +38,7 @@ export interface ResolvableItem {
 }
 
 /** "B.1" / "b1" / " B 1 " → "B1". Normaliza etiquetas para poder cruzarlas. */
-function normalizeLabel(label: string): string {
+export function normalizeLabel(label: string): string {
   return label.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 }
 
@@ -113,7 +119,7 @@ export function resolveRowAnswers(
 ): ResolvedRow {
   const byPosition = new Map<number, RawItemAnswer>();
   const unmatchedLabels: string[] = [];
-  const composites = new Map<number, ItemType>();
+  const composites = new Map<number, ResolvableItem>();
 
   for (const [label, value] of Object.entries(answers)) {
     const resolved = resolveScanLabel(index, label, value);
@@ -129,7 +135,7 @@ export function resolveRowAnswers(
     }
 
     const position = resolved.item.position;
-    composites.set(position, resolved.item.type);
+    composites.set(position, resolved.item);
     const existing = byPosition.get(position);
     const bucket =
       existing !== null && typeof existing === 'object' ? existing : ({} as Record<string, string>);
@@ -138,7 +144,7 @@ export function resolveRowAnswers(
   }
 
   const unexpectedCompositePositions = Array.from(composites.entries())
-    .filter(([, type]) => type !== 'matching')
+    .filter(([, item]) => !acceptsCompositeAnswer(item))
     .map(([position]) => position);
 
   return { byPosition, unmatchedLabels, unexpectedCompositePositions };
@@ -223,18 +229,98 @@ export function resolvePrescoredAnswers(
   return { byPosition, pendingPositions };
 }
 
-/**
- * Traduce las sub-respuestas de un pareado a `{ leftId: rightId }`.
- *
- * La sub-etiqueta del escaneo identifica el elemento RESPONDIBLE (`leftItems`) y
- * el valor escaneado es la opción elegida (`rightItems`) — ver la invariante de
- * dirección en `matchingContentSchema`. Se cruza por `id`/`label` normalizados y,
- * si el escaneo numera sin rótulo (`9.1`), por posición dentro de `leftItems`.
- */
-function resolveMatchingAnswer(
+export interface BubbleChoiceOption {
+  value: string;
+  id: string;
+}
+
+export interface BubbleChoiceRow {
+  subKey: string;
+  values: string[];
+}
+
+export type BubbleChoicePlan = { rows: BubbleChoiceRow[] } | { reason: string };
+
+interface ChoiceElement {
+  id: string;
+  label?: string;
+}
+
+const MAX_BUBBLE_VALUE_LENGTH = 2;
+const SEQUENCE_TOKEN_SEPARATORS = /[\s,;\-–/|]+/;
+const OPTION_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+function isBubbleChoiceSequence(item: { type: ItemType; content: ItemContent }): boolean {
+  return (
+    item.type === 'short_answer' &&
+    resolveResponseFormat({ type: item.type, content: item.content })?.kind === 'bubble_choice'
+  );
+}
+
+function acceptsCompositeAnswer(item: ResolvableItem): boolean {
+  return item.type === 'matching' || item.type === 'ordering' || isBubbleChoiceSequence(item);
+}
+
+function shortCodeOf(value: string | undefined): string | null {
+  if (value === undefined) return null;
+  const normalized = normalizeLabel(value);
+  return normalized.length > 0 && normalized.length <= MAX_BUBBLE_VALUE_LENGTH ? normalized : null;
+}
+
+function translateOption(options: readonly BubbleChoiceOption[], raw: string): string {
+  const trimmed = raw.trim();
+  for (const option of options) {
+    if (option.id === trimmed) return option.id;
+  }
+  const normalized = normalizeLabel(trimmed);
+  for (const option of options) {
+    if (option.value === normalized) return option.id;
+  }
+  return trimmed;
+}
+
+function optionsRoundTrip(options: readonly BubbleChoiceOption[]): boolean {
+  const values = new Set(options.map((option) => option.value));
+  if (values.size !== options.length) return false;
+  return options.every((option) => translateOption(options, option.value) === option.id);
+}
+
+export function bubbleChoiceOptions(
+  elements: readonly ChoiceElement[],
+): BubbleChoiceOption[] | null {
+  const schemes: ((element: ChoiceElement, index: number) => string | null)[] = [
+    (element) => shortCodeOf(element.label) ?? shortCodeOf(element.id),
+    (element) => shortCodeOf(element.id) ?? shortCodeOf(element.label),
+    (_, index) => OPTION_LETTERS[index] ?? null,
+  ];
+  for (const scheme of schemes) {
+    const options: BubbleChoiceOption[] = [];
+    for (const [index, element] of elements.entries()) {
+      const value = scheme(element, index);
+      if (value === null) break;
+      options.push({ value, id: element.id });
+    }
+    if (options.length === elements.length && optionsRoundTrip(options)) return options;
+  }
+  return null;
+}
+
+function choiceElementsOf(raw: unknown): ChoiceElement[] {
+  if (!Array.isArray(raw)) return [];
+  const elements: ChoiceElement[] = [];
+  for (const entry of raw) {
+    if (entry === null || typeof entry !== 'object') continue;
+    const { id, label } = entry as { id?: unknown; label?: unknown };
+    if (typeof id !== 'string' || id.length === 0) continue;
+    elements.push(typeof label === 'string' ? { id, label } : { id });
+  }
+  return elements;
+}
+
+export function matchingLeftIdForSubKey(
   content: MatchingContent,
-  subAnswers: Record<string, string>,
-): Record<string, string> {
+  subKey: string,
+): string | undefined {
   const leftItems = content.leftItems ?? [];
   const byLabel = new Map<string, string>();
   leftItems.forEach((el) => {
@@ -242,20 +328,160 @@ function resolveMatchingAnswer(
     if (el.label) byLabel.set(normalizeLabel(el.label), el.id);
   });
 
+  const normalized = normalizeLabel(subKey);
+  const leftId = byLabel.get(normalized);
+  if (leftId !== undefined) return leftId;
+
+  const ordinal = Number.parseInt(normalized.replace(/^\D+/, ''), 10);
+  return Number.isFinite(ordinal) ? leftItems[ordinal - 1]?.id : undefined;
+}
+
+function sequenceTokensOf(content: ItemContent): string[] {
+  const accepted = (content as { acceptedAnswers?: unknown }).acceptedAnswers;
+  const first = Array.isArray(accepted) ? accepted.find((key) => typeof key === 'string') : null;
+  if (typeof first !== 'string') return [];
+  return first.trim().split(SEQUENCE_TOKEN_SEPARATORS).filter(Boolean);
+}
+
+function sequenceOptionValues(tokens: readonly string[]): string[] {
+  const unique = Array.from(new Set(tokens.map(normalizeLabel)));
+  const numeric = unique.every((token) => /^\d+$/.test(token));
+  return unique.sort((a, b) => (numeric ? Number(a) - Number(b) : a.localeCompare(b)));
+}
+
+function positionRows(count: number, values: string[]): BubbleChoiceRow[] {
+  return Array.from({ length: count }, (_, index) => ({ subKey: String(index + 1), values }));
+}
+
+function matchingPlan(content: MatchingContent, maxOptions: number): BubbleChoicePlan {
+  const left = choiceElementsOf(content.leftItems);
+  const right = choiceElementsOf(content.rightItems);
+  if (left.length === 0 || right.length < 2) {
+    return { reason: 'El pareado no tiene términos ni opciones suficientes para dibujar burbujas' };
+  }
+  if (right.length > maxOptions) {
+    return {
+      reason: `El pareado tiene ${right.length} opciones y el máximo imprimible por fila es ${maxOptions}`,
+    };
+  }
+  const options = bubbleChoiceOptions(right);
+  if (options === null) {
+    return {
+      reason: 'Las opciones del pareado no tienen un rótulo corto e inequívoco para la burbuja',
+    };
+  }
+  const values = options.map((option) => option.value);
+  const rows: BubbleChoiceRow[] = [];
+  for (const [index, element] of left.entries()) {
+    const candidates = [element.label, String(index + 1), element.id]
+      .filter((candidate): candidate is string => candidate !== undefined)
+      .map(normalizeLabel)
+      .filter((candidate) => candidate.length > 0);
+    const subKey = candidates.find(
+      (candidate) => matchingLeftIdForSubKey(content, candidate) === element.id,
+    );
+    if (subKey === undefined) {
+      return { reason: `El término "${element.id}" del pareado no tiene una etiqueta inequívoca` };
+    }
+    rows.push({ subKey, values });
+  }
+  return { rows };
+}
+
+function orderingPlan(content: OrderingContent, maxOptions: number): BubbleChoicePlan {
+  const elements = choiceElementsOf(content.items);
+  if (elements.length < 2) {
+    return { reason: 'El ordenamiento no tiene elementos suficientes para dibujar burbujas' };
+  }
+  if (elements.length > maxOptions) {
+    return {
+      reason: `El ordenamiento tiene ${elements.length} elementos y el máximo imprimible por fila es ${maxOptions}`,
+    };
+  }
+  const options = bubbleChoiceOptions(elements);
+  if (options === null) {
+    return { reason: 'Los elementos del ordenamiento no tienen un rótulo corto e inequívoco' };
+  }
+  return {
+    rows: positionRows(
+      elements.length,
+      options.map((option) => option.value),
+    ),
+  };
+}
+
+function sequencePlan(content: ItemContent, maxOptions: number): BubbleChoicePlan {
+  const tokens = sequenceTokensOf(content);
+  if (tokens.length < 2) {
+    return { reason: 'La clave de la secuencia no tiene al menos dos elementos' };
+  }
+  const values = sequenceOptionValues(tokens);
+  if (values.some((value) => value.length === 0 || value.length > MAX_BUBBLE_VALUE_LENGTH)) {
+    return { reason: 'Los elementos de la secuencia no caben en una burbuja' };
+  }
+  if (values.length > maxOptions) {
+    return {
+      reason: `La secuencia usa ${values.length} elementos distintos y el máximo imprimible por fila es ${maxOptions}`,
+    };
+  }
+  return { rows: positionRows(tokens.length, values) };
+}
+
+export function planBubbleChoice(
+  item: { type: ItemType; content: ItemContent },
+  maxOptions: number,
+): BubbleChoicePlan {
+  if (item.type === 'matching') {
+    return matchingPlan(item.content as MatchingContent, maxOptions);
+  }
+  if (item.type === 'ordering') {
+    return orderingPlan(item.content as OrderingContent, maxOptions);
+  }
+  if (isBubbleChoiceSequence(item)) return sequencePlan(item.content, maxOptions);
+  return {
+    reason: `Las burbujas por fila (bubble_choice) solo aplican a pareados, ordenamientos y secuencias, no a "${item.type}"`,
+  };
+}
+
+function resolveMatchingAnswer(
+  content: MatchingContent,
+  subAnswers: Record<string, string>,
+): Record<string, string> {
+  const options = bubbleChoiceOptions(choiceElementsOf(content.rightItems)) ?? [];
   const resolved: Record<string, string> = {};
   for (const [subKey, value] of Object.entries(subAnswers)) {
-    const normalized = normalizeLabel(subKey);
-    let leftId = byLabel.get(normalized);
-
-    if (leftId === undefined) {
-      const ordinal = Number.parseInt(normalized.replace(/^\D+/, ''), 10);
-      const positional = Number.isFinite(ordinal) ? leftItems[ordinal - 1] : undefined;
-      leftId = positional?.id;
-    }
-
-    if (leftId !== undefined) resolved[leftId] = value;
+    const leftId = matchingLeftIdForSubKey(content, subKey);
+    if (leftId !== undefined) resolved[leftId] = translateOption(options, value);
   }
   return resolved;
+}
+
+function valuesByPosition(subAnswers: Record<string, string>): string[] | null {
+  const byPosition = new Map<number, string>();
+  let last = 0;
+  for (const [subKey, value] of Object.entries(subAnswers)) {
+    const position = Number.parseInt(normalizeLabel(subKey), 10);
+    if (!Number.isInteger(position) || position < 1 || value.trim().length === 0) continue;
+    byPosition.set(position, value.trim());
+    last = Math.max(last, position);
+  }
+  if (byPosition.size === 0) return null;
+  return Array.from({ length: last }, (_, index) => byPosition.get(index + 1) ?? '');
+}
+
+function resolveOrderingAnswer(
+  content: OrderingContent,
+  subAnswers: Record<string, string>,
+): string[] | null {
+  const positions = valuesByPosition(subAnswers);
+  if (positions === null) return null;
+  const options = bubbleChoiceOptions(choiceElementsOf(content.items)) ?? [];
+  return positions.map((value) => (value === '' ? '' : translateOption(options, value)));
+}
+
+function resolveSequenceAnswer(subAnswers: Record<string, string>): string | null {
+  const positions = valuesByPosition(subAnswers);
+  return positions === null ? null : positions.join('-');
 }
 
 /**
@@ -273,6 +499,10 @@ export function toScoringAnswer(
   if (item.type === 'matching') {
     return resolveMatchingAnswer(item.content as MatchingContent, value);
   }
+  if (item.type === 'ordering') {
+    return resolveOrderingAnswer(item.content as OrderingContent, value);
+  }
+  if (isBubbleChoiceSequence(item)) return resolveSequenceAnswer(value);
 
   const first = Object.values(value).find((v) => v !== null && v !== '');
   return first ?? null;

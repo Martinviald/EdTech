@@ -1,7 +1,9 @@
 import type { ItemContent } from '@soe/types';
 import {
   annulmentEvidence,
+  bubbleChoiceOptions,
   buildPrintedLabelIndex,
+  planBubbleChoice,
   resolveAnnulledAnswers,
   resolveRowAnswers,
   resolvePrescoredAnswers,
@@ -300,5 +302,118 @@ describe('resolvePrescoredAnswers', () => {
 
     expect(resolved.byPosition.size).toBe(0);
     expect(resolved.pendingPositions.size).toBe(0);
+  });
+});
+
+describe('burbujas por fila (bubble_choice)', () => {
+  const orderingContent = {
+    items: [
+      { id: 'semilla', text: 'Semilla' },
+      { id: 'brote', text: 'Brote' },
+      { id: 'planta', text: 'Planta' },
+    ],
+    correctOrder: ['semilla', 'brote', 'planta'],
+  } as unknown as ItemContent;
+
+  it('usa el id corto como valor de la burbuja y cae a letras cuando el id es largo', () => {
+    expect(bubbleChoiceOptions([{ id: '1' }, { id: '2' }])).toEqual([
+      { value: '1', id: '1' },
+      { value: '2', id: '2' },
+    ]);
+    expect(bubbleChoiceOptions([{ id: 'semilla' }, { id: 'brote', label: 'b' }])).toEqual([
+      { value: 'A', id: 'semilla' },
+      { value: 'B', id: 'brote' },
+    ]);
+  });
+
+  it('descarta un rótulo que se confundiría con el id de otra opción', () => {
+    expect(
+      bubbleChoiceOptions([
+        { id: 'x1', label: 'B' },
+        { id: 'B', label: 'Z' },
+      ]),
+    ).toEqual([
+      { value: 'X1', id: 'x1' },
+      { value: 'B', id: 'B' },
+    ]);
+    expect(bubbleChoiceOptions([{ id: 'B', label: 'q' }, { id: 'opcion-larga' }])).toBeNull();
+  });
+
+  it('el valor de la burbuja de un pareado se traduce al id de la opción', () => {
+    const content = {
+      ...(matchingContent as object),
+      rightItems: [
+        { id: 'mamifero', text: 'Mamífero', label: 'a' },
+        { id: 'ave', text: 'Ave', label: 'b' },
+      ],
+    } as unknown as ItemContent;
+    expect(toScoringAnswer({ type: 'matching', content }, { B1: 'A', B2: 'b', B3: 'ave' })).toEqual(
+      {
+        'B.1': 'mamifero',
+        'B.2': 'ave',
+        'B.3': 'ave',
+      },
+    );
+  });
+
+  it('las posiciones de un ordenamiento forman el arreglo de ids en orden', () => {
+    const item = { type: 'ordering' as const, content: orderingContent };
+    expect(toScoringAnswer(item, { '2': 'B', '1': 'A', '3': 'C' })).toEqual([
+      'semilla',
+      'brote',
+      'planta',
+    ]);
+    expect(toScoringAnswer(item, { '1': 'A', '3': 'C' })).toEqual(['semilla', '', 'planta']);
+    expect(toScoringAnswer(item, {})).toBeNull();
+  });
+
+  it('una secuencia declarada como burbujas se arma con guiones en el orden de las posiciones', () => {
+    const item = {
+      type: 'short_answer' as const,
+      content: {
+        prompt: 'x',
+        acceptedAnswers: ['3-1-2'],
+        responseFormat: { kind: 'bubble_choice' },
+      } as unknown as ItemContent,
+    };
+    expect(toScoringAnswer(item, { '1': '3', '2': '1', '3': '2' })).toBe('3-1-2');
+    expect(planBubbleChoice(item, 6)).toEqual({
+      rows: [
+        { subKey: '1', values: ['1', '2', '3'] },
+        { subKey: '2', values: ['1', '2', '3'] },
+        { subKey: '3', values: ['1', '2', '3'] },
+      ],
+    });
+  });
+
+  it('el ordenamiento y la secuencia declarada no se reportan como sub-numeración inesperada', () => {
+    const index = buildPrintedLabelIndex([
+      { position: 3, type: 'ordering', content: orderingContent },
+      {
+        position: 4,
+        type: 'short_answer',
+        content: {
+          prompt: 'x',
+          acceptedAnswers: ['3-1-2'],
+          responseFormat: { kind: 'bubble_choice' },
+        } as unknown as ItemContent,
+      },
+      {
+        position: 5,
+        type: 'short_answer',
+        content: { prompt: 'x', acceptedAnswers: ['3'] } as unknown as ItemContent,
+      },
+    ]);
+    const { unexpectedCompositePositions } = resolveRowAnswers(index, {
+      '3.1': 'A',
+      '4.1': '3',
+      '5.1': '3',
+    });
+    expect(unexpectedCompositePositions).toEqual([5]);
+  });
+
+  it('no planifica burbujas para un tipo que no las admite', () => {
+    const plan = planBubbleChoice({ type: 'gap_fill', content: {} as ItemContent }, 6);
+    expect('reason' in plan && plan.reason).toContain('bubble_choice');
   });
 });
