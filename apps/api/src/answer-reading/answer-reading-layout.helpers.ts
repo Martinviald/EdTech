@@ -1,17 +1,17 @@
-import type { LayoutField } from '@soe/types';
-import { VISION_SHORT_ANSWER_FORMAT_KINDS } from './answer-reading.constants';
+import type { LayoutField, ResponseFormatKind } from '@soe/types';
+import { VISION_READING_FORMAT_KINDS } from './answer-reading.constants';
 
 export type VisionFieldResponse = NonNullable<LayoutField['response']>;
 
-const VISION_KINDS: ReadonlySet<string> = new Set(VISION_SHORT_ANSWER_FORMAT_KINDS);
-
 export function visionResponsesByField(
   fields: readonly LayoutField[],
+  kinds: readonly ResponseFormatKind[] = VISION_READING_FORMAT_KINDS,
 ): Map<string, VisionFieldResponse> {
+  const allowedKinds: ReadonlySet<string> = new Set(kinds);
   const responses = new Map<string, VisionFieldResponse>();
   for (const field of fields) {
     if (field.kind !== 'crop_region' || field.response === undefined) continue;
-    if (!VISION_KINDS.has(field.response.format.kind)) continue;
+    if (!allowedKinds.has(field.response.format.kind)) continue;
     responses.set(field.fieldId, field.response);
   }
   return responses;

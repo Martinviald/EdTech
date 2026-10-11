@@ -4,6 +4,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import {
   evaluateConsensus,
   isAuditSample,
+  isTranscriptionPromptFor,
   needsTiebreak,
   normalizeTranscription,
   renderTranscriptionPrompt,
@@ -184,7 +185,11 @@ export class CropReadingService {
     };
     let result = evaluateConsensus(readings, policy, scoreOf, consensusOptions);
     const tiebreakReader = policy.tiebreakReader;
-    if (tiebreakReader !== null && needsTiebreak(result, readings, policy)) {
+    if (
+      tiebreakReader !== null &&
+      this.readsFormat(tiebreakReader, task) &&
+      needsTiebreak(result, readings, policy)
+    ) {
       const plan = this.planFor(scope, tiebreakReader, 'tiebreak');
       const tiebreak = await this.readWithReader(
         scope,
@@ -235,8 +240,15 @@ export class CropReadingService {
     if (task.route === null) return 'insufficient_readers';
     if (task.route.notReadReason !== null) return task.route.notReadReason;
     if (task.route.route.readers.length === 0) return 'insufficient_readers';
+    if (!task.route.route.readers.every((reader) => this.readsFormat(reader, task))) {
+      return 'insufficient_readers';
+    }
     if (task.cropFileId === null) return 'crop_unavailable';
     return null;
+  }
+
+  private readsFormat(reader: ReaderSpec, task: CropReadingTask): boolean {
+    return isTranscriptionPromptFor(reader.promptRef, task.format.kind);
   }
 
   private isBlankByInk(policy: ConsensusPolicy, task: CropReadingTask): boolean {
@@ -251,8 +263,10 @@ export class CropReadingService {
 
   private plansFor(scope: ReadingScope): ReaderPlan[] {
     const { route } = scope.route;
-    const shadows = route.shadowReaders.filter((reader) =>
-      isAuditSample(`${scope.cropSha256}:${reader.key}:shadow`, scope.route.shadowSampleRate),
+    const shadows = route.shadowReaders.filter(
+      (reader) =>
+        this.readsFormat(reader, scope.task) &&
+        isAuditSample(`${scope.cropSha256}:${reader.key}:shadow`, scope.route.shadowSampleRate),
     );
     return [
       ...route.readers.map((reader) => this.planFor(scope, reader, 'primary')),

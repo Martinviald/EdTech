@@ -62,6 +62,9 @@ const MARK_1 = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const MARK_2 = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
 const CROP_1 = 'f1111111-1111-4111-8111-111111111111';
 const CROP_2 = 'f2222222-2222-4222-8222-222222222222';
+const RUBRIC_ITEM_ID = '7a7a7a7a-7a7a-4a7a-8a7a-7a7a7a7a7a7a';
+const RUBRIC_ROUTE_ID = 'abababab-abab-4bab-8bab-abababababab';
+const RUBRIC_FIELD = 'f_desarrollo';
 const FIELD_1 = 'f_001';
 const FIELD_2 = 'f_002';
 
@@ -116,8 +119,23 @@ function field(fieldId: string) {
   };
 }
 
+const RUBRIC_FIELD_SPEC = {
+  ...field(RUBRIC_FIELD),
+  response: {
+    itemId: RUBRIC_ITEM_ID,
+    format: { kind: 'free_text', lines: 6 },
+    boxes: [],
+    cropProfileId: 'free-text@1',
+  },
+};
+
 const SPEC = {
-  fields: [field(FIELD_1), field(FIELD_2), { ...field('f_rubric'), response: undefined }],
+  fields: [
+    field(FIELD_1),
+    field(FIELD_2),
+    { ...field('f_rubric'), response: undefined },
+    RUBRIC_FIELD_SPEC,
+  ],
 } as unknown as LayoutSpec;
 
 class FakeDispatcher implements JobDispatcher {
@@ -192,6 +210,20 @@ function setup(setupOptions: SetupOptions = {}) {
       type: 'short_answer',
       content: { prompt: '¿Cuánto mide?', acceptedAnswers: ['7,3'] },
       scoringConfig: { points: 1 },
+    },
+    {
+      id: RUBRIC_ITEM_ID,
+      instrumentId: INSTRUMENT_ID,
+      type: 'rubric_scored',
+      content: {
+        prompt: 'Explica por qué se inundó el pueblo.',
+        levels: [
+          { code: '0', creditFraction: 0 },
+          { code: '1', creditFraction: 0.5 },
+          { code: '2', creditFraction: 1 },
+        ],
+      },
+      scoringConfig: { points: 2 },
     },
   ]);
   memory.seed(instruments, [{ id: INSTRUMENT_ID, subjectId: null, gradeId: GRADE_ID }]);
@@ -392,6 +424,77 @@ describe('AnswerReadingPipelineService — punta a punta del job', () => {
     expect(transcriber.calls).toHaveLength(0);
     expect(decisionsOf(memory)).toHaveLength(0);
     expect(memory.rows(answerReadingRuns)).toHaveLength(0);
+  });
+});
+
+describe('AnswerReadingPipelineService — respuestas de desarrollo', () => {
+  const SHA_2 = sha256(CROP_BYTES[CROP_2] as string);
+  const FREE_TEXT_HAIKU = reader('haiku-texto', 'anthropic-haiku', {
+    promptRef: 'transcribe.free-text@1',
+  });
+
+  function seedRubricRoute(memory: InMemoryDatabase): void {
+    memory.seed(readingRoutes, [
+      {
+        id: RUBRIC_ROUTE_ID,
+        orgId: null,
+        status: 'active',
+        level: 'format',
+        formatKind: 'free_text',
+        readers: [FREE_TEXT_HAIKU],
+        fallbackReaders: [],
+        shadowReaders: [],
+        shadowSampleRate: '0',
+        policy: { ...POLICY, id: 'rubric-transcription', minReaders: 1 },
+        version: 1,
+      },
+    ]);
+  }
+
+  it('transcribe con su ruta de formato y nunca autoacepta: queda en revisión por rúbrica con la transcripción', async () => {
+    const { memory, transcriber, runScan } = setup({
+      readings: {
+        'haiku-texto': {
+          [SHA_2]: { ...fakeOutput('Porque el río\nse desbordó'), confidence: 0.99 },
+        },
+      },
+      marks: [{ id: MARK_2, fieldId: RUBRIC_FIELD, cropFileId: CROP_2 }],
+    });
+    seedRubricRoute(memory);
+
+    await runScan();
+
+    expect(transcriber.calls).toHaveLength(1);
+    expect(transcriber.calls[0]?.prompt.ref).toBe('transcribe.free-text@1');
+    const decision = currentDecision(memory, MARK_2);
+    expect(decision).toMatchObject({
+      outcome: 'needs_review',
+      itemId: RUBRIC_ITEM_ID,
+      scoringOutcome: null,
+      reviewMode: 'grading',
+      routeId: RUBRIC_ROUTE_ID,
+    });
+    expect(decision.reasons).toContain('rubric_item');
+    expect(decision.value).toMatchObject({
+      formatKind: 'free_text',
+      value: { type: 'text', text: 'Porque el río\nse desbordó' },
+    });
+    expect(runOf(memory)).toMatchObject({ autoAccepted: 0, needsReview: 1 });
+  });
+
+  it('una ruta cuyo prompt no transcribe desarrollo no se usa: queda sin leer y sin llamar al modelo', async () => {
+    const { memory, transcriber, runScan } = setup({
+      readings: agree,
+      marks: [{ id: MARK_2, fieldId: RUBRIC_FIELD, cropFileId: CROP_2 }],
+    });
+
+    await runScan();
+
+    expect(transcriber.calls).toHaveLength(0);
+    expect(currentDecision(memory, MARK_2)).toMatchObject({
+      outcome: 'not_read',
+      reasons: ['insufficient_readers'],
+    });
   });
 });
 

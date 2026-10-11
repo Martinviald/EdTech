@@ -12,6 +12,16 @@ export const VISION_SHORT_ANSWER_FORMAT_KINDS = [
   'sequence',
 ] as const satisfies readonly ResponseFormatKind[];
 
+export const VISION_RUBRIC_FORMAT_KINDS = [
+  'free_text',
+  'math_work',
+] as const satisfies readonly ResponseFormatKind[];
+
+export const VISION_READING_FORMAT_KINDS: readonly ResponseFormatKind[] = [
+  ...VISION_SHORT_ANSWER_FORMAT_KINDS,
+  ...VISION_RUBRIC_FORMAT_KINDS,
+];
+
 export const ANSWER_READING_OPTIONS = 'ANSWER_READING_OPTIONS';
 
 export interface AnswerReadingOptions {
