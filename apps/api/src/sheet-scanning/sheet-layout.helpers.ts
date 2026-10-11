@@ -1,6 +1,7 @@
 import {
   layoutHash,
   resolveResponseFormat,
+  sameRubricCode,
   type ItemContent,
   type ItemType,
   type LayoutDraftModel,
@@ -16,6 +17,12 @@ import {
   SHEET_QR_IDENTITY_REGION,
   type SheetIdentityMode,
 } from '@soe/types';
+import {
+  buildPrintedLabelIndex,
+  planBubbleChoice,
+  resolveScanLabel,
+  type ResolvableItem,
+} from '../answer-sheets/lib/composite-answers';
 
 export interface DerivableItem {
   id: string;
@@ -25,11 +32,18 @@ export interface DerivableItem {
   content: ItemContent;
 }
 
+export interface BubbleRow {
+  label: string;
+  values: string[];
+  teacherScore: boolean;
+}
+
 export interface CorrectableItem {
   item: DerivableItem;
   label: string;
   values: string[];
   responseFormat: VisionResponseFormat | null;
+  bubbleRows: BubbleRow[];
 }
 
 export type VisionResponseFormat = Exclude<
@@ -55,6 +69,10 @@ export const SHEET_MAX_ROWS_PER_COLUMN = 25;
 export const SHEET_COLUMNS_PER_PAGE = 3;
 export const SHEET_MAX_BUBBLES_PER_FIELD = 6;
 export const SHEET_FIELDS_PER_PAGE = SHEET_MAX_ROWS_PER_COLUMN * SHEET_COLUMNS_PER_PAGE;
+export const TEACHER_SCORE_FIELD_SUFFIX = '_puntaje';
+export const TEACHER_SCORE_CAPTION = 'Puntaje (lo marca el docente)';
+const TEACHER_SCORE_MAX_CODE_LENGTH = 3;
+const TEACHER_SCORE_ROW_HEIGHT_MM = 10;
 
 const GRID_TOP = 0.18;
 const GRID_TOP_RUT_BUBBLES = 0.34;
@@ -108,7 +126,14 @@ const SHORT_TEXT_MAX_LINES = 3;
 const MULTI_BOX_LABEL_WIDTH_MM = 30;
 const MULTI_BOX_TEXT_WIDTH_MM = 80;
 const MULTI_BOX_NUMBER_WIDTH_MM = 40;
-const RESPONSE_FIELD_PADDING_MM = 3;
+export const MULTI_BOX_OPERATOR_SPACE_MM = 8;
+export const MULTI_BOX_LABEL_GAP_MM = 2;
+const MULTI_BOX_LABEL_CHAR_MM = 1.7;
+const MULTI_BOX_LABEL_MAX_MM = 40;
+const MULTI_BOX_INLINE_NUMBER_WIDTH_MM = 24;
+const MULTI_BOX_INLINE_GAP_MM = 3;
+const MULTI_BOX_INLINE_ROW_GAP_MM = 4;
+export const RESPONSE_FIELD_PADDING_MM = 3;
 const RESPONSE_FIELD_GAP_MM = 4;
 const RESPONSE_UNIT_SPACE_MM = 18;
 const RESPONSE_FIELD_LEFT = 0.08;
@@ -409,9 +434,15 @@ function lineBoxes(count: number, width: number): ResponseBoxMm[] {
   return boxes;
 }
 
-function multiBoxBlock(
-  format: Extract<VisionResponseFormat, { kind: 'multi_box' }>,
-): ResponseBlockMm {
+type MultiBoxFormat = Extract<VisionResponseFormat, { kind: 'multi_box' }>;
+type MultiBoxPart = MultiBoxFormat['boxes'][number];
+
+export function hasMultiBoxOperators(format: MultiBoxFormat): boolean {
+  return format.boxes.some((part) => part.operatorBefore !== undefined);
+}
+
+function multiBoxBlock(format: MultiBoxFormat, options: ResponseGeometryOptions): ResponseBlockMm {
+  if (hasMultiBoxOperators(format)) return inlineMultiBoxBlock(format, options);
   const boxes: ResponseBoxMm[] = [];
   let cursorY = 0;
   for (const part of format.boxes) {
@@ -430,6 +461,71 @@ function multiBoxBlock(
       height: TEXT_LINE_HEIGHT_MM,
     });
     cursorY += TEXT_LINE_HEIGHT_MM + RESPONSE_BOX_GAP_MM;
+  }
+  return blockOf(boxes);
+}
+
+function multiBoxLabelSpaceMm(label: string): number {
+  return Math.min(
+    label.trim().length * MULTI_BOX_LABEL_CHAR_MM + MULTI_BOX_LABEL_GAP_MM,
+    MULTI_BOX_LABEL_MAX_MM,
+  );
+}
+
+function inlinePartSize(part: MultiBoxPart): { width: number; height: number } {
+  if (part.kind === 'fraction') {
+    return {
+      width: FRACTION_PART_WIDTH_MM,
+      height: 2 * RESPONSE_CHAR_BOX_MM + FRACTION_BAR_GAP_MM,
+    };
+  }
+  return {
+    width: part.kind === 'short_text' ? WORD_BOX_WIDTH_MM : MULTI_BOX_INLINE_NUMBER_WIDTH_MM,
+    height: TEXT_LINE_HEIGHT_MM,
+  };
+}
+
+function inlineMultiBoxBlock(
+  format: MultiBoxFormat,
+  options: ResponseGeometryOptions,
+): ResponseBlockMm {
+  type Placed = { part: MultiBoxPart; x: number; width: number; height: number };
+  const rows: Placed[][] = [[]];
+  let cursor = 0;
+  for (const part of format.boxes) {
+    const lead =
+      (part.operatorBefore === undefined ? 0 : MULTI_BOX_OPERATOR_SPACE_MM) +
+      multiBoxLabelSpaceMm(part.label);
+    const size = inlinePartSize(part);
+    const row = rows[rows.length - 1]!;
+    if (row.length > 0 && cursor + lead + size.width > options.availableWidthMm) {
+      rows.push([]);
+      cursor = 0;
+    }
+    rows[rows.length - 1]!.push({ part, x: cursor + lead, ...size });
+    cursor += lead + size.width + MULTI_BOX_INLINE_GAP_MM;
+  }
+
+  const boxes: ResponseBoxMm[] = [];
+  let rowTop = 0;
+  for (const row of rows) {
+    const rowHeight = Math.max(...row.map((placed) => placed.height));
+    for (const placed of row) {
+      const y = rowTop + (rowHeight - placed.height) / 2;
+      if (placed.part.kind === 'fraction') {
+        boxes.push(...fractionBoxes(`${placed.part.partId}.`, placed.x, y, placed.width));
+        continue;
+      }
+      boxes.push({
+        partId: placed.part.partId,
+        role: 'word',
+        x: placed.x,
+        y,
+        width: placed.width,
+        height: placed.height,
+      });
+    }
+    rowTop += rowHeight + MULTI_BOX_INLINE_ROW_GAP_MM;
   }
   return blockOf(boxes);
 }
@@ -477,7 +573,7 @@ export function responseBlockMm(
       ]);
     }
     case 'multi_box':
-      return multiBoxBlock(format);
+      return multiBoxBlock(format, options);
   }
 }
 
@@ -521,8 +617,105 @@ function responseCursorStart(
   return { pageIndex, y: gridTop + rowsUsed * rowHeight };
 }
 
-function placeResponseFields(
-  entries: readonly CorrectableItem[],
+type FlowEntry =
+  | { kind: 'response'; entry: CorrectableItem; format: VisionResponseFormat }
+  | { kind: 'score'; row: BubbleRow };
+
+function flowEntriesOf(correctable: readonly CorrectableItem[]): FlowEntry[] {
+  const entries: FlowEntry[] = [];
+  for (const entry of correctable) {
+    if (entry.responseFormat !== null) {
+      entries.push({ kind: 'response', entry, format: entry.responseFormat });
+      continue;
+    }
+    for (const row of entry.bubbleRows) {
+      if (row.teacherScore) entries.push({ kind: 'score', row });
+    }
+  }
+  return entries;
+}
+
+export function isTeacherScoreField(field: Pick<LayoutField, 'fieldId' | 'kind'>): boolean {
+  return field.kind === 'bubble_group' && field.fieldId.endsWith(TEACHER_SCORE_FIELD_SUFFIX);
+}
+
+function teacherScoreField(
+  row: BubbleRow,
+  pageIndex: number,
+  top: number,
+  height: number,
+  padX: number,
+): LayoutField {
+  const centerY = roundCoordinate(top + height / 2);
+  return {
+    fieldId: `${fieldIdOf(row.label)}${TEACHER_SCORE_FIELD_SUFFIX}`,
+    kind: 'bubble_group',
+    printedNumber: row.label,
+    pageIndex,
+    selectMode: 'single',
+    bubbles: row.values.map((value, index) => ({
+      value,
+      center: {
+        x: roundCoordinate(
+          RESPONSE_FIELD_LEFT + padX + SHEET_BUBBLE_RADIUS + index * BUBBLE_SPACING_X,
+        ),
+        y: centerY,
+      },
+      radius: SHEET_BUBBLE_RADIUS,
+    })),
+    region: null,
+  };
+}
+
+function responseField(
+  entry: CorrectableItem,
+  format: VisionResponseFormat,
+  block: ResponseBlockMm,
+  geometry: {
+    pageIndex: number;
+    top: number;
+    height: number;
+    width: number;
+    padX: number;
+    padY: number;
+  },
+  frame: FrameSizeMm,
+): LayoutField {
+  const { pageIndex, top, height, width, padX, padY } = geometry;
+  const left = RESPONSE_FIELD_LEFT;
+  const boxes: OmrResponseBox[] = block.boxes.map((box) => {
+    const boxLeft = left + padX + box.x / frame.width;
+    const boxTop = top + padY + box.y / frame.height;
+    return {
+      partId: box.partId,
+      role: box.role,
+      region: frameRegion(
+        boxLeft,
+        boxTop,
+        boxLeft + box.width / frame.width,
+        boxTop + box.height / frame.height,
+      ),
+    };
+  });
+  return {
+    fieldId: fieldIdOf(entry.label),
+    kind: 'crop_region',
+    printedNumber: entry.label,
+    pageIndex,
+    selectMode: 'single',
+    bubbles: [],
+    region: frameRegion(left, top, left + width, top + height),
+    response: {
+      itemId: entry.item.id,
+      format,
+      boxes,
+      cropProfileId: cropProfileIdFor(format),
+    },
+  };
+}
+
+function placeFlowFields(
+  entries: readonly FlowEntry[],
   bubbleCount: number,
   gridTop: number,
   frame: FrameSizeMm,
@@ -536,9 +729,18 @@ function placeResponseFields(
   let { pageIndex, y } = responseCursorStart(bubbleCount, gridTop);
   if (bubbleCount > 0) y += gap;
 
-  for (const entry of entries) {
-    const format = entry.responseFormat;
-    if (format === null) continue;
+  for (const flow of entries) {
+    if (flow.kind === 'score') {
+      const height = TEACHER_SCORE_ROW_HEIGHT_MM / frame.height;
+      if (y + height > GRID_BOTTOM) {
+        pageIndex += 1;
+        y = gridTop;
+      }
+      fields.push(teacherScoreField(flow.row, pageIndex, y, height, padX));
+      y += height + gap;
+      continue;
+    }
+    const { entry, format } = flow;
     const unitSpaceMm = itemUnitOf(entry.item.content) === null ? 0 : RESPONSE_UNIT_SPACE_MM;
     const block = responseBlockMm(format, {
       availableWidthMm: contentWidthMm - 2 * RESPONSE_FIELD_PADDING_MM - unitSpaceMm,
@@ -551,36 +753,9 @@ function placeResponseFields(
       pageIndex += 1;
       y = gridTop;
     }
-    const left = RESPONSE_FIELD_LEFT;
-    const boxes: OmrResponseBox[] = block.boxes.map((box) => {
-      const boxLeft = left + padX + box.x / frame.width;
-      const boxTop = y + padY + box.y / frame.height;
-      return {
-        partId: box.partId,
-        role: box.role,
-        region: frameRegion(
-          boxLeft,
-          boxTop,
-          boxLeft + box.width / frame.width,
-          boxTop + box.height / frame.height,
-        ),
-      };
-    });
-    fields.push({
-      fieldId: fieldIdOf(entry.label),
-      kind: 'crop_region',
-      printedNumber: entry.label,
-      pageIndex,
-      selectMode: 'single',
-      bubbles: [],
-      region: frameRegion(left, y, left + width, y + height),
-      response: {
-        itemId: entry.item.id,
-        format,
-        boxes,
-        cropProfileId: cropProfileIdFor(format),
-      },
-    });
+    fields.push(
+      responseField(entry, format, block, { pageIndex, top: y, height, width, padX, padY }, frame),
+    );
     y += height + gap;
   }
   return fields;
@@ -593,52 +768,137 @@ function unsupportedReason(item: DerivableItem, format: ResponseFormat | null): 
   return `Tipo de ítem "${item.type}" no soportado por el lector todavía: su formato de respuesta (${format.kind}) aún no se imprime en la hoja`;
 }
 
+type RowsOrReason = { rows: BubbleRow[] } | { reason: string };
+
+function choiceRowsOf(
+  item: DerivableItem,
+  label: string,
+  labelIndex: Map<string, ResolvableItem>,
+): RowsOrReason {
+  const plan = planBubbleChoice(item, SHEET_MAX_BUBBLES_PER_FIELD);
+  if ('reason' in plan) return plan;
+  const rows: BubbleRow[] = [];
+  for (const row of plan.rows) {
+    const rowLabel = `${label}.${row.subKey}`;
+    const resolved = resolveScanLabel(labelIndex, rowLabel, null);
+    if (resolved.kind !== 'sub' || resolved.item !== item || resolved.subKey !== row.subKey) {
+      return {
+        reason: `La fila "${rowLabel}" de las burbujas choca con otro número impreso del instrumento`,
+      };
+    }
+    rows.push({ label: rowLabel, values: row.values, teacherScore: false });
+  }
+  return { rows };
+}
+
+function teacherScoreRowsOf(
+  item: DerivableItem,
+  label: string,
+  format: Extract<ResponseFormat, { kind: 'score_bubbles' }>,
+): RowsOrReason {
+  if (item.type !== 'rubric_scored') {
+    return {
+      reason: `Las burbujas de puntaje docente (score_bubbles) solo aplican a ítems de rúbrica, no a "${item.type}"`,
+    };
+  }
+  if (format.levels.length > SHEET_MAX_BUBBLES_PER_FIELD) {
+    return {
+      reason: `El ítem declara ${format.levels.length} niveles y el máximo imprimible por fila es ${SHEET_MAX_BUBBLES_PER_FIELD}`,
+    };
+  }
+  const levels = (item.content as { levels?: { code?: unknown }[] }).levels ?? [];
+  const codes = levels
+    .map((level) => level.code)
+    .filter((code): code is string => typeof code === 'string');
+  const values = format.levels.map((level) => level.trim());
+  const unknown = values.filter((value) => !codes.some((code) => sameRubricCode(code, value)));
+  if (unknown.length > 0) {
+    return {
+      reason: `Los niveles ${unknown.join(', ')} de las burbujas de puntaje no existen en la rúbrica del ítem`,
+    };
+  }
+  if (values.some((value) => value.length > TEACHER_SCORE_MAX_CODE_LENGTH)) {
+    return { reason: 'Los códigos de nivel de la rúbrica son muy largos para una burbuja' };
+  }
+  if (new Set(values).size !== values.length) {
+    return { reason: 'Las burbujas de puntaje repiten un nivel' };
+  }
+  return { rows: [{ label, values, teacherScore: true }] };
+}
+
+function bubbleRowsOf(
+  item: DerivableItem,
+  label: string,
+  format: ResponseFormat | null,
+  labelIndex: Map<string, ResolvableItem>,
+): RowsOrReason {
+  if (SUPPORTED_ITEM_TYPES.has(item.type)) {
+    const result = bubbleValuesOf(item);
+    return 'reason' in result
+      ? result
+      : { rows: [{ label, values: result.values, teacherScore: false }] };
+  }
+  if (format?.kind === 'bubble_choice') return choiceRowsOf(item, label, labelIndex);
+  if (format?.kind === 'score_bubbles') return teacherScoreRowsOf(item, label, format);
+  return { reason: unsupportedReason(item, format) };
+}
+
 export function partitionDerivableItems(items: readonly DerivableItem[]): PartitionedItems {
   const sorted = [...items].sort((a, b) => a.position - b.position);
   const correctable: CorrectableItem[] = [];
   const excluded: LayoutExcludedItemModel[] = [];
   const seenLabels = new Set<string>();
+  const labelIndex = buildPrintedLabelIndex(sorted);
 
   for (const item of sorted) {
     const label = printedLabelOf(item);
-    const readsBubbles = SUPPORTED_ITEM_TYPES.has(item.type);
-    const format = readsBubbles ? null : resolveResponseFormat(item);
-
-    if (!readsBubbles && !isVisionResponseFormat(format)) {
-      excluded.push({
-        itemId: item.id,
-        printedNumber: label,
-        reason: unsupportedReason(item, format),
-      });
-      continue;
-    }
-
-    if (seenLabels.has(label)) {
-      excluded.push({
-        itemId: item.id,
-        printedNumber: label,
-        reason: `Número impreso "${label}" duplicado en el instrumento`,
-      });
-      continue;
-    }
-
-    if (isVisionResponseFormat(format)) {
-      seenLabels.add(label);
-      correctable.push({ item, label, values: [], responseFormat: format });
-      continue;
-    }
-
-    const result = bubbleValuesOf(item);
-    if ('reason' in result) {
+    const format = SUPPORTED_ITEM_TYPES.has(item.type) ? null : resolveResponseFormat(item);
+    const vision = isVisionResponseFormat(format);
+    const result = vision ? null : bubbleRowsOf(item, label, format, labelIndex);
+    if (result !== null && 'reason' in result) {
       excluded.push({ itemId: item.id, printedNumber: label, reason: result.reason });
       continue;
     }
 
+    const clash = [label, ...(result?.rows ?? []).map((row) => row.label)].find((candidate) =>
+      seenLabels.has(candidate),
+    );
+    if (clash !== undefined) {
+      excluded.push({
+        itemId: item.id,
+        printedNumber: label,
+        reason: `Número impreso "${clash}" duplicado en el instrumento`,
+      });
+      continue;
+    }
+
+    if (vision) {
+      seenLabels.add(label);
+      correctable.push({ item, label, values: [], responseFormat: format, bubbleRows: [] });
+      continue;
+    }
+    if (result === null) continue;
+
     seenLabels.add(label);
-    correctable.push({ item, label, values: result.values, responseFormat: null });
+    for (const row of result.rows) seenLabels.add(row.label);
+    const values =
+      result.rows.length === 1 && result.rows[0]!.label === label ? result.rows[0]!.values : [];
+    correctable.push({ item, label, values, responseFormat: null, bubbleRows: result.rows });
   }
 
   return { correctable, excluded };
+}
+
+export function expectedFieldLabels(correctable: readonly CorrectableItem[]): string[] {
+  const labels: string[] = [];
+  for (const entry of correctable) {
+    if (entry.responseFormat !== null) {
+      labels.push(entry.label);
+      continue;
+    }
+    for (const row of entry.bubbleRows) labels.push(row.label);
+  }
+  return labels;
 }
 
 export function identityModeOf(spec: LayoutSpec | null | undefined): SheetIdentityMode {
@@ -690,7 +950,7 @@ function buildIdentity(identityMode: SheetIdentityMode): LayoutSpec['identity'] 
   };
 }
 
-function buildField(entry: CorrectableItem, slot: number, gridTop: number): LayoutField {
+function buildField(bubbleRow: BubbleRow, slot: number, gridTop: number): LayoutField {
   const pageIndex = Math.floor(slot / SHEET_FIELDS_PER_PAGE);
   const slotInPage = slot % SHEET_FIELDS_PER_PAGE;
   const column = Math.floor(slotInPage / SHEET_MAX_ROWS_PER_COLUMN);
@@ -700,16 +960,16 @@ function buildField(entry: CorrectableItem, slot: number, gridTop: number): Layo
   const rowHeight = (GRID_BOTTOM - gridTop) / SHEET_MAX_ROWS_PER_COLUMN;
   const centerY = gridTop + (row + 0.5) * rowHeight;
 
-  const bubbles: OmrBubble[] = entry.values.map((value, index) => ({
+  const bubbles: OmrBubble[] = bubbleRow.values.map((value, index) => ({
     value,
     center: { x: columnX + FIRST_BUBBLE_OFFSET_X + index * BUBBLE_SPACING_X, y: centerY },
     radius: SHEET_BUBBLE_RADIUS,
   }));
 
   return {
-    fieldId: fieldIdOf(entry.label),
+    fieldId: fieldIdOf(bubbleRow.label),
     kind: 'bubble_group',
-    printedNumber: entry.label,
+    printedNumber: bubbleRow.label,
     pageIndex,
     selectMode: 'single',
     bubbles,
@@ -734,16 +994,23 @@ export function deriveLayoutDraft(
     sizeRatio: SHEET_FIDUCIAL_SIZE_RATIO,
     marginRatio: SHEET_FIDUCIAL_MARGIN_RATIO,
   });
-  const bubbleEntries = correctable.filter((entry) => entry.responseFormat === null);
-  const responseEntries = correctable.filter((entry) => entry.responseFormat !== null);
-  const fieldByItemId = new Map<string, LayoutField>();
-  for (const [slot, entry] of bubbleEntries.entries()) {
-    fieldByItemId.set(entry.item.id, buildField(entry, slot, gridTop));
+  const gridRows: BubbleRow[] = [];
+  for (const entry of correctable) {
+    for (const row of entry.bubbleRows) if (!row.teacherScore) gridRows.push(row);
   }
-  for (const field of placeResponseFields(responseEntries, bubbleEntries.length, gridTop, frame)) {
-    if (field.response) fieldByItemId.set(field.response.itemId, field);
+  const fieldByLabel = new Map<string, LayoutField>();
+  for (const [slot, row] of gridRows.entries()) {
+    fieldByLabel.set(row.label, buildField(row, slot, gridTop));
   }
-  const fields = correctable.map((entry) => fieldByItemId.get(entry.item.id)!);
+  for (const field of placeFlowFields(
+    flowEntriesOf(correctable),
+    gridRows.length,
+    gridTop,
+    frame,
+  )) {
+    fieldByLabel.set(field.printedNumber, field);
+  }
+  const fields = expectedFieldLabels(correctable).map((label) => fieldByLabel.get(label)!);
   let lastPageIndex = 0;
   for (const field of fields) lastPageIndex = Math.max(lastPageIndex, field.pageIndex);
   const pageCount = lastPageIndex + 1;
@@ -1005,9 +1272,11 @@ export function collectInvariantViolations(
 ): InvariantViolation[] {
   const violations: InvariantViolation[] = [];
 
+  const { correctable } = partitionDerivableItems(items);
+  const correctableLabels = new Set(expectedFieldLabels(correctable));
   const allLabels = new Set(items.map((item) => printedLabelOf(item)));
   for (const field of spec.fields) {
-    if (!allLabels.has(field.printedNumber)) {
+    if (!allLabels.has(field.printedNumber) && !correctableLabels.has(field.printedNumber)) {
       violations.push({
         invariant: 1,
         message: `el número impreso "${field.printedNumber}" no existe en el instrumento`,
@@ -1033,8 +1302,6 @@ export function collectInvariantViolations(
     }
   }
 
-  const { correctable } = partitionDerivableItems(items);
-  const correctableLabels = new Set(correctable.map((entry) => entry.label));
   const fieldLabels = new Map<string, number>();
   for (const field of spec.fields) {
     fieldLabels.set(field.printedNumber, (fieldLabels.get(field.printedNumber) ?? 0) + 1);

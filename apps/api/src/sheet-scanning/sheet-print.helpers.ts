@@ -10,7 +10,17 @@ import {
   type OmrFieldResponse,
   type OmrRegion,
 } from '@soe/types';
-import { identityModeOf, PAPER_SIZES_PT, SHEET_QR_IDENTITY_REGION } from './sheet-layout.helpers';
+import {
+  hasMultiBoxOperators,
+  identityModeOf,
+  isTeacherScoreField,
+  MULTI_BOX_LABEL_GAP_MM,
+  MULTI_BOX_OPERATOR_SPACE_MM,
+  PAPER_SIZES_PT,
+  RESPONSE_FIELD_PADDING_MM,
+  SHEET_QR_IDENTITY_REGION,
+  TEACHER_SCORE_CAPTION,
+} from './sheet-layout.helpers';
 
 export { PAPER_SIZES_PT };
 
@@ -61,6 +71,14 @@ export interface DrawPlanGlyph {
   centerY: number;
   size: number;
   align: 'center' | 'left' | 'right';
+  maxWidth?: number;
+}
+
+export interface PlacedGlyph {
+  text: string;
+  x: number;
+  y: number;
+  size: number;
 }
 
 export interface DrawPlanResponseField {
@@ -84,6 +102,7 @@ export interface SheetDrawPlan {
   fiducials: DrawPlanRect[];
   bubbles: DrawPlanBubble[];
   labels: DrawPlanLabel[];
+  captions: DrawPlanLabel[];
   syncTicks: DrawPlanRect[];
   qr: { x: number; y: number; size: number };
   header: { nameX: number; nameY: number; courseX: number; courseY: number };
@@ -265,6 +284,9 @@ const UNIT_FONT_SIZE = 11;
 const COMPONENT_GLYPH_SCALE = 1.25;
 const SEPARATOR_GLYPH_SCALE = 0.9;
 const MULTI_BOX_LABEL_FONT_SIZE = 8;
+const MULTI_BOX_OPERATOR_FONT_SIZE = 14;
+const MIN_GLYPH_FONT_SIZE = 5;
+const PT_PER_MM = 72 / 25.4;
 const RUT_INSTRUCTION_LINES = [
   'RUT: rellena UN círculo por columna, de izquierda a derecha.',
   'La última columna es el dígito verificador (marca K si corresponde).',
@@ -360,28 +382,93 @@ function tupleGlyphs(boxes: readonly DrawPlanResponseBox[]): DrawPlanGlyph[] {
   return glyphs;
 }
 
-function multiBoxLabels(
+function partBoxesOf(boxes: readonly DrawPlanResponseBox[], partId: string): DrawPlanResponseBox[] {
+  return boxes.filter((box) => box.partId === partId || box.partId.startsWith(`${partId}.`));
+}
+
+function sameRow(a: DrawPlanRect, b: DrawPlanRect): boolean {
+  return a.y < b.y + b.height && b.y < a.y + a.height;
+}
+
+function multiBoxGlyphs(
   response: OmrFieldResponse,
   boxes: readonly DrawPlanResponseBox[],
   regionLeft: number,
 ): DrawPlanGlyph[] {
-  if (response.format.kind !== 'multi_box') return [];
+  const format = response.format;
+  if (format.kind !== 'multi_box') return [];
+  const inline = hasMultiBoxOperators(format);
   const glyphs: DrawPlanGlyph[] = [];
-  for (const part of response.format.boxes) {
-    const partBoxes = boxes.filter(
-      (box) => box.partId === part.partId || box.partId.startsWith(`${part.partId}.`),
-    );
+  let previous: DrawPlanRect | null = null;
+  for (const part of format.boxes) {
+    const partBoxes = partBoxesOf(boxes, part.partId);
     if (partBoxes.length === 0) continue;
     const span = spanOf(partBoxes);
+    const centerY = span.y + span.height / 2;
+    const labelRight = span.x - MULTI_BOX_LABEL_GAP_MM * PT_PER_MM;
+    if (!inline) {
+      const labelLeft = regionLeft + LABEL_GAP;
+      glyphs.push({
+        text: part.label,
+        centerX: labelLeft,
+        centerY,
+        size: MULTI_BOX_LABEL_FONT_SIZE,
+        align: 'left',
+        maxWidth: Math.max(labelRight - labelLeft, 0),
+      });
+      continue;
+    }
+    let leadLeft =
+      previous !== null && sameRow(previous, span)
+        ? previous.x + previous.width
+        : regionLeft + RESPONSE_FIELD_PADDING_MM * PT_PER_MM;
+    if (part.operatorBefore !== undefined) {
+      const operatorSpace = MULTI_BOX_OPERATOR_SPACE_MM * PT_PER_MM;
+      glyphs.push({
+        text: part.operatorBefore,
+        centerX: leadLeft + operatorSpace / 2,
+        centerY,
+        size: MULTI_BOX_OPERATOR_FONT_SIZE,
+        align: 'center',
+        maxWidth: operatorSpace,
+      });
+      leadLeft += operatorSpace;
+    }
     glyphs.push({
       text: part.label,
-      centerX: regionLeft + LABEL_GAP,
-      centerY: span.y + span.height / 2,
+      centerX: labelRight,
+      centerY,
       size: MULTI_BOX_LABEL_FONT_SIZE,
-      align: 'left',
+      align: 'right',
+      maxWidth: Math.max(labelRight - leadLeft, 0),
     });
+    previous = span;
   }
   return glyphs;
+}
+
+export function placeGlyph(
+  glyph: DrawPlanGlyph,
+  widthOf: (text: string, size: number) => number,
+): PlacedGlyph | null {
+  let size = glyph.size;
+  let text = glyph.text;
+  if (glyph.maxWidth !== undefined) {
+    const natural = widthOf(text, size);
+    if (natural > glyph.maxWidth) {
+      size = Math.max((size * glyph.maxWidth) / natural, MIN_GLYPH_FONT_SIZE);
+      text = fitTextToWidth(text, glyph.maxWidth, (value) => widthOf(value, size));
+      if (widthOf(text, size) > glyph.maxWidth) return null;
+    }
+  }
+  const width = widthOf(text, size);
+  const x =
+    glyph.align === 'center'
+      ? glyph.centerX - width / 2
+      : glyph.align === 'right'
+        ? glyph.centerX - width
+        : glyph.centerX;
+  return { text, x, y: glyph.centerY - size * 0.35, size };
 }
 
 function buildResponseField(
@@ -417,7 +504,7 @@ function buildResponseField(
     }
   }
   if (field.response.format.kind === 'ordered_tuple') glyphs.push(...tupleGlyphs(boxes));
-  glyphs.push(...multiBoxLabels(field.response, boxes, rect.x));
+  glyphs.push(...multiBoxGlyphs(field.response, boxes, rect.x));
   if (unit !== null && boxes.length > 0) {
     const span = spanOf(boxes);
     glyphs.push({
@@ -483,11 +570,13 @@ export function computeDrawPlan(
 
   const bubbles: DrawPlanBubble[] = [];
   const labels: DrawPlanLabel[] = [];
+  const captions: DrawPlanLabel[] = [];
   const rowCenters = new Set<number>();
 
   for (const field of spec.fields) {
     if (field.pageIndex !== pageIndex) continue;
     let minCx = Number.POSITIVE_INFINITY;
+    let maxRight = Number.NEGATIVE_INFINITY;
     let rowCy = 0;
     let radiusPt = 0;
     for (const bubble of field.bubbles) {
@@ -508,6 +597,14 @@ export function computeDrawPlan(
         rowCy = cy;
         radiusPt = radius;
       }
+      maxRight = Math.max(maxRight, cx + radius);
+    }
+    if (field.bubbles.length > 0 && isTeacherScoreField(field)) {
+      captions.push({
+        text: TEACHER_SCORE_CAPTION,
+        x: maxRight + 2 * LABEL_GAP,
+        y: rowCy - LABEL_FONT_SIZE * 0.35,
+      });
     }
     if (field.bubbles.length > 0) {
       labels.push({
@@ -603,6 +700,7 @@ export function computeDrawPlan(
     fiducials,
     bubbles,
     labels,
+    captions,
     syncTicks,
     qr: { x: qrX, y: qrY, size: qrSize },
     header,
@@ -641,17 +739,12 @@ function drawResponseField(
     });
   }
   for (const glyph of response.glyphs) {
-    const width = font.widthOfTextAtSize(glyph.text, glyph.size);
-    const x =
-      glyph.align === 'center'
-        ? glyph.centerX - width / 2
-        : glyph.align === 'right'
-          ? glyph.centerX - width
-          : glyph.centerX;
-    page.drawText(glyph.text, {
-      x,
-      y: glyph.centerY - glyph.size * 0.35,
-      size: glyph.size,
+    const placed = placeGlyph(glyph, (text, size) => font.widthOfTextAtSize(text, size));
+    if (placed === null) continue;
+    page.drawText(placed.text, {
+      x: placed.x,
+      y: placed.y,
+      size: placed.size,
       font,
       color: black,
     });
@@ -719,6 +812,16 @@ export async function renderSheetsPdf(
           y: label.y,
           size: LABEL_FONT_SIZE,
           font: boldFont,
+          color: black,
+        });
+      }
+
+      for (const caption of plan.captions) {
+        page.drawText(caption.text, {
+          x: caption.x,
+          y: caption.y,
+          size: LABEL_FONT_SIZE,
+          font,
           color: black,
         });
       }

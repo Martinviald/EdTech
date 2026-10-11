@@ -11,6 +11,7 @@ import {
   computeDrawPlan,
   fitTextToWidth,
   gradeAliasesFromCode,
+  placeGlyph,
   renderSheetsPdf,
   type PrintableSheetInfo,
 } from './sheet-print.helpers';
@@ -773,6 +774,143 @@ describe('computeDrawPlan — casillas por formato de respuesta', () => {
       ],
       { unitsByItemId: units },
     );
+    const doc = await PDFDocument.load(bytes);
+    expect(doc.getPageCount()).toBe(spec.pageCount);
+  });
+});
+
+function f10bSpec(): LayoutSpec {
+  return deriveLayoutDraft(INSTRUMENT_ID, [
+    mcItem(1),
+    responseItem(2, 'gap_fill', {
+      textWithGaps: '___ + ___ = ___',
+      gaps: [
+        { position: 0, acceptedAnswers: ['30'], partId: 'd' },
+        { position: 1, acceptedAnswers: ['4'], partId: 'u' },
+        { position: 2, acceptedAnswers: ['34'], partId: 't' },
+      ],
+      responseFormat: {
+        kind: 'multi_box',
+        boxes: [
+          { partId: 'd', label: 'Decenas:', kind: 'integer' },
+          { partId: 'u', label: 'Unidades:', kind: 'integer', operatorBefore: '+' },
+          { partId: 't', label: 'Total:', kind: 'integer', operatorBefore: '=' },
+        ],
+      },
+    }),
+    responseItem(3, 'gap_fill', {
+      textWithGaps: 'x',
+      gaps: [
+        {
+          position: 0,
+          acceptedAnswers: ['3'],
+          label: 'Un rótulo larguísimo que no cabe en la columna',
+        },
+        { position: 1, acceptedAnswers: ['4'], label: 'Unidades' },
+      ],
+    }),
+    responseItem(4, 'rubric_scored', {
+      prompt: 'x',
+      levels: [
+        { code: '0', creditFraction: 0 },
+        { code: '1', creditFraction: 0.5 },
+        { code: '2', creditFraction: 1 },
+      ],
+      responseFormat: { kind: 'score_bubbles', levels: ['0', '1', '2'] },
+    }),
+  ]).spec;
+}
+
+describe('computeDrawPlan — formatos de F10b', () => {
+  const spec = f10bSpec();
+  const plan = computeDrawPlan(spec, 0);
+  const byNumber = new Map(plan.responseFields.map((field) => [field.printedNumber, field]));
+  let widthOf: (text: string, size: number) => number = () => 0;
+
+  beforeAll(async () => {
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    widthOf = (text, size) => font.widthOfTextAtSize(text, size);
+  });
+
+  function placedRect(glyph: Parameters<typeof placeGlyph>[0]) {
+    const placed = placeGlyph(glyph, widthOf)!;
+    return {
+      x: placed.x,
+      y: placed.y,
+      width: widthOf(placed.text, placed.size),
+      height: placed.size * 0.7,
+    };
+  }
+
+  function overlaps(
+    a: { x: number; y: number; width: number; height: number },
+    b: { x: number; y: number; width: number; height: number },
+  ) {
+    return (
+      a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height
+    );
+  }
+
+  it('imprime los signos de la operación entre casillas y los rótulos a la izquierda, nunca dentro', () => {
+    const operation = byNumber.get('2')!;
+    expect(operation.glyphs.map((g) => g.text)).toEqual([
+      'Decenas:',
+      '+',
+      'Unidades:',
+      '=',
+      'Total:',
+    ]);
+    const rects = operation.glyphs.map(placedRect);
+    for (const rect of rects) {
+      for (const box of operation.boxes) expect(overlaps(rect, box.rect)).toBe(false);
+      expect(rect.x).toBeGreaterThanOrEqual(operation.rect.x);
+    }
+    for (let i = 0; i < rects.length; i++) {
+      for (let j = i + 1; j < rects.length; j++) expect(overlaps(rects[i]!, rects[j]!)).toBe(false);
+    }
+    const [decenas, unidades] = operation.boxes;
+    const plus = operation.glyphs[1]!;
+    expect(plus.centerX).toBeGreaterThan(decenas!.rect.x + decenas!.rect.width);
+    expect(plus.centerX).toBeLessThan(unidades!.rect.x);
+  });
+
+  it('achica o recorta un rótulo largo para que no entre a su casilla', () => {
+    const vertical = byNumber.get('3')!;
+    const label = vertical.glyphs.find((g) => g.text.startsWith('Un rótulo'))!;
+    const rect = placedRect(label);
+    for (const box of vertical.boxes) expect(overlaps(rect, box.rect)).toBe(false);
+  });
+
+  it('rotula las burbujas de puntaje docente a la derecha de la última burbuja', () => {
+    const scoreBubbles = plan.bubbles.filter((b) => b.printedNumber === '4');
+    expect(scoreBubbles.map((b) => b.value)).toEqual(['0', '1', '2']);
+    expect(plan.captions).toHaveLength(1);
+    const caption = plan.captions[0]!;
+    expect(caption.text).toBe('Puntaje (lo marca el docente)');
+    const rightmost = Math.max(...scoreBubbles.map((b) => b.cx + b.radius));
+    expect(caption.x).toBeGreaterThan(rightmost);
+    expect(caption.x + widthOf(caption.text, 8)).toBeLessThan(plan.pageWidth);
+    expect(plan.labels.some((l) => l.text === '4')).toBe(true);
+  });
+
+  it('las hojas sin burbujas de puntaje no llevan rótulo de puntaje', () => {
+    expect(computeDrawPlan(makeSpec(5), 0).captions).toEqual([]);
+  });
+
+  it('renderiza el PDF con los formatos nuevos', async () => {
+    const bytes = await renderSheetsPdf(spec, SPEC_HASH, [
+      {
+        printedSheetId: '22222222-2222-4222-8222-222222222222',
+        sequence: 1,
+        shortCode: null,
+        studentName: null,
+        classGroupName: null,
+        listNumber: null,
+        instrumentLabel: null,
+        administeredAt: null,
+      },
+    ]);
     const doc = await PDFDocument.load(bytes);
     expect(doc.getPageCount()).toBe(spec.pageCount);
   });
