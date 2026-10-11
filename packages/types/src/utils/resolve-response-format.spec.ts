@@ -106,8 +106,26 @@ describe('resolveResponseFormat', () => {
     });
   });
 
-  it('una clave de texto es texto corto con holgura de palabras', () => {
+  it('una lista de palabras separadas por coma es word_list', () => {
     expect(resolveResponseFormat(shortAnswer(['Cabeza, tórax, abdomen']))).toEqual({
+      kind: 'word_list',
+      count: 3,
+    });
+    expect(resolveResponseFormat(shortAnswer(['Cabeza, tórax y abdomen']))).toEqual({
+      kind: 'word_list',
+      count: 3,
+    });
+    expect(
+      resolveResponseFormat(shortAnswer(['sistema nervioso, sistema digestivo, corazón'])),
+    ).toEqual({ kind: 'word_list', count: 3 });
+  });
+
+  it('una oración con coma no es lista: es texto corto con holgura de palabras', () => {
+    expect(resolveResponseFormat(shortAnswer(['Sí, porque llueve']))).toEqual({
+      kind: 'short_text',
+      maxWords: 5,
+    });
+    expect(resolveResponseFormat(shortAnswer(['Pedro is cooking.']))).toEqual({
       kind: 'short_text',
       maxWords: 5,
     });
@@ -147,5 +165,52 @@ describe('resolveResponseFormat', () => {
     expect(resolveResponseFormat({ type: 'multiple_choice', content: {} })).toBeNull();
     expect(resolveResponseFormat({ type: 'oral_reading', content: { passage: 'x' } })).toBeNull();
     expect(resolveResponseFormat({ type: 'gap_fill', content: {} })).toBeNull();
+  });
+
+  it('gap_fill con dos o más casillas es multi_box con el tipo de cada casilla', () => {
+    const content = {
+      textWithGaps: '___ + ___ = ___',
+      gaps: [
+        { position: 0, acceptedAnswers: ['12'], partId: 'a', label: 'Sumando' },
+        { position: 1, acceptedAnswers: ['2,5'] },
+        { position: 2, acceptedAnswers: ['29/2'] },
+        { position: 3, acceptedAnswers: ['catorce'] },
+      ],
+    };
+    expect(resolveResponseFormat({ type: 'gap_fill', content })).toEqual({
+      kind: 'multi_box',
+      boxes: [
+        { partId: 'a', label: 'Sumando', kind: 'integer' },
+        { partId: '1', label: 'Casilla 2', kind: 'decimal' },
+        { partId: '2', label: 'Casilla 3', kind: 'fraction' },
+        { partId: '3', label: 'Casilla 4', kind: 'short_text' },
+      ],
+    });
+  });
+
+  it('gap_fill de una casilla o con casillas repetidas no deriva multi_box', () => {
+    const one = { textWithGaps: '___', gaps: [{ position: 0, acceptedAnswers: ['1'] }] };
+    expect(resolveResponseFormat({ type: 'gap_fill', content: one })).toBeNull();
+    const repeated = {
+      textWithGaps: '___ ___',
+      gaps: [
+        { position: 0, acceptedAnswers: ['1'], partId: 'x' },
+        { position: 1, acceptedAnswers: ['2'], partId: 'x' },
+      ],
+    };
+    expect(resolveResponseFormat({ type: 'gap_fill', content: repeated })).toBeNull();
+  });
+
+  it('una casilla con comparison de texto es texto aunque la clave sea un número', () => {
+    const content = {
+      textWithGaps: '___ ___',
+      gaps: [
+        { position: 0, acceptedAnswers: ['12'], comparison: 'text' },
+        { position: 1, acceptedAnswers: ['3'] },
+      ],
+    };
+    expect(resolveResponseFormat({ type: 'gap_fill', content })).toMatchObject({
+      boxes: [{ kind: 'short_text' }, { kind: 'integer' }],
+    });
   });
 });
