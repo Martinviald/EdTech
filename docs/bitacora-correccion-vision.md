@@ -323,3 +323,17 @@ registra.
 - **Riesgo anotado:** los glifos impresos dentro de la región (rótulos, signos, paréntesis,
   unidad) cuentan como tinta en el `inkRatio` total del OMR (`ink.py` solo descuenta los
   bordes de las casillas); `inkRatioByPart` no se ve afectado.
+
+### F10b integrada y `transcribe.short-text@2`
+
+- F10b (`10a2b1fa`…`7b0c4b4f` → rama): signos de operación entre casillas de `multi_box`
+  (`operatorBefore`, opcional en el contrato), burbujas por fila para pareados y ordenamiento
+  (`16.A1`, `17.3`), fila de puntaje docente para `score_bubbles`. Hoja revisada en PNG por el
+  orquestador. Riesgos que quedan: rótulos y signos cuentan como tinta en el `inkRatio` global del
+  campo (no en el de cada casilla; ya pasaba en F5b), y los borradores nuevos de instrumentos con
+  pareados u ordenamiento cambian porque esos ítems antes quedaban excluidos.
+- **`transcribe.short-text@2`**: la v1 pedía ignorar los rótulos pero no los signos que ahora se
+  imprimen entre casillas. La v2 los nombra. La 0049 (sin aplicar fuera de bases desechables) se
+  editó para sembrar la v2; los hashes de la v1 en el lock no cambiaron.
+- CI de `df015d82` 7/7 verde tras corregir el test de fixtures del arnés (comparaba PNG byte a
+  byte; zlib comprime distinto en macOS y Linux, ahora compara píxeles).
