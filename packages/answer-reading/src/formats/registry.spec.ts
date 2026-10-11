@@ -23,6 +23,7 @@ const DECIMAL: ResponseFormat = { kind: 'decimal', maxChars: 8, allowNegative: f
 const FRACTION: ResponseFormat = { kind: 'fraction', allowNegative: false, allowMixed: true };
 const PAIR: ResponseFormat = { kind: 'ordered_tuple', arity: 2, componentKind: 'integer' };
 const SEQUENCE: ResponseFormat = { kind: 'sequence', length: 4 };
+const SEQUENCE_2: ResponseFormat = { kind: 'sequence', length: 2 };
 
 function scoreAgainst(
   format: ResponseFormat,
@@ -115,6 +116,9 @@ describe('normalize — tabla de casos (incluye errores del experimento)', () =>
     ['secuencia con guiones', SEQUENCE, '3-1-4-2', 's:3|1|4|2', []],
     ['secuencia pegada', SEQUENCE, '3142', 's:3|1|4|2', []],
     ['secuencia corta', SEQUENCE, '3-1-4', 's:3|1|4', ['format_mismatch']],
+    ['entero con punto de miles', INTEGER, '1.500', 'n:1500', []],
+    ['secuencia de 2 pegada no se separa', SEQUENCE_2, '12', 's:12', ['format_mismatch']],
+    ['secuencia de 2 con separador', SEQUENCE_2, '1-2', 's:1|2', []],
   ];
 
   it.each(rows)('%s', (_name, format, literal, canonical, issues) => {
@@ -196,6 +200,7 @@ describe('toScoringInput → corrección existente', () => {
   });
 
   it('secuencias pegadas o con separadores', () => {
+    expect(scoreAgainst(SEQUENCE_2, '12', ['1-2'])).toBe('incorrect');
     expect(scoreAgainst(SEQUENCE, '3142', ['3-1-4-2'])).toBe('correct');
     expect(scoreAgainst(SEQUENCE, '3 1 2 4', ['3-1-4-2'])).toBe('incorrect');
   });

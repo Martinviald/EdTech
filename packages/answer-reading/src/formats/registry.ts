@@ -5,6 +5,7 @@ import {
   parseScalarText,
   parseSequenceText,
   primaryReading,
+  resolveNumberConvention,
   type CanonicalParse,
   type CanonicalValue,
   type NormalizationIssue,
@@ -148,7 +149,7 @@ function normalizeNumeric(
 ): NormalizedAnswer {
   return normalizeWith(output, {
     kind,
-    parse: parseScalarText,
+    parse: (text) => resolveNumberConvention(parseScalarText(text), kind, 'answer'),
     partsLiteral: () => null,
     partsEmpty: () => false,
     formatIssues: (value) => scalarIssues(value, { allowNegative, expect: kind }),
@@ -266,6 +267,9 @@ const orderedTupleDefinition: AnswerFormatDefinition<'ordered_tuple'> = {
   toScoringInput: toScoringText,
 };
 
+/** Igual que la corrección de CSV: `12` en una secuencia de 2 puede ser el número 12. */
+const MIN_PASTED_SEQUENCE_LENGTH = 3;
+
 const sequenceDefinition: AnswerFormatDefinition<'sequence'> = {
   kind: 'sequence',
   readBy: 'vision',
@@ -284,7 +288,10 @@ const sequenceDefinition: AnswerFormatDefinition<'sequence'> = {
   normalize: (output, format) => {
     const ids = indexedIds('e', format.length);
     const parse = (text: string) =>
-      parseSequenceText(text, { expectedLength: format.length, allowPasted: true });
+      parseSequenceText(text, {
+        expectedLength: format.length,
+        allowPasted: format.length >= MIN_PASTED_SEQUENCE_LENGTH,
+      });
     return normalizeWith(output, {
       kind: 'sequence',
       parse,
