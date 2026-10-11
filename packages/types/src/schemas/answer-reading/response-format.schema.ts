@@ -26,6 +26,10 @@ export type ReadBy = (typeof READ_BY)[number];
 
 export const MULTI_BOX_PART_KINDS = ['integer', 'decimal', 'fraction', 'short_text'] as const;
 
+// Signo de la operación que la hoja imprime ANTES de la casilla (`[ ] + [ ] = [ ]`),
+// siempre fuera de ella. Solo caracteres que la fuente estándar del PDF sabe dibujar.
+export const MULTI_BOX_OPERATORS = ['+', '-', '×', '÷', '=', '<', '>'] as const;
+
 export const responseFormatSchema = z.discriminatedUnion('kind', [
   z
     .object({
@@ -68,6 +72,7 @@ export const responseFormatSchema = z.discriminatedUnion('kind', [
               partId: z.string().min(1),
               label: z.string().min(1),
               kind: z.enum(MULTI_BOX_PART_KINDS),
+              operatorBefore: z.enum(MULTI_BOX_OPERATORS).optional(),
             })
             .strict(),
         )

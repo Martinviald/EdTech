@@ -99,6 +99,21 @@ describe('contratos de lectura por visión', () => {
     ).toBe(false);
   });
 
+  it('las casillas múltiples aceptan un signo de operación impreso antes de la casilla', () => {
+    const boxes = [
+      { partId: 'a', label: 'Sumando', kind: 'integer' },
+      { partId: 'b', label: 'Sumando', kind: 'integer', operatorBefore: '+' },
+      { partId: 'c', label: 'Total', kind: 'integer', operatorBefore: '=' },
+    ];
+    expect(responseFormatSchema.safeParse({ kind: 'multi_box', boxes }).success).toBe(true);
+    expect(
+      responseFormatSchema.safeParse({
+        kind: 'multi_box',
+        boxes: [boxes[0], { ...boxes[1], operatorBefore: '√' }],
+      }).success,
+    ).toBe(false);
+  });
+
   it('las equivalencias y el crédito por componente viajan en scoring_config', () => {
     expect(
       scoringConfigSchema.safeParse({
