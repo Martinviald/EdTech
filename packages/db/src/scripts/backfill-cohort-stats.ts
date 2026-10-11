@@ -37,7 +37,7 @@
  * derivan de `responses`: leen de acá. Migrar sin correr esto deja la analítica en
  * blanco — correctRate null, skills [] y heatmap []. Por eso el deploy lo corre dentro
  * del mismo túnel que la migración y antes de publicar la imagen nueva
- * (.github/workflows/deploy-backend.yml).
+ * (.github/workflows/deploy.yml).
  *
  * Lo que hace con los resultados por alumno (docs/diseno-logro-unificado-y-cohorte.md §4.4):
  *  · No reescribe `assessment_results` ni el % o el nivel de `skill_results`: el backfill no

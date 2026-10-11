@@ -6,7 +6,7 @@
  *
  * Idempotente (upsert por org × instrumento × nivel × asignatura): correrlo dos veces
  * deja el mismo estado. Lo corren el deploy de backend y el job programado
- * (.github/workflows/deploy-backend.yml y refresh-benchmark.yml); antes sólo existía
+ * (.github/workflows/deploy.yml y refresh-benchmark.yml); antes sólo existía
  * el endpoint `POST /api/benchmarking/refresh` y el read-model quedaba congelado en
  * lo que sembró `seed/benchmark-demo.ts`. Ver `queries/benchmark-aggregates.ts`.
  */

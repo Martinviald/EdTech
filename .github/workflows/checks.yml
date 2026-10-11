@@ -1,13 +1,15 @@
 name: Checks
 
-# Los gates de calidad, en UN solo lugar. Los invocan tanto `ci.yml` (en cada
-# PR) como los dos workflows de deploy (antes de tocar nada en AWS).
+# Los gates de calidad, en UN solo lugar. Los invoca `ci.yml` en cada PR.
 #
-# Existe porque estaban definidos sólo en `ci.yml`, que corre en `pull_request`: los
-# deploys disparan con `push` a `main` y no dependían de ningún check. Un CI en rojo
-# no impedía el deploy, y un push directo a `main` no corría ninguna verificación.
-# Duplicar los pasos en cada workflow habría sido la otra salida, pero se
-# desincronizan solos; con `workflow_call` hay una definición y tres llamadores.
+# Los deploys (deploy.yml) NO los corren: la branch protection de `main` exige que estos
+# jobs pasen en la PR y bloquea el push directo (también a admins), así que todo lo que
+# llega a `main` ya pasó por acá. Antes cada workflow de deploy los repetía y un merge
+# los corría hasta tres veces (~5 min por deploy).
+#
+# ⚠️ La protección exige los checks POR NOMBRE ("checks / Web (typecheck · …)"). Si se
+# renombra o se agrega un job acá, hay que actualizar la lista de required checks de
+# `main` (Settings → Branches) o la PR queda esperando un check que no existe.
 
 on:
   workflow_call:
@@ -33,7 +35,7 @@ jobs:
 
       # apps/web resuelve @soe/types y @soe/db (transpilePackages en next.config);
       # se construyen para que typecheck y `next build` los encuentren. Mismo par
-      # que arma el deploy del front antes de `next build` (deploy-frontend.yml).
+      # que arma el deploy del front antes de `next build` (job `frontend` de deploy.yml).
       - name: Build workspace deps
         run: pnpm --filter @soe/types build && pnpm --filter @soe/db build
 
