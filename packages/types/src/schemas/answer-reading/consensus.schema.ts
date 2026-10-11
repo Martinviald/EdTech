@@ -74,6 +74,10 @@ export const REVIEW_REASONS = [
   'audit_sample',
   'rubric_item',
   'external_vision_disabled',
+  'reading_disabled',
+  'budget_exceeded',
+  'run_limit_exceeded',
+  'crop_unavailable',
 ] as const;
 export type ReviewReason = (typeof REVIEW_REASONS)[number];
 export const reviewReasonSchema = z.enum(REVIEW_REASONS);
@@ -96,6 +100,10 @@ export const REVIEW_MODE_BY_REASON: Record<ReviewReason, ReviewMode> = {
   insufficient_readers: 'reading',
   reader_requested_review: 'reading',
   external_vision_disabled: 'reading',
+  reading_disabled: 'reading',
+  budget_exceeded: 'reading',
+  run_limit_exceeded: 'reading',
+  crop_unavailable: 'reading',
   format_mismatch: 'reading',
   audit_sample: 'reading',
   undecidable: 'grading',
