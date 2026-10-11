@@ -89,6 +89,14 @@ describe('registro de prompts', () => {
 });
 
 describe('prompts de texto (F10a)', () => {
+  it('short-text@2 ignora los signos de operación impresos entre casillas', () => {
+    const v1 = getPrompt('transcribe.short-text@1')?.system ?? '';
+    const v2 = getPrompt('transcribe.short-text@2')?.system ?? '';
+    expect(v2).not.toEqual(v1);
+    expect(v2).toMatch(/signos de operación impresos entre casillas/);
+    expect(v1).not.toMatch(/signos de operación/);
+  });
+
   it('short-text atiende listas, texto corto y casillas; free-text atiende el desarrollo', () => {
     expect(getPrompt('transcribe.short-text@1')?.formatKinds).toEqual([
       'word_list',

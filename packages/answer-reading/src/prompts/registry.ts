@@ -19,12 +19,17 @@ import { rubricGradeJsonSchema } from '../grading/rubric-grade-schema';
 import { GRADE_RUBRIC_V1 } from './grade-rubric';
 import { promptHash, promptRef, renderPrompt } from './render';
 import { TRANSCRIBE_SHORT_ANSWER_V1, TRANSCRIBE_SHORT_ANSWER_V2 } from './transcribe-short-answer';
-import { TRANSCRIBE_FREE_TEXT_V1, TRANSCRIBE_SHORT_TEXT_V1 } from './transcribe-text';
+import {
+  TRANSCRIBE_FREE_TEXT_V1,
+  TRANSCRIBE_SHORT_TEXT_V1,
+  TRANSCRIBE_SHORT_TEXT_V2,
+} from './transcribe-text';
 
 export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_SHORT_ANSWER_V1,
   TRANSCRIBE_SHORT_ANSWER_V2,
   TRANSCRIBE_SHORT_TEXT_V1,
+  TRANSCRIBE_SHORT_TEXT_V2,
   TRANSCRIBE_FREE_TEXT_V1,
   GRADE_RUBRIC_V1,
 ].map((prompt) => promptVersionSchema.parse(prompt));

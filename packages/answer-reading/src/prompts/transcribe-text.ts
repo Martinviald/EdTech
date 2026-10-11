@@ -50,6 +50,15 @@ ${REVIEW_SECTION}`,
 {{#formatLabel}}Tipo de respuesta que pide la pregunta: {{formatLabel}}. Úsalo para ubicar la respuesta, pero transcribe lo que el estudiante escribió aunque no calce con ese tipo.{{/formatLabel}}`,
 };
 
+export const TRANSCRIBE_SHORT_TEXT_V2: PromptVersion = {
+  ...TRANSCRIBE_SHORT_TEXT_V1,
+  version: 2,
+  system: TRANSCRIBE_SHORT_TEXT_V1.system.replace(
+    '- Ignora los rótulos y textos impresos en la hoja: transcribe solo lo manuscrito.',
+    '- Ignora los rótulos, los signos de operación impresos entre casillas (+, −, ×, ÷, =, <, >) y los demás textos impresos en la hoja: transcribe solo lo manuscrito.',
+  ),
+};
+
 export const TRANSCRIBE_FREE_TEXT_V1: PromptVersion = {
   id: 'transcribe.free-text',
   version: 1,
