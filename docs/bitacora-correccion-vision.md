@@ -181,3 +181,26 @@ deshabilitados que dejan de usarse en ejecución.
 
 - F7-A (pipeline) y F10a (normalizadores) despachados sobre la rama con F2 corregida; F9 (arnés)
   despachado tras la corrección de F3, con tope de US$0,50 para la línea base real.
+
+### F10a integrada (`c4343e8e`…`fd576292` → rama, + `c787da6e`)
+
+- `word_list`, `short_text`, `multi_box` (crédito por casilla en `gap_fill` solo con
+  `componentCredit`/`partialCredit`), formatos de rúbrica `free_text`/`math_work` que el consenso
+  nunca autoacepta (`rubric_item`), prompts `transcribe.short-text@1` y `transcribe.free-text@1`.
+- Pares DIA reales: II° P12 `[2#4]` vs `(2,-4)` con `componentCredit` → 1 de 2; 7° P18 `[3#7]`
+  vs `(7;3)` → 0.
+- **Para F7-B y F10b:** al corregir, el ítem debe llevar el formato derivado
+  (`resolveResponseFormat`), o `word_list`/`short_text` se comparan como texto plano y una
+  diferencia queda incorrecta en vez de ir a revisión.
+
+### F7-A integrada (7 commits + migración `0048`: `crop_evidence` y ruta global por defecto)
+
+- Módulo `apps/api/src/answer-reading/`: puerto `VisionTranscriber` + `LlmVisionTranscriber`,
+  `ReadingRoutesService`, `AnswerReadingPipelineService` (un job por lote; 4 recortes en paralelo
+  por hoja; idempotencia por `reading_key`; interruptores `enabled`/`allowExternalVision`;
+  presupuesto contra `aiBudgetUsd` y `monthlyBudgetUsd`; tope `ANSWER_READING_MAX_CROPS_PER_RUN`).
+- Motivos nuevos: `reading_disabled`, `budget_exceeded`, `run_limit_exceeded`, `crop_unavailable`.
+- `ConcurrencyLimiter` movido a `apps/api/src/common/concurrency/`.
+- CI: el job de API construye `@soe/answer-reading`; el Dockerfile ya lo incluía.
+- Riesgos anotados: dos lotes con la misma imagen en paralelo pueden chocar en el único de
+  `answer_readings` (queda en revisión); un reproceso suma de nuevo `crops_total`.
