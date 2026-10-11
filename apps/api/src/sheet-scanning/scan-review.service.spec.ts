@@ -1,11 +1,12 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import type { Database } from '@soe/db';
-import type { LayoutSpec, PageQuality } from '@soe/types';
+import type { LayoutSpec, PageQuality, RubricEngine } from '@soe/types';
 import type {
   AnswerReadingConsolidationService,
   ConfirmedReadingsInput,
   ReadingConfirmation,
 } from '../answer-reading/answer-reading-consolidation.service';
+import type { RubricGradingService } from '../answer-reading/rubric-grading.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import * as observability from '../common/observability/report-error';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
@@ -122,10 +123,25 @@ function makeReadingConsolidation(
   return { consolidation, linkCalls, readingCalls };
 }
 
+function makeRubricGrading(engine: RubricEngine | Error = 'legacy') {
+  const rubricBatches: Array<{ orgId: string; batchId: string }> = [];
+  const rubricGrading = {
+    engineFor: async () => {
+      if (engine instanceof Error) throw engine;
+      return engine;
+    },
+    scheduleForBatch: (orgId: string, batchId: string) => {
+      rubricBatches.push({ orgId, batchId });
+    },
+  } as unknown as RubricGradingService;
+  return { rubricGrading, rubricBatches };
+}
+
 function makeService(
   selectResults: unknown[][],
   readings?: Map<string, ReadingConfirmation>,
   linkError: Error | null = null,
+  engine: RubricEngine | Error = 'legacy',
 ) {
   const { db, updates } = makeDb(selectResults);
   const { confirmer, calls: confirmCalls } = makeConfirmer();
@@ -136,14 +152,16 @@ function makeService(
     },
   } as unknown as DevelopmentGradingService;
   const { consolidation, linkCalls, readingCalls } = makeReadingConsolidation(readings, linkError);
+  const { rubricGrading, rubricBatches } = makeRubricGrading(engine);
   const service = new ScanReviewService(
     db,
     confirmer,
     filesServiceFake,
     developmentGradingFake,
     consolidation,
+    rubricGrading,
   );
-  return { service, updates, confirmCalls, gradingCalls, linkCalls, readingCalls };
+  return { service, updates, confirmCalls, gradingCalls, linkCalls, readingCalls, rubricBatches };
 }
 
 function bubbleField(fieldId: string, printedNumber: string, pageIndex: number, values: string[]) {
@@ -1249,6 +1267,54 @@ describe('ScanReviewService.confirmBatch', () => {
     ]);
   });
 
+  it('con el motor legacy no agenda la calificación con rúbrica', async () => {
+    const { service, gradingCalls, rubricBatches } = makeService([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(gradingCalls).toHaveLength(1);
+    expect(rubricBatches).toHaveLength(0);
+  });
+
+  it('con el motor rubric_grading agenda la calificación con rúbrica y apaga el servicio viejo', async () => {
+    const { service, gradingCalls, rubricBatches } = makeService(
+      [[CONFIRM_BATCH_ROW], CONFIRM_SCANS, CONFIRM_MARKS, CONFIRM_STUDENTS],
+      undefined,
+      null,
+      'rubric_grading',
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(gradingCalls).toHaveLength(0);
+    expect(rubricBatches).toEqual([{ orgId: ORG_ID, batchId: BATCH_ID }]);
+  });
+
+  it('si no se puede leer el motor, confirma igual y no agenda ninguna calificación', async () => {
+    const reportSpy = jest
+      .spyOn(observability, 'reportServerError')
+      .mockImplementation(() => undefined);
+    const { service, gradingCalls, rubricBatches } = makeService(
+      [[CONFIRM_BATCH_ROW], CONFIRM_SCANS, CONFIRM_MARKS, CONFIRM_STUDENTS],
+      undefined,
+      null,
+      new Error('bdd caída'),
+    );
+
+    await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).resolves.toMatchObject({
+      status: 'confirmed',
+    });
+    expect(gradingCalls).toHaveLength(0);
+    expect(rubricBatches).toHaveLength(0);
+    expect(reportSpy).toHaveBeenCalled();
+    reportSpy.mockRestore();
+  });
+
   it('no agenda corrección de desarrollo si el confirm de answer-sheets falla', async () => {
     const { db } = makeDb([[CONFIRM_BATCH_ROW], CONFIRM_SCANS, CONFIRM_MARKS, CONFIRM_STUDENTS]);
     const gradingCalls: ScheduleConfirmedBatchParams[] = [];
@@ -1268,6 +1334,7 @@ describe('ScanReviewService.confirmBatch', () => {
       filesServiceFake,
       developmentGradingFake,
       makeReadingConsolidation().consolidation,
+      makeRubricGrading().rubricGrading,
     );
 
     await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toThrow('falló la ingesta');

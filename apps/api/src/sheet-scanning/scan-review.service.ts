@@ -34,6 +34,7 @@ import type {
   ReviewQueueModel,
   ReviewScanModel,
   SheetScanState,
+  RubricEngine,
 } from '@soe/types';
 import { autoAnnulMinConfidence, isQuickConfirmEnabled } from '@soe/types';
 import {
@@ -42,6 +43,7 @@ import {
   type ConfirmedReadingsInput,
   type ReadingConfirmation,
 } from '../answer-reading/answer-reading-consolidation.service';
+import { RubricGradingService } from '../answer-reading/rubric-grading.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
@@ -49,7 +51,10 @@ import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { ParserResult } from '../answer-sheets/lib/parsers/parser.types';
 import { FilesService } from '../files/files.service';
-import { DevelopmentGradingService } from './development-grading.service';
+import {
+  DevelopmentGradingService,
+  type ScheduleConfirmedBatchParams,
+} from './development-grading.service';
 import { toParserResult, type ConfirmedScanInput } from './scan-result.adapter';
 
 export const ANSWER_SHEET_CONFIRMER = 'ANSWER_SHEET_CONFIRMER';
@@ -174,6 +179,7 @@ export class ScanReviewService {
     private readonly filesService: FilesService,
     private readonly developmentGrading: DevelopmentGradingService,
     private readonly readingConsolidation: AnswerReadingConsolidationService,
+    private readonly rubricGrading: RubricGradingService,
   ) {}
 
   async getQueue(orgId: string, batchId: string): Promise<ReviewQueueModel> {
@@ -781,7 +787,7 @@ export class ScanReviewService {
       cropMarkIds: confirmedCropMarkIds,
     });
 
-    this.developmentGrading.scheduleConfirmedBatch({
+    await this.scheduleDevelopmentGrading({
       orgId,
       batchId,
       assessmentId: prepared.batch.assessmentId,
@@ -799,6 +805,25 @@ export class ScanReviewService {
         assumedPending,
       },
     };
+  }
+
+  private async scheduleDevelopmentGrading(params: ScheduleConfirmedBatchParams): Promise<void> {
+    let engine: RubricEngine;
+    try {
+      engine = await this.rubricGrading.engineFor(params.orgId);
+    } catch (error) {
+      reportServerError(error, {
+        orgId: params.orgId,
+        batchId: params.batchId,
+        stage: 'resolve_rubric_engine',
+      });
+      return;
+    }
+    if (engine === 'rubric_grading') {
+      this.rubricGrading.scheduleForBatch(params.orgId, params.batchId);
+      return;
+    }
+    this.developmentGrading.scheduleConfirmedBatch(params);
   }
 
   private async linkConfirmedReadings(
