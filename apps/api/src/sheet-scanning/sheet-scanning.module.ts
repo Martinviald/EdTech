@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AnswerReadingModule } from '../answer-reading/answer-reading.module';
 import { AnswerSheetsModule } from '../answer-sheets/answer-sheets.module';
 import { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
@@ -42,7 +43,7 @@ import { SheetScanMetricsService } from './sheet-scan-metrics.service';
 import { SheetScanService } from './sheet-scan.service';
 
 @Module({
-  imports: [FilesModule, JobsModule, AnswerSheetsModule, LlmModule],
+  imports: [FilesModule, JobsModule, AnswerSheetsModule, LlmModule, AnswerReadingModule],
   controllers: [
     SheetLayoutsController,
     SheetPrintRunsController,
