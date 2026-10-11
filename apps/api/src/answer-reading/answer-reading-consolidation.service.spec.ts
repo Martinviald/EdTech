@@ -45,6 +45,7 @@ const SHEET_ID = '99999999-9999-4999-8999-999999999999';
 const NUMBER_ITEM = 'aaaaaaaa-0000-4000-8000-000000000001';
 const WORDS_ITEM = 'aaaaaaaa-0000-4000-8000-000000000002';
 const OPEN_ITEM = 'aaaaaaaa-0000-4000-8000-000000000003';
+const TEXT_ITEM = 'aaaaaaaa-0000-4000-8000-000000000004';
 const MARK_A = 'bbbbbbbb-0000-4000-8000-000000000001';
 const MARK_B = 'bbbbbbbb-0000-4000-8000-000000000002';
 const MARK_C = 'bbbbbbbb-0000-4000-8000-000000000003';
@@ -55,6 +56,7 @@ const RESPONSE_B = 'dddddddd-0000-4000-8000-000000000002';
 
 const INTEGER: ResponseFormat = { kind: 'integer', maxChars: 3, allowNegative: false };
 const WORDS: ResponseFormat = { kind: 'word_list', count: 3 };
+const SHORT_TEXT: ResponseFormat = { kind: 'short_text', maxWords: 5 };
 
 function answer(literal: string, format: ResponseFormat): NormalizedAnswer {
   return normalizeTranscription(fakeOutput(literal), format);
@@ -658,6 +660,56 @@ describe('AnswerReadingConsolidationService.consolidateDecisions', () => {
     expect(decision.supersededById).toBe(reviewable.id);
     expect(report.pending).toEqual([reviewable.id]);
     expect(response.finalScore).toBeNull();
+  });
+
+  it('un short_text autoaceptado que la clave no decide pasa a revisión y la respuesta queda pendiente, nunca en 0', async () => {
+    const { memory, service } = setup();
+    memory.seed(items, [
+      {
+        id: TEXT_ITEM,
+        type: 'short_answer',
+        content: { prompt: '¿Cómo se llama el proceso?', acceptedAnswers: ['fotosíntesis'] },
+        scoringConfig: { points: 1 },
+      },
+    ]);
+    const response = seedResponse(memory, { id: RESPONSE_A, itemId: TEXT_ITEM });
+    const decision = seedDecision(memory, {
+      itemId: TEXT_ITEM,
+      value: answer('fotosintesis', SHORT_TEXT),
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.consolidateDecisions(ORG_ID, [decision.id]);
+
+    expect(report.scored).toEqual([]);
+    expect(currentDecisionOf(memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['undecidable'],
+    });
+    expect(response).toMatchObject({ finalScore: null, isCorrect: null });
+  });
+
+  it('un short_text autoaceptado que coincide con la clave se consolida correcto', async () => {
+    const { memory, service } = setup();
+    memory.seed(items, [
+      {
+        id: TEXT_ITEM,
+        type: 'short_answer',
+        content: { prompt: '¿Cómo se llama el proceso?', acceptedAnswers: ['fotosíntesis'] },
+        scoringConfig: { points: 1 },
+      },
+    ]);
+    const response = seedResponse(memory, { id: RESPONSE_A, itemId: TEXT_ITEM });
+    const decision = seedDecision(memory, {
+      itemId: TEXT_ITEM,
+      value: answer('Fotosíntesis', SHORT_TEXT),
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.consolidateDecisions(ORG_ID, [decision.id]);
+
+    expect(report.scored).toEqual([decision.id]);
+    expect(response).toMatchObject({ finalScore: '1.00', isCorrect: true, scoredBy: 'ai' });
   });
 
   it('una respuesta que ya estaba pendiente no se reescribe ni recalcula', async () => {

@@ -68,6 +68,9 @@ const RUBRIC_ITEM_ID = '7a7a7a7a-7a7a-4a7a-8a7a-7a7a7a7a7a7a';
 const RUBRIC_ROUTE_ID = 'abababab-abab-4bab-8bab-abababababab';
 const RUBRIC_FIELD = 'f_desarrollo';
 const SEQUENCE_ITEM_ID = '7b7b7b7b-7b7b-4b7b-8b7b-7b7b7b7b7b7b';
+const WORDS_ITEM_ID = '7c7c7c7c-7c7c-4c7c-8c7c-7c7c7c7c7c7c';
+const TEXT_ITEM_ID = '7d7d7d7d-7d7d-4d7d-8d7d-7d7d7d7d7d7d';
+const GAPS_ITEM_ID = '7e7e7e7e-7e7e-4e7e-8e7e-7e7e7e7e7e7e';
 const SEQUENCE_FIELD = 'f_secuencia';
 const FIELD_1 = 'f_001';
 const FIELD_2 = 'f_002';
@@ -143,8 +146,28 @@ const SEQUENCE_FIELD_SPEC = {
   },
 };
 
+function textField(fieldId: string, itemId: string, format: Record<string, unknown>) {
+  return {
+    ...field(fieldId),
+    response: { itemId, format, boxes: [], cropProfileId: 'short-answer@1' },
+  };
+}
+
+const TEXT_FIELDS = {
+  word_list: textField('f_palabras', WORDS_ITEM_ID, { kind: 'word_list', count: 3 }),
+  short_text: textField('f_texto', TEXT_ITEM_ID, { kind: 'short_text', maxWords: 5 }),
+  multi_box: textField('f_casillas', GAPS_ITEM_ID, {
+    kind: 'multi_box',
+    boxes: [
+      { partId: '0', label: 'Casilla 1', kind: 'integer' },
+      { partId: '1', label: 'Casilla 2', kind: 'short_text' },
+    ],
+  }),
+};
+
 const SPEC = {
   fields: [
+    ...Object.values(TEXT_FIELDS),
     field(FIELD_1),
     field(FIELD_2),
     { ...field('f_rubric'), response: undefined },
@@ -508,6 +531,133 @@ describe('AnswerReadingPipelineService — punta a punta del job', () => {
     expect(transcriber.calls).toHaveLength(0);
     expect(decisionsOf(memory)).toHaveLength(0);
     expect(memory.rows(answerReadingRuns)).toHaveLength(0);
+  });
+});
+
+describe('AnswerReadingPipelineService — formatos de texto', () => {
+  const TEXT_HAIKU = reader('haiku-texto', 'anthropic-haiku', {
+    promptRef: 'transcribe.short-text@1',
+  });
+  const TEXT_FLASH = reader('flash-texto', 'gemini-flash-lite', {
+    provider: 'gemini',
+    promptRef: 'transcribe.short-text@1',
+  });
+
+  function seedTextWorld(memory: InMemoryDatabase): void {
+    memory.seed(items, [
+      {
+        id: WORDS_ITEM_ID,
+        instrumentId: INSTRUMENT_ID,
+        type: 'short_answer',
+        content: { prompt: 'Partes del insecto', acceptedAnswers: ['Cabeza, tórax, abdomen'] },
+        scoringConfig: { points: 2 },
+      },
+      {
+        id: TEXT_ITEM_ID,
+        instrumentId: INSTRUMENT_ID,
+        type: 'short_answer',
+        content: { prompt: '¿Cómo se llama el proceso?', acceptedAnswers: ['fotosíntesis'] },
+        scoringConfig: { points: 1 },
+      },
+      {
+        id: GAPS_ITEM_ID,
+        instrumentId: INSTRUMENT_ID,
+        type: 'gap_fill',
+        content: {
+          textWithGaps: '___ se escribe ___',
+          gaps: [
+            { position: 0, acceptedAnswers: ['12'] },
+            { position: 1, acceptedAnswers: ['doce'] },
+          ],
+        },
+        scoringConfig: { points: 2 },
+      },
+    ]);
+    memory.seed(
+      readingRoutes,
+      (['word_list', 'short_text', 'multi_box'] as const).map((formatKind) => ({
+        orgId: null,
+        status: 'active',
+        level: 'format',
+        formatKind,
+        readers: [TEXT_HAIKU, TEXT_FLASH],
+        fallbackReaders: [],
+        shadowReaders: [],
+        shadowSampleRate: '0',
+        policy: { ...POLICY, id: `texto-${formatKind}` },
+        version: 1,
+      })),
+    );
+  }
+
+  function bothRead(output: FakeReading) {
+    return { 'haiku-texto': { [SHA_1]: output }, 'flash-texto': { [SHA_1]: output } };
+  }
+
+  it.each([
+    [
+      'word_list',
+      fakeOutput('cabeza, torax, abdomen', {
+        parts: { w1: 'cabeza', w2: 'torax', w3: 'abdomen' },
+      }),
+    ],
+    ['short_text', fakeOutput('fotosíntesis')],
+    ['multi_box', fakeOutput('12 | doce', { parts: { '0': '12', '1': 'doce' } })],
+  ] as const)(
+    '%s se lee con su ruta de formato, se normaliza con su formato y se corrige con la clave',
+    async (formatKind, output) => {
+      const { memory, transcriber, runScan } = setup({
+        readings: bothRead(output),
+        marks: [{ id: MARK_1, fieldId: TEXT_FIELDS[formatKind].fieldId, cropFileId: CROP_1 }],
+      });
+      seedTextWorld(memory);
+
+      await runScan();
+
+      expect(transcriber.calls).toHaveLength(2);
+      expect(transcriber.calls.every((call) => call.prompt.ref === 'transcribe.short-text@1')).toBe(
+        true,
+      );
+      for (const reading of readingsOf(memory)) {
+        expect(reading.normalized?.formatKind).toBe(formatKind);
+      }
+      expect(currentDecision(memory)).toMatchObject({
+        outcome: 'auto_accepted',
+        scoringOutcome: 'correct',
+        value: expect.objectContaining({ formatKind }),
+      });
+    },
+  );
+});
+
+describe('AnswerReadingPipelineService — formatos de texto indecidibles', () => {
+  it('un short_text que la clave no decide va a revisión, nunca a 0', async () => {
+    const textReader = (key: string, family: string) =>
+      reader(key, family, { promptRef: 'transcribe.short-text@1' });
+    const { memory, runScan } = setup({
+      readings: {
+        'haiku-texto': { [SHA_1]: fakeOutput('fotosintesis') },
+        'flash-texto': { [SHA_1]: fakeOutput('fotosintesis') },
+      },
+      readers: [textReader('haiku-texto', 'anthropic-haiku'), textReader('flash-texto', 'gemini')],
+      marks: [{ id: MARK_1, fieldId: TEXT_FIELDS.short_text.fieldId, cropFileId: CROP_1 }],
+    });
+    memory.seed(items, [
+      {
+        id: TEXT_ITEM_ID,
+        instrumentId: INSTRUMENT_ID,
+        type: 'short_answer',
+        content: { prompt: '¿Cómo se llama el proceso?', acceptedAnswers: ['fotosíntesis'] },
+        scoringConfig: { points: 1 },
+      },
+    ]);
+
+    await runScan();
+
+    const decision = currentDecision(memory);
+    expect(decision).toMatchObject({ outcome: 'needs_review', reviewMode: 'grading' });
+    expect(decision.reasons).toContain('undecidable');
+    expect(decision.scoringOutcome).not.toBe('incorrect');
   });
 });
 
