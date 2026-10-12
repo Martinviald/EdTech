@@ -20,6 +20,7 @@ import {
   type TranscriptionJsonSchema,
 } from '../formats/transcription-json-schema';
 import { rubricGradeJsonSchema } from '../grading/rubric-grade-schema';
+import { verificationJsonSchema } from '../verification/verification-json-schema';
 import { GRADE_RUBRIC_V1 } from './grade-rubric';
 import { promptHash, promptRef, renderPrompt } from './render';
 import { TRANSCRIBE_BOXES_V1 } from './transcribe-boxes';
@@ -29,6 +30,7 @@ import {
   TRANSCRIBE_SHORT_TEXT_V1,
   TRANSCRIBE_SHORT_TEXT_V2,
 } from './transcribe-text';
+import { VERIFY_INCORRECT_V1 } from './verify-incorrect';
 
 export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_SHORT_ANSWER_V1,
@@ -38,6 +40,7 @@ export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_FREE_TEXT_V1,
   TRANSCRIBE_BOXES_V1,
   GRADE_RUBRIC_V1,
+  VERIFY_INCORRECT_V1,
 ].map((prompt) => promptVersionSchema.parse(prompt));
 
 const BY_REF = new Map(PROMPT_VERSIONS.map((prompt) => [promptRef(prompt), prompt]));
@@ -57,17 +60,24 @@ export function readsByBoxCell(prompt: Pick<PromptVersion, 'outputSchemaId'>): b
   return prompt.outputSchemaId === TRANSCRIPTION_BOX_CELLS_SCHEMA_ID;
 }
 
+const TEMPLATE_OUTPUT_SCHEMAS: Record<
+  PromptVersion['purpose'],
+  (prompt: PromptVersion) => unknown
+> = {
+  transcription: (prompt) =>
+    baseTranscriptionJsonSchema(
+      readsByBoxCell(prompt) ? TRANSCRIPTION_BOX_CELLS_SCHEMA_ID : undefined,
+    ).schema,
+  rubric_grading: () => rubricGradeJsonSchema().schema,
+  verification: () => verificationJsonSchema().schema,
+};
+
 /**
  * Hash de la plantilla sin renderizar (lo que congela `prompts.lock.json`), con el
- * esquema base de su propósito: transcripción o calificación con rúbrica.
+ * esquema base de su propósito: transcripción, calificación con rúbrica o verificación.
  */
 export function templateHash(prompt: PromptVersion): string {
-  const outputSchema =
-    prompt.purpose === 'rubric_grading'
-      ? rubricGradeJsonSchema().schema
-      : baseTranscriptionJsonSchema(
-          readsByBoxCell(prompt) ? TRANSCRIPTION_BOX_CELLS_SCHEMA_ID : undefined,
-        ).schema;
+  const outputSchema = TEMPLATE_OUTPUT_SCHEMAS[prompt.purpose](prompt);
   return promptHash(prompt.system, prompt.user, prompt.outputSchemaId, outputSchema);
 }
 
@@ -161,6 +171,26 @@ export function promptFormatLockHash(
     .digest('hex');
 }
 
+/** Lo que el formato agrega a un prompt de verificación: solo su etiqueta (nunca la guía). */
+export function verificationFormatLockParts(format: ResponseFormat): FormatLockParts {
+  const output = verificationJsonSchema();
+  return {
+    label: formatLabelFor(format),
+    guide: '',
+    outputSchemaId: output.schemaId,
+    outputSchema: output.schema,
+  };
+}
+
+const FORMAT_LOCK_PARTS_BY_PURPOSE: Record<
+  PromptVersion['purpose'],
+  ((prompt: PromptVersion, format: ResponseFormat) => readonly FormatLockParts[]) | null
+> = {
+  transcription: (prompt, format) => lockPartsFor(prompt, format),
+  rubric_grading: null,
+  verification: (_prompt, format) => [verificationFormatLockParts(format)],
+};
+
 /**
  * Lo que congela `prompts.lock.json`: por cada versión publicada, el hash de la
  * plantilla y uno por cada formato que atiende. Cambiar la guía, la etiqueta o
@@ -171,12 +201,13 @@ export function promptLock(): Record<string, string> {
   for (const prompt of PROMPT_VERSIONS.filter((p) => p.status === 'published')) {
     const ref = promptRef(prompt);
     lock[ref] = templateHash(prompt);
-    if (prompt.purpose !== 'transcription') continue;
+    const partsOf = FORMAT_LOCK_PARTS_BY_PURPOSE[prompt.purpose];
+    if (partsOf === null) continue;
     for (const kind of prompt.formatKinds.filter(isSupportedFormatKind)) {
       const samples = PROMPT_LOCK_SAMPLE_FORMATS.filter((format) => format.kind === kind);
       lock[`${ref} × ${kind}`] = promptFormatLockHash(
         prompt,
-        samples.flatMap((format) => lockPartsFor(prompt, format)),
+        samples.flatMap((format) => partsOf(prompt, format)),
       );
     }
   }
