@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { buildComparabilityMeta } from '@soe/types';
 import type {
   AssessmentReportResponse,
@@ -9,6 +10,7 @@ import type { JwtPayload } from '../../auth/jwt-payload.types';
 import type { ComparableTrajectoryService } from '../../analytics/comparable-trajectory.service';
 import type { AssessmentReportService } from '../../assessment-report/assessment-report.service';
 import type { AssessmentResultsService } from '../../assessment-results/assessment-results.service';
+import type { ItemAnalysisService } from '../../item-analysis/item-analysis.service';
 import { GetComparableTrajectoryTool } from './get-comparable-trajectory.tool';
 import { GetAssessmentReportTool } from './get-assessment-report.tool';
 import { GetStudentDetailTool } from './get-student-detail.tool';
@@ -99,6 +101,15 @@ describe('GetComparableTrajectoryTool', () => {
 // ──────────────────────────────────────────────────────────────────────────────
 
 describe('GetAssessmentReportTool', () => {
+  const INSTRUMENT_ID = '33333333-3333-3333-3333-333333333333';
+
+  function makeReportTool(getReport: jest.Mock, listAssessments: jest.Mock = jest.fn()) {
+    return new GetAssessmentReportTool(
+      { getReport } as unknown as AssessmentReportService,
+      { listAssessments } as unknown as ItemAnalysisService,
+    );
+  }
+
   function makeReport(): AssessmentReportResponse {
     return {
       meta: {
@@ -150,9 +161,7 @@ describe('GetAssessmentReportTool', () => {
 
   it('llama al service con ctx.user y remueve nombre/RUT de studentsAtRisk', async () => {
     const getReport = jest.fn().mockResolvedValue(makeReport());
-    const tool = new GetAssessmentReportTool({
-      getReport,
-    } as unknown as AssessmentReportService);
+    const tool = makeReportTool(getReport);
 
     const result = await tool.execute({ assessmentId: ASSESSMENT_ID }, CTX);
 
@@ -172,11 +181,56 @@ describe('GetAssessmentReportTool', () => {
     expect(risk.weakestSkill).toBe('Comprensión lectora');
   });
 
+  it('si el id es de un instrumento devuelve sus evaluaciones por curso en vez de un 404 mudo', async () => {
+    const getReport = jest
+      .fn()
+      .mockRejectedValue(new NotFoundException('Evaluación no encontrada'));
+    const listAssessments = jest.fn().mockResolvedValue({
+      data: [
+        {
+          assessmentId: ASSESSMENT_ID,
+          name: 'DIA Matemática 7° Básico 2026 — Intermedio · A',
+          instrumentName: 'DIA Matemática 7° Básico 2026 — Intermedio',
+          instrumentType: 'dia',
+          subjectName: 'Matemática',
+          gradeName: '7° básico',
+          administeredAt: null,
+          studentsCount: 39,
+        },
+      ],
+    });
+    const tool = makeReportTool(getReport, listAssessments);
+
+    const result = await tool.execute({ assessmentId: INSTRUMENT_ID }, CTX);
+
+    expect(listAssessments).toHaveBeenCalledWith(USER, { instrumentId: [INSTRUMENT_ID] });
+    expect(result.isError).toBe(true);
+    const parsed = JSON.parse(result.content) as {
+      error: string;
+      assessments: Array<{ assessmentId: string; studentsCount: number }>;
+    };
+    expect(parsed.error).toContain('instrumento');
+    expect(parsed.assessments).toEqual([
+      expect.objectContaining({ assessmentId: ASSESSMENT_ID, studentsCount: 39 }),
+    ]);
+  });
+
+  it('si el id no es evaluación ni instrumento indica usar list_assessments', async () => {
+    const getReport = jest
+      .fn()
+      .mockRejectedValue(new NotFoundException('Evaluación no encontrada'));
+    const listAssessments = jest.fn().mockResolvedValue({ data: [] });
+    const tool = makeReportTool(getReport, listAssessments);
+
+    const result = await tool.execute({ assessmentId: INSTRUMENT_ID }, CTX);
+
+    expect(result.isError).toBe(true);
+    expect(JSON.parse(result.content).error).toContain('list_assessments');
+  });
+
   it('input inválido → isError sin llamar al service', async () => {
     const getReport = jest.fn();
-    const tool = new GetAssessmentReportTool({
-      getReport,
-    } as unknown as AssessmentReportService);
+    const tool = makeReportTool(getReport);
 
     const result = await tool.execute({ assessmentId: 'nope' }, CTX);
 

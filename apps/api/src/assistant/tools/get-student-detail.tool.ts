@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
-import type {
-  AssessmentResultModel,
-  StudentResultDetail,
-} from '@soe/types';
+import type { AssessmentResultModel, StudentResultDetail } from '@soe/types';
 import type {
   AssistantTool,
   AssistantToolContext,
@@ -19,10 +16,7 @@ const inputSchema = z.object({
 });
 
 /** Resultado del alumno SIN PII: igual al modelo pero sin nombre ni RUT. */
-type ResultPiiFree = Omit<
-  AssessmentResultModel,
-  'studentRut' | 'studentFullName'
->;
+type ResultPiiFree = Omit<AssessmentResultModel, 'studentRut' | 'studentFullName'>;
 
 /** Detalle del alumno con `result` proyectado a su forma PII-free. */
 type StudentResultDetailPiiFree = Omit<StudentResultDetail, 'result'> & {
@@ -52,8 +46,8 @@ export class GetStudentDetailTool implements AssistantTool {
       'Devuelve el detalle del resultado de un alumno en una evaluación: ' +
       'métricas globales (porcentaje de logro, nota, nivel de desempeño), ' +
       'resultados por habilidad y la respuesta por ítem (acierto/error y ' +
-      'puntajes). Requiere assessmentId y studentId (ambos UUID); los obtienes de ' +
-      'list_filter_options o get_dashboard_*. Identifica al alumno sólo por su ' +
+      'puntajes). Requiere assessmentId y studentId (ambos UUID): el assessmentId ' +
+      'sale de list_assessments y el studentId de get_dashboard_*. Identifica al alumno sólo por su ' +
       'studentId: no expone nombre ni RUT.',
     inputSchema: {
       type: 'object',
@@ -71,10 +65,7 @@ export class GetStudentDetailTool implements AssistantTool {
     },
   };
 
-  async execute(
-    input: unknown,
-    ctx: AssistantToolContext,
-  ): Promise<AssistantToolResult> {
+  async execute(input: unknown, ctx: AssistantToolContext): Promise<AssistantToolResult> {
     const parsed = inputSchema.safeParse(input);
     if (!parsed.success) {
       return {
