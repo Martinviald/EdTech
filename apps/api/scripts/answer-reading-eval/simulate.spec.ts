@@ -438,7 +438,7 @@ describe('verificador de incorrectas en el arnés', () => {
       injected: true,
       canonical: 'n:108',
       outcome: 'needs_review',
-      reasons: ['verifier_flagged'],
+      reasons: ['verifier_failed'],
       verifier: { status: 'error', errorCode: 'fake_missing' },
     });
     expect(result.readings.filter((record) => record.sampleId === 'entero-leido-108')).toEqual([]);

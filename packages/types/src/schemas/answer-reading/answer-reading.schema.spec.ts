@@ -43,7 +43,7 @@ describe('contratos de lectura por visión', () => {
     expect(readerSpecSchema.safeParse({ ...reader, minConfidence: 1.2 }).success).toBe(false);
   });
 
-  it('el verificador de incorrectas es opcional en la política y su motivo se revisa con la clave (T4)', () => {
+  it('el verificador de incorrectas es opcional en la política y sus motivos se revisan como lectura (T4)', () => {
     const verifier = {
       key: 'luna-verifier',
       transcriberId: 'llm',
@@ -60,8 +60,11 @@ describe('contratos de lectura por visión', () => {
       consensusPolicySchema.parse({ ...DEFAULT_CONSENSUS_POLICY, incorrectVerifier: verifier })
         .incorrectVerifier?.key,
     ).toBe('luna-verifier');
-    expect(REVIEW_MODE_BY_REASON.verifier_flagged).toBe('grading');
-    expect(reviewModeFor(['verifier_flagged', 'low_confidence'])).toBe('reading');
+    expect(REVIEW_MODE_BY_REASON.verifier_flagged).toBe('reading');
+    expect(REVIEW_MODE_BY_REASON.verifier_failed).toBe('reading');
+    expect(reviewModeFor(['verifier_flagged'])).toBe('reading');
+    expect(reviewModeFor(['verifier_failed'])).toBe('reading');
+    expect(reviewModeFor(['policy_requires_review', 'verifier_flagged'])).toBe('reading');
   });
 
   it('la clave y la lectura acordada solo se declaran en prompts de verificación (T4)', () => {

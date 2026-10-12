@@ -829,7 +829,7 @@ describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
     flash: { [SHA_1]: fakeOutput('7.4') },
   };
 
-  it('una incorrecta que podría ser la clave pasa a revisión de corrección y guarda la evidencia', async () => {
+  it('una incorrecta que podría ser la clave pasa a revisión de lectura y guarda la evidencia', async () => {
     const { memory, transcriber, runScan } = setup({
       ...withVerifier,
       readings: agreeIncorrect,
@@ -841,7 +841,7 @@ describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
     expect(currentDecision(memory)).toMatchObject({
       outcome: 'needs_review',
       reasons: ['verifier_flagged'],
-      reviewMode: 'grading',
+      reviewMode: 'reading',
     });
     expect(transcriber.verifyCalls).toHaveLength(1);
     const [call] = transcriber.verifyCalls;
@@ -876,8 +876,12 @@ describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
     expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted', reasons: [] });
   });
 
-  it('un "no" dudoso o un verificador que falla mandan a revisión, nunca aceptan', async () => {
-    for (const verdict of [fakeVerdict(false, 0.6), { status: 'refused' as const }]) {
+  it('un "no" dudoso o un verificador que falla mandan a revisión de lectura, nunca aceptan', async () => {
+    const cases = [
+      { verdict: fakeVerdict(false, 0.6), reason: 'verifier_flagged' },
+      { verdict: { status: 'refused' as const }, reason: 'verifier_failed' },
+    ];
+    for (const { verdict, reason } of cases) {
       const { memory, runScan } = setup({
         ...withVerifier,
         readings: agreeIncorrect,
@@ -888,7 +892,8 @@ describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
 
       expect(currentDecision(memory)).toMatchObject({
         outcome: 'needs_review',
-        reasons: ['verifier_flagged'],
+        reasons: [reason],
+        reviewMode: 'reading',
       });
     }
   });

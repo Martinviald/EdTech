@@ -225,7 +225,7 @@ function verifierSection(verifier: VerifierMetrics): string[] {
   const lines = [
     '## Verificador de incorrectas',
     '',
-    `Verificador: ${verifier.readerKeys.map((key) => `\`${key}\``).join(', ')}. Solo puede mandar a revisión (\`verifier_flagged\`): nunca acepta ni cambia una nota.`,
+    `Verificador: ${verifier.readerKeys.map((key) => `\`${key}\``).join(', ')}. Solo puede mandar a revisión (\`verifier_flagged\` si duda, \`verifier_failed\` si no pudo revisar): nunca acepta ni cambia una nota.`,
     '',
     '| Métrica | Valor [IC 95 % de Wilson] |',
     '|---|---|',

@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner';
 import {
   submitReviewSchema,
+  VERIFIER_REVIEW_REASONS,
   type GradingContext,
   type ReviewAction,
   type ReviewQueueGroup,
@@ -76,6 +77,10 @@ export function readingOptions(group: ReviewQueueGroup): ReadingOption[] {
   return [...byLiteral.values()].slice(0, MAX_OPTION_KEYS);
 }
 
+function hasVerifierReason(group: ReviewQueueGroup): boolean {
+  return group.reasons.some((reason) => VERIFIER_REVIEW_REASONS.includes(reason));
+}
+
 function proposedGradingAction(grading: GradingContext | null): ReviewAction | null {
   if (grading?.proposedOutcome === 'correct') return 'mark_correct';
   if (grading?.proposedOutcome === 'incorrect') return 'mark_incorrect';
@@ -124,7 +129,8 @@ export function ReviewGroupPanel({
   const included = group.members.filter((member) => !excluded.has(member.decisionId));
   const focused = group.members[Math.min(focusedIndex, group.members.length - 1)];
   const proposal = group.displayValue ?? group.canonical;
-  const gradingProposal = isReading ? null : proposedGradingAction(group.grading);
+  const withoutProposal = isReading || hasVerifierReason(group);
+  const gradingProposal = withoutProposal ? null : proposedGradingAction(group.grading);
   const disabled = pending || included.length === 0;
 
   const focusPanel = useCallback(() => {
@@ -305,7 +311,9 @@ export function ReviewGroupPanel({
 
           <ReadersList group={group} />
 
-          {!isReading && group.grading && <GradingContextView grading={group.grading} />}
+          {!isReading && group.grading && (
+            <GradingContextView grading={group.grading} showProposal={!withoutProposal} />
+          )}
 
           {editParts ? (
             <EditAnswerField
@@ -575,7 +583,13 @@ function ReadersList({ group }: { group: ReviewQueueGroup }) {
   );
 }
 
-function GradingContextView({ grading }: { grading: GradingContext }) {
+function GradingContextView({
+  grading,
+  showProposal,
+}: {
+  grading: GradingContext;
+  showProposal: boolean;
+}) {
   return (
     <div className="space-y-2 rounded-md border bg-muted/30 p-3 text-sm" aria-label="Clave">
       <p>
@@ -585,7 +599,7 @@ function GradingContextView({ grading }: { grading: GradingContext }) {
         </span>
         {grading.unit && <span className="text-muted-foreground"> · unidad {grading.unit}</span>}
       </p>
-      {grading.proposedOutcome && (
+      {showProposal && grading.proposedOutcome && (
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Propuesta:</span>
           <StatusBadge tone={SCORING_OUTCOME_TONES[grading.proposedOutcome]}>

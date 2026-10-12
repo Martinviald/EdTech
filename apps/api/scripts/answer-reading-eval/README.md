@@ -226,8 +226,10 @@ Si la política de una ruta trae `incorrectVerifier` (un `ReaderSpec` con un pro
 `verification`, hoy `verify.incorrect@1`), la simulación aplica el mismo código que la API
 (`needsIncorrectVerification` y `applyIncorrectVerification` de `@soe/answer-reading`): cuando el
 consenso iba a autoaceptar una incorrecta o parcial, el verificador recibe el recorte, la lectura
-acordada y la clave, y si dice que podría ser la clave, duda (confianza bajo su `minConfidence`) o
-falla, la casilla pasa a revisión con `verifier_flagged`. Nunca acepta ni cambia una nota. Los
+acordada y la clave, y si dice que podría ser la clave o duda (confianza bajo su `minConfidence`),
+la casilla pasa a revisión con `verifier_flagged`; si falla o se le vence el plazo, con
+`verifier_failed`. Ambos motivos se revisan en modo lectura, sin la clave a la vista ni una
+corrección preseleccionada. Nunca acepta ni cambia una nota. Los
 veredictos van al mismo caché (clave con el prompt renderizado, que incluye lectura y clave) y al
 mismo tope de gasto; con verificador en las rutas, `--budget-usd` es obligatorio.
 

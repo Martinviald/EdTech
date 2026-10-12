@@ -81,28 +81,39 @@ describe('verificador de incorrectas: cuándo corre', () => {
 });
 
 describe('verificador de incorrectas: solo puede mandar a revisión', () => {
-  it('"podría ser la clave" manda a revisión de corrección y conserva la propuesta', () => {
+  it('"podría ser la clave" manda a revisión de lectura y conserva la propuesta', () => {
     const flagged = applyIncorrectVerification(decision(), WITH_VERIFIER, says(true, 0.95));
     expect(flagged).toMatchObject({
       outcome: 'needs_review',
       reasons: ['verifier_flagged'],
-      reviewMode: 'grading',
+      reviewMode: 'reading',
       scoringOutcome: 'incorrect',
       usedReadingIds: ['a', 'b'],
     });
     expect(flagged.value).toEqual(decision().value);
   });
 
-  it('un "no" con confianza bajo el umbral, una falla o la falta de veredicto también mandan a revisión', () => {
+  it('un "no" con confianza bajo el umbral es una duda del verificador', () => {
+    expect(applyIncorrectVerification(decision(), WITH_VERIFIER, says(false, 0.8))).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['verifier_flagged'],
+      reviewMode: 'reading',
+    });
+  });
+
+  it('una falla, un plazo vencido o la falta de veredicto mandan a revisión de lectura sin decir que duda', () => {
     for (const verdict of [
-      says(false, 0.8),
       { status: 'error' as const, output: null },
+      { status: 'timeout' as const, output: null },
       { status: 'invalid_output' as const, output: null },
+      { status: 'refused' as const, output: null },
       null,
     ]) {
-      expect(applyIncorrectVerification(decision(), WITH_VERIFIER, verdict).outcome).toBe(
-        'needs_review',
-      );
+      expect(applyIncorrectVerification(decision(), WITH_VERIFIER, verdict)).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['verifier_failed'],
+        reviewMode: 'reading',
+      });
     }
   });
 

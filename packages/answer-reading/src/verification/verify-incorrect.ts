@@ -24,6 +24,7 @@ import { verificationJsonSchema, type VerificationJsonSchema } from './verificat
 // nada en aceptado ni toca la corrección propuesta.
 
 export const VERIFIER_FLAGGED: ReviewReason = 'verifier_flagged';
+export const VERIFIER_FAILED: ReviewReason = 'verifier_failed';
 
 /** Resultados que perjudican al estudiante si la lectura está equivocada. */
 export const VERIFIED_SCORING_OUTCOMES: ReadonlySet<ScoringOutcome> = new Set<ScoringOutcome>([
@@ -71,10 +72,16 @@ export function verifierClears(verdict: IncorrectVerificationVerdict, threshold:
   );
 }
 
+/** ¿El verificador llegó a dar un veredicto? Una falla, un plazo vencido o la falta de veredicto no. */
+export function verifierAnswered(verdict: IncorrectVerificationVerdict | null): boolean {
+  return verdict !== null && verdict.status === 'ok' && verdict.output !== null;
+}
+
 /**
  * Aplica el veredicto: si la decisión necesitaba verificación y el verificador no la
- * despeja (dice que podría ser la clave, duda o falló), pasa a revisión con
- * `verifier_flagged`, conservando valor, corrección propuesta y lecturas usadas. En
+ * despeja, pasa a revisión de lectura conservando valor, corrección propuesta y
+ * lecturas usadas: con `verifier_flagged` si el verificador respondió y duda, y con
+ * `verifier_failed` si no llegó a responder (falla, plazo vencido, sin veredicto). En
  * cualquier otro caso devuelve la decisión intacta.
  */
 export function applyIncorrectVerification(
@@ -86,7 +93,8 @@ export function applyIncorrectVerification(
   if (verdict !== null && verifierClears(verdict, incorrectVerifierThreshold(policy))) {
     return result;
   }
-  const reasons: ReviewReason[] = [...result.reasons, VERIFIER_FLAGGED];
+  const reason = verifierAnswered(verdict) ? VERIFIER_FLAGGED : VERIFIER_FAILED;
+  const reasons: ReviewReason[] = [...result.reasons, reason];
   return { ...result, outcome: 'needs_review', reasons, reviewMode: reviewModeFor(reasons) };
 }
 
