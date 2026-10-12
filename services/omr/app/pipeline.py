@@ -831,7 +831,7 @@ def _read_marks(
         marks = [
             READERS[field["kind"]].read(
                 rectified, field, fills, PageThreshold(threshold=0.5, separable=False),
-                ambiguity_margin,
+                ambiguity_margin, page_fields=readable,
             )
             for field, fills in zip(readable, fills_by_field, strict=True)
         ]
@@ -859,7 +859,9 @@ def _read_marks(
         )
 
     marks = [
-        READERS[field["kind"]].read(rectified, field, fills, threshold, ambiguity_margin)
+        READERS[field["kind"]].read(
+            rectified, field, fills, threshold, ambiguity_margin, page_fields=readable
+        )
         for field, fills in zip(readable, fills_by_field, strict=True)
     ]
     classify_debug["fieldContrast"] = _field_contrast_summary(readable, fills_by_field, marks)
@@ -887,7 +889,7 @@ def _crops_with_undecided_bubbles(
     con las burbujas lo dice `quality.marksReadability`.
     """
     return [
-        READERS[field["kind"]].read(rectified, field, fills, threshold)
+        READERS[field["kind"]].read(rectified, field, fills, threshold, page_fields=fields)
         if field["kind"] == "crop_region"
         else undecided_reading(rectified, field, fills, threshold)
         for field, fills in zip(fields, fills_by_field, strict=True)

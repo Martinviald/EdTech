@@ -57,8 +57,9 @@ espejo `tests/synthetic.py`. Implementación gemela del impresor:
 
 Diseño en `docs/diseno-correccion-vision-preguntas-abiertas.md` §4. Si el campo trae
 `response.cropProfileId` (F5b lo agrega a `omrFieldSchema`), el recorte usa ese perfil:
-margen uniforme de `bleedRatio` × el lado mayor de la región (recortado al borde de la
-página rectificada), ancho `targetWidthPx`, gris, calidad JPEG y contraste `clahe`
+margen de `bleedRatio` × el lado mayor (`bleedBasis: longer_side`, v1) o menor
+(`shorter_side`, v2) de la región, limitado en v2 a `neighborGapFraction` × la distancia al
+campo vecino de cada lado y recortado al borde de la página rectificada, ancho `targetWidthPx`, gris, calidad JPEG y contraste `clahe`
 opcional. **Nunca se binariza ni se limpian trazos**: puede borrar un punto decimal. Sin
 perfil (o con uno desconocido) el recorte es el histórico: sin margen, 600 px, calidad 70.
 

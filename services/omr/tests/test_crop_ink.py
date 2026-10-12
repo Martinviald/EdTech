@@ -234,7 +234,9 @@ def test_profile_sets_output_width_and_keeps_aspect(key: str) -> None:
     assert image.width_px == profile.target_width_px
     rx0, ry0 = point_to_px(region["topLeft"], PAGE_SIZE)
     rx1, ry1 = point_to_px(region["bottomRight"], PAGE_SIZE)
-    pad = round(profile.bleed_ratio * max(rx1 - rx0 + 1, ry1 - ry0 + 1))
+    sides = (rx1 - rx0 + 1, ry1 - ry0 + 1)
+    side = max(sides) if profile.bleed_basis == "longer_side" else min(sides)
+    pad = round(profile.bleed_ratio * side)
     expected = (rx1 - rx0 + 1 + 2 * pad) / (ry1 - ry0 + 1 + 2 * pad)
     assert image.width_px / image.height_px == pytest.approx(expected, rel=0.02)
 

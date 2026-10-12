@@ -54,6 +54,7 @@ from __future__ import annotations
 
 import base64
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -72,6 +73,7 @@ from .crop import (
     LEGACY_CROP_PROFILE,
     CropImage,
     crop_with_profile,
+    neighbor_footprints_px,
     resolve_crop_profile,
 )
 from .geometry import point_to_px, radius_to_px
@@ -129,6 +131,7 @@ class FieldReader(Protocol):
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]: ...
 
 
@@ -338,6 +341,7 @@ class BubbleGroupReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         threshold = page_threshold.threshold
         samples = bubble_samples(field["bubbles"], fills, page_threshold, ambiguity_margin)
@@ -396,6 +400,7 @@ class DigitGridReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         groups = read_digit_groups(field["bubbles"], fills, page_threshold, ambiguity_margin)
         state, value, representative = self._classify(groups)
@@ -449,13 +454,19 @@ class CropRegionReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         response = field.get("response") or {}
         profile_id = response.get("cropProfileId")
         if profile_id is None:
             image = legacy_crop_image(page, field["region"])
         else:
-            image = crop_with_profile(page, field["region"], resolve_crop_profile(profile_id))
+            image = crop_with_profile(
+                page,
+                field["region"],
+                resolve_crop_profile(profile_id),
+                neighbor_footprints_px(field, page_fields, page.size),
+            )
         encoded = image.jpeg
         reading = {
             "fieldId": field["fieldId"],

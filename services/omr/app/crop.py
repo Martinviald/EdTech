@@ -8,11 +8,21 @@ crop.schema.ts) y se replican aca; `tests/test_crop_profiles_contract.py` los
 compara contra `contracts/crop-profiles.json`, que genera
 `pnpm --filter @soe/types gen:omr-contracts`.
 
-Margen: `bleedRatio` es fraccion del lado MAYOR de la region y se aplica igual
-en los cuatro lados, recortado a los bordes de la pagina rectificada. Un margen
-uniforme en px conserva la tinta que se sale por arriba o por abajo de una
-respuesta de una linea (si fuera fraccion de cada eje, una region ancha y baja
-casi no tendria margen vertical).
+Margen: `bleedRatio` es fraccion de un lado de la region segun `bleedBasis`, y
+se aplica igual en los cuatro lados antes de los topes, recortado a los bordes
+de la pagina rectificada. Un margen uniforme en px conserva la tinta que se sale
+por arriba o por abajo de una respuesta de una linea.
+
+- `longer_side` (v1): fraccion del lado MAYOR. En un campo ancho y bajo el
+  margen vertical superaba la altura del campo y el recorte traia la pregunta
+  de abajo (fotos reales del 2026-10-12, P8 y P9): los lectores la transcribian.
+- `shorter_side` (v2): fraccion del lado MENOR.
+- `neighborGapFraction` (v2: 0.5; null en v1): en cada lado el margen no pasa de
+  esa fraccion de la distancia al campo vecino mas cercano de ESE lado. Vecinos
+  son los otros campos de la misma pagina (su `region`, o la caja de sus
+  burbujas); uno limita arriba/abajo solo si se superpone en x con la region, y
+  a izquierda/derecha solo si se superpone en y; uno superpuesto con la region
+  no limita nada. Replica `cropBleedBox` de crop.schema.ts.
 
 Nunca se binariza ni se "limpian" trazos (diseno §16.2): puede borrar un punto
 decimal. El recorte sale en gris, reescalado conservando la proporcion.
@@ -25,17 +35,21 @@ pide perfil, para no cambiar el comportamiento existente.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 import cv2
 import numpy as np
 
-from .geometry import point_to_px
+from .geometry import point_to_px, radius_to_px
 from .rectify import RectifiedPage
 
 CLAHE_CLIP_LIMIT = 2.0
 CLAHE_TILE_GRID = (8, 8)
+
+BleedBasis = Literal["longer_side", "shorter_side"]
+PxBox = tuple[int, int, int, int]
 
 
 @dataclass(frozen=True)
@@ -46,6 +60,8 @@ class CropProfile:
     target_width_px: int
     jpeg_quality: int
     contrast: str
+    bleed_basis: BleedBasis = "longer_side"
+    neighbor_gap_fraction: float | None = None
 
     @property
     def key(self) -> str:
@@ -59,13 +75,30 @@ class CropProfile:
             "targetWidthPx": self.target_width_px,
             "jpegQuality": self.jpeg_quality,
             "contrast": self.contrast,
+            "bleedBasis": self.bleed_basis,
+            "neighborGapFraction": self.neighbor_gap_fraction,
         }
 
 
 def _profile(
-    id: str, version: int, bleed_ratio: float, target_width_px: int, jpeg_quality: int
+    id: str,
+    version: int,
+    bleed_ratio: float,
+    target_width_px: int,
+    jpeg_quality: int,
+    bleed_basis: BleedBasis = "longer_side",
+    neighbor_gap_fraction: float | None = None,
 ) -> CropProfile:
-    return CropProfile(id, version, bleed_ratio, target_width_px, jpeg_quality, "none")
+    return CropProfile(
+        id,
+        version,
+        bleed_ratio,
+        target_width_px,
+        jpeg_quality,
+        "none",
+        bleed_basis,
+        neighbor_gap_fraction,
+    )
 
 
 CROP_PROFILES: dict[str, CropProfile] = {
@@ -73,6 +106,8 @@ CROP_PROFILES: dict[str, CropProfile] = {
     for profile in (
         _profile("short-answer", 1, 0.15, 1000, 85),
         _profile("free-text", 1, 0.05, 1400, 85),
+        _profile("short-answer", 2, 0.3, 1000, 85, "shorter_side", 0.5),
+        _profile("free-text", 2, 0.1, 1400, 85, "shorter_side", 0.5),
     )
 }
 
@@ -111,19 +146,85 @@ def region_box_px(
     return min(ax, bx), min(ay, by), max(ax, bx), max(ay, by)
 
 
+def field_footprint_px(field: dict[str, Any], size: tuple[int, int]) -> PxBox | None:
+    """Lo que ocupa un campo en la pagina: su `region`, o la caja de sus burbujas."""
+    region = field.get("region")
+    if region is not None:
+        return region_box_px(region, size)
+    bubbles = field.get("bubbles") or []
+    if not bubbles:
+        return None
+    centers = [point_to_px(bubble["center"], size) for bubble in bubbles]
+    radius = max(radius_to_px(bubble["radius"], size) for bubble in bubbles)
+    return (
+        min(x for x, _ in centers) - radius,
+        min(y for _, y in centers) - radius,
+        max(x for x, _ in centers) + radius,
+        max(y for _, y in centers) + radius,
+    )
+
+
+def neighbor_footprints_px(
+    field: dict[str, Any], page_fields: Sequence[dict[str, Any]], size: tuple[int, int]
+) -> list[PxBox]:
+    """Las huellas de los OTROS campos de la pagina, los que pueden limitar el margen."""
+    footprints = []
+    for other in page_fields:
+        if other is field or other.get("fieldId") == field.get("fieldId"):
+            continue
+        footprint = field_footprint_px(other, size)
+        if footprint is not None:
+            footprints.append(footprint)
+    return footprints
+
+
 def bleed_box_px(
-    box: tuple[int, int, int, int], bleed_ratio: float, size: tuple[int, int]
-) -> tuple[int, int, int, int]:
+    box: PxBox,
+    profile: CropProfile,
+    size: tuple[int, int],
+    neighbors: Sequence[PxBox] = (),
+) -> PxBox:
+    """La caja del recorte: region + margen del perfil, con topes por vecino y por pagina."""
     x0, y0, x1, y1 = box
-    pad = round(bleed_ratio * max(x1 - x0 + 1, y1 - y0 + 1))
+    sides = (x1 - x0 + 1, y1 - y0 + 1)
+    side = max(sides) if profile.bleed_basis == "longer_side" else min(sides)
+    pad = profile.bleed_ratio * side
+    fraction = profile.neighbor_gap_fraction
+    in_row = [n for n in neighbors if _overlaps(n[1], n[3], y0, y1)]
+    in_column = [n for n in neighbors if _overlaps(n[0], n[2], x0, x1)]
+    left = _side_pad(pad, fraction, [x0 - n[2] - 1 for n in in_row])
+    right = _side_pad(pad, fraction, [n[0] - x1 - 1 for n in in_row])
+    top = _side_pad(pad, fraction, [y0 - n[3] - 1 for n in in_column])
+    bottom = _side_pad(pad, fraction, [n[1] - y1 - 1 for n in in_column])
     width, height = size
-    return max(0, x0 - pad), max(0, y0 - pad), min(width - 1, x1 + pad), min(height - 1, y1 + pad)
+    return (
+        max(0, x0 - left),
+        max(0, y0 - top),
+        min(width - 1, x1 + right),
+        min(height - 1, y1 + bottom),
+    )
+
+
+def _overlaps(a0: int, a1: int, b0: int, b1: int) -> bool:
+    return a0 <= b1 and b0 <= a1
+
+
+def _side_pad(pad: float, fraction: float | None, gaps: list[int]) -> int:
+    if fraction is None:
+        return round(pad)
+    free = [gap for gap in gaps if gap >= 0]
+    if not free:
+        return round(pad)
+    return round(min(pad, fraction * min(free)))
 
 
 def crop_with_profile(
-    page: RectifiedPage, region: dict[str, dict[str, float]], profile: CropProfile
+    page: RectifiedPage,
+    region: dict[str, dict[str, float]],
+    profile: CropProfile,
+    neighbors: Sequence[PxBox] = (),
 ) -> CropImage:
-    x0, y0, x1, y1 = bleed_box_px(region_box_px(region, page.size), profile.bleed_ratio, page.size)
+    x0, y0, x1, y1 = bleed_box_px(region_box_px(region, page.size), profile, page.size, neighbors)
     crop = page.gray[y0 : y1 + 1, x0 : x1 + 1]
     if profile.contrast == "clahe":
         clahe = cv2.createCLAHE(clipLimit=CLAHE_CLIP_LIMIT, tileGridSize=CLAHE_TILE_GRID)
