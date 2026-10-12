@@ -581,3 +581,25 @@ Plan: `docs/plan-etapa1-lectura-vision.md`.
   `disabled` → `between_tools` (sin otro campo en `thinking`) → sin `thinking` y
   `output_config.effort: 'low'` (último recurso para modelos sin modo apagado), y recuerda el
   escalón por modelo. Haiku 5.5 sigue enviando `disabled` sin reintentos.
+
+### Etapa 1 — T0 y T1 cerradas con su compuerta
+
+- **T0, arnés v2** (`apps/api/scripts/answer-reading-eval/`): dataset `fotos-reales-v1` fuera del
+  repo (30 recortes con verdad por casilla), rutas por formato con `resolveReadingRoute`, caché de
+  lecturas (las 720 ya pagadas importadas), errores separados en "perjudica" y "favorece",
+  intervalos de Wilson y McNemar pareado. **Compuerta:** reproduce exacto la línea base
+  (15/72 = 20,8 % [13,1–31,6], 0 equivocadas) y el pipeline B con override (32/72 = 44,4 %
+  [33,5–55,9], 0 equivocadas). Gasto US$0.
+- **T1:** `ReaderSpec.minConfidence` opcional (E1-1), escalera de `reasoning.effort` de OpenAI por
+  `param` del error (el mensaje real nunca dice "reasoning" ni "effort"), escalera de `thinking`
+  de Anthropic por modelo.
+- **Bug de integración T0×T1 atrapado por la compuerta:** el arnés armaba la lectura para el
+  consenso sin `minConfidence` y el umbral de la ruta se perdía (40/72 con 1 equivocada). Arreglado
+  con test que falla sin el arreglo; con el umbral en la ruta el pipeline B da 32/72 con 0
+  equivocadas, **idéntico casilla por casilla** al override (0 discordantes).
+- **Hallazgo:** el endpoint `gemini-3.5-flash` responde con `modelVersion: gemini-3.6-flash` (la
+  página de deprecaciones de Google lo confirma: el alias se redirige). Todo lo medido como
+  "Gemini 3.5 Flash" fue 3.6 Flash. Precio oficial de 3.6 y 3.8 Flash: US$0,75 / 3,75 por millón
+  hasta el 31-12-2026 y US$1,50 / 7,50 desde 2027 (las cifras de agregadores eran otras).
+  Consecuencias para T2: la ruta nombra el modelo real, se mide 3.8 Flash contra 3.6, y el
+  proveedor de Gemini debe guardar el `modelVersion` que respondió (hoy guarda el pedido).
