@@ -54,6 +54,9 @@ export function AiModelsForm({ initial }: AiModelsFormProps) {
   const [, startTransition] = useTransition();
 
   const modelsFor = (provider: LlmProviderId) => initial.catalog[provider] ?? [];
+  const unavailableProviders = new Set(
+    initial.providers.filter((p) => !p.available).map((p) => p.id),
+  );
 
   function patchRow(feature: string, patch: Partial<EditableRow>) {
     setRows((rs) => rs.map((r) => (r.feature === feature ? { ...r, ...patch } : r)));
@@ -114,11 +117,17 @@ export function AiModelsForm({ initial }: AiModelsFormProps) {
                     <SelectContent>
                       {initial.providers.map((p) => (
                         <SelectItem key={p.id} value={p.id}>
-                          {p.label}
+                          {p.available ? p.label : `${p.label} (no configurado)`}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {unavailableProviders.has(row.provider) ? (
+                    <p className="text-muted-foreground text-xs">
+                      Proveedor no configurado: falta su API key en el servidor. Las llamadas
+                      fallarán hasta configurarla.
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="flex-1 space-y-1.5">

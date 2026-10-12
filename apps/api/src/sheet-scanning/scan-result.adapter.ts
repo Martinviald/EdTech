@@ -1,5 +1,9 @@
 import type { AnswerSheetRowError, MarkReviewDecision, MarkState } from '@soe/types';
-import type { ParsedAnswerSheetRow, ParserResult } from '../answer-sheets/lib/parsers/parser.types';
+import type {
+  ParsedAnswerSheetRow,
+  ParserResult,
+  PrescoredAnswer,
+} from '../answer-sheets/lib/parsers/parser.types';
 
 export interface ConfirmedScanMarkInput {
   printedNumber: string;
@@ -7,6 +11,8 @@ export interface ConfirmedScanMarkInput {
   value: string | null;
   reviewedValue?: string | null;
   reviewDecision?: MarkReviewDecision | null;
+  pendingReading?: true;
+  prescored?: PrescoredAnswer;
 }
 
 export interface ConfirmedScanInput {
@@ -24,12 +30,24 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
   for (const scan of scans) {
     const answers: Record<string, string | null> = {};
     const annulledLabels: string[] = [];
+    const pendingReadingLabels: string[] = [];
+    const prescoredAnswers: Record<string, PrescoredAnswer> = {};
     const errors: AnswerSheetRowError[] = [];
 
     for (const mark of scan.marks) {
       if (!seenColumns.has(mark.printedNumber)) {
         seenColumns.add(mark.printedNumber);
         detectedColumns.push(mark.printedNumber);
+      }
+
+      if (mark.prescored) {
+        prescoredAnswers[mark.printedNumber] = mark.prescored;
+        continue;
+      }
+
+      if (mark.pendingReading) {
+        pendingReadingLabels.push(mark.printedNumber);
+        continue;
       }
 
       if (mark.reviewedValue !== undefined) {
@@ -56,6 +74,8 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
       studentFullName: scan.studentFullName,
       answers,
       ...(annulledLabels.length > 0 ? { annulledLabels } : {}),
+      ...(pendingReadingLabels.length > 0 ? { pendingReadingLabels } : {}),
+      ...(Object.keys(prescoredAnswers).length > 0 ? { prescoredAnswers } : {}),
       errors,
     });
   }

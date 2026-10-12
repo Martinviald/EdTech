@@ -148,6 +148,56 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "crop": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "cropProfileId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "inkRatio": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "inkRatioByPart": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              }
+                            },
+                            "widthPx": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0
+                            },
+                            "heightPx": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "minLength": 64,
+                              "maxLength": 64
+                            }
+                          },
+                          "required": [
+                            "cropProfileId",
+                            "inkRatio",
+                            "widthPx",
+                            "heightPx",
+                            "sha256"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [

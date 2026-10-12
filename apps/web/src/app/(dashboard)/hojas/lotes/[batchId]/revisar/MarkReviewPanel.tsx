@@ -14,6 +14,7 @@ import {
 import type { ReviewMarkDto, ReviewMarkModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Kbd } from '@/components/ui/kbd';
 import { cn } from '@/lib/utils';
 import { AlertCallout } from '@/components/shared';
 import { isMarkResolved, useResolveMark } from '../../../hooks/use-review-queue';
@@ -34,14 +35,6 @@ const ANNUL_KEY_CANDIDATES = ['N', 'X'] as const;
 
 function pickAnnulKey(options: string[]): string | null {
   return ANNUL_KEY_CANDIDATES.find((key) => !options.includes(key)) ?? null;
-}
-
-function Kbd({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-      {children}
-    </kbd>
-  );
 }
 
 interface MarkReviewPanelProps {

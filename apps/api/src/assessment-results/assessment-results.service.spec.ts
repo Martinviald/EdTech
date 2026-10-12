@@ -3,6 +3,7 @@ import type { Database } from '@soe/db';
 import type { JwtPayload, } from '../auth/jwt-payload.types';
 import type { UserRole } from '@soe/types';
 import { AssessmentResultsService } from './assessment-results.service';
+import { ANSWER_SHEET_IMPORT_POLICY } from './lib/persist-results';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers: construir un Database mock por escenario.
@@ -571,5 +572,42 @@ describe('AssessmentResultsService.calculate teacher scoping', () => {
         force: false,
       }),
     ).rejects.toThrow(ForbiddenException);
+  });
+});
+
+describe('AssessmentResultsService.recalculateAnswerSheetResults', () => {
+  it('recalcula una vez cada evaluación con la política de hojas de respuesta y salta las aggregate_only', async () => {
+    const db = makeDb([
+      [
+        { id: 'a-1', instrumentId: 'inst-1', dataGranularity: 'student_level' },
+        { id: 'a-2', instrumentId: 'inst-1', dataGranularity: 'student_level' },
+        { id: 'a-3', instrumentId: 'inst-1', dataGranularity: 'aggregate_only' },
+      ],
+      [{ gradingScaleId: null }],
+    ]);
+    const service = makeService(db);
+    const compute = jest
+      .spyOn(
+        service as unknown as { computeAndPersist: (...args: unknown[]) => Promise<unknown> },
+        'computeAndPersist',
+      )
+      .mockResolvedValue({});
+
+    const done = await service.recalculateAnswerSheetResults('org-1', ['a-1', 'a-2', 'a-1', 'a-3']);
+
+    expect(done).toEqual(['a-1', 'a-2']);
+    expect(compute).toHaveBeenCalledTimes(2);
+    expect(compute.mock.calls.map((call) => [call[1], call[4]])).toEqual([
+      ['a-1', ANSWER_SHEET_IMPORT_POLICY],
+      ['a-2', ANSWER_SHEET_IMPORT_POLICY],
+    ]);
+  });
+
+  it('sin evaluaciones no abre transacción', async () => {
+    const db = makeDb([]);
+    const service = makeService(db);
+
+    await expect(service.recalculateAnswerSheetResults('org-1', [])).resolves.toEqual([]);
+    expect(db.__transactionRan).toBe(false);
   });
 });

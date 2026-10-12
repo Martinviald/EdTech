@@ -9,6 +9,7 @@ import {
   type MarkReading,
   type ScannedPage,
 } from '@soe/types';
+import type { AnswerReadingPipelineService } from '../answer-reading/answer-reading-pipeline.service';
 import * as observability from '../common/observability/report-error';
 import type { FilesService } from '../files/files.service';
 import type { EnqueuedJob, JobDispatcher } from '../jobs/job-dispatcher';
@@ -181,6 +182,7 @@ function makeService(
   dispatcher: FakeDispatcher;
   createUploadIntent: jest.Mock;
   confirm: jest.Mock;
+  scheduleForScan: jest.Mock;
 } {
   const { db, inserts, updates } = makeDb(selectResults, insertReturning);
   const { filesService, createUploadIntent, confirm } = makeFilesService();
@@ -191,6 +193,8 @@ function makeService(
   const calibrationService = { getCalibration } as unknown as OmrCalibrationService;
   const omr = new FakeOmrClient();
   const dispatcher = new FakeDispatcher();
+  const scheduleForScan = jest.fn();
+  const answerReading = { scheduleForScan } as unknown as AnswerReadingPipelineService;
   const service = new SheetScanService(
     db,
     filesService,
@@ -198,6 +202,7 @@ function makeService(
     calibrationService,
     omr,
     dispatcher,
+    answerReading,
   );
   return {
     service,
@@ -210,6 +215,7 @@ function makeService(
     dispatcher,
     createUploadIntent,
     confirm,
+    scheduleForScan,
   };
 }
 
@@ -886,6 +892,68 @@ describe('SheetScanService job', () => {
     );
     const marks = inserts[1].values as Array<Record<string, unknown>>;
     expect(marks[0]).toMatchObject({ cropFileId: 'file-0' });
+  });
+
+  it('D2: guarda la evidencia del recorte y agenda la lectura por visión de la hoja recién procesada', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({ ok: true, status: 200 } as Response);
+    const crop = {
+      cropProfileId: 'short-answer@1',
+      inkRatio: 0.12,
+      widthPx: 1000,
+      heightPx: 300,
+      sha256: 'c'.repeat(64),
+    };
+    const { service, inserts, resolve, omr, scheduleForScan } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 1 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [
+        makePage({
+          identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 },
+          marks: [makeMark({ state: 'blank', value: null, cropJpegBase64: 'aGVsbG8=', crop })],
+        }),
+      ],
+    });
+    resolve.mockResolvedValueOnce(candidate());
+
+    await runJob(service);
+
+    const marks = inserts[1].values as Array<Record<string, unknown>>;
+    expect(marks[0]).toMatchObject({ cropEvidence: crop });
+    const scan = inserts[0].values as Record<string, unknown>;
+    expect(scheduleForScan).toHaveBeenCalledTimes(1);
+    expect(scheduleForScan).toHaveBeenCalledWith({
+      orgId: ORG_ID,
+      batchId: BATCH_ID,
+      scanId: scan.id,
+    });
+  });
+
+  it('D2: una hoja sin recortes no agenda la lectura por visión', async () => {
+    const { service, resolve, omr, scheduleForScan } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 1 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [
+        makePage({
+          identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 },
+          marks: [makeMark()],
+        }),
+      ],
+    });
+    resolve.mockResolvedValueOnce(candidate());
+
+    await runJob(service);
+
+    expect(scheduleForScan).not.toHaveBeenCalled();
   });
 });
 

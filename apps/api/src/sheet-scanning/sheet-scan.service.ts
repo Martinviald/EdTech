@@ -45,6 +45,7 @@ import {
   type SheetScanBatchStatus,
   type SheetScanState,
 } from '@soe/types';
+import { AnswerReadingPipelineService } from '../answer-reading/answer-reading-pipeline.service';
 import { InjectDb, type Database } from '../database/database.types';
 import { FilesService } from '../files/files.service';
 import { JOB_DISPATCHER, type JobDispatcher } from '../jobs/job-dispatcher';
@@ -158,6 +159,7 @@ export class SheetScanService {
     private readonly omrCalibrationService: OmrCalibrationService,
     @Inject(OMR_CLIENT) private readonly omrClient: OmrClient,
     @Inject(JOB_DISPATCHER) private readonly dispatcher: JobDispatcher,
+    private readonly answerReading: AnswerReadingPipelineService,
   ) {}
 
   async createBatch(
@@ -760,6 +762,7 @@ export class SheetScanService {
             threshold: mark.threshold.toFixed(3),
             margin: Math.min(mark.margin, 999.999).toFixed(3),
             cropFileId: cropFileIdByField.get(mark.fieldId) ?? null,
+            cropEvidence: mark.crop ?? null,
             suggestedValue: mark.suggestedValue ?? null,
             doubtReason: mark.doubtReason ?? null,
             nullConfidence: mark.nullConfidence == null ? null : mark.nullConfidence.toFixed(3),
@@ -768,6 +771,10 @@ export class SheetScanService {
         );
       }
     });
+
+    if (cropFileIdByField.size > 0) {
+      this.answerReading.scheduleForScan({ orgId, batchId, scanId });
+    }
   }
 
   private autoAnnulment(

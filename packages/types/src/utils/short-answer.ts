@@ -6,33 +6,78 @@
 //
 // El criterio, tomado de las respuestas reales digitalizadas:
 //   · se tolera la FORMA (separador decimal, espacios, fracción equivalente, la
-//     unidad declarada) — el alumno no debe perder puntaje por cómo se escribió;
+//     unidad declarada escrita o no) — el alumno no debe perder puntaje por cómo
+//     se escribió; una unidad DISTINTA a la declarada va a revisión;
 //   · se marca incorrecto lo que es otra cantidad (`56` cuando la clave es `5,6`);
 //   · se marca INDECIDIBLE lo que trae más de un valor candidato (`0=16.5`, `1 4`)
+//     o lo que admite dos lecturas con resultados distintos (`1.500`: ¿1500 o 1,5?)
 //     — ahí no se puede saber qué respondió, y adivinar sería inventar un dato.
+//
+// La clave y la respuesta se convierten a la MISMA estructura canónica antes de
+// compararse (`answer-canonical`, diseño §5.5).
+
+import type {
+  ComponentCredit,
+  Equivalences,
+  ResponseFormatKind,
+} from '../schemas/answer-reading/response-format.schema';
+import {
+  compareCanonical,
+  compareShortText,
+  isNumericSequenceText,
+  isParsed,
+  normalizeText,
+  parseOrderedTupleText,
+  parseScalarText,
+  parseSequenceText,
+  parseWordListText,
+  resolveEquivalences,
+  type CanonicalComparison,
+  type CanonicalParse,
+  type CanonicalSequence,
+  type CanonicalTuple,
+} from './answer-canonical';
 
 /** Resultado de comparar una respuesta contra las claves aceptadas. */
 export type ShortAnswerMatch = 'match' | 'mismatch' | 'undecidable';
 
+/**
+ * Modo de comparación. `numeric` y `text` comparan UN valor; `sequence` compara un
+ * orden (`3-1-4-2`); `ordered_tuple` un par o terna ordenada (`(7;3)`);
+ * `word_list` una lista de palabras (`Cabeza, tórax, abdomen`); `short_text` una
+ * oración corta, que solo se da por correcta si calza exacta (si no, revisión).
+ */
+export type ShortAnswerComparison =
+  | 'numeric'
+  | 'text'
+  | 'sequence'
+  | 'ordered_tuple'
+  | 'word_list'
+  | 'short_text';
+
 export type ShortAnswerOptions = {
-  comparison?: 'numeric' | 'text' | 'sequence';
+  comparison?: ShortAnswerComparison;
   unit?: string;
   caseSensitive?: boolean;
+  /** Formato declarado del ítem (`content.responseFormat.kind`); ajusta las equivalencias. */
+  formatKind?: ResponseFormatKind;
+  /** Equivalencias de la pauta (`scoring_config.equivalences`). */
+  equivalences?: Equivalences;
+  /** Crédito por componente en pares ordenados o por palabra (`scoring_config.componentCredit`). */
+  componentCredit?: ComponentCredit;
 };
 
-const FRACTION = /^([+-]?\d+)\s*\/\s*(\d+)$/;
-const DECIMAL = /^[+-]?(\d+([.,]\d+)?|[.,]\d+)$/;
+/** Comparación con crédito: `partial` solo existe con `componentCredit` (pares y listas). */
+export type ShortAnswerCredit = CanonicalComparison;
 
-/** Un racional exacto, para no comparar `21/10` con `2.1` en punto flotante. */
-type Rational = { numerator: number; denominator: number };
+const INCORRECT: ShortAnswerCredit = { outcome: 'incorrect', credit: 0 };
+const UNDECIDABLE: ShortAnswerCredit = { outcome: 'undecidable', credit: 0 };
+const EXPLICIT_TUPLE = /^\s*[([{].*[)\]}]\s*$|[;#]/;
+const WRITTEN_UNIT = /^(.*\d)\s*([\p{L}]+[²³]?)\.?$/u;
+const NON_PAIR_SEPARATOR = /\d\s*[/.,]\s*\d/;
 
 function collapseWhitespace(value: string): string {
   return value.trim().replace(/\s+/g, ' ');
-}
-
-/** `21 / 10` es UN valor: la barra no separa dos números, los relaciona. */
-function tightenFractionSlash(value: string): string {
-  return value.replace(/\s*\/\s*/g, '/');
 }
 
 function stripUnit(value: string, unit: string | undefined): string {
@@ -40,115 +85,254 @@ function stripUnit(value: string, unit: string | undefined): string {
   const normalized = value.toLowerCase();
   const suffix = unit.trim().toLowerCase();
   if (!suffix || !normalized.endsWith(suffix)) return value;
-  return value.slice(0, value.length - suffix.length).trim();
+  const body = value.slice(0, value.length - suffix.length);
+  return /\p{L}$/u.test(body) ? value : body.trim();
 }
 
-function parseRational(value: string): Rational | null {
-  const fraction = FRACTION.exec(value);
-  if (fraction) {
-    const denominator = Number(fraction[2]);
-    if (denominator === 0) return null;
-    return { numerator: Number(fraction[1]), denominator };
-  }
-  if (!DECIMAL.test(value)) return null;
-  const normalized = value.replace(',', '.');
-  const [whole, decimals = ''] = normalized.split('.');
-  const denominator = 10 ** decimals.length;
-  const digits = `${whole === '' || whole === '+' || whole === '-' ? `${whole}0` : whole}${decimals}`;
-  const numerator = Number(digits);
-  return Number.isFinite(numerator) ? { numerator, denominator } : null;
-}
+type UnitCheck = { kind: 'ok' | 'missing' | 'unexpected'; value: string };
 
-function sameRational(a: Rational, b: Rational): boolean {
-  return a.numerator * b.denominator === b.numerator * a.denominator;
+/**
+ * Unidad de una respuesta numérica (§5.5). La declarada se acepta escrita o no
+ * (`ignoreUnit`, por defecto); con `ignoreUnit: false` es obligatoria (`missing`).
+ * Una unidad distinta a la declarada, o una unidad donde no se declaró ninguna, es
+ * `unexpected`. `value` es el número sin la unidad.
+ */
+function checkUnit(value: string, unit: string | undefined, ignoreUnit: boolean): UnitCheck {
+  const stripped = collapseWhitespace(stripUnit(value, unit));
+  if (unit && stripped !== value) return { kind: 'ok', value: stripped };
+  const written = WRITTEN_UNIT.exec(value);
+  const number = written?.[1]?.trim() ?? '';
+  if (written && isParsed(parseScalarText(number))) return { kind: 'unexpected', value: number };
+  return { kind: unit && !ignoreUnit ? 'missing' : 'ok', value };
 }
 
 /**
- * Un valor es indecidible cuando contiene más de un número candidato: `0=16.5`,
- * `1 4`, `2,5-2`. Un separador de miles no cuenta (`1.234` es un solo número), por
- * eso se mira si al partir por separadores quedan varios tokens numéricos.
+ * Un valor que no se pudo leer como número es indecidible cuando contiene más de
+ * un número candidato: `0=16.5`, `1 4`, `2,5-2`.
  */
-function isAmbiguous(value: string): boolean {
-  const tokens = value.split(/[\s=;|]+/).filter(Boolean);
+function hasSeveralValues(value: string): boolean {
+  const tightened = value.replace(/\s*\/\s*/g, '/');
+  const tokens = tightened.split(/[\s=;|]+/).filter(Boolean);
   if (tokens.length > 1 && tokens.filter((t) => /\d/.test(t)).length > 1) return true;
-  return /\d\s*[-+*][\s]*\d/.test(value) && !FRACTION.test(value);
-}
-
-/**
- * Los números de una secuencia, en orden: `3-1-4-2`, `3,1,4,2`, `2 – 4 – 3 – 1`
- * y `(5,6)` / `(5;6)` son la misma lista escrita distinto. Un guion pegado a un
- * dígito separa (`3-1`); sólo es signo cuando abre el número (`(-3,2)`).
- */
-function sequenceOf(value: string): number[] {
-  return (value.match(/(?<!\d)-?\d+/g) ?? []).map(Number);
+  return /\d\s*[-+*][\s]*\d/.test(tightened) && !/^[+-]?\d+\/\d+$/.test(tightened);
 }
 
 function looksNumeric(value: string): boolean {
-  return parseRational(value) !== null;
+  return isParsed(parseScalarText(value));
+}
+
+function looksLikeTuple(value: string): boolean {
+  return EXPLICIT_TUPLE.test(value) && isParsed(parseOrderedTupleText(value));
+}
+
+/** `(-3,2)` es un par, no el número -3,2 entre paréntesis: dos componentes envueltos. */
+function looksOnlyNumeric(value: string): boolean {
+  return looksNumeric(value) && !looksLikeTuple(value);
+}
+
+/**
+ * Modo de comparación que impone un formato de respuesta declarado. Solo los
+ * formatos estructurados lo fijan: los numéricos ya se infieren de la clave.
+ */
+export function comparisonForFormat(
+  formatKind: ResponseFormatKind | undefined,
+): ShortAnswerComparison | undefined {
+  if (
+    formatKind === 'sequence' ||
+    formatKind === 'ordered_tuple' ||
+    formatKind === 'word_list' ||
+    formatKind === 'short_text'
+  ) {
+    return formatKind;
+  }
+  return undefined;
 }
 
 /** Deriva el modo de comparación cuando el ítem no lo declara. */
-export function inferComparisonMode(accepted: readonly string[]): 'numeric' | 'text' {
+export function inferComparisonMode(
+  accepted: readonly string[],
+): Extract<ShortAnswerComparison, 'numeric' | 'text' | 'ordered_tuple'> {
   const cleaned = accepted.map((a) => collapseWhitespace(a)).filter(Boolean);
-  return cleaned.length > 0 && cleaned.every(looksNumeric) ? 'numeric' : 'text';
+  if (cleaned.length === 0) return 'text';
+  if (cleaned.every(looksOnlyNumeric)) return 'numeric';
+  if (cleaned.every(looksLikeTuple)) return 'ordered_tuple';
+  return 'text';
+}
+
+function firstElements(parse: CanonicalParse<CanonicalSequence>): string[] {
+  return parse.readings.decimal[0]?.elements ?? [];
+}
+
+function tupleArity(parse: CanonicalParse<CanonicalTuple>): number | null {
+  const lengths = new Set(
+    [...parse.readings.decimal, ...parse.readings.thousands].map((t) => t.components.length),
+  );
+  return lengths.size === 1 ? ([...lengths][0] ?? null) : null;
+}
+
+function bestOf(results: ShortAnswerCredit[]): ShortAnswerCredit {
+  if (results.some((r) => r.outcome === 'undecidable')) {
+    return results.some((r) => r.outcome === 'correct')
+      ? { outcome: 'correct', credit: 1 }
+      : UNDECIDABLE;
+  }
+  return results.reduce<ShortAnswerCredit>(
+    (top, r) =>
+      r.outcome === 'correct' || (top.outcome !== 'correct' && r.credit > top.credit) ? r : top,
+    INCORRECT,
+  );
+}
+
+function compareSequence(
+  answer: string,
+  keys: string[],
+  options: ShortAnswerOptions,
+): ShortAnswerCredit {
+  const parsedKeys = keys
+    .map((key) => ({
+      numericOnly: isNumericSequenceText(key),
+      parse: parseSequenceText(key, { numericOnly: isNumericSequenceText(key) }),
+    }))
+    .filter(({ parse }) => isParsed(parse));
+  if (parsedKeys.length === 0) return INCORRECT;
+  return bestOf(
+    parsedKeys.map(({ numericOnly, parse: key }) => {
+      const elements = firstElements(key);
+      // Un escáner pega las casillas de un orden (`3142`): se separa sólo si la
+      // clave es un orden de 3+ elementos de un carácter y trae esa cantidad.
+      // Un par (`56` contra `(5,6)`) no: podría ser el número 56. Una clave con
+      // números compara solo los números (`R: 3-1-4-2`, `P3-P1-P4-P2`).
+      const given = parseSequenceText(answer, {
+        expectedLength: elements.length,
+        allowPasted: elements.length >= 3 && elements.every((e) => [...e].length === 1),
+        numericOnly,
+      });
+      if (!isParsed(given)) return INCORRECT;
+      return compareCanonical(given, [key], options.formatKind ?? null, options.equivalences);
+    }),
+  );
+}
+
+/**
+ * Respaldo para un par sin separador de par reconocible (`7-3`): un token por
+ * componente. La barra, el punto y la coma entre dígitos no separan componentes:
+ * `3/2` es una fracción y `7.3` un decimal, no pares.
+ */
+function tupleFromTokens(answer: string, arity: number): CanonicalParse<CanonicalTuple> | null {
+  if (NON_PAIR_SEPARATOR.test(answer)) return null;
+  const tokens = firstElements(parseSequenceText(answer));
+  return tokens.length === arity ? parseOrderedTupleText(`(${tokens.join(';')})`, arity) : null;
+}
+
+function compareTuple(
+  answer: string,
+  keys: string[],
+  options: ShortAnswerOptions,
+): ShortAnswerCredit {
+  const parsedKeys = keys.map((key) => parseOrderedTupleText(key)).filter(isParsed);
+  if (parsedKeys.length === 0) return UNDECIDABLE;
+  return bestOf(
+    parsedKeys.map((key) => {
+      const arity = tupleArity(key) ?? undefined;
+      const direct = parseOrderedTupleText(answer, arity);
+      const given =
+        isParsed(direct) || arity === undefined ? direct : tupleFromTokens(answer, arity);
+      if (given === null || !isParsed(given)) return INCORRECT;
+      return compareCanonical(
+        given,
+        [key],
+        options.formatKind ?? null,
+        options.equivalences,
+        options.componentCredit,
+      );
+    }),
+  );
+}
+
+function compareWordList(
+  answer: string,
+  keys: string[],
+  options: ShortAnswerOptions,
+): ShortAnswerCredit {
+  const given = parseWordListText(answer);
+  const parsedKeys = keys.map((key) => parseWordListText(key)).filter(isParsed);
+  if (parsedKeys.length === 0) return UNDECIDABLE;
+  if (!isParsed(given)) return INCORRECT;
+  return compareCanonical(
+    given,
+    parsedKeys,
+    options.formatKind ?? 'word_list',
+    options.equivalences,
+    options.componentCredit,
+  );
+}
+
+function compareNumeric(
+  answer: string,
+  keys: string[],
+  options: ShortAnswerOptions,
+): ShortAnswerCredit {
+  const given = parseScalarText(answer);
+  if (!isParsed(given)) return hasSeveralValues(answer) ? UNDECIDABLE : INCORRECT;
+  const parsedKeys = keys.map((key) => parseScalarText(key)).filter(isParsed);
+  if (parsedKeys.length === 0) return INCORRECT;
+  return compareCanonical(given, parsedKeys, options.formatKind ?? null, options.equivalences);
+}
+
+/**
+ * Igual que `matchesAcceptedAnswer`, pero con el crédito: en pares ordenados con
+ * `componentCredit` puede ser `partial` (una coordenada bien de dos).
+ */
+export function creditForAcceptedAnswer(
+  raw: unknown,
+  accepted: readonly string[],
+  options: ShortAnswerOptions = {},
+): ShortAnswerCredit {
+  if (typeof raw !== 'string') return UNDECIDABLE;
+  const cleaned = collapseWhitespace(raw);
+  if (cleaned.length === 0) return INCORRECT;
+  if (accepted.length === 0) return UNDECIDABLE;
+
+  const mode = options.comparison ?? inferComparisonMode(accepted);
+  const withoutUnit = collapseWhitespace(stripUnit(cleaned, options.unit));
+  const keys = accepted.map((candidate) =>
+    collapseWhitespace(stripUnit(collapseWhitespace(candidate), options.unit)),
+  );
+
+  if (mode === 'sequence') return compareSequence(withoutUnit, keys, options);
+  if (mode === 'ordered_tuple') return compareTuple(withoutUnit, keys, options);
+  if (mode === 'word_list') return compareWordList(withoutUnit, keys, options);
+  if (mode === 'short_text') return compareShortText(cleaned, accepted, options.caseSensitive);
+  if (mode === 'numeric') {
+    const { ignoreUnit } = resolveEquivalences(options.formatKind ?? null, options.equivalences);
+    const unit = checkUnit(cleaned, options.unit, ignoreUnit);
+    const result = compareNumeric(unit.value, keys, options);
+    if (result.outcome !== 'correct' || unit.kind === 'ok') return result;
+    // El número calza, pero la unidad no: otra unidad va a revisión; la que falta
+    // (con `ignoreUnit: false`) es incorrecta.
+    return unit.kind === 'unexpected' ? UNDECIDABLE : INCORRECT;
+  }
+
+  const normalize = (value: string) => (options.caseSensitive ? value : normalizeText(value));
+  const given = normalize(withoutUnit);
+  return keys.some((key) => normalize(key) === given)
+    ? { outcome: 'correct', credit: 1 }
+    : INCORRECT;
 }
 
 /**
  * Compara la respuesta cruda del alumno con las claves aceptadas.
  *
  * Una respuesta vacía es `mismatch` (no respondió), no `undecidable`: eso ya lo
- * decide quien llama, que sabe si hubo marca o no.
+ * decide quien llama, que sabe si hubo marca o no. Un acierto parcial es
+ * `mismatch` aquí; el crédito lo informa `creditForAcceptedAnswer`.
  */
 export function matchesAcceptedAnswer(
   raw: unknown,
   accepted: readonly string[],
   options: ShortAnswerOptions = {},
 ): ShortAnswerMatch {
-  if (typeof raw !== 'string') return 'undecidable';
-  const cleaned = collapseWhitespace(raw);
-  if (cleaned.length === 0) return 'mismatch';
-  if (accepted.length === 0) return 'undecidable';
-
-  const mode = options.comparison ?? inferComparisonMode(accepted);
-  const withoutUnit = collapseWhitespace(stripUnit(cleaned, options.unit));
-
-  if (mode === 'sequence') {
-    const given = sequenceOf(withoutUnit);
-    if (given.length === 0) return 'mismatch';
-    const same = (key: number[]) => {
-      // Un escáner pega las casillas de un orden (`3142`): se separa sólo si la
-      // clave es un orden de 3+ dígitos sueltos y trae exactamente esa cantidad.
-      // Un par (`56` contra `(5,6)`) no: podría ser el número 56.
-      const pasted =
-        given.length === 1 &&
-        key.length >= 3 &&
-        key.every((n) => n >= 0 && n <= 9) &&
-        String(given[0]).length === key.length;
-      const digits = pasted ? String(given[0]).split('').map(Number) : given;
-      return key.length === digits.length && key.every((n, i) => n === digits[i]);
-    };
-    return accepted.some((candidate) => same(sequenceOf(candidate))) ? 'match' : 'mismatch';
-  }
-
-  if (mode === 'numeric') {
-    const normalized = tightenFractionSlash(withoutUnit);
-    if (isAmbiguous(normalized)) return 'undecidable';
-    const given = parseRational(normalized);
-    if (given === null) return 'mismatch';
-    for (const candidate of accepted) {
-      const key = parseRational(
-        tightenFractionSlash(collapseWhitespace(stripUnit(candidate, options.unit))),
-      );
-      if (key !== null && sameRational(given, key)) return 'match';
-    }
-    return 'mismatch';
-  }
-
-  const normalize = (value: string) =>
-    options.caseSensitive ? value : value.toLocaleLowerCase('es');
-  const given = normalize(withoutUnit);
-  for (const candidate of accepted) {
-    if (normalize(collapseWhitespace(stripUnit(candidate, options.unit))) === given) return 'match';
-  }
-  return 'mismatch';
+  const { outcome } = creditForAcceptedAnswer(raw, accepted, options);
+  if (outcome === 'correct') return 'match';
+  return outcome === 'undecidable' ? 'undecidable' : 'mismatch';
 }

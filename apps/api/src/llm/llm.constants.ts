@@ -22,7 +22,7 @@ export interface ProviderStaticConfig {
   /** Máximo de tokens de salida baseline. */
   maxTokens: number;
   /** Temperatura de muestreo (0 = determinista, recomendado para etiquetado). */
-  temperature: number;
+  temperature?: number;
 }
 
 export const LLM_PROVIDER_DEFAULTS: Record<LlmProviderName, ProviderStaticConfig> = {
@@ -40,14 +40,10 @@ export const LLM_PROVIDER_DEFAULTS: Record<LlmProviderName, ProviderStaticConfig
     maxTokens: 8192,
     temperature: 0,
   },
-  // ── Puntos de extensión ──
-  // Para activarlos: implementar el provider en `providers/`, registrarlo en
-  // `LlmModule` y apuntar `ACTIVE_LLM_PROVIDER` aquí.
   openai: {
     apiKeyEnv: 'OPENAI_API_KEY',
-    model: 'gpt-4o',
+    model: 'gpt-5.4-mini',
     maxTokens: 4096,
-    temperature: 0,
   },
   deepseek: {
     apiKeyEnv: 'DEEPSEEK_API_KEY',

@@ -1,6 +1,8 @@
 import { ServiceUnavailableException } from '@nestjs/common';
 import { LlmAgentService, type AgentStreamEvent } from './llm-agent.service';
 import type { LlmConfigService } from './llm.config';
+import { GeminiProvider } from './providers/gemini.provider';
+import { estimateLlmCostUsd } from './llm.pricing';
 import type {
   LlmAgentEvent,
   LlmAgentRequest,
@@ -41,7 +43,6 @@ function makeConfig(provider = 'anthropic'): LlmConfigService {
         provider: provider as 'anthropic',
         model: 'claude-test',
         maxTokens: 1024,
-        temperature: 0,
       }),
   } as unknown as LlmConfigService;
 }
@@ -54,7 +55,171 @@ async function collect(
   return out;
 }
 
+interface GeminiTurnRequest {
+  contents: Array<{ role: string; parts: Array<Record<string, unknown>> }>;
+}
+
+function makeGeminiProvider(turns: unknown[][]) {
+  const provider = new GeminiProvider();
+  const requests: GeminiTurnRequest[] = [];
+  let turn = 0;
+  const generateContentStream = jest.fn((req: GeminiTurnRequest) => {
+    requests.push(req);
+    const chunks = turns[turn] ?? [];
+    turn += 1;
+    return Promise.resolve(
+      (async function* () {
+        for (const chunk of chunks) yield chunk;
+      })(),
+    );
+  });
+  (provider as unknown as { client: unknown }).client = { models: { generateContentStream } };
+  return { provider, requests };
+}
+
+function makeGeminiConfig(): LlmConfigService {
+  return {
+    resolve: () =>
+      Promise.resolve({ provider: 'gemini', model: 'gemini-3.5-flash', maxTokens: 1024 }),
+  } as unknown as LlmConfigService;
+}
+
+describe('LlmAgentService con Gemini', () => {
+  it('reinyecta la thoughtSignature de la function call en el turno siguiente', async () => {
+    const { provider, requests } = makeGeminiProvider([
+      [
+        {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    functionCall: { name: 'get_heatmap', args: { classGroupId: 'cg-1' } },
+                    thoughtSignature: 'firma-opaca',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        { candidates: [{ finishReason: 'STOP' }] },
+      ],
+      [{ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'Listo.' }] } }] }],
+    ]);
+    const service = new LlmAgentService(makeGeminiConfig(), [provider]);
+    const executeTool = jest.fn().mockResolvedValue({ content: '{"ok":true}' });
+
+    const events = await collect(
+      service.runAgent({
+        system: 's',
+        messages: [{ role: 'user', content: [{ type: 'text', text: 'x' }] }],
+        tools: [{ name: 'get_heatmap', description: 'd', inputSchema: { type: 'object' } }],
+        executeTool,
+      }),
+    );
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1]?.contents[1]).toEqual({
+      role: 'model',
+      parts: [
+        {
+          functionCall: { name: 'get_heatmap', args: { classGroupId: 'cg-1' } },
+          thoughtSignature: 'firma-opaca',
+        },
+      ],
+    });
+    expect(executeTool).toHaveBeenCalledWith({
+      id: 'get_heatmap-0',
+      name: 'get_heatmap',
+      input: { classGroupId: 'cg-1' },
+    });
+    const final = events.find((e) => e.type === 'final');
+    expect(final).toMatchObject({
+      messages: [
+        { role: 'user' },
+        {
+          role: 'assistant',
+          content: [{ type: 'tool_use', providerMetadata: { thoughtSignature: 'firma-opaca' } }],
+        },
+        { role: 'user' },
+        { role: 'assistant' },
+      ],
+    });
+  });
+});
+
+describe('LlmAgentService con Gemini: uso de tokens', () => {
+  it('cuenta una sola vez el uso acumulado de un turno con varios chunks, con razonamiento', async () => {
+    const { provider } = makeGeminiProvider([
+      [
+        {
+          candidates: [{ content: { parts: [{ text: 'El 8°B ' }] } }],
+          usageMetadata: { promptTokenCount: 1_000_000, candidatesTokenCount: 100_000 },
+        },
+        {
+          candidates: [{ content: { parts: [{ text: 'bajó.' }] } }],
+          usageMetadata: {
+            promptTokenCount: 1_000_000,
+            candidatesTokenCount: 300_000,
+            thoughtsTokenCount: 200_000,
+          },
+        },
+        {
+          candidates: [{ finishReason: 'STOP' }],
+          usageMetadata: {
+            promptTokenCount: 1_000_000,
+            candidatesTokenCount: 300_000,
+            thoughtsTokenCount: 200_000,
+          },
+        },
+      ],
+    ]);
+    const service = new LlmAgentService(makeGeminiConfig(), [provider]);
+
+    const events = await collect(
+      service.runAgent({
+        system: 's',
+        messages: [{ role: 'user', content: [{ type: 'text', text: 'x' }] }],
+        tools: [],
+        executeTool: jest.fn(),
+      }),
+    );
+
+    const final = events.find(
+      (e): e is Extract<AgentStreamEvent, { type: 'final' }> => e.type === 'final',
+    );
+    expect(final?.usage).toEqual({ inputTokens: 1_000_000, outputTokens: 500_000 });
+    expect(estimateLlmCostUsd('gemini-2.5-flash', final?.usage)).toBe('1.550000');
+  });
+});
+
 describe('LlmAgentService', () => {
+  it('no envía temperatura al proveedor cuando la configuración no la define', async () => {
+    const requests: LlmAgentRequest[] = [];
+    const provider = makeProvider([], {
+      streamWithTools(req: LlmAgentRequest): AsyncIterable<LlmAgentEvent> {
+        requests.push(req);
+        return (async function* (): AsyncGenerator<LlmAgentEvent> {
+          yield { type: 'done', stopReason: 'end_turn' };
+        })();
+      },
+    });
+    const service = new LlmAgentService(makeConfig(), [provider]);
+
+    await collect(
+      service.runAgent({
+        system: 'eres un asistente',
+        messages: [{ role: 'user', content: [{ type: 'text', text: 'hola' }] }],
+        tools: [],
+        executeTool: jest.fn(),
+        maxSteps: 1,
+      }),
+    );
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.options).toEqual({ model: 'claude-test', maxTokens: 1024 });
+  });
+
   it('conduce el loop modelo→tool→modelo y cierra en prosa', async () => {
     const provider = makeProvider([
       // Vuelta 1: el modelo dice algo y pide una tool.

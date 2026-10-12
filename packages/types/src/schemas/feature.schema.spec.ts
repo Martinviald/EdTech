@@ -2,6 +2,8 @@ import {
   AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE,
   autoAnnulMinConfidence,
   isQuickConfirmEnabled,
+  orgConfigSchema,
+  resolveAnswerReadingSettings,
 } from './feature.schema';
 
 // El default de `quickConfirm` se invirtió: nació apagado "para el primer ciclo",
@@ -50,5 +52,90 @@ describe('autoAnnulMinConfidence', () => {
         review: { autoAnnulMinConfidence: AUTO_ANNUL_RECOMMENDED_MIN_CONFIDENCE },
       }),
     ).toBe(0.9);
+  });
+});
+
+describe('resolveAnswerReadingSettings', () => {
+  it('sin config rigen los defaults decididos (D3: se envían recortes; D7: dataset interno)', () => {
+    for (const config of [undefined, null, {}]) {
+      expect(resolveAnswerReadingSettings(config)).toEqual({
+        enabled: true,
+        allowExternalVision: true,
+        rubricAssistEnabled: false,
+        rubricEngine: 'legacy',
+        datasetConsent: 'org_internal',
+        reviewAll: false,
+      });
+    }
+  });
+
+  it('lo guardado por la org gana sobre el default', () => {
+    const resolved = resolveAnswerReadingSettings({
+      answerReading: { allowExternalVision: false, allowedProviders: ['anthropic'] },
+    });
+    expect(resolved.allowExternalVision).toBe(false);
+    expect(resolved.allowedProviders).toEqual(['anthropic']);
+    expect(resolved.enabled).toBe(true);
+    expect(resolved.datasetConsent).toBe('org_internal');
+  });
+
+  it('el motor de calificación de desarrollo es legacy salvo que la org elija el nuevo', () => {
+    expect(resolveAnswerReadingSettings({}).rubricEngine).toBe('legacy');
+    expect(
+      resolveAnswerReadingSettings({ answerReading: { rubricEngine: 'rubric_grading' } })
+        .rubricEngine,
+    ).toBe('rubric_grading');
+    expect(
+      resolveAnswerReadingSettings({ answerReading: { rubricEngine: 'otro' } }).rubricEngine,
+    ).toBe('legacy');
+  });
+
+  it('un answerReading corrupto no envía imágenes a terceros', () => {
+    const resolved = resolveAnswerReadingSettings({
+      answerReading: { allowExternalVision: 'no', claveDesconocida: true },
+    });
+    expect(resolved.allowExternalVision).toBe(false);
+  });
+
+  it('una clave corrupta de otro dominio no afecta la lectura', () => {
+    const resolved = resolveAnswerReadingSettings({
+      review: { quickConfirm: 'sí' },
+      answerReading: { reviewAll: true },
+    });
+    expect(resolved.reviewAll).toBe(true);
+    expect(resolved.allowExternalVision).toBe(true);
+  });
+
+  it('orgConfigSchema deja answerReading sin validar y resolveAnswerReadingSettings lo valida', () => {
+    const parsed = orgConfigSchema.parse({
+      answerReading: { datasetConsent: 'none' },
+      otraCosa: 1,
+    });
+    expect(parsed).toHaveProperty('otraCosa', 1);
+    expect(resolveAnswerReadingSettings(parsed).datasetConsent).toBe('none');
+    expect(
+      orgConfigSchema.safeParse({ answerReading: { allowedProviders: ['otro'] } }).success,
+    ).toBe(true);
+    expect(
+      resolveAnswerReadingSettings({ answerReading: { allowedProviders: ['otro'] } })
+        .allowExternalVision,
+    ).toBe(false);
+  });
+});
+
+describe('answerReading corrupto no invalida el resto de la configuración', () => {
+  it('conserva features, presupuesto y anulación automática', () => {
+    const parsed = orgConfigSchema.safeParse({
+      allowedFeatures: ['remedial'],
+      aiBudgetUsd: 25,
+      answerReading: { allowExternalVision: false, comentario: 'x' },
+    });
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.aiBudgetUsd).toBe(25);
+    expect(
+      resolveAnswerReadingSettings({
+        answerReading: { allowExternalVision: false, comentario: 'x' },
+      }).allowExternalVision,
+    ).toBe(false);
   });
 });

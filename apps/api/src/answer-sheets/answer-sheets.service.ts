@@ -7,6 +7,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import {
   assessments,
   gradingScales,
@@ -56,13 +57,15 @@ import { parseZipgradeCsv } from './lib/parsers/zipgrade-parser';
 import { parseDiaOfficialCsv } from './lib/parsers/dia-official-parser';
 import { parseGenericCsv } from './lib/parsers/generic-csv-parser';
 import { getTemplate, listTemplates } from './lib/templates';
-import type { ParserResult } from './lib/parsers/parser.types';
+import type { ParserResult, PrescoredAnswer } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
 import {
   annulmentEvidence,
   buildPrintedLabelIndex,
   resolveRowAnswers,
   resolveAnnulledAnswers,
+  resolvePendingReadingPositions,
+  resolvePrescoredAnswers,
   toScoringAnswer,
 } from './lib/composite-answers';
 
@@ -421,8 +424,23 @@ export class AnswerSheetsService {
       // contra los ítems del instrumento antes de corregir.
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
       const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
+      const pendingReading = resolvePendingReadingPositions(labelIndex, row.pendingReadingLabels);
+      const prescored = resolvePrescoredAnswers(labelIndex, row.prescoredAnswers);
 
       for (const item of scopedItems) {
+        if (pendingReading.has(item.position) || prescored.pendingPositions.has(item.position)) {
+          responseRows.push(
+            this.pendingResponseRow(studentId, item, { answer: null, pendingReading: true }),
+          );
+          continue;
+        }
+
+        const prescoredAnswer = prescored.byPosition.get(item.position);
+        if (prescoredAnswer) {
+          responseRows.push(this.prescoredResponseRow(studentId, item, prescoredAnswer, now));
+          continue;
+        }
+
         const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
         const evidence = annulmentEvidence(annulled, item.position);
         const answerValue =
@@ -439,21 +457,7 @@ export class AnswerSheetsService {
         });
 
         if (result.requiresManualGrading) {
-          // Pendiente de corrección humana/IA (F4). NUNCA puntuar 0/incorrecto:
-          // scores en null → el calculador puro excluye `isCorrect === null` del
-          // denominador, así no contaminan el % de los autocorregidos.
-          responseRows.push({
-            assessmentId: '', // se completa una vez creado el assessment
-            studentId,
-            itemId: item.id,
-            value: answerValue,
-            isCorrect: null,
-            rawScore: null,
-            maxScore: item.maxScore.toFixed(2),
-            finalScore: null,
-            scoredBy: 'human',
-            scoredAt: null,
-          });
+          responseRows.push(this.pendingResponseRow(studentId, item, answerValue));
           continue;
         }
 
@@ -546,22 +550,12 @@ export class AnswerSheetsService {
       }));
 
       // Batch insert con upsert (assessmentId, studentId, itemId).
-      const keepsExistingScore = sql`excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL`;
       await tx
         .insert(responses)
         .values(responsesWithAssessment)
         .onConflictDoUpdate({
           target: [responses.assessmentId, responses.studentId, responses.itemId],
-          set: {
-            value: sql`excluded.value`,
-            isCorrect: sql`excluded.is_correct`,
-            rawScore: sql`excluded.raw_score`,
-            maxScore: sql`excluded.max_score`,
-            finalScore: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.finalScore} ELSE excluded.final_score END`,
-            scoredBy: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredBy} ELSE excluded.scored_by END`,
-            scoredAt: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredAt} ELSE excluded.scored_at END`,
-            updatedAt: now,
-          },
+          set: this.responseUpsertSet(now),
         });
 
       // Delete + reinsert de assessment_results / skill_results / read-model de
@@ -671,6 +665,64 @@ export class AnswerSheetsService {
   }
 
   // ---------- helpers ----------
+
+  private responseUpsertSet(now: Date) {
+    const keepsScore = sql`${responses.humanScore} IS NOT NULL OR (excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL)`;
+    const kept = (column: AnyPgColumn, incoming: string) =>
+      sql`CASE WHEN ${keepsScore} THEN ${column} ELSE ${sql.raw(`excluded.${incoming}`)} END`;
+    return {
+      value: kept(responses.value, 'value'),
+      isCorrect: kept(responses.isCorrect, 'is_correct'),
+      rawScore: kept(responses.rawScore, 'raw_score'),
+      maxScore: sql`excluded.max_score`,
+      finalScore: kept(responses.finalScore, 'final_score'),
+      scoredBy: kept(responses.scoredBy, 'scored_by'),
+      scoredAt: kept(responses.scoredAt, 'scored_at'),
+      aiScore: sql`COALESCE(excluded.ai_score, ${responses.aiScore})`,
+      updatedAt: now,
+    };
+  }
+
+  private pendingResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    value: Record<string, unknown>,
+  ): typeof responses.$inferInsert {
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value,
+      isCorrect: null,
+      rawScore: null,
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: null,
+      scoredBy: 'human',
+      scoredAt: null,
+    };
+  }
+
+  private prescoredResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    prescored: PrescoredAnswer,
+    now: Date,
+  ): typeof responses.$inferInsert {
+    const score = prescored.rawScore.toFixed(2);
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value: prescored.value,
+      isCorrect: prescored.isCorrect,
+      rawScore: score,
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: score,
+      aiScore: prescored.aiScore,
+      scoredBy: prescored.scoredBy,
+      scoredAt: now,
+    };
+  }
 
   private requireOrgId(user: JwtPayload): string {
     if (!user.orgId) {

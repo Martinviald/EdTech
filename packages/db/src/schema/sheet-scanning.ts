@@ -16,6 +16,7 @@ import { relations, sql } from 'drizzle-orm';
 import type {
   CaptureProfile,
   CaptureSessionCapture,
+  CropEvidence,
   LayoutSpec,
   DoubtReason,
   PageDiagnostics,
@@ -252,6 +253,12 @@ export const sheetScanMarks = pgTable(
     threshold: decimal('threshold', { precision: 4, scale: 3 }).notNull(),
     margin: decimal('margin', { precision: 6, scale: 3 }).notNull(),
     cropFileId: uuid('crop_file_id').references(() => files.id),
+    /**
+     * Evidencia del recorte que devuelve el motor OMR (contrato v2): perfil, tinta
+     * medida descontando la plantilla y sha256 del JPEG. La lectura por visión la
+     * usa para decidir blancos sin llamar modelos y para la idempotencia.
+     */
+    cropEvidence: jsonb('crop_evidence').$type<CropEvidence>(),
     suggestedValue: text('suggested_value'),
     doubtReason: text('doubt_reason').$type<DoubtReason>(),
     nullConfidence: decimal('null_confidence', { precision: 4, scale: 3 }),

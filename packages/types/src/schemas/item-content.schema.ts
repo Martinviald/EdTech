@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { responseFormatSchema } from './answer-reading/response-format.schema';
 import type { ItemType } from '../enums';
 // `multiple_choice` ya tiene su schema canónico en item.schema.ts. Lo reutilizamos
 // para no duplicar la definición ni colisionar en el re-export del índice.
@@ -33,6 +34,7 @@ const baseContent = {
   imageUrl: z.string().url().optional(),
   audioUrl: z.string().url().optional(),
   explanation: z.string().optional(),
+  responseFormat: responseFormatSchema.optional(),
 };
 
 // ── Schemas de content por tipo ──────────────────────────────────────────────
@@ -205,6 +207,22 @@ export const orderingContentSchema = z.object({
   ...baseContent,
 });
 
+/**
+ * Completar casillas. Cada casilla trae sus claves. Opcionales y retrocompatibles
+ * (corrección por visión, formato `multi_box`): `partId` identifica la casilla en
+ * la hoja y en la respuesta (por defecto, `position` como texto), `label` es su
+ * rótulo impreso y `comparison` compara por estructura canónica como
+ * `short_answer` (sin él, comparación exacta histórica).
+ */
+export const GAP_COMPARISONS = [
+  'numeric',
+  'text',
+  'sequence',
+  'ordered_tuple',
+  'word_list',
+  'short_text',
+] as const;
+
 export const gapFillContentSchema = z.object({
   textWithGaps: z.string().min(1),
   gaps: z
@@ -213,6 +231,9 @@ export const gapFillContentSchema = z.object({
         position: z.number().int().min(0),
         acceptedAnswers: z.array(z.string().min(1)).min(1),
         caseSensitive: z.boolean().optional(),
+        partId: z.string().min(1).optional(),
+        label: z.string().min(1).optional(),
+        comparison: z.enum(GAP_COMPARISONS).optional(),
       }),
     )
     .min(1),
@@ -232,7 +253,7 @@ export const gapFillContentSchema = z.object({
 export const shortAnswerContentSchema = z.object({
   prompt: z.string().min(1),
   acceptedAnswers: z.array(z.string().min(1)).min(1),
-  comparison: z.enum(['numeric', 'text', 'sequence']).optional(),
+  comparison: z.enum(['numeric', 'text', 'sequence', 'ordered_tuple']).optional(),
   unit: z.string().min(1).optional(),
   caseSensitive: z.boolean().optional(),
   ...baseContent,

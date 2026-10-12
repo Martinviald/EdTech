@@ -9,7 +9,7 @@ import {
 } from '@soe/decisions';
 import type { DecisionFeature, DecisionThresholds } from '@soe/types';
 import { reportServerError } from '../common/observability/report-error';
-import { ConcurrencyLimiter } from './concurrency-limiter';
+import { ConcurrencyLimiter } from '../common/concurrency/concurrency-limiter';
 import { DecisionCallsRecorder } from './decision-calls.recorder';
 import {
   DECISION_ENGINES,

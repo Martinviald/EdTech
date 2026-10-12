@@ -3,6 +3,7 @@ import { PDFDocument } from 'pdf-lib';
 import type { Database } from '@soe/db';
 import type { ItemContent, LayoutSpec } from '@soe/types';
 import { deriveLayoutDraft, type DerivableItem } from './sheet-layout.helpers';
+import * as printHelpers from './sheet-print.helpers';
 import { SheetPrintService } from './sheet-print.service';
 
 const ORG_ID = '22222222-2222-4222-8222-222222222222';
@@ -515,6 +516,33 @@ describe('SheetPrintService.renderPdf', () => {
     const doc = await PDFDocument.load(pdf);
 
     expect(doc.getPageCount()).toBe(spec.pageCount * SHEET_ROWS.length);
+  });
+
+  it('pasa a la impresión la unidad de los ítems con casillas de respuesta', async () => {
+    const itemId = '00000000-0000-4000-8000-000000000002';
+    const responseSpec = deriveLayoutDraft(INSTRUMENT_ID, [
+      mcItem(1),
+      {
+        id: itemId,
+        position: 2,
+        printedNumber: null,
+        type: 'short_answer',
+        content: { prompt: 'Mide', acceptedAnswers: ['12'], unit: 'cm' } as ItemContent,
+      },
+    ]).spec;
+    const render = jest.spyOn(printHelpers, 'renderSheetsPdf');
+    const { db } = makeDb([
+      [{ ...PDF_RUN_ROW, spec: responseSpec }],
+      SHEET_ROWS,
+      [{ id: itemId, content: { prompt: 'Mide', acceptedAnswers: ['12'], unit: 'cm' } }],
+    ]);
+    const service = new SheetPrintService(db);
+
+    await service.renderPdf(ORG_ID, RUN_ID);
+
+    const options = render.mock.calls[0]![3];
+    expect(options?.unitsByItemId?.get(itemId)).toBe('cm');
+    render.mockRestore();
   });
 
   it('lanza NotFound cuando la tirada no existe', async () => {

@@ -1,0 +1,18 @@
+{
+  "short-answer@1": {
+    "id": "short-answer",
+    "version": 1,
+    "bleedRatio": 0.15,
+    "targetWidthPx": 1000,
+    "jpegQuality": 85,
+    "contrast": "none"
+  },
+  "free-text@1": {
+    "id": "free-text",
+    "version": 1,
+    "bleedRatio": 0.05,
+    "targetWidthPx": 1400,
+    "jpegQuality": 85,
+    "contrast": "none"
+  }
+}

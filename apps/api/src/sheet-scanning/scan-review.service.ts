@@ -34,15 +34,28 @@ import type {
   ReviewQueueModel,
   ReviewScanModel,
   SheetScanState,
+  RubricEngine,
 } from '@soe/types';
 import { autoAnnulMinConfidence, isQuickConfirmEnabled } from '@soe/types';
+import {
+  AnswerReadingConsolidationService,
+  type ConfirmedCropMark,
+  type ConfirmedReadingLink,
+  type ConfirmedReadingsInput,
+  type ReadingConfirmation,
+} from '../answer-reading/answer-reading-consolidation.service';
+import { RubricGradingService } from '../answer-reading/rubric-grading.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
+import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
 import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { ParserResult } from '../answer-sheets/lib/parsers/parser.types';
 import { FilesService } from '../files/files.service';
-import { DevelopmentGradingService } from './development-grading.service';
+import {
+  DevelopmentGradingService,
+  type ScheduleConfirmedBatchParams,
+} from './development-grading.service';
 import { toParserResult, type ConfirmedScanInput } from './scan-result.adapter';
 
 export const ANSWER_SHEET_CONFIRMER = 'ANSWER_SHEET_CONFIRMER';
@@ -166,6 +179,8 @@ export class ScanReviewService {
     @Inject(ANSWER_SHEET_CONFIRMER) private readonly answerSheetConfirmer: AnswerSheetConfirmer,
     private readonly filesService: FilesService,
     private readonly developmentGrading: DevelopmentGradingService,
+    private readonly readingConsolidation: AnswerReadingConsolidationService,
+    private readonly rubricGrading: RubricGradingService,
   ) {}
 
   async getQueue(orgId: string, batchId: string): Promise<ReviewQueueModel> {
@@ -642,7 +657,13 @@ export class ScanReviewService {
     });
 
     const pageCount = prepared.batch.spec.pageCount;
-    const cropPrintedNumbers = this.cropPrintedNumbersOf(prepared.batch.spec);
+    const cropItemByPrintedNumber = this.cropItemsByPrintedNumber(prepared.batch.spec);
+    const readings =
+      cropItemByPrintedNumber.size > 0
+        ? await this.readingConsolidation.readingsForConfirmation(orgId, batchId)
+        : new Map<string, ReadingConfirmation>();
+    const readingLinks: ConfirmedReadingLink[] = [];
+    const confirmedCropMarks: ConfirmedCropMark[] = [];
     const confirmedScans: ConfirmedScanInput[] = [];
     let incompleteSheets = 0;
     let unidentifiedSheets = 0;
@@ -660,7 +681,38 @@ export class ScanReviewService {
       }
       const marks: ConfirmedScanInput['marks'] = [];
       for (const mark of sheet.marks) {
-        if (cropPrintedNumbers.has(mark.printedNumber)) continue;
+        if (cropItemByPrintedNumber.has(mark.printedNumber)) {
+          const reading = readings.get(mark.markId);
+          confirmedCropMarks.push({
+            markId: mark.markId,
+            studentId: student.id,
+            itemId: cropItemByPrintedNumber.get(mark.printedNumber) ?? null,
+          });
+          if (reading) {
+            readingLinks.push({
+              decisionId: reading.decisionId,
+              studentId: student.id,
+              itemId: reading.itemId,
+              consolidated: reading.prescored !== null,
+            });
+          }
+          marks.push(
+            reading?.prescored
+              ? {
+                  printedNumber: mark.printedNumber,
+                  state: mark.state,
+                  value: null,
+                  prescored: reading.prescored,
+                }
+              : {
+                  printedNumber: mark.printedNumber,
+                  state: mark.state,
+                  value: null,
+                  pendingReading: true,
+                },
+          );
+          continue;
+        }
         const reviewed = mark.reviewedAt !== null;
         if (!reviewed && (mark.state === 'multiple' || mark.state === 'ambiguous')) {
           assumedPending++;
@@ -734,7 +786,13 @@ export class ScanReviewService {
         .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)));
     });
 
-    this.developmentGrading.scheduleConfirmedBatch({
+    await this.linkConfirmedReadings(orgId, batchId, {
+      assessmentId: prepared.batch.assessmentId,
+      links: readingLinks,
+      cropMarks: confirmedCropMarks,
+    });
+
+    await this.scheduleDevelopmentGrading({
       orgId,
       batchId,
       assessmentId: prepared.batch.assessmentId,
@@ -752,6 +810,37 @@ export class ScanReviewService {
         assumedPending,
       },
     };
+  }
+
+  private async scheduleDevelopmentGrading(params: ScheduleConfirmedBatchParams): Promise<void> {
+    let engine: RubricEngine;
+    try {
+      engine = await this.rubricGrading.engineFor(params.orgId);
+    } catch (error) {
+      reportServerError(error, {
+        orgId: params.orgId,
+        batchId: params.batchId,
+        stage: 'resolve_rubric_engine',
+      });
+      return;
+    }
+    if (engine === 'rubric_grading') {
+      this.rubricGrading.scheduleForBatch(params.orgId, params.batchId);
+      return;
+    }
+    this.developmentGrading.scheduleConfirmedBatch(params);
+  }
+
+  private async linkConfirmedReadings(
+    orgId: string,
+    batchId: string,
+    input: ConfirmedReadingsInput,
+  ): Promise<void> {
+    try {
+      await this.readingConsolidation.linkConfirmedResponses(orgId, input);
+    } catch (error) {
+      reportServerError(error, { orgId, batchId, stage: 'link_answer_readings' });
+    }
   }
 
   private async selectBatchScans(
@@ -944,12 +1033,13 @@ export class ScanReviewService {
     return index;
   }
 
-  private cropPrintedNumbersOf(spec: LayoutSpec): Set<string> {
-    const printedNumbers = new Set<string>();
+  private cropItemsByPrintedNumber(spec: LayoutSpec): Map<string, string | null> {
+    const itemByPrintedNumber = new Map<string, string | null>();
     for (const field of spec.fields) {
-      if (field.kind === 'crop_region') printedNumbers.add(field.printedNumber);
+      if (field.kind !== 'crop_region') continue;
+      itemByPrintedNumber.set(field.printedNumber, field.response?.itemId ?? null);
     }
-    return printedNumbers;
+    return itemByPrintedNumber;
   }
 
   private buildOptionsIndex(spec: LayoutSpec): Map<string, string[]> {

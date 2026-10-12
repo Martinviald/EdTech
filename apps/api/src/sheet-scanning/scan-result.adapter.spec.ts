@@ -50,6 +50,46 @@ describe('toParserResult', () => {
     expect(result.warnings).toEqual([]);
   });
 
+  it('un campo leído por recorte queda pendiente de lectura, sin respuesta ni error', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({ printedNumber: '1', value: 'B' }),
+          mark({ printedNumber: '2', state: 'marked', value: null, pendingReading: true }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '1': 'B' });
+    expect(result.rows[0]?.pendingReadingLabels).toEqual(['2']);
+    expect(result.rows[0]?.errors).toEqual([]);
+    expect(result.detectedColumns).toEqual(['1', '2']);
+  });
+
+  it('una lectura ya corregida viaja aparte, sin respuesta cruda ni etiqueta pendiente', () => {
+    const prescored = {
+      itemId: 'item-2',
+      value: { answer: '7', reading: { canonical: 'n:7', decisionId: 'dec-1' } },
+      isCorrect: true,
+      rawScore: 1,
+      scoredBy: 'ai' as const,
+      aiScore: { score: 1, decisionId: 'dec-1' },
+    };
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({ printedNumber: '1', value: 'B' }),
+          mark({ printedNumber: '2', state: 'marked', value: null, prescored }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '1': 'B' });
+    expect(result.rows[0]?.prescoredAnswers).toEqual({ '2': prescored });
+    expect(result.rows[0]?.pendingReadingLabels).toBeUndefined();
+    expect(result.detectedColumns).toEqual(['1', '2']);
+  });
+
   it('blank produce null sin error de fila', () => {
     const result = toParserResult([
       scan({ marks: [mark({ printedNumber: '4', state: 'blank', value: null })] }),

@@ -1,4 +1,16 @@
+import type { NewResponse } from '@soe/db';
 import type { AnswerSheetRowError } from '@soe/types';
+
+export type ResponseAiScore = NonNullable<NewResponse['aiScore']>;
+
+export interface PrescoredAnswer {
+  itemId: string;
+  value: Record<string, unknown>;
+  isCorrect: boolean;
+  rawScore: number;
+  scoredBy: 'auto' | 'ai';
+  aiScore: ResponseAiScore | null;
+}
 
 /**
  * Fila parseada desde un archivo CSV/Excel de hojas de respuesta.
@@ -23,6 +35,8 @@ export interface ParsedAnswerSheetRow {
   studentFullName: string | null;
   answers: Record<string, string | null>;
   annulledLabels?: string[];
+  pendingReadingLabels?: string[];
+  prescoredAnswers?: Record<string, PrescoredAnswer>;
   errors: AnswerSheetRowError[];
 }
 

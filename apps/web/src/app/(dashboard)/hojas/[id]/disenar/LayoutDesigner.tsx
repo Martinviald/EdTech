@@ -4,7 +4,7 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2, Lock } from 'lucide-react';
-import type { LayoutDraftModel, LayoutSpec } from '@soe/types';
+import type { LayoutDraftModel, LayoutSpec, ResponseFormat } from '@soe/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +27,40 @@ const PAPER_LABELS: Record<LayoutSpec['paper'], string> = {
   a4: 'A4',
   legal: 'Oficio',
 };
+
+const RESPONSE_FORMAT_LABELS: Record<ResponseFormat['kind'], string> = {
+  integer: 'Número entero',
+  decimal: 'Número decimal',
+  fraction: 'Fracción',
+  ordered_tuple: 'Par ordenado',
+  sequence: 'Secuencia',
+  word_list: 'Lista de palabras',
+  short_text: 'Texto corto',
+  multi_box: 'Varias casillas',
+  free_text: 'Texto libre',
+  math_work: 'Desarrollo',
+  bubble_choice: 'Burbujas',
+  score_bubbles: 'Nivel de rúbrica',
+};
+
+function describeResponseFormat(format: ResponseFormat): string {
+  const label = RESPONSE_FORMAT_LABELS[format.kind];
+  switch (format.kind) {
+    case 'integer':
+    case 'decimal':
+      return `${label} · ${format.maxChars} casillas${format.allowNegative ? ' y signo' : ''}`;
+    case 'fraction':
+      return format.allowMixed ? `${label} (admite número mixto)` : label;
+    case 'ordered_tuple':
+      return `${label} de ${format.arity} componentes`;
+    case 'sequence':
+      return `${label} de ${format.length} posiciones`;
+    case 'free_text':
+      return `${label} · ${format.lines} renglones`;
+    default:
+      return label;
+  }
+}
 
 function buildFieldsHint(fields: LayoutSpec['fields']): string {
   let bubbleGroups = 0;
@@ -56,6 +90,9 @@ export function LayoutDesigner({
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const { spec, excludedItems } = draft;
+  const responseFields = spec.fields.flatMap((field) =>
+    field.response ? [{ printedNumber: field.printedNumber, format: field.response.format }] : [],
+  );
 
   function handleFreeze() {
     startTransition(async () => {
@@ -102,7 +139,7 @@ export function LayoutDesigner({
           title={`${excludedItems.length} ${excludedItems.length === 1 ? 'ítem quedó fuera' : 'ítems quedaron fuera'} de la hoja`}
         >
           <p className="mb-2">
-            Estas preguntas no se pueden leer con burbujas y deberán corregirse por otra vía:
+            Estas preguntas no se pueden leer en la hoja y deberán corregirse por otra vía:
           </p>
           <ul className="list-disc space-y-1 pl-5">
             {excludedItems.map((item) => (
@@ -112,6 +149,24 @@ export function LayoutDesigner({
             ))}
           </ul>
         </AlertCallout>
+      ) : null}
+
+      {responseFields.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-base font-semibold text-foreground">Respuestas escritas</h2>
+          <p className="text-sm text-muted-foreground">
+            Estas preguntas se responden escribiendo en casillas impresas según su formato. El
+            formato se deduce de la pauta del ítem.
+          </p>
+          <ul className="grid gap-1 text-sm sm:grid-cols-2">
+            {responseFields.map((field) => (
+              <li key={field.printedNumber}>
+                <span className="font-medium">Pregunta {field.printedNumber}</span> —{' '}
+                {describeResponseFormat(field.format)}
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       <section className="space-y-3">
