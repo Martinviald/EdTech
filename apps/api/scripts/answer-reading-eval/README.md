@@ -37,6 +37,40 @@ Ambas cifras coinciden exactamente con `experimento-lectores` (15/72) y la medic
 McNemar pareado de la autoaceptación: 20 casillas×repetición pasan a autoaceptadas y 3 dejan de
 serlo (p < 0,001, optimista porque las repeticiones no son independientes).
 
+## T2: Gemini 3.6 Flash contra 3.8 Flash (pipeline B con el modelo nombrado)
+
+El alias `gemini-3.5-flash` responde con `modelVersion: gemini-3.6-flash`: lo medido como
+"3.5 Flash" fue 3.6. Las rutas `pipeline-b-36.json` y `pipeline-b-38.json` nombran el modelo y
+llevan el umbral en el lector (`minConfidence` 0,97 Gemini, 0,85 luna; sin override). Las lecturas
+de luna salen del caché (mismo pedido que `pipeline-b.json`); las de Gemini se pidieron por
+repetición (`--repetitions 1`, `2` y `3`, para que el peor caso de cada corrida quepa en el tope):
+
+```bash
+pnpm answer-reading:eval --dataset "$P/datasets/fotos-reales-v1" \
+  --routes scripts/answer-reading-eval/routes/pipeline-b-38.json \
+  --repetitions 3 --budget-usd 0.70 --out "$P/resultados/t2-pipeline-b-38" \
+  --compare "$P/resultados/t2-pipeline-b-36/informe.json"
+```
+
+| Configuración (2026-10-12)    | Autoaceptadas [IC 95 %]    | Equivocadas (perjudica / favorece) | Fidelidad desarrollo (media / mín.) | US$/recorte corto | Latencia Gemini p50 |
+| ----------------------------- | -------------------------- | ---------------------------------- | ----------------------------------- | ----------------- | ------------------- |
+| alias `gemini-3.5-flash` (T1) | 32/72 = 44,4 % [33,5–55,9] | 0 (0 / 0)                          | 0,96 / 0,78                         | 0,00332           | 1,9 s               |
+| `gemini-3.6-flash`            | 31/72 = 43,1 % [32,3–54,6] | 1 (0 / 1)                          | 0,93 / 0,56                         | 0,00311           | 2,0 s               |
+| `gemini-3.8-flash`            | 30/72 = 41,7 % [31,0–53,2] | 0 (0 / 0)                          | 0,94 / 0,68                         | 0,00344           | 3,1 s               |
+
+- Costo nominal: el alias con la tarifa de agregadores (US$1,50 / 9,00), 3.6 y 3.8 con la de 2027
+  (US$1,50 / 7,50); el gasto real de 2026 es la mitad.
+- 3.6 reproduce al alias dentro del no determinismo: misma canónica en 63/72 lecturas (el alias
+  coincide consigo mismo entre repeticiones en 62/72 pares).
+- La equivocada de 3.6 (`celeste-p07`, `triangulo|rectangulo` por `triangulo lo|rectangulo`) la
+  dio Gemini con confianza 1,00 y luna con 0,91; el alias leyó lo mismo con 1,00 en otra
+  repetición (luna 0,76 la salvó). Ningún umbral la evita en 3.5/3.6.
+- Calibración de 3.8: ninguna lectura equivocada sobre 0,95 (4 en 0,95) y 37/37 exactas con
+  ≥ 0,97. Simulado desde el caché: 0,90–0,95 → 37/72 sin equivocadas (dependen de luna para las 4
+  de 0,95), 0,96–0,98 → 30/72, 0,99 → 16/72. El umbral queda en 0,97.
+- `gemini-3.8-flash` rechaza `thinkingLevel: MINIMAL` (400); el proveedor sube a `LOW`, así que con
+  `reasoning: 'off'` razona un poco (más salida y latencia).
+
 ## Opciones
 
 | Opción                        | Qué hace                                                                                                                                                                                                                                                                                |
@@ -56,8 +90,9 @@ serlo (p < 0,001, optimista porque las repeticiones no son independientes).
 Las claves de API salen del `.env` de la raíz. Las tarifas están en `tariffs.ts`: Haiku 5.5,
 Flash-Lite y luna de `llm_models` (migraciones 0044 y 0046); `gemini-3.5-flash` a US$1,50 /
 US$9,00 por millón, de agregadores de precios (sep. 2026, anotado en
-`experimento-lectores/analisis.md`; no hay página oficial). El arnés no lee ni escribe la base de
-datos.
+`experimento-lectores/analisis.md`); `gemini-3.6-flash` y `gemini-3.8-flash` con el precio oficial
+de 2027 (US$1,50 / US$7,50; hasta el 31-12-2026 es la mitad), por conservador. El arnés no lee ni
+escribe la base de datos.
 
 ## Rutas por formato
 
@@ -71,6 +106,9 @@ de `resolveReadingRoute`, igual que en producción: la de formato gana a la por 
 - `routes/pipeline-b.json`: los mismos formatos, prompts, hints y políticas, con
   `gemini-3.5-flash` + `gpt-6-luna` (`reasoning: low`) en respuesta corta y texto, y
   `gemini-3.5-flash` en desarrollo.
+- `routes/pipeline-b-36.json` y `routes/pipeline-b-38.json`: pipeline B con el modelo nombrado y
+  el umbral por lector en la ruta; ids y versiones de la migración 0051. `pipeline-b-38.json` es
+  idéntico a lo que siembra 0051 (verificado contra una BD PG14 con `readingRouteSchema`).
 - `routes/default.json`: la ruta por defecto sola (fixtures sintéticos).
 
 **Umbral por lector (provisional hasta T1).** El esquema de rutas todavía no admite
