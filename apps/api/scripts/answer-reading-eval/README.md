@@ -218,6 +218,39 @@ Todas las proporciones llevan intervalo de Wilson al 95 %.
 
 La auditoría muestral se apaga (`auditSampleRate` 0): se mide todo lo que se autoaceptaría.
 
+## Verificador de incorrectas (etapa 1, T4)
+
+Si la política de una ruta trae `incorrectVerifier` (un `ReaderSpec` con un prompt de propósito
+`verification`, hoy `verify.incorrect@1`), la simulación aplica el mismo código que la API
+(`needsIncorrectVerification` y `applyIncorrectVerification` de `@soe/answer-reading`): cuando el
+consenso iba a autoaceptar una incorrecta o parcial, el verificador recibe el recorte, la lectura
+acordada y la clave, y si dice que podría ser la clave, duda (confianza bajo su `minConfidence`) o
+falla, la casilla pasa a revisión con `verifier_flagged`. Nunca acepta ni cambia una nota. Los
+veredictos van al mismo caché (clave con el prompt renderizado, que incluye lectura y clave) y al
+mismo tope de gasto; con verificador en las rutas, `--budget-usd` es obligatorio.
+
+`informe.md` suma la sección «Verificador de incorrectas»: incorrectas autoaceptadas antes y después,
+**0 injustos atrapados** (autoaceptadas que perjudicaban al alumno y el verificador mandó a
+revisión), falsos avisos (incorrectas verdaderas bien leídas que mandó a revisión) y costo extra.
+
+**Conjunto de estrés.** Una muestra con `injectedReading: { literal, parts? }` no llama a los
+lectores: entra al consenso con esa lectura (dos lecturas idénticas de familias ficticias) y se
+corrige y verifica como cualquier otra. Así se mide el verificador con lecturas equivocadas
+controladas sobre recortes reales. `pruebas-vlm-manuscrito/datasets/estres-verificador-v1/`
+(fuera del repo) tiene 15 casos de 0 injusto (12 lecturas equivocadas reales del caché y 3
+perturbaciones) y las 8 incorrectas verdaderas de `fotos-reales-v1` con la lectura correcta.
+
+Resultados (2026-10-12, 3 repeticiones; `resultados/t4-estres-*` y `resultados/t4-real-*`):
+
+| Verificador                                   | 0 injustos atrapados (estrés) | Falsos avisos (estrés)     | Falsos avisos (fotos reales) | US$ por verificación |
+| --------------------------------------------- | ----------------------------- | -------------------------- | ---------------------------- | -------------------- |
+| `gemini-3.5-flash` (responde 3.6), umbral 0,9 | 33/36 = 91,7 % [78,2–97,1]    | 3/24 = 12,5 % [4,3–31,0]   | 0/9 [0–29,9]                 | 0,0044               |
+| `gpt-6-luna@low`, umbral 0,9                  | 34/36 = 94,4 % [81,9–98,5]    | 14/24 = 58,3 % [38,8–75,5] | 2/9                          | 0,0003               |
+
+Cada verificador falla justo en el error de su familia: Flash no ve el `8, 15, 12` de Bruno P5
+(lo leyó Flash-Lite) y luna no ve el `0109`/`0102` de Bruno P2 (lo leyó luna). La ruta
+`routes/pipeline-b-t4.json` usa Flash.
+
 ## Fixtures sintéticos
 
 `fixtures/` tiene casillas dibujadas por código (sin datos personales). Para regenerarlas:
