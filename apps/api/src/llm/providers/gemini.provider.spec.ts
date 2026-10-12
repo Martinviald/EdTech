@@ -491,6 +491,88 @@ describe('GeminiProvider.completeStructured', () => {
     },
   );
 
+  describe('razonamiento apagado en modelos que no aceptan MINIMAL', () => {
+    function apiError(status: number, message: string): Error {
+      return Object.assign(new Error(message), { name: 'ApiError', status });
+    }
+
+    const MINIMAL_REJECTED = apiError(
+      400,
+      '{"error":{"code":400,"message":"Thinking level MINIMAL is not supported for this model. Please retry with other thinking level.","status":"INVALID_ARGUMENT"}}',
+    );
+
+    function makeRejectingProvider(rejection: Error) {
+      const provider = new GeminiProvider();
+      const generateContent = jest.fn((req: { config: { thinkingConfig?: unknown } }) =>
+        JSON.stringify(req.config.thinkingConfig) === JSON.stringify({ thinkingLevel: 'MINIMAL' })
+          ? Promise.reject(rejection)
+          : Promise.resolve(STRUCTURED_RESPONSE),
+      );
+      (provider as unknown as { client: unknown }).client = { models: { generateContent } };
+      return { provider, generateContent };
+    }
+
+    function thinkingConfigsOf(generateContent: jest.Mock): unknown[] {
+      return generateContent.mock.calls.map(
+        (call) => (call[0] as { config: { thinkingConfig?: unknown } }).config.thinkingConfig,
+      );
+    }
+
+    it('reintenta con LOW cuando el modelo rechaza MINIMAL y lo recuerda para el modelo', async () => {
+      const { provider, generateContent } = makeRejectingProvider(MINIMAL_REJECTED);
+      const request = makeStructuredRequest({ model: 'gemini-3.8-flash' });
+
+      const first = await provider.completeStructured(request);
+      const second = await provider.completeStructured(request);
+
+      expect(first.finishReason).toBe('stop');
+      expect(second.finishReason).toBe('stop');
+      expect(thinkingConfigsOf(generateContent)).toEqual([
+        { thinkingLevel: 'MINIMAL' },
+        { thinkingLevel: 'LOW' },
+        { thinkingLevel: 'LOW' },
+      ]);
+    });
+
+    it('sigue pidiendo MINIMAL a otro modelo que sí lo acepta', async () => {
+      const { provider, generateContent } = makeRejectingProvider(MINIMAL_REJECTED);
+      generateContent.mockImplementationOnce(() => Promise.reject(MINIMAL_REJECTED));
+
+      await provider.completeStructured(makeStructuredRequest({ model: 'gemini-3.8-flash' }));
+      generateContent.mockImplementation(() => Promise.resolve(STRUCTURED_RESPONSE));
+      await provider.completeStructured(makeStructuredRequest({ model: 'gemini-3.6-flash' }));
+
+      expect(thinkingConfigsOf(generateContent).at(-1)).toEqual({ thinkingLevel: 'MINIMAL' });
+    });
+
+    it.each([
+      ['otro 400', apiError(400, 'Invalid JSON payload received.')],
+      ['un 500 que menciona el nivel', apiError(500, 'Thinking level MINIMAL is not supported')],
+    ])('no reintenta ante %s', async (_case, rejection) => {
+      const { provider, generateContent } = makeRejectingProvider(rejection);
+
+      await expect(
+        provider.completeStructured(makeStructuredRequest({ model: 'gemini-3.8-flash' })),
+      ).rejects.toBe(rejection);
+      expect(generateContent).toHaveBeenCalledTimes(1);
+    });
+
+    it('propaga el rechazo si tampoco acepta LOW', async () => {
+      const lowRejected = apiError(400, 'Thinking level LOW is not supported for this model.');
+      const provider = new GeminiProvider();
+      const generateContent = jest
+        .fn()
+        .mockRejectedValueOnce(MINIMAL_REJECTED)
+        .mockRejectedValueOnce(lowRejected);
+      (provider as unknown as { client: unknown }).client = { models: { generateContent } };
+
+      await expect(
+        provider.completeStructured(makeStructuredRequest({ model: 'gemini-3.8-flash' })),
+      ).rejects.toBe(lowRejected);
+      expect(generateContent).toHaveBeenCalledTimes(2);
+    });
+  });
+
   it('omite thinkingConfig y mediaResolution en modelos sin razonamiento configurable', async () => {
     const { provider, generateContent } = makeStructuredProvider(STRUCTURED_RESPONSE);
 
