@@ -372,6 +372,13 @@
       "when": 1791846913834,
       "tag": "0052_answer_reading_verifier",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1791847803451,
+      "tag": "0053_verificador_incorrectas",
+      "breakpoints": true
     }
   ]
 }
