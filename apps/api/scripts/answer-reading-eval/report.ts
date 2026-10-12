@@ -1,5 +1,11 @@
 import type { ReadingRoute } from '@soe/types';
-import type { EvalMetricsV2, PairedComparison, ReaderMetrics } from './metrics';
+import type {
+  EvalMetricsV2,
+  PairedComparison,
+  ReaderMetrics,
+  VerifiedCase,
+  VerifierMetrics,
+} from './metrics';
 import type { ReaderMinConfidence } from './route-set';
 import type { ReadingRecord, SampleRecord, UnitRecord } from './simulate';
 import type { Proportion } from './statistics';
@@ -209,6 +215,44 @@ function comparisonSection(comparison: PairedComparison): string[] {
 
 type ChangedSide = PairedComparison['changedUnits'][number]['before'];
 
+const VERIFIED_CASE_LABELS: Readonly<Record<VerifiedCase['kind'], string>> = {
+  unfair_zero: '0 injusto',
+  true_incorrect: 'incorrecta verdadera',
+  other_error: 'otra lectura equivocada',
+};
+
+function verifierSection(verifier: VerifierMetrics): string[] {
+  const lines = [
+    '## Verificador de incorrectas',
+    '',
+    `Verificador: ${verifier.readerKeys.map((key) => `\`${key}\``).join(', ')}. Solo puede mandar a revisión (\`verifier_flagged\`): nunca acepta ni cambia una nota.`,
+    '',
+    '| Métrica | Valor [IC 95 % de Wilson] |',
+    '|---|---|',
+    `| Incorrectas autoaceptadas antes → después | ${verifier.autoAcceptedIncorrect.before} → ${verifier.autoAcceptedIncorrect.after} |`,
+    `| Marcadas por el verificador | ${rate(verifier.flagged)} |`,
+    `| **0 injustos atrapados** | ${rate(verifier.unfairZeros.caught)} |`,
+    `| Falsos avisos (incorrectas verdaderas a revisión) | ${rate(verifier.falseAlarms)} |`,
+    `| Otras lecturas equivocadas marcadas | ${verifier.otherErrors.flagged}/${verifier.otherErrors.before} |`,
+    `| Autoaceptadas que perjudican al alumno antes → después | ${verifier.harmsStudent.before} → ${verifier.harmsStudent.after} |`,
+    `| Llamadas / desde el caché / fallidas | ${verifier.called} / ${verifier.fromCache} / ${verifier.failed} |`,
+    `| Costo extra total / por recorte corto | ${usd(verifier.extraCostUsd)} / ${usd(verifier.extraCostPerShortCropUsd)} |`,
+    '',
+    '| Muestra | Rep. | Aceptada | Verdad | Caso | Veredicto | Marcada |',
+    '|---|---|---|---|---|---|---|',
+  ];
+  for (const entry of verifier.cases) {
+    const verdict =
+      entry.status !== 'ok'
+        ? `falla (${entry.status ?? 'sin llamada'})`
+        : `${entry.couldBeKey ? 'podría ser la clave' : 'no'} ${num(entry.confidence)}`;
+    lines.push(
+      `| ${entry.sampleId} | ${entry.repetition} | \`${entry.accepted}\` | \`${entry.truth}\` | ${VERIFIED_CASE_LABELS[entry.kind]} | ${verdict} | ${entry.flagged ? 'sí' : 'no'} |`,
+    );
+  }
+  return lines;
+}
+
 export function renderReportMarkdown(
   report: EvalReportV2,
   comparison: PairedComparison | null,
@@ -309,6 +353,7 @@ export function renderReportMarkdown(
     'El costo y la latencia de una lectura del caché son los de la llamada original.',
     '',
   );
+  if (metrics.verifier) lines.push(...verifierSection(metrics.verifier), '');
   if (comparison) lines.push(...comparisonSection(comparison), '');
   lines.push(
     '## Detalle por muestra',

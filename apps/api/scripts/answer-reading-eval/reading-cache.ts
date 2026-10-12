@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { access, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { TranscriptionJsonSchema, TranscriptionResult } from '@soe/answer-reading';
-import type { ReaderSpec, RenderedPrompt } from '@soe/types';
+import type { StructuredVisionResult } from '@soe/answer-reading';
+import type { ReaderSpec, RenderedPrompt, TranscriptionOutput } from '@soe/types';
 
 export const READING_CACHE_KEY_VERSION = 1;
 
@@ -11,7 +11,10 @@ export type CacheMode = 'use' | 'refresh' | 'off';
 export interface ReadingCacheKeyInput {
   readonly reader: Pick<ReaderSpec, 'provider' | 'model' | 'params'>;
   readonly prompt: Pick<RenderedPrompt, 'system' | 'user' | 'outputSchemaId'>;
-  readonly outputJsonSchema: TranscriptionJsonSchema;
+  readonly outputJsonSchema: {
+    readonly schema: unknown;
+    readonly propertyOrder: readonly string[];
+  };
   readonly imageSha256: string;
   readonly repetition: number;
 }
@@ -30,14 +33,14 @@ export interface ReadingCacheKeyMaterial {
   readonly repetition: number;
 }
 
-export interface CachedReading {
+export interface CachedReading<TOutput = TranscriptionOutput> {
   readonly key: string;
   readonly source: string;
   readonly storedAt: string;
   readonly promptRef: string;
   readonly promptHash: string;
   readonly material: Omit<ReadingCacheKeyMaterial, 'system' | 'user' | 'outputSchema'>;
-  readonly result: TranscriptionResult;
+  readonly result: StructuredVisionResult<TOutput>;
 }
 
 export function canonicalJson(value: unknown): string {
@@ -101,10 +104,10 @@ export class ReadingCache {
     }
   }
 
-  async get(key: string): Promise<CachedReading | null> {
+  async get<TOutput = TranscriptionOutput>(key: string): Promise<CachedReading<TOutput> | null> {
     if (this.mode !== 'use' || this.dir === null) return null;
     try {
-      const entry = JSON.parse(await readFile(this.pathFor(key), 'utf8')) as CachedReading;
+      const entry = JSON.parse(await readFile(this.pathFor(key), 'utf8')) as CachedReading<TOutput>;
       if (entry.key !== key || entry.result.status !== 'ok') {
         this.misses += 1;
         return null;
@@ -117,7 +120,7 @@ export class ReadingCache {
     }
   }
 
-  async put(entry: CachedReading): Promise<boolean> {
+  async put<TOutput>(entry: CachedReading<TOutput>): Promise<boolean> {
     if (this.mode === 'off' || this.dir === null || entry.result.status !== 'ok') return false;
     const path = this.pathFor(entry.key);
     await mkdir(join(this.dir, entry.key.slice(0, 2)), { recursive: true });
@@ -129,13 +132,13 @@ export class ReadingCache {
   }
 }
 
-export function cachedReadingEntry(
+export function cachedReadingEntry<TOutput>(
   key: string,
   input: ReadingCacheKeyInput,
   prompt: Pick<RenderedPrompt, 'ref' | 'hash'>,
-  result: TranscriptionResult,
+  result: StructuredVisionResult<TOutput>,
   source: string,
-): CachedReading {
+): CachedReading<TOutput> {
   const full = readingCacheKeyMaterial(input);
   return {
     key,

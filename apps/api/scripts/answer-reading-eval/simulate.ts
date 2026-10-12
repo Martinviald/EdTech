@@ -1,19 +1,30 @@
 import {
+  acceptedAnswersOf,
+  agreedReadingOf,
+  applyIncorrectVerification,
   evaluateConsensus,
+  fakeOutput,
   isTranscriptionPromptFor,
+  isVerificationPromptFor,
+  needsIncorrectVerification,
   needsTiebreak,
   normalizeTranscription,
   readingKeyFor,
   renderTranscriptionPrompt,
   responseGeometryOf,
+  renderVerificationPrompt,
   type ConsensusReading,
   type ResolvedRouteWithFallback,
+  type StructuredVisionResult,
   type TranscriptionRequest,
   type TranscriptionResult,
+  type VerificationRequest,
+  type VerificationResult,
 } from '@soe/answer-reading';
 import type {
   ConsensusPolicy,
   ConsensusResult,
+  ItemType,
   ReaderSpec,
   ReadingOutcome,
   ReadingState,
@@ -23,6 +34,7 @@ import type {
   ReviewReason,
   ScoringOutcome,
   TranscriptionStatus,
+  VerificationOutput,
 } from '@soe/types';
 import type { PreparedSample, SampleGroup } from './dataset';
 import {
@@ -42,6 +54,7 @@ export interface HarnessTranscriber {
   readonly id: string;
   supports(reader: ReaderSpec): boolean;
   transcribe(request: HarnessTranscriptionRequest): Promise<TranscriptionResult>;
+  verify?(request: VerificationRequest): Promise<VerificationResult>;
 }
 
 export interface SimulationBudget {
@@ -88,6 +101,26 @@ export interface ReadingRecord {
   readonly latencyMs: number;
 }
 
+export interface VerifierRecord {
+  readonly readerKey: string;
+  readonly model: string;
+  readonly called: boolean;
+  readonly fromCache: boolean;
+  readonly status: TranscriptionStatus | null;
+  readonly errorCode: string | null;
+  readonly couldBeKey: boolean | null;
+  readonly confidence: number | null;
+  readonly differingCharacters: readonly string[];
+  readonly flagged: boolean;
+  readonly costUsd: number;
+  readonly latencyMs: number;
+}
+
+export interface BeforeVerifierRecord {
+  readonly outcome: ReadingOutcome;
+  readonly autoAcceptedError: AutoAcceptedErrorKind | null;
+}
+
 export interface UnitRecord {
   readonly sampleId: string;
   readonly repetition: number;
@@ -110,6 +143,9 @@ export interface UnitRecord {
   readonly pointsDelta: number | null;
   readonly autoAcceptedError: AutoAcceptedErrorKind | null;
   readonly usedTiebreak: boolean;
+  readonly injected: boolean;
+  readonly verifier: VerifierRecord | null;
+  readonly beforeVerifier: BeforeVerifierRecord | null;
   readonly costUsd: number;
   readonly latencyMs: number;
 }
@@ -251,7 +287,7 @@ export function planReadings(
 ): PlannedReading[] {
   const readings: PlannedReading[] = [];
   for (const { prepared, route, skip } of planned) {
-    if (skip !== null || route === null) continue;
+    if (skip !== null || route === null || prepared.sample.injectedReading) continue;
     for (let repetition = 0; repetition < repetitions; repetition += 1) {
       const roles: Array<[ReaderSpec, ReaderRole]> = route.readers.map((reader) => [
         reader,
@@ -317,7 +353,10 @@ class SpendGate {
   }
 }
 
-function failedResult(reader: ReaderSpec, errorCode: string): TranscriptionResult {
+function failedResult<TOutput>(
+  reader: ReaderSpec,
+  errorCode: string,
+): StructuredVisionResult<TOutput> {
   return {
     status: 'error',
     output: null,
@@ -400,6 +439,87 @@ class UnitRunner {
   ): ReaderRun {
     return { reader, role, cacheKey, fromCache: false, cacheSource: null, result };
   }
+
+  async verify(
+    prepared: PreparedSample,
+    verifier: ReaderSpec,
+    result: ConsensusResult,
+    readings: readonly ConsensusReading[],
+    repetition: number,
+  ): Promise<VerifierRun | null> {
+    const image = prepared.image;
+    const agreedReading = agreedReadingOf(result, readings);
+    const acceptedAnswers = prepared.sample.item
+      ? acceptedAnswersOf({
+          type: prepared.sample.item.type as ItemType,
+          content: prepared.sample.item.content,
+        })
+      : [...(prepared.sample.acceptedAnswers ?? [])];
+    if (
+      image === null ||
+      agreedReading === null ||
+      acceptedAnswers.length === 0 ||
+      !isVerificationPromptFor(verifier.promptRef, prepared.sample.format)
+    ) {
+      return null;
+    }
+    const rendered = renderVerificationPrompt({
+      reader: verifier,
+      format: prepared.sample.format,
+      agreedReading,
+      acceptedAnswers,
+      gradeName: prepared.sample.gradeName ?? null,
+    });
+    const keyInput = {
+      reader: verifier,
+      prompt: rendered.prompt,
+      outputJsonSchema: rendered.outputSchema,
+      imageSha256: image.sha256,
+      repetition,
+    };
+    const cacheKey = readingCacheKey(keyInput);
+    const cached = await this.options.cache.get<VerificationOutput>(cacheKey);
+    if (cached) return { fromCache: true, result: cached.result };
+    const transcriber = this.options.transcriberFor(verifier);
+    if (!transcriber?.verify) {
+      return { fromCache: false, result: failedResult(verifier, 'no_transcriber') };
+    }
+    const estimate = this.gate.reserve(verifier);
+    if (estimate === null) {
+      return { fromCache: false, result: failedResult(verifier, 'budget_exceeded') };
+    }
+    let verification: VerificationResult;
+    try {
+      verification = await transcriber.verify({
+        readingKey: cacheKey,
+        image,
+        reader: verifier,
+        prompt: rendered.prompt,
+        outputSchema: rendered.outputSchema,
+      });
+    } catch (error) {
+      verification = failedResult(
+        verifier,
+        error instanceof Error ? error.name || 'error' : 'error',
+      );
+    }
+    this.gate.settle(verifier, estimate, verification.costUsd);
+    await this.options.cache.put(
+      cachedReadingEntry(
+        cacheKey,
+        keyInput,
+        rendered.prompt,
+        verification,
+        this.options.cacheSource ?? 'api',
+      ),
+    );
+    return { fromCache: false, result: verification };
+  }
+}
+
+interface VerifierRun {
+  readonly fromCache: boolean;
+  readonly result: VerificationResult;
 }
 
 function toConsensusReading(run: ReaderRun, index: number): ConsensusReading {
@@ -501,15 +621,22 @@ function errorKind(delta: number | null): AutoAcceptedErrorKind {
   return delta < 0 ? 'harms' : 'favors';
 }
 
-function unitRecord(
-  planned: PlannedSample & { route: ResolvedRouteWithFallback },
-  repetition: number,
+interface UnitExtras {
+  readonly injected: boolean;
+  readonly verifier: VerifierRecord | null;
+  readonly beforeVerifier: ConsensusResult | null;
+}
+
+function scoredOutcome(
+  prepared: PreparedSample,
   result: ConsensusResult,
-  runs: readonly ReaderRun[],
-  readerThresholdApplied: boolean,
-  usedTiebreak: boolean,
-): UnitRecord {
-  const { prepared, route } = planned;
+): {
+  autoAccepted: boolean;
+  decisionCorrect: boolean;
+  acceptedPoints: number | null;
+  pointsDelta: number | null;
+  autoAcceptedError: AutoAcceptedErrorKind | null;
+} {
   const autoAccepted = AUTO_OUTCOMES.has(result.outcome);
   const decisionCorrect = isDecisionCorrect(prepared, result);
   const scorable = autoAccepted && prepared.group === 'short' && result.value !== null;
@@ -519,6 +646,29 @@ function unitRecord(
     acceptedPoints !== null && prepared.expectedPoints !== null
       ? acceptedPoints - prepared.expectedPoints
       : null;
+  return {
+    autoAccepted,
+    decisionCorrect,
+    acceptedPoints,
+    pointsDelta,
+    autoAcceptedError:
+      autoAccepted && prepared.group === 'short' && !decisionCorrect
+        ? errorKind(pointsDelta)
+        : null,
+  };
+}
+
+function unitRecord(
+  planned: PlannedSample & { route: ResolvedRouteWithFallback },
+  repetition: number,
+  result: ConsensusResult,
+  runs: readonly ReaderRun[],
+  readerThresholdApplied: boolean,
+  usedTiebreak: boolean,
+  extras: UnitExtras,
+): UnitRecord {
+  const { prepared, route } = planned;
+  const scored = scoredOutcome(prepared, result);
   const primaryLatency = Math.max(
     0,
     ...runs.filter((run) => run.role === 'primary').map((run) => run.result.latencyMs),
@@ -526,6 +676,7 @@ function unitRecord(
   const tiebreakLatency = runs
     .filter((run) => run.role === 'tiebreak')
     .reduce((sum, run) => sum + run.result.latencyMs, 0);
+  const verifierCost = extras.verifier?.costUsd ?? 0;
   return {
     sampleId: prepared.sample.id,
     repetition,
@@ -535,24 +686,78 @@ function unitRecord(
     routeVersion: route.routeVersion,
     routeLevel: route.matchedLevel,
     outcome: result.outcome,
-    autoAccepted,
+    autoAccepted: scored.autoAccepted,
     reasons: result.reasons,
     reviewMode: result.reviewMode,
     readerThresholdApplied,
     canonical: result.value?.canonical ?? null,
     valueState: result.value?.state ?? null,
-    decisionCorrect,
+    decisionCorrect: scored.decisionCorrect,
     scoringOutcome: result.scoringOutcome,
-    acceptedPoints,
+    acceptedPoints: scored.acceptedPoints,
     expectedPoints: prepared.expectedPoints,
-    pointsDelta,
-    autoAcceptedError:
-      autoAccepted && prepared.group === 'short' && !decisionCorrect
-        ? errorKind(pointsDelta)
-        : null,
+    pointsDelta: scored.pointsDelta,
+    autoAcceptedError: scored.autoAcceptedError,
     usedTiebreak,
-    costUsd: runs.reduce((sum, run) => sum + (run.result.costUsd ?? 0), 0),
-    latencyMs: primaryLatency + tiebreakLatency,
+    injected: extras.injected,
+    verifier: extras.verifier,
+    beforeVerifier: extras.beforeVerifier
+      ? {
+          outcome: extras.beforeVerifier.outcome,
+          autoAcceptedError: scoredOutcome(prepared, extras.beforeVerifier).autoAcceptedError,
+        }
+      : null,
+    costUsd: runs.reduce((sum, run) => sum + (run.result.costUsd ?? 0), 0) + verifierCost,
+    latencyMs: primaryLatency + tiebreakLatency + (extras.verifier?.latencyMs ?? 0),
+  };
+}
+
+function injectedReadings(prepared: PreparedSample): ConsensusReading[] {
+  const injected = prepared.sample.injectedReading;
+  if (!injected) return [];
+  const output = fakeOutput(injected.literal, { parts: injected.parts ?? null });
+  return ['a', 'b'].map((suffix) => ({
+    readingId: `injected#${suffix}`,
+    family: `injected-${suffix}`,
+    status: 'ok' as const,
+    output,
+    role: 'primary' as const,
+  }));
+}
+
+async function verifyUnit(
+  runner: UnitRunner,
+  prepared: PreparedSample,
+  policy: ConsensusPolicy,
+  result: ConsensusResult,
+  readings: readonly ConsensusReading[],
+  repetition: number,
+): Promise<{ result: ConsensusResult; record: VerifierRecord | null }> {
+  const verifier = policy.incorrectVerifier;
+  if (!verifier || !needsIncorrectVerification(result, policy)) return { result, record: null };
+  const run = await runner.verify(prepared, verifier, result, readings, repetition);
+  const output = run?.result.status === 'ok' ? run.result.output : null;
+  const verified = applyIncorrectVerification(
+    result,
+    policy,
+    run ? { status: run.result.status, output } : null,
+  );
+  return {
+    result: verified,
+    record: {
+      readerKey: verifier.key,
+      model: verifier.model,
+      called: run !== null && !run.fromCache && run.result.errorCode !== 'no_transcriber',
+      fromCache: run?.fromCache ?? false,
+      status: run?.result.status ?? null,
+      errorCode: run?.result.errorCode ?? null,
+      couldBeKey: output?.couldBeKey ?? null,
+      confidence: output?.confidence ?? null,
+      differingCharacters: output?.differingCharacters ?? [],
+      flagged: verified.outcome !== result.outcome,
+      costUsd: run?.result.costUsd ?? 0,
+      latencyMs: run?.result.latencyMs ?? 0,
+    },
   };
 }
 
@@ -569,13 +774,16 @@ async function runUnit(
     format: prepared.sample.format,
     readingKey: `${prepared.sample.id}#${repetition}`,
   };
-  const runs = await Promise.all(
-    route.readers.map((reader) => runner.read(prepared, reader, 'primary', repetition)),
-  );
-  let readings = runs.map(toConsensusReading);
+  const injected = prepared.sample.injectedReading !== undefined;
+  const runs = injected
+    ? []
+    : await Promise.all(
+        route.readers.map((reader) => runner.read(prepared, reader, 'primary', repetition)),
+      );
+  let readings = injected ? injectedReadings(prepared) : runs.map(toConsensusReading);
   let result = evaluateConsensus(readings, policy, prepared.scorer.outcome, options);
   let usedTiebreak = false;
-  if (policy.tiebreakReader !== null && needsTiebreak(result, readings, policy)) {
+  if (!injected && policy.tiebreakReader !== null && needsTiebreak(result, readings, policy)) {
     runs.push(await runner.read(prepared, policy.tiebreakReader, 'tiebreak', repetition));
     readings = runs.map(toConsensusReading);
     result = evaluateConsensus(readings, policy, prepared.scorer.outcome, options);
@@ -584,8 +792,20 @@ async function runUnit(
   const adjusted = thresholds
     ? applyReaderMinConfidence(result, runs, thresholds, route.policy.minConfidence)
     : { result, applied: false };
+  const verified = await verifyUnit(
+    runner,
+    prepared,
+    basePolicy,
+    adjusted.result,
+    readings,
+    repetition,
+  );
   return {
-    unit: unitRecord(planned, repetition, adjusted.result, runs, adjusted.applied, usedTiebreak),
+    unit: unitRecord(planned, repetition, verified.result, runs, adjusted.applied, usedTiebreak, {
+      injected,
+      verifier: verified.record,
+      beforeVerifier: verified.record ? adjusted.result : null,
+    }),
     readings: runs.map((run) => readingRecord(run, prepared, repetition)),
   };
 }

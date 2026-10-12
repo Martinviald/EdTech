@@ -47,9 +47,8 @@ export function allRouteReaders(routeSet: RouteSet): ReaderSpec[] {
   const byKey = new Map<string, ReaderSpec>();
   for (const route of routeSet.routes) {
     for (const reader of route.readers) byKey.set(`${reader.provider}:${reader.model}`, reader);
-    if (route.policy.tiebreakReader) {
-      const tiebreak = route.policy.tiebreakReader;
-      byKey.set(`${tiebreak.provider}:${tiebreak.model}`, tiebreak);
+    for (const extra of [route.policy.tiebreakReader, route.policy.incorrectVerifier]) {
+      if (extra) byKey.set(`${extra.provider}:${extra.model}`, extra);
     }
   }
   return [...byKey.values()];

@@ -86,6 +86,38 @@ export interface DevelopmentDecisionMetrics {
   readonly reviewByReason: Readonly<Partial<Record<ReviewReason, number>>>;
 }
 
+export type VerifiedCaseKind = 'unfair_zero' | 'true_incorrect' | 'other_error';
+
+export interface VerifiedCase {
+  readonly sampleId: string;
+  readonly repetition: number;
+  readonly formatKind: ResponseFormatKind;
+  readonly accepted: string | null;
+  readonly truth: string | null;
+  readonly kind: VerifiedCaseKind;
+  readonly status: string | null;
+  readonly couldBeKey: boolean | null;
+  readonly confidence: number | null;
+  readonly flagged: boolean;
+}
+
+export interface VerifierMetrics {
+  readonly readerKeys: readonly string[];
+  readonly checked: number;
+  readonly called: number;
+  readonly fromCache: number;
+  readonly failed: number;
+  readonly flagged: Proportion;
+  readonly unfairZeros: { readonly before: number; readonly caught: Proportion };
+  readonly falseAlarms: Proportion;
+  readonly otherErrors: { readonly before: number; readonly flagged: number };
+  readonly autoAcceptedIncorrect: { readonly before: number; readonly after: number };
+  readonly harmsStudent: { readonly before: number; readonly after: number };
+  readonly extraCostUsd: number;
+  readonly extraCostPerShortCropUsd: number | null;
+  readonly cases: readonly VerifiedCase[];
+}
+
 export interface EvalMetricsV2 {
   readonly samples: {
     readonly total: number;
@@ -93,6 +125,7 @@ export interface EvalMetricsV2 {
     readonly skipped: Readonly<Partial<Record<SkipReason, number>>>;
   };
   readonly short: ShortDecisionMetrics;
+  readonly verifier: VerifierMetrics | null;
   readonly development: DevelopmentDecisionMetrics;
   readonly readers: readonly ReaderMetrics[];
   readonly cost: {
@@ -280,6 +313,60 @@ function shortDecisionMetrics(
   };
 }
 
+function verifiedCaseKind(unit: UnitRecord): VerifiedCaseKind {
+  if (unit.beforeVerifier?.autoAcceptedError === 'harms') return 'unfair_zero';
+  return unit.decisionCorrect ? 'true_incorrect' : 'other_error';
+}
+
+function verifierMetrics(
+  shortUnits: readonly UnitRecord[],
+  truthBySample: ReadonlyMap<string, string | null>,
+): VerifierMetrics | null {
+  const checked = shortUnits.filter((unit) => unit.verifier !== null);
+  if (checked.length === 0) return null;
+  const cases: VerifiedCase[] = checked.map((unit) => ({
+    sampleId: unit.sampleId,
+    repetition: unit.repetition,
+    formatKind: unit.formatKind,
+    accepted: unit.canonical,
+    truth: truthBySample.get(unit.sampleId) ?? null,
+    kind: verifiedCaseKind(unit),
+    status: unit.verifier?.status ?? null,
+    couldBeKey: unit.verifier?.couldBeKey ?? null,
+    confidence: unit.verifier?.confidence ?? null,
+    flagged: unit.verifier?.flagged ?? false,
+  }));
+  const ofKind = (kind: VerifiedCaseKind) => cases.filter((entry) => entry.kind === kind);
+  const flaggedIn = (list: readonly VerifiedCase[]) => list.filter((entry) => entry.flagged).length;
+  const unfair = ofKind('unfair_zero');
+  const trueIncorrect = ofKind('true_incorrect');
+  const other = ofKind('other_error');
+  const extraCostUsd = checked.reduce((sum, unit) => sum + (unit.verifier?.costUsd ?? 0), 0);
+  const harmsAfter = shortUnits.filter((unit) => unit.autoAcceptedError === 'harms').length;
+  const harmsBefore = shortUnits.filter(
+    (unit) => (unit.beforeVerifier ?? unit).autoAcceptedError === 'harms',
+  ).length;
+  return {
+    readerKeys: [...new Set(checked.map((unit) => unit.verifier?.readerKey ?? ''))].sort(),
+    checked: checked.length,
+    called: checked.filter((unit) => unit.verifier?.called).length,
+    fromCache: checked.filter((unit) => unit.verifier?.fromCache).length,
+    failed: checked.filter((unit) => unit.verifier?.status !== 'ok').length,
+    flagged: proportion(flaggedIn(cases), cases.length),
+    unfairZeros: { before: unfair.length, caught: proportion(flaggedIn(unfair), unfair.length) },
+    falseAlarms: proportion(flaggedIn(trueIncorrect), trueIncorrect.length),
+    otherErrors: { before: other.length, flagged: flaggedIn(other) },
+    autoAcceptedIncorrect: {
+      before: checked.length,
+      after: checked.filter((unit) => !unit.verifier?.flagged).length,
+    },
+    harmsStudent: { before: harmsBefore, after: harmsAfter },
+    extraCostUsd,
+    extraCostPerShortCropUsd: shortUnits.length > 0 ? extraCostUsd / shortUnits.length : null,
+    cases,
+  };
+}
+
 export function computeMetrics(
   result: SimulationResult,
   cacheStats: { hits: number },
@@ -301,6 +388,7 @@ export function computeMetrics(
       skipped: countBy(skipped, (sample) => (sample.skipped ? [sample.skipped] : [])),
     },
     short: shortDecisionMetrics(shortUnits, truthBySample),
+    verifier: verifierMetrics(shortUnits, truthBySample),
     development: {
       units: developmentUnits.length,
       autoAccepted: developmentUnits.filter((unit) => unit.autoAccepted).length,

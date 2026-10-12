@@ -62,8 +62,16 @@ const datasetContextSchema = z
   })
   .strict();
 
+const injectedReadingSchema = z
+  .object({
+    literal: z.string().min(1),
+    parts: z.record(z.string(), z.string()).nullable().optional(),
+  })
+  .strict();
+
 export const datasetSampleSchema = evalSampleSchema.extend({
   label: datasetLabelSchema,
+  injectedReading: injectedReadingSchema.optional(),
   item: datasetItemSchema.optional(),
   student: z.string().min(1).optional(),
   question: z.union([z.string().min(1), z.number()]).optional(),

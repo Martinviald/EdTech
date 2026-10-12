@@ -5,7 +5,9 @@ import { join } from 'node:path';
 import {
   FakeTranscriber,
   fakeOutput,
+  fakeVerdict,
   type FakeReading,
+  type FakeVerdict,
   type TranscriptionResult,
 } from '@soe/answer-reading';
 import type { ConsensusResult, ReaderSpec, TranscriptionOutput } from '@soe/types';
@@ -113,17 +115,50 @@ function perfectReadings(confidence = 0.99): Record<SampleId, TranscriptionOutpu
   };
 }
 
-function fakeFor(
-  byReader: Record<string, Partial<Record<SampleId, FakeReading>>>,
-): FakeTranscriber {
-  const bySha: Record<string, Record<string, FakeReading>> = {};
-  for (const [readerKey, readings] of Object.entries(byReader)) {
+function bySample<T>(
+  byReader: Record<string, Partial<Record<SampleId, T>>>,
+): Record<string, Record<string, T>> {
+  const bySha: Record<string, Record<string, T>> = {};
+  for (const [readerKey, values] of Object.entries(byReader)) {
     bySha[readerKey] = {};
-    for (const [id, value] of Object.entries(readings)) {
+    for (const [id, value] of Object.entries(values)) {
       if (value) bySha[readerKey]![SHA[id as SampleId]] = value;
     }
   }
-  return new FakeTranscriber({ id: 'llm', byReader: bySha });
+  return bySha;
+}
+
+function fakeFor(
+  byReader: Record<string, Partial<Record<SampleId, FakeReading>>>,
+  verdicts: Record<string, Partial<Record<SampleId, FakeVerdict>>> = {},
+): FakeTranscriber {
+  return new FakeTranscriber({
+    id: 'llm',
+    byReader: bySample(byReader),
+    verdicts: bySample(verdicts),
+  });
+}
+
+const VERIFIER: ReaderSpec = {
+  key: 'verificador',
+  transcriberId: 'llm',
+  provider: 'openai',
+  family: 'openai-luna',
+  model: 'gpt-6-luna',
+  promptRef: 'verify.incorrect@1',
+  hints: 'format',
+  minConfidence: 0.9,
+  params: { maxOutputTokens: 1024, reasoning: 'low', timeoutMs: 30000 },
+};
+
+function withVerifier(routeSet: RouteSet): RouteSet {
+  return {
+    ...routeSet,
+    routes: routeSet.routes.map((route) => ({
+      ...route,
+      policy: { ...route.policy, incorrectVerifier: VERIFIER },
+    })),
+  };
 }
 
 describe('simulación del arnés con rutas por formato', () => {
@@ -313,6 +348,117 @@ describe('simulación del arnés con rutas por formato', () => {
       expect(cache.stats.hits).toBe(14);
       expect(second.units).toEqual(first.units.map((unit) => ({ ...unit })));
       expect(second.readings.every((record) => record.fromCache)).toBe(true);
+    } finally {
+      await rm(cacheDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('verificador de incorrectas en el arnés', () => {
+  let dir: string;
+  let routeSet: RouteSet;
+
+  beforeAll(async () => {
+    dir = await mkdtemp(join(tmpdir(), 'answer-reading-verifier-spec-'));
+    await Promise.all(
+      Object.values(SAMPLES).map((sample) =>
+        writeFile(join(dir, sample.image), renderAnswerBox(sample.drawn)),
+      ),
+    );
+    const entero = MANIFEST.samples[0]!;
+    const manifest: DatasetManifest = {
+      ...MANIFEST,
+      samples: [
+        ...MANIFEST.samples,
+        { ...entero, id: 'entero-leido-108', injectedReading: { literal: '108' } },
+      ],
+    };
+    await writeFile(join(dir, 'manifest.json'), JSON.stringify(manifest), 'utf8');
+    routeSet = withVerifier(await loadRouteSet(ACTUAL_ROUTES));
+  });
+
+  afterAll(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  async function simulate(transcriber: HarnessTranscriber, cache = new ReadingCache(null, 'off')) {
+    const dataset = await loadDataset(dir);
+    return runSimulation({
+      samples: dataset.samples,
+      routeSet,
+      repetitions: 1,
+      concurrency: 2,
+      readerMinConfidence: null,
+      transcriberFor: () => transcriber,
+      cache,
+      budget: null,
+    });
+  }
+
+  const misread = { ...perfectReadings(), entero: reading('101', 0.99) };
+
+  it('manda a revisión el 0 injusto que atrapa, deja la incorrecta verdadera y no toca las correctas', async () => {
+    const fake = fakeFor(
+      { [HAIKU]: misread, [FLASH_LITE]: misread },
+      { verificador: { entero: fakeVerdict(true, 0.95), decimal: fakeVerdict(false, 0.95) } },
+    );
+
+    const result = await simulate(fake);
+
+    const unitOf = (id: string) => result.units.find((unit) => unit.sampleId === id);
+    expect(unitOf('entero')).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['verifier_flagged'],
+      autoAcceptedError: null,
+      beforeVerifier: { outcome: 'auto_accepted', autoAcceptedError: 'harms' },
+      verifier: { couldBeKey: true, flagged: true },
+    });
+    expect(unitOf('decimal')).toMatchObject({
+      outcome: 'auto_accepted',
+      verifier: { couldBeKey: false, flagged: false },
+    });
+    expect(unitOf('secuencia')?.verifier).toBeNull();
+    const verifier = computeMetrics(result, { hits: 0 }).verifier;
+    expect(verifier).toMatchObject({
+      checked: 3,
+      unfairZeros: { before: 2, caught: { count: 2, total: 2 } },
+      falseAlarms: { count: 0, total: 1 },
+      autoAcceptedIncorrect: { before: 3, after: 1 },
+      harmsStudent: { before: 2, after: 0 },
+    });
+  });
+
+  it('una lectura inyectada no llama a los lectores y se verifica con esa lectura', async () => {
+    const fake = fakeFor({ [HAIKU]: perfectReadings(), [FLASH_LITE]: perfectReadings() });
+
+    const result = await simulate(fake);
+
+    const injected = result.units.find((unit) => unit.sampleId === 'entero-leido-108');
+    expect(injected).toMatchObject({
+      injected: true,
+      canonical: 'n:108',
+      outcome: 'needs_review',
+      reasons: ['verifier_flagged'],
+      verifier: { status: 'error', errorCode: 'fake_missing' },
+    });
+    expect(result.readings.filter((record) => record.sampleId === 'entero-leido-108')).toEqual([]);
+    const verifyCall = fake.verifyCalls.find((call) => call.prompt.user.includes('108'));
+    expect(verifyCall?.prompt.user).toContain('- 100');
+  });
+
+  it('el veredicto se guarda en el caché y la segunda corrida no vuelve a llamar', async () => {
+    const cacheDir = await mkdtemp(join(tmpdir(), 'answer-reading-verifier-cache-'));
+    try {
+      const verdicts = { verificador: { entero: fakeVerdict(true, 0.95) } };
+      const first = fakeFor({ [HAIKU]: misread, [FLASH_LITE]: misread }, verdicts);
+      await simulate(first, new ReadingCache(cacheDir, 'use'));
+      const second = fakeFor({ [HAIKU]: misread, [FLASH_LITE]: misread }, verdicts);
+      const rerun = await simulate(second, new ReadingCache(cacheDir, 'use'));
+      expect(second.verifyCalls.filter((call) => call.image.sha256 === SHA.entero)).toEqual([]);
+      expect(rerun.units.find((unit) => unit.sampleId === 'entero')?.verifier).toMatchObject({
+        fromCache: true,
+        flagged: true,
+      });
     } finally {
       await rm(cacheDir, { recursive: true, force: true });
     }

@@ -79,6 +79,21 @@ function assertReadersCovered(
   }
 }
 
+function assertVerifiersCovered(
+  verifiers: readonly ReaderSpec[],
+  transcriberFor: (reader: ReaderSpec) => HarnessTranscriber | null,
+): void {
+  const missing = verifiers.filter((reader) => {
+    const transcriber = transcriberFor(reader);
+    return !transcriber || !transcriber.supports(reader) || !transcriber.verify;
+  });
+  if (missing.length > 0) {
+    throw new Error(
+      `No hay verificador disponible para: ${missing.map((r) => `${r.key} (${r.provider})`).join(', ')}`,
+    );
+  }
+}
+
 async function missingReadings(
   dataset: LoadedDataset,
   routeSet: RouteSet,
@@ -125,8 +140,19 @@ export async function runEvalCommand(
   const cache = new ReadingCache(options.cacheDir, cacheMode);
 
   const { planned, missing } = await missingReadings(dataset, routeSet, options.repetitions, cache);
+  const verifiers = uniqueReaders(
+    routeSet.routes.flatMap((route) =>
+      route.policy.incorrectVerifier ? [route.policy.incorrectVerifier] : [],
+    ),
+  );
   if (!options.dryRun) {
     assertReadersCovered(uniqueReaders(missing.map((reading) => reading.reader)), transcriberFor);
+    assertVerifiersCovered(verifiers, transcriberFor);
+    if (verifiers.length > 0 && options.budgetUsd === null) {
+      throw new Error(
+        'Las rutas traen verificador de incorrectas: fija --budget-usd (sus llamadas no se estiman de antemano)',
+      );
+    }
   }
   const estimate = deps.estimateCallUsd;
   const missingUsd = estimate
