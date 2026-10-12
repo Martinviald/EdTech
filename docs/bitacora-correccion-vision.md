@@ -603,3 +603,27 @@ Plan: `docs/plan-etapa1-lectura-vision.md`.
   hasta el 31-12-2026 y US$1,50 / 7,50 desde 2027 (las cifras de agregadores eran otras).
   Consecuencias para T2: la ruta nombra el modelo real, se mide 3.8 Flash contra 3.6, y el
   proveedor de Gemini debe guardar el `modelVersion` que respondió (hoy guarda el pedido).
+
+### Etapa 1 — T2 y T3 cerradas con su compuerta
+
+- **T2 (pipeline B):** los proveedores devuelven el modelo que respondió (`providerModel`, que se
+  guarda en `answer_readings.provider_model`; `model` sigue siendo el pedido y con él se costea).
+  `gemini-3.8-flash` rechaza `thinkingLevel: MINIMAL`: el proveedor baja a `LOW` y lo recuerda por
+  modelo. Medición (72 unidades): alias 3.5→3.6 44,4 % / 0 eq.; **3.6 Flash 43,1 % / 1 eq.
+  (favorece)**; **3.8 Flash 41,7 % / 0 eq.** — elegido 3.8 (decisión E1-2): ninguna lectura
+  equivocada pasa de 0,95 y las 37 con ≥ 0,97 son exactas; 3.6 dio 1,00 a una lectura errónea.
+  Umbral 0,97 confirmado simulando 0,90–0,99 desde caché. Migración **0051**: retira las 8 rutas
+  vigentes y siembra las del pipeline B; agrega `gemini-3.6-flash` al catálogo y sube 3.8 Flash al
+  precio oficial de 2027 (US$1,50 / 7,50; afecta el costo estimado de otras funcionalidades que
+  usen 3.8 Flash, a favor de no quedarse corto).
+- **T3 (lectura por casilla, `transcribe.boxes@1`):** partes por casilla (`sign`, `i1…iK`, `f1…fM`,
+  `e1…eN`) y armado del valor en código (la coma la pone la geometría). Medido con el alias 3.5:
+  decimal Gemini 7/9 → 9/9 exactas. **Medido de nuevo con 3.8 Flash (la ruta final):** decimal sin
+  mejora (8/9 en ambos) → **conserva su prompt**; secuencia 4/9 → 6/9 autoaceptadas → **adopta el
+  prompt nuevo** (0051 ajustada; `pipeline-b-final.json` idéntico a lo sembrado, verificado en PG14).
+  Entero descartado (sin mejora, 25 % más caro).
+- **Resultado acumulado de la etapa:** 15/72 → **32/72 autoaceptadas** (20,8 % → 44,4 %), **0
+  equivocadas** en todo el camino. Gasto acumulado de la etapa ≈ US$0,73 (a precio 2027).
+- **Riesgo anotado (T3):** la posición de la coma se deriva de la clave del ítem (igual que la hoja
+  impresa). Si la clave cambia después de imprimir, la lectura por casilla supondría otra geometría
+  que la impresa. Hoy solo aplica a secuencias (no hay coma), así que no afecta a la ruta final.
