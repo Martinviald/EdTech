@@ -568,3 +568,16 @@ Plan: `docs/plan-etapa1-lectura-vision.md`.
   trae `param`, decide el parámetro (`reasoning` o `reasoning.*`); solo sin `param` se mira el
   mensaje. Un 400 con otro `param` ya no se reintenta aunque el mensaje hable de razonamiento. Con
   `gpt-6.1-sol` la escalera queda `none` → `minimal` → `low` y recuerda `low` para el modelo.
+- **`AnthropicProvider`: `thinking: { type: 'disabled' }` rechazado por modelos nuevos.** Sin
+  llamadas reales. Fuente: la referencia de errores y la guía de migración de la API de Claude
+  (Sonnet 5.5 responde 400 `invalid_request_error` con `"thinking.type.disabled" is not supported
+  for this model. Use "thinking.type.between_tools" for the lowest thinking setting, …`; Opus 5.5
+  rechaza `disabled` y `between_tools`; Haiku 5.5 acepta `disabled` con esfuerzo `high` o menor).
+  El cuerpo llega en el SDK 0.98 como `BadRequestError` con `status: 400`,
+  `type: 'invalid_request_error'` y `error: { type: 'error', error: { type, message } }`; el
+  `message` del `Error` es `400 ` + el JSON del cuerpo. La API de Anthropic no trae `param`, así
+  que se decide con `error.error.type` y el `message` del cuerpo (que nombre
+  `thinking.type.disabled` o `thinking.type.between_tools`). Con `reasoning: 'off'` la escalera es
+  `disabled` → `between_tools` (sin otro campo en `thinking`) → sin `thinking` y
+  `output_config.effort: 'low'` (último recurso para modelos sin modo apagado), y recuerda el
+  escalón por modelo. Haiku 5.5 sigue enviando `disabled` sin reintentos.
