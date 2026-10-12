@@ -65,6 +65,7 @@ describe('contratos de lectura por visión', () => {
     expect(reviewModeFor(['verifier_flagged'])).toBe('reading');
     expect(reviewModeFor(['verifier_failed'])).toBe('reading');
     expect(reviewModeFor(['policy_requires_review', 'verifier_flagged'])).toBe('reading');
+    expect(REVIEW_MODE_BY_REASON.scoring_changed).toBe('reading');
   });
 
   it('la clave y la lectura acordada solo se declaran en prompts de verificación (T4)', () => {

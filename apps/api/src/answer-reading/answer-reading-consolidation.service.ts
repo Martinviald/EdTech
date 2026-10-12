@@ -14,8 +14,13 @@ import {
   type AnswerReadingDecision,
   type AnswerReview,
 } from '@soe/db';
-import { isSupportedFormatKind, toScoringInput } from '@soe/answer-reading';
-import { rubricScoredStrategy, type NormalizedAnswer } from '@soe/types';
+import { isSupportedFormatKind, toScoringInput, toScoringOutcome } from '@soe/answer-reading';
+import {
+  rubricScoredStrategy,
+  type NormalizedAnswer,
+  type ReviewReason,
+  type ScoringOutcome,
+} from '@soe/types';
 import type { PrescoredAnswer, ResponseAiScore } from '../answer-sheets/lib/parsers/parser.types';
 import { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import { InjectDb, type Database } from '../database/database.types';
@@ -123,7 +128,12 @@ interface ScoredValue {
   readonly answer: unknown;
   readonly isCorrect: boolean;
   readonly rawScore: number;
+  readonly outcome: ScoringOutcome;
 }
+
+type Prescoring =
+  | { readonly kind: 'scored'; readonly answer: PrescoredAnswer }
+  | { readonly kind: 'review'; readonly reason: ReviewReason };
 
 interface ResponseWrite {
   readonly decisionId: string;
@@ -178,13 +188,15 @@ export class AnswerReadingConsolidationService {
       const context = await this.loadScoringContext(tx, decisions);
       const confirmations = new Map<string, ReadingConfirmation>();
       for (const decision of decisions) {
-        const prescored = this.prescore(decision, context);
+        const prescoring = this.prescore(decision, context);
         const confirmed =
-          prescored === null ? await this.escalateIfUndecidable(tx, orgId, decision) : decision;
+          prescoring.kind === 'review'
+            ? await this.escalateAutoAccepted(tx, orgId, decision, prescoring.reason)
+            : decision;
         confirmations.set(decision.markId, {
           decisionId: confirmed.id,
           itemId: decision.itemId,
-          prescored,
+          prescored: prescoring.kind === 'scored' ? prescoring.answer : null,
         });
       }
       return confirmations;
@@ -317,16 +329,16 @@ export class AnswerReadingConsolidationService {
           skipped.push({ decisionId: decision.id, reason: 'human_scored' });
           continue;
         }
-        const prescored = this.prescore(decision, context);
-        if (prescored) {
+        const prescoring = this.prescore(decision, context);
+        if (prescoring.kind === 'scored') {
           writes.push({
-            ...this.automaticWrite(decision, target, prescored),
+            ...this.automaticWrite(decision, target, prescoring.answer),
             respectHuman: false,
             clearHuman: true,
           });
           continue;
         }
-        const reviewable = await this.escalateIfUndecidable(tx, orgId, decision);
+        const reviewable = await this.escalateAutoAccepted(tx, orgId, decision, prescoring.reason);
         pending.push(reviewable.id);
         writes.push({
           ...this.pendingWrite(reviewable, target),
@@ -373,12 +385,12 @@ export class AnswerReadingConsolidationService {
           links.push({ decisionId: decision.id, responseId: target.id, resolved: false });
           continue;
         }
-        const prescored = this.prescore(decision, context);
-        if (prescored) {
-          writes.push(this.automaticWrite(decision, target, prescored));
+        const prescoring = this.prescore(decision, context);
+        if (prescoring.kind === 'scored') {
+          writes.push(this.automaticWrite(decision, target, prescoring.answer));
           continue;
         }
-        const reviewable = await this.escalateIfUndecidable(tx, orgId, decision);
+        const reviewable = await this.escalateAutoAccepted(tx, orgId, decision, prescoring.reason);
         pending.push(reviewable.id);
         links.push({ decisionId: reviewable.id, responseId: target.id, resolved: false });
         if (!target.isPending) writes.push(this.pendingWrite(reviewable, target));
@@ -636,42 +648,50 @@ export class AnswerReadingConsolidationService {
     };
   }
 
-  private prescore(
-    decision: AnswerReadingDecision,
-    context: ScoringContext,
-  ): PrescoredAnswer | null {
+  private prescore(decision: AnswerReadingDecision, context: ScoringContext): Prescoring {
     if (decision.outcome === 'auto_blank') {
       return {
-        itemId: decision.itemId,
-        value: this.readingValue(null, null, decision),
-        isCorrect: false,
-        rawScore: 0,
-        scoredBy: 'auto',
-        aiScore: null,
+        kind: 'scored',
+        answer: {
+          itemId: decision.itemId,
+          value: this.readingValue(null, null, decision),
+          isCorrect: false,
+          rawScore: 0,
+          scoredBy: 'auto',
+          aiScore: null,
+        },
       };
     }
-    if (decision.outcome !== 'auto_accepted' || decision.value === null) return null;
+    const undecidable: Prescoring = { kind: 'review', reason: 'undecidable' };
+    if (decision.outcome !== 'auto_accepted' || decision.value === null) return undecidable;
     const item = context.items.get(decision.itemId);
-    if (!item) return null;
+    if (!item) return undecidable;
     const scored = this.scoreValue(item, decision.value);
-    if (!scored) return null;
+    if (!scored) return undecidable;
+    if (decision.scoringOutcome !== null && scored.outcome !== decision.scoringOutcome) {
+      return { kind: 'review', reason: 'scoring_changed' };
+    }
     return {
-      itemId: decision.itemId,
-      value: this.readingValue(scored.answer, decision.value.canonical, decision),
-      isCorrect: scored.isCorrect,
-      rawScore: scored.rawScore,
-      scoredBy: 'ai',
-      aiScore: this.aiScoreOf(decision, scored.rawScore, context.readings),
+      kind: 'scored',
+      answer: {
+        itemId: decision.itemId,
+        value: this.readingValue(scored.answer, decision.value.canonical, decision),
+        isCorrect: scored.isCorrect,
+        rawScore: scored.rawScore,
+        scoredBy: 'ai',
+        aiScore: this.aiScoreOf(decision, scored.rawScore, context.readings),
+      },
     };
   }
 
-  private async escalateIfUndecidable(
+  private async escalateAutoAccepted(
     tx: Database,
     orgId: string,
     decision: AnswerReadingDecision,
+    reason: ReviewReason,
   ): Promise<AnswerReadingDecision> {
     if (decision.outcome !== 'auto_accepted') return decision;
-    return this.decisions.escalateToReview(tx, orgId, decision, 'undecidable');
+    return this.decisions.escalateToReview(tx, orgId, decision, reason);
   }
 
   private scoreValue(item: ReadingScoringItem, value: NormalizedAnswer): ScoredValue | null {
@@ -679,7 +699,12 @@ export class AnswerReadingConsolidationService {
     if (!scored) return null;
     const { output } = scored;
     if (output.requiresManualGrading || output.isCorrect === null) return null;
-    return { answer: scored.answer, isCorrect: output.isCorrect, rawScore: output.rawScore ?? 0 };
+    return {
+      answer: scored.answer,
+      isCorrect: output.isCorrect,
+      rawScore: output.rawScore ?? 0,
+      outcome: toScoringOutcome(output),
+    };
   }
 
   private aiScoreOf(
