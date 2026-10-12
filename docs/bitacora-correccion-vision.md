@@ -493,3 +493,15 @@ Evidencia: 30 casillas de 6 fotos de celular (`pruebas-vlm-manuscrito/hojas-sint
   cambia solo por el id del perfil, verificado en el test); los congelados conservan su v1.
   **Bloqueante de despliegue:** mientras el OMR no conozca los v2, `resolve_crop_profile` cae al
   recorte heredado (sin margen, 600 px) en silencio, y `test_crop_profiles_contract.py` falla.
+- **Decisión FR-2 — guía de formato (`hints: format`) en las rutas de varias partes y de texto.**
+  Contexto: C-1 dejó `hints: none` midiendo solo números de una casilla; sin la guía, Haiku leyó
+  solo la primera casilla de la secuencia en 3 de 3 hojas. Con `format`, `transcriptionVariables`
+  agrega `formatLabel` y `formatGuide` (que nombra las partes `e1…`, `c1…`, `w1…` o los rótulos de
+  las casillas), nunca la clave. Decisión: migración de datos (pendiente de numerar, SQL en el
+  informe de la rama) que retira las rutas `word_list`, `short_text` y `multi_box` de la 0049 y
+  crea sus v2 (`…09`, `…0a`, `…0b`, `supersedes_id` a la v1) con `hints: format`, y crea rutas
+  `format` para `sequence` (`…07`) y `ordered_tuple` (`…08`) con los lectores y la política de la
+  ruta por defecto. La ruta por defecto (números de una casilla) sigue en `none`. Cada ruta se
+  validó con `readingRouteSchema` y renderizando su prompt; el SQL se aplicó dos veces sobre una
+  base PG14 desechable con 0000–0049 (idempotente). `fraction` queda en la ruta por defecto: sus
+  partes ya venían bien en las fotos.
