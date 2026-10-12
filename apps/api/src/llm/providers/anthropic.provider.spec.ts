@@ -17,8 +17,10 @@ interface FakeMessageResponse {
 function makeProvider(response: FakeMessageResponse) {
   const provider = new AnthropicProvider();
   const create = jest.fn(
-    (_req: Record<string, unknown>, _opts?: { timeout?: number; maxRetries?: number }) =>
-      Promise.resolve(response),
+    (
+      _req: Record<string, unknown>,
+      _opts?: { timeout?: number; maxRetries?: number; signal?: AbortSignal },
+    ) => Promise.resolve(response),
   );
   (provider as unknown as { client: unknown }).client = { messages: { create } };
   return { provider, create };
@@ -175,7 +177,13 @@ describe('AnthropicProvider.completeStructured', () => {
       output_config: { format: { type: 'json_schema', schema: STRUCTURED_SCHEMA } },
     });
     expect(body).not.toHaveProperty('temperature');
-    expect(requestOptions).toEqual({ timeout: 15_000, maxRetries: 1 });
+    expect(requestOptions).toEqual({
+      timeout: expect.any(Number),
+      maxRetries: 1,
+      signal: expect.any(AbortSignal),
+    });
+    expect(requestOptions?.timeout).toBeGreaterThan(14_000);
+    expect(requestOptions?.timeout).toBeLessThanOrEqual(15_000);
   });
 
   it('con razonamiento usa thinking adaptativo y el esfuerzo pedido', async () => {
@@ -257,8 +265,9 @@ type CreateBody = Record<string, unknown>;
 
 function makeProviderWith(handler: (body: CreateBody) => Promise<FakeMessageResponse>) {
   const provider = new AnthropicProvider();
-  const create = jest.fn((body: CreateBody, _opts?: { timeout?: number; maxRetries?: number }) =>
-    handler(body),
+  const create = jest.fn(
+    (body: CreateBody, _opts?: { timeout?: number; maxRetries?: number; signal?: AbortSignal }) =>
+      handler(body),
   );
   (provider as unknown as { client: unknown }).client = { messages: { create } };
   return { provider, create };
@@ -368,5 +377,21 @@ describe('AnthropicProvider.completeStructured sin razonamiento en modelos nuevo
       ),
     ).rejects.toThrow('thinking.type.disabled');
     expect(create).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('AnthropicProvider.completeStructured con plazo total', () => {
+  it('una llamada que nunca responde termina en timeout dentro del plazo', async () => {
+    const { provider, create } = makeProviderWith(() => new Promise<never>(() => undefined));
+    const startedAt = Date.now();
+
+    const error = await provider.completeStructured(makeStructuredRequest({ timeoutMs: 80 })).then(
+      () => null,
+      (failure: unknown) => failure,
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(Date.now() - startedAt).toBeLessThan(230);
+    expect(create.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
   });
 });

@@ -8,6 +8,7 @@ import {
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
 import type { LlmService } from '../../llm/llm.service';
 import type { LlmStructuredResult } from '../../llm/llm.types';
+import { LlmTimeoutError } from '../../llm/providers/llm-deadline.helpers';
 import { LlmVisionTranscriber } from './llm-vision-transcriber';
 import type { VisionTranscriptionRequest } from './vision-transcriber';
 
@@ -155,6 +156,7 @@ describe('LlmVisionTranscriber', () => {
     });
     const cases: Array<[unknown, string, string]> = [
       [timeoutError, 'timeout', 'timeout'],
+      [new LlmTimeoutError(45_000), 'timeout', 'timeout'],
       [Object.assign(new Error('overloaded'), { status: 529 }), 'error', 'provider_unavailable'],
       [Object.assign(new Error('too many'), { status: 429 }), 'error', 'rate_limited'],
       [Object.assign(new Error('bad request'), { status: 400 }), 'error', 'provider_error'],

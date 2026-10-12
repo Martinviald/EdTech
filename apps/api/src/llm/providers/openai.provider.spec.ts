@@ -31,7 +31,7 @@ interface FakeResponse {
   };
 }
 
-type CreateArgs = [Record<string, unknown>, { timeout?: number }?];
+type CreateArgs = [Record<string, unknown>, { timeout?: number; signal?: AbortSignal }?];
 type CreateMock = jest.Mock<Promise<unknown>, CreateArgs>;
 
 function makeCreate(impl: (...args: CreateArgs) => Promise<unknown>): CreateMock {
@@ -252,7 +252,12 @@ describe('OpenAiProvider.completeStructured', () => {
       reasoning: { effort: 'none' },
     });
     expect(body).not.toHaveProperty('temperature');
-    expect(requestOptions).toEqual({ timeout: 15_000 });
+    expect(requestOptions).toEqual({
+      timeout: expect.any(Number),
+      signal: expect.any(AbortSignal),
+    });
+    expect(requestOptions?.timeout).toBeGreaterThan(14_000);
+    expect(requestOptions?.timeout).toBeLessThanOrEqual(15_000);
   });
 
   it('vuelve estricto un objeto anidado y quita $schema', async () => {
@@ -450,6 +455,82 @@ describe('OpenAiProvider.completeStructured', () => {
     expect(result.finishReason).toBe('max_tokens');
     expect(result.usage).toBeNull();
     expect(result.providerRequestId).toBeNull();
+  });
+});
+
+describe('OpenAiProvider.completeStructured con plazo total', () => {
+  const TIMEOUT_MS = 80;
+  const MARGIN_MS = 150;
+
+  function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function elapsedFailure(
+    run: () => Promise<unknown>,
+  ): Promise<{ error: unknown; ms: number }> {
+    const startedAt = Date.now();
+    const error = await run().then(
+      () => null,
+      (failure: unknown) => failure,
+    );
+    return { error, ms: Date.now() - startedAt };
+  }
+
+  it('una llamada que nunca responde termina en timeout dentro del plazo', async () => {
+    const create = makeCreate(() => new Promise<never>(() => undefined));
+    const provider = makeProvider(create);
+
+    const { error, ms } = await elapsedFailure(() =>
+      provider.completeStructured(makeStructuredRequest({ timeoutMs: TIMEOUT_MS })),
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(ms).toBeLessThan(TIMEOUT_MS + MARGIN_MS);
+    expect(create.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+  });
+
+  it('un cliente que reintenta sin respetar el timeout por intento igual corta en el plazo total', async () => {
+    const create = makeCreate(async () => {
+      for (let attempt = 0; attempt < 3; attempt += 1) await sleep(TIMEOUT_MS);
+      return STRUCTURED_RESPONSE;
+    });
+    const provider = makeProvider(create);
+
+    const { error, ms } = await elapsedFailure(() =>
+      provider.completeStructured(makeStructuredRequest({ timeoutMs: TIMEOUT_MS })),
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(ms).toBeLessThan(TIMEOUT_MS + MARGIN_MS);
+  });
+
+  it('la escalera de esfuerzo comparte el plazo: cada escalón recibe el tiempo que queda', async () => {
+    const create = makeCreate(async (body, options) => {
+      const effort = (body.reasoning as { effort?: string } | undefined)?.effort;
+      if (effort === 'low') {
+        return new Promise<never>((_, reject) =>
+          options?.signal?.addEventListener('abort', () =>
+            reject(Object.assign(new Error('Request was aborted.'), { name: 'APIUserAbortError' })),
+          ),
+        );
+      }
+      await sleep(30);
+      throw badRequest(`Unsupported value: '${effort}' for reasoning.effort`);
+    });
+    const provider = makeProvider(create);
+
+    const { error, ms } = await elapsedFailure(() =>
+      provider.completeStructured(makeStructuredRequest({ timeoutMs: TIMEOUT_MS })),
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(ms).toBeLessThan(TIMEOUT_MS + MARGIN_MS);
+    const timeouts = create.mock.calls.map(([, options]) => options?.timeout ?? 0);
+    expect(timeouts).toHaveLength(3);
+    expect(timeouts[1]).toBeLessThan(timeouts[0]!);
+    expect(timeouts[2]).toBeLessThan(timeouts[1]!);
+    expect(timeouts[0]).toBeLessThanOrEqual(TIMEOUT_MS);
   });
 });
 

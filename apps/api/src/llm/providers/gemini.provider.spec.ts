@@ -450,7 +450,8 @@ describe('GeminiProvider.completeStructured', () => {
         maxOutputTokens: 512,
         responseMimeType: 'application/json',
         responseJsonSchema: STRUCTURED_SCHEMA,
-        httpOptions: { timeout: 15_000 },
+        httpOptions: { timeout: expect.any(Number) },
+        abortSignal: expect.any(AbortSignal),
         mediaResolution: 'MEDIA_RESOLUTION_HIGH',
         thinkingConfig: { thinkingLevel: 'MINIMAL' },
       },
@@ -647,5 +648,25 @@ describe('GeminiProvider.completeStructured', () => {
     const result = await provider.completeStructured(makeStructuredRequest());
 
     expect(result.usage?.imageTokens).toBeNull();
+  });
+});
+
+describe('GeminiProvider.completeStructured con plazo total', () => {
+  it('una llamada que nunca responde termina en timeout dentro del plazo', async () => {
+    const provider = new GeminiProvider();
+    const generateContent = jest.fn(
+      (_req: { config: { abortSignal?: AbortSignal } }) => new Promise<never>(() => undefined),
+    );
+    (provider as unknown as { client: unknown }).client = { models: { generateContent } };
+    const startedAt = Date.now();
+
+    const error = await provider.completeStructured(makeStructuredRequest({ timeoutMs: 80 })).then(
+      () => null,
+      (failure: unknown) => failure,
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(Date.now() - startedAt).toBeLessThan(230);
+    expect(generateContent.mock.calls[0]?.[0].config.abortSignal?.aborted).toBe(true);
   });
 });

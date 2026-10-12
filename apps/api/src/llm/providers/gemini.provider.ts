@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { LLM_PROVIDER_DEFAULTS } from '../llm.constants';
+import { runWithinDeadline, type LlmDeadline } from './llm-deadline.helpers';
 import type {
   LlmAgentContent,
   LlmAgentEvent,
@@ -329,7 +330,9 @@ export class GeminiProvider implements LlmProvider {
     }
 
     const client = this.client as unknown as GeminiStructuredClient;
-    const response = await this.generateWithThinking(client, request);
+    const response = await runWithinDeadline(request.options.timeoutMs, (deadline) =>
+      this.generateWithThinking(client, request, deadline),
+    );
 
     const candidate = response.candidates?.[0];
     const rawText = (candidate?.content?.parts ?? [])
@@ -350,6 +353,7 @@ export class GeminiProvider implements LlmProvider {
   private async generateWithThinking(
     client: GeminiStructuredClient,
     request: LlmStructuredRequest,
+    deadline: LlmDeadline,
   ): Promise<GeminiStructuredResponse> {
     const { model, reasoning, maxTokens } = request.options;
     if (!this.usesOffThinkingLevels(model, reasoning)) {
@@ -357,13 +361,19 @@ export class GeminiProvider implements LlmProvider {
         client,
         request,
         this.structuredThinkingConfig(model, reasoning, maxTokens),
+        deadline,
       );
     }
     let step = this.offThinkingStepByModel.get(model) ?? 0;
     for (;;) {
       const thinkingLevel = GEMINI_OFF_THINKING_LEVELS[step] ?? 'LOW';
       try {
-        const response = await this.generateStructured(client, request, { thinkingLevel });
+        const response = await this.generateStructured(
+          client,
+          request,
+          { thinkingLevel },
+          deadline,
+        );
         this.offThinkingStepByModel.set(model, step);
         return response;
       } catch (error) {
@@ -389,6 +399,7 @@ export class GeminiProvider implements LlmProvider {
     client: GeminiStructuredClient,
     request: LlmStructuredRequest,
     thinkingConfig: GeminiThinkingConfig | undefined,
+    deadline: LlmDeadline,
   ): Promise<GeminiStructuredResponse> {
     return client.models.generateContent({
       model: request.options.model,
@@ -398,7 +409,7 @@ export class GeminiProvider implements LlmProvider {
         })),
         { text: request.prompt },
       ],
-      config: this.structuredConfig(request, thinkingConfig),
+      config: this.structuredConfig(request, thinkingConfig, deadline),
     });
   }
 
@@ -415,13 +426,15 @@ export class GeminiProvider implements LlmProvider {
   private structuredConfig(
     request: LlmStructuredRequest,
     thinkingConfig: GeminiThinkingConfig | undefined,
+    deadline: LlmDeadline,
   ): Record<string, unknown> {
     return {
       systemInstruction: request.system,
       maxOutputTokens: request.options.maxTokens,
       responseMimeType: 'application/json',
       responseJsonSchema: request.jsonSchema,
-      httpOptions: { timeout: request.options.timeoutMs },
+      httpOptions: { timeout: deadline.remainingMs() },
+      abortSignal: deadline.signal,
       ...(request.options.mediaResolution
         ? { mediaResolution: GEMINI_MEDIA_RESOLUTION[request.options.mediaResolution] }
         : {}),
