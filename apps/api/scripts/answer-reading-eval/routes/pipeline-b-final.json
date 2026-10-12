@@ -1,9 +1,9 @@
 {
-  "description": "Pipeline B con Gemini 3.8 Flash nombrado explícitamente: gemini-3.8-flash (umbral 0,97 por lector) + gpt-6-luna con reasoning low (umbral 0,85 por lector) en las rutas de respuesta corta y de texto; desarrollo (free_text, math_work) con gemini-3.8-flash solo, sin autoaceptación. Mismos prompts, hints y políticas que actual.json; ids y versiones de la migración 0051 (siguiente versión de cada ruta vigente).",
+  "description": "Pipeline B con Gemini 3.8 Flash nombrado explícitamente: gemini-3.8-flash (umbral 0,97 por lector) + gpt-6-luna con reasoning low (umbral 0,85 por lector) en las rutas de respuesta corta y de texto, con el verificador de incorrectas gemini-3.8-flash (verify.incorrect@1, umbral 0,95) en esas rutas; desarrollo (free_text, math_work) con gemini-3.8-flash solo, sin autoaceptación ni verificador. Mismos prompts, hints y políticas que actual.json; ids y versiones de la migración 0053 (siguiente versión de cada ruta de 0051).",
   "routes": [
     {
-      "id": "7ead0000-0000-4000-8000-00000000000c",
-      "version": 2,
+      "id": "7ead0000-0000-4000-8000-000000000016",
+      "version": 3,
       "orgId": null,
       "status": "active",
       "level": "default",
@@ -62,7 +62,23 @@
         "blankByInkBelow": null,
         "autoAcceptOutcomes": ["correct", "incorrect"],
         "requireDistinctFamilies": true,
-        "alternativePlausibilityFloor": 0.2
+        "alternativePlausibilityFloor": 0.2,
+        "incorrectVerifier": {
+          "key": "gemini-3.8-flash-verificador",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "verify.incorrect@1",
+          "hints": "format",
+          "minConfidence": 0.95,
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 45000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
       }
     },
     {
@@ -160,8 +176,8 @@
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000000f",
-      "version": 2,
+      "id": "7ead0000-0000-4000-8000-000000000017",
+      "version": 3,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -220,12 +236,28 @@
         "blankByInkBelow": null,
         "autoAcceptOutcomes": ["correct", "incorrect"],
         "requireDistinctFamilies": true,
-        "alternativePlausibilityFloor": 0.2
+        "alternativePlausibilityFloor": 0.2,
+        "incorrectVerifier": {
+          "key": "gemini-3.8-flash-verificador",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "verify.incorrect@1",
+          "hints": "format",
+          "minConfidence": 0.95,
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 45000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-000000000010",
-      "version": 2,
+      "id": "7ead0000-0000-4000-8000-000000000018",
+      "version": 3,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -284,12 +316,28 @@
         "blankByInkBelow": null,
         "autoAcceptOutcomes": ["correct", "incorrect"],
         "requireDistinctFamilies": true,
-        "alternativePlausibilityFloor": 0.2
+        "alternativePlausibilityFloor": 0.2,
+        "incorrectVerifier": {
+          "key": "gemini-3.8-flash-verificador",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "verify.incorrect@1",
+          "hints": "format",
+          "minConfidence": 0.95,
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 45000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-000000000011",
-      "version": 3,
+      "id": "7ead0000-0000-4000-8000-000000000019",
+      "version": 4,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -348,12 +396,28 @@
         "blankByInkBelow": null,
         "autoAcceptOutcomes": ["correct", "incorrect"],
         "requireDistinctFamilies": true,
-        "alternativePlausibilityFloor": 0.2
+        "alternativePlausibilityFloor": 0.2,
+        "incorrectVerifier": {
+          "key": "gemini-3.8-flash-verificador",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "verify.incorrect@1",
+          "hints": "format",
+          "minConfidence": 0.95,
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 45000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-000000000012",
-      "version": 3,
+      "id": "7ead0000-0000-4000-8000-00000000001a",
+      "version": 4,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -412,12 +476,28 @@
         "blankByInkBelow": null,
         "autoAcceptOutcomes": ["correct", "incorrect"],
         "requireDistinctFamilies": true,
-        "alternativePlausibilityFloor": 0.2
+        "alternativePlausibilityFloor": 0.2,
+        "incorrectVerifier": {
+          "key": "gemini-3.8-flash-verificador",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "verify.incorrect@1",
+          "hints": "format",
+          "minConfidence": 0.95,
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 45000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-000000000013",
-      "version": 3,
+      "id": "7ead0000-0000-4000-8000-00000000001b",
+      "version": 4,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -476,7 +556,23 @@
         "blankByInkBelow": null,
         "autoAcceptOutcomes": ["correct", "incorrect"],
         "requireDistinctFamilies": true,
-        "alternativePlausibilityFloor": 0.2
+        "alternativePlausibilityFloor": 0.2,
+        "incorrectVerifier": {
+          "key": "gemini-3.8-flash-verificador",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "verify.incorrect@1",
+          "hints": "format",
+          "minConfidence": 0.95,
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 45000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
       }
     }
   ]

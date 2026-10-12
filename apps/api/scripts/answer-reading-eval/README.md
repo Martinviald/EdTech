@@ -109,6 +109,8 @@ de `resolveReadingRoute`, igual que en producción: la de formato gana a la por 
 - `routes/pipeline-b-36.json` y `routes/pipeline-b-38.json`: pipeline B con el modelo nombrado y
   el umbral por lector en la ruta; ids y versiones de la migración 0051. `pipeline-b-38.json` es
   idéntico a lo que siembra 0051 (verificado contra una BD PG14 con `readingRouteSchema`).
+- `routes/pipeline-b-final.json`: la ruta final de la etapa 1, con el verificador de incorrectas
+  `gemini-3.8-flash` (umbral 0,95) en las rutas que autoaceptan; idéntica a lo que siembra 0053.
 - `routes/default.json`: la ruta por defecto sola (fixtures sintéticos).
 
 **Umbral por lector (provisional hasta T1).** El esquema de rutas todavía no admite
@@ -250,6 +252,27 @@ Resultados (2026-10-12, 3 repeticiones; `resultados/t4-estres-*` y `resultados/t
 Cada verificador falla justo en el error de su familia: Flash no ve el `8, 15, 12` de Bruno P5
 (lo leyó Flash-Lite) y luna no ve el `0109`/`0102` de Bruno P2 (lo leyó luna). La ruta
 `routes/pipeline-b-t4.json` usa Flash.
+
+### Verificador con el modelo de la ruta final (T4b)
+
+Medido de nuevo con el modelo nombrado, sobre la ruta final (`pipeline-b-final.json`), 3
+repeticiones (2026-10-12; `resultados/t4b-estres-38`, `t4b-estres-36`, `t4b-real-36` y
+`t4b-final`):
+
+| Verificador (umbral 0,9) | 0 injustos atrapados (estrés) | Falsos avisos (estrés)   | Falsos avisos (fotos reales) | US$ por verificación | Latencia p50 / p95 |
+| ------------------------ | ----------------------------- | ------------------------ | ---------------------------- | -------------------- | ------------------ |
+| `gemini-3.8-flash`       | 34/36 = 94,4 % [81,9–98,5]    | 3/24 = 12,5 % [4,3–31,0] | 0/8 [0–32,4]                 | 0,0037               | 3,4 s / 5,6 s      |
+| `gemini-3.6-flash`       | 33/36 = 91,7 % [78,2–97,1]    | 5/24 = 20,8 % [9,2–40,5] | 0/8 [0–32,4]                 | 0,0041               | 2,7 s / 3,4 s      |
+
+- Empatan dentro del ruido; queda `gemini-3.8-flash`, el mismo modelo que el lector principal.
+- **Umbral 0,95.** Los "no es la clave" de 3.8 que fallan llevan confianza 0,90 y 0,95; los
+  acertados, 0,95 (3), 0,98 y 0,99. Con 0,95 (marca bajo 0,95) atrapa 35/36 = 97,2 %
+  [85,8–99,5] con los mismos 3/24 falsos avisos; con 0,96 atraparía 36/36 pero con 6/24. En fotos
+  reales sus veredictos son 0,98–0,99: ninguno cambia.
+- **Ruta final con verificador** (`pipeline-b-final.json`, ids de 0053): 32/72 autoaceptadas y 0
+  equivocadas, idéntica casilla por casilla a `t3-final` (0 discordantes); el verificador revisó
+  las 8 incorrectas autoaceptadas y no mandó ninguna a revisión. Costo extra US$0,0004 por recorte
+  corto.
 
 ## Fixtures sintéticos
 
