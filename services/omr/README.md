@@ -91,6 +91,22 @@ relativo al fondo local (un clúster único con todos los fills altos es tinta
 real). Re-escanear no la arregla, así que no se rechaza: cada campo `single`
 sale `multiple` y va a la cola.
 
+Excepción por recortes: si la página tiene campos `crop_region`, un problema de las
+burbujas no la rechaza. Queda `quality.ok: true` con `marksReadability` en `likely_blank` o
+`unreadable`, cada campo de burbujas sale `ambiguous` con su evidencia (a revisión, nunca
+`blank`) y los recortes salen como siempre: no dependen de las burbujas. Una página solo de
+burbujas se sigue rechazando.
+
+## Fotos de celular: encuadre de la hoja (`app/framing.py`)
+
+Con `captureProfile.source: phone`, si la primera pasada no queda confirmada se localiza la
+hoja en la foto, se recorta su rectángulo y la rectificación completa corre sobre el
+recorte. Así `cropped` significa que falta parte de la hoja, no que sobra fondo (mesa,
+ropa). La rectificación encuadrada se acepta solo si los 4 fiduciales forman un
+cuadrilátero coherente con la hoja (`fiducial_quad_consistent`) y, si la página que declara
+el QR tiene burbujas, si su firma calza. El debug lo registra en `sheetFramed`. El perfil
+`scanner` no cambia. Fixtures reales en `tests/fixtures/fotos-celular/`.
+
 ## Catálogo de suciedad real cubierto (`tests/test_dirty_catalog.py`)
 
 Derivado de ~2.700 escaneos reales de GradeCam. Cada caso tiene un test que
