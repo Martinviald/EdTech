@@ -74,6 +74,7 @@ from .crop import (
     CropImage,
     crop_with_profile,
     neighbor_footprints_px,
+    printed_label_footprints_px,
     resolve_crop_profile,
 )
 from .geometry import point_to_px, radius_to_px
@@ -466,6 +467,7 @@ class CropRegionReader:
                 field["region"],
                 resolve_crop_profile(profile_id),
                 neighbor_footprints_px(field, page_fields, page.size),
+                printed_label_footprints_px(page_fields, page.size),
             )
         encoded = image.jpeg
         reading = {

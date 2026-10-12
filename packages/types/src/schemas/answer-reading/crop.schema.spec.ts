@@ -39,6 +39,36 @@ describe('cropBleedBox (margen del recorte)', () => {
     );
   });
 
+  it('v3: el margen no alcanza al número impreso de la pregunta (rótulo a la izquierda)', () => {
+    const label: CropBox = { x0: 8, y0: 101, x1: 14, y1: 108 };
+    const box = cropBleedBox(LINE, CROP_PROFILES['short-answer@3'], [], [label]);
+    expect(box.x0).toBeCloseTo(17);
+    const tight = cropBleedBox(
+      LINE,
+      CROP_PROFILES['short-answer@3'],
+      [],
+      [{ x0: 10, y0: 101, x1: 18, y1: 108 }],
+    );
+    expect(tight.x0).toBeCloseTo(19);
+    expect(tight.y0).toBeCloseTo(97);
+    expect(tight.x1).toBeCloseTo(183);
+  });
+
+  it('v1 y v2 ignoran los rótulos impresos; v3 sin rótulos recorta como v2', () => {
+    const label: CropBox = { x0: 10, y0: 101, x1: 18, y1: 108 };
+    for (const ref of ['short-answer@1', 'short-answer@2', 'free-text@2'] as const) {
+      expect(cropBleedBox(LINE, CROP_PROFILES[ref], [], [label])).toEqual(
+        cropBleedBox(LINE, CROP_PROFILES[ref], []),
+      );
+    }
+    expect(cropBleedBox(LINE, CROP_PROFILES['short-answer@3'], [])).toEqual(
+      cropBleedBox(LINE, CROP_PROFILES['short-answer@2'], []),
+    );
+    expect(cropBleedBox(LINE, CROP_PROFILES['free-text@3'], [])).toEqual(
+      cropBleedBox(LINE, CROP_PROFILES['free-text@2'], []),
+    );
+  });
+
   it('regionBox pasa de fracciones del marco a sus unidades', () => {
     expect(
       regionBox(

@@ -441,6 +441,9 @@
                       "cropProfileId": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "printedLabelRegion": {
+                        "$ref": "#/definitions/assess-request/properties/layoutSpec/properties/identity/properties/region"
                       }
                     },
                     "required": ["itemId", "format", "boxes", "cropProfileId"],
