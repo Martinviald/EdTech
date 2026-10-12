@@ -93,9 +93,17 @@ interface ReaderPlan {
   readonly outputJsonSchema: TranscriptionJsonSchema;
   readonly readingKey: string;
   readonly lookupKey: string;
+  readonly reuseKey: string;
 }
 
-interface StoredReading {
+interface ReuseFingerprint {
+  readonly provider: string;
+  readonly model: string;
+  readonly params: ReaderSpec['params'];
+  readonly promptHash: string;
+}
+
+interface StoredReading extends ReuseFingerprint {
   readonly id: string;
   readonly readingKey: string;
   readonly readerKey: string;
@@ -131,6 +139,7 @@ interface VerificationPlan {
   readonly rendered: RenderedVerificationPrompt;
   readonly readingKey: string;
   readonly lookupKey: string;
+  readonly reuseKey: string;
 }
 
 interface VerifiedAttempt {
@@ -185,7 +194,7 @@ export class CropReadingService {
       task.orgId,
       plans.map((plan) => plan.readingKey),
     );
-    if (plans.some((plan) => !existing.reusable.has(plan.lookupKey))) {
+    if (plans.some((plan) => !existing.reusable.has(plan.reuseKey))) {
       try {
         await image();
       } catch (error) {
@@ -246,7 +255,7 @@ export class CropReadingService {
     if (plan === null)
       return { result: applyIncorrectVerification(result, policy, null), costUsd: 0 };
     const existing = await this.loadExisting(scope.task.orgId, [plan.readingKey]);
-    const reused = existing.reusable.get(plan.lookupKey);
+    const reused = existing.reusable.get(plan.reuseKey);
     if (reused?.verificationOutput) {
       const verdict = { status: reused.status, output: reused.verificationOutput };
       return { result: applyIncorrectVerification(result, policy, verdict), costUsd: 0 };
@@ -294,11 +303,13 @@ export class CropReadingService {
         task.cropProfileId,
       ].join('|'),
     );
+    const lookupKey = this.lookupKey(readingKey, verifier.key, 'verifier');
     return {
       reader: verifier,
       rendered,
       readingKey,
-      lookupKey: this.lookupKey(readingKey, verifier.key, 'verifier'),
+      lookupKey,
+      reuseKey: this.reuseKey(lookupKey, { ...verifier, promptHash: rendered.prompt.hash }),
     };
   }
 
@@ -482,6 +493,7 @@ export class CropReadingService {
         '|',
       ),
     );
+    const lookupKey = this.lookupKey(readingKey, reader.key, mode);
     return {
       reader,
       mode,
@@ -489,7 +501,8 @@ export class CropReadingService {
       outputSchema: outputZodSchema,
       outputJsonSchema: outputSchema,
       readingKey,
-      lookupKey: this.lookupKey(readingKey, reader.key, mode),
+      lookupKey,
+      reuseKey: this.reuseKey(lookupKey, { ...reader, promptHash: prompt.hash }),
     };
   }
 
@@ -512,6 +525,10 @@ export class CropReadingService {
           family: answerReadings.family,
           output: answerReadings.output,
           verificationOutput: answerReadings.verificationOutput,
+          provider: answerReadings.provider,
+          model: answerReadings.model,
+          params: answerReadings.params,
+          promptHash: answerReadings.promptHash,
         })
         .from(answerReadings)
         .where(
@@ -524,13 +541,14 @@ export class CropReadingService {
     for (const row of rows) {
       const key = this.lookupKey(row.readingKey, row.readerKey, row.mode);
       lastAttempt.set(key, Math.max(lastAttempt.get(key) ?? 0, row.attempt));
-      const current = reusable.get(key);
+      const reuseKey = this.reuseKey(key, row);
+      const current = reusable.get(reuseKey);
       if (
         row.status === 'ok' &&
         (row.output !== null || row.verificationOutput !== null) &&
         (!current || row.attempt > current.attempt)
       ) {
-        reusable.set(key, row);
+        reusable.set(reuseKey, row);
       }
     }
     return { reusable, lastAttempt };
@@ -542,7 +560,7 @@ export class CropReadingService {
     existing: ExistingReadings,
   ): Promise<ExecutedReading> {
     const role = plan.mode === 'tiebreak' ? 'tiebreak' : 'primary';
-    const reused = existing.reusable.get(plan.lookupKey);
+    const reused = existing.reusable.get(plan.reuseKey);
     if (reused) {
       return {
         mode: plan.mode,
@@ -772,6 +790,19 @@ export class CropReadingService {
 
   private lookupKey(readingKey: string, readerKey: string, mode: ReadingMode): string {
     return `${readingKey}|${readerKey}|${mode}`;
+  }
+
+  private reuseKey(lookupKey: string, fingerprint: ReuseFingerprint): string {
+    const { params } = fingerprint;
+    return [
+      lookupKey,
+      fingerprint.provider,
+      fingerprint.model,
+      params.maxOutputTokens,
+      params.reasoning,
+      params.mediaResolution ?? '',
+      fingerprint.promptHash,
+    ].join('|');
   }
 
   private sha256(text: string): string {

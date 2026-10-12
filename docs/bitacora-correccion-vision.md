@@ -725,3 +725,11 @@ Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), d
   ~US$0,0004 por recorte corto, y un esperado necesitaría una tasa de incorrectas autoaceptadas que
   la org todavía no tiene medida. Puede bloquear un escaneo que en la práctica cabría cuando el
   presupuesto está casi agotado; los reintentos por error transitorio siguen sin contarse.
+- **Reutilización de lecturas y veredictos.** La clave de reutilización (`reuseKey`) de
+  `CropReadingService` suma al `readingKey|readerKey|mode` el proveedor, el modelo,
+  `maxOutputTokens`, `reasoning`, `mediaResolution` y el hash del prompt renderizado, tanto para el
+  verificador como para los lectores. Un cambio de modelo o de parámetros sin cambiar `key` vuelve a
+  leer (con el intento siguiente: el conteo de intentos sigue por `readingKey|readerKey|mode`, que es
+  el índice único). `timeoutMs` y `minConfidence` no entran porque no cambian lo que se le pide al
+  modelo. Las lecturas ya guardadas se siguen reutilizando si nada cambió: guardan esos mismos
+  valores (`provider`, `model`, `params`, `prompt_hash`), así que no hace falta migración.

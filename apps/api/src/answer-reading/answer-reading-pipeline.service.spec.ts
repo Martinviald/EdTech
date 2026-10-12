@@ -755,6 +755,32 @@ describe('AnswerReadingPipelineService — idempotencia', () => {
     expect(runOf(memory)).toMatchObject({ cropsTotal: 2, cropsDone: 2, autoAccepted: 2 });
   });
 
+  it('si el lector cambia de modelo o de parámetros sin cambiar su clave, vuelve a leer', async () => {
+    const { memory, transcriber, runScan } = setup({ readings: agree });
+    await runScan();
+    expect(transcriber.calls).toHaveLength(2);
+
+    const [route] = memory.rows<{ readers: ReaderSpec[] }>(readingRoutes);
+    if (!route) throw new Error('falta la ruta');
+    route.readers = [
+      { ...HAIKU, model: 'haiku-model-2' },
+      { ...FLASH, params: { ...FLASH.params, reasoning: 'low' } },
+    ];
+    await runScan();
+
+    expect(transcriber.calls).toHaveLength(4);
+    expect(transcriber.calls.slice(2).map((call) => call.reader.model)).toEqual(
+      expect.arrayContaining(['haiku-model-2', FLASH.model]),
+    );
+
+    route.readers = [
+      { ...HAIKU, model: 'haiku-model-2', params: { ...HAIKU.params, timeoutMs: 45000 } },
+      { ...FLASH, params: { ...FLASH.params, reasoning: 'low' } },
+    ];
+    await runScan();
+    expect(transcriber.calls).toHaveLength(4);
+  });
+
   it('otra marca con el mismo recorte reutiliza las lecturas y crea su propia decisión', async () => {
     const { memory, transcriber, runScan } = setup({ readings: agree });
     await runScan();
@@ -908,6 +934,25 @@ describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
     await withoutVerifier.runScan();
     expect(withoutVerifier.transcriber.verifyCalls).toHaveLength(0);
     expect(currentDecision(withoutVerifier.memory)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+
+  it('si el verificador cambia de modelo sin cambiar su clave, no reutiliza el veredicto viejo', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(true, 0.95) } },
+    });
+    await runScan();
+    expect(transcriber.verifyCalls).toHaveLength(1);
+
+    const [route] = memory.rows<{ policy: ConsensusPolicy }>(readingRoutes);
+    if (!route) throw new Error('falta la ruta');
+    route.policy = { ...route.policy, incorrectVerifier: { ...VERIFIER, model: 'otro-modelo' } };
+    await runScan();
+
+    expect(transcriber.verifyCalls).toHaveLength(2);
+    expect(transcriber.verifyCalls[1]?.reader.model).toBe('otro-modelo');
+    expect(transcriber.calls).toHaveLength(2);
   });
 
   it('reprocesar el mismo recorte reutiliza el veredicto sin volver a llamar', async () => {
