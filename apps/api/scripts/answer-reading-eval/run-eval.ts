@@ -1,141 +1,72 @@
-import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { extname, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
+import { FakeTranscriber, readingKeyFor, type FakeReading } from '@soe/answer-reading';
+import type { ReaderSpec } from '@soe/types';
+import { labelReading, loadDataset, type LoadedDataset } from './dataset';
+import { comparePaired, computeMetrics, type PairedComparison } from './metrics';
+import { ReadingCache, type CacheMode } from './reading-cache';
+import { EVAL_REPORT_VERSION, renderReportMarkdown, type EvalReportV2 } from './report';
+import { loadRouteSet, type ReaderMinConfidence, type RouteSet } from './route-set';
 import {
-  FakeTranscriber,
-  buildEvalReport,
-  compareEvalReports,
-  isEvaluableFormat,
-  labelAsOutput,
-  parseEvalManifest,
-  readingKeyFor,
-  renderEvalMarkdown,
-  runEvaluation,
-  type EvalBudget,
-  type EvalComparison,
-  type EvalManifest,
-  type EvalReport,
-  type EvalSampleInput,
-  type EvalTranscriber,
-  type FakeReading,
-  type TranscriptionImage,
-} from '@soe/answer-reading';
-import { readingRouteSchema, type ReaderSpec, type ReadingRoute } from '@soe/types';
+  planReadings,
+  planSamples,
+  runSimulation,
+  type HarnessTranscriber,
+  type SimulationBudget,
+} from './simulate';
 
 export const REPORT_FILE = 'informe.json';
-export const SUMMARY_FILE = 'resumen.md';
+export const SUMMARY_FILE = 'informe.md';
 export const COMPARISON_FILE = 'comparacion.json';
-
-const MIME_BY_EXTENSION: Readonly<Record<string, TranscriptionImage['mimeType']>> = {
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-};
-
-export interface LoadedDataset {
-  readonly dir: string;
-  readonly manifest: EvalManifest;
-  readonly inputs: EvalSampleInput[];
-}
-
-export async function loadDataset(datasetDir: string): Promise<LoadedDataset> {
-  const dir = resolve(datasetDir);
-  const raw: unknown = JSON.parse(await readFile(join(dir, 'manifest.json'), 'utf8'));
-  const parsed = parseEvalManifest(raw);
-  if (!parsed.ok) {
-    throw new Error(`manifest.json inválido:\n- ${parsed.errors.join('\n- ')}`);
-  }
-  const inputs = await Promise.all(
-    parsed.manifest.samples.map(async (sample): Promise<EvalSampleInput> => {
-      const mimeType = MIME_BY_EXTENSION[extname(sample.image).toLowerCase()];
-      if (!mimeType) {
-        return { sample, image: null, imageError: `Extensión no soportada: ${sample.image}` };
-      }
-      try {
-        const bytes = await readFile(join(dir, sample.image));
-        return {
-          sample,
-          image: {
-            mimeType,
-            base64: bytes.toString('base64'),
-            sha256: createHash('sha256').update(bytes).digest('hex'),
-          },
-        };
-      } catch (error) {
-        return {
-          sample,
-          image: null,
-          imageError: error instanceof Error ? error.message : String(error),
-        };
-      }
-    }),
-  );
-  return { dir, manifest: parsed.manifest, inputs };
-}
-
-export async function loadRoute(routeFile: string): Promise<ReadingRoute> {
-  const raw: unknown = JSON.parse(await readFile(resolve(routeFile), 'utf8'));
-  const parsed = readingRouteSchema.safeParse(raw);
-  if (!parsed.success) {
-    const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
-    throw new Error(`Ruta inválida (${routeFile}):\n- ${issues.join('\n- ')}`);
-  }
-  return parsed.data;
-}
-
-export function routeReaders(route: ReadingRoute): ReaderSpec[] {
-  return route.policy.tiebreakReader
-    ? [...route.readers, route.policy.tiebreakReader]
-    : [...route.readers];
-}
-
-export function dryRunTranscribers(
-  route: ReadingRoute,
-  inputs: readonly EvalSampleInput[],
-): (reader: ReaderSpec) => EvalTranscriber | null {
-  const byReadingKey: Record<string, FakeReading> = {};
-  for (const input of inputs) {
-    if (input.image === null || !isEvaluableFormat(input.sample.format)) continue;
-    byReadingKey[readingKeyFor(input.sample, input.image)] = labelAsOutput(input.sample);
-  }
-  const fakes = new Map<string, FakeTranscriber>();
-  for (const reader of routeReaders(route)) {
-    if (!fakes.has(reader.transcriberId)) {
-      fakes.set(
-        reader.transcriberId,
-        new FakeTranscriber({ id: reader.transcriberId, byReadingKey }),
-      );
-    }
-  }
-  return (reader) => fakes.get(reader.transcriberId) ?? null;
-}
 
 export interface EvalCommandOptions {
   readonly datasetDir: string;
-  readonly routeFile: string;
+  readonly routesFile: string;
   readonly repetitions: number;
   readonly concurrency: number;
   readonly outDir: string;
   readonly dryRun: boolean;
   readonly budgetUsd: number | null;
   readonly compareFile: string | null;
+  readonly cacheDir: string | null;
+  readonly cacheMode: CacheMode;
+  readonly readerMinConfidence: ReaderMinConfidence | null;
 }
 
 export interface EvalCommandDeps {
-  readonly transcriberFor?: (reader: ReaderSpec) => EvalTranscriber | null;
-  readonly estimateCallUsd?: EvalBudget['estimateCallUsd'];
+  readonly transcriberFor?: (reader: ReaderSpec) => HarnessTranscriber | null;
+  readonly estimateCallUsd?: SimulationBudget['estimateCallUsd'];
   readonly log?: (message: string) => void;
 }
 
 export interface EvalCommandResult {
-  readonly report: EvalReport;
-  readonly comparison: EvalComparison | null;
+  readonly report: EvalReportV2;
+  readonly comparison: PairedComparison | null;
   readonly files: readonly string[];
+  readonly cacheStats: { hits: number; misses: number; writes: number };
+}
+
+export function dryRunTranscribers(
+  dataset: LoadedDataset,
+): (reader: ReaderSpec) => HarnessTranscriber | null {
+  const byReadingKey: Record<string, FakeReading> = {};
+  for (const prepared of dataset.samples) {
+    if (prepared.image === null || prepared.group === 'unsupported') continue;
+    byReadingKey[readingKeyFor(prepared.sample, prepared.image)] = labelReading(prepared.sample);
+  }
+  const fakes = new Map<string, FakeTranscriber>();
+  return (reader) => {
+    const existing = fakes.get(reader.transcriberId);
+    if (existing) return existing;
+    const fake = new FakeTranscriber({ id: reader.transcriberId, byReadingKey });
+    fakes.set(reader.transcriberId, fake);
+    return fake;
+  };
 }
 
 function assertReadersCovered(
   readers: readonly ReaderSpec[],
-  transcriberFor: (reader: ReaderSpec) => EvalTranscriber | null,
+  transcriberFor: (reader: ReaderSpec) => HarnessTranscriber | null,
 ): void {
   const missing = readers.filter((reader) => {
     const transcriber = transcriberFor(reader);
@@ -148,70 +79,131 @@ function assertReadersCovered(
   }
 }
 
+async function missingReadings(
+  dataset: LoadedDataset,
+  routeSet: RouteSet,
+  repetitions: number,
+  cache: ReadingCache,
+) {
+  const planned = planReadings(planSamples(dataset.samples, routeSet), repetitions);
+  const present = await Promise.all(planned.map((reading) => cache.has(reading.cacheKey)));
+  return {
+    planned,
+    missing: planned.filter((_, index) => !present[index]),
+  };
+}
+
+function uniqueReaders(readers: readonly ReaderSpec[]): ReaderSpec[] {
+  return [...new Map(readers.map((reader) => [`${reader.key}|${reader.model}`, reader])).values()];
+}
+
+async function loadPrevious(compareFile: string): Promise<EvalReportV2> {
+  const previous = JSON.parse(
+    await readFile(resolve(compareFile), 'utf8'),
+  ) as Partial<EvalReportV2>;
+  if (previous.meta?.reportVersion !== EVAL_REPORT_VERSION || !Array.isArray(previous.units)) {
+    throw new Error(
+      `${compareFile} no es un informe v${EVAL_REPORT_VERSION} del arnés (le faltan las unidades)`,
+    );
+  }
+  return previous as EvalReportV2;
+}
+
 export async function runEvalCommand(
   options: EvalCommandOptions,
   deps: EvalCommandDeps = {},
 ): Promise<EvalCommandResult> {
   const log = deps.log ?? (() => undefined);
-  const [dataset, route] = await Promise.all([
+  const [dataset, routeSet] = await Promise.all([
     loadDataset(options.datasetDir),
-    loadRoute(options.routeFile),
+    loadRouteSet(options.routesFile),
   ]);
-  const previous = options.compareFile
-    ? (JSON.parse(await readFile(resolve(options.compareFile), 'utf8')) as EvalReport)
-    : null;
-  const transcriberFor = options.dryRun
-    ? dryRunTranscribers(route, dataset.inputs)
-    : deps.transcriberFor;
+  const previous = options.compareFile ? await loadPrevious(options.compareFile) : null;
+  const transcriberFor = options.dryRun ? dryRunTranscribers(dataset) : deps.transcriberFor;
   if (!transcriberFor) throw new Error('Sin --dry-run hace falta un transcriptor real');
-  assertReadersCovered(routeReaders(route), transcriberFor);
-  const budget: EvalBudget | undefined =
-    options.budgetUsd !== null && deps.estimateCallUsd && !options.dryRun
-      ? { limitUsd: options.budgetUsd, estimateCallUsd: deps.estimateCallUsd }
-      : undefined;
+  const cacheMode: CacheMode = options.dryRun ? 'off' : options.cacheMode;
+  const cache = new ReadingCache(options.cacheDir, cacheMode);
+
+  const { planned, missing } = await missingReadings(dataset, routeSet, options.repetitions, cache);
+  if (!options.dryRun) {
+    assertReadersCovered(uniqueReaders(missing.map((reading) => reading.reader)), transcriberFor);
+  }
+  const estimate = deps.estimateCallUsd;
+  const missingUsd = estimate
+    ? missing.reduce((sum, reading) => sum + estimate(reading.reader, []), 0)
+    : 0;
+  log(
+    `Dataset ${dataset.manifest.name} v${dataset.manifest.datasetVersion}: ${dataset.samples.length} muestras × ${options.repetitions} repeticiones; ${planned.length} lecturas, ${planned.length - missing.length} en caché, ${missing.length} por pedir (peor caso US$${missingUsd.toFixed(4)})`,
+  );
+  if (!options.dryRun && missing.length > 0) {
+    if (options.budgetUsd === null) {
+      throw new Error('Faltan lecturas en el caché: fija --budget-usd para pedirlas');
+    }
+    if (estimate && missingUsd > options.budgetUsd) {
+      throw new Error(
+        `Pedir las ${missing.length} lecturas que faltan costaría hasta US$${missingUsd.toFixed(4)} (peor caso), sobre el tope de US$${options.budgetUsd}. Sube el tope o reduce las repeticiones.`,
+      );
+    }
+  }
+  const budget: SimulationBudget | null =
+    !options.dryRun && options.budgetUsd !== null && estimate
+      ? { limitUsd: options.budgetUsd, estimateCallUsd: estimate }
+      : null;
 
   const startedAt = new Date().toISOString();
-  log(
-    `Dataset ${dataset.manifest.name} v${dataset.manifest.datasetVersion}: ${dataset.inputs.length} muestras × ${options.repetitions} repeticiones`,
-  );
-  const run = await runEvaluation({
-    samples: dataset.inputs,
-    readers: route.readers,
-    policy: route.policy,
+  const simulation = await runSimulation({
+    samples: dataset.samples,
+    routeSet,
     repetitions: options.repetitions,
     concurrency: options.concurrency,
+    readerMinConfidence: options.readerMinConfidence,
     transcriberFor,
+    cache,
     budget,
     onUnitDone: ({ done, total, spentUsd }) =>
-      log(`  ${done}/${total} · US$${spentUsd.toFixed(5)}`),
+      log(`  ${done}/${total} · gastado US$${spentUsd.toFixed(5)}`),
   });
-  const report = buildEvalReport(
-    {
+  const report: EvalReportV2 = {
+    meta: {
+      reportVersion: EVAL_REPORT_VERSION,
       datasetName: dataset.manifest.name,
       datasetVersion: dataset.manifest.datasetVersion,
-      routeId: route.id,
-      routeVersion: route.version,
-      readers: route.readers,
-      policy: route.policy,
+      routesFile: routeSet.file,
+      routesDescription: routeSet.description,
+      routes: routeSet.routes.map((route) => ({
+        id: route.id,
+        version: route.version,
+        status: route.status,
+        level: route.level,
+        formatKind: route.formatKind,
+        readers: route.readers.map((reader) => `${reader.key}:${reader.promptRef}:${reader.hints}`),
+        minConfidence: route.policy.minConfidence,
+      })),
+      readerMinConfidence: options.readerMinConfidence,
       repetitions: options.repetitions,
       dryRun: options.dryRun,
-      budgetUsd: budget ? budget.limitUsd : null,
-      stoppedByBudget: run.stoppedByBudget,
+      cacheDir: cacheMode === 'off' ? null : options.cacheDir,
+      cacheMode,
+      budgetUsd: options.budgetUsd,
+      stoppedByBudget: simulation.stoppedByBudget,
       startedAt,
       finishedAt: new Date().toISOString(),
     },
-    run.samples,
-  );
-  const comparison = previous ? compareEvalReports(previous, report) : null;
+    metrics: computeMetrics(simulation, cache.stats),
+    samples: simulation.samples,
+    units: simulation.units,
+    readings: simulation.readings,
+  };
+  const comparison = previous ? comparePaired(previous.units, report.units) : null;
 
   await mkdir(options.outDir, { recursive: true });
   const files = [join(options.outDir, REPORT_FILE), join(options.outDir, SUMMARY_FILE)];
   await writeFile(files[0]!, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-  await writeFile(files[1]!, renderEvalMarkdown(report, comparison ?? undefined), 'utf8');
+  await writeFile(files[1]!, renderReportMarkdown(report, comparison), 'utf8');
   if (comparison) {
     const comparisonFile = join(options.outDir, COMPARISON_FILE);
     await writeFile(comparisonFile, `${JSON.stringify(comparison, null, 2)}\n`, 'utf8');
     files.push(comparisonFile);
   }
-  return { report, comparison, files };
+  return { report, comparison, files, cacheStats: cache.stats };
 }
