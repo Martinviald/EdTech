@@ -139,8 +139,16 @@ pnpm exec tsx scripts/answer-reading-eval/importar-lecturas.ts \
   --lecturas "$P/hojas-sinteticas/experimento-lectores/lecturas.json" \
   --lecturas "$P/hojas-sinteticas/experimento-pipeline/lecturas.json" \
   --routes scripts/answer-reading-eval/routes/actual.json \
-  --routes scripts/answer-reading-eval/routes/pipeline-b.json [--dry-run]
+  --routes scripts/answer-reading-eval/routes/pipeline-b.json [--dry-run] [--force]
 ```
+
+**Control del prompt.** Si la lectura guardada trae `promptHash` (o el texto `prompt.system` y
+`prompt.user`), se compara con el prompt que se renderiza hoy y, si cambió, la lectura se omite
+siempre. `experimento-lectores` y `experimento-pipeline` **no guardaron** ni el texto ni el hash del
+prompt (solo `promptRef`): sin ese dato no se puede probar que el prompt sea el mismo, así que esas
+lecturas solo se importan con `--force`, y quien lo pasa asume el control a mano (el argumento de
+abajo sobre el historial de `packages/answer-reading/src/prompts`). Un experimento nuevo debe guardar
+`promptHash`.
 
 Una lectura se importa solo si su imagen de origen tiene el mismo sha256 que una muestra del
 dataset, el formato coincide, el lector guardado es una `ReaderSpec` válida cuyo `promptRef` atiende

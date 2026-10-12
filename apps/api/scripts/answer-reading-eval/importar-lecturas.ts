@@ -29,6 +29,8 @@ export interface ExperimentReading {
   readonly formatKind: string;
   readonly reader: unknown;
   readonly promptRef: string;
+  readonly promptHash?: string;
+  readonly prompt?: { readonly system: string; readonly user: string };
   readonly status: string;
   readonly errorCode: string | null;
   readonly providerModel: string | null;
@@ -52,7 +54,12 @@ export interface ImportContext {
   readonly sampleByImageSha: ReadonlyMap<string, PreparedSample>;
   readonly imageShaOf: (reading: ExperimentReading) => Promise<string | null>;
   readonly source: string;
+  readonly force: boolean;
 }
+
+const UNCHECKED_PROMPT =
+  'sin el prompt ni su hash guardados (usa --force para importar sin ese control)';
+const PROMPT_CHANGED = 'el prompt renderizado cambió desde el experimento';
 
 const SOURCE_IMAGE_DIR_BY_MEDICION: Readonly<Record<string, string>> = {
   'numero-tapado': 'sin-numero',
@@ -82,6 +89,9 @@ export async function verdictFor(
   const rendered = renderTranscriptionPrompt(reader.data, format, {
     gradeName: prepared.sample.gradeName ?? null,
   });
+  const promptCheck = promptCheckOf(reading, rendered.prompt);
+  if (promptCheck === 'changed') return skip(PROMPT_CHANGED);
+  if (promptCheck === 'unchecked' && !context.force) return skip(UNCHECKED_PROMPT);
   const output = rendered.outputZodSchema.safeParse(reading.output);
   if (!output.success) return skip('la salida no valida contra el esquema del formato');
   const keyInput: ReadingCacheKeyInput = {
@@ -105,6 +115,20 @@ export async function verdictFor(
       canonicalJson(normalizeTranscription(output.data, format)) !==
       canonicalJson(reading.normalized),
   };
+}
+
+function promptCheckOf(
+  reading: ExperimentReading,
+  rendered: { readonly hash: string; readonly system: string; readonly user: string },
+): 'same' | 'changed' | 'unchecked' {
+  if (reading.promptHash !== undefined) {
+    return reading.promptHash === rendered.hash ? 'same' : 'changed';
+  }
+  if (reading.prompt !== undefined) {
+    const same = reading.prompt.system === rendered.system && reading.prompt.user === rendered.user;
+    return same ? 'same' : 'changed';
+  }
+  return 'unchecked';
 }
 
 function transcriptionResult(reading: ExperimentReading): TranscriptionResult {
@@ -146,9 +170,10 @@ async function main(): Promise<void> {
   const files = valuesOf(argv, '--lecturas');
   const routeFiles = valuesOf(argv, '--routes');
   const dryRun = argv.includes('--dry-run');
+  const force = argv.includes('--force');
   if (!datasetDir || !cacheDir || files.length === 0) {
     throw new Error(
-      'Uso: importar-lecturas.ts --dataset <dir> --cache-dir <dir> --lecturas <lecturas.json>... [--routes <rutas.json>...] [--dry-run]',
+      'Uso: importar-lecturas.ts --dataset <dir> --cache-dir <dir> --lecturas <lecturas.json>... [--routes <rutas.json>...] [--dry-run] [--force]',
     );
   }
   const dataset = await loadDataset(datasetDir);
@@ -178,7 +203,7 @@ async function main(): Promise<void> {
     let alreadyCached = 0;
     let normalizationChanged = 0;
     for (const reading of lecturas) {
-      const verdict = await verdictFor(reading, { sampleByImageSha, imageShaOf, source });
+      const verdict = await verdictFor(reading, { sampleByImageSha, imageShaOf, source, force });
       if (verdict.kind === 'skip') {
         skipped.set(verdict.reason, (skipped.get(verdict.reason) ?? 0) + 1);
         continue;
