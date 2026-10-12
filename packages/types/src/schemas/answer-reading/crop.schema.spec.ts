@@ -64,9 +64,6 @@ describe('cropBleedBox (margen del recorte)', () => {
     expect(cropBleedBox(LINE, CROP_PROFILES['short-answer@3'], [])).toEqual(
       cropBleedBox(LINE, CROP_PROFILES['short-answer@2'], []),
     );
-    expect(cropBleedBox(LINE, CROP_PROFILES['free-text@3'], [])).toEqual(
-      cropBleedBox(LINE, CROP_PROFILES['free-text@2'], []),
-    );
   });
 
   it('regionBox pasa de fracciones del marco a sus unidades', () => {

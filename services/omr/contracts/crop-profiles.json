@@ -53,16 +53,5 @@
     "targetWidthPx": 1000,
     "jpegQuality": 85,
     "contrast": "none"
-  },
-  "free-text@3": {
-    "id": "free-text",
-    "version": 3,
-    "bleedRatio": 0.1,
-    "bleedBasis": "shorter_side",
-    "neighborGapFraction": 0.5,
-    "printedLabelGapFraction": 0.5,
-    "targetWidthPx": 1400,
-    "jpegQuality": 85,
-    "contrast": "none"
   }
 }

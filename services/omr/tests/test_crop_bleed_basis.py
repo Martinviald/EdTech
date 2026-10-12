@@ -164,18 +164,16 @@ def test_wide_field_crop_with_v2_stops_before_the_next_question(
 LABEL_LEFT_OF_BOX = (70, 505, 89, 525)
 
 
-@pytest.mark.parametrize(
-    ("key", "bleed", "width"), [("short-answer@3", 0.3, 1000), ("free-text@3", 0.1, 1400)]
-)
-def test_v3_profiles_add_the_printed_label_cap(key: str, bleed: float, width: int) -> None:
-    assert CROP_PROFILES[key].to_contract() == {
-        "id": key.split("@")[0],
+def test_v3_profile_adds_the_printed_label_cap() -> None:
+    assert "free-text@3" not in CROP_PROFILES
+    assert CROP_PROFILES["short-answer@3"].to_contract() == {
+        "id": "short-answer",
         "version": 3,
-        "bleedRatio": bleed,
+        "bleedRatio": 0.3,
         "bleedBasis": "shorter_side",
         "neighborGapFraction": 0.5,
         "printedLabelGapFraction": 0.5,
-        "targetWidthPx": width,
+        "targetWidthPx": 1000,
         "jpegQuality": 85,
         "contrast": "none",
     }

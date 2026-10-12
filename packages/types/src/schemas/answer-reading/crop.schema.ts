@@ -20,6 +20,8 @@ import { responseFormatSchema } from './response-format.schema';
 //   "4" de la pregunta como parte de la respuesta ("4 3/4", Celeste P4). Lo
 //   impreso DENTRO de la región (coma, barra, paréntesis, signos, rótulos de
 //   casilla) no se toca. Un layout sin `printedLabelRegion` recorta como v2.
+//   No hay `free-text@3`: en las fotos reales el desarrollo empieza a escribirse
+//   en el margen izquierdo y el tope cortaba la respuesta ("47" → "17").
 export const CROP_BLEED_BASES = ['longer_side', 'shorter_side'] as const;
 export type CropBleedBasis = (typeof CROP_BLEED_BASES)[number];
 
@@ -91,17 +93,6 @@ export const CROP_PROFILES = {
     neighborGapFraction: 0.5,
     printedLabelGapFraction: 0.5,
     targetWidthPx: 1000,
-    jpegQuality: 85,
-    contrast: 'none',
-  },
-  'free-text@3': {
-    id: 'free-text',
-    version: 3,
-    bleedRatio: 0.1,
-    bleedBasis: 'shorter_side',
-    neighborGapFraction: 0.5,
-    printedLabelGapFraction: 0.5,
-    targetWidthPx: 1400,
     jpegQuality: 85,
     contrast: 'none',
   },

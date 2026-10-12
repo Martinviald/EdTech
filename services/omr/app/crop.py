@@ -27,7 +27,8 @@ por arriba o por abajo de una respuesta de una linea.
   los rotulos impresos fuera de la region (`response.printedLabelRegion` de los
   campos de la pagina: el numero de la pregunta). Un lector leia el "4" de la
   pregunta como parte de la respuesta ("4 3/4", Celeste P4). Un layout sin
-  `printedLabelRegion` recorta igual que con v2.
+  `printedLabelRegion` recorta igual que con v2. No hay `free-text@3`: el
+  desarrollo se empieza a escribir en el margen izquierdo y el tope lo cortaba.
 
 Nunca se binariza ni se "limpian" trazos (diseno §16.2): puede borrar un punto
 decimal. El recorte sale en gris, reescalado conservando la proporcion.
@@ -118,7 +119,6 @@ CROP_PROFILES: dict[str, CropProfile] = {
         _profile("short-answer", 2, 0.3, 1000, 85, "shorter_side", 0.5),
         _profile("free-text", 2, 0.1, 1400, 85, "shorter_side", 0.5),
         _profile("short-answer", 3, 0.3, 1000, 85, "shorter_side", 0.5, 0.5),
-        _profile("free-text", 3, 0.1, 1400, 85, "shorter_side", 0.5, 0.5),
     )
 }
 
