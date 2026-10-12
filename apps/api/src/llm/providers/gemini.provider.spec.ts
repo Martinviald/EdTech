@@ -359,6 +359,7 @@ describe('GeminiProvider.completeWithUsage', () => {
 
 interface FakeStructuredResponse {
   responseId?: string;
+  modelVersion?: string;
   promptFeedback?: { blockReason?: string };
   candidates?: Array<{
     finishReason?: string;
@@ -510,6 +511,7 @@ describe('GeminiProvider.completeStructured', () => {
       data: { literal: '2,5', confidence: 0.9 },
       rawText: '{"literal":"2,5","confidence":0.9}',
       model: 'gemini-3.5-flash-lite',
+      providerModel: 'gemini-3.5-flash-lite',
       finishReason: 'stop',
       usage: {
         inputTokens: 300,
@@ -520,6 +522,20 @@ describe('GeminiProvider.completeStructured', () => {
       },
       providerRequestId: 'resp-1',
     });
+  });
+
+  it('devuelve como providerModel el modelVersion que respondió cuando el alias se redirige', async () => {
+    const { provider } = makeStructuredProvider({
+      ...STRUCTURED_RESPONSE,
+      modelVersion: 'gemini-3.6-flash',
+    });
+
+    const result = await provider.completeStructured(
+      makeStructuredRequest({ model: 'gemini-3.5-flash' }),
+    );
+
+    expect(result.model).toBe('gemini-3.5-flash');
+    expect(result.providerModel).toBe('gemini-3.6-flash');
   });
 
   it.each([

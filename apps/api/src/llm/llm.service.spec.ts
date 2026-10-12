@@ -14,6 +14,7 @@ const RESULT: LlmStructuredResult = {
   data: { literal: '2,5' },
   rawText: '{"literal":"2,5"}',
   model: 'modelo-del-proveedor',
+  providerModel: 'modelo-que-respondio',
   finishReason: 'stop',
   usage: null,
   providerRequestId: 'req-1',
@@ -85,6 +86,7 @@ describe('LlmService.completeStructured', () => {
       'confidence',
     ]);
     expect(result.model).toBe('claude-haiku-5-5');
+    expect(result.providerModel).toBe('modelo-que-respondio');
   });
 
   it('usa el modelo fijado por la ruta y respeta las opciones explícitas', async () => {

@@ -77,7 +77,7 @@ export class LlmVisionTranscriber implements VisionTranscriber {
   ): TranscriptionResult {
     const usage = this.usageOf(result);
     const base = {
-      providerModel: result.model,
+      providerModel: result.providerModel,
       usage,
       costUsd: this.costOf(result.model, usage),
       latencyMs,

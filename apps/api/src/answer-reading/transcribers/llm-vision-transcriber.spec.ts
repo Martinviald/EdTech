@@ -35,6 +35,7 @@ function structured(overrides: Partial<LlmStructuredResult> = {}): LlmStructured
     data: fakeOutput('2,5'),
     rawText: '{}',
     model: 'claude-haiku-5-5',
+    providerModel: 'claude-haiku-5-5',
     finishReason: 'stop',
     usage: {
       inputTokens: 1000,
@@ -82,6 +83,15 @@ describe('LlmVisionTranscriber', () => {
       usage: { inputTokens: 1000, outputTokens: 200, imageTokens: 600 },
       errorCode: null,
     });
+    expect(result.costUsd).toBeCloseTo((1000 * 0.1 + 200 * 0.5) / 1_000_000, 9);
+  });
+
+  it('guarda como providerModel el modelo que respondió y costea con el modelo pedido', async () => {
+    const result = await makeTranscriber(
+      jest.fn().mockResolvedValue(structured({ providerModel: 'claude-haiku-5-5-20260901' })),
+    ).transcribe(request());
+
+    expect(result.providerModel).toBe('claude-haiku-5-5-20260901');
     expect(result.costUsd).toBeCloseTo((1000 * 0.1 + 200 * 0.5) / 1_000_000, 9);
   });
 

@@ -3,6 +3,7 @@ import type { LlmCompletionRequest, LlmStructuredRequest } from '../llm.types';
 
 interface FakeMessageResponse {
   id?: string;
+  model?: string;
   content: Array<{ type: string; text?: string }>;
   stop_reason?: string;
   usage?: {
@@ -200,6 +201,7 @@ describe('AnthropicProvider.completeStructured', () => {
       data: { literal: '2,5', confidence: 0.93 },
       rawText: '{"literal":"2,5","confidence":0.93}',
       model: 'claude-haiku-5-5',
+      providerModel: 'claude-haiku-5-5',
       finishReason: 'stop',
       usage: {
         inputTokens: 1000,
@@ -210,6 +212,18 @@ describe('AnthropicProvider.completeStructured', () => {
       },
       providerRequestId: 'msg_123',
     });
+  });
+
+  it('devuelve como providerModel el modelo que trae la respuesta', async () => {
+    const { provider } = makeProvider({
+      ...STRUCTURED_RESPONSE,
+      model: 'claude-haiku-5-5-20260901',
+    });
+
+    const result = await provider.completeStructured(makeStructuredRequest());
+
+    expect(result.model).toBe('claude-haiku-5-5');
+    expect(result.providerModel).toBe('claude-haiku-5-5-20260901');
   });
 
   it.each([

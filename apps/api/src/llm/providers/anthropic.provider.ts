@@ -34,6 +34,7 @@ interface AnthropicStreamEvent {
 
 interface AnthropicMessageResponse {
   id?: string;
+  model?: string;
   content: Array<{ type: string; text?: string }>;
   stop_reason?: string | null;
   usage?: {
@@ -210,6 +211,7 @@ export class AnthropicProvider implements LlmProvider {
       data: this.parseStructuredText(rawText),
       rawText,
       model: request.options.model,
+      providerModel: response.model || request.options.model,
       finishReason: this.toStructuredFinishReason(response.stop_reason),
       usage: this.toStructuredUsage(response.usage),
       providerRequestId: response.id ?? null,

@@ -142,6 +142,7 @@ export class OpenAiProvider implements LlmProvider {
       data: finishReason === 'refusal' ? null : this.parseStructuredText(output.text, request),
       rawText: output.text.length > 0 ? output.text : output.refusal,
       model: request.options.model,
+      providerModel: response.model || request.options.model,
       finishReason,
       usage: this.toStructuredUsage(response.usage),
       providerRequestId: response.id ?? null,

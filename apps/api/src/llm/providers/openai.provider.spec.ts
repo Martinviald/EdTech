@@ -16,6 +16,7 @@ const OpenAiConstructor = OpenAI as unknown as jest.Mock;
 
 interface FakeResponse {
   id?: string;
+  model?: string;
   status?: string;
   incomplete_details?: { reason?: string } | null;
   output?: Array<{
@@ -383,6 +384,7 @@ describe('OpenAiProvider.completeStructured', () => {
       data: { literal: '2,5', confidence: 0.93 },
       rawText: '{"literal":"2,5","confidence":0.93,"note":null}',
       model: 'gpt-6-luna',
+      providerModel: 'gpt-6-luna',
       finishReason: 'stop',
       usage: {
         inputTokens: 1200,
@@ -393,6 +395,15 @@ describe('OpenAiProvider.completeStructured', () => {
       },
       providerRequestId: 'resp_123',
     });
+  });
+
+  it('devuelve como providerModel el modelo que trae la respuesta', async () => {
+    const create = respondWith({ ...STRUCTURED_RESPONSE, model: 'gpt-6-luna-2026-09-01' });
+
+    const result = await makeProvider(create).completeStructured(makeStructuredRequest());
+
+    expect(result.model).toBe('gpt-6-luna');
+    expect(result.providerModel).toBe('gpt-6-luna-2026-09-01');
   });
 
   it.each([

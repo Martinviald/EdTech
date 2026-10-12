@@ -31,6 +31,7 @@ interface GeminiUsageMetadata {
 
 interface GeminiStructuredResponse {
   responseId?: string;
+  modelVersion?: string;
   promptFeedback?: { blockReason?: string };
   candidates?: Array<{
     finishReason?: string;
@@ -341,6 +342,7 @@ export class GeminiProvider implements LlmProvider {
       data: this.parseStructuredText(rawText),
       rawText,
       model: request.options.model,
+      providerModel: response.modelVersion || request.options.model,
       finishReason: this.toStructuredFinishReason(response),
       usage: this.toStructuredUsage(response.usageMetadata),
       providerRequestId: response.responseId ?? null,
