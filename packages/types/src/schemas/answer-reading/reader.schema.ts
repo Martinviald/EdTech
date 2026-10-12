@@ -22,6 +22,8 @@ export const PROMPT_REF_PATTERN = /^[a-z0-9.-]+@\d+$/;
 // `family` agrupa modelos que se equivocan parecido (mismo proveedor y línea).
 // La política de consenso puede exigir familias distintas (dos Gemini coinciden
 // mucho pero se equivocan igual: medido en el experimento del 2026-10-11).
+// `minConfidence` (opcional) reemplaza al de la política solo para este lector:
+// cada modelo declara su confianza con otra calibración (decisión E1-1).
 export const readerSpecSchema = z
   .object({
     key: z.string().min(1),
@@ -31,6 +33,7 @@ export const readerSpecSchema = z
     model: z.string().min(1),
     promptRef: z.string().regex(PROMPT_REF_PATTERN),
     hints: z.enum(READER_HINTS),
+    minConfidence: z.number().min(0).max(1).optional(),
     params: z
       .object({
         maxOutputTokens: z.number().int().positive(),

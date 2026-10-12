@@ -259,6 +259,7 @@ function toConsensusReading(run: ReaderRun, repetition: number): ConsensusReadin
     status: run.result.status,
     output: run.result.status === 'ok' ? run.result.output : null,
     role: run.role,
+    minConfidence: run.reader.minConfidence,
   };
 }
 

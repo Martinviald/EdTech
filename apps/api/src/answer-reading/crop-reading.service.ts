@@ -344,6 +344,7 @@ export class CropReadingService {
           status: reused.status,
           output: reused.output,
           role,
+          minConfidence: plan.reader.minConfidence,
         },
       };
     }
@@ -364,6 +365,7 @@ export class CropReadingService {
         status: attempt.status,
         output: attempt.output,
         role,
+        minConfidence: plan.reader.minConfidence,
       },
     };
   }

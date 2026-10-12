@@ -536,3 +536,26 @@ recorte trae preguntas vecinas; Haiku 13 → 16 y Gemini 14 → 18 de 24 casilla
   la ruta por defecto sigue en `hints: none` (C-1).
 - La confianza de Haiku rara vez llega a 0,85: domina la revisión por `low_confidence`. Calibrar con
   hojas reales de alumnos antes de tocar `minConfidence` (C-2).
+
+## Etapa 1 — Lectura por visión más exacta (`feat/vision-lectura-etapa1`)
+
+Plan: `docs/plan-etapa1-lectura-vision.md`.
+
+### T1 — Umbral por lector y arreglos de proveedores (`wip/e1-t1`)
+
+- **Decisión E1-1 — el umbral de confianza vive en el lector.** `readerSpecSchema` suma
+  `minConfidence` opcional (0 a 1). Si el lector lo trae, reemplaza al `minConfidence` de la
+  política solo para las lecturas de ese lector (hacia arriba o hacia abajo); si no, rige el de la
+  política, así que las rutas guardadas no cambian de comportamiento. Se eligió el lector y no un
+  mapa en la política porque la calibración es del modelo (Gemini 3.5 Flash declara confianza alta
+  aun cuando falla y necesita 0,97; `gpt-6-luna` está mejor calibrado con 0,85), el lector de
+  desempate ya es un `ReaderSpec` y lo hereda sin otra clave, y un mapa por `key` dejaría umbrales
+  huérfanos al renombrar un lector. Quien arma las lecturas del consenso
+  (`CropReadingService`, también al reutilizar una lectura guardada, y el arnés `run-sample`) copia
+  `reader.minConfidence` en `ConsensusReading.minConfidence`.
+- `evaluateConsensus` aplica el umbral de cada lectura en todos los puntos donde se mira la
+  confianza: blancos (`acceptBlank`, incluidos los de tinta sin lecturas), formatos de rúbrica,
+  grupo acordado (incluida la lectura de desempate) y la propuesta de revisión, que ahora ordena
+  por: no pidió revisión → interpretable → **supera el umbral de su lector** → confianza. Con un
+  umbral único ese criterio es monótono con la confianza, por lo que la propuesta no cambia sin
+  umbrales por lector. Los 37 casos previos de `evaluate-consensus.spec` y los del pipeline pasan sin tocarse.

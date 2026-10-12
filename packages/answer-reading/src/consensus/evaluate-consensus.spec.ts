@@ -499,3 +499,84 @@ describe('fotos reales: formatos con partes', () => {
     });
   });
 });
+
+describe('evaluateConsensus: umbral de confianza por lector (E1-1)', () => {
+  const flash = (literal: string, overrides: Partial<TranscriptionOutput> = {}) =>
+    reading('r-flash', 'gemini', fakeOutput(literal, overrides), { minConfidence: 0.97 });
+  const luna = (literal: string, overrides: Partial<TranscriptionOutput> = {}) =>
+    reading('r-luna', 'gpt', fakeOutput(literal, overrides), { minConfidence: 0.85 });
+
+  it('cada lectura se compara con el umbral de su lector', () => {
+    expect(
+      evaluate([flash('2,5', { confidence: 0.96 }), luna('2,5', { confidence: 0.86 })]),
+    ).toMatchObject({ outcome: 'needs_review', reasons: ['low_confidence'] });
+    expect(
+      evaluate([flash('2,5', { confidence: 0.98 }), luna('2,5', { confidence: 0.86 })]),
+    ).toMatchObject({ outcome: 'auto_accepted', scoringOutcome: 'correct' });
+    expect(
+      evaluate([flash('2,5', { confidence: 0.98 }), luna('2,5', { confidence: 0.84 })]),
+    ).toMatchObject({ outcome: 'needs_review', reasons: ['low_confidence'] });
+  });
+
+  it('el umbral del lector reemplaza al de la política, también hacia abajo', () => {
+    const strict = { ...POLICY, minConfidence: 0.9 };
+    expect(
+      evaluate([flash('2,5', { confidence: 0.98 }), luna('2,5', { confidence: 0.86 })], strict),
+    ).toMatchObject({ outcome: 'auto_accepted' });
+    expect(
+      evaluate([flash('2,5', { confidence: 0.98 }), claude('2,5', { confidence: 0.86 })], strict),
+    ).toMatchObject({ outcome: 'needs_review', reasons: ['low_confidence'] });
+  });
+
+  it('los blancos respetan el umbral de cada lector', () => {
+    const blank = (confidence: number) => ({ state: 'blank' as const, confidence });
+    expect(evaluate([flash('', blank(0.96)), luna('', blank(0.86))])).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['low_confidence'],
+    });
+    expect(evaluate([flash('', blank(0.98)), luna('', blank(0.86))])).toMatchObject({
+      outcome: 'auto_blank',
+    });
+  });
+
+  it('el desempate respeta el umbral del lector de desempate', () => {
+    const policy = { ...POLICY, onDisagreement: 'tiebreak_reader' as const };
+    const primaries = [claude('2,5'), gemini('3,5')];
+    const tiebreak = (confidence: number) =>
+      reading('r-tb', 'gpt', fakeOutput('2,5', { confidence }), {
+        role: 'tiebreak',
+        minConfidence: 0.97,
+      });
+    expect(evaluate([...primaries, tiebreak(0.96)], policy)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['low_confidence'],
+      usedReadingIds: ['r-claude', 'r-tb'],
+    });
+    expect(evaluate([...primaries, tiebreak(0.98)], policy)).toMatchObject({
+      outcome: 'auto_accepted',
+    });
+  });
+
+  it('la propuesta de revisión prefiere la lectura que supera el umbral de su lector', () => {
+    const result = evaluate([
+      flash('7', { reviewRequested: true, confidence: 0.96 }),
+      luna('2,5', { reviewRequested: true, confidence: 0.9 }),
+    ]);
+    expect(result).toMatchObject({ outcome: 'needs_review', reasons: ['reader_requested_review'] });
+    expect(result.value?.value).toMatchObject({ written: '2,5' });
+  });
+
+  it('en formatos de rúbrica la confianza también se mide por lector', () => {
+    const freeText: ResponseFormat = { kind: 'free_text', lines: 3 };
+    const evaluateText = (readings: ConsensusReading[]) =>
+      evaluateConsensus(readings, POLICY, scoreOf, { format: freeText, readingKey: 'casilla' });
+    expect(
+      evaluateText([flash('hola', { confidence: 0.96 }), luna('hola', { confidence: 0.86 })])
+        .reasons,
+    ).toEqual(['low_confidence', 'rubric_item']);
+    expect(
+      evaluateText([flash('hola', { confidence: 0.98 }), luna('hola', { confidence: 0.86 })])
+        .reasons,
+    ).toEqual(['rubric_item']);
+  });
+});

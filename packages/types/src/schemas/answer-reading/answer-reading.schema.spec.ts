@@ -8,6 +8,7 @@ import {
   consensusPolicySchema,
   cropProfileSchema,
   orgAnswerReadingSettingsSchema,
+  readerSpecSchema,
   responseFormatSchema,
   reviewModeFor,
   reviewQueueQuerySchema,
@@ -23,6 +24,22 @@ describe('contratos de lectura por visión', () => {
     expect(DEFAULT_CONSENSUS_POLICY.autoAcceptOutcomes).toEqual(['correct', 'incorrect']);
     expect(DEFAULT_CONSENSUS_POLICY.requireDistinctFamilies).toBe(true);
     expect(DEFAULT_CONSENSUS_POLICY.auditSampleRate).toBeGreaterThan(0);
+  });
+
+  it('el umbral de confianza del lector es opcional y está entre 0 y 1 (E1-1)', () => {
+    const reader = {
+      key: 'flash',
+      transcriberId: 'gemini',
+      provider: 'gemini',
+      family: 'gemini',
+      model: 'gemini-3.5-flash',
+      promptRef: 'transcribe.short-answer@2',
+      hints: 'none',
+      params: { maxOutputTokens: 512, reasoning: 'off', timeoutMs: 30000 },
+    };
+    expect(readerSpecSchema.safeParse(reader).success).toBe(true);
+    expect(readerSpecSchema.parse({ ...reader, minConfidence: 0.97 }).minConfidence).toBe(0.97);
+    expect(readerSpecSchema.safeParse({ ...reader, minConfidence: 1.2 }).success).toBe(false);
   });
 
   it('el interruptor de imágenes a terceros viene apagado y el dataset es interno (D3, D7)', () => {

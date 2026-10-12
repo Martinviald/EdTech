@@ -759,6 +759,53 @@ describe('AnswerReadingPipelineService — idempotencia', () => {
   });
 });
 
+describe('AnswerReadingPipelineService — umbral de confianza por lector', () => {
+  const calibrated = {
+    readers: [
+      reader('flash', 'gemini-flash', { provider: 'gemini', minConfidence: 0.97 }),
+      reader('luna', 'openai-luna', { provider: 'openai', minConfidence: 0.85 }),
+    ],
+  };
+
+  it('cada lectura se compara con el umbral de su lector, también al reutilizarla', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...calibrated,
+      readings: {
+        flash: { [SHA_1]: { ...fakeOutput('7,3'), confidence: 0.96 } },
+        luna: { [SHA_1]: { ...fakeOutput('7.3'), confidence: 0.86 } },
+      },
+    });
+
+    await runScan();
+    memory.seed(sheetScanMarks, [
+      { id: MARK_2, orgId: ORG_ID, scanId: SCAN_2, fieldId: FIELD_1, cropFileId: CROP_1 },
+    ]);
+    await runScan(SCAN_2);
+
+    expect(transcriber.calls).toHaveLength(2);
+    for (const markId of [MARK_1, MARK_2]) {
+      expect(currentDecision(memory, markId)).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['low_confidence'],
+      });
+    }
+  });
+
+  it('con la confianza sobre el umbral de cada lector autoacepta', async () => {
+    const { memory, runScan } = setup({
+      ...calibrated,
+      readings: {
+        flash: { [SHA_1]: { ...fakeOutput('7,3'), confidence: 0.98 } },
+        luna: { [SHA_1]: { ...fakeOutput('7.3'), confidence: 0.86 } },
+      },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+});
+
 describe('AnswerReadingPipelineService — interruptor y presupuesto', () => {
   it('con allowExternalVision: false no llama a ningún transcriptor y deja not_read', async () => {
     const { memory, transcriber, fetchSpy, runScan } = setup({
