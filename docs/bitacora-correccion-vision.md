@@ -627,3 +627,40 @@ Plan: `docs/plan-etapa1-lectura-vision.md`.
 - **Riesgo anotado (T3):** la posición de la coma se deriva de la clave del ítem (igual que la hoja
   impresa). Si la clave cambia después de imprimir, la lectura por casilla supondría otra geometría
   que la impresa. Hoy solo aplica a secuencias (no hay coma), así que no afecta a la ruta final.
+
+### Etapa 1 — T4 cerrada: verificador de incorrectas
+
+- **Contrato y piezas:** motivo `verifier_flagged` (modo corrección), `ConsensusPolicy.incorrectVerifier`
+  opcional, propósito de prompt `verification` (el esquema impide que un prompt de transcripción o de
+  rúbrica declare la clave o la lectura acordada), prompt `verify.incorrect@1` con lock por formato,
+  funciones puras en `@soe/answer-reading` usadas por el pipeline y el arnés, lectura del verificador
+  en `answer_readings` con modo `verifier` (fuera de `usedReadingIds`; la cola de revisión las
+  excluye). Se activa con incorrectas **y parciales** autoaceptadas. **Nunca acepta ni cambia una
+  nota.** Migración **0052** (`answer_reading_mode` + `verification_output`) y **0053** (verificador
+  en las 6 rutas que autoaceptan; desarrollo sin cambio).
+- **Elección (E1-3):** conjunto de estrés fuera del repo (`datasets/estres-verificador-v1`: 12 ceros
+  injustos que llegan a autoaceptarse y 8 incorrectas verdaderas). `gpt-6-luna` 34/36 atrapados con
+  14/24 falsos avisos → descartado. `gemini-3.6-flash` 33/36 con 5/24. **`gemini-3.8-flash` 34/36
+  con 3/24**, y con umbral **0,95** (sus "no" erróneos venían con 0,90–0,95) atrapa **35/36 [85,8–99,5]
+  con 3/24 falsos avisos**. Cada verificador falla en el error de su propia familia (luna no ve el
+  `0109` que leyó luna; Gemini no ve el `8, 15, 12` de Flash-Lite): con el par Gemini + luna no hay una
+  tercera familia, y se eligió el que menos falsos avisos da.
+- **Bug de producción encontrado y corregido:** dos llamadas a `gpt-6-luna` quedaron colgadas ~81 min
+  con `timeoutMs` 45 s. Causa (en el código de los SDK): OpenAI 6.49 y Anthropic 0.98 limpian el
+  timeout al recibir las cabeceras y la lectura del cuerpo queda sin plazo; reintentos y escalera de
+  razonamiento lo multiplicaban. `runWithinDeadline` da un plazo total único por llamada a los tres
+  proveedores (`LlmTimeoutError` → estado `timeout`).
+- **Compuerta en fotos reales con la ruta final:** 32/72 autoaceptadas, 0 equivocadas; el verificador
+  revisó las 8 incorrectas autoaceptadas, mandó 0 a revisión, ninguna casilla cambió de decisión;
+  costo extra US$0,0004 por recorte corto.
+
+### Etapa 1 — resultado consolidado (arnés, fotos-reales-v1, 72 unidades, `e1-final` vs `t0-actual`)
+
+| | Antes (Flash-Lite + Haiku) | Después (pipeline B final) |
+|---|---|---|
+| Autoaceptadas | 15/72 = 20,8 % [13,1–31,6] | **32/72 = 44,4 % [33,5–55,9]** (19 ganadas, 2 perdidas; McNemar p < 0,001, optimista) |
+| Autoaceptadas equivocadas | 0 | **0** (0 perjudican, 0 favorecen) |
+| Ceros injustos atrapados por el verificador (estrés) | — | 35/36 |
+| Costo nominal por recorte corto (precio 2027) | US$0,0013 | US$0,0038 (la mitad hasta dic-2026) |
+
+Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), dentro del tope de US$5.
