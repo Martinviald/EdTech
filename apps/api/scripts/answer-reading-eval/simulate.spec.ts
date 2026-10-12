@@ -259,6 +259,38 @@ describe('simulación del arnés con rutas por formato', () => {
     });
   });
 
+  it('el umbral que el lector trae en la ruta llega al consenso sin override', async () => {
+    const readings = perfectReadings(0.95);
+    const fake = fakeFor({ [HAIKU]: readings, [FLASH_LITE]: readings });
+    const withReaderThreshold = (value: unknown): unknown => {
+      if (Array.isArray(value)) return value.map(withReaderThreshold);
+      if (value === null || typeof value !== 'object') return value;
+      const entries = Object.entries(value).map(([key, inner]) => [
+        key,
+        withReaderThreshold(inner),
+      ]);
+      const record = Object.fromEntries(entries) as Record<string, unknown>;
+      return record['key'] === FLASH_LITE && 'promptRef' in record
+        ? { ...record, minConfidence: 0.97 }
+        : record;
+    };
+    const strictRoutes = withReaderThreshold(routeSet) as RouteSet;
+    const dataset = await loadDataset(dir);
+    const result = await runSimulation({
+      samples: dataset.samples,
+      routeSet: strictRoutes,
+      repetitions: 1,
+      concurrency: 2,
+      readerMinConfidence: null,
+      transcriberFor: () => fake,
+      cache: new ReadingCache(null, 'off'),
+      budget: null,
+    });
+    const shortUnits = result.units.filter((unit) => unit.group === 'short');
+    expect(shortUnits.every((unit) => unit.outcome === 'needs_review')).toBe(true);
+    expect(shortUnits.every((unit) => unit.reasons.includes('low_confidence'))).toBe(true);
+  });
+
   it('una segunda corrida sale entera del caché sin llamar al transcriptor', async () => {
     const cacheDir = await mkdtemp(join(tmpdir(), 'answer-reading-sim-cache-'));
     try {

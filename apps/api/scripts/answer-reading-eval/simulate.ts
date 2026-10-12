@@ -404,6 +404,7 @@ function toConsensusReading(run: ReaderRun, index: number): ConsensusReading {
     status: run.result.status,
     output: run.result.status === 'ok' ? run.result.output : null,
     role: run.role,
+    ...(run.reader.minConfidence === undefined ? {} : { minConfidence: run.reader.minConfidence }),
   };
 }
 
