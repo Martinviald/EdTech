@@ -473,6 +473,35 @@ class CropRegionReader:
         return reading
 
 
+def undecided_reading(
+    page: RectifiedPage, field: dict[str, Any], fills: list[float], page_threshold: PageThreshold
+) -> dict[str, Any]:
+    """Un campo de burbujas de una pagina cuyas burbujas no se pudieron separar.
+
+    Solo se usa cuando la pagina se conserva por sus recortes (ver
+    `_read_marks` en pipeline.py): la pagina no tiene dos grupos de fills, asi
+    que ninguna decision sobre la burbuja seria confiable. Sale `ambiguous`, sin
+    valor ni sugerencia y con el recorte de sus burbujas como evidencia: va a
+    revision, jamas como `blank` confiado. `fill` es el de la burbuja mas
+    oscura del campo, que es lo que el revisor necesita ver primero.
+    """
+    fill = max(fills, default=0.0)
+    threshold = min(1.0, max(0.0, page_threshold.threshold))
+    reading = {
+        "fieldId": field["fieldId"],
+        "printedNumber": field["printedNumber"],
+        "state": "ambiguous",
+        "value": None,
+        "fill": round(fill, 4),
+        "threshold": round(threshold, 4),
+        "margin": round(margin_of(fill, threshold), 4),
+        "cropJpegBase64": _bubbles_crop_base64(page, field) if field.get("bubbles") else None,
+    }
+    if contract_v2_enabled():
+        reading.update(empty_doubt_fields())
+    return reading
+
+
 def legacy_crop_image(page: RectifiedPage, region: dict[str, Any]) -> CropImage:
     encoded = crop_region_jpeg(page, region)
     decoded = cv2.imdecode(encoded, cv2.IMREAD_GRAYSCALE)

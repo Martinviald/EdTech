@@ -88,7 +88,7 @@ from .identity import (
 )
 from .illumination import flatten_illumination
 from .quality import assess
-from .readers import READERS, sample_bubble_fills_at_spec
+from .readers import READERS, sample_bubble_fills_at_spec, undecided_reading
 from .rectify import (
     FiducialFailure,
     RectifiedPage,
@@ -214,7 +214,7 @@ def classify_page_debug(
     retry_page, retry_debug = _classify_once(
         flatten_illumination(bgr), page_index, spec, profile, flattened=True
     )
-    if not retry_page["quality"]["ok"]:
+    if not _keeps_flattened_retry(page, retry_page):
         return page, debug
     retry_page["imageSha256"] = page["imageSha256"]
     return retry_page, retry_debug
@@ -233,9 +233,28 @@ def _should_retry_flattened(page: dict[str, Any], profile: dict[str, Any]) -> bo
     perfil `phone` lo trae en true y el `scanner` en false: un escaneo plano no
     tiene gradiente que aplanar, y no paga el costo.
     """
-    return page["quality"]["rejectReason"] == "no_separable_marks" and bool(
-        profile.get("normalizeIllumination", False)
+    if not profile.get("normalizeIllumination", False):
+        return False
+    quality = page["quality"]
+    return quality["rejectReason"] == "no_separable_marks" or (
+        quality["ok"] and quality.get("marksReadability", MARKS_READABLE) != MARKS_READABLE
     )
+
+
+def _keeps_flattened_retry(original: dict[str, Any], retry: dict[str, Any]) -> bool:
+    """El reintento aplanado se conserva solo si deja la pagina MEJOR que el original.
+
+    Legible siempre gana. Si el original estaba rechazado, basta con que el
+    reintento quede aceptado (aunque sea solo por sus recortes). Si el original
+    ya estaba aceptado con las burbujas sin decidir, el reintento tiene que
+    hacerlas legibles: cambiar un sin-decidir por otro no aporta nada.
+    """
+    retry_quality = retry["quality"]
+    if not retry_quality["ok"]:
+        return False
+    if retry_quality.get("marksReadability", MARKS_READABLE) == MARKS_READABLE:
+        return True
+    return not original["quality"]["ok"]
 
 
 def _classify_once(
@@ -340,7 +359,7 @@ def assess_page(
         return page
 
     retry = _assess_once(flatten_illumination(bgr), spec, profile, flattened=True)
-    if not retry["quality"]["ok"]:
+    if not _keeps_flattened_retry(page, retry):
         return page
     retry["imageSha256"] = page["imageSha256"]
     return retry
@@ -364,9 +383,9 @@ def _assess_once(
         _ambiguity_margin(profile),
     )
     if quality["ok"] and isinstance(rectified, RectifiedPage):
-        verdict = _marks_readability(rectified, spec, identity, 0)[4]
+        readable, _, _, _, verdict, _ = _marks_readability(rectified, spec, identity, 0)
         quality["marksReadability"] = verdict
-        if verdict != MARKS_READABLE:
+        if verdict != MARKS_READABLE and not _has_crop_fields(readable):
             _reject_page(quality, "no_separable_marks")
     return {"imageSha256": image_sha256, "quality": quality, "identity": identity}
 
@@ -832,8 +851,12 @@ def _read_marks(
         "registration": summarize(registration_log, local_registration_enabled()),
     }
     if verdict != MARKS_READABLE:
-        _reject_page(quality, "no_separable_marks")
-        return [], classify_debug
+        if not _has_crop_fields(readable):
+            _reject_page(quality, "no_separable_marks")
+            return [], classify_debug
+        return _crops_with_undecided_bubbles(rectified, readable, fills_by_field, threshold), (
+            classify_debug
+        )
 
     marks = [
         READERS[field["kind"]].read(rectified, field, fills, threshold, ambiguity_margin)
@@ -841,6 +864,34 @@ def _read_marks(
     ]
     classify_debug["fieldContrast"] = _field_contrast_summary(readable, fills_by_field, marks)
     return marks, classify_debug
+
+
+def _has_crop_fields(fields: list[dict[str, Any]]) -> bool:
+    return any(field["kind"] == "crop_region" for field in fields)
+
+
+def _crops_with_undecided_bubbles(
+    rectified: RectifiedPage,
+    fields: list[dict[str, Any]],
+    fills_by_field: list[list[float]],
+    threshold: PageThreshold,
+) -> list[dict[str, Any]]:
+    """Las marcas de una pagina valida cuyas burbujas no se separan pero que tiene recortes.
+
+    Un rechazo de pagina tiraba tambien los recortes de sus `crop_region`, que no
+    dependen de las burbujas: la pagina 1 de la prueba de respuestas abiertas (1
+    pregunta de alternativas, 8 recortes) perdia los 8 por una sola pregunta en
+    blanco. La geometria ya esta confirmada y el QR leido, asi que la pagina se
+    conserva: los recortes salen como siempre y cada campo de burbujas sale
+    `ambiguous` con su evidencia (`undecided_reading`), nunca `blank`. Que paso
+    con las burbujas lo dice `quality.marksReadability`.
+    """
+    return [
+        READERS[field["kind"]].read(rectified, field, fills, threshold)
+        if field["kind"] == "crop_region"
+        else undecided_reading(rectified, field, fills, threshold)
+        for field, fills in zip(fields, fills_by_field, strict=True)
+    ]
 
 
 def _field_contrast_summary(
