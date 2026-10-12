@@ -52,6 +52,11 @@ export class ListAssessmentsTool implements AssistantTool {
           type: 'string',
           description: 'UUID del período/año académico. Sale de list_filter_options.',
         },
+        instrumentId: {
+          type: 'string',
+          description:
+            'UUID del instrumento. Sale de list_filter_options. Devuelve una evaluación por curso.',
+        },
         instrumentType: {
           type: 'string',
           description: 'Tipo de instrumento (p. ej. "dia"). Texto, no UUID.',
