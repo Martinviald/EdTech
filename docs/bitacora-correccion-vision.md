@@ -481,3 +481,15 @@ Evidencia: 30 casillas de 6 fotos de celular (`pruebas-vlm-manuscrito/hojas-sint
   contamina con el recorte y con la forma de escribir; las partes vienen de un esquema por casilla.
   Una contradicción es justamente lo dudoso que el diseño §8 no deja autoaceptar. Cambio de
   contrato: `NORMALIZATION_ISSUES` suma `literal_subset_of_parts` (solo amplía el enum).
+- **Decisión FR-3 — margen del recorte proporcional al lado menor, con tope por vecinos.**
+  `short-answer@1` sumaba el 15 % del lado MAYOR de la región en los cuatro lados: en un renglón
+  ancho (P8) o en casillas con signos (P9) el recorte traía completas P7 y P9, y los dos lectores
+  transcribieron P7 como respuesta de P8. Perfiles nuevos `short-answer@2` (30 % del lado menor) y
+  `free-text@2` (10 % del lado menor), ambos con `neighborGapFraction: 0.5`: en cada lado el margen
+  no pasa de la mitad de la distancia al campo vecino más cercano de ese lado. El perfil suma dos
+  claves explícitas (`bleedBasis`, `neighborGapFraction`; en los v1, `longer_side` y `null`, sin
+  cambio de comportamiento). `cropBleedBox` en `crop.schema.ts` es la referencia que debe replicar
+  `services/omr/app/crop.py`. Los layouts nuevos piden los v2 (el hash de los layouts derivados
+  cambia solo por el id del perfil, verificado en el test); los congelados conservan su v1.
+  **Bloqueante de despliegue:** mientras el OMR no conozca los v2, `resolve_crop_profile` cae al
+  recorte heredado (sin margen, 600 px) en silencio, y `test_crop_profiles_contract.py` falla.

@@ -1,6 +1,11 @@
 import {
+  CROP_PROFILES,
+  cropBleedBox,
   getScoringStrategy,
   layoutHash,
+  regionBox,
+  type CropBox,
+  type CropProfileRef,
   layoutSpecSchema,
   type ItemContent,
   type LayoutField,
@@ -411,8 +416,8 @@ describe('deriveLayoutDraft — campos de respuesta escrita por formato', () => 
     expect(rolesOf(6)).toEqual(['lines.0:line']);
     expect(rolesOf(7)).toEqual(Array.from({ length: 6 }, (_, i) => `lines.${i}:line`));
 
-    expect(fields.slice(1, 7).every((f) => f.response!.cropProfileId === 'short-answer@1')).toBe(true);
-    expect(fields[7]!.response!.cropProfileId).toBe('free-text@1');
+    expect(fields.slice(1, 7).every((f) => f.response!.cropProfileId === 'short-answer@2')).toBe(true);
+    expect(fields[7]!.response!.cropProfileId).toBe('free-text@2');
   });
 
   it('las casillas de caracteres son cuadradas y de al menos 8 mm', () => {
@@ -677,12 +682,26 @@ describe('deriveLayoutDraft — formatos word_list, short_text y multi_box (F10b
         })),
       } as ItemContent,
     };
-    expect(layoutHash(deriveLayoutDraft(INSTRUMENT_ID, legacy, 'qr').spec)).toBe(
-      '67ffca863532fa57',
-    );
-    expect(layoutHash(deriveLayoutDraft(INSTRUMENT_ID, legacy, 'rut_bubbles').spec)).toBe(
-      '755b2fb018046f26',
-    );
+    const withV1CropProfiles = (spec: LayoutSpec): LayoutSpec => ({
+      ...spec,
+      fields: spec.fields.map((field) =>
+        field.response
+          ? {
+              ...field,
+              response: {
+                ...field.response,
+                cropProfileId: field.response.cropProfileId.replace(/@2$/, '@1'),
+              },
+            }
+          : field,
+      ),
+    });
+    const qr = deriveLayoutDraft(INSTRUMENT_ID, legacy, 'qr').spec;
+    const rut = deriveLayoutDraft(INSTRUMENT_ID, legacy, 'rut_bubbles').spec;
+    expect(layoutHash(withV1CropProfiles(qr))).toBe('67ffca863532fa57');
+    expect(layoutHash(withV1CropProfiles(rut))).toBe('755b2fb018046f26');
+    expect(layoutHash(qr)).toBe('1bd231149a3f753a');
+    expect(layoutHash(rut)).toBe('c8923ae68a8ca568');
   });
 });
 
@@ -950,5 +969,57 @@ describe('ingesta de las burbujas hasta la estrategia (F10b)', () => {
     expect(scored.get(3)!.rawAnswer).toBeNull();
     expect(scored.get(4)!.rawAnswer).toBeNull();
     expect(scored.get(5)!.result).toMatchObject({ requiresManualGrading: true });
+  });
+});
+
+describe('perfil de recorte de los campos derivados (fotos reales: P8 leída como P7)', () => {
+  function footprint(field: LayoutField, frame: { width: number; height: number }): CropBox {
+    if (field.region) return regionBox(field.region, frame);
+    const xs = field.bubbles.flatMap((b) => [b.center.x - b.radius, b.center.x + b.radius]);
+    const ys = field.bubbles.flatMap((b) => [
+      b.center.y * frame.height - b.radius * frame.width,
+      b.center.y * frame.height + b.radius * frame.width,
+    ]);
+    return {
+      x0: Math.min(...xs) * frame.width,
+      x1: Math.max(...xs) * frame.width,
+      y0: Math.min(...ys),
+      y1: Math.max(...ys),
+    };
+  }
+
+  function intersects(a: CropBox, b: CropBox): boolean {
+    return a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+  }
+
+  it.each([
+    ['formatos numéricos y de desarrollo', formatItems()],
+    [
+      'lista de palabras, renglón y casillas con signos',
+      [mcItem(1), wordListItem(2), shortAnswerItem(3, ['producto']), operationItem(4), mcItem(5)],
+    ],
+  ])('%s: el margen del recorte no alcanza a ningún campo vecino', (_name, items) => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, items).spec;
+    const frame = sheetFrameSizeMm(spec.paper, spec.fiducials);
+    for (const field of spec.fields.filter((f) => f.response && f.region)) {
+      const profile = CROP_PROFILES[field.response!.cropProfileId as CropProfileRef];
+      const neighbors = spec.fields
+        .filter((other) => other !== field && other.pageIndex === field.pageIndex)
+        .map((other) => footprint(other, frame));
+      const bleed = cropBleedBox(regionBox(field.region!, frame), profile, neighbors);
+      const reached = neighbors.filter((neighbor) => intersects(bleed, neighbor));
+      expect({ field: field.printedNumber, reached }).toEqual({ field: field.printedNumber, reached: [] });
+    }
+  });
+
+  it('el margen deja aire alrededor de la región', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, formatItems()).spec;
+    const frame = sheetFrameSizeMm(spec.paper, spec.fiducials);
+    for (const field of spec.fields.filter((f) => f.response && f.region)) {
+      const profile = CROP_PROFILES[field.response!.cropProfileId as CropProfileRef];
+      const region = regionBox(field.region!, frame);
+      const bleed = cropBleedBox(region, profile, []);
+      expect(region.y0 - bleed.y0).toBeGreaterThanOrEqual(1);
+    }
   });
 });

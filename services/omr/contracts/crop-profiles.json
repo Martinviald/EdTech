@@ -3,6 +3,8 @@
     "id": "short-answer",
     "version": 1,
     "bleedRatio": 0.15,
+    "bleedBasis": "longer_side",
+    "neighborGapFraction": null,
     "targetWidthPx": 1000,
     "jpegQuality": 85,
     "contrast": "none"
@@ -11,6 +13,28 @@
     "id": "free-text",
     "version": 1,
     "bleedRatio": 0.05,
+    "bleedBasis": "longer_side",
+    "neighborGapFraction": null,
+    "targetWidthPx": 1400,
+    "jpegQuality": 85,
+    "contrast": "none"
+  },
+  "short-answer@2": {
+    "id": "short-answer",
+    "version": 2,
+    "bleedRatio": 0.3,
+    "bleedBasis": "shorter_side",
+    "neighborGapFraction": 0.5,
+    "targetWidthPx": 1000,
+    "jpegQuality": 85,
+    "contrast": "none"
+  },
+  "free-text@2": {
+    "id": "free-text",
+    "version": 2,
+    "bleedRatio": 0.1,
+    "bleedBasis": "shorter_side",
+    "neighborGapFraction": 0.5,
     "targetWidthPx": 1400,
     "jpegQuality": 85,
     "contrast": "none"

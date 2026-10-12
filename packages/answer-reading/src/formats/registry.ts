@@ -242,7 +242,7 @@ const integerDefinition: AnswerFormatDefinition<'integer'> = {
   kind: 'integer',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: () => 'número entero',
   promptGuide: () => `La respuesta es un número entero. ${NUMERIC_NOTE}`,
@@ -255,7 +255,7 @@ const decimalDefinition: AnswerFormatDefinition<'decimal'> = {
   kind: 'decimal',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: () => 'número decimal',
   promptGuide: () => `La respuesta es un número, posiblemente con decimales. ${NUMERIC_NOTE}`,
@@ -270,7 +270,7 @@ const fractionDefinition: AnswerFormatDefinition<'fraction'> = {
   kind: 'fraction',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) => (format.allowMixed ? 'fracción o número mixto' : 'fracción'),
   promptGuide: (format) =>
@@ -320,7 +320,7 @@ const orderedTupleDefinition: AnswerFormatDefinition<'ordered_tuple'> = {
   kind: 'ordered_tuple',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) => tupleLabel(format.arity),
   promptGuide: (format) =>
@@ -360,7 +360,7 @@ const sequenceDefinition: AnswerFormatDefinition<'sequence'> = {
   kind: 'sequence',
   readBy: 'vision',
   compatibleItemTypes: ['short_answer', 'ordering'],
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) => `secuencia de ${format.length} elementos`,
   promptGuide: (format) =>
@@ -400,7 +400,7 @@ const wordListDefinition: AnswerFormatDefinition<'word_list'> = {
   kind: 'word_list',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'key',
   formatLabel: (format) =>
     format.count === 1 ? 'una palabra' : `lista de ${format.count} palabras`,
@@ -438,7 +438,7 @@ const shortTextDefinition: AnswerFormatDefinition<'short_text'> = {
   kind: 'short_text',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'key',
   formatLabel: () => 'texto corto',
   promptGuide: (format) =>
@@ -541,7 +541,7 @@ const multiBoxDefinition: AnswerFormatDefinition<'multi_box'> = {
   kind: 'multi_box',
   readBy: 'vision',
   compatibleItemTypes: ['gap_fill'],
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) =>
     `${format.boxes.length} casillas: ${format.boxes.map((box) => box.label).join(', ')}`,
@@ -616,7 +616,7 @@ const freeTextDefinition: AnswerFormatDefinition<'free_text'> = {
   kind: 'free_text',
   readBy: 'vision',
   compatibleItemTypes: RUBRIC_ITEM_TYPES,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'rubric',
   formatLabel: () => 'respuesta de desarrollo',
   promptGuide: (format) =>
@@ -630,7 +630,7 @@ const mathWorkDefinition: AnswerFormatDefinition<'math_work'> = {
   kind: 'math_work',
   readBy: 'vision',
   compatibleItemTypes: RUBRIC_ITEM_TYPES,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'rubric',
   formatLabel: () => 'desarrollo matemático',
   promptGuide: () =>
