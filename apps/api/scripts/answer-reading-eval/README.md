@@ -77,7 +77,7 @@ pnpm answer-reading:eval --dataset "$P/datasets/fotos-reales-v1" \
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--dataset <dir>`             | Carpeta con `manifest.json` y las imágenes (obligatoria).                                                                                                                                                                                                                               |
 | `--routes <archivo.json>`     | `{ "description": "…", "routes": [ReadingRoute…] }` como `reading_routes` (se respeta `status`), o una sola `ReadingRoute` (se trata como activa). Por defecto `routes/actual.json`. `--route` es un alias.                                                                             |
-| `--reader-min-confidence <m>` | Umbral por clave de lector (`"gemini-3.5-flash=0.97,gpt-6-luna=0.85"`). **Simulación provisional hasta T1**: ver abajo.                                                                                                                                                                 |
+| `--reader-min-confidence <m>` | Umbral por clave de lector (`"gemini-3.5-flash=0.97,gpt-6-luna=0.85"`); reemplaza al umbral que el lector trae en la ruta. Ver abajo.                                                                                                                                                   |
 | `--repetitions <n>`           | Repeticiones por muestra (índices 0…n−1, parte de la clave del caché).                                                                                                                                                                                                                  |
 | `--budget-usd <x>`            | Tope de gasto. Obligatorio si falta alguna lectura en el caché. Antes de correr se estima el peor caso de lo que falta (3.000 tokens de entrada + `maxOutputTokens`) y, si supera el tope, no se llama a nada. Durante la corrida, cada llamada reserva su costo y no se pasa del tope. |
 | `--concurrency <n>`           | Muestras en paralelo (los lectores de una muestra siempre van en paralelo).                                                                                                                                                                                                             |
@@ -113,13 +113,15 @@ de `resolveReadingRoute`, igual que en producción: la de formato gana a la por 
   `gemini-3.8-flash` (umbral 0,95) en las rutas que autoaceptan; idéntica a lo que siembra 0053.
 - `routes/default.json`: la ruta por defecto sola (fixtures sintéticos).
 
-**Umbral por lector (provisional hasta T1).** El esquema de rutas todavía no admite
-`minConfidence` por lector. Con `--reader-min-confidence`, la política se evalúa con
-`minConfidence` 0 y, si alguna lectura principal queda bajo el umbral de su lector (o bajo el
-`minConfidence` de la ruta si ese lector no tiene umbral), la casilla pasa a revisión de lectura con
-`low_confidence`. Es lo mismo que hizo `experimento-pipeline` (medición 2): el paso de confianza de
-`evaluateConsensus` solo puede mandar a revisión, nunca autoaceptar. Cuando T1 agregue el umbral al
-contrato, este override se reemplaza por la ruta.
+**Umbral por lector.** Desde T1 la ruta trae `minConfidence` por lector y el consenso lo aplica.
+`--reader-min-confidence "clave=umbral,…"` sirve para barrer umbrales sin editar la ruta: el umbral
+pasado **reemplaza** al `minConfidence` que el lector trae en la ruta (hacia arriba o hacia abajo),
+también en el lector de desempate; los lectores que no se nombran conservan el suyo. Además, la
+política se evalúa con `minConfidence` 0 y, si alguna lectura principal queda bajo el umbral del
+override (o bajo el `minConfidence` de la ruta si ese lector no tiene umbral en el override), la
+casilla pasa a revisión de lectura con `low_confidence`. El override no toca al verificador de
+incorrectas ni a la clave del caché (el umbral no cambia lo que se le pide al modelo), así que un
+barrido sale entero del caché.
 
 ## Caché de lecturas
 

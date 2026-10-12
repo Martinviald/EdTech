@@ -274,7 +274,7 @@ export function renderReportMarkdown(
   ];
   if (thresholds) {
     lines.push(
-      `**Umbral por lector (simulación provisional hasta T1):** ${thresholds}. La política se evalúa con \`minConfidence\` 0 y, si alguna lectura principal queda bajo el umbral de su lector (o bajo el \`minConfidence\` de la ruta si el lector no tiene umbral propio), la casilla va a revisión por \`low_confidence\`.`,
+      `**Umbral por lector (override):** ${thresholds}. Reemplaza al umbral que cada lector nombrado trae en la ruta. La política se evalúa con \`minConfidence\` 0 y, si alguna lectura principal queda bajo el umbral de su lector (o bajo el \`minConfidence\` de la ruta si el lector no tiene umbral propio), la casilla va a revisión por \`low_confidence\`.`,
       '',
     );
   }

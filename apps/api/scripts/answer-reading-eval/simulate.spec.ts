@@ -294,7 +294,7 @@ describe('simulación del arnés con rutas por formato', () => {
     });
   });
 
-  it('el umbral que el lector trae en la ruta llega al consenso sin override', async () => {
+  it('el umbral que el lector trae en la ruta llega al consenso y el override lo reemplaza', async () => {
     const readings = perfectReadings(0.95);
     const fake = fakeFor({ [HAIKU]: readings, [FLASH_LITE]: readings });
     const withReaderThreshold = (value: unknown): unknown => {
@@ -324,6 +324,18 @@ describe('simulación del arnés con rutas por formato', () => {
     const shortUnits = result.units.filter((unit) => unit.group === 'short');
     expect(shortUnits.every((unit) => unit.outcome === 'needs_review')).toBe(true);
     expect(shortUnits.every((unit) => unit.reasons.includes('low_confidence'))).toBe(true);
+
+    const overridden = await runSimulation({
+      samples: dataset.samples,
+      routeSet: strictRoutes,
+      repetitions: 1,
+      concurrency: 2,
+      readerMinConfidence: parseReaderMinConfidence(`${FLASH_LITE}=0.90`),
+      transcriberFor: () => fake,
+      cache: new ReadingCache(null, 'off'),
+      budget: null,
+    });
+    expect(overridden.units.filter((unit) => unit.autoAccepted)).toHaveLength(3);
   });
 
   it('una segunda corrida sale entera del caché sin llamar al transcriptor', async () => {

@@ -761,13 +761,36 @@ async function verifyUnit(
   };
 }
 
+function withReaderThreshold(reader: ReaderSpec, thresholds: ReaderMinConfidence): ReaderSpec {
+  const threshold = thresholds[reader.key];
+  return threshold === undefined ? reader : { ...reader, minConfidence: threshold };
+}
+
+function withReaderThresholds(
+  route: ResolvedRouteWithFallback,
+  thresholds: ReaderMinConfidence | null,
+): ResolvedRouteWithFallback {
+  if (!thresholds) return route;
+  const tiebreakReader = route.policy.tiebreakReader;
+  return {
+    ...route,
+    readers: route.readers.map((reader) => withReaderThreshold(reader, thresholds)),
+    policy: {
+      ...route.policy,
+      tiebreakReader:
+        tiebreakReader === null ? null : withReaderThreshold(tiebreakReader, thresholds),
+    },
+  };
+}
+
 async function runUnit(
   runner: UnitRunner,
   planned: PlannedSample & { route: ResolvedRouteWithFallback },
   repetition: number,
   thresholds: ReaderMinConfidence | null,
 ): Promise<{ unit: UnitRecord; readings: ReadingRecord[] }> {
-  const { prepared, route } = planned;
+  const { prepared } = planned;
+  const route = withReaderThresholds(planned.route, thresholds);
   const basePolicy: ConsensusPolicy = { ...route.policy, auditSampleRate: 0 };
   const policy: ConsensusPolicy = thresholds ? { ...basePolicy, minConfidence: 0 } : basePolicy;
   const options = {
