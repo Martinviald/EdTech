@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   assessmentReportQuerySchema,
   type AssessmentReportResponse,
@@ -11,6 +11,7 @@ import type {
 } from './assistant-tool.types';
 import type { LlmToolDefinition } from '../../llm/llm.types';
 import { AssessmentReportService } from '../../assessment-report/assessment-report.service';
+import { ItemAnalysisService } from '../../item-analysis/item-analysis.service';
 
 /** Alumno en foco SIN PII: estructuralmente igual pero sin nombre ni RUT. */
 type RiskStudentPiiFree = Omit<AssessmentReportRiskStudent, 'studentRut' | 'studentFullName'>;
@@ -37,7 +38,10 @@ type AssessmentReportPiiFree = Omit<AssessmentReportResponse, 'studentsAtRisk'> 
  */
 @Injectable()
 export class GetAssessmentReportTool implements AssistantTool {
-  constructor(private readonly report: AssessmentReportService) {}
+  constructor(
+    private readonly report: AssessmentReportService,
+    private readonly itemAnalysis: ItemAnalysisService,
+  ) {}
 
   readonly definition: LlmToolDefinition = {
     name: 'get_assessment_report',
@@ -50,14 +54,16 @@ export class GetAssessmentReportTool implements AssistantTool {
       'Los flags describen el APRENDIZAJE del curso, no la calidad del ' +
       'instrumento: son pruebas estandarizadas y validadas y no se juzgan. ' +
       'Requiere assessmentId; opcionalmente acota a un curso con classGroupId. ' +
-      'Los IDs se obtienen de list_filter_options o get_dashboard_*. No expone ' +
-      'nombres ni RUT de alumnos.',
+      'El assessmentId se obtiene SIEMPRE de list_assessments: list_filter_options ' +
+      'devuelve instrumentos, no evaluaciones, y cada curso tiene su propia ' +
+      'evaluación del mismo instrumento. No expone nombres ni RUT de alumnos.',
     inputSchema: {
       type: 'object',
       properties: {
         assessmentId: {
           type: 'string',
-          description: 'UUID de la evaluación a analizar. Requerido.',
+          description:
+            'UUID de la evaluación (assessmentId de list_assessments, no el id de un instrumento). Requerido.',
         },
         classGroupId: {
           type: 'string',
@@ -81,8 +87,49 @@ export class GetAssessmentReportTool implements AssistantTool {
       };
     }
 
-    const data = await this.report.getReport(ctx.user, parsed.data);
-    return { content: JSON.stringify(this.sanitize(data)) };
+    try {
+      const data = await this.report.getReport(ctx.user, parsed.data);
+      return { content: JSON.stringify(this.sanitize(data)) };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return this.notFoundGuidance(ctx, parsed.data.assessmentId);
+      }
+      throw error;
+    }
+  }
+
+  private async notFoundGuidance(
+    ctx: AssistantToolContext,
+    unknownId: string,
+  ): Promise<AssistantToolResult> {
+    const { data: assessmentsOfInstrument } = await this.itemAnalysis.listAssessments(ctx.user, {
+      instrumentId: [unknownId],
+    });
+    if (assessmentsOfInstrument.length === 0) {
+      return {
+        content: JSON.stringify({
+          error:
+            'No existe una evaluación con ese assessmentId dentro de tu alcance. ' +
+            'Busca el assessmentId con list_assessments antes de reintentar.',
+        }),
+        isError: true,
+      };
+    }
+    return {
+      content: JSON.stringify({
+        error:
+          'Ese UUID es de un instrumento, no de una evaluación. Cada curso tiene su ' +
+          'propia evaluación de este instrumento: reintenta con el assessmentId de ' +
+          'la que corresponda o pregunta al usuario qué curso quiere ver.',
+        assessments: assessmentsOfInstrument.map((assessment) => ({
+          assessmentId: assessment.assessmentId,
+          name: assessment.name,
+          gradeName: assessment.gradeName,
+          studentsCount: assessment.studentsCount,
+        })),
+      }),
+      isError: true,
+    };
   }
 
   /**
