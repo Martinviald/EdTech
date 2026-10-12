@@ -4,7 +4,6 @@ import {
   fakeVerdict,
   renderTranscriptionPrompt,
   renderVerificationPrompt,
-  transcriptionZodSchema,
 } from '@soe/answer-reading';
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
 import type { LlmService } from '../../llm/llm.service';
