@@ -150,9 +150,23 @@ def test_la_evidencia_de_la_busqueda_queda_registrada(
     from app.pipeline import classify_page_debug
 
     gray = wide_margin_page(spec, marks_abcd)
-    _, debug = classify_page_debug(syn.to_bgr(gray), 0, spec, profile)
+    without_framing = {**profile, "source": "scanner"}
+    _, debug = classify_page_debug(syn.to_bgr(gray), 0, spec, without_framing)
 
     assert debug["fiducialRescue"], "la pagina rescatada debe decir que salio de la busqueda"
+
+
+def test_con_perfil_phone_la_hoja_encuadrada_gana_antes_que_la_busqueda(
+    spec: dict, profile: dict, marks_abcd: dict
+) -> None:
+    from app.pipeline import classify_page_debug
+
+    gray = wide_margin_page(spec, marks_abcd)
+    page, debug = classify_page_debug(syn.to_bgr(gray), 0, spec, profile)
+
+    assert debug["sheetFramed"] is True
+    assert debug["fiducialRescue"] is None
+    assert_marks_match(page, marks_abcd)
 
 
 def test_la_pagina_sana_no_reporta_rescate(

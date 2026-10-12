@@ -157,7 +157,7 @@ from typing import Any
 import cv2
 import numpy as np
 
-from .geometry import workspace_size
+from .geometry import fiducial_rect_mm, workspace_size
 
 CORNER_REGION_FRACTION = 0.45
 MIN_SQUARE_AREA_PX = 60
@@ -176,6 +176,11 @@ REFINE_WORKSPACE_FRACTION = 0.025
 REFINE_MIN_STEP_PX = 1.0
 SEARCH_CANDIDATES_PER_CORNER = 6
 SEARCH_MAX_COMBINATIONS = 512
+QUAD_MAX_ASPECT_DEVIATION = 0.15
+QUAD_MIN_OPPOSITE_SIDE_RATIO = 0.75
+QUAD_MAX_ANGLE_DEVIATION_DEG = 25.0
+
+Corners = tuple[tuple[float, float], ...]
 
 
 @dataclass(frozen=True)
@@ -187,6 +192,8 @@ class RectifiedPage:
     reconstructed: bool = False
     reconstructed_corner: int | None = None
     searched: bool = False
+    corners: Corners | None = None
+    framed: bool = False
 
 
 @dataclass(frozen=True)
@@ -287,8 +294,12 @@ def search_rectification(
     El costo se acota por tres lados: corre SOLO en el camino de reintento (si
     la rectificacion estricta ya confirmo, esto no se ejecuta y el camino feliz
     no paga nada), se topea el numero de combinaciones, y se descartan temprano
-    las no convexas — que es barato y poda mucho, porque un cuadrilatero con dos
-    esquinas cruzadas no puede ser una hoja.
+    los cuadrilateros que no pueden ser una hoja (`fiducial_quad_consistent`: no
+    convexos, de proporcion ajena al papel o con angulos imposibles) — que es
+    barato y poda mucho. Ademas es lo que protege a una pagina con POCAS
+    burbujas: con 4 burbujas la firma no discrimina (cualquier homografia que
+    deje los 4 discos sobre texto la pasa) y en IMG_2199 la busqueda eligio una
+    que mapeaba media hoja al espacio de trabajo.
     """
     gray = cv2.cvtColor(page_bgr, cv2.COLOR_BGR2GRAY)
     candidates = _fiducial_candidates(gray, SEARCH_CANDIDATES_PER_CORNER)
@@ -299,8 +310,7 @@ def search_rectification(
     best: tuple[RectifiedPage, float, int] | None = None
     evaluated = 0
     for combo in itertools.product(*candidates):
-        quad = np.array([c[0] for c in combo], dtype=np.float32).reshape(-1, 1, 2)
-        if not cv2.isContourConvex(quad):
+        if not fiducial_quad_consistent(tuple(c[0] for c in combo), spec):
             continue
         evaluated += 1
         page = _warp(gray, list(combo), spec, found=4, touches=False, searched=True)
@@ -486,7 +496,54 @@ def _warp(
         reconstructed=corner is not None,
         reconstructed_corner=corner,
         searched=searched,
+        corners=tuple((float(x), float(y)) for x, y in src),
     )
+
+
+def fiducial_quad_consistent(corners: Corners, spec: dict[str, Any]) -> bool:
+    """Los 4 centros (TL, TR, BR, BL) pueden ser los fiduciales de ESTA hoja.
+
+    Es una prueba de forma, independiente de donde este la hoja en la imagen:
+    cuadrilatero convexo, proporcion ancho/alto como la del rectangulo fiducial
+    del `paper` (+-15 %), lados opuestos parecidos (>= 0.75: la perspectiva de una
+    foto de mano los acorta poco) y angulos interiores a menos de 25 grados de
+    recto. Medido sobre las 16 capturas reales con 4/4 fiduciales verdaderos
+    (6 fotos 2026-10-12 + 10 del corte real-phone): proporcion 0.996-1.049,
+    lados opuestos >= 0.859, angulos 78-105. La homografia equivocada que la
+    busqueda por firma eligio en IMG_2199 (pagina con 4 burbujas, donde la firma
+    no discrimina) mapeaba media hoja al espacio de trabajo: no pasa.
+
+    No reemplaza a la firma de la grilla: la firma prueba que la homografia hace
+    calzar las burbujas; esto solo descarta cuadrilateros que no pueden ser una
+    hoja, que es lo unico que hay para juzgar una pagina sin burbujas.
+    """
+    if len(corners) != 4:
+        return False
+    points = np.array(corners, dtype=np.float64)
+    if not cv2.isContourConvex(points.astype(np.float32).reshape(-1, 1, 2)):
+        return False
+    sides = [float(np.linalg.norm(points[(i + 1) % 4] - points[i])) for i in range(4)]
+    if min(sides) <= 0:
+        return False
+    top, right, bottom, left = sides
+    rect_w, rect_h = fiducial_rect_mm(spec)
+    aspect = ((top + bottom) / (right + left)) / (rect_w / rect_h)
+    if abs(aspect - 1) > QUAD_MAX_ASPECT_DEVIATION:
+        return False
+    if min(top, bottom) / max(top, bottom) < QUAD_MIN_OPPOSITE_SIDE_RATIO:
+        return False
+    if min(left, right) / max(left, right) < QUAD_MIN_OPPOSITE_SIDE_RATIO:
+        return False
+    return all(
+        abs(_interior_angle_deg(points, i) - 90) <= QUAD_MAX_ANGLE_DEVIATION_DEG for i in range(4)
+    )
+
+
+def _interior_angle_deg(points: np.ndarray, index: int) -> float:
+    before = points[index - 1] - points[index]
+    after = points[(index + 1) % 4] - points[index]
+    cosine = float(np.dot(before, after) / (np.linalg.norm(before) * np.linalg.norm(after)))
+    return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
 
 
 def _complete_parallelogram(
