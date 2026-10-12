@@ -69,6 +69,7 @@ const LEGACY_REASONING_MODEL = /^gpt-5(-|$)/;
 const O_SERIES_MODEL = /^o\d/;
 const NON_REASONING_MODEL = /^(gpt-4|gpt-3\.5|chatgpt-)/;
 const REASONING_ERROR_MESSAGE = /reasoning|effort/i;
+const REASONING_PARAM = /^reasoning(\.|$)/;
 const BAD_REQUEST_STATUS = 400;
 
 @Injectable()
@@ -294,12 +295,11 @@ export class OpenAiProvider implements LlmProvider {
   }
 
   private isReasoningRejection(error: unknown): boolean {
-    return (
-      error instanceof Error &&
-      'status' in error &&
-      (error as { status: unknown }).status === BAD_REQUEST_STATUS &&
-      REASONING_ERROR_MESSAGE.test(error.message)
-    );
+    if (!(error instanceof Error)) return false;
+    const { status, param } = error as Error & { status?: unknown; param?: unknown };
+    if (status !== BAD_REQUEST_STATUS) return false;
+    if (typeof param === 'string') return REASONING_PARAM.test(param);
+    return REASONING_ERROR_MESSAGE.test(error.message);
   }
 
   private toImageParts(images: LlmImagePart[], detail: OpenAiImageDetail): ResponseInputContent[] {

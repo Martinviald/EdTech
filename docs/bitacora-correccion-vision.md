@@ -559,3 +559,12 @@ Plan: `docs/plan-etapa1-lectura-vision.md`.
   por: no pidió revisión → interpretable → **supera el umbral de su lector** → confianza. Con un
   umbral único ese criterio es monótono con la confianza, por lo que la propuesta no cambia sin
   umbrales por lector. Los 37 casos previos de `evaluate-consensus.spec` y los del pipeline pasan sin tocarse.
+- **`OpenAiProvider`: la escalera de `reasoning.effort` no bajaba de nivel.** Error real
+  (una llamada de texto a `gpt-6.1-sol` con `reasoning: { effort: 'none' }`, rechazada sin costo):
+  `BadRequestError`, `status: 400`, `code: 'unsupported_value'`, `param: 'reasoning.effort'`,
+  `type: 'invalid_request_error'`, `message: "400 Unsupported value: 'none' is not supported with
+  the 'gpt-6.1-sol' model. Supported values are: 'low', 'medium', 'high', 'xhigh', and 'max'."`.
+  El mensaje no nombra `reasoning` ni `effort`, por eso el patrón nunca calzaba. Ahora, si el error
+  trae `param`, decide el parámetro (`reasoning` o `reasoning.*`); solo sin `param` se mira el
+  mensaje. Un 400 con otro `param` ya no se reintenta aunque el mensaje hable de razonamiento. Con
+  `gpt-6.1-sol` la escalera queda `none` → `minimal` → `low` y recuerda `low` para el modelo.

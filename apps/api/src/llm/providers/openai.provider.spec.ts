@@ -121,6 +121,17 @@ function badRequest(message: string): Error {
   return Object.assign(new Error(message), { status: 400 });
 }
 
+function unsupportedParam(param: string, value: string, model: string): Error {
+  const message = `Unsupported value: '${value}' is not supported with the '${model}' model. Supported values are: 'low', 'medium', 'high', 'xhigh', and 'max'.`;
+  return Object.assign(new Error(`400 ${message}`), {
+    status: 400,
+    code: 'unsupported_value',
+    param,
+    type: 'invalid_request_error',
+    error: { message, type: 'invalid_request_error', param, code: 'unsupported_value' },
+  });
+}
+
 describe('OpenAiProvider', () => {
   beforeEach(() => OpenAiConstructor.mockClear());
 
@@ -323,6 +334,35 @@ describe('OpenAiProvider.completeStructured', () => {
       ([body]) => (body.reasoning as { effort?: string } | undefined)?.effort,
     );
     expect(efforts).toEqual(['none', 'minimal', 'minimal']);
+  });
+
+  it('reconoce el rechazo real de la API por el parámetro reasoning.effort aunque el mensaje no lo nombre', async () => {
+    const create = makeCreate((body) => {
+      const effort = (body.reasoning as { effort?: string } | undefined)?.effort;
+      return effort === 'none' || effort === 'minimal'
+        ? Promise.reject(unsupportedParam('reasoning.effort', effort, 'gpt-6.1-sol'))
+        : Promise.resolve(STRUCTURED_RESPONSE);
+    });
+    const provider = makeProvider(create);
+
+    await provider.completeStructured(makeStructuredRequest({ model: 'gpt-6.1-sol' }));
+    await provider.completeStructured(makeStructuredRequest({ model: 'gpt-6.1-sol' }));
+
+    const efforts = create.mock.calls.map(
+      ([body]) => (body.reasoning as { effort?: string } | undefined)?.effort,
+    );
+    expect(efforts).toEqual(['none', 'minimal', 'low', 'low']);
+  });
+
+  it('no reintenta si el error estructurado señala otro parámetro aunque el mensaje hable de razonamiento', async () => {
+    const create = makeCreate(() =>
+      Promise.reject(unsupportedParam('text.format', 'reasoning_schema', 'gpt-6.1-sol')),
+    );
+
+    await expect(
+      makeProvider(create).completeStructured(makeStructuredRequest({ model: 'gpt-6.1-sol' })),
+    ).rejects.toThrow('reasoning_schema');
+    expect(create).toHaveBeenCalledTimes(1);
   });
 
   it('no reintenta ante un error que no es del razonamiento', async () => {
