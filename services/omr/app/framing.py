@@ -20,6 +20,15 @@ con TODOS sus gates intactos. Dentro del recorte los fiduciales vuelven a estar
 a ~0.05-0.10 de la esquina, como en un escaneo. Medido sobre las 6 fotos: 4/4
 fiduciales en el recorte en todas, a resolucion nativa y a la de la app.
 
+El recorte ademas se lleva a lo sumo a `FRAMING_MAX_WIDTH` px de ancho. El
+detector umbraliza con un `blockSize` fijo en PIXELES (51): en una foto nativa
+de 2268 px el fiducial de la hoja encuadrada mide ~53 px, su interior queda
+sobre la media local y se ahueca, y si el hueco toca el borde deja de ser un
+cuadrado (medido en IMG_2199: la esquina TL perdia su fiducial y la pasada
+estricta coronaba una letra del titulo). A 1800 px el fiducial mide ~42 px y
+sale solido. No se pierde nada que se use: el espacio de trabajo rectificado
+mide 1600 px de ancho.
+
 El recorte es una CANDIDATA, igual que las demas rectificaciones de rescate: el
 pipeline solo la acepta si los 4 fiduciales forman un cuadrilatero coherente con
 la hoja (`fiducial_quad_consistent` en rectify.py) y, cuando la pagina tiene
@@ -36,10 +45,11 @@ FRAMING_OPEN_FRACTION = 0.02
 FRAMING_MIN_SHEET_FRACTION = 0.2
 FRAMING_PAD_FRACTION = 0.03
 FRAMING_MAX_KEPT_AREA = 0.95
+FRAMING_MAX_WIDTH = 1800
 
 
 def frame_sheet(bgr: np.ndarray) -> np.ndarray | None:
-    """Recorte de la foto al rectangulo de la hoja (con margen), o None si no aporta.
+    """Recorte de la foto al rectangulo de la hoja (con margen y ancho acotado), o None.
 
     None cuando no aparece un blob claro que pueda ser la hoja (menos del 20 % del
     cuadro) o cuando el recorte conservaria casi toda la imagen: en ese caso la
@@ -52,7 +62,13 @@ def frame_sheet(bgr: np.ndarray) -> np.ndarray | None:
     x0, y0, x1, y1 = box
     if (x1 - x0) * (y1 - y0) >= FRAMING_MAX_KEPT_AREA * width * height:
         return None
-    return np.ascontiguousarray(bgr[y0:y1, x0:x1])
+    framed = bgr[y0:y1, x0:x1]
+    framed_width = x1 - x0
+    if framed_width <= FRAMING_MAX_WIDTH:
+        return np.ascontiguousarray(framed)
+    scale = FRAMING_MAX_WIDTH / framed_width
+    size = (FRAMING_MAX_WIDTH, max(1, round((y1 - y0) * scale)))
+    return cv2.resize(framed, size, interpolation=cv2.INTER_AREA)
 
 
 def _sheet_box(gray: np.ndarray) -> tuple[int, int, int, int] | None:

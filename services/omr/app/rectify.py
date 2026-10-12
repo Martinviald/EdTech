@@ -177,8 +177,8 @@ REFINE_MIN_STEP_PX = 1.0
 SEARCH_CANDIDATES_PER_CORNER = 6
 SEARCH_MAX_COMBINATIONS = 512
 QUAD_MAX_ASPECT_DEVIATION = 0.15
-QUAD_MIN_OPPOSITE_SIDE_RATIO = 0.75
-QUAD_MAX_ANGLE_DEVIATION_DEG = 25.0
+QUAD_MIN_OPPOSITE_SIDE_RATIO = 0.85
+QUAD_MAX_ANGLE_DEVIATION_DEG = 12.0
 
 Corners = tuple[tuple[float, float], ...]
 
@@ -505,13 +505,16 @@ def fiducial_quad_consistent(corners: Corners, spec: dict[str, Any]) -> bool:
 
     Es una prueba de forma, independiente de donde este la hoja en la imagen:
     cuadrilatero convexo, proporcion ancho/alto como la del rectangulo fiducial
-    del `paper` (+-15 %), lados opuestos parecidos (>= 0.75: la perspectiva de una
-    foto de mano los acorta poco) y angulos interiores a menos de 25 grados de
-    recto. Medido sobre las 16 capturas reales con 4/4 fiduciales verdaderos
-    (6 fotos 2026-10-12 + 10 del corte real-phone): proporcion 0.996-1.049,
-    lados opuestos >= 0.859, angulos 78-105. La homografia equivocada que la
-    busqueda por firma eligio en IMG_2199 (pagina con 4 burbujas, donde la firma
-    no discrimina) mapeaba media hoja al espacio de trabajo: no pasa.
+    del `paper` (+-15 %), lados opuestos parecidos (>= 0.85) y angulos interiores
+    a menos de 12 grados de recto. Medido sobre las 15 capturas reales con 4/4
+    fiduciales verdaderos (6 fotos del 2026-10-12, encuadradas, y 9 del corte
+    real-phone): proporcion 0.996-1.002, lados opuestos >= 0.945, angulos a <= 5
+    grados de recto. Lo que tiene que rechazar, medido en IMG_2199 nativa (1
+    pregunta, 4 burbujas: ahi la firma no discrimina): la busqueda por firma
+    eligio un cuadrilatero con lados opuestos 0.84 y angulos 72-107 que mapeaba la
+    hoja torcida, y la B rellena salia `likely_blank`. Una foto de mano con
+    perspectiva fuerte puede quedar fuera: en ese caso se pierde un rescate, no
+    se lee mal.
 
     No reemplaza a la firma de la grilla: la firma prueba que la homografia hace
     calzar las burbujas; esto solo descarta cuadrilateros que no pueden ser una

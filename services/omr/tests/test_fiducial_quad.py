@@ -72,6 +72,7 @@ def test_quad_with_moderate_phone_perspective_is_consistent() -> None:
         "media-hoja",
         "cruzado",
         "trapecio-extremo",
+        "img-2199-nativa",
     ],
 )
 def test_quad_that_cannot_be_the_sheet_is_rejected(deform: str) -> None:
@@ -81,6 +82,12 @@ def test_quad_that_cannot_be_the_sheet_is_rejected(deform: str) -> None:
         "media-hoja": (tl, tr, (br[0], (tr[1] + br[1]) / 2), (bl[0], (tl[1] + bl[1]) / 2)),
         "cruzado": (tl, tr, bl, br),
         "trapecio-extremo": ((tl[0] + 600, tl[1]), (tr[0] - 600, tr[1]), br, bl),
+        "img-2199-nativa": (
+            (227.36, 773.71),
+            (2110.0, 662.18),
+            (2143.69, 3271.41),
+            (218.61, 3877.65),
+        ),
     }
 
     assert not fiducial_quad_consistent(quads[deform], spec)

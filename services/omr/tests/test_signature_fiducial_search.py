@@ -36,6 +36,7 @@ from app.rectify import (
     WIDE_CORNER_DISTANCE_FRACTION,
     _find_fiducials_with_clipping,
     _trim_to_combination_budget,
+    fiducial_quad_consistent,
     search_rectification,
 )
 from tests import synthetic as syn
@@ -232,7 +233,10 @@ def test_cuadrado_falso_lejano_no_se_acepta(
     detections, _ = _find_fiducials_with_clipping(base)
     assert detections[0] is None, "el tope estricto debe seguir ignorando la mancha"
     found = search_rectification(syn.to_bgr(base), spec, always_confirms)
-    assert found is not None, "con un puntaje ciego la busqueda si corona la mancha"
+    # Con un puntaje ciego la busqueda coronaba la mancha; ahora el filtro de forma
+    # (fiducial_quad_consistent) la poda antes de puntuar: si queda una candidata,
+    # es un cuadrilatero que puede ser la hoja.
+    assert found is None or fiducial_quad_consistent(found[0].corners, spec)
 
     # La candidata existe y es MALA. El pipeline no la debe usar: o lee la
     # pagina por el camino de siempre (paralelogramo confirmado), o la rechaza.
