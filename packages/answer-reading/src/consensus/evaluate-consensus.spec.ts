@@ -182,6 +182,24 @@ describe('evaluateConsensus (diseño §8.2)', () => {
     });
   });
 
+  it('4c. la propuesta es la mejor lectura, no la del primer lector de la ruta', () => {
+    const result = evaluate([
+      claude('7', { reviewRequested: true, confidence: 0.45 }),
+      gemini('2,5', { confidence: 0.95 }),
+    ]);
+    expect(result).toMatchObject({ outcome: 'needs_review', reasons: ['reader_requested_review'] });
+    expect(result.value?.value).toMatchObject({ written: '2,5' });
+  });
+
+  it('4d. si todos piden revisión, propone la lectura interpretable de mayor confianza', () => {
+    const result = evaluate([
+      claude('γ', { reviewRequested: true, confidence: 0.95 }),
+      gemini('7', { reviewRequested: true, confidence: 0.4 }),
+      reading('r-third', 'third', fakeOutput('2,5', { reviewRequested: true, confidence: 0.7 })),
+    ]);
+    expect(result.value?.value).toMatchObject({ written: '2,5' });
+  });
+
   it('5. no convertible al formato → revisión de corrección, nunca incorrecta', () => {
     const result = evaluate([claude('γ,5'), gemini('γ,5')]);
     expect(result).toMatchObject({

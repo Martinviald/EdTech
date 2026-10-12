@@ -46,6 +46,15 @@ export interface ConsensusOptions {
 
 type ValidReading = ConsensusReading & { readonly output: TranscriptionOutput };
 
+/** Orden lexicográfico: la primera componente que difiere decide; un empate conserva el orden de la ruta. */
+function isBetterRank(candidate: readonly number[], current: readonly number[]): boolean {
+  for (let index = 0; index < candidate.length; index += 1) {
+    const difference = (candidate[index] ?? 0) - (current[index] ?? 0);
+    if (difference !== 0) return difference > 0;
+  }
+  return false;
+}
+
 interface Normalized {
   readonly reading: ValidReading;
   readonly answer: NormalizedAnswer;
@@ -184,8 +193,17 @@ export function evaluateConsensus(
 
   const valid = primaries.filter(isValid);
   const proposal = (): NormalizedAnswer | null => {
-    const first = valid[0];
-    return first ? normalizeTranscription(first.output, format) : null;
+    let best: { answer: NormalizedAnswer; rank: readonly number[] } | null = null;
+    for (const reading of valid) {
+      const answer = normalizeTranscription(reading.output, format);
+      const rank = [
+        reading.output.reviewRequested ? 0 : 1,
+        answer.canonical === null ? 0 : 1,
+        reading.output.confidence,
+      ];
+      if (best === null || isBetterRank(rank, best.rank)) best = { answer, rank };
+    }
+    return best?.answer ?? null;
   };
 
   if (valid.length < policy.minReaders) {
