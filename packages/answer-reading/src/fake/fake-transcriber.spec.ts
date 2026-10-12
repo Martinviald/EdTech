@@ -1,7 +1,8 @@
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
 import { renderTranscriptionPrompt } from '../prompts/registry';
 import type { TranscriptionRequest } from '../transcriber';
-import { FakeTranscriber, fakeOutput } from './fake-transcriber';
+import { renderVerificationPrompt } from '../verification/verify-incorrect';
+import { FakeTranscriber, fakeOutput, fakeVerdict } from './fake-transcriber';
 
 const FORMAT: ResponseFormat = { kind: 'integer', maxChars: 4, allowNegative: false };
 const READER: ReaderSpec = {
@@ -72,5 +73,31 @@ describe('FakeTranscriber', () => {
     const fake = new FakeTranscriber();
     expect(fake.supports(READER)).toBe(true);
     expect(fake.supports({ ...READER, transcriberId: 'llm' })).toBe(false);
+  });
+
+  it('devuelve el veredicto programado del verificador y una falla si no hay', async () => {
+    const verifier = { ...READER, key: 'verif', promptRef: 'verify.incorrect@1' };
+    const fake = new FakeTranscriber({ verdicts: { verif: { abc: fakeVerdict(true, 0.9) } } });
+    const rendered = renderVerificationPrompt({
+      reader: verifier,
+      format: FORMAT,
+      agreedReading: { literal: '15', parts: null },
+      acceptedAnswers: ['10'],
+    });
+    const verifyRequest = (sha256: string) => ({
+      readingKey: 'v',
+      image: { mimeType: 'image/jpeg' as const, base64: '', sha256 },
+      reader: verifier,
+      ...rendered,
+    });
+    expect(await fake.verify(verifyRequest('abc'))).toMatchObject({
+      status: 'ok',
+      output: { couldBeKey: true, confidence: 0.9 },
+    });
+    expect(await fake.verify(verifyRequest('otro'))).toMatchObject({
+      status: 'error',
+      errorCode: 'fake_missing',
+    });
+    expect(fake.verifyCalls).toHaveLength(2);
   });
 });
