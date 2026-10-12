@@ -4,7 +4,13 @@ jest.mock('drizzle-orm', () => ({
 }));
 
 import { createHash } from 'node:crypto';
-import { FakeTranscriber, fakeOutput, type FakeReading } from '@soe/answer-reading';
+import {
+  FakeTranscriber,
+  fakeOutput,
+  fakeVerdict,
+  type FakeReading,
+  type FakeVerdict,
+} from '@soe/answer-reading';
 import {
   answerReadingDecisions,
   answerReadingRuns,
@@ -193,6 +199,7 @@ class FakeDispatcher implements JobDispatcher {
 
 interface SetupOptions {
   readonly readings?: Record<string, Record<string, FakeReading>>;
+  readonly verdicts?: Record<string, Record<string, FakeVerdict>>;
   readonly policy?: ConsensusPolicy;
   readonly readers?: ReaderSpec[];
   readonly shadowReaders?: ReaderSpec[];
@@ -291,7 +298,10 @@ function setup(setupOptions: SetupOptions = {}) {
 
   memory.unique(answerReadings, ['orgId', 'readingKey', 'readerKey', 'mode', 'attempt']);
   const db = memory.asDatabase();
-  const transcriber = new FakeTranscriber({ byReader: setupOptions.readings ?? {} });
+  const transcriber = new FakeTranscriber({
+    byReader: setupOptions.readings ?? {},
+    verdicts: setupOptions.verdicts ?? {},
+  });
   const activeTranscriber = setupOptions.wrapTranscriber?.(transcriber, memory) ?? transcriber;
   const files = {
     getById: jest.fn(async (_orgId: string, fileId: string) => ({
@@ -803,6 +813,111 @@ describe('AnswerReadingPipelineService — umbral de confianza por lector', () =
     await runScan();
 
     expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+});
+
+describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
+  const VERIFIER = reader('verificador', 'openai-luna', {
+    provider: 'openai',
+    promptRef: 'verify.incorrect@1',
+    hints: 'format',
+    minConfidence: 0.9,
+  });
+  const withVerifier = { policy: { ...POLICY, incorrectVerifier: VERIFIER } };
+  const agreeIncorrect = {
+    haiku: { [SHA_1]: fakeOutput('7,4') },
+    flash: { [SHA_1]: fakeOutput('7.4') },
+  };
+
+  it('una incorrecta que podría ser la clave pasa a revisión de corrección y guarda la evidencia', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(true, 0.95) } },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['verifier_flagged'],
+      reviewMode: 'grading',
+    });
+    expect(transcriber.verifyCalls).toHaveLength(1);
+    const [call] = transcriber.verifyCalls;
+    expect(call?.prompt.ref).toBe('verify.incorrect@1');
+    expect(call?.prompt.user).toContain('7,3');
+    expect(call?.prompt.user).toContain('7,4');
+    for (const transcription of transcriber.calls) {
+      expect(`${transcription.prompt.system}${transcription.prompt.user}`).not.toContain('7,3');
+    }
+    const verification = readingsOf(memory).filter((row) => row.mode === 'verifier');
+    expect(verification).toHaveLength(1);
+    expect(verification[0]).toMatchObject({
+      readerKey: 'verificador',
+      promptRef: 'verify.incorrect@1',
+      status: 'ok',
+      output: null,
+      literal: null,
+      verificationOutput: { couldBeKey: true, confidence: 0.95 },
+    });
+    expect(currentDecision(memory).usedReadingIds).not.toContain(verification[0]?.id);
+  });
+
+  it('un "no" con confianza suficiente deja la incorrecta autoaceptada', async () => {
+    const { memory, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(false, 0.95) } },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted', reasons: [] });
+  });
+
+  it('un "no" dudoso o un verificador que falla mandan a revisión, nunca aceptan', async () => {
+    for (const verdict of [fakeVerdict(false, 0.6), { status: 'refused' as const }]) {
+      const { memory, runScan } = setup({
+        ...withVerifier,
+        readings: agreeIncorrect,
+        verdicts: { verificador: { [SHA_1]: verdict } },
+      });
+
+      await runScan();
+
+      expect(currentDecision(memory)).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['verifier_flagged'],
+      });
+    }
+  });
+
+  it('no llama al verificador con una correcta ni sin verificador en la política', async () => {
+    const correct = setup({ ...withVerifier, readings: agree });
+    await correct.runScan();
+    expect(correct.transcriber.verifyCalls).toHaveLength(0);
+    expect(currentDecision(correct.memory)).toMatchObject({ outcome: 'auto_accepted' });
+
+    const withoutVerifier = setup({ readings: agreeIncorrect });
+    await withoutVerifier.runScan();
+    expect(withoutVerifier.transcriber.verifyCalls).toHaveLength(0);
+    expect(currentDecision(withoutVerifier.memory)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+
+  it('reprocesar el mismo recorte reutiliza el veredicto sin volver a llamar', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(true, 0.95) } },
+    });
+
+    await runScan();
+    await runScan();
+
+    expect(transcriber.verifyCalls).toHaveLength(1);
+    expect(readingsOf(memory).filter((row) => row.mode === 'verifier')).toHaveLength(1);
+    expect(currentDecision(memory)).toMatchObject({ reasons: ['verifier_flagged'] });
   });
 });
 

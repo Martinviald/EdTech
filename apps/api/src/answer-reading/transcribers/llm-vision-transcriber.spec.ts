@@ -1,5 +1,11 @@
 import { ServiceUnavailableException } from '@nestjs/common';
-import { fakeOutput, renderTranscriptionPrompt } from '@soe/answer-reading';
+import {
+  fakeOutput,
+  fakeVerdict,
+  renderTranscriptionPrompt,
+  renderVerificationPrompt,
+  transcriptionZodSchema,
+} from '@soe/answer-reading';
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
 import type { LlmService } from '../../llm/llm.service';
 import type { LlmStructuredResult } from '../../llm/llm.types';
@@ -168,5 +174,38 @@ describe('LlmVisionTranscriber', () => {
     expect(transcriber.supports(READER)).toBe(true);
     expect(transcriber.supports({ ...READER, transcriberId: 'fake' })).toBe(false);
     expect(transcriber.supports({ ...READER, provider: 'bedrock_anthropic' })).toBe(false);
+  });
+
+  it('verifica con el esquema de verificación y valida el veredicto', async () => {
+    const verifier: ReaderSpec = { ...READER, key: 'verificador', promptRef: 'verify.incorrect@1' };
+    const rendered = renderVerificationPrompt({
+      reader: verifier,
+      format: FORMAT,
+      agreedReading: { literal: '2,5', parts: null },
+      acceptedAnswers: ['2,8'],
+    });
+    const verifyRequest = {
+      readingKey: 'v'.repeat(64),
+      image: { mimeType: 'image/jpeg' as const, base64: 'aGVsbG8=', sha256: 'a'.repeat(64) },
+      reader: verifier,
+      ...rendered,
+    };
+    const completeStructured = jest
+      .fn()
+      .mockResolvedValueOnce(structured({ data: fakeVerdict(true, 0.9) }))
+      .mockResolvedValueOnce(structured({ data: fakeOutput('2,5') }));
+    const transcriber = makeTranscriber(completeStructured);
+
+    const ok = await transcriber.verify(verifyRequest);
+    const invalid = await transcriber.verify(verifyRequest);
+
+    const [call] = completeStructured.mock.calls[0] as [Record<string, unknown>];
+    expect(call).toMatchObject({
+      schemaName: 'incorrect_verification',
+      propertyOrder: ['notes', 'differingCharacters', 'couldBeKey', 'confidence'],
+    });
+    expect(call['prompt']).toContain('2,8');
+    expect(ok).toMatchObject({ status: 'ok', output: { couldBeKey: true, confidence: 0.9 } });
+    expect(invalid).toMatchObject({ status: 'invalid_output', output: null });
   });
 });

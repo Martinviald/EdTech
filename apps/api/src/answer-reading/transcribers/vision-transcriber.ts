@@ -1,4 +1,9 @@
-import type { TranscriptionRequest, TranscriptionResult } from '@soe/answer-reading';
+import type {
+  TranscriptionRequest,
+  TranscriptionResult,
+  VerificationRequest,
+  VerificationResult,
+} from '@soe/answer-reading';
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
 
 export interface VisionTranscriptionRequest extends TranscriptionRequest {
@@ -9,6 +14,7 @@ export interface VisionTranscriber {
   readonly id: string;
   supports(reader: ReaderSpec): boolean;
   transcribe(request: VisionTranscriptionRequest): Promise<TranscriptionResult>;
+  verify?(request: VerificationRequest): Promise<VerificationResult>;
 }
 
 export const VISION_TRANSCRIBERS = 'VISION_TRANSCRIBERS';

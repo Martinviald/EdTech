@@ -1,12 +1,21 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import type { TranscriptionResult } from '@soe/answer-reading';
+import {
+  type StructuredVisionResult,
+  type TranscriptionImage,
+  type TranscriptionResult,
+  type VerificationRequest,
+  type VerificationResult,
+} from '@soe/answer-reading';
 import {
   LLM_PROVIDERS,
+  verificationOutputSchema,
   type LlmProviderId,
   type ReaderSpec,
   type ReadingUsage,
+  type RenderedPrompt,
   type TranscriptionOutput,
 } from '@soe/types';
+import type { ZodType } from 'zod';
 import { estimateLlmCostUsd } from '../../llm/llm.pricing';
 import { LlmService } from '../../llm/llm.service';
 import type { LlmStructuredResult } from '../../llm/llm.types';
@@ -21,9 +30,21 @@ export const LLM_VISION_TRANSCRIBER_ID = 'llm';
 
 const STRUCTURED_SCHEMA_NAME = 'answer_transcription';
 
+const VERIFICATION_SCHEMA_NAME = 'incorrect_verification';
+
 const TIMEOUT_PATTERN = /time(d)?\s?out/i;
 
 type FailureStatus = Pick<TranscriptionResult, 'status' | 'errorCode'>;
+
+interface StructuredVisionCall<TOutput> {
+  readonly reader: ReaderSpec;
+  readonly image: TranscriptionImage;
+  readonly prompt: RenderedPrompt;
+  readonly jsonSchema: Record<string, unknown>;
+  readonly propertyOrder: readonly string[];
+  readonly schemaName: string;
+  readonly outputSchema: ZodType<TOutput>;
+}
 
 @Injectable()
 export class LlmVisionTranscriber implements VisionTranscriber {
@@ -36,45 +57,71 @@ export class LlmVisionTranscriber implements VisionTranscriber {
   }
 
   async transcribe(request: VisionTranscriptionRequest): Promise<TranscriptionResult> {
+    const output = request.outputJsonSchema;
+    return this.complete<TranscriptionOutput>({
+      reader: request.reader,
+      image: request.image,
+      prompt: request.prompt,
+      jsonSchema: output.schema as unknown as Record<string, unknown>,
+      propertyOrder: output.propertyOrder,
+      schemaName: STRUCTURED_SCHEMA_NAME,
+      outputSchema: request.outputSchema as ZodType<TranscriptionOutput>,
+    });
+  }
+
+  async verify(request: VerificationRequest): Promise<VerificationResult> {
+    return this.complete({
+      reader: request.reader,
+      image: request.image,
+      prompt: request.prompt,
+      jsonSchema: request.outputSchema.schema as unknown as Record<string, unknown>,
+      propertyOrder: request.outputSchema.propertyOrder,
+      schemaName: VERIFICATION_SCHEMA_NAME,
+      outputSchema: verificationOutputSchema,
+    });
+  }
+
+  private async complete<TOutput>(
+    call: StructuredVisionCall<TOutput>,
+  ): Promise<StructuredVisionResult<TOutput>> {
     const startedAt = Date.now();
-    const provider = this.llmProviderOf(request.reader);
+    const provider = this.llmProviderOf(call.reader);
     if (provider === null) {
-      return this.failed(request, startedAt, {
+      return this.failed(call.reader, startedAt, {
         status: 'error',
         errorCode: TRANSCRIPTION_ERROR_CODES.unsupportedProvider,
       });
     }
-    const output = request.outputJsonSchema;
-    const { params } = request.reader;
+    const { params } = call.reader;
     try {
       const result = await this.llm.completeStructured(
         {
-          system: request.prompt.system,
-          prompt: request.prompt.user,
-          images: [{ mimeType: request.image.mimeType, data: request.image.base64 }],
-          jsonSchema: output.schema as unknown as Record<string, unknown>,
-          schemaName: STRUCTURED_SCHEMA_NAME,
-          propertyOrder: [...output.propertyOrder],
+          system: call.prompt.system,
+          prompt: call.prompt.user,
+          images: [{ mimeType: call.image.mimeType, data: call.image.base64 }],
+          jsonSchema: call.jsonSchema,
+          schemaName: call.schemaName,
+          propertyOrder: [...call.propertyOrder],
           reasoning: params.reasoning,
           mediaResolution: params.mediaResolution,
           maxTokens: params.maxOutputTokens,
           timeoutMs: params.timeoutMs,
-          target: { provider, model: request.reader.model },
+          target: { provider, model: call.reader.model },
         },
         null,
         ANSWER_READING_LLM_FEATURE,
       );
-      return this.toResult(request, result, Date.now() - startedAt);
+      return this.toResult(call, result, Date.now() - startedAt);
     } catch (error) {
-      return this.failed(request, startedAt, this.failureOf(error));
+      return this.failed(call.reader, startedAt, this.failureOf(error));
     }
   }
 
-  private toResult(
-    request: VisionTranscriptionRequest,
+  private toResult<TOutput>(
+    call: StructuredVisionCall<TOutput>,
     result: LlmStructuredResult,
     latencyMs: number,
-  ): TranscriptionResult {
+  ): StructuredVisionResult<TOutput> {
     const usage = this.usageOf(result);
     const base = {
       providerModel: result.providerModel,
@@ -97,7 +144,7 @@ export class LlmVisionTranscriber implements VisionTranscriber {
         errorCode: TRANSCRIPTION_ERROR_CODES.invalidJson,
       };
     }
-    const parsed = request.outputSchema.safeParse(result.data);
+    const parsed = call.outputSchema.safeParse(result.data);
     if (!parsed.success) {
       return {
         ...base,
@@ -106,19 +153,19 @@ export class LlmVisionTranscriber implements VisionTranscriber {
         errorCode: TRANSCRIPTION_ERROR_CODES.schemaMismatch,
       };
     }
-    return { ...base, status: 'ok', output: parsed.data as TranscriptionOutput, errorCode: null };
+    return { ...base, status: 'ok', output: parsed.data, errorCode: null };
   }
 
-  private failed(
-    request: VisionTranscriptionRequest,
+  private failed<TOutput>(
+    reader: ReaderSpec,
     startedAt: number,
     failure: FailureStatus,
-  ): TranscriptionResult {
+  ): StructuredVisionResult<TOutput> {
     return {
       ...failure,
       output: null,
       rawText: null,
-      providerModel: request.reader.model,
+      providerModel: reader.model,
       usage: null,
       costUsd: null,
       latencyMs: Date.now() - startedAt,

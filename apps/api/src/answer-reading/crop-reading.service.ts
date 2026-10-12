@@ -2,18 +2,27 @@ import { Inject, Injectable } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { and, eq, inArray } from 'drizzle-orm';
 import {
+  acceptedAnswersOf,
+  agreedReadingOf,
+  applyIncorrectVerification,
   evaluateConsensus,
   isAuditSample,
   isTranscriptionPromptFor,
+  isVerificationPromptFor,
+  needsIncorrectVerification,
   needsTiebreak,
   normalizeTranscription,
+  renderVerificationPrompt,
   renderTranscriptionPrompt,
   responseGeometryOf,
   type ConsensusReading,
+  type IncorrectVerificationVerdict,
+  type RenderedVerificationPrompt,
   type ScoreOf,
   type TranscriptionImage,
   type TranscriptionJsonSchema,
   type TranscriptionResult,
+  type VerificationResult,
 } from '@soe/answer-reading';
 import { answerReadings, withOrgContext, type NewAnswerReadingRow } from '@soe/db';
 import {
@@ -29,6 +38,7 @@ import {
   type ReviewReason,
   type TranscriptionOutput,
   type TranscriptionStatus,
+  type VerificationOutput,
 } from '@soe/types';
 import type { ZodTypeAny } from 'zod';
 import { reportServerError } from '../common/observability/report-error';
@@ -94,6 +104,7 @@ interface StoredReading {
   readonly status: TranscriptionStatus;
   readonly family: string;
   readonly output: TranscriptionOutput | null;
+  readonly verificationOutput: VerificationOutput | null;
 }
 
 interface ExistingReadings {
@@ -112,6 +123,24 @@ interface PersistedAttempt {
   readonly status: TranscriptionStatus;
   readonly output: TranscriptionOutput | null;
   readonly errorCode: string | null;
+  readonly costUsd: number;
+}
+
+interface VerificationPlan {
+  readonly reader: ReaderSpec;
+  readonly rendered: RenderedVerificationPrompt;
+  readonly readingKey: string;
+  readonly lookupKey: string;
+}
+
+interface VerifiedAttempt {
+  readonly verdict: IncorrectVerificationVerdict;
+  readonly errorCode: string | null;
+  readonly costUsd: number;
+}
+
+interface VerifiedOutcome {
+  readonly result: ConsensusResult;
   readonly costUsd: number;
 }
 
@@ -171,6 +200,7 @@ export class CropReadingService {
     const readings = executed
       .filter((entry) => entry.mode === 'primary')
       .map((entry) => entry.reading);
+    let consensusReadings = readings;
     const consensusOptions = {
       format: task.format,
       inkRatio: task.cropEvidence?.inkRatio ?? null,
@@ -190,18 +220,191 @@ export class CropReadingService {
         await this.loadExisting(task.orgId, [plan.readingKey]),
       );
       costUsd += tiebreak.costUsd;
-      result = evaluateConsensus(
-        [...readings, tiebreak.reading],
-        policy,
-        scoreOf,
-        consensusOptions,
-      );
+      consensusReadings = [...readings, tiebreak.reading];
+      result = evaluateConsensus(consensusReadings, policy, scoreOf, consensusOptions);
     }
+    const verified = await this.verifyIncorrect(scope, policy, result, consensusReadings);
     return {
-      result,
+      result: verified.result,
+      costUsd: costUsd + verified.costUsd,
       routeId: task.route.route.routeId,
       routeVersion: task.route.route.routeVersion,
+    };
+  }
+
+  private async verifyIncorrect(
+    scope: ReadingScope,
+    policy: ConsensusPolicy,
+    result: ConsensusResult,
+    readings: readonly ConsensusReading[],
+  ): Promise<VerifiedOutcome> {
+    const verifier = policy.incorrectVerifier;
+    if (verifier === undefined || !needsIncorrectVerification(result, policy)) {
+      return { result, costUsd: 0 };
+    }
+    const plan = this.verificationPlanFor(scope, verifier, result, readings);
+    if (plan === null)
+      return { result: applyIncorrectVerification(result, policy, null), costUsd: 0 };
+    const existing = await this.loadExisting(scope.task.orgId, [plan.readingKey]);
+    const reused = existing.reusable.get(plan.lookupKey);
+    if (reused?.verificationOutput) {
+      const verdict = { status: reused.status, output: reused.verificationOutput };
+      return { result: applyIncorrectVerification(result, policy, verdict), costUsd: 0 };
+    }
+    const firstAttempt = (existing.lastAttempt.get(plan.lookupKey) ?? 0) + 1;
+    let attempt = await this.verifyAndPersist(scope, plan, firstAttempt);
+    let costUsd = attempt.costUsd;
+    if (this.isTransient(attempt.verdict.status, attempt.errorCode)) {
+      await this.pause(this.options.retryDelayMs);
+      attempt = await this.verifyAndPersist(scope, plan, firstAttempt + 1);
+      costUsd += attempt.costUsd;
+    }
+    return { result: applyIncorrectVerification(result, policy, attempt.verdict), costUsd };
+  }
+
+  private verificationPlanFor(
+    scope: ReadingScope,
+    verifier: ReaderSpec,
+    result: ConsensusResult,
+    readings: readonly ConsensusReading[],
+  ): VerificationPlan | null {
+    const { task } = scope;
+    const agreedReading = agreedReadingOf(result, readings);
+    const acceptedAnswers = acceptedAnswersOf(task.item);
+    if (
+      agreedReading === null ||
+      acceptedAnswers.length === 0 ||
+      !isVerificationPromptFor(verifier.promptRef, task.format)
+    ) {
+      return null;
+    }
+    const rendered = renderVerificationPrompt({
+      reader: verifier,
+      format: task.format,
+      agreedReading,
+      acceptedAnswers,
+      gradeName: task.gradeName,
+    });
+    const readingKey = this.sha256(
+      [
+        scope.cropSha256,
+        task.item.id,
+        rendered.prompt.ref,
+        rendered.prompt.hash,
+        task.cropProfileId,
+      ].join('|'),
+    );
+    return {
+      reader: verifier,
+      rendered,
+      readingKey,
+      lookupKey: this.lookupKey(readingKey, verifier.key, 'verifier'),
+    };
+  }
+
+  private async verifyAndPersist(
+    scope: ReadingScope,
+    plan: VerificationPlan,
+    attempt: number,
+  ): Promise<VerifiedAttempt> {
+    const { task } = scope;
+    const result = await this.verify(scope, plan);
+    if (result.status === 'error' || result.status === 'timeout') {
+      reportServerError(
+        new Error(`La verificación de una incorrecta terminó en ${result.status}`),
+        {
+          orgId: task.orgId,
+          runId: task.runId,
+          readerKey: plan.reader.key,
+          errorCode: result.errorCode,
+        },
+      );
+    }
+    const output = result.status === 'ok' ? result.output : null;
+    const usage = result.usage;
+    const costUsd = result.costUsd ?? 0;
+    await this.insertReading(task.orgId, {
+      id: randomUUID(),
+      orgId: task.orgId,
+      runId: task.runId,
+      markId: task.markId,
+      itemId: task.item.id,
+      cropFileId: task.cropFileId,
+      cropSha256: scope.cropSha256,
+      cropProfileId: task.cropProfileId,
+      responseFormat: task.format,
+      readingKey: plan.readingKey,
+      mode: 'verifier',
+      attempt,
+      routeId: scope.route.route.routeId,
+      routeVersion: scope.route.route.routeVersion,
+      readerKey: plan.reader.key,
+      transcriberId: plan.reader.transcriberId,
+      provider: plan.reader.provider,
+      family: plan.reader.family,
+      model: plan.reader.model,
+      providerModel: result.providerModel,
+      promptRef: plan.rendered.prompt.ref,
+      promptHash: plan.rendered.prompt.hash,
+      outputSchemaId: plan.rendered.prompt.outputSchemaId,
+      params: plan.reader.params,
+      status: result.status,
+      output: null,
+      verificationOutput: output,
+      readingState: null,
+      literal: null,
+      confidence: output === null ? null : output.confidence.toFixed(3),
+      rawText: result.status === 'invalid_output' ? result.rawText : null,
+      normalized: null,
+      inputTokens: usage?.inputTokens ?? 0,
+      outputTokens: usage?.outputTokens ?? 0,
+      reasoningTokens: usage?.reasoningTokens ?? 0,
+      cachedInputTokens: usage?.cachedInputTokens ?? 0,
+      imageTokens: usage?.imageTokens ?? null,
+      costUsd: costUsd.toFixed(6),
+      latencyMs: result.latencyMs,
+      errorCode: result.errorCode,
+    });
+    return {
+      verdict: { status: result.status, output },
+      errorCode: result.errorCode,
       costUsd,
+    };
+  }
+
+  private async verify(scope: ReadingScope, plan: VerificationPlan): Promise<VerificationResult> {
+    const transcriber = this.transcribers.forReader(plan.reader);
+    if (transcriber === null || transcriber.verify === undefined) {
+      return this.failedVerification(plan.reader, TRANSCRIPTION_ERROR_CODES.transcriberNotFound);
+    }
+    try {
+      return await transcriber.verify({
+        readingKey: plan.readingKey,
+        image: await scope.image(),
+        reader: plan.reader,
+        prompt: plan.rendered.prompt,
+        outputSchema: plan.rendered.outputSchema,
+      });
+    } catch (error) {
+      reportServerError(error, {
+        orgId: scope.task.orgId,
+        runId: scope.task.runId,
+        readerKey: plan.reader.key,
+      });
+      return this.failedVerification(plan.reader, TRANSCRIPTION_ERROR_CODES.providerError);
+    }
+  }
+
+  private failedVerification(reader: ReaderSpec, errorCode: string): VerificationResult {
+    return {
+      status: 'error',
+      output: null,
+      rawText: null,
+      providerModel: reader.model,
+      usage: null,
+      costUsd: null,
+      latencyMs: 0,
+      errorCode,
     };
   }
 
@@ -308,6 +511,7 @@ export class CropReadingService {
           status: answerReadings.status,
           family: answerReadings.family,
           output: answerReadings.output,
+          verificationOutput: answerReadings.verificationOutput,
         })
         .from(answerReadings)
         .where(
@@ -323,7 +527,7 @@ export class CropReadingService {
       const current = reusable.get(key);
       if (
         row.status === 'ok' &&
-        row.output !== null &&
+        (row.output !== null || row.verificationOutput !== null) &&
         (!current || row.attempt > current.attempt)
       ) {
         reusable.set(key, row);
@@ -356,7 +560,7 @@ export class CropReadingService {
     const firstAttempt = (existing.lastAttempt.get(plan.lookupKey) ?? 0) + 1;
     let attempt = await this.transcribeAndPersist(scope, plan, firstAttempt);
     let costUsd = attempt.costUsd;
-    if (this.isTransient(attempt)) {
+    if (this.isTransient(attempt.status, attempt.errorCode)) {
       await this.pause(this.options.retryDelayMs);
       attempt = await this.transcribeAndPersist(scope, plan, firstAttempt + 1);
       costUsd += attempt.costUsd;
@@ -521,12 +725,10 @@ export class CropReadingService {
     };
   }
 
-  private isTransient(attempt: PersistedAttempt): boolean {
-    if (attempt.status === 'timeout') return true;
+  private isTransient(status: TranscriptionStatus, errorCode: string | null): boolean {
+    if (status === 'timeout') return true;
     return (
-      attempt.status === 'error' &&
-      attempt.errorCode !== null &&
-      TRANSIENT_TRANSCRIPTION_ERROR_CODES.has(attempt.errorCode)
+      status === 'error' && errorCode !== null && TRANSIENT_TRANSCRIPTION_ERROR_CODES.has(errorCode)
     );
   }
 
