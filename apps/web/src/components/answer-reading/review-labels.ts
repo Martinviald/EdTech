@@ -22,6 +22,7 @@ export const REVIEW_REASON_LABELS: Record<ReviewReason, string> = {
   budget_exceeded: 'Se alcanzó el presupuesto de lectura',
   run_limit_exceeded: 'Se alcanzó el tope de recortes por lote',
   crop_unavailable: 'El recorte no está disponible',
+  verifier_flagged: 'El verificador cree que podría ser la respuesta correcta mal leída',
 };
 
 export const REVIEW_MODE_LABELS: Record<ReviewMode, string> = {

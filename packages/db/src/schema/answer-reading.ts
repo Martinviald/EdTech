@@ -21,6 +21,7 @@ import type {
   ResponseFormatKind,
   ReviewReason,
   TranscriptionOutput,
+  VerificationOutput,
   VisionProvider,
 } from '@soe/types';
 import {
@@ -232,6 +233,8 @@ export const answerReadings = pgTable(
     params: jsonb('params').$type<ReaderSpec['params']>().notNull(),
     status: transcriptionStatusEnum('status').notNull(),
     output: jsonb('output').$type<TranscriptionOutput>(),
+    /** Solo en `mode = 'verifier'`: veredicto del verificador de incorrectas (T4). */
+    verificationOutput: jsonb('verification_output').$type<VerificationOutput>(),
     readingState: readingStateEnum('reading_state'),
     literal: text('literal'),
     confidence: decimal('confidence', { precision: 4, scale: 3 }),
