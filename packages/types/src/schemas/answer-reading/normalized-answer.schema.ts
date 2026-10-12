@@ -64,6 +64,7 @@ export const NORMALIZATION_ISSUES = [
   'empty_part',
   'non_numeric_in_numeric',
   'parts_disagree_with_literal',
+  'literal_subset_of_parts',
   'ambiguous_thousands_or_decimal',
   'unexpected_unit',
 ] as const;

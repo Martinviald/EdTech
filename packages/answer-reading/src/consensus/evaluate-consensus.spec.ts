@@ -451,3 +451,33 @@ describe('formatos de rúbrica: nunca se autoaceptan', () => {
     expect(result.reviewMode).toBe('reading');
   });
 });
+
+describe('fotos reales: formatos con partes', () => {
+  const pair: ResponseFormat = { kind: 'ordered_tuple', arity: 2, componentKind: 'integer' };
+  const evaluatePair = (readings: ConsensusReading[]) => {
+    const result = evaluateConsensus(readings, POLICY, scorer('(3;5)', pair), {
+      format: pair,
+      readingKey: 'casilla',
+    });
+    expect(consensusResultSchema.safeParse(result).success).toBe(true);
+    return result;
+  };
+  const parts = { c1: '3', c2: '5' };
+
+  it('un literal incompleto con partes completas no impide autoaceptar', () => {
+    expect(evaluatePair([claude('3;5', { parts }), gemini('3', { parts })])).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'correct',
+    });
+  });
+
+  it('un literal que contradice las partes va a revisión de lectura, no a unparsed_format', () => {
+    expect(
+      evaluatePair([claude('productos', { parts }), gemini('(3;5)', { parts })]),
+    ).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['format_mismatch'],
+      reviewMode: 'reading',
+    });
+  });
+});

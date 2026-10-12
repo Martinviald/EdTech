@@ -58,8 +58,10 @@ export interface AnswerFormatDefinition<K extends ResponseFormatKind> {
   /** Qué `parts` se piden al lector, o `null` si el formato no las usa. */
   outputPartsSchema(format: FormatOf<K>): PartsJsonSchema | null;
   /**
-   * Vuelve a interpretar `literal` con los parsers canónicos; `parts` solo sirve
-   * para marcar `parts_disagree_with_literal`. Un estado ≠ `answered` no tiene valor.
+   * Interpreta la lectura con los parsers canónicos. Si el formato pide `parts` y
+   * vienen completas y válidas, ellas son la fuente de verdad y el `literal` es
+   * control (`literal_subset_of_parts` o `parts_disagree_with_literal`); si no,
+   * se interpreta el `literal`. Un estado ≠ `answered` no tiene valor.
    */
   normalize(output: TranscriptionOutput, format: FormatOf<K>): NormalizedAnswer;
   /** Lo que recibe `getScoringStrategy(...).score` como `rawAnswer`. */

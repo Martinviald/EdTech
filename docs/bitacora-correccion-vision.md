@@ -454,3 +454,30 @@ Cada defecto de comportamiento con test previo que fallaba con el código anteri
 Riesgos que quedan: `response_reclaimed` no tiene campo propio en `SubmitReviewResult` (no cae en
 `skippedHumanScored` ni en `pendingConsolidation`); el costo de la corrección de desarrollo
 heredada (`development_crop`) no cuenta para `monthlyBudgetUsd`.
+
+### Fotos reales: correcciones de la lectura (rama `fix/vision-fotos-reales`)
+
+Evidencia: 30 casillas de 6 fotos de celular (`pruebas-vlm-manuscrito/hojas-sinteticas/resultado-fotos/`).
+
+- **Contrato OMR desactualizado.** `services/omr/contracts/*.json` no traía `operatorBefore`
+  (F10b) y el servicio respondía 422 al lote entero. Se regeneró y el test
+  `packages/types/scripts/omr-contracts.spec.ts` compara los contratos generados en memoria con los
+  versionados (corre con `pnpm --filter @soe/types test`, en local y en CI).
+- **Decisión FR-1 — en los formatos con partes, las partes mandan.** Los lectores devolvían `parts`
+  correctas con un `literal` incompleto (solo la 1.ª casilla, solo el total), sin separador
+  (`triángulo cuadrilátero`), con los signos impresos (`40 + 7 = 47`) o contaminado con la pregunta
+  vecina (`productos`), y el normalizador interpretaba el `literal`. Ahora, si el formato pide
+  `parts` y vienen **completas y válidas** (ninguna vacía, todas interpretables con su tipo), el
+  valor canónico sale de ellas y el `literal` queda como control:
+  - mismo valor → sin issue;
+  - el `literal` está vacío o sus palabras/números son una subsecuencia, en orden, de las de las
+    partes (sin tildes ni mayúsculas, ignorando signos y separadores) → issue nuevo
+    `literal_subset_of_parts`, que **no** fuerza revisión;
+  - el `literal` trae algo que las partes no dicen o en otro orden (`productos`, `(7;3)` con partes
+    `3, 7`, `triangulo isoseles cuadrado` con partes `triangulo, cuadrado`) →
+    `parts_disagree_with_literal`, que sigue forzando revisión de lectura (`format_mismatch`).
+  Con alguna parte vacía o no interpretable se interpreta el `literal` como antes y la parte vacía
+  sigue siendo `empty_part` (nunca 0 automático). Motivo: el `literal` libre es lo que más se
+  contamina con el recorte y con la forma de escribir; las partes vienen de un esquema por casilla.
+  Una contradicción es justamente lo dudoso que el diseño §8 no deja autoaceptar. Cambio de
+  contrato: `NORMALIZATION_ISSUES` suma `literal_subset_of_parts` (solo amplía el enum).
