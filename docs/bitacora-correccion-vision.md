@@ -714,3 +714,14 @@ Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), d
   las 24 casillas); (3) el OMR debe desplegarse con `short-answer@3` antes que la API, o
   `resolve_crop_profile` cae al recorte heredado (igual que con FR-3).
 - Gasto de IA: US$0,27 nominal (precio 2027).
+
+### Etapa 1 — corrección de la revisión final (`wip/e1-t5a`)
+
+- **Presupuesto previo con el peor caso.** La estimación antes de leer un escaneo cuenta, por
+  recorte, los lectores y los de sombra **más** una llamada de desempate (si la política tiene
+  `onDisagreement: tiebreak_reader` y lector de desempate) **más** una del verificador (si la
+  política autoacepta y trae `incorrectVerifier`), cada una al costo promedio por lectura de la org.
+  Se eligió el peor caso y no un costo esperado: es un tope, el verificador solo cuesta
+  ~US$0,0004 por recorte corto, y un esperado necesitaría una tasa de incorrectas autoaceptadas que
+  la org todavía no tiene medida. Puede bloquear un escaneo que en la práctica cabría cuando el
+  presupuesto está casi agotado; los reintentos por error transitorio siguen sin contarse.

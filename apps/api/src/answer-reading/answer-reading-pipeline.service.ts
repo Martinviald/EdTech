@@ -48,7 +48,11 @@ import {
   type CropReadingTask,
   type NotReadReason,
 } from './crop-reading.service';
-import { ReadingRoutesService, type ReadingRouteCatalog } from './reading-routes.service';
+import {
+  ReadingRoutesService,
+  type ReadingRouteCatalog,
+  type RouteForCrop,
+} from './reading-routes.service';
 import { RubricGradingService } from './rubric-grading.service';
 
 export interface ScheduleScanReadingParams {
@@ -693,7 +697,7 @@ export class AnswerReadingPipelineService implements OnModuleInit {
     let plannedReadings = 0;
     for (const { task } of planned) {
       if (task.blockedReason !== null || task.route === null) continue;
-      plannedReadings += task.route.route.readers.length + task.route.route.shadowReaders.length;
+      plannedReadings += this.worstCaseCallsOf(task.route.route);
     }
     return this.budget.isExceeded({
       orgId,
@@ -701,6 +705,15 @@ export class AnswerReadingPipelineService implements OnModuleInit {
       settings,
       plannedReadings,
     });
+  }
+
+  private worstCaseCallsOf(route: RouteForCrop['route']): number {
+    const { policy } = route;
+    const tiebreak = policy.onDisagreement === 'tiebreak_reader' && policy.tiebreakReader !== null;
+    const verifier = policy.autoAccept && policy.incorrectVerifier !== undefined;
+    return (
+      route.readers.length + route.shadowReaders.length + (tiebreak ? 1 : 0) + (verifier ? 1 : 0)
+    );
   }
 
   private blockedByBudget(planned: readonly PlannedCrop[]): PlannedCrop[] {

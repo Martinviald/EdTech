@@ -980,6 +980,55 @@ describe('AnswerReadingPipelineService — interruptor y presupuesto', () => {
     expect(runOf(memory)).toMatchObject({ status: 'budget_exceeded', cropsDone: 1 });
   });
 
+  it('el presupuesto previo cuenta el peor caso: lectores, desempate y verificador', async () => {
+    const verifier = reader('verificador', 'openai-luna', {
+      provider: 'openai',
+      promptRef: 'verify.incorrect@1',
+      hints: 'format',
+    });
+    const { isExceeded, runScan } = setup({
+      readings: agree,
+      budgetExceeded: true,
+      policy: {
+        ...POLICY,
+        onDisagreement: 'tiebreak_reader',
+        tiebreakReader: LUNA,
+        incorrectVerifier: verifier,
+      },
+    });
+
+    await runScan();
+
+    expect(isExceeded).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: ORG_ID, plannedReadings: 4 }),
+    );
+  });
+
+  it('sin desempate activo ni autoaceptación no suma esas llamadas al presupuesto previo', async () => {
+    const verifier = reader('verificador', 'openai-luna', {
+      provider: 'openai',
+      promptRef: 'verify.incorrect@1',
+      hints: 'format',
+    });
+    const { isExceeded, runScan } = setup({
+      readings: agree,
+      budgetExceeded: true,
+      policy: {
+        ...POLICY,
+        onDisagreement: 'review',
+        tiebreakReader: LUNA,
+        autoAccept: false,
+        incorrectVerifier: verifier,
+      },
+    });
+
+    await runScan();
+
+    expect(isExceeded).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: ORG_ID, plannedReadings: 2 }),
+    );
+  });
+
   it('respeta el tope de recortes por corrida sin dejar recortes en silencio', async () => {
     const { memory, transcriber, runScan } = setup({
       readings: agree,
