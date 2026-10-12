@@ -505,3 +505,34 @@ Evidencia: 30 casillas de 6 fotos de celular (`pruebas-vlm-manuscrito/hojas-sint
   validó con `readingRouteSchema` y renderizando su prompt; el SQL se aplicó dos veces sobre una
   base PG14 desechable con 0000–0049 (idempotente). `fraction` queda en la ruta por defecto: sus
   partes ya venían bien en las fotos.
+
+### Primera prueba con fotos reales y su corrección (`fix/vision-fotos-reales`)
+
+**Prueba** (base local `soe_vision`, instrumento sintético de 11 preguntas, 3 alumnos, 6 fotos de
+celular de 2268×4032 sin encuadrar, Haiku 5.5 + Gemini 3.5 Flash-Lite, US$0,035 por corrida).
+Antes del arreglo el OMR rechazaba las 6 fotos (5 por `cropped`, Celeste p1 por `likely_blank` con
+la B marcada) y el contrato del OMR respondía 422 ante `operatorBefore`; para medir hubo que
+encuadrar a mano y quitar los signos.
+
+**Corregido** (cada falla con test previo que fallaba):
+- Contrato OMR regenerado + test que falla si queda desactualizado.
+- Normalización desde `parts` en formatos de varias partes (decisión FR-1); el `literal` es control.
+- Rutas `hints: format` para formatos de varias partes y de texto (FR-2, migración 0050).
+- Perfiles de recorte `short-answer@2`/`free-text@2`: margen por lado menor con tope por vecinos.
+- OMR: encuadre de la hoja en fotos de celular con cuadrilátero validado por forma; un problema de
+  burbujas ya no descarta los recortes de la página. Goldset real 88,2 % → 97,7 % correctas, 0
+  confiadas incorrectas; goldset sintético idéntico.
+- La propuesta de revisión es la mejor lectura (no pidió revisión, interpretable, mayor confianza),
+  no la del primer lector de la ruta: antes el revisor veía "wedriétero" o "8" en vez de la lectura
+  buena de Gemini, y aceptar rápido dejaba en 0 una respuesta correcta.
+
+**Regresión con las 6 fotos originales:** las 6 aceptadas con su página y P1 correcta; ningún
+recorte trae preguntas vecinas; Haiku 13 → 16 y Gemini 14 → 18 de 24 casillas cortas bien leídas;
+2 autoaceptadas, ambas correctas; ninguna autoaceptación equivocada.
+
+**Abierto** (no se corrige en esta rama):
+- Haiku lee solo la primera casilla de la secuencia aun con la guía de formato (3 de 3 hojas).
+- Decimales escritos en casillas: espacios por casillas vacías ("2  ,75") y puntos sueltos ("1.2,75");
+  la ruta por defecto sigue en `hints: none` (C-1).
+- La confianza de Haiku rara vez llega a 0,85: domina la revisión por `low_confidence`. Calibrar con
+  hojas reales de alumnos antes de tocar `minConfidence` (C-2).
