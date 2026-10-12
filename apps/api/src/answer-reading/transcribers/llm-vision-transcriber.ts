@@ -1,5 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { transcriptionJsonSchema, type TranscriptionResult } from '@soe/answer-reading';
+import type { TranscriptionResult } from '@soe/answer-reading';
 import {
   LLM_PROVIDERS,
   type LlmProviderId,
@@ -44,7 +44,7 @@ export class LlmVisionTranscriber implements VisionTranscriber {
         errorCode: TRANSCRIPTION_ERROR_CODES.unsupportedProvider,
       });
     }
-    const output = transcriptionJsonSchema(request.format);
+    const output = request.outputJsonSchema;
     const { params } = request.reader;
     try {
       const result = await this.llm.completeStructured(

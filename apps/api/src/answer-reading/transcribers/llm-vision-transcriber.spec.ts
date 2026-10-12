@@ -1,5 +1,5 @@
 import { ServiceUnavailableException } from '@nestjs/common';
-import { fakeOutput, renderTranscriptionPrompt, transcriptionZodSchema } from '@soe/answer-reading';
+import { fakeOutput, renderTranscriptionPrompt } from '@soe/answer-reading';
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
 import type { LlmService } from '../../llm/llm.service';
 import type { LlmStructuredResult } from '../../llm/llm.types';
@@ -20,12 +20,14 @@ const READER: ReaderSpec = {
 };
 
 function request(reader: ReaderSpec = READER): VisionTranscriptionRequest {
+  const rendered = renderTranscriptionPrompt(reader, FORMAT, { geometry: { fractionDigits: 2 } });
   return {
     readingKey: 'k'.repeat(64),
     image: { mimeType: 'image/jpeg', base64: 'aGVsbG8=', sha256: 'a'.repeat(64) },
     reader,
-    prompt: renderTranscriptionPrompt(reader, FORMAT).prompt,
-    outputSchema: transcriptionZodSchema(FORMAT),
+    prompt: rendered.prompt,
+    outputSchema: rendered.outputZodSchema,
+    outputJsonSchema: rendered.outputSchema,
     format: FORMAT,
   };
 }
@@ -93,6 +95,24 @@ describe('LlmVisionTranscriber', () => {
 
     expect(result.providerModel).toBe('claude-haiku-5-5-20260901');
     expect(result.costUsd).toBeCloseTo((1000 * 0.1 + 200 * 0.5) / 1_000_000, 9);
+  });
+
+  it('pide al proveedor el esquema del prompt renderizado: una parte por casilla en la lectura por casilla', async () => {
+    const completeStructured = jest.fn().mockResolvedValue(
+      structured({
+        data: { ...fakeOutput('2,75'), parts: { i1: '', i2: '', i3: '2', f1: '7', f2: '5' } },
+      }),
+    );
+
+    const result = await makeTranscriber(completeStructured).transcribe(
+      request({ ...READER, promptRef: 'transcribe.boxes@1', hints: 'format' }),
+    );
+
+    const [call] = completeStructured.mock.calls[0] as [{ jsonSchema: { properties: object } }];
+    expect(call.jsonSchema.properties).toMatchObject({
+      parts: { required: ['i1', 'i2', 'i3', 'f1', 'f2'] },
+    });
+    expect(result).toMatchObject({ status: 'ok', output: { parts: { i3: '2', f2: '5' } } });
   });
 
   it('data null → invalid_output', async () => {

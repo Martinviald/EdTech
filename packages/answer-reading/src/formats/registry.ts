@@ -21,24 +21,15 @@ import {
 } from '@soe/types';
 import {
   SUPPORTED_FORMAT_KINDS,
+  partsSchema,
   type AnswerFormatDefinition,
   type FormatOf,
   type PartsJsonSchema,
   type SupportedFormatKind,
 } from './answer-format';
+import { numericCellsEmpty, numericCellsText } from './box-cells';
 
 type Parts = TranscriptionOutput['parts'];
-
-function partsSchema(entries: ReadonlyArray<[string, string]>): PartsJsonSchema {
-  return {
-    type: 'object',
-    properties: Object.fromEntries(
-      entries.map(([id, description]) => [id, { type: 'string' as const, description }]),
-    ),
-    required: entries.map(([id]) => id),
-    additionalProperties: false,
-  };
-}
 
 function indexedIds(prefix: string, count: number): string[] {
   return Array.from({ length: count }, (_, index) => `${prefix}${index + 1}`);
@@ -232,8 +223,8 @@ function normalizeNumeric(
   return normalizeWith(output, {
     kind,
     parse: (text) => resolveNumberConvention(parseScalarText(text), kind, 'answer'),
-    partsLiteral: () => null,
-    partsEmpty: () => false,
+    partsLiteral: numericCellsText,
+    partsEmpty: numericCellsEmpty,
     formatIssues: (value) => scalarIssues(value, { allowNegative, expect: kind }),
   });
 }

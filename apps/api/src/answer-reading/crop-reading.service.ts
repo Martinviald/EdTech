@@ -8,10 +8,11 @@ import {
   needsTiebreak,
   normalizeTranscription,
   renderTranscriptionPrompt,
-  transcriptionZodSchema,
+  responseGeometryOf,
   type ConsensusReading,
   type ScoreOf,
   type TranscriptionImage,
+  type TranscriptionJsonSchema,
   type TranscriptionResult,
 } from '@soe/answer-reading';
 import { answerReadings, withOrgContext, type NewAnswerReadingRow } from '@soe/db';
@@ -79,6 +80,7 @@ interface ReaderPlan {
   readonly mode: ReadingMode;
   readonly prompt: RenderedPrompt;
   readonly outputSchema: ZodTypeAny;
+  readonly outputJsonSchema: TranscriptionJsonSchema;
   readonly readingKey: string;
   readonly lookupKey: string;
 }
@@ -267,9 +269,11 @@ export class CropReadingService {
 
   private planFor(scope: ReadingScope, reader: ReaderSpec, mode: ReadingMode): ReaderPlan {
     const { task } = scope;
-    const { prompt } = renderTranscriptionPrompt(reader, task.format, {
-      gradeName: task.gradeName,
-    });
+    const { prompt, outputSchema, outputZodSchema } = renderTranscriptionPrompt(
+      reader,
+      task.format,
+      { gradeName: task.gradeName, geometry: responseGeometryOf(task.item.content) },
+    );
     const readingKey = this.sha256(
       [scope.cropSha256, task.item.id, prompt.ref, prompt.outputSchemaId, task.cropProfileId].join(
         '|',
@@ -279,7 +283,8 @@ export class CropReadingService {
       reader,
       mode,
       prompt,
-      outputSchema: transcriptionZodSchema(task.format),
+      outputSchema: outputZodSchema,
+      outputJsonSchema: outputSchema,
       readingKey,
       lookupKey: this.lookupKey(readingKey, reader.key, mode),
     };
@@ -490,6 +495,7 @@ export class CropReadingService {
         reader: plan.reader,
         prompt: plan.prompt,
         outputSchema: plan.outputSchema,
+        outputJsonSchema: plan.outputJsonSchema,
         format: scope.task.format,
       });
     } catch (error) {

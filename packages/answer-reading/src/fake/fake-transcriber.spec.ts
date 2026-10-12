@@ -1,5 +1,4 @@
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
-import { transcriptionZodSchema } from '../formats/transcription-json-schema';
 import { renderTranscriptionPrompt } from '../prompts/registry';
 import type { TranscriptionRequest } from '../transcriber';
 import { FakeTranscriber, fakeOutput } from './fake-transcriber';
@@ -17,12 +16,14 @@ const READER: ReaderSpec = {
 };
 
 function request(sha256: string, readingKey = 'k', reader = READER): TranscriptionRequest {
+  const rendered = renderTranscriptionPrompt(reader, FORMAT);
   return {
     readingKey,
     image: { mimeType: 'image/jpeg', base64: '', sha256 },
     reader,
-    prompt: renderTranscriptionPrompt(reader, FORMAT).prompt,
-    outputSchema: transcriptionZodSchema(FORMAT),
+    prompt: rendered.prompt,
+    outputSchema: rendered.outputZodSchema,
+    outputJsonSchema: rendered.outputSchema,
   };
 }
 

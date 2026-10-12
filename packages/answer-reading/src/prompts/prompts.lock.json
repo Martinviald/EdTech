@@ -22,5 +22,9 @@
   "transcribe.free-text@1": "4b9a26b3c3d1ba8b54e5c5487b4a0d2b6c6d5c675a8113aeeea14d17ba3b87ea",
   "transcribe.free-text@1 × free_text": "61de1fae22d029a262b6be14abfff140c6f35a60523ce6c1f4688b5d8f06c7a8",
   "transcribe.free-text@1 × math_work": "5487df0878dba1d1333d8eb349c0c0ee89557ef9c9ab1dda4ee94abdef450f8e",
+  "transcribe.boxes@1": "c8a673a8798181c1400a117373952e472dd36119345c65a51ffefcd45ba32904",
+  "transcribe.boxes@1 × integer": "dffe71b8c8ba079b212c7806ae15fcf87c21c71a94fa5e0973f481a363a7c87a",
+  "transcribe.boxes@1 × decimal": "e76507b3028dee501e9dca32f794b06ed0fbaeae4a7e979fb38b35dc2c8fb153",
+  "transcribe.boxes@1 × sequence": "6f7549b1273d45850c72c1e244ca692eb0e540e25aaa35c218796b633e1f062a",
   "grade.rubric@1": "0c9432a7a68e3211a7d46043a2f4c2ebe853a70a2c492ff0e153d74e7d9dc4ff"
 }

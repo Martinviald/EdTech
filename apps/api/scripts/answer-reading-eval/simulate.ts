@@ -5,7 +5,7 @@ import {
   normalizeTranscription,
   readingKeyFor,
   renderTranscriptionPrompt,
-  transcriptionZodSchema,
+  responseGeometryOf,
   type ConsensusReading,
   type ResolvedRouteWithFallback,
   type TranscriptionRequest,
@@ -226,8 +226,12 @@ function keyInputFor(
   reader: ReaderSpec,
   repetition: number,
 ): { keyInput: ReadingCacheKeyInput; rendered: ReturnType<typeof renderTranscriptionPrompt> } {
-  const rendered = renderTranscriptionPrompt(reader, prepared.sample.format, {
-    gradeName: prepared.sample.gradeName ?? null,
+  const { sample } = prepared;
+  const rendered = renderTranscriptionPrompt(reader, sample.format, {
+    gradeName: sample.gradeName ?? null,
+    geometry: responseGeometryOf(
+      sample.item?.content ?? { acceptedAnswers: sample.acceptedAnswers },
+    ),
   });
   return {
     rendered,
@@ -365,7 +369,8 @@ class UnitRunner {
       image,
       reader,
       prompt: rendered.prompt,
-      outputSchema: transcriptionZodSchema(prepared.sample.format),
+      outputSchema: rendered.outputZodSchema,
+      outputJsonSchema: rendered.outputSchema,
       format: prepared.sample.format,
     };
     let result: TranscriptionResult;

@@ -6,6 +6,7 @@ import type {
   TranscriptionStatus,
 } from '@soe/types';
 import type { ZodTypeAny } from 'zod';
+import type { TranscriptionJsonSchema } from './formats/transcription-json-schema';
 
 // Puerto de transcripción (diseño §4 S4). Las implementaciones reales viven en la
 // API sobre el módulo LLM; aquí solo el contrato y un transcriptor falso.
@@ -22,6 +23,8 @@ export interface TranscriptionRequest {
   readonly reader: ReaderSpec;
   readonly prompt: RenderedPrompt;
   readonly outputSchema: ZodTypeAny;
+  /** JSON Schema plano que se pide al proveedor; trae las mismas `parts` que `outputSchema`. */
+  readonly outputJsonSchema: TranscriptionJsonSchema;
 }
 
 export interface TranscriptionResult {

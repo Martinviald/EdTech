@@ -17,6 +17,7 @@ import {
   SHEET_QR_IDENTITY_REGION,
   type SheetIdentityMode,
 } from '@soe/types';
+import { numericBoxesFor, responseGeometryOf } from '@soe/answer-reading';
 import {
   buildPrintedLabelIndex,
   planBubbleChoice,
@@ -285,14 +286,14 @@ function numberBlock(
   format: Extract<VisionResponseFormat, { kind: 'integer' | 'decimal' }>,
   options: ResponseGeometryOptions,
 ): ResponseBlockMm {
-  const boxes: ResponseBoxMm[] = format.allowNegative ? [signBox()] : [];
-  let cursor = format.allowNegative ? RESPONSE_CHAR_BOX_MM + SIGN_BOX_GAP_MM : 0;
-  const digitCount = format.kind === 'decimal' ? Math.max(format.maxChars - 1, 2) : format.maxChars;
-  const fractionDigits =
-    format.kind === 'decimal'
-      ? Math.min(Math.max(options.fractionDigits ?? 2, 1), digitCount - 1)
-      : 0;
-  const integerDigits = digitCount - fractionDigits;
+  const {
+    signBox: hasSign,
+    integerDigits,
+    fractionDigits,
+  } = numericBoxesFor(format, options.fractionDigits);
+  const boxes: ResponseBoxMm[] = hasSign ? [signBox()] : [];
+  let cursor = hasSign ? RESPONSE_CHAR_BOX_MM + SIGN_BOX_GAP_MM : 0;
+  const digitCount = integerDigits + fractionDigits;
 
   for (let index = 0; index < digitCount; index++) {
     if (format.kind === 'decimal' && index === integerDigits) {
@@ -577,18 +578,6 @@ export function responseBlockMm(
   }
 }
 
-function fractionDigitsOf(item: DerivableItem): number | undefined {
-  const accepted = (item.content as { acceptedAnswers?: unknown }).acceptedAnswers;
-  if (!Array.isArray(accepted)) return undefined;
-  let digits: number | undefined;
-  for (const answer of accepted) {
-    if (typeof answer !== 'string') continue;
-    const match = /[.,](\d+)\s*$/.exec(answer.trim());
-    if (match) digits = Math.max(digits ?? 0, match[1]!.length);
-  }
-  return digits;
-}
-
 export function itemUnitOf(content: unknown): string | null {
   const unit = (content as { unit?: unknown } | null)?.unit;
   return typeof unit === 'string' && unit.trim().length > 0 ? unit.trim() : null;
@@ -745,7 +734,7 @@ function placeFlowFields(
     const block = responseBlockMm(format, {
       availableWidthMm: contentWidthMm - 2 * RESPONSE_FIELD_PADDING_MM - unitSpaceMm,
       availableHeightMm,
-      fractionDigits: fractionDigitsOf(entry.item),
+      fractionDigits: responseGeometryOf(entry.item.content).fractionDigits ?? undefined,
     });
     const height = (block.height + 2 * RESPONSE_FIELD_PADDING_MM) / frame.height;
     const width = (block.width + 2 * RESPONSE_FIELD_PADDING_MM + unitSpaceMm) / frame.width;

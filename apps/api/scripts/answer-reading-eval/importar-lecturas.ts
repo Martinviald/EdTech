@@ -5,7 +5,6 @@ import {
   isTranscriptionPromptFor,
   normalizeTranscription,
   renderTranscriptionPrompt,
-  transcriptionZodSchema,
   type TranscriptionResult,
 } from '@soe/answer-reading';
 import { readerSpecSchema, type TranscriptionStatus } from '@soe/types';
@@ -80,11 +79,11 @@ export async function verdictFor(
   if (!isTranscriptionPromptFor(reader.data.promptRef, format.kind)) {
     return skip('el prompt no atiende el formato');
   }
-  const output = transcriptionZodSchema(format).safeParse(reading.output);
-  if (!output.success) return skip('la salida no valida contra el esquema del formato');
   const rendered = renderTranscriptionPrompt(reader.data, format, {
     gradeName: prepared.sample.gradeName ?? null,
   });
+  const output = rendered.outputZodSchema.safeParse(reading.output);
+  if (!output.success) return skip('la salida no valida contra el esquema del formato');
   const keyInput: ReadingCacheKeyInput = {
     reader: reader.data,
     prompt: rendered.prompt,
