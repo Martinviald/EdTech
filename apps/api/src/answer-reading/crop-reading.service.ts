@@ -568,6 +568,7 @@ export class CropReadingService {
         reading: {
           readingId: reused.id,
           family: reused.family,
+          provider: reused.provider,
           status: reused.status,
           output: reused.output,
           role,
@@ -589,6 +590,7 @@ export class CropReadingService {
       reading: {
         readingId: attempt.id,
         family: plan.reader.family,
+        provider: plan.reader.provider,
         status: attempt.status,
         output: attempt.output,
         role,

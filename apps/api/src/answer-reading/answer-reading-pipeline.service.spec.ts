@@ -1158,6 +1158,62 @@ describe('AnswerReadingPipelineService — desempate y sombra', () => {
     expect(decision.usedReadingIds).toContain(tiebreak?.id);
   });
 
+  it('escalamiento: ante confianza baja pide al lector fuerte y acepta si coincide con otro proveedor', async () => {
+    const sol = reader('sol', 'openai-sol', { provider: 'openai', minConfidence: 0.9 });
+    const { memory, transcriber, runScan } = setup({
+      readings: {
+        haiku: { [SHA_1]: fakeOutput('7,3', { confidence: 0.5, reviewRequested: true }) },
+        flash: { [SHA_1]: fakeOutput('8,3') },
+        sol: { [SHA_1]: fakeOutput('7.3', { confidence: 0.95 }) },
+      },
+      policy: {
+        ...POLICY,
+        onDisagreement: 'tiebreak_reader',
+        tiebreakReader: sol,
+        tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+        tiebreakAgreeWith: 'other_provider',
+      },
+    });
+
+    await runScan();
+
+    expect(transcriber.calls.map((call) => call.reader.key)).toEqual(
+      expect.arrayContaining(['haiku', 'flash', 'sol']),
+    );
+    const escalation = readingsOf(memory).find((row) => row.readerKey === 'sol');
+    const haiku = readingsOf(memory).find((row) => row.readerKey === 'haiku');
+    expect(escalation?.mode).toBe('tiebreak');
+    const decision = currentDecision(memory);
+    expect(decision).toMatchObject({ outcome: 'auto_accepted', scoringOutcome: 'correct' });
+    expect(decision.usedReadingIds).toEqual([haiku?.id, escalation?.id]);
+  });
+
+  it('escalamiento: no acepta si el lector fuerte solo coincide con uno de su mismo proveedor', async () => {
+    const sol = reader('sol', 'openai-sol', { provider: 'openai', minConfidence: 0.9 });
+    const { memory, runScan } = setup({
+      readers: [HAIKU, LUNA],
+      readings: {
+        haiku: { [SHA_1]: fakeOutput('8,3') },
+        luna: { [SHA_1]: fakeOutput('7,3') },
+        sol: { [SHA_1]: fakeOutput('7,3', { confidence: 0.99 }) },
+      },
+      policy: {
+        ...POLICY,
+        onDisagreement: 'tiebreak_reader',
+        tiebreakReader: sol,
+        tiebreakOn: ['readers_disagree'],
+        tiebreakAgreeWith: 'other_provider',
+      },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['readers_disagree'],
+    });
+  });
+
   it('el lector en sombra se guarda con modo shadow y nunca entra al consenso', async () => {
     const { memory, transcriber, runScan } = setup({
       readings: { ...agree, sombra: { [SHA_1]: fakeOutput('9,9') } },

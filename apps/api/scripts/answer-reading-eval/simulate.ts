@@ -526,6 +526,7 @@ function toConsensusReading(run: ReaderRun, index: number): ConsensusReading {
   return {
     readingId: `${run.reader.key}#${run.role}#${index}`,
     family: run.reader.family,
+    provider: run.reader.provider,
     status: run.result.status,
     output: run.result.status === 'ok' ? run.result.output : null,
     role: run.role,
