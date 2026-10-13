@@ -469,11 +469,9 @@ function confirmByEscalation(
     )
     .map((reading) => ({ reading, answer: normalizeTranscription(reading.output, format) }))
     .filter(
-      (entry) =>
-        entry.answer.canonical !== null && keyOf(entry.answer) === keyOf(tiebreakAnswer),
+      (entry) => entry.answer.canonical !== null && keyOf(entry.answer) === keyOf(tiebreakAnswer),
     );
-  const match =
-    candidates.find((entry) => otherProvider(entry.reading)) ?? candidates[0] ?? null;
+  const match = candidates.find((entry) => otherProvider(entry.reading)) ?? candidates[0] ?? null;
   if (match === null || hasFormatIssue(match.answer)) return null;
   const scoringOutcome = scoreOf(match.answer);
   const acceptable = (policy.autoAcceptOutcomes as readonly ScoringOutcome[]).includes(

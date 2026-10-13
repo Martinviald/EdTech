@@ -671,9 +671,10 @@ describe('evaluateConsensus: escalamiento a un lector fuerte (tiebreakOn)', () =
 
   it('el lector fuerte debe superar su umbral y no pedir revisión', () => {
     const primaries = [flash('2,5', { confidence: 0.9 }), luna('2,5')];
-    expect(
-      evaluate([...primaries, sol('2,5', { confidence: 0.89 })], ESCALATION),
-    ).toMatchObject({ outcome: 'needs_review', reasons: ['low_confidence'] });
+    expect(evaluate([...primaries, sol('2,5', { confidence: 0.89 })], ESCALATION)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['low_confidence'],
+    });
     expect(
       evaluate([...primaries, sol('2,5', { reviewRequested: true })], ESCALATION),
     ).toMatchObject({ outcome: 'needs_review', reasons: ['low_confidence'] });
@@ -704,10 +705,7 @@ describe('evaluateConsensus: escalamiento a un lector fuerte (tiebreakOn)', () =
 
   it('lo confirmado puede caer en la muestra de auditoría', () => {
     const audited = { ...ESCALATION, auditSampleRate: 1 };
-    const result = evaluate(
-      [flash('2,5', { confidence: 0.9 }), luna('2,5'), sol('2,5')],
-      audited,
-    );
+    const result = evaluate([flash('2,5', { confidence: 0.9 }), luna('2,5'), sol('2,5')], audited);
     expect(result).toMatchObject({
       outcome: 'needs_review',
       reasons: ['audit_sample'],
