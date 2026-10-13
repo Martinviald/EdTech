@@ -664,3 +664,53 @@ Plan: `docs/plan-etapa1-lectura-vision.md`.
 | Costo nominal por recorte corto (precio 2027) | US$0,0013 | US$0,0038 (la mitad hasta dic-2026) |
 
 Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), dentro del tope de US$5.
+
+### Etapa 1 — T5b: el número de la pregunta fuera del recorte (`wip/e1-t5b`)
+
+- **Riesgo:** la hoja imprime el número de la pregunta 6 pt a la izquierda de la región del campo, a
+  la altura de la primera fila. El margen de `short-answer@2` (30 % del lado menor) lo incluía, y
+  Gemini 3.8 Flash leyó "4 3/4" en Celeste P4 con 0,95 en las 3 repeticiones (lo salvó el
+  desacuerdo con luna). Tapar el número pintándolo ya se había descartado (dejaba puntos de lápiz).
+- **Decisión E1-5 — el layout publica el rótulo y el perfil lo trata como obstáculo.** Cada campo de
+  respuesta escrita suma `response.printedLabelRegion` (opcional; derivado de las mismas constantes
+  con que se imprime el número, y un test comprueba que el ancho real de Helvetica-Bold cabe en la
+  caja). El perfil suma `printedLabelGapFraction`: en cada lado el margen no pasa de esa fracción de
+  la distancia al rótulo (mismo criterio que `neighborGapFraction`). `short-answer@3` = v2 + 0,5.
+  Lo impreso dentro de la región (coma, barra, paréntesis, `;`, signos, rótulos de casilla) no se
+  toca. Los v1/v2 ignoran el rótulo y un layout sin rótulo recorta como v2, así que los layouts
+  congelados no cambian. Los derivados nuevos cambian de hash (rótulo + id del perfil; la geometría
+  es la misma, verificado en el test).
+- **No hay `free-text@3`:** en las fotos, Ámbar empezó P10 en el margen izquierdo y el tope dejó
+  "17 tiene" en vez de "47 tiene". El desarrollo sigue en `free-text@2` (publica el rótulo, no lo usa).
+- **Medición** (dataset `fotos-reales-v1-sin-rotulo`: misma verdad, los 24 recortes cortos
+  regenerados por el OMR con `short-answer@3` desde las 6 fotos; los 6 de desarrollo, idénticos
+  byte a byte; la reproducción con `short-answer@2` dio 30/30 recortes idénticos al dataset
+  original). Ruta `pipeline-b-final.json`, 3 repeticiones, pareado contra `e1-final`:
+
+| | `e1-final` (`@2`) | Sin rótulo (`@3`) |
+|---|---|---|
+| Autoaceptadas | 32/72 = 44,4 % [33,5–55,9] | **32/72 = 44,4 % [33,5–55,9]** (5 ganadas, 5 perdidas; p = 1,0) |
+| Equivocadas (perjudica / favorece) | 0 (0 / 0) | **0 (0 / 0)** |
+| Lectura exacta Gemini 3.8 Flash | 56/72 = 77,8 % [66,9–85,8] | **62/72 = 86,1 % [76,3–92,3]** |
+| Lectura exacta gpt-6-luna | 60/72 = 83,3 % [73,1–90,2] | 58/72 = 80,6 % [70,0–88,0] |
+| Lecturas exactas del par | 116/144 | **120/144** |
+| Decisión con el valor correcto | 59/72 = 81,9 % [71,5–89,1] | 55/72 = 76,4 % [65,4–84,7] (p = 0,42) |
+
+  - Celeste P4: Gemini pasa de "4 3/4" (3/3) a "3/4" con 0,98–0,99 (3/3) y la casilla se autoacepta
+    en las 3 repeticiones. También desaparecen dos lecturas de luna que sumaban un dígito a la
+    izquierda ("12,73" por "2,73" en Bruno P3, "0109" por "0100" en Bruno P2).
+  - Por formato (autoaceptadas): fracción 5 → 8, entero 6 → 7, par ordenado 3 → 2, texto corto
+    6 → 3; el resto igual. La baja de texto corto es luna leyendo "productos" en Bruno P8 (3/3) con
+    el renglón intacto; Gemini lo lee bien 9/9 y el desacuerdo manda a revisión.
+  - Ruido entre repeticiones: autoaceptadas 11/11/10 antes y 12/10/10 ahora; decisión correcta
+    19/21/19 y 19/18/18.
+- **Integración:** cumple la regla (equivocadas 0 → 0, autoaceptación igual, el par suma 4
+  lecturas exactas). La baja de "decisión con el valor correcto" (−4, no significativa) viene de
+  desacuerdos nuevos de luna que van a revisión, no de autoaceptaciones. **Se integra.**
+- **Riesgos:** (1) las hojas ya impresas siguen con el número dentro del recorte hasta que se
+  vuelva a derivar el layout (si se quisiera cubrirlas, el OMR tendría que derivar el rótulo sin el
+  campo, acoplándose a las constantes de impresión); (2) con el margen izquierdo de ~1 mm, una
+  respuesta corta escrita fuera de la casilla hacia la izquierda más de ~4 mm se corta (no pasó en
+  las 24 casillas); (3) el OMR debe desplegarse con `short-answer@3` antes que la API, o
+  `resolve_crop_profile` cae al recorte heredado (igual que con FR-3).
+- Gasto de IA: US$0,27 nominal (precio 2027).
