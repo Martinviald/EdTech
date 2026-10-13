@@ -580,3 +580,157 @@ describe('evaluateConsensus: umbral de confianza por lector (E1-1)', () => {
     ).toEqual(['rubric_item']);
   });
 });
+
+describe('evaluateConsensus: escalamiento a un lector fuerte (tiebreakOn)', () => {
+  const solReader: ReaderSpec = {
+    key: 'gpt-6.1-sol',
+    transcriberId: 'llm',
+    provider: 'openai',
+    family: 'openai-sol',
+    model: 'gpt-6.1-sol',
+    promptRef: 'transcribe.short-answer@2',
+    hints: 'none',
+    params: { maxOutputTokens: 4096, reasoning: 'low', timeoutMs: 90000 },
+    minConfidence: 0.9,
+  };
+  const ESCALATION: ConsensusPolicy = {
+    ...POLICY,
+    onDisagreement: 'tiebreak_reader',
+    tiebreakReader: solReader,
+    tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+    tiebreakAgreeWith: 'other_provider',
+  };
+  const flash = (literal: string, overrides: Partial<TranscriptionOutput> = {}) =>
+    reading('r-flash', 'gemini-flash', fakeOutput(literal, overrides), {
+      provider: 'gemini',
+      minConfidence: 0.97,
+    });
+  const luna = (literal: string, overrides: Partial<TranscriptionOutput> = {}) =>
+    reading('r-luna', 'openai-luna', fakeOutput(literal, overrides), {
+      provider: 'openai',
+      minConfidence: 0.85,
+    });
+  const sol = (literal: string, overrides: Partial<TranscriptionOutput> = {}) =>
+    reading('r-sol', 'openai-sol', fakeOutput(literal, { confidence: 0.95, ...overrides }), {
+      role: 'tiebreak',
+      provider: 'openai',
+      minConfidence: 0.9,
+    });
+
+  it('confianza baja: el lector fuerte coincide con el de otro proveedor → autoacepta', () => {
+    const primaries = [flash('2,5', { confidence: 0.9 }), luna('2,5')];
+    const first = evaluate(primaries, ESCALATION);
+    expect(first.reasons).toEqual(['low_confidence']);
+    expect(needsTiebreak(first, primaries, ESCALATION)).toBe(true);
+    expect(evaluate([...primaries, sol('2,5')], ESCALATION)).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'correct',
+      reasons: [],
+      usedReadingIds: ['r-flash', 'r-sol'],
+    });
+  });
+
+  it('no exige la confianza ni la petición de revisión de la primaria con la que coincide', () => {
+    const primaries = [flash('2,5', { confidence: 0.5, reviewRequested: true }), luna('3,5')];
+    const first = evaluate(primaries, ESCALATION);
+    expect(first.reasons).toEqual(['reader_requested_review']);
+    expect(needsTiebreak(first, primaries, ESCALATION)).toBe(true);
+    expect(evaluate([...primaries, sol('2,5')], ESCALATION)).toMatchObject({
+      outcome: 'auto_accepted',
+      usedReadingIds: ['r-flash', 'r-sol'],
+    });
+  });
+
+  it('con other_provider no basta coincidir con el lector del mismo proveedor', () => {
+    const primaries = [flash('2,5'), luna('3,5')];
+    expect(evaluate(primaries, ESCALATION).reasons).toEqual(['readers_disagree']);
+    expect(evaluate([...primaries, sol('3,5')], ESCALATION)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['readers_disagree'],
+      value: null,
+    });
+    expect(evaluate([...primaries, sol('2,5')], ESCALATION)).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'correct',
+      usedReadingIds: ['r-flash', 'r-sol'],
+    });
+    const anyProvider = { ...ESCALATION, tiebreakAgreeWith: 'any' as const };
+    expect(evaluate([...primaries, sol('3,5')], anyProvider)).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'incorrect',
+      usedReadingIds: ['r-luna', 'r-sol'],
+    });
+  });
+
+  it('sin el proveedor de la lectura no se puede probar que sea de otro proveedor', () => {
+    const unknownFlash = reading('r-flash', 'gemini-flash', fakeOutput('2,5', { confidence: 0.9 }));
+    const primaries = [unknownFlash, luna('3,5')];
+    expect(needsTiebreak(evaluate(primaries, ESCALATION), primaries, ESCALATION)).toBe(false);
+    expect(evaluate([...primaries, sol('2,5')], ESCALATION).outcome).toBe('needs_review');
+  });
+
+  it('el lector fuerte debe superar su umbral y no pedir revisión', () => {
+    const primaries = [flash('2,5', { confidence: 0.9 }), luna('2,5')];
+    expect(
+      evaluate([...primaries, sol('2,5', { confidence: 0.89 })], ESCALATION),
+    ).toMatchObject({ outcome: 'needs_review', reasons: ['low_confidence'] });
+    expect(
+      evaluate([...primaries, sol('2,5', { reviewRequested: true })], ESCALATION),
+    ).toMatchObject({ outcome: 'needs_review', reasons: ['low_confidence'] });
+  });
+
+  it('solo escala por motivos de lectura: nunca por formato, corrección, ni con un estado no contestado', () => {
+    const illegible = [flash('2,5', { state: 'illegible' }), luna('2,5')];
+    expect(needsTiebreak(evaluate(illegible, ESCALATION), illegible, ESCALATION)).toBe(false);
+    const blankVsAnswered = [flash('', { state: 'blank' }), luna('2,5')];
+    const mixed = evaluate(blankVsAnswered, ESCALATION);
+    expect(mixed.reasons).toEqual(['readers_disagree']);
+    expect(needsTiebreak(mixed, blankVsAnswered, ESCALATION)).toBe(false);
+    const agreed = [flash('2,5'), luna('2,5')];
+    expect(needsTiebreak(evaluate(agreed, ESCALATION), agreed, ESCALATION)).toBe(false);
+    const confirmed = [flash('2,5', { confidence: 0.9 }), luna('2,5'), sol('2,5')];
+    expect(needsTiebreak(evaluate(confirmed, ESCALATION), confirmed, ESCALATION)).toBe(false);
+  });
+
+  it('lo confirmado pasa por la política: si no autoacepta ese resultado, queda la revisión original', () => {
+    const onlyCorrect = { ...ESCALATION, autoAcceptOutcomes: ['correct' as const] };
+    const primaries = [flash('7', { confidence: 0.9 }), luna('8')];
+    expect(evaluate([...primaries, sol('7')], onlyCorrect)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['readers_disagree'],
+      value: null,
+    });
+  });
+
+  it('lo confirmado puede caer en la muestra de auditoría', () => {
+    const audited = { ...ESCALATION, auditSampleRate: 1 };
+    const result = evaluate(
+      [flash('2,5', { confidence: 0.9 }), luna('2,5'), sol('2,5')],
+      audited,
+    );
+    expect(result).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['audit_sample'],
+      usedReadingIds: ['r-flash', 'r-sol'],
+    });
+    expect(result.value?.canonical).toBe('n:5/2');
+  });
+
+  it('sin tiebreakOn el desempate conserva su comportamiento original', () => {
+    const legacy = { ...ESCALATION, tiebreakOn: undefined, tiebreakAgreeWith: undefined };
+    const lowConfidence = [flash('2,5', { confidence: 0.9 }), luna('2,5')];
+    expect(needsTiebreak(evaluate(lowConfidence, legacy), lowConfidence, legacy)).toBe(false);
+    expect(evaluate([...lowConfidence, sol('2,5')], legacy).reasons).toEqual(['low_confidence']);
+    const disagree = [flash('2,5', { confidence: 0.9 }), luna('3,5')];
+    expect(needsTiebreak(evaluate(disagree, legacy), disagree, legacy)).toBe(true);
+    expect(evaluate([...disagree, sol('2,5')], legacy)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['low_confidence'],
+      usedReadingIds: ['r-flash', 'r-sol'],
+    });
+    expect(evaluate([...disagree, sol('3,5')], legacy)).toMatchObject({
+      outcome: 'auto_accepted',
+      usedReadingIds: ['r-luna', 'r-sol'],
+    });
+  });
+});

@@ -68,6 +68,26 @@ describe('contratos de lectura por visión', () => {
     expect(REVIEW_MODE_BY_REASON.scoring_changed).toBe('reading');
   });
 
+  it('el escalamiento del desempate es opcional y acotado a motivos de lectura', () => {
+    expect(consensusPolicySchema.parse(DEFAULT_CONSENSUS_POLICY).tiebreakOn).toBeUndefined();
+    const escalation = {
+      ...DEFAULT_CONSENSUS_POLICY,
+      tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+      tiebreakAgreeWith: 'other_provider',
+    };
+    expect(consensusPolicySchema.parse(escalation)).toMatchObject({
+      tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+      tiebreakAgreeWith: 'other_provider',
+    });
+    expect(consensusPolicySchema.safeParse({ ...escalation, tiebreakOn: [] }).success).toBe(false);
+    expect(
+      consensusPolicySchema.safeParse({ ...escalation, tiebreakOn: ['undecidable'] }).success,
+    ).toBe(false);
+    expect(
+      consensusPolicySchema.safeParse({ ...escalation, tiebreakAgreeWith: 'same_family' }).success,
+    ).toBe(false);
+  });
+
   it('la clave y la lectura acordada solo se declaran en prompts de verificación (T4)', () => {
     const prompt = {
       id: 'verify.incorrect',
