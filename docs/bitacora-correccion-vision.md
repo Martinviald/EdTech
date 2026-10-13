@@ -748,3 +748,34 @@ Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), d
   ambos pasos la API vieja ve rutas que no entiende. Despliega con el flag de backend en una ventana
   sin escaneos, y si entró alguno en esa ventana, reprocesa sus recortes `not_read` /
   `insufficient_readers` después del despliegue.
+- **Motivos del verificador en modo lectura.** `verifier_flagged` pasa a modo `reading` (D8: la
+  duda es de lectura; sin clave a la vista ni corrección preseleccionada) y un motivo nuevo,
+  `verifier_failed` (también lectura), cubre la falla, el plazo vencido o la falta de veredicto:
+  la web ya no dice «el verificador cree que podría ser…» cuando el verificador no respondió. La web
+  tampoco preselecciona «Incorrecta» ante un motivo del verificador aunque la decisión haya quedado
+  guardada en modo corrección (decisiones de T4 ya persistidas). `reasons` es JSONB: sin migración.
+- **La consolidación no corrige sin verificar un resultado que cambió.** Si la corrección con la
+  clave vigente no coincide con el `scoringOutcome` de la decisión autoaceptada (por ejemplo, una
+  correcta cuya clave se editó después), la decisión se reemplaza (procedimiento de F7:
+  `escalateToReview`, decisión nueva y la vieja con `superseded_by_id`) por una `needs_review` con
+  el motivo nuevo `scoring_changed` (modo lectura). La respuesta queda pendiente, nunca en 0. Las
+  decisiones con `scoringOutcome` nulo no se comparan.
+- **`--reader-min-confidence` reemplaza el umbral del lector.** Antes solo ponía 0 en la política y
+  el consenso seguía aplicando el `minConfidence` que el lector trae en la ruta, así que no se podía
+  bajar de él. Barrido verificado desde el caché (`pipeline-b-38.json`, 72 unidades, `gpt-6-luna` en
+  0,85, US$0):
+
+  | Umbral `gemini-3.8-flash` | 0,85 | 0,90 | 0,93 | 0,95 | 0,96 | 0,97 | 0,98 | 0,99 |
+  | ------------------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+  | Autoaceptadas / 72        | 37   | 37   | 37   | 37   | 30   | 30   | 30   | 16   |
+  | Equivocadas               | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    |
+
+  Confirma las cifras de T2 (0,90–0,95 → 37/72 y 0,96–0,98 → 30/72, 0 equivocadas). El umbral 0,97
+  no cambia: se eligió por margen sobre las lecturas equivocadas que 3.8 Flash dio con 0,90–0,95,
+  no porque en este dataset aparezcan equivocadas entre 0,90 y 0,96.
+- **`importar-lecturas` controla el prompt.** Compara el `promptHash` (o el texto) guardado con el
+  prompt que se renderiza hoy y omite la lectura si cambió. Los experimentos ya importados no
+  guardaron ninguno de los dos: sin ese dato solo se importan con `--force`.
+- **Compuerta:** el arnés con `pipeline-b-final.json` desde el caché sigue en **32/72, 0
+  equivocadas** (170 aciertos de caché, 0 llamadas, US$0); el verificador revisó las 8 incorrectas
+  autoaceptadas y no mandó ninguna a revisión, igual que en T4.
