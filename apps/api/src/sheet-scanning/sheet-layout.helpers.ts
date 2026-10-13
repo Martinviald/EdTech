@@ -141,8 +141,14 @@ const RESPONSE_FIELD_LEFT = 0.08;
 const RESPONSE_FIELD_RIGHT = 0.95;
 const COORDINATE_EPSILON = 1e-9;
 
-export const RESPONSE_CROP_PROFILE_SHORT = 'short-answer@2';
+export const RESPONSE_CROP_PROFILE_SHORT = 'short-answer@3';
 export const RESPONSE_CROP_PROFILE_FREE_TEXT = 'free-text@2';
+export const RESPONSE_LABEL_FONT_SIZE_PT = 8;
+export const RESPONSE_LABEL_GAP_PT = 6;
+export const RESPONSE_LABEL_BASELINE_OFFSET_PT = 17;
+export const RESPONSE_LABEL_CHAR_WIDTH_EM = 0.6;
+const RESPONSE_LABEL_ASCENT_EM = 0.75;
+const RESPONSE_LABEL_DESCENT_EM = 0.25;
 
 const VISION_FORMAT_KINDS: ReadonlySet<ResponseFormat['kind']> = new Set([
   'integer',
@@ -594,6 +600,29 @@ function frameRegion(left: number, top: number, right: number, bottom: number): 
   };
 }
 
+export function responseLabelRegion(
+  regionLeft: number,
+  regionTop: number,
+  printedNumber: string,
+  frame: FrameSizeMm,
+): OmrRegion {
+  const toX = (pt: number): number => (pt * MM_PER_PT) / frame.width;
+  const toY = (pt: number): number => (pt * MM_PER_PT) / frame.height;
+  const right = regionLeft - toX(RESPONSE_LABEL_GAP_PT);
+  const width = toX(
+    RESPONSE_LABEL_CHAR_WIDTH_EM * RESPONSE_LABEL_FONT_SIZE_PT * printedNumber.length,
+  );
+  const top =
+    regionTop +
+    toY(RESPONSE_LABEL_BASELINE_OFFSET_PT - RESPONSE_LABEL_ASCENT_EM * RESPONSE_LABEL_FONT_SIZE_PT);
+  const bottom =
+    regionTop +
+    toY(
+      RESPONSE_LABEL_BASELINE_OFFSET_PT + RESPONSE_LABEL_DESCENT_EM * RESPONSE_LABEL_FONT_SIZE_PT,
+    );
+  return frameRegion(right - width, top, right, bottom);
+}
+
 function responseCursorStart(
   bubbleCount: number,
   gridTop: number,
@@ -699,6 +728,7 @@ function responseField(
       format,
       boxes,
       cropProfileId: cropProfileIdFor(format),
+      printedLabelRegion: responseLabelRegion(left, top, entry.label, frame),
     },
   };
 }

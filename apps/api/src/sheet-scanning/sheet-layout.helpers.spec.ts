@@ -416,7 +416,7 @@ describe('deriveLayoutDraft — campos de respuesta escrita por formato', () => 
     expect(rolesOf(6)).toEqual(['lines.0:line']);
     expect(rolesOf(7)).toEqual(Array.from({ length: 6 }, (_, i) => `lines.${i}:line`));
 
-    expect(fields.slice(1, 7).every((f) => f.response!.cropProfileId === 'short-answer@2')).toBe(true);
+    expect(fields.slice(1, 7).every((f) => f.response!.cropProfileId === 'short-answer@3')).toBe(true);
     expect(fields[7]!.response!.cropProfileId).toBe('free-text@2');
   });
 
@@ -684,24 +684,24 @@ describe('deriveLayoutDraft — formatos word_list, short_text y multi_box (F10b
     };
     const withV1CropProfiles = (spec: LayoutSpec): LayoutSpec => ({
       ...spec,
-      fields: spec.fields.map((field) =>
-        field.response
-          ? {
-              ...field,
-              response: {
-                ...field.response,
-                cropProfileId: field.response.cropProfileId.replace(/@2$/, '@1'),
-              },
-            }
-          : field,
-      ),
+      fields: spec.fields.map((field) => {
+        if (!field.response) return field;
+        return {
+          ...field,
+          response: {
+            ...field.response,
+            printedLabelRegion: undefined,
+            cropProfileId: field.response.cropProfileId.replace(/@\d+$/, '@1'),
+          },
+        };
+      }),
     });
     const qr = deriveLayoutDraft(INSTRUMENT_ID, legacy, 'qr').spec;
     const rut = deriveLayoutDraft(INSTRUMENT_ID, legacy, 'rut_bubbles').spec;
     expect(layoutHash(withV1CropProfiles(qr))).toBe('67ffca863532fa57');
     expect(layoutHash(withV1CropProfiles(rut))).toBe('755b2fb018046f26');
-    expect(layoutHash(qr)).toBe('1bd231149a3f753a');
-    expect(layoutHash(rut)).toBe('c8923ae68a8ca568');
+    expect(layoutHash(qr)).toBe('15bbe7262e5891eb');
+    expect(layoutHash(rut)).toBe('5ae250c66abb6528');
   });
 });
 
@@ -1010,6 +1010,38 @@ describe('perfil de recorte de los campos derivados (fotos reales: P8 leída com
       const reached = neighbors.filter((neighbor) => intersects(bleed, neighbor));
       expect({ field: field.printedNumber, reached }).toEqual({ field: field.printedNumber, reached: [] });
     }
+  });
+
+  it('el recorte de respuesta corta deja fuera el número impreso de la pregunta (Celeste P4: "4 3/4")', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, formatItems()).spec;
+    const frame = sheetFrameSizeMm(spec.paper, spec.fiducials);
+    const shortFields = spec.fields.filter(
+      (f) => f.response?.cropProfileId.startsWith('short-answer') && f.region,
+    );
+    expect(shortFields.length).toBeGreaterThan(0);
+    for (const field of shortFields) {
+      const profile = CROP_PROFILES[field.response!.cropProfileId as CropProfileRef];
+      const pageFields = spec.fields.filter((other) => other.pageIndex === field.pageIndex);
+      const labels = pageFields.flatMap((other) =>
+        other.response?.printedLabelRegion ? [regionBox(other.response.printedLabelRegion, frame)] : [],
+      );
+      const region = regionBox(field.region!, frame);
+      const ownLabel = regionBox(field.response!.printedLabelRegion!, frame);
+      const bleed = cropBleedBox(region, profile, [], labels);
+      expect(ownLabel.x1).toBeLessThan(region.x0);
+      expect(ownLabel.y0).toBeGreaterThan(region.y0);
+      expect(ownLabel.y1).toBeLessThan(region.y1);
+      expect(bleed.x0).toBeGreaterThan(ownLabel.x1);
+      expect(bleed.x0).toBeLessThan(region.x0);
+      expect(cropBleedBox(region, profile, [], []).x0).toBeLessThan(ownLabel.x1);
+    }
+  });
+
+  it('el desarrollo publica el rótulo pero conserva free-text@2, que no lo usa', () => {
+    const spec = deriveLayoutDraft(INSTRUMENT_ID, formatItems()).spec;
+    const freeText = spec.fields.filter((f) => f.response?.cropProfileId === 'free-text@2');
+    expect(freeText.length).toBeGreaterThan(0);
+    expect(freeText.every((f) => f.response!.printedLabelRegion !== undefined)).toBe(true);
   });
 
   it('el margen deja aire alrededor de la región', () => {
