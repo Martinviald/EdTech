@@ -379,6 +379,13 @@
       "when": 1791847803451,
       "tag": "0053_verificador_incorrectas",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1791868022251,
+      "tag": "0054_escalamiento_gpt_sol",
+      "breakpoints": true
     }
   ]
 }
