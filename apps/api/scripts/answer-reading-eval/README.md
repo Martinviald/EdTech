@@ -86,13 +86,19 @@ pnpm answer-reading:eval --dataset "$P/datasets/fotos-reales-v1" \
 | `--out <dir>`                 | Carpeta de salida (`informe.json`, `informe.md`, `comparacion.json`). Los resultados con datos reales van **fuera del repo**.                                                                                                                                                           |
 | `--dry-run`                   | Transcriptor falso que devuelve la etiqueta; no usa el caché ni llama a ninguna API.                                                                                                                                                                                                    |
 | `--compare <informe.json>`    | Comparación **pareada** contra un informe v2 anterior (mismas muestras y repeticiones).                                                                                                                                                                                                 |
+| `--injected-escalation`       | Las lecturas inyectadas (estrés) entran como lecturas dudosas (confianza 0) de los lectores de la ruta, para medir si el escalamiento (`tiebreakOn`) confirma un 0 injusto. Sin la opción, entran como dos lecturas que coinciden (estrés del verificador).                              |
 
 Las claves de API salen del `.env` de la raíz. Las tarifas están en `tariffs.ts`: Haiku 5.5,
 Flash-Lite y luna de `llm_models` (migraciones 0044 y 0046); `gemini-3.5-flash` a US$1,50 /
 US$9,00 por millón, de agregadores de precios (sep. 2026, anotado en
 `experimento-lectores/analisis.md`); `gemini-3.6-flash` y `gemini-3.8-flash` con el precio oficial
-de 2027 (US$1,50 / US$7,50; hasta el 31-12-2026 es la mitad), por conservador. El arnés no lee ni
-escribe la base de datos.
+de 2027 (US$1,50 / US$7,50; hasta el 31-12-2026 es la mitad), por conservador; `gpt-6.1-sol` a
+US$2 / 10 por millón (developers.openai.com/api/docs/pricing, consultada el 2026-10-12). El arnés
+no lee ni escribe la base de datos.
+
+**Lecturas de desempate.** Solo se piden si el consenso las necesita, así que no entran al peor caso
+que bloquea la corrida: se informan aparte, exigen `--budget-usd` y el tope de la corrida las
+limita igual que al verificador.
 
 ## Rutas por formato
 
@@ -111,6 +117,11 @@ de `resolveReadingRoute`, igual que en producción: la de formato gana a la por 
   idéntico a lo que siembra 0051 (verificado contra una BD PG14 con `readingRouteSchema`).
 - `routes/pipeline-b-final.json`: la ruta final de la etapa 1, con el verificador de incorrectas
   `gemini-3.8-flash` (umbral 0,95) en las rutas que autoaceptan; idéntica a lo que siembra 0053.
+- `routes/pipeline-b-escalamiento.json`: `pipeline-b-final.json` + escalamiento a `gpt-6.1-sol`
+  (`reasoning: low`, umbral 0,9, prompt y hints del lector Gemini de cada ruta) en las 6 rutas que
+  autoaceptan, con `tiebreakOn` (`readers_disagree`, `low_confidence`, `reader_requested_review`) y
+  `tiebreakAgreeWith: other_provider`; idéntica a lo que siembra 0054. Un test comprueba que solo
+  difiere de la final en eso.
 - `routes/default.json`: la ruta por defecto sola (fixtures sintéticos).
 
 **Umbral por lector.** Desde T1 la ruta trae `minConfidence` por lector y el consenso lo aplica.
@@ -285,6 +296,27 @@ repeticiones (2026-10-12; `resultados/t4b-estres-38`, `t4b-estres-36`, `t4b-real
   equivocadas, idéntica casilla por casilla a `t3-final` (0 discordantes); el verificador revisó
   las 8 incorrectas autoaceptadas y no mandó ninguna a revisión. Costo extra US$0,0004 por recorte
   corto.
+
+## Escalamiento a un lector fuerte
+
+Desde el caché (las lecturas de `gpt-6.1-sol` las dejó `experimento-escalamiento` con la misma
+clave, US$0):
+
+```bash
+pnpm answer-reading:eval --dataset "$P/datasets/fotos-reales-v1-sin-rotulo" \
+  --routes scripts/answer-reading-eval/routes/pipeline-b-escalamiento.json \
+  --repetitions 3 --budget-usd 0.05 --out "$P/resultados/esc-sin-rotulo" \
+  --compare "$P/resultados/t5b-sin-rotulo/informe.json"
+
+pnpm answer-reading:eval --dataset "$P/datasets/estres-verificador-v1" \
+  --routes scripts/answer-reading-eval/routes/pipeline-b-escalamiento.json \
+  --repetitions 2 --budget-usd 0.10 --injected-escalation --out "$P/resultados/esc-estres"
+```
+
+Resultado (2026-10-13): **46/72 autoaceptadas [52,4–74,0], 0 equivocadas** (32 → 46; 14 ganadas, 0
+perdidas, McNemar p < 0,001, optimista), las mismas 14 casillas que rescató el experimento. Estrés:
+de 30 ceros injustos inyectados, el escalamiento no confirma ninguno; confirma 8 de 16 incorrectas
+verdaderas y el verificador no marca ninguna.
 
 ## Fixtures sintéticos
 

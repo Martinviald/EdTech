@@ -779,3 +779,67 @@ Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), d
 - **Compuerta:** el arnés con `pipeline-b-final.json` desde el caché sigue en **32/72, 0
   equivocadas** (170 aciertos de caché, 0 llamadas, US$0); el verificador revisó las 8 incorrectas
   autoaceptadas y no mandó ninguna a revisión, igual que en T4.
+
+## Escalamiento a un lector fuerte (`feat/vision-escalamiento`)
+
+Base: `pruebas-vlm-manuscrito/hojas-sinteticas/experimento-escalamiento/analisis.md` (gpt-6.1-sol en
+lectura independiente, variante «otra familia»: 46/72, 0 equivocadas).
+
+- **Decisión E1-5 — se extiende el desempate, no se crea un concepto nuevo.** `ConsensusPolicy` suma
+  dos campos opcionales: `tiebreakOn` (motivos que activan al lector de desempate; solo
+  `readers_disagree`, `low_confidence` y `reader_requested_review`) y `tiebreakAgreeWith`
+  (`any` | `other_provider`). El lector sigue siendo `tiebreakReader`, se guarda con el modo
+  `tiebreak` en `answer_readings` (sin enum nuevo ni migración de esquema) y el presupuesto previo
+  ya contaba esa llamada (`onDisagreement: tiebreak_reader` + lector). Sin `tiebreakOn` el desempate
+  se comporta igual que antes (test dedicado y los casos previos sin tocar).
+- **Semántica con `tiebreakOn` (confirmación independiente).** `needsTiebreak` pide al lector solo si
+  todos los motivos de revisión están en la lista y hay una primaria contestada que podría
+  corroborarlo; formato, indecidible, auditoría y verificador nunca escalan. `evaluateConsensus`
+  autoacepta solo si la lectura de escalamiento está contestada, supera su umbral (0,9), no pide
+  revisión y su canónica coincide con la de una primaria contestada de **otro proveedor**. No se
+  exige la confianza ni la petición de revisión de esa primaria: replica la regla medida
+  (`rescueIndependent` del script del experimento). El valor es el de la primaria (también es el que
+  ve el verificador, como en el experimento) y pasa por formato, corrección, `autoAcceptOutcomes` y
+  auditoría; si algo falla, queda la revisión original con sus motivos. Las incorrectas y parciales
+  confirmadas pasan por el verificador, que solo puede mandar a revisión. En el paso 6 el desempate
+  ya no se suma al grupo de las primarias (evita dos caminos).
+- **«Otra familia» es otro proveedor.** Las familias de la ruta son por modelo (`openai-luna`,
+  `openai-sol`), así que compararlas daría a luna como «otra familia» de sol, que es justo el error
+  correlacionado que el experimento midió (Celeste P7). El experimento comparó proveedores, por eso
+  el valor es `other_provider` y `ConsensusReading` suma `provider` (lo copian `CropReadingService`,
+  también al reutilizar una lectura guardada, `run-sample` y el arnés). Sin proveedor no hay
+  confirmación.
+- **Arnés.** Las lecturas de desempate son condicionales: ya no bloquean el peor caso previo, pero
+  exigen `--budget-usd` y el tope de la corrida las limita. `--injected-escalation` mete las lecturas
+  inyectadas del estrés como lecturas dudosas de los lectores de la ruta para medir la vía nueva.
+- **Ruta y catálogo.** `pipeline-b-escalamiento.json` = final + `gpt-6.1-sol` (`reasoning: low`, el
+  mínimo que acepta; `maxOutputTokens` 4096; `timeoutMs` 90 s; umbral 0,9; prompt y hints del lector
+  Gemini de cada ruta) en las 6 rutas que autoaceptan. Tarifa US$2 / 0,10 cacheada / 10 por millón
+  (developers.openai.com/api/docs/pricing, consultada el 2026-10-12) en `tariffs.ts`, en la tarifa de
+  respaldo y en la fila de `llm_models` del SQL 0054 (ids `…001c`–`…0021`, verificado en PG14).
+- **Compuerta (`fotos-reales-v1-sin-rotulo`, 3 repeticiones, desde el caché, US$0):**
+
+| | `pipeline-b-final` (`t5b-sin-rotulo`) | Escalamiento |
+|---|---|---|
+| Autoaceptadas | 32/72 = 44,4 % [33,5–55,9] | **46/72 = 63,9 % [52,4–74,0]** (14 ganadas, 0 perdidas; McNemar p < 0,001, optimista) |
+| Equivocadas (perjudica / favorece) | 0 (0 / 0) | **0 (0 / 0)** |
+| Decisión con el valor correcto | 55/72 | 59/72 (p = 0,125) |
+| Casillas escaladas | — | 36 (las 40 a revisión menos 3 `unparsed_format` y 1 `undecidable`) |
+| Costo nominal por recorte corto | US$0,00372 | US$0,00536 |
+| Latencia por recorte p50 / p95 | 4,5 s / 8,2 s | 6,2 s / 20,6 s |
+
+  Las 14 ganadas son **exactamente** las 14 unidades que rescató el experimento. Celeste P8 (indecidible)
+  sigue en revisión; la incorrecta rescatada (Bruno P4 rep 1) la revisó el verificador sin marcarla.
+  Las lecturas de sol salieron del caché sin importar nada: el experimento las guardó con la misma
+  clave (proveedor, modelo, parámetros, prompt renderizado, esquema, imagen y repetición).
+- **Estrés (`estres-verificador-v1`, 2 repeticiones, `--injected-escalation`, US$0):** 44 de 46
+  unidades escalan; el lector fuerte **no confirma ninguno de los 30 ceros injustos** (ninguno llega
+  al verificador) y confirma 8 de 16 incorrectas verdaderas, que el verificador deja pasar
+  (correcto). Mismo resultado que el experimento.
+- **Riesgos.** (1) La muestra es chica: 24 casillas de letra adulta, 15 recortes escalados; el IC
+  trata como independientes repeticiones que no lo son. (2) La p95 del recorte sube a ~21 s por la
+  llamada extra (el lote corre en paralelo por recorte). (3) Orden de despliegue: una API anterior
+  a este cambio rechaza las rutas de 0054 (`.strict()`), las descarta y los recortes quedan
+  `not_read`; van juntas, como 0051–0053. (4) La org debe permitir el proveedor OpenAI; si no,
+  `resolveReadingRoute` quita el desempate y la ruta se comporta como la final.
+- Gasto de IA: US$0 (todo desde el caché).

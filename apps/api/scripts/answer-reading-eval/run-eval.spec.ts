@@ -96,6 +96,49 @@ describe('arnés answer-reading:eval', () => {
     expect(luna.every((reader) => reader.params.reasoning === 'low')).toBe(true);
   });
 
+  it('la ruta de escalamiento es la final más gpt-6.1-sol en las rutas que autoaceptan', async () => {
+    const final = await loadRouteSet(join(__dirname, 'routes', 'pipeline-b-final.json'));
+    const escalation = await loadRouteSet(
+      join(__dirname, 'routes', 'pipeline-b-escalamiento.json'),
+    );
+    expect(escalation.routes).toHaveLength(final.routes.length);
+    final.routes.forEach((route, index) => {
+      const next = escalation.routes[index]!;
+      if (!route.policy.autoAccept) {
+        expect(next).toEqual(route);
+        return;
+      }
+      const gemini = route.readers.find((reader) => reader.provider === 'gemini')!;
+      expect(next).toEqual({
+        ...route,
+        id: next.id,
+        version: route.version + 1,
+        policy: {
+          ...route.policy,
+          onDisagreement: 'tiebreak_reader',
+          tiebreakReader: {
+            key: 'gpt-6.1-sol',
+            transcriberId: 'llm',
+            provider: 'openai',
+            family: 'openai-sol',
+            model: 'gpt-6.1-sol',
+            promptRef: gemini.promptRef,
+            hints: gemini.hints,
+            params: {
+              reasoning: 'low',
+              timeoutMs: 90000,
+              maxOutputTokens: 4096,
+              mediaResolution: 'medium',
+            },
+            minConfidence: 0.9,
+          },
+          tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+          tiebreakAgreeWith: 'other_provider',
+        },
+      });
+    });
+  });
+
   it('los fixtures en disco coinciden con su generador y el manifiesto v1 sigue siendo válido', async () => {
     const onDisk: unknown = JSON.parse(await readFile(join(FIXTURES_DIR, 'manifest.json'), 'utf8'));
     expect(onDisk).toEqual(FIXTURES_MANIFEST);
