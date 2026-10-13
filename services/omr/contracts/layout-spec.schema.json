@@ -323,6 +323,10 @@
                                 "kind": {
                                   "type": "string",
                                   "enum": ["integer", "decimal", "fraction", "short_text"]
+                                },
+                                "operatorBefore": {
+                                  "type": "string",
+                                  "enum": ["+", "-", "×", "÷", "=", "<", ">"]
                                 }
                               },
                               "required": ["partId", "label", "kind"],

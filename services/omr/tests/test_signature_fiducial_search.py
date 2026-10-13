@@ -36,6 +36,7 @@ from app.rectify import (
     WIDE_CORNER_DISTANCE_FRACTION,
     _find_fiducials_with_clipping,
     _trim_to_combination_budget,
+    fiducial_quad_consistent,
     search_rectification,
 )
 from tests import synthetic as syn
@@ -150,9 +151,23 @@ def test_la_evidencia_de_la_busqueda_queda_registrada(
     from app.pipeline import classify_page_debug
 
     gray = wide_margin_page(spec, marks_abcd)
-    _, debug = classify_page_debug(syn.to_bgr(gray), 0, spec, profile)
+    without_framing = {**profile, "source": "scanner"}
+    _, debug = classify_page_debug(syn.to_bgr(gray), 0, spec, without_framing)
 
     assert debug["fiducialRescue"], "la pagina rescatada debe decir que salio de la busqueda"
+
+
+def test_con_perfil_phone_la_hoja_encuadrada_gana_antes_que_la_busqueda(
+    spec: dict, profile: dict, marks_abcd: dict
+) -> None:
+    from app.pipeline import classify_page_debug
+
+    gray = wide_margin_page(spec, marks_abcd)
+    page, debug = classify_page_debug(syn.to_bgr(gray), 0, spec, profile)
+
+    assert debug["sheetFramed"] is True
+    assert debug["fiducialRescue"] is None
+    assert_marks_match(page, marks_abcd)
 
 
 def test_la_pagina_sana_no_reporta_rescate(
@@ -218,7 +233,10 @@ def test_cuadrado_falso_lejano_no_se_acepta(
     detections, _ = _find_fiducials_with_clipping(base)
     assert detections[0] is None, "el tope estricto debe seguir ignorando la mancha"
     found = search_rectification(syn.to_bgr(base), spec, always_confirms)
-    assert found is not None, "con un puntaje ciego la busqueda si corona la mancha"
+    # Con un puntaje ciego la busqueda coronaba la mancha; ahora el filtro de forma
+    # (fiducial_quad_consistent) la poda antes de puntuar: si queda una candidata,
+    # es un cuadrilatero que puede ser la hoja.
+    assert found is None or fiducial_quad_consistent(found[0].corners, spec)
 
     # La candidata existe y es MALA. El pipeline no la debe usar: o lee la
     # pagina por el camino de siempre (paralelogramo confirmado), o la rechaza.

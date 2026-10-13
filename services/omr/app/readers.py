@@ -54,6 +54,7 @@ from __future__ import annotations
 
 import base64
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -72,6 +73,7 @@ from .crop import (
     LEGACY_CROP_PROFILE,
     CropImage,
     crop_with_profile,
+    neighbor_footprints_px,
     resolve_crop_profile,
 )
 from .geometry import point_to_px, radius_to_px
@@ -129,6 +131,7 @@ class FieldReader(Protocol):
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]: ...
 
 
@@ -338,6 +341,7 @@ class BubbleGroupReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         threshold = page_threshold.threshold
         samples = bubble_samples(field["bubbles"], fills, page_threshold, ambiguity_margin)
@@ -396,6 +400,7 @@ class DigitGridReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         groups = read_digit_groups(field["bubbles"], fills, page_threshold, ambiguity_margin)
         state, value, representative = self._classify(groups)
@@ -449,13 +454,19 @@ class CropRegionReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         response = field.get("response") or {}
         profile_id = response.get("cropProfileId")
         if profile_id is None:
             image = legacy_crop_image(page, field["region"])
         else:
-            image = crop_with_profile(page, field["region"], resolve_crop_profile(profile_id))
+            image = crop_with_profile(
+                page,
+                field["region"],
+                resolve_crop_profile(profile_id),
+                neighbor_footprints_px(field, page_fields, page.size),
+            )
         encoded = image.jpeg
         reading = {
             "fieldId": field["fieldId"],
@@ -471,6 +482,35 @@ class CropRegionReader:
             reading.update(empty_doubt_fields())
             reading["crop"] = crop_evidence(page, field, image, response.get("boxes"))
         return reading
+
+
+def undecided_reading(
+    page: RectifiedPage, field: dict[str, Any], fills: list[float], page_threshold: PageThreshold
+) -> dict[str, Any]:
+    """Un campo de burbujas de una pagina cuyas burbujas no se pudieron separar.
+
+    Solo se usa cuando la pagina se conserva por sus recortes (ver
+    `_read_marks` en pipeline.py): la pagina no tiene dos grupos de fills, asi
+    que ninguna decision sobre la burbuja seria confiable. Sale `ambiguous`, sin
+    valor ni sugerencia y con el recorte de sus burbujas como evidencia: va a
+    revision, jamas como `blank` confiado. `fill` es el de la burbuja mas
+    oscura del campo, que es lo que el revisor necesita ver primero.
+    """
+    fill = max(fills, default=0.0)
+    threshold = min(1.0, max(0.0, page_threshold.threshold))
+    reading = {
+        "fieldId": field["fieldId"],
+        "printedNumber": field["printedNumber"],
+        "state": "ambiguous",
+        "value": None,
+        "fill": round(fill, 4),
+        "threshold": round(threshold, 4),
+        "margin": round(margin_of(fill, threshold), 4),
+        "cropJpegBase64": _bubbles_crop_base64(page, field) if field.get("bubbles") else None,
+    }
+    if contract_v2_enabled():
+        reading.update(empty_doubt_fields())
+    return reading
 
 
 def legacy_crop_image(page: RectifiedPage, region: dict[str, Any]) -> CropImage:

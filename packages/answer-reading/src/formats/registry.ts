@@ -64,6 +64,76 @@ interface NormalizeSpec<K extends ResponseFormatKind> {
   readonly formatIssues: (value: CanonicalValue) => NormalizationIssue[];
 }
 
+function comparableTokens(text: string): string[] {
+  return (
+    text
+      .normalize('NFD')
+      .replace(/\p{M}/gu, '')
+      .toLowerCase()
+      .match(/[\p{L}\p{N}]+/gu) ?? []
+  );
+}
+
+function isSubsequence(tokens: readonly string[], of: readonly string[]): boolean {
+  let next = 0;
+  for (const token of of) {
+    if (next < tokens.length && tokens[next] === token) next += 1;
+  }
+  return next === tokens.length;
+}
+
+/**
+ * Cómo se relaciona el literal con las partes cuando las partes mandan. Si el
+ * literal da el mismo valor, no hay problema. Si solo trae una parte de lo que
+ * dicen las partes (vacío, la primera casilla, el total, las palabras sin su
+ * separador o con los signos impresos), se registra `literal_subset_of_parts`,
+ * que no fuerza revisión. Si trae algo que las partes no dicen o en otro orden,
+ * es una contradicción: `parts_disagree_with_literal`, que sí la fuerza.
+ */
+function literalIssue<K extends ResponseFormatKind>(
+  literal: string,
+  partsText: string,
+  canonical: string,
+  spec: NormalizeSpec<K>,
+): NormalizationIssue | null {
+  if (literal.trim().length > 0) {
+    const parse = spec.parse(literal);
+    if (isParsed(parse) && parseCanonicalKey(parse) === canonical) return null;
+  }
+  return isSubsequence(comparableTokens(literal), comparableTokens(partsText))
+    ? 'literal_subset_of_parts'
+    : 'parts_disagree_with_literal';
+}
+
+function interpreted<K extends ResponseFormatKind>(
+  parse: CanonicalParse,
+  spec: NormalizeSpec<K>,
+  issues: Set<NormalizationIssue>,
+): { canonical: string; value: CanonicalValue | null } {
+  for (const issue of parse.issues) issues.add(issue);
+  const value = primaryReading(parse);
+  if (value !== null) for (const issue of spec.formatIssues(value)) issues.add(issue);
+  return { canonical: parseCanonicalKey(parse) ?? '', value };
+}
+
+/** Partes completas y válidas: ninguna vacía y todas interpretables con su tipo. */
+function usableParts<K extends ResponseFormatKind>(
+  output: TranscriptionOutput,
+  spec: NormalizeSpec<K>,
+): { text: string; parse: CanonicalParse } | null {
+  const text = spec.partsLiteral(output.parts);
+  if (text === null || spec.partsEmpty(output.parts)) return null;
+  const parse = spec.parse(text);
+  if (!isParsed(parse) || parse.issues.includes('empty_part')) return null;
+  return { text, parse };
+}
+
+/**
+ * En los formatos con partes, las partes completas y válidas son la fuente de
+ * verdad y el literal queda como control (`literalIssue`). Sin partes, o con
+ * alguna vacía o no interpretable, se interpreta el literal como antes y las
+ * partes solo marcan discrepancias.
+ */
 function normalizeWith<K extends ResponseFormatKind>(
   output: TranscriptionOutput,
   spec: NormalizeSpec<K>,
@@ -73,15 +143,20 @@ function normalizeWith<K extends ResponseFormatKind>(
     return { ...base, canonical: null, value: null, issues: [] };
   }
   const issues = new Set<NormalizationIssue>();
+  const parts = usableParts(output, spec);
+  if (parts !== null) {
+    const { canonical, value } = interpreted(parts.parse, spec, issues);
+    const issue = literalIssue(output.literal, parts.text, canonical, spec);
+    if (issue !== null) issues.add(issue);
+    return { ...base, canonical, value, issues: [...issues] };
+  }
   if (output.literal.trim().length === 0 || spec.partsEmpty(output.parts)) issues.add('empty_part');
   const parse = spec.parse(output.literal);
-  for (const issue of parse.issues) issues.add(issue);
   if (!isParsed(parse)) {
+    for (const issue of parse.issues) issues.add(issue);
     return { ...base, canonical: null, value: null, issues: [...issues] };
   }
-  const canonical = parseCanonicalKey(parse);
-  const value = primaryReading(parse);
-  if (value !== null) for (const issue of spec.formatIssues(value)) issues.add(issue);
+  const { canonical, value } = interpreted(parse, spec, issues);
   const fromParts = spec.partsLiteral(output.parts);
   if (fromParts !== null && parseCanonicalKey(spec.parse(fromParts)) !== canonical) {
     issues.add('parts_disagree_with_literal');
@@ -167,7 +242,7 @@ const integerDefinition: AnswerFormatDefinition<'integer'> = {
   kind: 'integer',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: () => 'número entero',
   promptGuide: () => `La respuesta es un número entero. ${NUMERIC_NOTE}`,
@@ -180,7 +255,7 @@ const decimalDefinition: AnswerFormatDefinition<'decimal'> = {
   kind: 'decimal',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: () => 'número decimal',
   promptGuide: () => `La respuesta es un número, posiblemente con decimales. ${NUMERIC_NOTE}`,
@@ -195,7 +270,7 @@ const fractionDefinition: AnswerFormatDefinition<'fraction'> = {
   kind: 'fraction',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) => (format.allowMixed ? 'fracción o número mixto' : 'fracción'),
   promptGuide: (format) =>
@@ -245,7 +320,7 @@ const orderedTupleDefinition: AnswerFormatDefinition<'ordered_tuple'> = {
   kind: 'ordered_tuple',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) => tupleLabel(format.arity),
   promptGuide: (format) =>
@@ -285,7 +360,7 @@ const sequenceDefinition: AnswerFormatDefinition<'sequence'> = {
   kind: 'sequence',
   readBy: 'vision',
   compatibleItemTypes: ['short_answer', 'ordering'],
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) => `secuencia de ${format.length} elementos`,
   promptGuide: (format) =>
@@ -325,7 +400,7 @@ const wordListDefinition: AnswerFormatDefinition<'word_list'> = {
   kind: 'word_list',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'key',
   formatLabel: (format) =>
     format.count === 1 ? 'una palabra' : `lista de ${format.count} palabras`,
@@ -363,7 +438,7 @@ const shortTextDefinition: AnswerFormatDefinition<'short_text'> = {
   kind: 'short_text',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'key',
   formatLabel: () => 'texto corto',
   promptGuide: (format) =>
@@ -466,7 +541,7 @@ const multiBoxDefinition: AnswerFormatDefinition<'multi_box'> = {
   kind: 'multi_box',
   readBy: 'vision',
   compatibleItemTypes: ['gap_fill'],
-  defaultCropProfileId: 'short-answer@1',
+  defaultCropProfileId: 'short-answer@2',
   gradedBy: 'key',
   formatLabel: (format) =>
     `${format.boxes.length} casillas: ${format.boxes.map((box) => box.label).join(', ')}`,
@@ -541,7 +616,7 @@ const freeTextDefinition: AnswerFormatDefinition<'free_text'> = {
   kind: 'free_text',
   readBy: 'vision',
   compatibleItemTypes: RUBRIC_ITEM_TYPES,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'rubric',
   formatLabel: () => 'respuesta de desarrollo',
   promptGuide: (format) =>
@@ -555,7 +630,7 @@ const mathWorkDefinition: AnswerFormatDefinition<'math_work'> = {
   kind: 'math_work',
   readBy: 'vision',
   compatibleItemTypes: RUBRIC_ITEM_TYPES,
-  defaultCropProfileId: 'free-text@1',
+  defaultCropProfileId: 'free-text@2',
   gradedBy: 'rubric',
   formatLabel: () => 'desarrollo matemático',
   promptGuide: () =>

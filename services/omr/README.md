@@ -57,8 +57,9 @@ espejo `tests/synthetic.py`. Implementación gemela del impresor:
 
 Diseño en `docs/diseno-correccion-vision-preguntas-abiertas.md` §4. Si el campo trae
 `response.cropProfileId` (F5b lo agrega a `omrFieldSchema`), el recorte usa ese perfil:
-margen uniforme de `bleedRatio` × el lado mayor de la región (recortado al borde de la
-página rectificada), ancho `targetWidthPx`, gris, calidad JPEG y contraste `clahe`
+margen de `bleedRatio` × el lado mayor (`bleedBasis: longer_side`, v1) o menor
+(`shorter_side`, v2) de la región, limitado en v2 a `neighborGapFraction` × la distancia al
+campo vecino de cada lado y recortado al borde de la página rectificada, ancho `targetWidthPx`, gris, calidad JPEG y contraste `clahe`
 opcional. **Nunca se binariza ni se limpian trazos**: puede borrar un punto decimal. Sin
 perfil (o con uno desconocido) el recorte es el histórico: sin margen, 600 px, calidad 70.
 
@@ -89,6 +90,22 @@ tiene dos grupos, pero se distingue del caso en blanco porque el fill es
 relativo al fondo local (un clúster único con todos los fills altos es tinta
 real). Re-escanear no la arregla, así que no se rechaza: cada campo `single`
 sale `multiple` y va a la cola.
+
+Excepción por recortes: si la página tiene campos `crop_region`, un problema de las
+burbujas no la rechaza. Queda `quality.ok: true` con `marksReadability` en `likely_blank` o
+`unreadable`, cada campo de burbujas sale `ambiguous` con su evidencia (a revisión, nunca
+`blank`) y los recortes salen como siempre: no dependen de las burbujas. Una página solo de
+burbujas se sigue rechazando.
+
+## Fotos de celular: encuadre de la hoja (`app/framing.py`)
+
+Con `captureProfile.source: phone`, si la primera pasada no queda confirmada se localiza la
+hoja en la foto, se recorta su rectángulo y la rectificación completa corre sobre el
+recorte. Así `cropped` significa que falta parte de la hoja, no que sobra fondo (mesa,
+ropa). La rectificación encuadrada se acepta solo si los 4 fiduciales forman un
+cuadrilátero coherente con la hoja (`fiducial_quad_consistent`) y, si la página que declara
+el QR tiene burbujas, si su firma calza. El debug lo registra en `sheetFramed`. El perfil
+`scanner` no cambia. Fixtures reales en `tests/fixtures/fotos-celular/`.
 
 ## Catálogo de suciedad real cubierto (`tests/test_dirty_catalog.py`)
 

@@ -351,6 +351,13 @@
       "when": 1791735023030,
       "tag": "0049_reading_routes_text_formats",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1791827187351,
+      "tag": "0050_reading_routes_format_hints",
+      "breakpoints": true
     }
   ]
 }

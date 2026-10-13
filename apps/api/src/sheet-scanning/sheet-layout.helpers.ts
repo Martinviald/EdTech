@@ -140,8 +140,8 @@ const RESPONSE_FIELD_LEFT = 0.08;
 const RESPONSE_FIELD_RIGHT = 0.95;
 const COORDINATE_EPSILON = 1e-9;
 
-export const RESPONSE_CROP_PROFILE_SHORT = 'short-answer@1';
-export const RESPONSE_CROP_PROFILE_FREE_TEXT = 'free-text@1';
+export const RESPONSE_CROP_PROFILE_SHORT = 'short-answer@2';
+export const RESPONSE_CROP_PROFILE_FREE_TEXT = 'free-text@2';
 
 const VISION_FORMAT_KINDS: ReadonlySet<ResponseFormat['kind']> = new Set([
   'integer',

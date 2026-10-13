@@ -150,7 +150,7 @@ describe('normalize — tabla de casos (incluye errores del experimento)', () =>
     expect(normalized.issues).toContain('empty_part');
   });
 
-  it('el literal manda; las partes solo marcan discrepancias', () => {
+  it('las partes completas mandan; el literal que las contradice se marca', () => {
     const agree = normalizeTranscription(
       fakeOutput('3/4', { parts: { whole: '', numerator: '3', denominator: '4' } }),
       FRACTION,
@@ -161,7 +161,7 @@ describe('normalize — tabla de casos (incluye errores del experimento)', () =>
       fakeOutput('3/4', { parts: { whole: '', numerator: '3', denominator: '8' } }),
       FRACTION,
     );
-    expect(disagree.canonical).toBe('f:3/4');
+    expect(disagree.canonical).toBe('f:3/8');
     expect(disagree.issues).toContain('parts_disagree_with_literal');
     const pair = normalizeTranscription(fakeOutput('(7;3)', { parts: { c1: '3', c2: '7' } }), PAIR);
     expect(pair.issues).toContain('parts_disagree_with_literal');
@@ -326,12 +326,12 @@ describe('formatos de texto, casillas y desarrollo (F10a)', () => {
     expect([...normalized.issues].sort()).toEqual([...issues].sort());
   });
 
-  it('las partes solo marcan discrepancias', () => {
+  it('el literal que contradice las partes se marca', () => {
     const words = normalizeTranscription(
       fakeOutput('cabeza, tórax, abdomen', { parts: { w1: 'cabeza', w2: 'tórax', w3: 'patas' } }),
       WORDS,
     );
-    expect(words.canonical).toBe('w:cabeza|torax|abdomen');
+    expect(words.canonical).toBe('w:cabeza|torax|patas');
     expect(words.issues).toContain('parts_disagree_with_literal');
     const fewer = normalizeTranscription(
       fakeOutput('cabeza, tórax', { parts: { w1: 'cabeza', w2: 'tórax', w3: '' } }),
@@ -399,5 +399,145 @@ describe('formatos de texto, casillas y desarrollo (F10a)', () => {
     expect(
       toScoringInput(normalizeTranscription(fakeOutput('', { state: 'blank' }), FREE_TEXT)),
     ).toBeNull();
+  });
+});
+
+describe('fotos reales: en formatos con partes, las partes mandan', () => {
+  const SIGNED_BOXES: ResponseFormat = {
+    kind: 'multi_box',
+    boxes: [
+      { kind: 'integer', label: 'Decenas:', partId: 'd' },
+      { kind: 'integer', label: 'Unidades:', partId: 'u', operatorBefore: '+' },
+      { kind: 'integer', label: 'Total:', partId: 't', operatorBefore: '=' },
+    ],
+  };
+  const TWO_WORDS: ResponseFormat = { kind: 'word_list', count: 2 };
+  const SEQUENCE_3: ResponseFormat = { kind: 'sequence', length: 3 };
+
+  const read = (format: ResponseFormat, literal: string, parts: Record<string, string>) =>
+    normalizeTranscription(fakeOutput(literal, { parts }), format);
+
+  it.each<
+    [string, ResponseFormat, string, Record<string, string>, string | null, NormalizationIssue[]]
+  >([
+    [
+      'Bruno P9 Gemini: literal con los signos impresos',
+      SIGNED_BOXES,
+      '40 + 7 = 47',
+      { d: '40', u: '7', t: '47' },
+      'm:d=n:40;t=n:47;u=n:7',
+      ['literal_subset_of_parts'],
+    ],
+    [
+      'Bruno P9 Haiku: literal de la pregunta vecina contradice las partes',
+      SIGNED_BOXES,
+      'productos',
+      { d: '40', u: '7', t: '47' },
+      'm:d=n:40;t=n:47;u=n:7',
+      ['parts_disagree_with_literal'],
+    ],
+    [
+      'Celeste P9: el literal trae solo el total',
+      SIGNED_BOXES,
+      '47',
+      { d: '4', u: '7', t: '47' },
+      'm:d=n:4;t=n:47;u=n:7',
+      ['literal_subset_of_parts'],
+    ],
+    [
+      'Ámbar P9 Haiku: el literal trae solo la primera casilla',
+      SIGNED_BOXES,
+      '40',
+      { d: '40', u: '7', t: '47' },
+      'm:d=n:40;t=n:47;u=n:7',
+      ['literal_subset_of_parts'],
+    ],
+    [
+      'Ámbar P7 Haiku: palabras sin separador en el literal',
+      TWO_WORDS,
+      'triángulo cuadrilátero',
+      { w1: 'triángulo', w2: 'cuadrilátero' },
+      'w:triangulo|cuadrilatero',
+      ['literal_subset_of_parts'],
+    ],
+    [
+      'Bruno P7 Gemini: el literal tiene una palabra que las partes perdieron',
+      TWO_WORDS,
+      'triangulo isoseles cuadrado',
+      { w1: 'triangulo', w2: 'cuadrado' },
+      'w:triangulo|cuadrado',
+      ['parts_disagree_with_literal'],
+    ],
+    [
+      'Bruno P5 Gemini: literal y partes coinciden',
+      SEQUENCE_3,
+      '8, 10, 12',
+      { e1: '8', e2: '10', e3: '12' },
+      's:8|10|12',
+      [],
+    ],
+    [
+      'Bruno P5 Haiku: casillas vacías siguen siendo partes vacías',
+      SEQUENCE_3,
+      '8',
+      { e1: '8', e2: '', e3: '' },
+      's:8',
+      ['empty_part', 'format_mismatch'],
+    ],
+    [
+      'Bruno P6 Gemini: el literal trae solo el primer valor',
+      PAIR,
+      '3',
+      { c1: '3', c2: '5' },
+      't:3|5',
+      ['literal_subset_of_parts'],
+    ],
+    [
+      'literal vacío con partes completas',
+      PAIR,
+      '',
+      { c1: '3', c2: '5' },
+      't:3|5',
+      ['literal_subset_of_parts'],
+    ],
+    [
+      'el literal invierte el orden: contradice',
+      PAIR,
+      '(7;3)',
+      { c1: '3', c2: '7' },
+      't:3|7',
+      ['parts_disagree_with_literal'],
+    ],
+  ])('%s', (_name, format, literal, parts, canonical, issues) => {
+    const normalized = read(format, literal, parts);
+    expect(normalized.canonical).toBe(canonical);
+    expect([...normalized.issues].sort()).toEqual([...issues].sort());
+  });
+
+  it('Ámbar P7 Haiku se corrige como correcta', () => {
+    const normalized = read(TWO_WORDS, 'triángulo cuadrilátero', {
+      w1: 'triángulo',
+      w2: 'cuadrilátero',
+    });
+    const output = getScoringStrategy('short_answer').score({
+      item: {
+        id: 'item',
+        type: 'short_answer',
+        content: {
+          prompt: '¿?',
+          acceptedAnswers: ['triángulo, cuadrilátero'],
+          responseFormat: TWO_WORDS,
+        } as ItemContent,
+        maxScore: 1,
+      },
+      rawAnswer: toScoringInput(normalized),
+    });
+    expect(toScoringOutcome(output)).toBe('correct');
+  });
+
+  it('partes no interpretables: se vuelve al literal', () => {
+    const normalized = read(PAIR, '(3;5)', { c1: 'x', c2: '5' });
+    expect(normalized.canonical).toBe('t:3|5');
+    expect(normalized.issues).toContain('parts_disagree_with_literal');
   });
 });

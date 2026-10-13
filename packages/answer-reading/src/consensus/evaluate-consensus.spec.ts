@@ -182,6 +182,24 @@ describe('evaluateConsensus (diseño §8.2)', () => {
     });
   });
 
+  it('4c. la propuesta es la mejor lectura, no la del primer lector de la ruta', () => {
+    const result = evaluate([
+      claude('7', { reviewRequested: true, confidence: 0.45 }),
+      gemini('2,5', { confidence: 0.95 }),
+    ]);
+    expect(result).toMatchObject({ outcome: 'needs_review', reasons: ['reader_requested_review'] });
+    expect(result.value?.value).toMatchObject({ written: '2,5' });
+  });
+
+  it('4d. si todos piden revisión, propone la lectura interpretable de mayor confianza', () => {
+    const result = evaluate([
+      claude('γ', { reviewRequested: true, confidence: 0.95 }),
+      gemini('7', { reviewRequested: true, confidence: 0.4 }),
+      reading('r-third', 'third', fakeOutput('2,5', { reviewRequested: true, confidence: 0.7 })),
+    ]);
+    expect(result.value?.value).toMatchObject({ written: '2,5' });
+  });
+
   it('5. no convertible al formato → revisión de corrección, nunca incorrecta', () => {
     const result = evaluate([claude('γ,5'), gemini('γ,5')]);
     expect(result).toMatchObject({
@@ -449,5 +467,35 @@ describe('formatos de rúbrica: nunca se autoaceptan', () => {
       expect.arrayContaining(['illegible', 'readers_disagree', 'rubric_item']),
     );
     expect(result.reviewMode).toBe('reading');
+  });
+});
+
+describe('fotos reales: formatos con partes', () => {
+  const pair: ResponseFormat = { kind: 'ordered_tuple', arity: 2, componentKind: 'integer' };
+  const evaluatePair = (readings: ConsensusReading[]) => {
+    const result = evaluateConsensus(readings, POLICY, scorer('(3;5)', pair), {
+      format: pair,
+      readingKey: 'casilla',
+    });
+    expect(consensusResultSchema.safeParse(result).success).toBe(true);
+    return result;
+  };
+  const parts = { c1: '3', c2: '5' };
+
+  it('un literal incompleto con partes completas no impide autoaceptar', () => {
+    expect(evaluatePair([claude('3;5', { parts }), gemini('3', { parts })])).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'correct',
+    });
+  });
+
+  it('un literal que contradice las partes va a revisión de lectura, no a unparsed_format', () => {
+    expect(
+      evaluatePair([claude('productos', { parts }), gemini('(3;5)', { parts })]),
+    ).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['format_mismatch'],
+      reviewMode: 'reading',
+    });
   });
 });

@@ -454,3 +454,85 @@ Cada defecto de comportamiento con test previo que fallaba con el código anteri
 Riesgos que quedan: `response_reclaimed` no tiene campo propio en `SubmitReviewResult` (no cae en
 `skippedHumanScored` ni en `pendingConsolidation`); el costo de la corrección de desarrollo
 heredada (`development_crop`) no cuenta para `monthlyBudgetUsd`.
+
+### Fotos reales: correcciones de la lectura (rama `fix/vision-fotos-reales`)
+
+Evidencia: 30 casillas de 6 fotos de celular (`pruebas-vlm-manuscrito/hojas-sinteticas/resultado-fotos/`).
+
+- **Contrato OMR desactualizado.** `services/omr/contracts/*.json` no traía `operatorBefore`
+  (F10b) y el servicio respondía 422 al lote entero. Se regeneró y el test
+  `packages/types/scripts/omr-contracts.spec.ts` compara los contratos generados en memoria con los
+  versionados (corre con `pnpm --filter @soe/types test`, en local y en CI).
+- **Decisión FR-1 — en los formatos con partes, las partes mandan.** Los lectores devolvían `parts`
+  correctas con un `literal` incompleto (solo la 1.ª casilla, solo el total), sin separador
+  (`triángulo cuadrilátero`), con los signos impresos (`40 + 7 = 47`) o contaminado con la pregunta
+  vecina (`productos`), y el normalizador interpretaba el `literal`. Ahora, si el formato pide
+  `parts` y vienen **completas y válidas** (ninguna vacía, todas interpretables con su tipo), el
+  valor canónico sale de ellas y el `literal` queda como control:
+  - mismo valor → sin issue;
+  - el `literal` está vacío o sus palabras/números son una subsecuencia, en orden, de las de las
+    partes (sin tildes ni mayúsculas, ignorando signos y separadores) → issue nuevo
+    `literal_subset_of_parts`, que **no** fuerza revisión;
+  - el `literal` trae algo que las partes no dicen o en otro orden (`productos`, `(7;3)` con partes
+    `3, 7`, `triangulo isoseles cuadrado` con partes `triangulo, cuadrado`) →
+    `parts_disagree_with_literal`, que sigue forzando revisión de lectura (`format_mismatch`).
+  Con alguna parte vacía o no interpretable se interpreta el `literal` como antes y la parte vacía
+  sigue siendo `empty_part` (nunca 0 automático). Motivo: el `literal` libre es lo que más se
+  contamina con el recorte y con la forma de escribir; las partes vienen de un esquema por casilla.
+  Una contradicción es justamente lo dudoso que el diseño §8 no deja autoaceptar. Cambio de
+  contrato: `NORMALIZATION_ISSUES` suma `literal_subset_of_parts` (solo amplía el enum).
+- **Decisión FR-3 — margen del recorte proporcional al lado menor, con tope por vecinos.**
+  `short-answer@1` sumaba el 15 % del lado MAYOR de la región en los cuatro lados: en un renglón
+  ancho (P8) o en casillas con signos (P9) el recorte traía completas P7 y P9, y los dos lectores
+  transcribieron P7 como respuesta de P8. Perfiles nuevos `short-answer@2` (30 % del lado menor) y
+  `free-text@2` (10 % del lado menor), ambos con `neighborGapFraction: 0.5`: en cada lado el margen
+  no pasa de la mitad de la distancia al campo vecino más cercano de ese lado. El perfil suma dos
+  claves explícitas (`bleedBasis`, `neighborGapFraction`; en los v1, `longer_side` y `null`, sin
+  cambio de comportamiento). `cropBleedBox` en `crop.schema.ts` es la referencia que debe replicar
+  `services/omr/app/crop.py`. Los layouts nuevos piden los v2 (el hash de los layouts derivados
+  cambia solo por el id del perfil, verificado en el test); los congelados conservan su v1.
+  **Bloqueante de despliegue:** mientras el OMR no conozca los v2, `resolve_crop_profile` cae al
+  recorte heredado (sin margen, 600 px) en silencio, y `test_crop_profiles_contract.py` falla.
+- **Decisión FR-2 — guía de formato (`hints: format`) en las rutas de varias partes y de texto.**
+  Contexto: C-1 dejó `hints: none` midiendo solo números de una casilla; sin la guía, Haiku leyó
+  solo la primera casilla de la secuencia en 3 de 3 hojas. Con `format`, `transcriptionVariables`
+  agrega `formatLabel` y `formatGuide` (que nombra las partes `e1…`, `c1…`, `w1…` o los rótulos de
+  las casillas), nunca la clave. Decisión: migración de datos (pendiente de numerar, SQL en el
+  informe de la rama) que retira las rutas `word_list`, `short_text` y `multi_box` de la 0049 y
+  crea sus v2 (`…09`, `…0a`, `…0b`, `supersedes_id` a la v1) con `hints: format`, y crea rutas
+  `format` para `sequence` (`…07`) y `ordered_tuple` (`…08`) con los lectores y la política de la
+  ruta por defecto. La ruta por defecto (números de una casilla) sigue en `none`. Cada ruta se
+  validó con `readingRouteSchema` y renderizando su prompt; el SQL se aplicó dos veces sobre una
+  base PG14 desechable con 0000–0049 (idempotente). `fraction` queda en la ruta por defecto: sus
+  partes ya venían bien en las fotos.
+
+### Primera prueba con fotos reales y su corrección (`fix/vision-fotos-reales`)
+
+**Prueba** (base local `soe_vision`, instrumento sintético de 11 preguntas, 3 alumnos, 6 fotos de
+celular de 2268×4032 sin encuadrar, Haiku 5.5 + Gemini 3.5 Flash-Lite, US$0,035 por corrida).
+Antes del arreglo el OMR rechazaba las 6 fotos (5 por `cropped`, Celeste p1 por `likely_blank` con
+la B marcada) y el contrato del OMR respondía 422 ante `operatorBefore`; para medir hubo que
+encuadrar a mano y quitar los signos.
+
+**Corregido** (cada falla con test previo que fallaba):
+- Contrato OMR regenerado + test que falla si queda desactualizado.
+- Normalización desde `parts` en formatos de varias partes (decisión FR-1); el `literal` es control.
+- Rutas `hints: format` para formatos de varias partes y de texto (FR-2, migración 0050).
+- Perfiles de recorte `short-answer@2`/`free-text@2`: margen por lado menor con tope por vecinos.
+- OMR: encuadre de la hoja en fotos de celular con cuadrilátero validado por forma; un problema de
+  burbujas ya no descarta los recortes de la página. Goldset real 88,2 % → 97,7 % correctas, 0
+  confiadas incorrectas; goldset sintético idéntico.
+- La propuesta de revisión es la mejor lectura (no pidió revisión, interpretable, mayor confianza),
+  no la del primer lector de la ruta: antes el revisor veía "wedriétero" o "8" en vez de la lectura
+  buena de Gemini, y aceptar rápido dejaba en 0 una respuesta correcta.
+
+**Regresión con las 6 fotos originales:** las 6 aceptadas con su página y P1 correcta; ningún
+recorte trae preguntas vecinas; Haiku 13 → 16 y Gemini 14 → 18 de 24 casillas cortas bien leídas;
+2 autoaceptadas, ambas correctas; ninguna autoaceptación equivocada.
+
+**Abierto** (no se corrige en esta rama):
+- Haiku lee solo la primera casilla de la secuencia aun con la guía de formato (3 de 3 hojas).
+- Decimales escritos en casillas: espacios por casillas vacías ("2  ,75") y puntos sueltos ("1.2,75");
+  la ruta por defecto sigue en `hints: none` (C-1).
+- La confianza de Haiku rara vez llega a 0,85: domina la revisión por `low_confidence`. Calibrar con
+  hojas reales de alumnos antes de tocar `minConfidence` (C-2).
