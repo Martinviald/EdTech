@@ -31,6 +31,7 @@ export interface EvalCommandOptions {
   readonly cacheDir: string | null;
   readonly cacheMode: CacheMode;
   readonly readerMinConfidence: ReaderMinConfidence | null;
+  readonly injectedEscalation?: boolean;
 }
 
 export interface EvalCommandDeps {
@@ -155,11 +156,13 @@ export async function runEvalCommand(
     }
   }
   const estimate = deps.estimateCallUsd;
+  const required = missing.filter((reading) => reading.role === 'primary');
+  const conditional = missing.length - required.length;
   const missingUsd = estimate
-    ? missing.reduce((sum, reading) => sum + estimate(reading.reader, []), 0)
+    ? required.reduce((sum, reading) => sum + estimate(reading.reader, []), 0)
     : 0;
   log(
-    `Dataset ${dataset.manifest.name} v${dataset.manifest.datasetVersion}: ${dataset.samples.length} muestras × ${options.repetitions} repeticiones; ${planned.length} lecturas, ${planned.length - missing.length} en caché, ${missing.length} por pedir (peor caso US$${missingUsd.toFixed(4)})`,
+    `Dataset ${dataset.manifest.name} v${dataset.manifest.datasetVersion}: ${dataset.samples.length} muestras × ${options.repetitions} repeticiones; ${planned.length} lecturas, ${planned.length - missing.length} en caché, ${required.length} por pedir (peor caso US$${missingUsd.toFixed(4)}) y ${conditional} de desempate que solo se piden si hacen falta, dentro del tope`,
   );
   if (!options.dryRun && missing.length > 0) {
     if (options.budgetUsd === null) {
@@ -167,7 +170,7 @@ export async function runEvalCommand(
     }
     if (estimate && missingUsd > options.budgetUsd) {
       throw new Error(
-        `Pedir las ${missing.length} lecturas que faltan costaría hasta US$${missingUsd.toFixed(4)} (peor caso), sobre el tope de US$${options.budgetUsd}. Sube el tope o reduce las repeticiones.`,
+        `Pedir las ${required.length} lecturas que faltan costaría hasta US$${missingUsd.toFixed(4)} (peor caso), sobre el tope de US$${options.budgetUsd}. Sube el tope o reduce las repeticiones.`,
       );
     }
   }
@@ -183,6 +186,7 @@ export async function runEvalCommand(
     repetitions: options.repetitions,
     concurrency: options.concurrency,
     readerMinConfidence: options.readerMinConfidence,
+    injectedEscalation: options.injectedEscalation ?? false,
     transcriberFor,
     cache,
     budget,

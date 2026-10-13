@@ -177,6 +177,7 @@ export interface SimulationOptions {
   readonly cache: ReadingCache;
   readonly budget: SimulationBudget | null;
   readonly cacheSource?: string;
+  readonly injectedEscalation?: boolean;
   readonly onUnitDone?: (progress: { done: number; total: number; spentUsd: number }) => void;
 }
 
@@ -713,9 +714,25 @@ function unitRecord(
   };
 }
 
-function injectedReadings(prepared: PreparedSample): ConsensusReading[] {
+function injectedReadings(
+  prepared: PreparedSample,
+  route: ResolvedRouteWithFallback,
+  escalation: boolean,
+): ConsensusReading[] {
   const injected = prepared.sample.injectedReading;
   if (!injected) return [];
+  if (escalation) {
+    const doubtful = fakeOutput(injected.literal, { parts: injected.parts ?? null, confidence: 0 });
+    return route.readers.map((reader) => ({
+      readingId: `injected#${reader.key}`,
+      family: reader.family,
+      provider: reader.provider,
+      status: 'ok' as const,
+      output: doubtful,
+      role: 'primary' as const,
+      ...(reader.minConfidence === undefined ? {} : { minConfidence: reader.minConfidence }),
+    }));
+  }
   const output = fakeOutput(injected.literal, { parts: injected.parts ?? null });
   return ['a', 'b'].map((suffix) => ({
     readingId: `injected#${suffix}`,
@@ -789,6 +806,7 @@ async function runUnit(
   planned: PlannedSample & { route: ResolvedRouteWithFallback },
   repetition: number,
   thresholds: ReaderMinConfidence | null,
+  injectedEscalation: boolean,
 ): Promise<{ unit: UnitRecord; readings: ReadingRecord[] }> {
   const { prepared } = planned;
   const route = withReaderThresholds(planned.route, thresholds);
@@ -804,12 +822,20 @@ async function runUnit(
     : await Promise.all(
         route.readers.map((reader) => runner.read(prepared, reader, 'primary', repetition)),
       );
-  let readings = injected ? injectedReadings(prepared) : runs.map(toConsensusReading);
+  const escalateInjected = injected && injectedEscalation && policy.tiebreakOn !== undefined;
+  let readings = injected
+    ? injectedReadings(prepared, route, escalateInjected)
+    : runs.map(toConsensusReading);
   let result = evaluateConsensus(readings, policy, prepared.scorer.outcome, options);
   let usedTiebreak = false;
-  if (!injected && policy.tiebreakReader !== null && needsTiebreak(result, readings, policy)) {
-    runs.push(await runner.read(prepared, policy.tiebreakReader, 'tiebreak', repetition));
-    readings = runs.map(toConsensusReading);
+  if (
+    (!injected || escalateInjected) &&
+    policy.tiebreakReader !== null &&
+    needsTiebreak(result, readings, policy)
+  ) {
+    const tiebreakRun = await runner.read(prepared, policy.tiebreakReader, 'tiebreak', repetition);
+    runs.push(tiebreakRun);
+    readings = [...readings, toConsensusReading(tiebreakRun, runs.length - 1)];
     result = evaluateConsensus(readings, policy, prepared.scorer.outcome, options);
     usedTiebreak = true;
   }
@@ -879,7 +905,13 @@ export async function runSimulation(options: SimulationOptions): Promise<Simulat
       const job = work[next];
       next += 1;
       if (!job) return;
-      const outcome = await runUnit(runner, job.planned, job.rep, options.readerMinConfidence);
+      const outcome = await runUnit(
+        runner,
+        job.planned,
+        job.rep,
+        options.readerMinConfidence,
+        options.injectedEscalation ?? false,
+      );
       units.push(outcome.unit);
       readings.push(...outcome.readings);
       done += 1;

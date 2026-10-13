@@ -15,6 +15,9 @@ const MIGRATION_0046 = 'llm_models, migración 0046_llm_models_openai.sql';
 const GEMINI_FLASH_2027 =
   'https://ai.google.dev/gemini-api/docs/pricing (oct. 2026): US$0,75 / 3,75 hasta el 31-12-2026 y US$1,50 / 7,50 desde el 1-1-2027, salida con razonamiento incluido; se usa el de 2027 (conservador)';
 
+const OPENAI_SOL =
+  'https://developers.openai.com/api/docs/pricing (consultada 2026-10-12): US$2,00 / 0,10 cacheada / 10,00 por millón (contexto corto ≤ 272k); llm_models en 0054';
+
 export const EVAL_TARIFFS: Readonly<Record<string, EvalTariff>> = {
   'claude-haiku-5-5': {
     provider: 'anthropic',
@@ -88,5 +91,14 @@ export const EVAL_TARIFFS: Readonly<Record<string, EvalTariff>> = {
     maxOutputTokens: 16384,
     supportsSamplingParams: false,
     source: MIGRATION_0046,
+  },
+  'gpt-6.1-sol': {
+    provider: 'openai',
+    inputUsdPerMtok: 2,
+    outputUsdPerMtok: 10,
+    cachedInputUsdPerMtok: 0.1,
+    maxOutputTokens: 16384,
+    supportsSamplingParams: false,
+    source: OPENAI_SOL,
   },
 };

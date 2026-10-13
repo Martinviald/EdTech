@@ -212,4 +212,52 @@ describe('arnés answer-reading:eval', () => {
       await rm(cacheDir, { recursive: true, force: true });
     }
   });
+
+  it('las lecturas de desempate son condicionales: no bloquean el tope previo, pero exigen --budget-usd', async () => {
+    const { routes } = await loadRouteSet(DEFAULT_ROUTE);
+    const [route] = routes;
+    if (!route) throw new Error('Sin ruta por defecto');
+    const [firstReader] = route.readers;
+    if (!firstReader) throw new Error('Sin lector');
+    const withTiebreak = {
+      ...route,
+      policy: {
+        ...route.policy,
+        onDisagreement: 'tiebreak_reader',
+        tiebreakReader: {
+          ...firstReader,
+          key: 'desempate',
+          model: 'gpt-6.1-sol',
+          provider: 'openai',
+        },
+        tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+        tiebreakAgreeWith: 'other_provider',
+      },
+    };
+    const routesFile = join(outDir, 'rutas-desempate.json');
+    await writeFile(
+      routesFile,
+      JSON.stringify({ description: 'desempate', routes: [withTiebreak] }),
+    );
+    const dataset = await loadDataset(FIXTURES_DIR);
+    const fake = dryRunTranscribers(dataset);
+    const cacheDir = await mkdtemp(join(tmpdir(), 'answer-reading-eval-cache-'));
+    try {
+      const real = options({
+        dryRun: false,
+        cacheDir,
+        cacheMode: 'use',
+        repetitions: 1,
+        routesFile,
+      });
+      await expect(runEvalCommand(real, { transcriberFor: fake })).rejects.toThrow('--budget-usd');
+      const result = await runEvalCommand(
+        { ...real, budgetUsd: 0.012 },
+        { transcriberFor: fake, estimateCallUsd: () => 0.001 },
+      );
+      expect(result.cacheStats.writes).toBe(10);
+    } finally {
+      await rm(cacheDir, { recursive: true, force: true });
+    }
+  });
 });

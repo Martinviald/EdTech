@@ -458,6 +458,78 @@ describe('verificador de incorrectas en el arnés', () => {
     expect(verifyCall?.prompt.user).toContain('- 100');
   });
 
+  it('estrés del escalamiento: la lectura inyectada dudosa pasa por el lector fuerte y luego por el verificador', async () => {
+    const strong: ReaderSpec = {
+      key: 'fuerte',
+      transcriberId: 'llm',
+      provider: 'openai',
+      family: 'openai-sol',
+      model: 'gpt-6.1-sol',
+      promptRef: 'transcribe.short-answer@2',
+      hints: 'none',
+      minConfidence: 0.9,
+      params: { maxOutputTokens: 4096, reasoning: 'low', timeoutMs: 90000 },
+    };
+    const escalation: RouteSet = {
+      ...routeSet,
+      routes: routeSet.routes.map((route) => ({
+        ...route,
+        policy: {
+          ...route.policy,
+          onDisagreement: 'tiebreak_reader',
+          tiebreakReader: { ...strong, promptRef: route.readers[0]!.promptRef },
+          tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+          tiebreakAgreeWith: 'other_provider',
+        },
+      })),
+    };
+    const doubtful = { ...perfectReadings(), entero: reading('100', 0.5) };
+    const fake = () =>
+      fakeFor(
+        {
+          [HAIKU]: doubtful,
+          [FLASH_LITE]: perfectReadings(),
+          fuerte: { entero: reading('108', 0.95) },
+        },
+        { verificador: { entero: fakeVerdict(true, 0.95) } },
+      );
+    const dataset = await loadDataset(dir);
+    const run = (injectedEscalation: boolean) =>
+      runSimulation({
+        samples: dataset.samples,
+        routeSet: escalation,
+        repetitions: 1,
+        concurrency: 2,
+        readerMinConfidence: null,
+        transcriberFor: fake,
+        cache: new ReadingCache(null, 'off'),
+        budget: null,
+        injectedEscalation,
+      });
+
+    const stressed = await run(true);
+    const unitOf = (result: typeof stressed, id: string) =>
+      result.units.find((unit) => unit.sampleId === id);
+    expect(unitOf(stressed, 'entero')).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['low_confidence'],
+      usedTiebreak: true,
+    });
+    expect(unitOf(stressed, 'entero-leido-108')).toMatchObject({
+      injected: true,
+      usedTiebreak: true,
+      outcome: 'needs_review',
+      reasons: ['verifier_flagged'],
+      beforeVerifier: { outcome: 'auto_accepted', autoAcceptedError: 'harms' },
+    });
+
+    const plain = await run(false);
+    expect(unitOf(plain, 'entero-leido-108')).toMatchObject({
+      injected: true,
+      usedTiebreak: false,
+    });
+  });
+
   it('el veredicto se guarda en el caché y la segunda corrida no vuelve a llamar', async () => {
     const cacheDir = await mkdtemp(join(tmpdir(), 'answer-reading-verifier-cache-'));
     try {
