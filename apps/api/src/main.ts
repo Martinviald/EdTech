@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import compression from 'compression';
+import type { Request, Response } from 'express';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -8,6 +9,12 @@ import { AppModule } from './app.module';
 import { DATABASE_CONNECTION } from './database/database.module';
 import type { Database } from './database/database.types';
 import { checkRlsEnforcement } from './database/rls-startup-check';
+
+function compressUnlessEventStream(req: Request, res: Response): boolean {
+  const contentType = String(res.getHeader('Content-Type') ?? '');
+  if (contentType.startsWith('text/event-stream')) return false;
+  return compression.filter(req, res);
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -18,7 +25,7 @@ async function bootstrap() {
   // Las respuestas de analítica son JSON grande y repetitivo. CloudFront ya comprime
   // lo que llega al navegador, pero no este hop: el front lo consume server-side
   // (Lambda -> App Runner) y el servidor MCP pega directo a la API por internet.
-  app.use(compression());
+  app.use(compression({ filter: compressUnlessEventStream }));
 
   // HTTP request logger (dev only)
   if (process.env.NODE_ENV !== 'production') {

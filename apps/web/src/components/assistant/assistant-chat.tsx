@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AtSign, Loader2, Send, Sparkles, X } from 'lucide-react';
+import { ArrowDown, AtSign, Loader2, Send, Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AssistantStudentResult } from '@soe/types';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,10 @@ function upsertTool(
  * Render incremental de `text_delta` + indicador de tool-calls. El `pageContext`
  * se envía SIN `label` (PII opción B: solo `kind`+`id` UUID viajan al backend).
  */
+// Distancia al fondo (px) bajo la cual se considera que el usuario sigue "pegado"
+// al final y el autoscroll acompaña al texto que llega por streaming.
+const STICK_TO_BOTTOM_THRESHOLD_PX = 48;
+
 export function AssistantChat() {
   const {
     pageContext,
@@ -82,7 +86,9 @@ export function AssistantChat() {
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [activity, setActivity] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
+  const [isAwayFromBottom, setIsAwayFromBottom] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Selector `@` de alumno (H21.11b). Las menciones son contexto del turno: se
@@ -146,9 +152,30 @@ export function AssistantChat() {
     textareaRef.current?.focus();
   }, [consumeSeedPrompt]);
 
+  // Autoscroll SOLO si el usuario está al fondo: si subió a leer mientras se
+  // genera la respuesta, cada `text_delta` no lo arrastra de vuelta abajo.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!stickToBottomRef.current) return;
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages, activity]);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const atBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight <= STICK_TO_BOTTOM_THRESHOLD_PX;
+    stickToBottomRef.current = atBottom;
+    setIsAwayFromBottom(!atBottom);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current = true;
+    setIsAwayFromBottom(false);
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }, []);
 
   async function send() {
     const content = input.trim();
@@ -157,6 +184,8 @@ export function AssistantChat() {
     setInput('');
     setIsStreaming(true);
     setActivity(null);
+    stickToBottomRef.current = true;
+    setIsAwayFromBottom(false);
 
     const userId = crypto.randomUUID();
     const assistantId = crypto.randomUUID();
@@ -238,71 +267,88 @@ export function AssistantChat() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-1 space-y-4 overflow-y-auto px-1 py-2">
-        {messages.length === 0 && (
-          <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center text-sm text-muted-foreground">
-            <Sparkles className="size-6 text-primary" aria-hidden />
-            <p className="font-medium text-foreground">¿En qué te ayudo con tus datos?</p>
-            <p>
-              Pregúntame sobre resultados, brechas o ítems. Si estás viendo una evaluación o un
-              curso, ya tengo ese contexto.
-            </p>
-          </div>
-        )}
-
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={cn('flex flex-col gap-1', m.role === 'user' ? 'items-end' : 'items-start')}
-          >
-            {m.role === 'assistant' && m.tools.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {m.tools.map((t) => (
-                  <span
-                    key={t.name}
-                    className={cn(
-                      'rounded-full px-2 py-0.5 text-[11px]',
-                      t.isError
-                        ? 'bg-destructive/10 text-destructive'
-                        : 'bg-muted text-muted-foreground',
-                    )}
-                  >
-                    {toolLabel(t.name)}
-                  </span>
-                ))}
-              </div>
-            )}
-            <div
-              className={cn(
-                'max-w-[85%] break-words rounded-2xl px-3 py-2 text-sm',
-                m.role === 'user'
-                  ? 'whitespace-pre-wrap bg-primary text-primary-foreground'
-                  : 'bg-muted text-foreground',
-              )}
-            >
-              {m.role === 'assistant' ? (
-                m.content ? (
-                  <Markdown>{m.content}</Markdown>
-                ) : isStreaming ? (
-                  '…'
-                ) : (
-                  ''
-                )
-              ) : (
-                m.content
-              )}
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="h-full space-y-4 overflow-y-auto overscroll-contain px-1 py-2"
+        >
+          {messages.length === 0 && (
+            <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center text-sm text-muted-foreground">
+              <Sparkles className="size-6 text-primary" aria-hidden />
+              <p className="font-medium text-foreground">¿En qué te ayudo con tus datos?</p>
+              <p>
+                Pregúntame sobre resultados, brechas o ítems. Si estás viendo una evaluación o un
+                curso, ya tengo ese contexto.
+              </p>
             </div>
-          </div>
-        ))}
+          )}
 
-        {activity && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="size-3 animate-spin" aria-hidden />
-            <span>Consultando datos… ({activity})</span>
-          </div>
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={cn('flex flex-col gap-1', m.role === 'user' ? 'items-end' : 'items-start')}
+            >
+              {m.role === 'assistant' && m.tools.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {m.tools.map((t) => (
+                    <span
+                      key={t.name}
+                      className={cn(
+                        'rounded-full px-2 py-0.5 text-[11px]',
+                        t.isError
+                          ? 'bg-destructive/10 text-destructive'
+                          : 'bg-muted text-muted-foreground',
+                      )}
+                    >
+                      {toolLabel(t.name)}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div
+                className={cn(
+                  'max-w-[85%] break-words rounded-2xl px-3 py-2 text-sm',
+                  m.role === 'user'
+                    ? 'whitespace-pre-wrap bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground',
+                )}
+              >
+                {m.role === 'assistant' ? (
+                  m.content ? (
+                    <Markdown>{m.content}</Markdown>
+                  ) : isStreaming ? (
+                    '…'
+                  ) : (
+                    ''
+                  )
+                ) : (
+                  m.content
+                )}
+              </div>
+            </div>
+          ))}
+
+          {activity && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" aria-hidden />
+              <span>Consultando datos… ({activity})</span>
+            </div>
+          )}
+        </div>
+
+        {isAwayFromBottom && (
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={scrollToBottom}
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full shadow-md"
+          >
+            <ArrowDown className="mr-1 size-3" aria-hidden />
+            {isStreaming ? 'Ver respuesta' : 'Ir al final'}
+          </Button>
         )}
-
-        <div ref={bottomRef} />
       </div>
 
       <form
