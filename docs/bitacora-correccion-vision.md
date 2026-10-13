@@ -671,7 +671,7 @@ Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), d
   la altura de la primera fila. El margen de `short-answer@2` (30 % del lado menor) lo incluía, y
   Gemini 3.8 Flash leyó "4 3/4" en Celeste P4 con 0,95 en las 3 repeticiones (lo salvó el
   desacuerdo con luna). Tapar el número pintándolo ya se había descartado (dejaba puntos de lápiz).
-- **Decisión E1-5 — el layout publica el rótulo y el perfil lo trata como obstáculo.** Cada campo de
+- **Decisión E1-4 — el layout publica el rótulo y el perfil lo trata como obstáculo.** Cada campo de
   respuesta escrita suma `response.printedLabelRegion` (opcional; derivado de las mismas constantes
   con que se imprime el número, y un test comprueba que el ancho real de Helvetica-Bold cabe en la
   caja). El perfil suma `printedLabelGapFraction`: en cada lado el margen no pasa de esa fracción de
