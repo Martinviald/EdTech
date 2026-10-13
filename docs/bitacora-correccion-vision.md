@@ -733,3 +733,18 @@ Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), d
   el índice único). `timeoutMs` y `minConfidence` no entran porque no cambian lo que se le pide al
   modelo. Las lecturas ya guardadas se siguen reutilizando si nada cambió: guardan esos mismos
   valores (`provider`, `model`, `params`, `prompt_hash`), así que no hace falta migración.
+- **Tarifa de respaldo.** `llm.pricing.ts` cobra `gemini-3.6-flash` y `gemini-3.8-flash` a
+  US$1,50 / 7,50 por millón, igual que el catálogo de 0051 (antes 3.8 estaba a 0,75 / 3,75 y 3.6
+  no tenía tarifa de respaldo).
+- **Orden de despliegue de 0051–0053 (verificado en el código).** `readerSpecSchema` y
+  `consensusPolicySchema` son `.strict()` desde antes de la etapa 1. Una API anterior a T1 que lea
+  las rutas sembradas por 0051 (lectores con `minConfidence`) o 0053 (`incorrectVerifier`) las
+  rechaza: `ReadingRoutesService.parseRoute` reporta «Ruta de lectura inválida: se ignora» y la
+  descarta, y como 0051 retira las rutas anteriores, ningún recorte encuentra ruta y queda
+  `not_read` con `insufficient_readers` (nunca una nota, pero la lectura se pierde y hay que
+  reprocesar). En la otra dirección, la API nueva **necesita** 0052 (columna
+  `verification_output` y modo `verifier`): sin ella falla la consulta de lecturas existentes.
+  Por eso van **juntas**: el `deploy.yml` corre `db:migrate` y después publica la imagen; entre
+  ambos pasos la API vieja ve rutas que no entiende. Despliega con el flag de backend en una ventana
+  sin escaneos, y si entró alguno en esa ventana, reprocesa sus recortes `not_read` /
+  `insufficient_readers` después del despliegue.
