@@ -162,6 +162,7 @@ export interface LlmStructuredResult {
   data: unknown;
   rawText: string;
   model: string;
+  providerModel: string;
   finishReason: LlmStructuredFinishReason;
   usage: LlmStructuredUsage | null;
   providerRequestId: string | null;

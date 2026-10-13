@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { LLM_PROVIDER_DEFAULTS } from '../llm.constants';
+import { runWithinDeadline, type LlmDeadline } from './llm-deadline.helpers';
 import type {
   LlmAgentContent,
   LlmAgentEvent,
@@ -31,6 +32,7 @@ interface GeminiUsageMetadata {
 
 interface GeminiStructuredResponse {
   responseId?: string;
+  modelVersion?: string;
   promptFeedback?: { blockReason?: string };
   candidates?: Array<{
     finishReason?: string;
@@ -61,6 +63,12 @@ const GEMINI_THINKING_BUDGET: Record<Exclude<LlmReasoningLevel, 'off'>, number> 
 };
 
 const GEMINI_PRO_MIN_THINKING_BUDGET = 128;
+
+const GEMINI_OFF_THINKING_LEVELS = ['MINIMAL', 'LOW'] as const;
+
+const BAD_REQUEST_STATUS = 400;
+
+const THINKING_LEVEL_REJECTION = /thinking level \w+ is not supported/i;
 
 const GEMINI_MAX_THINKING_SHARE = 0.5;
 
@@ -190,6 +198,7 @@ export class GeminiProvider implements LlmProvider {
   readonly name: LlmProviderName = 'gemini';
   private readonly logger = new Logger(GeminiProvider.name);
   private client: GeminiClient | null = null;
+  private readonly offThinkingStepByModel = new Map<string, number>();
 
   constructor() {
     this.initClient();
@@ -321,16 +330,9 @@ export class GeminiProvider implements LlmProvider {
     }
 
     const client = this.client as unknown as GeminiStructuredClient;
-    const response = await client.models.generateContent({
-      model: request.options.model,
-      contents: [
-        ...request.images.map((img) => ({
-          inlineData: { mimeType: img.mimeType, data: img.data },
-        })),
-        { text: request.prompt },
-      ],
-      config: this.structuredConfig(request),
-    });
+    const response = await runWithinDeadline(request.options.timeoutMs, (deadline) =>
+      this.generateWithThinking(client, request, deadline),
+    );
 
     const candidate = response.candidates?.[0];
     const rawText = (candidate?.content?.parts ?? [])
@@ -341,28 +343,98 @@ export class GeminiProvider implements LlmProvider {
       data: this.parseStructuredText(rawText),
       rawText,
       model: request.options.model,
+      providerModel: response.modelVersion || request.options.model,
       finishReason: this.toStructuredFinishReason(response),
       usage: this.toStructuredUsage(response.usageMetadata),
       providerRequestId: response.responseId ?? null,
     };
   }
 
+  private async generateWithThinking(
+    client: GeminiStructuredClient,
+    request: LlmStructuredRequest,
+    deadline: LlmDeadline,
+  ): Promise<GeminiStructuredResponse> {
+    const { model, reasoning, maxTokens } = request.options;
+    if (!this.usesOffThinkingLevels(model, reasoning)) {
+      return this.generateStructured(
+        client,
+        request,
+        this.structuredThinkingConfig(model, reasoning, maxTokens),
+        deadline,
+      );
+    }
+    let step = this.offThinkingStepByModel.get(model) ?? 0;
+    for (;;) {
+      const thinkingLevel = GEMINI_OFF_THINKING_LEVELS[step] ?? 'LOW';
+      try {
+        const response = await this.generateStructured(
+          client,
+          request,
+          { thinkingLevel },
+          deadline,
+        );
+        this.offThinkingStepByModel.set(model, step);
+        return response;
+      } catch (error) {
+        if (
+          step + 1 >= GEMINI_OFF_THINKING_LEVELS.length ||
+          !this.isThinkingLevelRejection(error)
+        ) {
+          throw error;
+        }
+        this.logger.warn(
+          `El modelo ${model} rechazó thinkingLevel=${thinkingLevel}; se reintenta con el siguiente nivel`,
+        );
+        step += 1;
+      }
+    }
+  }
+
+  private usesOffThinkingLevels(model: string, reasoning: LlmReasoningLevel): boolean {
+    return reasoning === 'off' && /^gemini-[3-9]/i.test(model) && !/pro/i.test(model);
+  }
+
+  private generateStructured(
+    client: GeminiStructuredClient,
+    request: LlmStructuredRequest,
+    thinkingConfig: GeminiThinkingConfig | undefined,
+    deadline: LlmDeadline,
+  ): Promise<GeminiStructuredResponse> {
+    return client.models.generateContent({
+      model: request.options.model,
+      contents: [
+        ...request.images.map((img) => ({
+          inlineData: { mimeType: img.mimeType, data: img.data },
+        })),
+        { text: request.prompt },
+      ],
+      config: this.structuredConfig(request, thinkingConfig, deadline),
+    });
+  }
+
+  private isThinkingLevelRejection(error: unknown): boolean {
+    if (!(error instanceof Error)) return false;
+    const { status } = error as Error & { status?: unknown };
+    return status === BAD_REQUEST_STATUS && THINKING_LEVEL_REJECTION.test(error.message);
+  }
+
   private samplingParams(options: LlmCompletionOptions): { temperature?: number } {
     return options.temperature !== undefined ? { temperature: options.temperature } : {};
   }
 
-  private structuredConfig(request: LlmStructuredRequest): Record<string, unknown> {
-    const thinkingConfig = this.structuredThinkingConfig(
-      request.options.model,
-      request.options.reasoning,
-      request.options.maxTokens,
-    );
+  private structuredConfig(
+    request: LlmStructuredRequest,
+    thinkingConfig: GeminiThinkingConfig | undefined,
+    deadline: LlmDeadline,
+  ): Record<string, unknown> {
     return {
       systemInstruction: request.system,
       maxOutputTokens: request.options.maxTokens,
       responseMimeType: 'application/json',
       responseJsonSchema: request.jsonSchema,
-      httpOptions: { timeout: request.options.timeoutMs },
+      httpOptions: { timeout: deadline.remainingMs() },
+      abortSignal: deadline.signal,
       ...(request.options.mediaResolution
         ? { mediaResolution: GEMINI_MEDIA_RESOLUTION[request.options.mediaResolution] }
         : {}),

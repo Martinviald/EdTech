@@ -223,3 +223,50 @@ describe('ReviewGroupPanel en modo corrección', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });
+
+describe('ReviewGroupPanel con motivos del verificador de incorrectas', () => {
+  const verifierGrading = {
+    acceptedAnswers: ['8, 16, 12'],
+    unit: null,
+    proposedOutcome: 'incorrect' as const,
+    optionOutcomes: [{ literal: '8, 15, 12', outcome: 'incorrect' as const }],
+  };
+
+  it('una duda del verificador se revisa como lectura, sin clave ni corrección propuesta', () => {
+    const { panel, onSubmit } = renderPanel({
+      group: readingGroup({ reasons: ['verifier_flagged'], grading: verifierGrading }),
+    });
+
+    expect(
+      screen.getByText('El verificador cree que podría ser la respuesta correcta mal leída'),
+    ).toBeTruthy();
+    expect(screen.getByText('¿Qué escribió el alumno?')).toBeTruthy();
+    expect(screen.queryByText(/Clave/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /Marcar como incorrecta/ })).toBeNull();
+    expect(screen.queryByText('Incorrecta')).toBeNull();
+    fireEvent.keyDown(panel, { key: 'x' });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('un verificador que falló no dice que duda de la lectura', () => {
+    renderPanel({ group: readingGroup({ reasons: ['verifier_failed'] }) });
+
+    expect(
+      screen.getByText(
+        'El verificador no pudo revisar esta respuesta: confirma qué escribió el alumno',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/El verificador cree/)).toBeNull();
+  });
+
+  it('una decisión guardada en modo corrección con motivo del verificador no preselecciona Incorrecta', () => {
+    const { panel, onSubmit } = renderPanel({
+      group: gradingGroup({ reasons: ['verifier_flagged'], grading: verifierGrading }),
+    });
+
+    expect(screen.queryByRole('button', { name: /Aceptar la propuesta/ })).toBeNull();
+    expect(screen.queryByText('Propuesta:')).toBeNull();
+    fireEvent.keyDown(panel, { key: 'a' });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+});

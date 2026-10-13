@@ -29,6 +29,8 @@ export interface ConsensusReading {
   readonly output: TranscriptionOutput | null;
   /** `tiebreak`: lectura de desempate pedida tras un desacuerdo (política `tiebreak_reader`). */
   readonly role?: 'primary' | 'tiebreak';
+  /** Umbral propio del lector (`ReaderSpec.minConfidence`); si falta, rige el de la política. */
+  readonly minConfidence?: number;
 }
 
 export interface ConsensusOptions {
@@ -92,6 +94,11 @@ function blankAnswer(format: ResponseFormat): NormalizedAnswer {
   return { formatKind: format.kind, state: 'blank', canonical: null, value: null, issues: [] };
 }
 
+/** Cada lectura se mide con el umbral de su lector; sin él, con el de la política. */
+function meetsConfidence(reading: ValidReading, policy: ConsensusPolicy): boolean {
+  return reading.output.confidence >= (reading.minConfidence ?? policy.minConfidence);
+}
+
 function distinctFamilies(readings: readonly ConsensusReading[]): number {
   return new Set(readings.map((reading) => reading.family)).size;
 }
@@ -109,7 +116,8 @@ function distinctFamilies(readings: readonly ConsensusReading[]): number {
  *  6. desacuerdo → desempate (si está configurado y llegó) o revisión [readers_disagree];
  *  6b. el valor acordado no calza con el formato o con sus partes (issues del
  *     normalizador) → revisión [format_mismatch];
- *  7. confianza baja → revisión [low_confidence];
+ *  7. confianza baja → revisión [low_confidence]; cada lectura se compara con su
+ *     propio umbral (`minConfidence` del lector) o, si no lo trae, con el de la política;
  *  8. alternativa plausible que cambia el resultado → revisión [alternative_flips_outcome];
  *  9. corrección indecidible → revisión [undecidable];
  * 10. la política no autoacepta ese resultado → revisión [policy_requires_review];
@@ -165,7 +173,7 @@ export function evaluateConsensus(
     if (used.some((reading) => reading.output.reviewRequested)) {
       return reviewBlank('reader_requested_review');
     }
-    if (used.some((reading) => reading.output.confidence < policy.minConfidence)) {
+    if (used.some((reading) => !meetsConfidence(reading, policy))) {
       return reviewBlank('low_confidence');
     }
     if (rubric) return reviewBlank('rubric_item');
@@ -199,6 +207,7 @@ export function evaluateConsensus(
       const rank = [
         reading.output.reviewRequested ? 0 : 1,
         answer.canonical === null ? 0 : 1,
+        meetsConfidence(reading, policy) ? 1 : 0,
         reading.output.confidence,
       ];
       if (best === null || isBetterRank(rank, best.rank)) best = { answer, rank };
@@ -242,7 +251,7 @@ export function evaluateConsensus(
     const first = normalized[0]?.answer ?? null;
     const agree = new Set(normalized.map((entry) => entry.answer.canonical)).size === 1;
     const reasons: ReviewReason[] = agree ? [] : ['readers_disagree'];
-    if (valid.some((reading) => reading.output.confidence < policy.minConfidence)) {
+    if (valid.some((reading) => !meetsConfidence(reading, policy))) {
       reasons.push('low_confidence');
     }
     return review(reasons, first, valid);
@@ -261,7 +270,7 @@ export function evaluateConsensus(
     return review(['format_mismatch'], agreed, usedReadings);
   }
 
-  if (usedReadings.some((reading) => reading.output.confidence < policy.minConfidence)) {
+  if (usedReadings.some((reading) => !meetsConfidence(reading, policy))) {
     return review(['low_confidence'], agreed, usedReadings);
   }
 

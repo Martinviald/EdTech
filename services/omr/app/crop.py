@@ -23,6 +23,12 @@ por arriba o por abajo de una respuesta de una linea.
   burbujas); uno limita arriba/abajo solo si se superpone en x con la region, y
   a izquierda/derecha solo si se superpone en y; uno superpuesto con la region
   no limita nada. Replica `cropBleedBox` de crop.schema.ts.
+- `printedLabelGapFraction` (v3: 0.5; null en v1/v2): el mismo tope, pero contra
+  los rotulos impresos fuera de la region (`response.printedLabelRegion` de los
+  campos de la pagina: el numero de la pregunta). Un lector leia el "4" de la
+  pregunta como parte de la respuesta ("4 3/4", Celeste P4). Un layout sin
+  `printedLabelRegion` recorta igual que con v2. No hay `free-text@3`: el
+  desarrollo se empieza a escribir en el margen izquierdo y el tope lo cortaba.
 
 Nunca se binariza ni se "limpian" trazos (diseno §16.2): puede borrar un punto
 decimal. El recorte sale en gris, reescalado conservando la proporcion.
@@ -62,6 +68,7 @@ class CropProfile:
     contrast: str
     bleed_basis: BleedBasis = "longer_side"
     neighbor_gap_fraction: float | None = None
+    printed_label_gap_fraction: float | None = None
 
     @property
     def key(self) -> str:
@@ -77,6 +84,7 @@ class CropProfile:
             "contrast": self.contrast,
             "bleedBasis": self.bleed_basis,
             "neighborGapFraction": self.neighbor_gap_fraction,
+            "printedLabelGapFraction": self.printed_label_gap_fraction,
         }
 
 
@@ -88,6 +96,7 @@ def _profile(
     jpeg_quality: int,
     bleed_basis: BleedBasis = "longer_side",
     neighbor_gap_fraction: float | None = None,
+    printed_label_gap_fraction: float | None = None,
 ) -> CropProfile:
     return CropProfile(
         id,
@@ -98,6 +107,7 @@ def _profile(
         "none",
         bleed_basis,
         neighbor_gap_fraction,
+        printed_label_gap_fraction,
     )
 
 
@@ -108,6 +118,7 @@ CROP_PROFILES: dict[str, CropProfile] = {
         _profile("free-text", 1, 0.05, 1400, 85),
         _profile("short-answer", 2, 0.3, 1000, 85, "shorter_side", 0.5),
         _profile("free-text", 2, 0.1, 1400, 85, "shorter_side", 0.5),
+        _profile("short-answer", 3, 0.3, 1000, 85, "shorter_side", 0.5, 0.5),
     )
 }
 
@@ -178,24 +189,42 @@ def neighbor_footprints_px(
     return footprints
 
 
+def printed_label_footprints_px(
+    page_fields: Sequence[dict[str, Any]], size: tuple[int, int]
+) -> list[PxBox]:
+    """Las cajas de los rotulos impresos fuera de los campos (numero de la pregunta)."""
+    footprints = []
+    for field in page_fields:
+        label = (field.get("response") or {}).get("printedLabelRegion")
+        if label is not None:
+            footprints.append(region_box_px(label, size))
+    return footprints
+
+
 def bleed_box_px(
     box: PxBox,
     profile: CropProfile,
     size: tuple[int, int],
     neighbors: Sequence[PxBox] = (),
+    printed_labels: Sequence[PxBox] = (),
 ) -> PxBox:
-    """La caja del recorte: region + margen del perfil, con topes por vecino y por pagina."""
+    """La caja del recorte: region + margen del perfil, con topes por vecino, rotulo y pagina."""
     x0, y0, x1, y1 = box
     sides = (x1 - x0 + 1, y1 - y0 + 1)
     side = max(sides) if profile.bleed_basis == "longer_side" else min(sides)
     pad = profile.bleed_ratio * side
-    fraction = profile.neighbor_gap_fraction
-    in_row = [n for n in neighbors if _overlaps(n[1], n[3], y0, y1)]
-    in_column = [n for n in neighbors if _overlaps(n[0], n[2], x0, x1)]
-    left = _side_pad(pad, fraction, [x0 - n[2] - 1 for n in in_row])
-    right = _side_pad(pad, fraction, [n[0] - x1 - 1 for n in in_row])
-    top = _side_pad(pad, fraction, [y0 - n[3] - 1 for n in in_column])
-    bottom = _side_pad(pad, fraction, [n[1] - y1 - 1 for n in in_column])
+    fields = _side_gaps(box, neighbors)
+    labels = _side_gaps(box, printed_labels)
+    left, right, top, bottom = (
+        round(
+            _side_cap(
+                _side_cap(pad, profile.neighbor_gap_fraction, field_gaps),
+                profile.printed_label_gap_fraction,
+                label_gaps,
+            )
+        )
+        for field_gaps, label_gaps in zip(fields, labels, strict=True)
+    )
     width, height = size
     return (
         max(0, x0 - left),
@@ -209,13 +238,25 @@ def _overlaps(a0: int, a1: int, b0: int, b1: int) -> bool:
     return a0 <= b1 and b0 <= a1
 
 
-def _side_pad(pad: float, fraction: float | None, gaps: list[int]) -> int:
+def _side_gaps(box: PxBox, obstacles: Sequence[PxBox]) -> tuple[list[int], ...]:
+    x0, y0, x1, y1 = box
+    in_row = [n for n in obstacles if _overlaps(n[1], n[3], y0, y1)]
+    in_column = [n for n in obstacles if _overlaps(n[0], n[2], x0, x1)]
+    return (
+        [x0 - n[2] - 1 for n in in_row],
+        [n[0] - x1 - 1 for n in in_row],
+        [y0 - n[3] - 1 for n in in_column],
+        [n[1] - y1 - 1 for n in in_column],
+    )
+
+
+def _side_cap(pad: float, fraction: float | None, gaps: list[int]) -> float:
     if fraction is None:
-        return round(pad)
+        return pad
     free = [gap for gap in gaps if gap >= 0]
     if not free:
-        return round(pad)
-    return round(min(pad, fraction * min(free)))
+        return pad
+    return min(pad, fraction * min(free))
 
 
 def crop_with_profile(
@@ -223,8 +264,11 @@ def crop_with_profile(
     region: dict[str, dict[str, float]],
     profile: CropProfile,
     neighbors: Sequence[PxBox] = (),
+    printed_labels: Sequence[PxBox] = (),
 ) -> CropImage:
-    x0, y0, x1, y1 = bleed_box_px(region_box_px(region, page.size), profile, page.size, neighbors)
+    x0, y0, x1, y1 = bleed_box_px(
+        region_box_px(region, page.size), profile, page.size, neighbors, printed_labels
+    )
     crop = page.gray[y0 : y1 + 1, x0 : x1 + 1]
     if profile.contrast == "clahe":
         clahe = cv2.createCLAHE(clipLimit=CLAHE_CLIP_LIMIT, tileGridSize=CLAHE_TILE_GRID)

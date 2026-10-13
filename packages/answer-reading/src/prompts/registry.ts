@@ -9,21 +9,28 @@ import {
   type ResponseFormat,
   type ResponseFormatKind,
 } from '@soe/types';
+import { boxCellGuide } from '../formats/box-cells';
 import { formatLabelFor, isSupportedFormatKind, promptGuideFor } from '../formats/registry';
+import { DEFAULT_RESPONSE_GEOMETRY, type ResponseGeometry } from '../formats/response-geometry';
 import {
+  TRANSCRIPTION_BOX_CELLS_SCHEMA_ID,
   baseTranscriptionJsonSchema,
   transcriptionJsonSchema,
+  transcriptionZodSchema,
   type TranscriptionJsonSchema,
 } from '../formats/transcription-json-schema';
 import { rubricGradeJsonSchema } from '../grading/rubric-grade-schema';
+import { verificationJsonSchema } from '../verification/verification-json-schema';
 import { GRADE_RUBRIC_V1 } from './grade-rubric';
 import { promptHash, promptRef, renderPrompt } from './render';
+import { TRANSCRIBE_BOXES_V1 } from './transcribe-boxes';
 import { TRANSCRIBE_SHORT_ANSWER_V1, TRANSCRIBE_SHORT_ANSWER_V2 } from './transcribe-short-answer';
 import {
   TRANSCRIBE_FREE_TEXT_V1,
   TRANSCRIBE_SHORT_TEXT_V1,
   TRANSCRIBE_SHORT_TEXT_V2,
 } from './transcribe-text';
+import { VERIFY_INCORRECT_V1 } from './verify-incorrect';
 
 export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_SHORT_ANSWER_V1,
@@ -31,7 +38,9 @@ export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_SHORT_TEXT_V1,
   TRANSCRIBE_SHORT_TEXT_V2,
   TRANSCRIBE_FREE_TEXT_V1,
+  TRANSCRIBE_BOXES_V1,
   GRADE_RUBRIC_V1,
+  VERIFY_INCORRECT_V1,
 ].map((prompt) => promptVersionSchema.parse(prompt));
 
 const BY_REF = new Map(PROMPT_VERSIONS.map((prompt) => [promptRef(prompt), prompt]));
@@ -46,15 +55,29 @@ export function isTranscriptionPromptFor(ref: string, kind: ResponseFormatKind):
   return prompt !== null && prompt.purpose === 'transcription' && prompt.formatKinds.includes(kind);
 }
 
+/** ¿El prompt lee por casilla? Lo decide la familia de esquema que declara. */
+export function readsByBoxCell(prompt: Pick<PromptVersion, 'outputSchemaId'>): boolean {
+  return prompt.outputSchemaId === TRANSCRIPTION_BOX_CELLS_SCHEMA_ID;
+}
+
+const TEMPLATE_OUTPUT_SCHEMAS: Record<
+  PromptVersion['purpose'],
+  (prompt: PromptVersion) => unknown
+> = {
+  transcription: (prompt) =>
+    baseTranscriptionJsonSchema(
+      readsByBoxCell(prompt) ? TRANSCRIPTION_BOX_CELLS_SCHEMA_ID : undefined,
+    ).schema,
+  rubric_grading: () => rubricGradeJsonSchema().schema,
+  verification: () => verificationJsonSchema().schema,
+};
+
 /**
  * Hash de la plantilla sin renderizar (lo que congela `prompts.lock.json`), con el
- * esquema base de su propósito: transcripción o calificación con rúbrica.
+ * esquema base de su propósito: transcripción, calificación con rúbrica o verificación.
  */
 export function templateHash(prompt: PromptVersion): string {
-  const outputSchema =
-    prompt.purpose === 'rubric_grading'
-      ? rubricGradeJsonSchema().schema
-      : baseTranscriptionJsonSchema().schema;
+  const outputSchema = TEMPLATE_OUTPUT_SCHEMAS[prompt.purpose](prompt);
   return promptHash(prompt.system, prompt.user, prompt.outputSchemaId, outputSchema);
 }
 
@@ -112,6 +135,32 @@ export function formatLockParts(format: ResponseFormat): FormatLockParts {
   };
 }
 
+/** Lo mismo para un prompt que lee por casilla: la guía y el esquema dependen de la geometría. */
+export function boxCellLockParts(
+  format: ResponseFormat,
+  geometry: ResponseGeometry,
+): FormatLockParts {
+  const output = transcriptionJsonSchema(format, geometry);
+  return {
+    label: formatLabelFor(format),
+    guide: boxCellGuide(format, geometry),
+    outputSchemaId: output.schemaId,
+    outputSchema: output.schema,
+  };
+}
+
+/** Geometrías de muestra del lock para la lectura por casilla (decimales de 1, 2 y 3 cifras). */
+export const PROMPT_LOCK_SAMPLE_GEOMETRIES: readonly ResponseGeometry[] = [
+  DEFAULT_RESPONSE_GEOMETRY,
+  { fractionDigits: 1 },
+  { fractionDigits: 3 },
+];
+
+function lockPartsFor(prompt: PromptVersion, format: ResponseFormat): FormatLockParts[] {
+  if (!readsByBoxCell(prompt)) return [formatLockParts(format)];
+  return PROMPT_LOCK_SAMPLE_GEOMETRIES.map((geometry) => boxCellLockParts(format, geometry));
+}
+
 /** Hash de un par prompt × formato: la plantilla más lo que aporta cada muestra del formato. */
 export function promptFormatLockHash(
   prompt: PromptVersion,
@@ -121,6 +170,26 @@ export function promptFormatLockHash(
     .update(JSON.stringify([templateHash(prompt), formats]), 'utf8')
     .digest('hex');
 }
+
+/** Lo que el formato agrega a un prompt de verificación: solo su etiqueta (nunca la guía). */
+export function verificationFormatLockParts(format: ResponseFormat): FormatLockParts {
+  const output = verificationJsonSchema();
+  return {
+    label: formatLabelFor(format),
+    guide: '',
+    outputSchemaId: output.schemaId,
+    outputSchema: output.schema,
+  };
+}
+
+const FORMAT_LOCK_PARTS_BY_PURPOSE: Record<
+  PromptVersion['purpose'],
+  ((prompt: PromptVersion, format: ResponseFormat) => readonly FormatLockParts[]) | null
+> = {
+  transcription: (prompt, format) => lockPartsFor(prompt, format),
+  rubric_grading: null,
+  verification: (_prompt, format) => [verificationFormatLockParts(format)],
+};
 
 /**
  * Lo que congela `prompts.lock.json`: por cada versión publicada, el hash de la
@@ -132,10 +201,14 @@ export function promptLock(): Record<string, string> {
   for (const prompt of PROMPT_VERSIONS.filter((p) => p.status === 'published')) {
     const ref = promptRef(prompt);
     lock[ref] = templateHash(prompt);
-    if (prompt.purpose !== 'transcription') continue;
+    const partsOf = FORMAT_LOCK_PARTS_BY_PURPOSE[prompt.purpose];
+    if (partsOf === null) continue;
     for (const kind of prompt.formatKinds.filter(isSupportedFormatKind)) {
       const samples = PROMPT_LOCK_SAMPLE_FORMATS.filter((format) => format.kind === kind);
-      lock[`${ref} × ${kind}`] = promptFormatLockHash(prompt, samples.map(formatLockParts));
+      lock[`${ref} × ${kind}`] = promptFormatLockHash(
+        prompt,
+        samples.flatMap((format) => partsOf(prompt, format)),
+      );
     }
   }
   return lock;
@@ -143,6 +216,15 @@ export function promptLock(): Record<string, string> {
 
 export interface TranscriptionPromptContext {
   readonly gradeName?: string | null;
+  /** Geometría impresa de la casilla; solo la usan los prompts que leen por casilla. */
+  readonly geometry?: ResponseGeometry | null;
+}
+
+function cellsGeometry(
+  prompt: PromptVersion,
+  context: TranscriptionPromptContext,
+): ResponseGeometry | null {
+  return readsByBoxCell(prompt) ? (context.geometry ?? DEFAULT_RESPONSE_GEOMETRY) : null;
 }
 
 /**
@@ -155,10 +237,14 @@ export function transcriptionVariables(
   hints: ReaderSpec['hints'],
   context: TranscriptionPromptContext = {},
 ): PromptVariables {
+  const cells = cellsGeometry(prompt, context);
   const candidates: Partial<Record<PromptVariable, string>> = {
     gradeName: context.gradeName ?? undefined,
     ...(hints === 'format'
-      ? { formatLabel: formatLabelFor(format), formatGuide: promptGuideFor(format) }
+      ? {
+          formatLabel: formatLabelFor(format),
+          formatGuide: cells === null ? promptGuideFor(format) : boxCellGuide(format, cells),
+        }
       : {}),
   };
   const variables: PromptVariables = {};
@@ -172,6 +258,8 @@ export function transcriptionVariables(
 export interface RenderedTranscriptionPrompt {
   readonly prompt: RenderedPrompt;
   readonly outputSchema: TranscriptionJsonSchema;
+  /** Validación de la salida con las mismas `parts` que pide `outputSchema`. */
+  readonly outputZodSchema: ReturnType<typeof transcriptionZodSchema>;
 }
 
 export function renderTranscriptionPrompt(
@@ -184,7 +272,8 @@ export function renderTranscriptionPrompt(
   if (prompt.purpose !== 'transcription' || !prompt.formatKinds.includes(format.kind)) {
     throw new Error(`El prompt ${reader.promptRef} no sirve para el formato ${format.kind}`);
   }
-  const outputSchema = transcriptionJsonSchema(format);
+  const cells = cellsGeometry(prompt, context);
+  const outputSchema = transcriptionJsonSchema(format, cells);
   return {
     prompt: renderPrompt(
       prompt,
@@ -192,5 +281,6 @@ export function renderTranscriptionPrompt(
       outputSchema,
     ),
     outputSchema,
+    outputZodSchema: transcriptionZodSchema(format, cells),
   };
 }

@@ -32,7 +32,8 @@ const FALLBACK_MODEL_PRICING_PER_MTOK: ReadonlyArray<{
   { prefix: 'claude-3-5-haiku', inputUsd: 0.8, outputUsd: 4 },
   { prefix: 'claude-3-haiku', inputUsd: 0.25, outputUsd: 1.25 },
   // Google Gemini — variantes específicas primero (ver nota de orden arriba).
-  { prefix: 'gemini-3.8-flash', inputUsd: 0.75, outputUsd: 3.75 },
+  { prefix: 'gemini-3.8-flash', inputUsd: 1.5, outputUsd: 7.5 },
+  { prefix: 'gemini-3.6-flash', inputUsd: 1.5, outputUsd: 7.5 },
   { prefix: 'gemini-3.5-flash-lite', inputUsd: 0.3, outputUsd: 2.5 },
   { prefix: 'gemini-3.1-flash-lite', inputUsd: 0.25, outputUsd: 1.5 },
   { prefix: 'gemini-2.5-flash-lite', inputUsd: 0.1, outputUsd: 0.4 },

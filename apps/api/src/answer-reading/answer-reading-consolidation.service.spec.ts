@@ -332,6 +332,26 @@ describe('AnswerReadingConsolidationService.readingsForConfirmation', () => {
     });
   });
 
+  it('una autoaceptada cuyo resultado cambió con la clave vigente no se corrige al confirmar el lote', async () => {
+    const { memory, service, decisions } = setup();
+    const decision = seedDecision(memory, {
+      value: answer('9', INTEGER),
+      scoringOutcome: 'correct',
+    });
+    jest.spyOn(decisions, 'findCurrentByBatch').mockResolvedValue(batchDecisions([decision]));
+
+    const readings = await service.readingsForConfirmation(ORG_ID, BATCH_ID);
+
+    const confirmation = readings.get(MARK_A);
+    expect(confirmation?.prescored).toBeNull();
+    expect(currentDecisionOf(memory)).toMatchObject({
+      id: confirmation?.decisionId,
+      outcome: 'needs_review',
+      reasons: ['scoring_changed'],
+      reviewMode: 'reading',
+    });
+  });
+
   it('aplica el formato derivado del ítem: una lista con falta de ortografía va a revisión, no a incorrecta', async () => {
     const { memory, service, decisions } = setup();
     const misspelled = answer('cabeza, torax, abdomem', WORDS);
@@ -695,6 +715,50 @@ describe('AnswerReadingConsolidationService.consolidateDecisions', () => {
     expect(decision.supersededById).toBe(reviewable.id);
     expect(report.pending).toEqual([reviewable.id]);
     expect(response.finalScore).toBeNull();
+  });
+
+  it('una correcta autoaceptada cuya clave cambió después pasa a revisión de lectura, nunca a 0 sin verificar', async () => {
+    const { memory, service } = setup();
+    const item = memory
+      .rows<{ id: string; content: unknown }>(items)
+      .find((row) => row.id === NUMBER_ITEM);
+    if (item) item.content = { prompt: '¿Cuántos lados?', acceptedAnswers: ['8'] };
+    const response = seedResponse(memory, { id: RESPONSE_A });
+    const decision = seedDecision(memory, {
+      value: answer('7', INTEGER),
+      scoringOutcome: 'correct',
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.consolidateDecisions(ORG_ID, [decision.id]);
+
+    const reviewable = currentDecisionOf(memory);
+    expect(reviewable).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['scoring_changed'],
+      reviewMode: 'reading',
+      canonical: decision.canonical,
+      usedReadingIds: decision.usedReadingIds,
+    });
+    expect(decision.supersededById).toBe(reviewable.id);
+    expect(report.scored).toEqual([]);
+    expect(report.pending).toEqual([reviewable.id]);
+    expect(response).toMatchObject({ finalScore: null, isCorrect: null });
+  });
+
+  it('una autoaceptada cuyo resultado no cambió con la clave vigente se consolida sin revisión', async () => {
+    const { memory, service } = setup();
+    const response = seedResponse(memory, { id: RESPONSE_A });
+    const decision = seedDecision(memory, {
+      value: answer('9', INTEGER),
+      scoringOutcome: 'incorrect',
+      responseId: RESPONSE_A,
+    });
+
+    const report = await service.consolidateDecisions(ORG_ID, [decision.id]);
+
+    expect(report.scored).toEqual([decision.id]);
+    expect(response).toMatchObject({ finalScore: '0.00', isCorrect: false, scoredBy: 'ai' });
   });
 
   it('un short_text autoaceptado que la clave no decide pasa a revisión y la respuesta queda pendiente, nunca en 0', async () => {

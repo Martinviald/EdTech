@@ -22,6 +22,8 @@ export const PROMPT_REF_PATTERN = /^[a-z0-9.-]+@\d+$/;
 // `family` agrupa modelos que se equivocan parecido (mismo proveedor y línea).
 // La política de consenso puede exigir familias distintas (dos Gemini coinciden
 // mucho pero se equivocan igual: medido en el experimento del 2026-10-11).
+// `minConfidence` (opcional) reemplaza al de la política solo para este lector:
+// cada modelo declara su confianza con otra calibración (decisión E1-1).
 export const readerSpecSchema = z
   .object({
     key: z.string().min(1),
@@ -31,6 +33,7 @@ export const readerSpecSchema = z
     model: z.string().min(1),
     promptRef: z.string().regex(PROMPT_REF_PATTERN),
     hints: z.enum(READER_HINTS),
+    minConfidence: z.number().min(0).max(1).optional(),
     params: z
       .object({
         maxOutputTokens: z.number().int().positive(),
@@ -43,7 +46,7 @@ export const readerSpecSchema = z
   .strict();
 export type ReaderSpec = z.infer<typeof readerSpecSchema>;
 
-export const PROMPT_PURPOSES = ['transcription', 'rubric_grading'] as const;
+export const PROMPT_PURPOSES = ['transcription', 'rubric_grading', 'verification'] as const;
 export type PromptPurpose = (typeof PROMPT_PURPOSES)[number];
 
 // Lista cerrada. NUNCA hay variables con datos del alumno, y un prompt de
@@ -59,13 +62,30 @@ export const PROMPT_VARIABLES = [
   'partLabels',
   'rubricLevels',
   'transcription',
+  'agreedReading',
+  'acceptedAnswers',
 ] as const;
 export type PromptVariable = (typeof PROMPT_VARIABLES)[number];
 
 export const TRANSCRIPTION_FORBIDDEN_VARIABLES: readonly PromptVariable[] = [
   'rubricLevels',
   'transcription',
+  'agreedReading',
+  'acceptedAnswers',
 ];
+
+// La clave (`acceptedAnswers`) y la lectura acordada solo pueden ir a un prompt
+// de verificación: el verificador decide si mandar a revisión, nunca transcribe.
+export const VERIFICATION_ONLY_VARIABLES: readonly PromptVariable[] = [
+  'agreedReading',
+  'acceptedAnswers',
+];
+
+export function promptVariableAllowed(purpose: PromptPurpose, variable: PromptVariable): boolean {
+  if (VERIFICATION_ONLY_VARIABLES.includes(variable)) return purpose === 'verification';
+  if (purpose === 'transcription') return !TRANSCRIPTION_FORBIDDEN_VARIABLES.includes(variable);
+  return true;
+}
 
 export const PROMPT_STATUSES = ['draft', 'published', 'retired'] as const;
 
@@ -81,7 +101,18 @@ export const promptVersionSchema = z
     user: z.string().min(1),
     status: z.enum(PROMPT_STATUSES),
   })
-  .strict();
+  .strict()
+  .superRefine((prompt, ctx) => {
+    for (const variable of prompt.variables) {
+      if (!promptVariableAllowed(prompt.purpose, variable)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['variables'],
+          message: `Un prompt de ${prompt.purpose} no puede declarar ${variable}`,
+        });
+      }
+    }
+  });
 export type PromptVersion = z.infer<typeof promptVersionSchema>;
 
 export const promptVariablesSchema = z.record(z.enum(PROMPT_VARIABLES), z.string());

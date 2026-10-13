@@ -17,6 +17,7 @@ import {
   SHEET_QR_IDENTITY_REGION,
   type SheetIdentityMode,
 } from '@soe/types';
+import { numericBoxesFor, responseGeometryOf } from '@soe/answer-reading';
 import {
   buildPrintedLabelIndex,
   planBubbleChoice,
@@ -140,8 +141,14 @@ const RESPONSE_FIELD_LEFT = 0.08;
 const RESPONSE_FIELD_RIGHT = 0.95;
 const COORDINATE_EPSILON = 1e-9;
 
-export const RESPONSE_CROP_PROFILE_SHORT = 'short-answer@2';
+export const RESPONSE_CROP_PROFILE_SHORT = 'short-answer@3';
 export const RESPONSE_CROP_PROFILE_FREE_TEXT = 'free-text@2';
+export const RESPONSE_LABEL_FONT_SIZE_PT = 8;
+export const RESPONSE_LABEL_GAP_PT = 6;
+export const RESPONSE_LABEL_BASELINE_OFFSET_PT = 17;
+export const RESPONSE_LABEL_CHAR_WIDTH_EM = 0.6;
+const RESPONSE_LABEL_ASCENT_EM = 0.75;
+const RESPONSE_LABEL_DESCENT_EM = 0.25;
 
 const VISION_FORMAT_KINDS: ReadonlySet<ResponseFormat['kind']> = new Set([
   'integer',
@@ -285,14 +292,14 @@ function numberBlock(
   format: Extract<VisionResponseFormat, { kind: 'integer' | 'decimal' }>,
   options: ResponseGeometryOptions,
 ): ResponseBlockMm {
-  const boxes: ResponseBoxMm[] = format.allowNegative ? [signBox()] : [];
-  let cursor = format.allowNegative ? RESPONSE_CHAR_BOX_MM + SIGN_BOX_GAP_MM : 0;
-  const digitCount = format.kind === 'decimal' ? Math.max(format.maxChars - 1, 2) : format.maxChars;
-  const fractionDigits =
-    format.kind === 'decimal'
-      ? Math.min(Math.max(options.fractionDigits ?? 2, 1), digitCount - 1)
-      : 0;
-  const integerDigits = digitCount - fractionDigits;
+  const {
+    signBox: hasSign,
+    integerDigits,
+    fractionDigits,
+  } = numericBoxesFor(format, options.fractionDigits);
+  const boxes: ResponseBoxMm[] = hasSign ? [signBox()] : [];
+  let cursor = hasSign ? RESPONSE_CHAR_BOX_MM + SIGN_BOX_GAP_MM : 0;
+  const digitCount = integerDigits + fractionDigits;
 
   for (let index = 0; index < digitCount; index++) {
     if (format.kind === 'decimal' && index === integerDigits) {
@@ -577,18 +584,6 @@ export function responseBlockMm(
   }
 }
 
-function fractionDigitsOf(item: DerivableItem): number | undefined {
-  const accepted = (item.content as { acceptedAnswers?: unknown }).acceptedAnswers;
-  if (!Array.isArray(accepted)) return undefined;
-  let digits: number | undefined;
-  for (const answer of accepted) {
-    if (typeof answer !== 'string') continue;
-    const match = /[.,](\d+)\s*$/.exec(answer.trim());
-    if (match) digits = Math.max(digits ?? 0, match[1]!.length);
-  }
-  return digits;
-}
-
 export function itemUnitOf(content: unknown): string | null {
   const unit = (content as { unit?: unknown } | null)?.unit;
   return typeof unit === 'string' && unit.trim().length > 0 ? unit.trim() : null;
@@ -603,6 +598,29 @@ function frameRegion(left: number, top: number, right: number, bottom: number): 
     topLeft: { x: roundCoordinate(left), y: roundCoordinate(top) },
     bottomRight: { x: roundCoordinate(right), y: roundCoordinate(bottom) },
   };
+}
+
+export function responseLabelRegion(
+  regionLeft: number,
+  regionTop: number,
+  printedNumber: string,
+  frame: FrameSizeMm,
+): OmrRegion {
+  const toX = (pt: number): number => (pt * MM_PER_PT) / frame.width;
+  const toY = (pt: number): number => (pt * MM_PER_PT) / frame.height;
+  const right = regionLeft - toX(RESPONSE_LABEL_GAP_PT);
+  const width = toX(
+    RESPONSE_LABEL_CHAR_WIDTH_EM * RESPONSE_LABEL_FONT_SIZE_PT * printedNumber.length,
+  );
+  const top =
+    regionTop +
+    toY(RESPONSE_LABEL_BASELINE_OFFSET_PT - RESPONSE_LABEL_ASCENT_EM * RESPONSE_LABEL_FONT_SIZE_PT);
+  const bottom =
+    regionTop +
+    toY(
+      RESPONSE_LABEL_BASELINE_OFFSET_PT + RESPONSE_LABEL_DESCENT_EM * RESPONSE_LABEL_FONT_SIZE_PT,
+    );
+  return frameRegion(right - width, top, right, bottom);
 }
 
 function responseCursorStart(
@@ -710,6 +728,7 @@ function responseField(
       format,
       boxes,
       cropProfileId: cropProfileIdFor(format),
+      printedLabelRegion: responseLabelRegion(left, top, entry.label, frame),
     },
   };
 }
@@ -745,7 +764,7 @@ function placeFlowFields(
     const block = responseBlockMm(format, {
       availableWidthMm: contentWidthMm - 2 * RESPONSE_FIELD_PADDING_MM - unitSpaceMm,
       availableHeightMm,
-      fractionDigits: fractionDigitsOf(entry.item),
+      fractionDigits: responseGeometryOf(entry.item.content).fractionDigits ?? undefined,
     });
     const height = (block.height + 2 * RESPONSE_FIELD_PADDING_MM) / frame.height;
     const width = (block.width + 2 * RESPONSE_FIELD_PADDING_MM + unitSpaceMm) / frame.width;

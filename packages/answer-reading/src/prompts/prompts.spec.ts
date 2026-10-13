@@ -4,6 +4,7 @@ import {
   type ReaderSpec,
   type ResponseFormat,
 } from '@soe/types';
+import { fakeOutput } from '../fake/fake-transcriber';
 import lock from './prompts.lock.json';
 import {
   PROMPT_LOCK_SAMPLE_FORMATS,
@@ -209,6 +210,60 @@ describe('renderPrompt / renderTranscriptionPrompt', () => {
         kind: 'free_text',
         lines: 3,
       }),
+    ).toThrow(/no sirve/);
+  });
+});
+
+describe('lectura por casilla (transcribe.boxes@1)', () => {
+  const DECIMAL: ResponseFormat = { kind: 'decimal', maxChars: 6, allowNegative: false };
+
+  it('describe las casillas con la geometría y pide una parte por casilla', () => {
+    const { prompt, outputSchema, outputZodSchema } = renderTranscriptionPrompt(
+      reader('transcribe.boxes@1', 'format'),
+      DECIMAL,
+      { gradeName: '6° Básico', geometry: { fractionDigits: 1 } },
+    );
+    expect(prompt.system).toMatch(/4 casillas, después una coma IMPRESA y después 1 casillas/);
+    expect(prompt.system).toMatch(/punto, una mancha o una marca suelta/);
+    expect(prompt.system).toMatch(/número de la pregunta/);
+    expect(prompt.outputSchemaId).toBe('transcription-cells.decimal.i4f1@1');
+    expect(outputSchema.schema.properties.parts).toMatchObject({
+      required: ['i1', 'i2', 'i3', 'i4', 'f1'],
+    });
+    const cells = { i1: '', i2: '', i3: '2', i4: '7', f1: '5' };
+    expect(outputZodSchema.safeParse({ ...fakeOutput('27,5'), parts: cells }).success).toBe(true);
+    expect(outputZodSchema.safeParse(fakeOutput('27,5')).success).toBe(false);
+  });
+
+  it('sin geometría usa la de la hoja por defecto; con hints none no agrega la guía', () => {
+    const fallback = renderTranscriptionPrompt(reader('transcribe.boxes@1', 'format'), DECIMAL);
+    expect(fallback.prompt.outputSchemaId).toBe('transcription-cells.decimal.i3f2@1');
+    const bare = renderTranscriptionPrompt(reader('transcribe.boxes@1', 'none'), DECIMAL, {
+      geometry: { fractionDigits: 2 },
+    });
+    expect(bare.prompt.system).not.toMatch(/coma IMPRESA y después/);
+    expect(bare.prompt.outputSchemaId).toBe('transcription-cells.decimal.i3f2@1');
+  });
+
+  it('la geometría no cambia lo que se envía con los prompts que no leen por casilla', () => {
+    const plain = renderTranscriptionPrompt(reader('transcribe.short-answer@2', 'none'), DECIMAL);
+    const withGeometry = renderTranscriptionPrompt(
+      reader('transcribe.short-answer@2', 'none'),
+      DECIMAL,
+      { geometry: { fractionDigits: 1 } },
+    );
+    expect(withGeometry.prompt).toEqual(plain.prompt);
+    expect(withGeometry.outputSchema).toEqual(plain.outputSchema);
+  });
+
+  it('atiende enteros, decimales y secuencias, y no fracciones', () => {
+    expect(getPrompt('transcribe.boxes@1')?.formatKinds).toEqual([
+      'integer',
+      'decimal',
+      'sequence',
+    ]);
+    expect(() =>
+      renderTranscriptionPrompt(reader('transcribe.boxes@1', 'format'), FRACTION),
     ).toThrow(/no sirve/);
   });
 });

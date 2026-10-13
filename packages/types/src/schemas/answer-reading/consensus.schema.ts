@@ -3,6 +3,11 @@ import { normalizedAnswerSchema } from './normalized-answer.schema';
 import { readerSpecSchema } from './reader.schema';
 
 // Política de consenso y resultado de la decisión (diseño §8).
+// `incorrectVerifier` (opcional, etapa 1 T4): lector con un prompt de propósito
+// `verification` que revisa cada incorrecta que se iba a autoaceptar y puede
+// mandarla a revisión (`verifier_flagged` si duda, `verifier_failed` si no pudo
+// revisar). Ambos se revisan como lectura, sin clave a la vista ni corrección
+// preseleccionada. Nunca acepta ni cambia una nota.
 // Regla central: indecidible ≠ incorrecto. Lo que no se puede decidir con certeza
 // va a revisión humana y queda pendiente (final_score null), NUNCA 0.
 
@@ -23,6 +28,7 @@ export const consensusPolicySchema = z
     blankByInkBelow: z.number().min(0).max(1).nullable(),
     onDisagreement: z.enum(ON_DISAGREEMENT),
     tiebreakReader: readerSpecSchema.nullable(),
+    incorrectVerifier: readerSpecSchema.optional(),
     autoAccept: z.boolean(),
     autoAcceptOutcomes: z.array(z.enum(AUTO_ACCEPT_OUTCOMES)),
     auditSampleRate: z.number().min(0).max(1),
@@ -78,6 +84,9 @@ export const REVIEW_REASONS = [
   'budget_exceeded',
   'run_limit_exceeded',
   'crop_unavailable',
+  'verifier_flagged',
+  'verifier_failed',
+  'scoring_changed',
 ] as const;
 export type ReviewReason = (typeof REVIEW_REASONS)[number];
 export const reviewReasonSchema = z.enum(REVIEW_REASONS);
@@ -106,11 +115,19 @@ export const REVIEW_MODE_BY_REASON: Record<ReviewReason, ReviewMode> = {
   crop_unavailable: 'reading',
   format_mismatch: 'reading',
   audit_sample: 'reading',
+  verifier_flagged: 'reading',
+  verifier_failed: 'reading',
+  scoring_changed: 'reading',
   undecidable: 'grading',
   unparsed_format: 'grading',
   policy_requires_review: 'grading',
   rubric_item: 'grading',
 };
+
+export const VERIFIER_REVIEW_REASONS: readonly ReviewReason[] = [
+  'verifier_flagged',
+  'verifier_failed',
+];
 
 // Si hay motivos de los dos modos, primero se resuelve la lectura.
 export function reviewModeFor(reasons: readonly ReviewReason[]): ReviewMode {

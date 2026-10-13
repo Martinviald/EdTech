@@ -706,6 +706,30 @@ describe('computeDrawPlan — casillas por formato de respuesta', () => {
   const plan = computeDrawPlan(spec, 0, { unitsByItemId: units });
   const byNumber = new Map(plan.responseFields.map((field) => [field.printedNumber, field]));
 
+  it('el número de la pregunta se imprime dentro del printedLabelRegion que publica el layout', async () => {
+    const font = await (await PDFDocument.create()).embedFont(StandardFonts.HelveticaBold);
+    for (const drawn of plan.responseFields) {
+      const field = spec.fields.find((f) => f.printedNumber === drawn.printedNumber)!;
+      const region = field.region!;
+      const label = field.response!.printedLabelRegion!;
+      const ptPerX = drawn.rect.width / (region.bottomRight.x - region.topLeft.x);
+      const ptPerY = drawn.rect.height / (region.bottomRight.y - region.topLeft.y);
+      const top = drawn.rect.y + drawn.rect.height;
+      const left = drawn.rect.x + (label.topLeft.x - region.topLeft.x) * ptPerX;
+      const right = drawn.rect.x + (label.bottomRight.x - region.topLeft.x) * ptPerX;
+      const upper = top - (label.topLeft.y - region.topLeft.y) * ptPerY;
+      const lower = top - (label.bottomRight.y - region.topLeft.y) * ptPerY;
+      const size = 8;
+      const width = font.widthOfTextAtSize(drawn.label.text, size);
+      const ascent = font.heightAtSize(size, { descender: false });
+      expect(drawn.label.x).toBeGreaterThanOrEqual(left - 0.01);
+      expect(drawn.label.x + width).toBeLessThanOrEqual(right + 0.01);
+      expect(drawn.label.y + ascent).toBeLessThanOrEqual(upper + 0.01);
+      expect(drawn.label.y).toBeGreaterThanOrEqual(lower - 0.01);
+      expect(right).toBeLessThan(drawn.rect.x);
+    }
+  });
+
   it('un crop_region con response se dibuja por casillas y no como rectángulo único', () => {
     expect(plan.cropRegions).toEqual([]);
     expect(plan.responseFields.map((f) => f.printedNumber)).toEqual(['2', '3', '4', '5', '6']);

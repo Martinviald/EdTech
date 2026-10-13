@@ -38,7 +38,8 @@ describe('estimateLlmCostUsd', () => {
     ['claude-opus-4-6', '30.000000'],
     ['gemini-3.1-flash-lite', '1.750000'],
     ['gemini-3.5-flash-lite', '2.800000'],
-    ['gemini-3.8-flash', '4.500000'],
+    ['gemini-3.8-flash', '9.000000'],
+    ['gemini-3.6-flash', '9.000000'],
     ['gemini-2.5-flash-lite', '0.500000'],
   ])('aplica la tarifa vigente de %s (1M de entrada + 1M de salida = %s USD)', (model, cost) => {
     expect(estimateLlmCostUsd(model, { inputTokens: 1_000_000, outputTokens: 1_000_000 })).toBe(

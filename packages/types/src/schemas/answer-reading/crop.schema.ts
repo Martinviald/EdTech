@@ -14,6 +14,14 @@ import { responseFormatSchema } from './response-format.schema';
 // - `neighborGapFraction` (null = sin tope): en cada lado, el margen no pasa de esa
 //   fracción de la distancia al campo vecino más cercano de ese lado (ver
 //   `cropBleedBox`, la referencia que replica services/omr/app/crop.py).
+// - `printedLabelGapFraction` (v3; null = los rótulos no limitan): igual que
+//   `neighborGapFraction`, pero contra los rótulos impresos fuera de la región
+//   (`response.printedLabelRegion`, el número de la pregunta). Un lector leía el
+//   "4" de la pregunta como parte de la respuesta ("4 3/4", Celeste P4). Lo
+//   impreso DENTRO de la región (coma, barra, paréntesis, signos, rótulos de
+//   casilla) no se toca. Un layout sin `printedLabelRegion` recorta como v2.
+//   No hay `free-text@3`: en las fotos reales el desarrollo empieza a escribirse
+//   en el margen izquierdo y el tope cortaba la respuesta ("47" → "17").
 export const CROP_BLEED_BASES = ['longer_side', 'shorter_side'] as const;
 export type CropBleedBasis = (typeof CROP_BLEED_BASES)[number];
 
@@ -24,6 +32,7 @@ export const cropProfileSchema = z
     bleedRatio: z.number().min(0).max(0.5),
     bleedBasis: z.enum(CROP_BLEED_BASES),
     neighborGapFraction: z.number().min(0).max(1).nullable(),
+    printedLabelGapFraction: z.number().min(0).max(1).nullable(),
     targetWidthPx: z.number().int().min(200).max(2000),
     jpegQuality: z.number().int().min(50).max(100),
     contrast: z.enum(['none', 'clahe']),
@@ -38,6 +47,7 @@ export const CROP_PROFILES = {
     bleedRatio: 0.15,
     bleedBasis: 'longer_side',
     neighborGapFraction: null,
+    printedLabelGapFraction: null,
     targetWidthPx: 1000,
     jpegQuality: 85,
     contrast: 'none',
@@ -48,6 +58,7 @@ export const CROP_PROFILES = {
     bleedRatio: 0.05,
     bleedBasis: 'longer_side',
     neighborGapFraction: null,
+    printedLabelGapFraction: null,
     targetWidthPx: 1400,
     jpegQuality: 85,
     contrast: 'none',
@@ -58,6 +69,7 @@ export const CROP_PROFILES = {
     bleedRatio: 0.3,
     bleedBasis: 'shorter_side',
     neighborGapFraction: 0.5,
+    printedLabelGapFraction: null,
     targetWidthPx: 1000,
     jpegQuality: 85,
     contrast: 'none',
@@ -68,7 +80,19 @@ export const CROP_PROFILES = {
     bleedRatio: 0.1,
     bleedBasis: 'shorter_side',
     neighborGapFraction: 0.5,
+    printedLabelGapFraction: null,
     targetWidthPx: 1400,
+    jpegQuality: 85,
+    contrast: 'none',
+  },
+  'short-answer@3': {
+    id: 'short-answer',
+    version: 3,
+    bleedRatio: 0.3,
+    bleedBasis: 'shorter_side',
+    neighborGapFraction: 0.5,
+    printedLabelGapFraction: 0.5,
+    targetWidthPx: 1000,
     jpegQuality: 85,
     contrast: 'none',
   },
@@ -98,55 +122,57 @@ function sideCap(gaps: readonly number[], fraction: number | null, pad: number):
   return Number.isFinite(nearest) ? Math.min(pad, fraction * nearest) : pad;
 }
 
+interface SideGaps {
+  readonly left: number[];
+  readonly right: number[];
+  readonly top: number[];
+  readonly bottom: number[];
+}
+
+function sideGaps(region: CropBox, obstacles: readonly CropBox[]): SideGaps {
+  const inRow = obstacles.filter((n) => overlaps(n.y0, n.y1, region.y0, region.y1));
+  const inColumn = obstacles.filter((n) => overlaps(n.x0, n.x1, region.x0, region.x1));
+  return {
+    left: inRow.map((n) => region.x0 - n.x1),
+    right: inRow.map((n) => n.x0 - region.x1),
+    top: inColumn.map((n) => region.y0 - n.y1),
+    bottom: inColumn.map((n) => n.y0 - region.y1),
+  };
+}
+
 /**
  * Caja recortada (en las unidades de `frame`, sin acotar a la página) de una región
  * con su perfil. `neighbors` son las huellas de los OTROS campos de la misma página
- * (su `region`, o la caja de sus burbujas). Un vecino limita el lado hacia el que
- * está solo si se superpone con la región en el eje perpendicular; un vecino que
- * se superpone con la región misma no limita nada.
+ * (su `region`, o la caja de sus burbujas); `printedLabels`, las cajas de los rótulos
+ * impresos de la página (`response.printedLabelRegion`). Un obstáculo limita el lado
+ * hacia el que está solo si se superpone con la región en el eje perpendicular; uno
+ * que se superpone con la región misma no limita nada. Los rótulos solo limitan con
+ * `printedLabelGapFraction`.
  */
 export function cropBleedBox(
   region: CropBox,
   profile: CropProfile,
   neighbors: readonly CropBox[],
+  printedLabels: readonly CropBox[] = [],
 ): CropBox {
   const width = region.x1 - region.x0;
   const height = region.y1 - region.y0;
-  const side =
+  const basis =
     profile.bleedBasis === 'longer_side' ? Math.max(width, height) : Math.min(width, height);
-  const pad = profile.bleedRatio * side;
-  const fraction = profile.neighborGapFraction;
-  const inRow = neighbors.filter((n) => overlaps(n.y0, n.y1, region.y0, region.y1));
-  const inColumn = neighbors.filter((n) => overlaps(n.x0, n.x1, region.x0, region.x1));
+  const pad = profile.bleedRatio * basis;
+  const fields = sideGaps(region, neighbors);
+  const labels = sideGaps(region, printedLabels);
+  const cap = (edge: keyof SideGaps): number =>
+    sideCap(
+      labels[edge],
+      profile.printedLabelGapFraction,
+      sideCap(fields[edge], profile.neighborGapFraction, pad),
+    );
   return {
-    x0:
-      region.x0 -
-      sideCap(
-        inRow.map((n) => region.x0 - n.x1),
-        fraction,
-        pad,
-      ),
-    x1:
-      region.x1 +
-      sideCap(
-        inRow.map((n) => n.x0 - region.x1),
-        fraction,
-        pad,
-      ),
-    y0:
-      region.y0 -
-      sideCap(
-        inColumn.map((n) => region.y0 - n.y1),
-        fraction,
-        pad,
-      ),
-    y1:
-      region.y1 +
-      sideCap(
-        inColumn.map((n) => n.y0 - region.y1),
-        fraction,
-        pad,
-      ),
+    x0: region.x0 - cap('left'),
+    x1: region.x1 + cap('right'),
+    y0: region.y0 - cap('top'),
+    y1: region.y1 + cap('bottom'),
   };
 }
 
@@ -194,6 +220,7 @@ export const omrFieldResponseSchema = z
     format: responseFormatSchema,
     boxes: z.array(omrResponseBoxSchema),
     cropProfileId: z.string().min(1),
+    printedLabelRegion: omrRegionSchema.optional(),
   })
   .strict();
 export type OmrFieldResponse = z.infer<typeof omrFieldResponseSchema>;

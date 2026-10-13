@@ -13,6 +13,7 @@ import type {
 import type { ReasoningEffort } from 'openai/resources/shared';
 import { reportServerError } from '../../common/observability/report-error';
 import { LLM_PROVIDER_DEFAULTS } from '../llm.constants';
+import { runWithinDeadline, type LlmDeadline } from './llm-deadline.helpers';
 import type {
   LlmAgentContent,
   LlmAgentEvent,
@@ -36,6 +37,7 @@ type OpenAiImageDetail = 'low' | 'high' | 'auto';
 
 interface OpenAiRequestOptions {
   timeout?: number;
+  signal?: AbortSignal;
 }
 
 interface OpenAiResponsesApi {
@@ -69,6 +71,7 @@ const LEGACY_REASONING_MODEL = /^gpt-5(-|$)/;
 const O_SERIES_MODEL = /^o\d/;
 const NON_REASONING_MODEL = /^(gpt-4|gpt-3\.5|chatgpt-)/;
 const REASONING_ERROR_MESSAGE = /reasoning|effort/i;
+const REASONING_PARAM = /^reasoning(\.|$)/;
 const BAD_REQUEST_STATUS = 400;
 
 @Injectable()
@@ -131,9 +134,9 @@ export class OpenAiProvider implements LlmProvider {
       },
     };
 
-    const response = await this.createWithReasoning(client, body, request, {
-      timeout: request.options.timeoutMs,
-    });
+    const response = await runWithinDeadline(request.options.timeoutMs, (deadline) =>
+      this.createWithReasoning(client, body, request, deadline),
+    );
 
     const output = this.extractOutput(response);
     const finishReason = this.toStructuredFinishReason(response, output);
@@ -141,6 +144,7 @@ export class OpenAiProvider implements LlmProvider {
       data: finishReason === 'refusal' ? null : this.parseStructuredText(output.text, request),
       rawText: output.text.length > 0 ? output.text : output.refusal,
       model: request.options.model,
+      providerModel: response.model || request.options.model,
       finishReason,
       usage: this.toStructuredUsage(response.usage),
       providerRequestId: response.id ?? null,
@@ -259,11 +263,14 @@ export class OpenAiProvider implements LlmProvider {
     client: OpenAiClient,
     body: ResponseCreateParamsNonStreaming,
     request: LlmStructuredRequest,
-    options: OpenAiRequestOptions,
+    deadline: LlmDeadline,
   ): Promise<OpenAiResponse> {
     const { model, reasoning } = request.options;
     if (reasoning !== 'off') {
-      return client.responses.create({ ...body, reasoning: { effort: reasoning } }, options);
+      return client.responses.create(
+        { ...body, reasoning: { effort: reasoning } },
+        this.requestOptions(deadline),
+      );
     }
 
     let step = this.offEffortStepByModel.get(model) ?? this.initialOffEffortStep(model);
@@ -272,7 +279,7 @@ export class OpenAiProvider implements LlmProvider {
       try {
         const response = await client.responses.create(
           effort === null ? body : { ...body, reasoning: { effort } },
-          options,
+          this.requestOptions(deadline),
         );
         this.offEffortStepByModel.set(model, step);
         return response;
@@ -286,6 +293,10 @@ export class OpenAiProvider implements LlmProvider {
     }
   }
 
+  private requestOptions(deadline: LlmDeadline): OpenAiRequestOptions {
+    return { timeout: deadline.remainingMs(), signal: deadline.signal };
+  }
+
   private initialOffEffortStep(model: string): number {
     if (NON_REASONING_MODEL.test(model)) return OFF_EFFORT_LADDER.indexOf(null);
     if (O_SERIES_MODEL.test(model)) return OFF_EFFORT_LADDER.indexOf('low');
@@ -294,12 +305,11 @@ export class OpenAiProvider implements LlmProvider {
   }
 
   private isReasoningRejection(error: unknown): boolean {
-    return (
-      error instanceof Error &&
-      'status' in error &&
-      (error as { status: unknown }).status === BAD_REQUEST_STATUS &&
-      REASONING_ERROR_MESSAGE.test(error.message)
-    );
+    if (!(error instanceof Error)) return false;
+    const { status, param } = error as Error & { status?: unknown; param?: unknown };
+    if (status !== BAD_REQUEST_STATUS) return false;
+    if (typeof param === 'string') return REASONING_PARAM.test(param);
+    return REASONING_ERROR_MESSAGE.test(error.message);
   }
 
   private toImageParts(images: LlmImagePart[], detail: OpenAiImageDetail): ResponseInputContent[] {

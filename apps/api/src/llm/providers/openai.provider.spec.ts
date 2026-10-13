@@ -16,6 +16,7 @@ const OpenAiConstructor = OpenAI as unknown as jest.Mock;
 
 interface FakeResponse {
   id?: string;
+  model?: string;
   status?: string;
   incomplete_details?: { reason?: string } | null;
   output?: Array<{
@@ -30,7 +31,7 @@ interface FakeResponse {
   };
 }
 
-type CreateArgs = [Record<string, unknown>, { timeout?: number }?];
+type CreateArgs = [Record<string, unknown>, { timeout?: number; signal?: AbortSignal }?];
 type CreateMock = jest.Mock<Promise<unknown>, CreateArgs>;
 
 function makeCreate(impl: (...args: CreateArgs) => Promise<unknown>): CreateMock {
@@ -119,6 +120,17 @@ const STRUCTURED_RESPONSE: FakeResponse = {
 
 function badRequest(message: string): Error {
   return Object.assign(new Error(message), { status: 400 });
+}
+
+function unsupportedParam(param: string, value: string, model: string): Error {
+  const message = `Unsupported value: '${value}' is not supported with the '${model}' model. Supported values are: 'low', 'medium', 'high', 'xhigh', and 'max'.`;
+  return Object.assign(new Error(`400 ${message}`), {
+    status: 400,
+    code: 'unsupported_value',
+    param,
+    type: 'invalid_request_error',
+    error: { message, type: 'invalid_request_error', param, code: 'unsupported_value' },
+  });
 }
 
 describe('OpenAiProvider', () => {
@@ -240,7 +252,12 @@ describe('OpenAiProvider.completeStructured', () => {
       reasoning: { effort: 'none' },
     });
     expect(body).not.toHaveProperty('temperature');
-    expect(requestOptions).toEqual({ timeout: 15_000 });
+    expect(requestOptions).toEqual({
+      timeout: expect.any(Number),
+      signal: expect.any(AbortSignal),
+    });
+    expect(requestOptions?.timeout).toBeGreaterThan(14_000);
+    expect(requestOptions?.timeout).toBeLessThanOrEqual(15_000);
   });
 
   it('vuelve estricto un objeto anidado y quita $schema', async () => {
@@ -325,6 +342,35 @@ describe('OpenAiProvider.completeStructured', () => {
     expect(efforts).toEqual(['none', 'minimal', 'minimal']);
   });
 
+  it('reconoce el rechazo real de la API por el parámetro reasoning.effort aunque el mensaje no lo nombre', async () => {
+    const create = makeCreate((body) => {
+      const effort = (body.reasoning as { effort?: string } | undefined)?.effort;
+      return effort === 'none' || effort === 'minimal'
+        ? Promise.reject(unsupportedParam('reasoning.effort', effort, 'gpt-6.1-sol'))
+        : Promise.resolve(STRUCTURED_RESPONSE);
+    });
+    const provider = makeProvider(create);
+
+    await provider.completeStructured(makeStructuredRequest({ model: 'gpt-6.1-sol' }));
+    await provider.completeStructured(makeStructuredRequest({ model: 'gpt-6.1-sol' }));
+
+    const efforts = create.mock.calls.map(
+      ([body]) => (body.reasoning as { effort?: string } | undefined)?.effort,
+    );
+    expect(efforts).toEqual(['none', 'minimal', 'low', 'low']);
+  });
+
+  it('no reintenta si el error estructurado señala otro parámetro aunque el mensaje hable de razonamiento', async () => {
+    const create = makeCreate(() =>
+      Promise.reject(unsupportedParam('text.format', 'reasoning_schema', 'gpt-6.1-sol')),
+    );
+
+    await expect(
+      makeProvider(create).completeStructured(makeStructuredRequest({ model: 'gpt-6.1-sol' })),
+    ).rejects.toThrow('reasoning_schema');
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
   it('no reintenta ante un error que no es del razonamiento', async () => {
     const create = makeCreate(() => Promise.reject(badRequest('Invalid schema')));
 
@@ -343,6 +389,7 @@ describe('OpenAiProvider.completeStructured', () => {
       data: { literal: '2,5', confidence: 0.93 },
       rawText: '{"literal":"2,5","confidence":0.93,"note":null}',
       model: 'gpt-6-luna',
+      providerModel: 'gpt-6-luna',
       finishReason: 'stop',
       usage: {
         inputTokens: 1200,
@@ -353,6 +400,15 @@ describe('OpenAiProvider.completeStructured', () => {
       },
       providerRequestId: 'resp_123',
     });
+  });
+
+  it('devuelve como providerModel el modelo que trae la respuesta', async () => {
+    const create = respondWith({ ...STRUCTURED_RESPONSE, model: 'gpt-6-luna-2026-09-01' });
+
+    const result = await makeProvider(create).completeStructured(makeStructuredRequest());
+
+    expect(result.model).toBe('gpt-6-luna');
+    expect(result.providerModel).toBe('gpt-6-luna-2026-09-01');
   });
 
   it.each([
@@ -399,6 +455,82 @@ describe('OpenAiProvider.completeStructured', () => {
     expect(result.finishReason).toBe('max_tokens');
     expect(result.usage).toBeNull();
     expect(result.providerRequestId).toBeNull();
+  });
+});
+
+describe('OpenAiProvider.completeStructured con plazo total', () => {
+  const TIMEOUT_MS = 80;
+  const MARGIN_MS = 150;
+
+  function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function elapsedFailure(
+    run: () => Promise<unknown>,
+  ): Promise<{ error: unknown; ms: number }> {
+    const startedAt = Date.now();
+    const error = await run().then(
+      () => null,
+      (failure: unknown) => failure,
+    );
+    return { error, ms: Date.now() - startedAt };
+  }
+
+  it('una llamada que nunca responde termina en timeout dentro del plazo', async () => {
+    const create = makeCreate(() => new Promise<never>(() => undefined));
+    const provider = makeProvider(create);
+
+    const { error, ms } = await elapsedFailure(() =>
+      provider.completeStructured(makeStructuredRequest({ timeoutMs: TIMEOUT_MS })),
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(ms).toBeLessThan(TIMEOUT_MS + MARGIN_MS);
+    expect(create.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+  });
+
+  it('un cliente que reintenta sin respetar el timeout por intento igual corta en el plazo total', async () => {
+    const create = makeCreate(async () => {
+      for (let attempt = 0; attempt < 3; attempt += 1) await sleep(TIMEOUT_MS);
+      return STRUCTURED_RESPONSE;
+    });
+    const provider = makeProvider(create);
+
+    const { error, ms } = await elapsedFailure(() =>
+      provider.completeStructured(makeStructuredRequest({ timeoutMs: TIMEOUT_MS })),
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(ms).toBeLessThan(TIMEOUT_MS + MARGIN_MS);
+  });
+
+  it('la escalera de esfuerzo comparte el plazo: cada escalón recibe el tiempo que queda', async () => {
+    const create = makeCreate(async (body, options) => {
+      const effort = (body.reasoning as { effort?: string } | undefined)?.effort;
+      if (effort === 'low') {
+        return new Promise<never>((_, reject) =>
+          options?.signal?.addEventListener('abort', () =>
+            reject(Object.assign(new Error('Request was aborted.'), { name: 'APIUserAbortError' })),
+          ),
+        );
+      }
+      await sleep(30);
+      throw badRequest(`Unsupported value: '${effort}' for reasoning.effort`);
+    });
+    const provider = makeProvider(create);
+
+    const { error, ms } = await elapsedFailure(() =>
+      provider.completeStructured(makeStructuredRequest({ timeoutMs: TIMEOUT_MS })),
+    );
+
+    expect((error as Error).name).toBe('TimeoutError');
+    expect(ms).toBeLessThan(TIMEOUT_MS + MARGIN_MS);
+    const timeouts = create.mock.calls.map(([, options]) => options?.timeout ?? 0);
+    expect(timeouts).toHaveLength(3);
+    expect(timeouts[1]).toBeLessThan(timeouts[0]!);
+    expect(timeouts[2]).toBeLessThan(timeouts[1]!);
+    expect(timeouts[0]).toBeLessThanOrEqual(TIMEOUT_MS);
   });
 });
 

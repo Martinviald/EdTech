@@ -71,6 +71,7 @@ async function main(): Promise<void> {
       JSON.stringify(
         {
           model: target.model,
+          providerModel: result.providerModel,
           latencyMs: Date.now() - startedAt,
           finishReason: result.finishReason,
           data: result.data,

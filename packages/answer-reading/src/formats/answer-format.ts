@@ -36,6 +36,17 @@ export type PartsJsonSchema = {
   readonly additionalProperties: false;
 };
 
+export function partsSchema(entries: ReadonlyArray<readonly [string, string]>): PartsJsonSchema {
+  return {
+    type: 'object',
+    properties: Object.fromEntries(
+      entries.map(([id, description]) => [id, { type: 'string' as const, description }]),
+    ),
+    required: entries.map(([id]) => id),
+    additionalProperties: false,
+  };
+}
+
 /**
  * Definición de un formato de respuesta (diseño §5.4). Agregar un formato es una
  * entrada nueva en `ANSWER_FORMATS` más su test. La geometría de impresión

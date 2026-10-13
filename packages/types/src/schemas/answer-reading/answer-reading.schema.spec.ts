@@ -8,6 +8,8 @@ import {
   consensusPolicySchema,
   cropProfileSchema,
   orgAnswerReadingSettingsSchema,
+  promptVersionSchema,
+  readerSpecSchema,
   responseFormatSchema,
   reviewModeFor,
   reviewQueueQuerySchema,
@@ -23,6 +25,76 @@ describe('contratos de lectura por visión', () => {
     expect(DEFAULT_CONSENSUS_POLICY.autoAcceptOutcomes).toEqual(['correct', 'incorrect']);
     expect(DEFAULT_CONSENSUS_POLICY.requireDistinctFamilies).toBe(true);
     expect(DEFAULT_CONSENSUS_POLICY.auditSampleRate).toBeGreaterThan(0);
+  });
+
+  it('el umbral de confianza del lector es opcional y está entre 0 y 1 (E1-1)', () => {
+    const reader = {
+      key: 'flash',
+      transcriberId: 'gemini',
+      provider: 'gemini',
+      family: 'gemini',
+      model: 'gemini-3.5-flash',
+      promptRef: 'transcribe.short-answer@2',
+      hints: 'none',
+      params: { maxOutputTokens: 512, reasoning: 'off', timeoutMs: 30000 },
+    };
+    expect(readerSpecSchema.safeParse(reader).success).toBe(true);
+    expect(readerSpecSchema.parse({ ...reader, minConfidence: 0.97 }).minConfidence).toBe(0.97);
+    expect(readerSpecSchema.safeParse({ ...reader, minConfidence: 1.2 }).success).toBe(false);
+  });
+
+  it('el verificador de incorrectas es opcional en la política y sus motivos se revisan como lectura (T4)', () => {
+    const verifier = {
+      key: 'luna-verifier',
+      transcriberId: 'llm',
+      provider: 'openai',
+      family: 'openai-luna',
+      model: 'gpt-6-luna',
+      promptRef: 'verify.incorrect@1',
+      hints: 'format',
+      minConfidence: 0.9,
+      params: { maxOutputTokens: 1024, reasoning: 'low', timeoutMs: 30000 },
+    };
+    expect(consensusPolicySchema.parse(DEFAULT_CONSENSUS_POLICY).incorrectVerifier).toBeUndefined();
+    expect(
+      consensusPolicySchema.parse({ ...DEFAULT_CONSENSUS_POLICY, incorrectVerifier: verifier })
+        .incorrectVerifier?.key,
+    ).toBe('luna-verifier');
+    expect(REVIEW_MODE_BY_REASON.verifier_flagged).toBe('reading');
+    expect(REVIEW_MODE_BY_REASON.verifier_failed).toBe('reading');
+    expect(reviewModeFor(['verifier_flagged'])).toBe('reading');
+    expect(reviewModeFor(['verifier_failed'])).toBe('reading');
+    expect(reviewModeFor(['policy_requires_review', 'verifier_flagged'])).toBe('reading');
+    expect(REVIEW_MODE_BY_REASON.scoring_changed).toBe('reading');
+  });
+
+  it('la clave y la lectura acordada solo se declaran en prompts de verificación (T4)', () => {
+    const prompt = {
+      id: 'verify.incorrect',
+      version: 9,
+      purpose: 'verification',
+      formatKinds: ['integer'],
+      outputSchemaId: 'verification-output@1',
+      variables: ['agreedReading', 'acceptedAnswers'],
+      system: 'x',
+      user: 'y',
+      status: 'draft',
+    };
+    expect(promptVersionSchema.safeParse(prompt).success).toBe(true);
+    for (const purpose of ['transcription', 'rubric_grading']) {
+      for (const variables of [['acceptedAnswers'], ['agreedReading']]) {
+        expect(promptVersionSchema.safeParse({ ...prompt, purpose, variables }).success).toBe(
+          false,
+        );
+      }
+    }
+    expect(
+      promptVersionSchema.safeParse({
+        ...prompt,
+        purpose: 'transcription',
+        variables: ['transcription'],
+      }).success,
+    ).toBe(false);
   });
 
   it('el interruptor de imágenes a terceros viene apagado y el dataset es interno (D3, D7)', () => {

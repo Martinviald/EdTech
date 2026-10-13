@@ -24,9 +24,10 @@ export const ANSWER_READING_RUN_TRIGGERS = [
 export type AnswerReadingRunTrigger = (typeof ANSWER_READING_RUN_TRIGGERS)[number];
 export const answerReadingRunTriggerSchema = z.enum(ANSWER_READING_RUN_TRIGGERS);
 
-// `primary` entra al consenso, `shadow` solo se mide (§6.5) y `tiebreak` es el
-// lector de desempate de la política (§8.1).
-export const READING_MODES = ['primary', 'shadow', 'tiebreak'] as const;
+// `primary` entra al consenso, `shadow` solo se mide (§6.5), `tiebreak` es el
+// lector de desempate de la política (§8.1) y `verifier` el verificador de
+// incorrectas (etapa 1 T4): no transcribe y nunca entra al consenso.
+export const READING_MODES = ['primary', 'shadow', 'tiebreak', 'verifier'] as const;
 export type ReadingMode = (typeof READING_MODES)[number];
 export const readingModeSchema = z.enum(READING_MODES);
 

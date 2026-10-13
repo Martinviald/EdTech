@@ -21,6 +21,7 @@ from app.crop import (
     CROP_PROFILES,
     bleed_box_px,
     field_footprint_px,
+    printed_label_footprints_px,
 )
 from app.pipeline import process_page
 from tests import synthetic as syn
@@ -48,6 +49,7 @@ def test_v2_profiles_match_the_types_package(
         "bleedRatio": bleed,
         "bleedBasis": "shorter_side",
         "neighborGapFraction": 0.5,
+        "printedLabelGapFraction": None,
         "targetWidthPx": width,
         "jpegQuality": quality,
         "contrast": "none",
@@ -157,3 +159,93 @@ def test_wide_field_crop_with_v2_stops_before_the_next_question(
         assert height > 0.3 * width_px
     else:
         assert height < 0.15 * width_px
+
+
+LABEL_LEFT_OF_BOX = (70, 505, 89, 525)
+
+
+def test_v3_profile_adds_the_printed_label_cap() -> None:
+    assert "free-text@3" not in CROP_PROFILES
+    assert CROP_PROFILES["short-answer@3"].to_contract() == {
+        "id": "short-answer",
+        "version": 3,
+        "bleedRatio": 0.3,
+        "bleedBasis": "shorter_side",
+        "neighborGapFraction": 0.5,
+        "printedLabelGapFraction": 0.5,
+        "targetWidthPx": 1000,
+        "jpegQuality": 85,
+        "contrast": "none",
+    }
+
+
+def test_v3_left_margin_stops_before_the_printed_question_number() -> None:
+    box = (100, 500, 499, 539)
+
+    x0, y0, x1, y1 = bleed_box_px(
+        box, CROP_PROFILES["short-answer@3"], PAGE, printed_labels=[LABEL_LEFT_OF_BOX]
+    )
+
+    assert x0 == 100 - 5
+    assert x0 > LABEL_LEFT_OF_BOX[2]
+    assert (y0, x1, y1) == (488, 511, 551)
+
+
+@pytest.mark.parametrize("key", ["short-answer@1", "short-answer@2", "free-text@2"])
+def test_v1_and_v2_ignore_printed_labels(key: str) -> None:
+    box = (100, 500, 499, 539)
+    profile = CROP_PROFILES[key]
+
+    assert bleed_box_px(box, profile, PAGE, printed_labels=[LABEL_LEFT_OF_BOX]) == bleed_box_px(
+        box, profile, PAGE
+    )
+
+
+def test_v3_without_printed_labels_crops_like_v2() -> None:
+    box = (100, 500, 499, 539)
+
+    assert bleed_box_px(box, CROP_PROFILES["short-answer@3"], PAGE) == bleed_box_px(
+        box, CROP_PROFILES["short-answer@2"], PAGE
+    )
+
+
+def test_printed_label_footprints_come_from_the_response_of_each_field() -> None:
+    fields = [
+        {"fieldId": "f_001", "kind": "bubble_group", "bubbles": [], "region": None},
+        {
+            "fieldId": "f_002",
+            "kind": "crop_region",
+            "response": {
+                "cropProfileId": "short-answer@3",
+                "printedLabelRegion": {
+                    "topLeft": {"x": 0.25, "y": 0.5},
+                    "bottomRight": {"x": 0.0625, "y": 0.25},
+                },
+            },
+        },
+    ]
+
+    assert printed_label_footprints_px(fields, PAGE) == [(100, 500, 400, 1000)]
+
+
+def numbered_crop_height(profile_id: str, profile: dict) -> int:
+    spec = syn.make_layout_spec(fields_per_page=1)
+    field = syn.make_crop_region_field(
+        "f_numero", "2", top_left=(0.20, 0.40), bottom_right=(0.60, 0.50)
+    )
+    field["response"] = {
+        "cropProfileId": profile_id,
+        "printedLabelRegion": {
+            "topLeft": {"x": 0.17, "y": 0.42},
+            "bottomRight": {"x": 0.19, "y": 0.44},
+        },
+    }
+    spec["fields"].append(field)
+    gray = syn.render_page(spec, 0, marks={"f_001": "A"}, rng=np.random.default_rng(3))
+    return crop_height(process_page(syn.to_bgr(gray), 0, spec, profile), "f_numero")
+
+
+def test_crop_with_v3_is_narrower_on_the_side_of_the_question_number(profile: dict) -> None:
+    assert numbered_crop_height("short-answer@3", profile) > numbered_crop_height(
+        "short-answer@2", profile
+    )

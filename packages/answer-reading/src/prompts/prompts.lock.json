@@ -22,5 +22,18 @@
   "transcribe.free-text@1": "4b9a26b3c3d1ba8b54e5c5487b4a0d2b6c6d5c675a8113aeeea14d17ba3b87ea",
   "transcribe.free-text@1 × free_text": "61de1fae22d029a262b6be14abfff140c6f35a60523ce6c1f4688b5d8f06c7a8",
   "transcribe.free-text@1 × math_work": "5487df0878dba1d1333d8eb349c0c0ee89557ef9c9ab1dda4ee94abdef450f8e",
-  "grade.rubric@1": "0c9432a7a68e3211a7d46043a2f4c2ebe853a70a2c492ff0e153d74e7d9dc4ff"
+  "transcribe.boxes@1": "c8a673a8798181c1400a117373952e472dd36119345c65a51ffefcd45ba32904",
+  "transcribe.boxes@1 × integer": "dffe71b8c8ba079b212c7806ae15fcf87c21c71a94fa5e0973f481a363a7c87a",
+  "transcribe.boxes@1 × decimal": "e76507b3028dee501e9dca32f794b06ed0fbaeae4a7e979fb38b35dc2c8fb153",
+  "transcribe.boxes@1 × sequence": "6f7549b1273d45850c72c1e244ca692eb0e540e25aaa35c218796b633e1f062a",
+  "grade.rubric@1": "0c9432a7a68e3211a7d46043a2f4c2ebe853a70a2c492ff0e153d74e7d9dc4ff",
+  "verify.incorrect@1": "f0cb5bc53ccb395a900f0e9a2e1bec880632757047f8a9ce5ac4fd9e2645ff2c",
+  "verify.incorrect@1 × integer": "e4c6038f47383ad2cd8c624320e7f7803e3988bde95268a9e3b90cff23767e8d",
+  "verify.incorrect@1 × decimal": "34fae10ac3dc0e3d3e49fb60facf09bd970b40a0281befcbd600aef1157f64d3",
+  "verify.incorrect@1 × fraction": "5914dab40b63b2745c54b9f3cce3d1c8596cf805bf574df2a02595be9beae0ee",
+  "verify.incorrect@1 × ordered_tuple": "240568c6619a7819800072a249efecb060dc3e53a9d7ec289a85fc7728dc5c15",
+  "verify.incorrect@1 × sequence": "b4ec4cd141ef6d20a3d048e4c8d04cb6cb467f8f45b4123e639401897b32ef01",
+  "verify.incorrect@1 × word_list": "50daf38f24a1875f8af2f184e867fe6968de05142812a0c74c9c7b41deb67171",
+  "verify.incorrect@1 × short_text": "34457bb0416c2f13d2f915e6b8fbe478214015cef3e8d5b042ae0de98e10565c",
+  "verify.incorrect@1 × multi_box": "cdf836b8ff6e905e0b45ff8b85394030ca25c9dfdccb615a171e0f6d573f6faa"
 }

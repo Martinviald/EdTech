@@ -20,10 +20,6 @@ import {
   type ScoreOf,
 } from '../consensus/evaluate-consensus';
 import { normalizeTranscription } from '../formats/registry';
-import {
-  transcriptionZodSchema,
-  type TranscriptionJsonSchema,
-} from '../formats/transcription-json-schema';
 import { isTranscriptionPromptFor, renderTranscriptionPrompt } from '../prompts/registry';
 import type { TranscriptionImage, TranscriptionRequest, TranscriptionResult } from '../transcriber';
 import {
@@ -35,13 +31,7 @@ import {
 } from './label';
 import type { EvalSample } from './manifest';
 
-/**
- * Request del arnés: el del puerto más el JSON Schema plano del formato, que los
- * adaptadores LLM necesitan para pedir salida estructurada.
- */
-export interface EvalTranscriptionRequest extends TranscriptionRequest {
-  readonly outputJsonSchema: TranscriptionJsonSchema;
-}
+export type EvalTranscriptionRequest = TranscriptionRequest;
 
 export interface EvalTranscriber {
   readonly id: string;
@@ -236,7 +226,7 @@ async function runReader(
     image: input.image,
     reader,
     prompt: rendered.prompt,
-    outputSchema: transcriptionZodSchema(sample.format),
+    outputSchema: rendered.outputZodSchema,
     outputJsonSchema: rendered.outputSchema,
   };
   try {
@@ -259,6 +249,7 @@ function toConsensusReading(run: ReaderRun, repetition: number): ConsensusReadin
     status: run.result.status,
     output: run.result.status === 'ok' ? run.result.output : null,
     role: run.role,
+    minConfidence: run.reader.minConfidence,
   };
 }
 

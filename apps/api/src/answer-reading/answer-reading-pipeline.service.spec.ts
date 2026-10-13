@@ -4,7 +4,13 @@ jest.mock('drizzle-orm', () => ({
 }));
 
 import { createHash } from 'node:crypto';
-import { FakeTranscriber, fakeOutput, type FakeReading } from '@soe/answer-reading';
+import {
+  FakeTranscriber,
+  fakeOutput,
+  fakeVerdict,
+  type FakeReading,
+  type FakeVerdict,
+} from '@soe/answer-reading';
 import {
   answerReadingDecisions,
   answerReadingRuns,
@@ -193,6 +199,7 @@ class FakeDispatcher implements JobDispatcher {
 
 interface SetupOptions {
   readonly readings?: Record<string, Record<string, FakeReading>>;
+  readonly verdicts?: Record<string, Record<string, FakeVerdict>>;
   readonly policy?: ConsensusPolicy;
   readonly readers?: ReaderSpec[];
   readonly shadowReaders?: ReaderSpec[];
@@ -291,7 +298,10 @@ function setup(setupOptions: SetupOptions = {}) {
 
   memory.unique(answerReadings, ['orgId', 'readingKey', 'readerKey', 'mode', 'attempt']);
   const db = memory.asDatabase();
-  const transcriber = new FakeTranscriber({ byReader: setupOptions.readings ?? {} });
+  const transcriber = new FakeTranscriber({
+    byReader: setupOptions.readings ?? {},
+    verdicts: setupOptions.verdicts ?? {},
+  });
   const activeTranscriber = setupOptions.wrapTranscriber?.(transcriber, memory) ?? transcriber;
   const files = {
     getById: jest.fn(async (_orgId: string, fileId: string) => ({
@@ -745,6 +755,32 @@ describe('AnswerReadingPipelineService — idempotencia', () => {
     expect(runOf(memory)).toMatchObject({ cropsTotal: 2, cropsDone: 2, autoAccepted: 2 });
   });
 
+  it('si el lector cambia de modelo o de parámetros sin cambiar su clave, vuelve a leer', async () => {
+    const { memory, transcriber, runScan } = setup({ readings: agree });
+    await runScan();
+    expect(transcriber.calls).toHaveLength(2);
+
+    const [route] = memory.rows<{ readers: ReaderSpec[] }>(readingRoutes);
+    if (!route) throw new Error('falta la ruta');
+    route.readers = [
+      { ...HAIKU, model: 'haiku-model-2' },
+      { ...FLASH, params: { ...FLASH.params, reasoning: 'low' } },
+    ];
+    await runScan();
+
+    expect(transcriber.calls).toHaveLength(4);
+    expect(transcriber.calls.slice(2).map((call) => call.reader.model)).toEqual(
+      expect.arrayContaining(['haiku-model-2', FLASH.model]),
+    );
+
+    route.readers = [
+      { ...HAIKU, model: 'haiku-model-2', params: { ...HAIKU.params, timeoutMs: 45000 } },
+      { ...FLASH, params: { ...FLASH.params, reasoning: 'low' } },
+    ];
+    await runScan();
+    expect(transcriber.calls).toHaveLength(4);
+  });
+
   it('otra marca con el mismo recorte reutiliza las lecturas y crea su propia decisión', async () => {
     const { memory, transcriber, runScan } = setup({ readings: agree });
     await runScan();
@@ -756,6 +792,182 @@ describe('AnswerReadingPipelineService — idempotencia', () => {
 
     expect(transcriber.calls).toHaveLength(2);
     expect(currentDecision(memory, MARK_2)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+});
+
+describe('AnswerReadingPipelineService — umbral de confianza por lector', () => {
+  const calibrated = {
+    readers: [
+      reader('flash', 'gemini-flash', { provider: 'gemini', minConfidence: 0.97 }),
+      reader('luna', 'openai-luna', { provider: 'openai', minConfidence: 0.85 }),
+    ],
+  };
+
+  it('cada lectura se compara con el umbral de su lector, también al reutilizarla', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...calibrated,
+      readings: {
+        flash: { [SHA_1]: { ...fakeOutput('7,3'), confidence: 0.96 } },
+        luna: { [SHA_1]: { ...fakeOutput('7.3'), confidence: 0.86 } },
+      },
+    });
+
+    await runScan();
+    memory.seed(sheetScanMarks, [
+      { id: MARK_2, orgId: ORG_ID, scanId: SCAN_2, fieldId: FIELD_1, cropFileId: CROP_1 },
+    ]);
+    await runScan(SCAN_2);
+
+    expect(transcriber.calls).toHaveLength(2);
+    for (const markId of [MARK_1, MARK_2]) {
+      expect(currentDecision(memory, markId)).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['low_confidence'],
+      });
+    }
+  });
+
+  it('con la confianza sobre el umbral de cada lector autoacepta', async () => {
+    const { memory, runScan } = setup({
+      ...calibrated,
+      readings: {
+        flash: { [SHA_1]: { ...fakeOutput('7,3'), confidence: 0.98 } },
+        luna: { [SHA_1]: { ...fakeOutput('7.3'), confidence: 0.86 } },
+      },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+});
+
+describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
+  const VERIFIER = reader('verificador', 'openai-luna', {
+    provider: 'openai',
+    promptRef: 'verify.incorrect@1',
+    hints: 'format',
+    minConfidence: 0.9,
+  });
+  const withVerifier = { policy: { ...POLICY, incorrectVerifier: VERIFIER } };
+  const agreeIncorrect = {
+    haiku: { [SHA_1]: fakeOutput('7,4') },
+    flash: { [SHA_1]: fakeOutput('7.4') },
+  };
+
+  it('una incorrecta que podría ser la clave pasa a revisión de lectura y guarda la evidencia', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(true, 0.95) } },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['verifier_flagged'],
+      reviewMode: 'reading',
+    });
+    expect(transcriber.verifyCalls).toHaveLength(1);
+    const [call] = transcriber.verifyCalls;
+    expect(call?.prompt.ref).toBe('verify.incorrect@1');
+    expect(call?.prompt.user).toContain('7,3');
+    expect(call?.prompt.user).toContain('7,4');
+    for (const transcription of transcriber.calls) {
+      expect(`${transcription.prompt.system}${transcription.prompt.user}`).not.toContain('7,3');
+    }
+    const verification = readingsOf(memory).filter((row) => row.mode === 'verifier');
+    expect(verification).toHaveLength(1);
+    expect(verification[0]).toMatchObject({
+      readerKey: 'verificador',
+      promptRef: 'verify.incorrect@1',
+      status: 'ok',
+      output: null,
+      literal: null,
+      verificationOutput: { couldBeKey: true, confidence: 0.95 },
+    });
+    expect(currentDecision(memory).usedReadingIds).not.toContain(verification[0]?.id);
+  });
+
+  it('un "no" con confianza suficiente deja la incorrecta autoaceptada', async () => {
+    const { memory, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(false, 0.95) } },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted', reasons: [] });
+  });
+
+  it('un "no" dudoso o un verificador que falla mandan a revisión de lectura, nunca aceptan', async () => {
+    const cases = [
+      { verdict: fakeVerdict(false, 0.6), reason: 'verifier_flagged' },
+      { verdict: { status: 'refused' as const }, reason: 'verifier_failed' },
+    ];
+    for (const { verdict, reason } of cases) {
+      const { memory, runScan } = setup({
+        ...withVerifier,
+        readings: agreeIncorrect,
+        verdicts: { verificador: { [SHA_1]: verdict } },
+      });
+
+      await runScan();
+
+      expect(currentDecision(memory)).toMatchObject({
+        outcome: 'needs_review',
+        reasons: [reason],
+        reviewMode: 'reading',
+      });
+    }
+  });
+
+  it('no llama al verificador con una correcta ni sin verificador en la política', async () => {
+    const correct = setup({ ...withVerifier, readings: agree });
+    await correct.runScan();
+    expect(correct.transcriber.verifyCalls).toHaveLength(0);
+    expect(currentDecision(correct.memory)).toMatchObject({ outcome: 'auto_accepted' });
+
+    const withoutVerifier = setup({ readings: agreeIncorrect });
+    await withoutVerifier.runScan();
+    expect(withoutVerifier.transcriber.verifyCalls).toHaveLength(0);
+    expect(currentDecision(withoutVerifier.memory)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+
+  it('si el verificador cambia de modelo sin cambiar su clave, no reutiliza el veredicto viejo', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(true, 0.95) } },
+    });
+    await runScan();
+    expect(transcriber.verifyCalls).toHaveLength(1);
+
+    const [route] = memory.rows<{ policy: ConsensusPolicy }>(readingRoutes);
+    if (!route) throw new Error('falta la ruta');
+    route.policy = { ...route.policy, incorrectVerifier: { ...VERIFIER, model: 'otro-modelo' } };
+    await runScan();
+
+    expect(transcriber.verifyCalls).toHaveLength(2);
+    expect(transcriber.verifyCalls[1]?.reader.model).toBe('otro-modelo');
+    expect(transcriber.calls).toHaveLength(2);
+  });
+
+  it('reprocesar el mismo recorte reutiliza el veredicto sin volver a llamar', async () => {
+    const { memory, transcriber, runScan } = setup({
+      ...withVerifier,
+      readings: agreeIncorrect,
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(true, 0.95) } },
+    });
+
+    await runScan();
+    await runScan();
+
+    expect(transcriber.verifyCalls).toHaveLength(1);
+    expect(readingsOf(memory).filter((row) => row.mode === 'verifier')).toHaveLength(1);
+    expect(currentDecision(memory)).toMatchObject({ reasons: ['verifier_flagged'] });
   });
 });
 
@@ -811,6 +1023,55 @@ describe('AnswerReadingPipelineService — interruptor y presupuesto', () => {
       reviewMode: 'reading',
     });
     expect(runOf(memory)).toMatchObject({ status: 'budget_exceeded', cropsDone: 1 });
+  });
+
+  it('el presupuesto previo cuenta el peor caso: lectores, desempate y verificador', async () => {
+    const verifier = reader('verificador', 'openai-luna', {
+      provider: 'openai',
+      promptRef: 'verify.incorrect@1',
+      hints: 'format',
+    });
+    const { isExceeded, runScan } = setup({
+      readings: agree,
+      budgetExceeded: true,
+      policy: {
+        ...POLICY,
+        onDisagreement: 'tiebreak_reader',
+        tiebreakReader: LUNA,
+        incorrectVerifier: verifier,
+      },
+    });
+
+    await runScan();
+
+    expect(isExceeded).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: ORG_ID, plannedReadings: 4 }),
+    );
+  });
+
+  it('sin desempate activo ni autoaceptación no suma esas llamadas al presupuesto previo', async () => {
+    const verifier = reader('verificador', 'openai-luna', {
+      provider: 'openai',
+      promptRef: 'verify.incorrect@1',
+      hints: 'format',
+    });
+    const { isExceeded, runScan } = setup({
+      readings: agree,
+      budgetExceeded: true,
+      policy: {
+        ...POLICY,
+        onDisagreement: 'review',
+        tiebreakReader: LUNA,
+        autoAccept: false,
+        incorrectVerifier: verifier,
+      },
+    });
+
+    await runScan();
+
+    expect(isExceeded).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: ORG_ID, plannedReadings: 2 }),
+    );
   });
 
   it('respeta el tope de recortes por corrida sin dejar recortes en silencio', async () => {

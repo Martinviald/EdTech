@@ -535,7 +535,7 @@ export class AnswerReadingReviewQueueService {
               and(
                 eq(answerReadings.orgId, orgId),
                 inArray(answerReadings.markId, [...markIdsWithoutReadings]),
-                ne(answerReadings.mode, 'shadow'),
+                inArray(answerReadings.mode, ['primary', 'tiebreak']),
               ),
             )
             .orderBy(asc(answerReadings.createdAt));

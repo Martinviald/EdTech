@@ -21,24 +21,15 @@ import {
 } from '@soe/types';
 import {
   SUPPORTED_FORMAT_KINDS,
+  partsSchema,
   type AnswerFormatDefinition,
   type FormatOf,
   type PartsJsonSchema,
   type SupportedFormatKind,
 } from './answer-format';
+import { numericCellsEmpty, numericCellsText } from './box-cells';
 
 type Parts = TranscriptionOutput['parts'];
-
-function partsSchema(entries: ReadonlyArray<[string, string]>): PartsJsonSchema {
-  return {
-    type: 'object',
-    properties: Object.fromEntries(
-      entries.map(([id, description]) => [id, { type: 'string' as const, description }]),
-    ),
-    required: entries.map(([id]) => id),
-    additionalProperties: false,
-  };
-}
 
 function indexedIds(prefix: string, count: number): string[] {
   return Array.from({ length: count }, (_, index) => `${prefix}${index + 1}`);
@@ -232,8 +223,8 @@ function normalizeNumeric(
   return normalizeWith(output, {
     kind,
     parse: (text) => resolveNumberConvention(parseScalarText(text), kind, 'answer'),
-    partsLiteral: () => null,
-    partsEmpty: () => false,
+    partsLiteral: numericCellsText,
+    partsEmpty: numericCellsEmpty,
     formatIssues: (value) => scalarIssues(value, { allowNegative, expect: kind }),
   });
 }
@@ -242,7 +233,7 @@ const integerDefinition: AnswerFormatDefinition<'integer'> = {
   kind: 'integer',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@2',
+  defaultCropProfileId: 'short-answer@3',
   gradedBy: 'key',
   formatLabel: () => 'número entero',
   promptGuide: () => `La respuesta es un número entero. ${NUMERIC_NOTE}`,
@@ -255,7 +246,7 @@ const decimalDefinition: AnswerFormatDefinition<'decimal'> = {
   kind: 'decimal',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@2',
+  defaultCropProfileId: 'short-answer@3',
   gradedBy: 'key',
   formatLabel: () => 'número decimal',
   promptGuide: () => `La respuesta es un número, posiblemente con decimales. ${NUMERIC_NOTE}`,
@@ -270,7 +261,7 @@ const fractionDefinition: AnswerFormatDefinition<'fraction'> = {
   kind: 'fraction',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@2',
+  defaultCropProfileId: 'short-answer@3',
   gradedBy: 'key',
   formatLabel: (format) => (format.allowMixed ? 'fracción o número mixto' : 'fracción'),
   promptGuide: (format) =>
@@ -320,7 +311,7 @@ const orderedTupleDefinition: AnswerFormatDefinition<'ordered_tuple'> = {
   kind: 'ordered_tuple',
   readBy: 'vision',
   compatibleItemTypes: SHORT_ANSWER_ONLY,
-  defaultCropProfileId: 'short-answer@2',
+  defaultCropProfileId: 'short-answer@3',
   gradedBy: 'key',
   formatLabel: (format) => tupleLabel(format.arity),
   promptGuide: (format) =>
@@ -360,7 +351,7 @@ const sequenceDefinition: AnswerFormatDefinition<'sequence'> = {
   kind: 'sequence',
   readBy: 'vision',
   compatibleItemTypes: ['short_answer', 'ordering'],
-  defaultCropProfileId: 'short-answer@2',
+  defaultCropProfileId: 'short-answer@3',
   gradedBy: 'key',
   formatLabel: (format) => `secuencia de ${format.length} elementos`,
   promptGuide: (format) =>
@@ -541,7 +532,7 @@ const multiBoxDefinition: AnswerFormatDefinition<'multi_box'> = {
   kind: 'multi_box',
   readBy: 'vision',
   compatibleItemTypes: ['gap_fill'],
-  defaultCropProfileId: 'short-answer@2',
+  defaultCropProfileId: 'short-answer@3',
   gradedBy: 'key',
   formatLabel: (format) =>
     `${format.boxes.length} casillas: ${format.boxes.map((box) => box.label).join(', ')}`,

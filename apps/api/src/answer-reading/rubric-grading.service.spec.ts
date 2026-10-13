@@ -159,6 +159,7 @@ function setup(
         },
         rawText: '{}',
         model: 'gemini-3.5-flash-lite',
+        providerModel: 'gemini-3.5-flash-lite',
         finishReason: 'stop',
         usage: {
           inputTokens: 500,

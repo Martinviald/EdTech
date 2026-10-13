@@ -536,3 +536,246 @@ recorte trae preguntas vecinas; Haiku 13 → 16 y Gemini 14 → 18 de 24 casilla
   la ruta por defecto sigue en `hints: none` (C-1).
 - La confianza de Haiku rara vez llega a 0,85: domina la revisión por `low_confidence`. Calibrar con
   hojas reales de alumnos antes de tocar `minConfidence` (C-2).
+
+## Etapa 1 — Lectura por visión más exacta (`feat/vision-lectura-etapa1`)
+
+Plan: `docs/plan-etapa1-lectura-vision.md`.
+
+### T1 — Umbral por lector y arreglos de proveedores (`wip/e1-t1`)
+
+- **Decisión E1-1 — el umbral de confianza vive en el lector.** `readerSpecSchema` suma
+  `minConfidence` opcional (0 a 1). Si el lector lo trae, reemplaza al `minConfidence` de la
+  política solo para las lecturas de ese lector (hacia arriba o hacia abajo); si no, rige el de la
+  política, así que las rutas guardadas no cambian de comportamiento. Se eligió el lector y no un
+  mapa en la política porque la calibración es del modelo (Gemini 3.5 Flash declara confianza alta
+  aun cuando falla y necesita 0,97; `gpt-6-luna` está mejor calibrado con 0,85), el lector de
+  desempate ya es un `ReaderSpec` y lo hereda sin otra clave, y un mapa por `key` dejaría umbrales
+  huérfanos al renombrar un lector. Quien arma las lecturas del consenso
+  (`CropReadingService`, también al reutilizar una lectura guardada, y el arnés `run-sample`) copia
+  `reader.minConfidence` en `ConsensusReading.minConfidence`.
+- `evaluateConsensus` aplica el umbral de cada lectura en todos los puntos donde se mira la
+  confianza: blancos (`acceptBlank`, incluidos los de tinta sin lecturas), formatos de rúbrica,
+  grupo acordado (incluida la lectura de desempate) y la propuesta de revisión, que ahora ordena
+  por: no pidió revisión → interpretable → **supera el umbral de su lector** → confianza. Con un
+  umbral único ese criterio es monótono con la confianza, por lo que la propuesta no cambia sin
+  umbrales por lector. Los 37 casos previos de `evaluate-consensus.spec` y los del pipeline pasan sin tocarse.
+- **`OpenAiProvider`: la escalera de `reasoning.effort` no bajaba de nivel.** Error real
+  (una llamada de texto a `gpt-6.1-sol` con `reasoning: { effort: 'none' }`, rechazada sin costo):
+  `BadRequestError`, `status: 400`, `code: 'unsupported_value'`, `param: 'reasoning.effort'`,
+  `type: 'invalid_request_error'`, `message: "400 Unsupported value: 'none' is not supported with
+  the 'gpt-6.1-sol' model. Supported values are: 'low', 'medium', 'high', 'xhigh', and 'max'."`.
+  El mensaje no nombra `reasoning` ni `effort`, por eso el patrón nunca calzaba. Ahora, si el error
+  trae `param`, decide el parámetro (`reasoning` o `reasoning.*`); solo sin `param` se mira el
+  mensaje. Un 400 con otro `param` ya no se reintenta aunque el mensaje hable de razonamiento. Con
+  `gpt-6.1-sol` la escalera queda `none` → `minimal` → `low` y recuerda `low` para el modelo.
+- **`AnthropicProvider`: `thinking: { type: 'disabled' }` rechazado por modelos nuevos.** Sin
+  llamadas reales. Fuente: la referencia de errores y la guía de migración de la API de Claude
+  (Sonnet 5.5 responde 400 `invalid_request_error` con `"thinking.type.disabled" is not supported
+  for this model. Use "thinking.type.between_tools" for the lowest thinking setting, …`; Opus 5.5
+  rechaza `disabled` y `between_tools`; Haiku 5.5 acepta `disabled` con esfuerzo `high` o menor).
+  El cuerpo llega en el SDK 0.98 como `BadRequestError` con `status: 400`,
+  `type: 'invalid_request_error'` y `error: { type: 'error', error: { type, message } }`; el
+  `message` del `Error` es `400 ` + el JSON del cuerpo. La API de Anthropic no trae `param`, así
+  que se decide con `error.error.type` y el `message` del cuerpo (que nombre
+  `thinking.type.disabled` o `thinking.type.between_tools`). Con `reasoning: 'off'` la escalera es
+  `disabled` → `between_tools` (sin otro campo en `thinking`) → sin `thinking` y
+  `output_config.effort: 'low'` (último recurso para modelos sin modo apagado), y recuerda el
+  escalón por modelo. Haiku 5.5 sigue enviando `disabled` sin reintentos.
+
+### Etapa 1 — T0 y T1 cerradas con su compuerta
+
+- **T0, arnés v2** (`apps/api/scripts/answer-reading-eval/`): dataset `fotos-reales-v1` fuera del
+  repo (30 recortes con verdad por casilla), rutas por formato con `resolveReadingRoute`, caché de
+  lecturas (las 720 ya pagadas importadas), errores separados en "perjudica" y "favorece",
+  intervalos de Wilson y McNemar pareado. **Compuerta:** reproduce exacto la línea base
+  (15/72 = 20,8 % [13,1–31,6], 0 equivocadas) y el pipeline B con override (32/72 = 44,4 %
+  [33,5–55,9], 0 equivocadas). Gasto US$0.
+- **T1:** `ReaderSpec.minConfidence` opcional (E1-1), escalera de `reasoning.effort` de OpenAI por
+  `param` del error (el mensaje real nunca dice "reasoning" ni "effort"), escalera de `thinking`
+  de Anthropic por modelo.
+- **Bug de integración T0×T1 atrapado por la compuerta:** el arnés armaba la lectura para el
+  consenso sin `minConfidence` y el umbral de la ruta se perdía (40/72 con 1 equivocada). Arreglado
+  con test que falla sin el arreglo; con el umbral en la ruta el pipeline B da 32/72 con 0
+  equivocadas, **idéntico casilla por casilla** al override (0 discordantes).
+- **Hallazgo:** el endpoint `gemini-3.5-flash` responde con `modelVersion: gemini-3.6-flash` (la
+  página de deprecaciones de Google lo confirma: el alias se redirige). Todo lo medido como
+  "Gemini 3.5 Flash" fue 3.6 Flash. Precio oficial de 3.6 y 3.8 Flash: US$0,75 / 3,75 por millón
+  hasta el 31-12-2026 y US$1,50 / 7,50 desde 2027 (las cifras de agregadores eran otras).
+  Consecuencias para T2: la ruta nombra el modelo real, se mide 3.8 Flash contra 3.6, y el
+  proveedor de Gemini debe guardar el `modelVersion` que respondió (hoy guarda el pedido).
+
+### Etapa 1 — T2 y T3 cerradas con su compuerta
+
+- **T2 (pipeline B):** los proveedores devuelven el modelo que respondió (`providerModel`, que se
+  guarda en `answer_readings.provider_model`; `model` sigue siendo el pedido y con él se costea).
+  `gemini-3.8-flash` rechaza `thinkingLevel: MINIMAL`: el proveedor baja a `LOW` y lo recuerda por
+  modelo. Medición (72 unidades): alias 3.5→3.6 44,4 % / 0 eq.; **3.6 Flash 43,1 % / 1 eq.
+  (favorece)**; **3.8 Flash 41,7 % / 0 eq.** — elegido 3.8 (decisión E1-2): ninguna lectura
+  equivocada pasa de 0,95 y las 37 con ≥ 0,97 son exactas; 3.6 dio 1,00 a una lectura errónea.
+  Umbral 0,97 confirmado simulando 0,90–0,99 desde caché. Migración **0051**: retira las 8 rutas
+  vigentes y siembra las del pipeline B; agrega `gemini-3.6-flash` al catálogo y sube 3.8 Flash al
+  precio oficial de 2027 (US$1,50 / 7,50; afecta el costo estimado de otras funcionalidades que
+  usen 3.8 Flash, a favor de no quedarse corto).
+- **T3 (lectura por casilla, `transcribe.boxes@1`):** partes por casilla (`sign`, `i1…iK`, `f1…fM`,
+  `e1…eN`) y armado del valor en código (la coma la pone la geometría). Medido con el alias 3.5:
+  decimal Gemini 7/9 → 9/9 exactas. **Medido de nuevo con 3.8 Flash (la ruta final):** decimal sin
+  mejora (8/9 en ambos) → **conserva su prompt**; secuencia 4/9 → 6/9 autoaceptadas → **adopta el
+  prompt nuevo** (0051 ajustada; `pipeline-b-final.json` idéntico a lo sembrado, verificado en PG14).
+  Entero descartado (sin mejora, 25 % más caro).
+- **Resultado acumulado de la etapa:** 15/72 → **32/72 autoaceptadas** (20,8 % → 44,4 %), **0
+  equivocadas** en todo el camino. Gasto acumulado de la etapa ≈ US$0,73 (a precio 2027).
+- **Riesgo anotado (T3):** la posición de la coma se deriva de la clave del ítem (igual que la hoja
+  impresa). Si la clave cambia después de imprimir, la lectura por casilla supondría otra geometría
+  que la impresa. Hoy solo aplica a secuencias (no hay coma), así que no afecta a la ruta final.
+
+### Etapa 1 — T4 cerrada: verificador de incorrectas
+
+- **Contrato y piezas:** motivo `verifier_flagged` (modo corrección), `ConsensusPolicy.incorrectVerifier`
+  opcional, propósito de prompt `verification` (el esquema impide que un prompt de transcripción o de
+  rúbrica declare la clave o la lectura acordada), prompt `verify.incorrect@1` con lock por formato,
+  funciones puras en `@soe/answer-reading` usadas por el pipeline y el arnés, lectura del verificador
+  en `answer_readings` con modo `verifier` (fuera de `usedReadingIds`; la cola de revisión las
+  excluye). Se activa con incorrectas **y parciales** autoaceptadas. **Nunca acepta ni cambia una
+  nota.** Migración **0052** (`answer_reading_mode` + `verification_output`) y **0053** (verificador
+  en las 6 rutas que autoaceptan; desarrollo sin cambio).
+- **Elección (E1-3):** conjunto de estrés fuera del repo (`datasets/estres-verificador-v1`: 12 ceros
+  injustos que llegan a autoaceptarse y 8 incorrectas verdaderas). `gpt-6-luna` 34/36 atrapados con
+  14/24 falsos avisos → descartado. `gemini-3.6-flash` 33/36 con 5/24. **`gemini-3.8-flash` 34/36
+  con 3/24**, y con umbral **0,95** (sus "no" erróneos venían con 0,90–0,95) atrapa **35/36 [85,8–99,5]
+  con 3/24 falsos avisos**. Cada verificador falla en el error de su propia familia (luna no ve el
+  `0109` que leyó luna; Gemini no ve el `8, 15, 12` de Flash-Lite): con el par Gemini + luna no hay una
+  tercera familia, y se eligió el que menos falsos avisos da.
+- **Bug de producción encontrado y corregido:** dos llamadas a `gpt-6-luna` quedaron colgadas ~81 min
+  con `timeoutMs` 45 s. Causa (en el código de los SDK): OpenAI 6.49 y Anthropic 0.98 limpian el
+  timeout al recibir las cabeceras y la lectura del cuerpo queda sin plazo; reintentos y escalera de
+  razonamiento lo multiplicaban. `runWithinDeadline` da un plazo total único por llamada a los tres
+  proveedores (`LlmTimeoutError` → estado `timeout`).
+- **Compuerta en fotos reales con la ruta final:** 32/72 autoaceptadas, 0 equivocadas; el verificador
+  revisó las 8 incorrectas autoaceptadas, mandó 0 a revisión, ninguna casilla cambió de decisión;
+  costo extra US$0,0004 por recorte corto.
+
+### Etapa 1 — resultado consolidado (arnés, fotos-reales-v1, 72 unidades, `e1-final` vs `t0-actual`)
+
+| | Antes (Flash-Lite + Haiku) | Después (pipeline B final) |
+|---|---|---|
+| Autoaceptadas | 15/72 = 20,8 % [13,1–31,6] | **32/72 = 44,4 % [33,5–55,9]** (19 ganadas, 2 perdidas; McNemar p < 0,001, optimista) |
+| Autoaceptadas equivocadas | 0 | **0** (0 perjudican, 0 favorecen) |
+| Ceros injustos atrapados por el verificador (estrés) | — | 35/36 |
+| Costo nominal por recorte corto (precio 2027) | US$0,0013 | US$0,0038 (la mitad hasta dic-2026) |
+
+Gasto de IA de la etapa ≈ US$1,58 (nominal 2027; ~US$0,8 facturado en 2026), dentro del tope de US$5.
+
+### Etapa 1 — T5b: el número de la pregunta fuera del recorte (`wip/e1-t5b`)
+
+- **Riesgo:** la hoja imprime el número de la pregunta 6 pt a la izquierda de la región del campo, a
+  la altura de la primera fila. El margen de `short-answer@2` (30 % del lado menor) lo incluía, y
+  Gemini 3.8 Flash leyó "4 3/4" en Celeste P4 con 0,95 en las 3 repeticiones (lo salvó el
+  desacuerdo con luna). Tapar el número pintándolo ya se había descartado (dejaba puntos de lápiz).
+- **Decisión E1-4 — el layout publica el rótulo y el perfil lo trata como obstáculo.** Cada campo de
+  respuesta escrita suma `response.printedLabelRegion` (opcional; derivado de las mismas constantes
+  con que se imprime el número, y un test comprueba que el ancho real de Helvetica-Bold cabe en la
+  caja). El perfil suma `printedLabelGapFraction`: en cada lado el margen no pasa de esa fracción de
+  la distancia al rótulo (mismo criterio que `neighborGapFraction`). `short-answer@3` = v2 + 0,5.
+  Lo impreso dentro de la región (coma, barra, paréntesis, `;`, signos, rótulos de casilla) no se
+  toca. Los v1/v2 ignoran el rótulo y un layout sin rótulo recorta como v2, así que los layouts
+  congelados no cambian. Los derivados nuevos cambian de hash (rótulo + id del perfil; la geometría
+  es la misma, verificado en el test).
+- **No hay `free-text@3`:** en las fotos, Ámbar empezó P10 en el margen izquierdo y el tope dejó
+  "17 tiene" en vez de "47 tiene". El desarrollo sigue en `free-text@2` (publica el rótulo, no lo usa).
+- **Medición** (dataset `fotos-reales-v1-sin-rotulo`: misma verdad, los 24 recortes cortos
+  regenerados por el OMR con `short-answer@3` desde las 6 fotos; los 6 de desarrollo, idénticos
+  byte a byte; la reproducción con `short-answer@2` dio 30/30 recortes idénticos al dataset
+  original). Ruta `pipeline-b-final.json`, 3 repeticiones, pareado contra `e1-final`:
+
+| | `e1-final` (`@2`) | Sin rótulo (`@3`) |
+|---|---|---|
+| Autoaceptadas | 32/72 = 44,4 % [33,5–55,9] | **32/72 = 44,4 % [33,5–55,9]** (5 ganadas, 5 perdidas; p = 1,0) |
+| Equivocadas (perjudica / favorece) | 0 (0 / 0) | **0 (0 / 0)** |
+| Lectura exacta Gemini 3.8 Flash | 56/72 = 77,8 % [66,9–85,8] | **62/72 = 86,1 % [76,3–92,3]** |
+| Lectura exacta gpt-6-luna | 60/72 = 83,3 % [73,1–90,2] | 58/72 = 80,6 % [70,0–88,0] |
+| Lecturas exactas del par | 116/144 | **120/144** |
+| Decisión con el valor correcto | 59/72 = 81,9 % [71,5–89,1] | 55/72 = 76,4 % [65,4–84,7] (p = 0,42) |
+
+  - Celeste P4: Gemini pasa de "4 3/4" (3/3) a "3/4" con 0,98–0,99 (3/3) y la casilla se autoacepta
+    en las 3 repeticiones. También desaparecen dos lecturas de luna que sumaban un dígito a la
+    izquierda ("12,73" por "2,73" en Bruno P3, "0109" por "0100" en Bruno P2).
+  - Por formato (autoaceptadas): fracción 5 → 8, entero 6 → 7, par ordenado 3 → 2, texto corto
+    6 → 3; el resto igual. La baja de texto corto es luna leyendo "productos" en Bruno P8 (3/3) con
+    el renglón intacto; Gemini lo lee bien 9/9 y el desacuerdo manda a revisión.
+  - Ruido entre repeticiones: autoaceptadas 11/11/10 antes y 12/10/10 ahora; decisión correcta
+    19/21/19 y 19/18/18.
+- **Integración:** cumple la regla (equivocadas 0 → 0, autoaceptación igual, el par suma 4
+  lecturas exactas). La baja de "decisión con el valor correcto" (−4, no significativa) viene de
+  desacuerdos nuevos de luna que van a revisión, no de autoaceptaciones. **Se integra.**
+- **Riesgos:** (1) las hojas ya impresas siguen con el número dentro del recorte hasta que se
+  vuelva a derivar el layout (si se quisiera cubrirlas, el OMR tendría que derivar el rótulo sin el
+  campo, acoplándose a las constantes de impresión); (2) con el margen izquierdo de ~1 mm, una
+  respuesta corta escrita fuera de la casilla hacia la izquierda más de ~4 mm se corta (no pasó en
+  las 24 casillas); (3) el OMR debe desplegarse con `short-answer@3` antes que la API, o
+  `resolve_crop_profile` cae al recorte heredado (igual que con FR-3).
+- Gasto de IA: US$0,27 nominal (precio 2027).
+
+### Etapa 1 — corrección de la revisión final (`wip/e1-t5a`)
+
+- **Presupuesto previo con el peor caso.** La estimación antes de leer un escaneo cuenta, por
+  recorte, los lectores y los de sombra **más** una llamada de desempate (si la política tiene
+  `onDisagreement: tiebreak_reader` y lector de desempate) **más** una del verificador (si la
+  política autoacepta y trae `incorrectVerifier`), cada una al costo promedio por lectura de la org.
+  Se eligió el peor caso y no un costo esperado: es un tope, el verificador solo cuesta
+  ~US$0,0004 por recorte corto, y un esperado necesitaría una tasa de incorrectas autoaceptadas que
+  la org todavía no tiene medida. Puede bloquear un escaneo que en la práctica cabría cuando el
+  presupuesto está casi agotado; los reintentos por error transitorio siguen sin contarse.
+- **Reutilización de lecturas y veredictos.** La clave de reutilización (`reuseKey`) de
+  `CropReadingService` suma al `readingKey|readerKey|mode` el proveedor, el modelo,
+  `maxOutputTokens`, `reasoning`, `mediaResolution` y el hash del prompt renderizado, tanto para el
+  verificador como para los lectores. Un cambio de modelo o de parámetros sin cambiar `key` vuelve a
+  leer (con el intento siguiente: el conteo de intentos sigue por `readingKey|readerKey|mode`, que es
+  el índice único). `timeoutMs` y `minConfidence` no entran porque no cambian lo que se le pide al
+  modelo. Las lecturas ya guardadas se siguen reutilizando si nada cambió: guardan esos mismos
+  valores (`provider`, `model`, `params`, `prompt_hash`), así que no hace falta migración.
+- **Tarifa de respaldo.** `llm.pricing.ts` cobra `gemini-3.6-flash` y `gemini-3.8-flash` a
+  US$1,50 / 7,50 por millón, igual que el catálogo de 0051 (antes 3.8 estaba a 0,75 / 3,75 y 3.6
+  no tenía tarifa de respaldo).
+- **Orden de despliegue de 0051–0053 (verificado en el código).** `readerSpecSchema` y
+  `consensusPolicySchema` son `.strict()` desde antes de la etapa 1. Una API anterior a T1 que lea
+  las rutas sembradas por 0051 (lectores con `minConfidence`) o 0053 (`incorrectVerifier`) las
+  rechaza: `ReadingRoutesService.parseRoute` reporta «Ruta de lectura inválida: se ignora» y la
+  descarta, y como 0051 retira las rutas anteriores, ningún recorte encuentra ruta y queda
+  `not_read` con `insufficient_readers` (nunca una nota, pero la lectura se pierde y hay que
+  reprocesar). En la otra dirección, la API nueva **necesita** 0052 (columna
+  `verification_output` y modo `verifier`): sin ella falla la consulta de lecturas existentes.
+  Por eso van **juntas**: el `deploy.yml` corre `db:migrate` y después publica la imagen; entre
+  ambos pasos la API vieja ve rutas que no entiende. Despliega con el flag de backend en una ventana
+  sin escaneos, y si entró alguno en esa ventana, reprocesa sus recortes `not_read` /
+  `insufficient_readers` después del despliegue.
+- **Motivos del verificador en modo lectura.** `verifier_flagged` pasa a modo `reading` (D8: la
+  duda es de lectura; sin clave a la vista ni corrección preseleccionada) y un motivo nuevo,
+  `verifier_failed` (también lectura), cubre la falla, el plazo vencido o la falta de veredicto:
+  la web ya no dice «el verificador cree que podría ser…» cuando el verificador no respondió. La web
+  tampoco preselecciona «Incorrecta» ante un motivo del verificador aunque la decisión haya quedado
+  guardada en modo corrección (decisiones de T4 ya persistidas). `reasons` es JSONB: sin migración.
+- **La consolidación no corrige sin verificar un resultado que cambió.** Si la corrección con la
+  clave vigente no coincide con el `scoringOutcome` de la decisión autoaceptada (por ejemplo, una
+  correcta cuya clave se editó después), la decisión se reemplaza (procedimiento de F7:
+  `escalateToReview`, decisión nueva y la vieja con `superseded_by_id`) por una `needs_review` con
+  el motivo nuevo `scoring_changed` (modo lectura). La respuesta queda pendiente, nunca en 0. Las
+  decisiones con `scoringOutcome` nulo no se comparan.
+- **`--reader-min-confidence` reemplaza el umbral del lector.** Antes solo ponía 0 en la política y
+  el consenso seguía aplicando el `minConfidence` que el lector trae en la ruta, así que no se podía
+  bajar de él. Barrido verificado desde el caché (`pipeline-b-38.json`, 72 unidades, `gpt-6-luna` en
+  0,85, US$0):
+
+  | Umbral `gemini-3.8-flash` | 0,85 | 0,90 | 0,93 | 0,95 | 0,96 | 0,97 | 0,98 | 0,99 |
+  | ------------------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+  | Autoaceptadas / 72        | 37   | 37   | 37   | 37   | 30   | 30   | 30   | 16   |
+  | Equivocadas               | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    |
+
+  Confirma las cifras de T2 (0,90–0,95 → 37/72 y 0,96–0,98 → 30/72, 0 equivocadas). El umbral 0,97
+  no cambia: se eligió por margen sobre las lecturas equivocadas que 3.8 Flash dio con 0,90–0,95,
+  no porque en este dataset aparezcan equivocadas entre 0,90 y 0,96.
+- **`importar-lecturas` controla el prompt.** Compara el `promptHash` (o el texto) guardado con el
+  prompt que se renderiza hoy y omite la lectura si cambió. Los experimentos ya importados no
+  guardaron ninguno de los dos: sin ese dato solo se importan con `--force`.
+- **Compuerta:** el arnés con `pipeline-b-final.json` desde el caché sigue en **32/72, 0
+  equivocadas** (170 aciertos de caché, 0 llamadas, US$0); el verificador revisó las 8 incorrectas
+  autoaceptadas y no mandó ninguna a revisión, igual que en T4.

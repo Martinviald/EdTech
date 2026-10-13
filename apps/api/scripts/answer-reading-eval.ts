@@ -5,43 +5,33 @@ import { join, resolve } from 'node:path';
 import { Module, type DynamicModule, type INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { config as loadEnv } from 'dotenv';
-import type {
-  EvalTranscriber,
-  EvalTranscriptionRequest,
-  TranscriptionResult,
-} from '@soe/answer-reading';
 import type { Database } from '@soe/db';
-import type {
-  LlmModel,
-  LlmProviderId,
-  ReaderSpec,
-  ReadingUsage,
-  TranscriptionStatus,
-  VisionProvider,
-} from '@soe/types';
+import type { LlmModel, LlmProviderId, ReaderSpec } from '@soe/types';
+import { LlmVisionTranscriber } from '../src/answer-reading/transcribers/llm-vision-transcriber';
 import { LlmConfigService } from '../src/llm/llm.config';
 import { LLM_PROVIDERS } from '../src/llm/llm.constants';
 import { LlmModelsService } from '../src/llm/llm-models.service';
-import { estimateLlmCostUsd } from '../src/llm/llm.pricing';
+import { estimateLlmCostUsd, setCatalogTariffs } from '../src/llm/llm.pricing';
 import { LlmService } from '../src/llm/llm.service';
-import type { LlmProvider, LlmStructuredResult } from '../src/llm/llm.types';
+import type { LlmProvider } from '../src/llm/llm.types';
 import { AnthropicProvider } from '../src/llm/providers/anthropic.provider';
 import { GeminiProvider } from '../src/llm/providers/gemini.provider';
 import { OpenAiProvider } from '../src/llm/providers/openai.provider';
-import { loadRoute, routeReaders, runEvalCommand } from './answer-reading-eval/run-eval';
+import { EVAL_TARIFFS, type EvalTariff } from './answer-reading-eval/tariffs';
+import type { CacheMode } from './answer-reading-eval/reading-cache';
+import {
+  allRouteReaders,
+  loadRouteSet,
+  parseReaderMinConfidence,
+} from './answer-reading-eval/route-set';
+import { runEvalCommand, type EvalCommandOptions } from './answer-reading-eval/run-eval';
+import type { HarnessTranscriber } from './answer-reading-eval/simulate';
 
 const REPO_ROOT = resolve(__dirname, '..', '..', '..');
-const DEFAULT_ROUTE = resolve(__dirname, 'answer-reading-eval', 'routes', 'default.json');
-const LLM_TRANSCRIBER_ID = 'llm';
+const DEFAULT_ROUTES = resolve(__dirname, 'answer-reading-eval', 'routes', 'actual.json');
+const DEFAULT_CACHE_DIR = resolve(REPO_ROOT, '..', 'pruebas-vlm-manuscrito', 'cache-lecturas');
 const ESTIMATED_INPUT_TOKENS = 3000;
 const OBSERVED_COST_MARGIN = 1.25;
-const STRUCTURED_SCHEMA_NAME = 'transcription';
-
-const LLM_PROVIDER_BY_VISION: Partial<Record<VisionProvider, LlmProviderId>> = {
-  anthropic: 'anthropic',
-  gemini: 'gemini',
-  openai: 'openai',
-};
 
 const NO_DATABASE = new Proxy(
   {},
@@ -52,28 +42,25 @@ const NO_DATABASE = new Proxy(
   },
 ) as Database;
 
-interface CliOptions {
-  datasetDir: string;
-  routeFile: string;
-  repetitions: number;
-  concurrency: number;
-  budgetUsd: number | null;
-  outDir: string;
-  dryRun: boolean;
-  compareFile: string | null;
-}
-
 const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [opciones]
 
-  --dataset <dir>          Directorio con manifest.json e imágenes (obligatorio)
-  --route <archivo.json>   ReadingRoute a evaluar (por defecto routes/default.json)
-  --repetitions <n>        Repeticiones por muestra (por defecto 1)
-  --budget-usd <x>         Tope de gasto; obligatorio sin --dry-run
-  --concurrency <n>        Muestras en paralelo (por defecto 2)
-  --out <dir>              Carpeta de salida (por defecto una carpeta temporal)
-  --dry-run                Usa el transcriptor falso: no llama a ninguna API
-  --compare <informe.json> Compara contra un informe anterior
+  --dataset <dir>                Directorio con manifest.json e imágenes (obligatorio)
+  --routes <archivo.json>        Conjunto de rutas ({ routes: [...] }) o una sola ReadingRoute
+                                 (por defecto routes/actual.json). --route es un alias.
+  --reader-min-confidence <m>    Umbral por lector, simulación provisional hasta T1
+                                 (p. ej. "gemini-3.5-flash=0.97,gpt-6-luna=0.85")
+  --repetitions <n>              Repeticiones por muestra (por defecto 1)
+  --budget-usd <x>               Tope de gasto; obligatorio si faltan lecturas en el caché
+  --concurrency <n>              Muestras en paralelo (por defecto 2)
+  --cache-dir <dir>              Caché de lecturas (por defecto ../pruebas-vlm-manuscrito/cache-lecturas)
+  --no-cache                     No lee ni escribe el caché
+  --refresh                      Vuelve a pedir todo y reescribe el caché
+  --out <dir>                    Carpeta de salida (por defecto una carpeta temporal)
+  --dry-run                      Transcriptor falso que lee la etiqueta: no llama a ninguna API
+  --compare <informe.json>       Comparación pareada contra un informe v2 anterior
 `;
+
+const FLAGS = new Set(['dry-run', 'no-cache', 'refresh']);
 
 function numberOption(value: string | undefined, name: string, fallback: number): number {
   if (value === undefined) return fallback;
@@ -82,7 +69,15 @@ function numberOption(value: string | undefined, name: string, fallback: number)
   return parsed;
 }
 
-function parseArgs(argv: readonly string[]): CliOptions {
+function cacheModeOf(flags: ReadonlySet<string>): CacheMode {
+  if (flags.has('no-cache') && flags.has('refresh')) {
+    throw new Error('--no-cache y --refresh no se combinan');
+  }
+  if (flags.has('no-cache')) return 'off';
+  return flags.has('refresh') ? 'refresh' : 'use';
+}
+
+function parseArgs(argv: readonly string[]): EvalCommandOptions {
   const flags = new Set<string>();
   const values = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 1) {
@@ -91,26 +86,25 @@ function parseArgs(argv: readonly string[]): CliOptions {
       process.stdout.write(HELP);
       process.exit(0);
     }
-    if (arg === '--dry-run') {
-      flags.add('dry-run');
+    if (!arg.startsWith('--')) throw new Error(`Argumento inesperado: ${arg}`);
+    const name = arg.slice(2);
+    if (FLAGS.has(name)) {
+      flags.add(name);
       continue;
     }
-    if (!arg.startsWith('--')) throw new Error(`Argumento inesperado: ${arg}`);
     const value = argv[index + 1];
     if (value === undefined || value.startsWith('--')) throw new Error(`Falta el valor de ${arg}`);
-    values.set(arg.slice(2), value);
+    values.set(name === 'route' ? 'routes' : name, value);
     index += 1;
   }
   const dataset = values.get('dataset');
   if (!dataset) throw new Error('Falta --dataset');
-  const dryRun = flags.has('dry-run');
   const budget = values.get('budget-usd');
-  if (!dryRun && budget === undefined) {
-    throw new Error('Sin --dry-run debes fijar --budget-usd para no gastar sin tope');
-  }
+  const thresholds = values.get('reader-min-confidence');
+  const compare = values.get('compare');
   return {
     datasetDir: resolve(dataset),
-    routeFile: resolve(values.get('route') ?? DEFAULT_ROUTE),
+    routesFile: resolve(values.get('routes') ?? DEFAULT_ROUTES),
     repetitions: Math.floor(numberOption(values.get('repetitions'), '--repetitions', 1)),
     concurrency: Math.floor(numberOption(values.get('concurrency'), '--concurrency', 2)),
     budgetUsd: budget === undefined ? null : numberOption(budget, '--budget-usd', 0),
@@ -118,18 +112,18 @@ function parseArgs(argv: readonly string[]): CliOptions {
       values.get('out') ??
         join(tmpdir(), `answer-reading-eval-${new Date().toISOString().replace(/[:.]/g, '-')}`),
     ),
-    dryRun,
-    compareFile: values.get('compare') ? resolve(values.get('compare') ?? '') : null,
+    dryRun: flags.has('dry-run'),
+    compareFile: compare ? resolve(compare) : null,
+    cacheDir: resolve(values.get('cache-dir') ?? DEFAULT_CACHE_DIR),
+    cacheMode: cacheModeOf(flags),
+    readerMinConfidence: thresholds ? parseReaderMinConfidence(thresholds) : null,
   };
 }
 
-function tariffPerMtok(model: string, kind: 'input' | 'output'): number | null {
-  const usage =
-    kind === 'input'
-      ? { inputTokens: 1_000_000, outputTokens: 0 }
-      : { inputTokens: 0, outputTokens: 1_000_000 };
-  const cost = estimateLlmCostUsd(model, usage);
-  return cost === null ? null : Number(cost);
+function tariffFor(model: string): EvalTariff {
+  const tariff = EVAL_TARIFFS[model];
+  if (!tariff) throw new Error(`Sin tarifa para ${model}: agrégala a tariffs.ts con su fuente`);
+  return tariff;
 }
 
 class EvalModelCatalog extends LlmModelsService {
@@ -140,27 +134,23 @@ class EvalModelCatalog extends LlmModelsService {
     const now = new Date().toISOString();
     this.models = new Map();
     for (const reader of readers) {
-      const provider = LLM_PROVIDER_BY_VISION[reader.provider];
-      const input = tariffPerMtok(reader.model, 'input');
-      const output = tariffPerMtok(reader.model, 'output');
-      if (!provider || input === null || output === null) {
-        throw new Error(
-          `Sin tarifa ni proveedor LLM para el lector ${reader.key} (${reader.model})`,
-        );
+      const tariff = tariffFor(reader.model);
+      if (tariff.provider !== reader.provider) {
+        throw new Error(`El lector ${reader.key} pide ${reader.model} a ${reader.provider}`);
       }
-      this.models.set(`${provider}:${reader.model}`, {
+      this.models.set(`${tariff.provider}:${reader.model}`, {
         id: randomUUID(),
-        provider,
+        provider: tariff.provider,
         modelId: reader.model,
         label: reader.model,
-        maxOutputTokens: reader.params.maxOutputTokens,
+        maxOutputTokens: tariff.maxOutputTokens,
         supportsImages: true,
         supportsStructuredOutput: true,
         supportsBatch: false,
-        supportsSamplingParams: false,
-        inputUsdPerMtok: input,
-        outputUsdPerMtok: output,
-        cachedInputUsdPerMtok: null,
+        supportsSamplingParams: tariff.supportsSamplingParams,
+        inputUsdPerMtok: tariff.inputUsdPerMtok,
+        outputUsdPerMtok: tariff.outputUsdPerMtok,
+        cachedInputUsdPerMtok: tariff.cachedInputUsdPerMtok,
         batchDiscount: null,
         enabled: true,
         deprecatedAt: null,
@@ -217,106 +207,13 @@ class EvalLlmModule {
             new LlmService(config, providers),
           inject: [LlmConfigService, LLM_PROVIDERS],
         },
-      ],
-      exports: [LlmService],
-    };
-  }
-}
-
-class LlmEvalTranscriber implements EvalTranscriber {
-  readonly id = LLM_TRANSCRIBER_ID;
-
-  constructor(
-    private readonly llm: LlmService,
-    private readonly providers: ReadonlyMap<LlmProviderId, LlmProvider>,
-  ) {}
-
-  supports(reader: ReaderSpec): boolean {
-    const provider = LLM_PROVIDER_BY_VISION[reader.provider];
-    return (
-      reader.transcriberId === this.id &&
-      provider !== undefined &&
-      (this.providers.get(provider)?.isAvailable() ?? false)
-    );
-  }
-
-  async transcribe(request: EvalTranscriptionRequest): Promise<TranscriptionResult> {
-    const { reader } = request;
-    const provider = LLM_PROVIDER_BY_VISION[reader.provider];
-    const startedAt = performance.now();
-    if (!provider) return this.failure(reader, 'error', 'unsupported_provider', startedAt);
-    try {
-      const result = await this.llm.completeStructured(
         {
-          system: request.prompt.system,
-          prompt: request.prompt.user,
-          images: [{ mimeType: request.image.mimeType, data: request.image.base64 }],
-          jsonSchema: request.outputJsonSchema.schema,
-          schemaName: STRUCTURED_SCHEMA_NAME,
-          propertyOrder: [...request.outputJsonSchema.propertyOrder],
-          reasoning: reader.params.reasoning,
-          maxTokens: reader.params.maxOutputTokens,
-          timeoutMs: reader.params.timeoutMs,
-          target: { provider, model: reader.model },
-          ...(reader.params.mediaResolution
-            ? { mediaResolution: reader.params.mediaResolution }
-            : {}),
+          provide: LlmVisionTranscriber,
+          useFactory: (llm: LlmService) => new LlmVisionTranscriber(llm),
+          inject: [LlmService],
         },
-        null,
-        'answer_transcription',
-      );
-      return this.toTranscription(request, result, startedAt);
-    } catch (error) {
-      const code = error instanceof Error ? error.message.slice(0, 200) : 'error';
-      const status: TranscriptionStatus = /timeout|timed out|abort/i.test(code)
-        ? 'timeout'
-        : 'error';
-      return this.failure(reader, status, code, startedAt);
-    }
-  }
-
-  private toTranscription(
-    request: EvalTranscriptionRequest,
-    result: LlmStructuredResult,
-    startedAt: number,
-  ): TranscriptionResult {
-    const usage: ReadingUsage | null = result.usage ? { ...result.usage } : null;
-    const cost = estimateLlmCostUsd(result.model, result.usage, 8);
-    const base = {
-      rawText: result.rawText,
-      providerModel: result.model,
-      usage,
-      costUsd: cost === null ? null : Number(cost),
-      latencyMs: Math.round(performance.now() - startedAt),
-    };
-    if (result.finishReason === 'max_tokens') {
-      return { ...base, status: 'truncated', output: null, errorCode: 'max_tokens' };
-    }
-    if (result.finishReason === 'refusal' || result.finishReason === 'safety') {
-      return { ...base, status: 'refused', output: null, errorCode: result.finishReason };
-    }
-    const parsed = request.outputSchema.safeParse(result.data);
-    if (result.data === null || !parsed.success) {
-      return { ...base, status: 'invalid_output', output: null, errorCode: 'schema' };
-    }
-    return { ...base, status: 'ok', output: parsed.data, errorCode: null };
-  }
-
-  private failure(
-    reader: ReaderSpec,
-    status: TranscriptionStatus,
-    errorCode: string,
-    startedAt: number,
-  ): TranscriptionResult {
-    return {
-      status,
-      output: null,
-      rawText: null,
-      providerModel: reader.model,
-      usage: null,
-      costUsd: null,
-      latencyMs: Math.round(performance.now() - startedAt),
-      errorCode,
+      ],
+      exports: [LlmVisionTranscriber],
     };
   }
 }
@@ -331,46 +228,56 @@ function estimateCallUsd(reader: ReaderSpec, observedUsd: readonly number[]): nu
   return Number(worstCase);
 }
 
-async function realTranscribers(
-  routeFile: string,
-): Promise<{ context: INestApplicationContext; transcriber: LlmEvalTranscriber }> {
-  const route = await loadRoute(routeFile);
-  const context = await NestFactory.createApplicationContext(
-    EvalLlmModule.forReaders(routeReaders(route)),
-    { logger: ['error', 'warn'] },
-  );
-  const providers = new Map<LlmProviderId, LlmProvider>([
+function availableTranscriber(
+  context: INestApplicationContext,
+): (reader: ReaderSpec) => HarnessTranscriber | null {
+  const transcriber = context.get(LlmVisionTranscriber);
+  const providers = new Map<string, LlmProvider>([
     ['anthropic', context.get(AnthropicProvider)],
     ['gemini', context.get(GeminiProvider)],
     ['openai', context.get(OpenAiProvider)],
   ]);
-  return { context, transcriber: new LlmEvalTranscriber(context.get(LlmService), providers) };
+  return (reader) =>
+    transcriber.supports(reader) && (providers.get(reader.provider)?.isAvailable() ?? false)
+      ? transcriber
+      : null;
 }
 
 async function main(): Promise<void> {
   loadEnv({ path: join(REPO_ROOT, '.env') });
   const options = parseArgs(process.argv.slice(2));
   const log = (message: string) => process.stderr.write(`${message}\n`);
-  const real = options.dryRun ? null : await realTranscribers(options.routeFile);
+  setCatalogTariffs(
+    new Map(
+      Object.entries(EVAL_TARIFFS).map(([model, tariff]) => [
+        model,
+        {
+          inputUsdPerMtok: tariff.inputUsdPerMtok,
+          outputUsdPerMtok: tariff.outputUsdPerMtok,
+          cachedInputUsdPerMtok: tariff.cachedInputUsdPerMtok,
+        },
+      ]),
+    ),
+  );
+  const context = options.dryRun
+    ? null
+    : await NestFactory.createApplicationContext(
+        EvalLlmModule.forReaders(allRouteReaders(await loadRouteSet(options.routesFile))),
+        { logger: ['error', 'warn'] },
+      );
   try {
-    const transcriber = real?.transcriber;
     const result = await runEvalCommand(options, {
       log,
       estimateCallUsd,
-      ...(transcriber
-        ? {
-            transcriberFor: (reader: ReaderSpec) =>
-              transcriber.supports(reader) ? transcriber : null,
-          }
-        : {}),
+      ...(context ? { transcriberFor: availableTranscriber(context) } : {}),
     });
-    const { metrics } = result.report;
+    const { short, cost } = result.report.metrics;
     log(
-      `Precisión autoaceptada ${metrics.autoAcceptedPrecision.count}/${metrics.autoAcceptedPrecision.total} · autoaceptación ${metrics.autoAccepted.count}/${metrics.autoAccepted.total} · costo US$${metrics.cost.totalUsd.toFixed(5)}`,
+      `Autoaceptadas ${short.autoAccepted.count}/${short.autoAccepted.total} · equivocadas ${short.autoAcceptedWrong.count} (perjudican ${short.harmsStudent.count}, favorecen ${short.favorsStudent.count}) · caché ${result.cacheStats.hits} aciertos, ${result.cacheStats.writes} escrituras · gasto real US$${cost.spentUsd.toFixed(5)}`,
     );
     for (const file of result.files) log(`Escrito: ${file}`);
   } finally {
-    await real?.context.close();
+    await context?.close();
   }
 }
 

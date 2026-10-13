@@ -18,6 +18,10 @@ import {
   MULTI_BOX_OPERATOR_SPACE_MM,
   PAPER_SIZES_PT,
   RESPONSE_FIELD_PADDING_MM,
+  RESPONSE_LABEL_BASELINE_OFFSET_PT,
+  RESPONSE_LABEL_CHAR_WIDTH_EM,
+  RESPONSE_LABEL_FONT_SIZE_PT,
+  RESPONSE_LABEL_GAP_PT,
   SHEET_QR_IDENTITY_REGION,
   TEACHER_SCORE_CAPTION,
 } from './sheet-layout.helpers';
@@ -268,8 +272,8 @@ export function qrPayloadForSheet(
 }
 
 const SYNC_TICK_HEIGHT = 1.6;
-const LABEL_FONT_SIZE = 8;
-const LABEL_GAP = 6;
+const LABEL_FONT_SIZE = RESPONSE_LABEL_FONT_SIZE_PT;
+const LABEL_GAP = RESPONSE_LABEL_GAP_PT;
 const NAME_FONT_SIZE = 11;
 const COURSE_FONT_SIZE = 9;
 const INSTRUCTION_FONT_SIZE = 7;
@@ -279,7 +283,6 @@ const HEADER_QR_GAP = 8;
 const BLANK_NAME_LINE = '________________________________';
 const RUT_MODE_NAME_LINE = 'Nombre: ____________________________';
 const UNIT_GAP_PT = 5;
-const RESPONSE_LABEL_TOP_OFFSET = 17;
 const UNIT_FONT_SIZE = 11;
 const COMPONENT_GLYPH_SCALE = 1.25;
 const SEPARATOR_GLYPH_SCALE = 0.9;
@@ -520,8 +523,11 @@ function buildResponseField(
     rect,
     label: {
       text: field.printedNumber,
-      x: rect.x - LABEL_GAP - LABEL_FONT_SIZE * 0.6 * field.printedNumber.length,
-      y: rect.y + rect.height - RESPONSE_LABEL_TOP_OFFSET,
+      x:
+        rect.x -
+        LABEL_GAP -
+        LABEL_FONT_SIZE * RESPONSE_LABEL_CHAR_WIDTH_EM * field.printedNumber.length,
+      y: rect.y + rect.height - RESPONSE_LABEL_BASELINE_OFFSET_PT,
     },
     boxes,
     segments,

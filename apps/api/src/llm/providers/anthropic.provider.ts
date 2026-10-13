@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { LLM_PROVIDER_DEFAULTS } from '../llm.constants';
+import { runWithinDeadline, type LlmDeadline } from './llm-deadline.helpers';
 import type {
   LlmAgentContent,
   LlmAgentEvent,
@@ -34,6 +35,7 @@ interface AnthropicStreamEvent {
 
 interface AnthropicMessageResponse {
   id?: string;
+  model?: string;
   content: Array<{ type: string; text?: string }>;
   stop_reason?: string | null;
   usage?: {
@@ -45,12 +47,26 @@ interface AnthropicMessageResponse {
 }
 
 const STRUCTURED_MAX_RETRIES = 1;
+const BAD_REQUEST_STATUS = 400;
+const OFF_THINKING_LADDER: readonly ('disabled' | 'between_tools' | null)[] = [
+  'disabled',
+  'between_tools',
+  null,
+];
+const OFF_THINKING_FALLBACK_EFFORT = 'low';
+const THINKING_TYPE_REJECTION = /thinking\.type\.(disabled|between_tools)\b/;
+
+type AnthropicRequestOptions = {
+  timeout?: number;
+  maxRetries?: number;
+  signal?: AbortSignal;
+};
 
 type AnthropicStructuredClient = {
   messages: {
     create(
       req: Record<string, unknown>,
-      options?: { timeout?: number; maxRetries?: number },
+      options?: AnthropicRequestOptions,
     ): Promise<AnthropicMessageResponse>;
   };
 };
@@ -70,6 +86,7 @@ type Anthropic = import('@anthropic-ai/sdk').default;
 export class AnthropicProvider implements LlmProvider {
   readonly name: LlmProviderName = 'anthropic';
   private readonly logger = new Logger(AnthropicProvider.name);
+  private readonly offThinkingStepByModel = new Map<string, number>();
   private client: Anthropic | null = null;
 
   constructor() {
@@ -182,15 +199,18 @@ export class AnthropicProvider implements LlmProvider {
     }
 
     const client = this.client as unknown as AnthropicStructuredClient;
-    const response = await client.messages.create(
-      {
-        model: request.options.model,
-        max_tokens: request.options.maxTokens,
-        system: request.system,
-        messages: [{ role: 'user', content: this.structuredContent(request) }],
-        ...this.reasoningParams(request),
-      },
-      { timeout: request.options.timeoutMs, maxRetries: STRUCTURED_MAX_RETRIES },
+    const response = await runWithinDeadline(request.options.timeoutMs, (deadline) =>
+      this.createWithThinking(
+        client,
+        {
+          model: request.options.model,
+          max_tokens: request.options.maxTokens,
+          system: request.system,
+          messages: [{ role: 'user', content: this.structuredContent(request) }],
+        },
+        request,
+        deadline,
+      ),
     );
 
     const rawText = response.content.find((b) => b.type === 'text')?.text ?? '';
@@ -198,6 +218,7 @@ export class AnthropicProvider implements LlmProvider {
       data: this.parseStructuredText(rawText),
       rawText,
       model: request.options.model,
+      providerModel: response.model || request.options.model,
       finishReason: this.toStructuredFinishReason(response.stop_reason),
       usage: this.toStructuredUsage(response.usage),
       providerRequestId: response.id ?? null,
@@ -214,15 +235,67 @@ export class AnthropicProvider implements LlmProvider {
     ];
   }
 
-  private reasoningParams(request: LlmStructuredRequest): Record<string, unknown> {
+  private async createWithThinking(
+    client: AnthropicStructuredClient,
+    body: Record<string, unknown>,
+    request: LlmStructuredRequest,
+    deadline: LlmDeadline,
+  ): Promise<AnthropicMessageResponse> {
+    const { model, reasoning } = request.options;
     const format = { type: 'json_schema', schema: request.jsonSchema };
-    if (request.options.reasoning === 'off') {
-      return { thinking: { type: 'disabled' }, output_config: { format } };
+    if (reasoning !== 'off') {
+      return client.messages.create(
+        { ...body, thinking: { type: 'adaptive' }, output_config: { format, effort: reasoning } },
+        this.requestOptions(deadline),
+      );
     }
+
+    let step = this.offThinkingStepByModel.get(model) ?? 0;
+    for (;;) {
+      const thinking = OFF_THINKING_LADDER[step] ?? null;
+      const params =
+        thinking === null
+          ? { output_config: { format, effort: OFF_THINKING_FALLBACK_EFFORT } }
+          : { thinking: { type: thinking }, output_config: { format } };
+      try {
+        const response = await client.messages.create(
+          { ...body, ...params },
+          this.requestOptions(deadline),
+        );
+        this.offThinkingStepByModel.set(model, step);
+        return response;
+      } catch (error) {
+        if (thinking === null || !this.isThinkingRejection(error)) throw error;
+        this.logger.warn(
+          `El modelo ${model} rechazó thinking.type=${thinking}; se reintenta con el siguiente valor`,
+        );
+        step += 1;
+      }
+    }
+  }
+
+  private requestOptions(deadline: LlmDeadline): AnthropicRequestOptions {
     return {
-      thinking: { type: 'adaptive' },
-      output_config: { format, effort: request.options.reasoning },
+      timeout: deadline.remainingMs(),
+      maxRetries: STRUCTURED_MAX_RETRIES,
+      signal: deadline.signal,
     };
+  }
+
+  private isThinkingRejection(error: unknown): boolean {
+    if (!(error instanceof Error)) return false;
+    const { status, error: body } = error as Error & { status?: unknown; error?: unknown };
+    if (status !== BAD_REQUEST_STATUS) return false;
+    const detail =
+      body !== null && typeof body === 'object' && 'error' in body
+        ? (body as { error?: { type?: unknown; message?: unknown } }).error
+        : undefined;
+    if (detail && typeof detail.message === 'string') {
+      return (
+        detail.type === 'invalid_request_error' && THINKING_TYPE_REJECTION.test(detail.message)
+      );
+    }
+    return THINKING_TYPE_REJECTION.test(error.message);
   }
 
   private parseStructuredText(rawText: string): unknown {
