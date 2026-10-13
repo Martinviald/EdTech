@@ -96,6 +96,49 @@ describe('arnés answer-reading:eval', () => {
     expect(luna.every((reader) => reader.params.reasoning === 'low')).toBe(true);
   });
 
+  it('la ruta de escalamiento es la final más gpt-6.1-sol en las rutas que autoaceptan', async () => {
+    const final = await loadRouteSet(join(__dirname, 'routes', 'pipeline-b-final.json'));
+    const escalation = await loadRouteSet(
+      join(__dirname, 'routes', 'pipeline-b-escalamiento.json'),
+    );
+    expect(escalation.routes).toHaveLength(final.routes.length);
+    final.routes.forEach((route, index) => {
+      const next = escalation.routes[index]!;
+      if (!route.policy.autoAccept) {
+        expect(next).toEqual(route);
+        return;
+      }
+      const gemini = route.readers.find((reader) => reader.provider === 'gemini')!;
+      expect(next).toEqual({
+        ...route,
+        id: next.id,
+        version: route.version + 1,
+        policy: {
+          ...route.policy,
+          onDisagreement: 'tiebreak_reader',
+          tiebreakReader: {
+            key: 'gpt-6.1-sol',
+            transcriberId: 'llm',
+            provider: 'openai',
+            family: 'openai-sol',
+            model: 'gpt-6.1-sol',
+            promptRef: gemini.promptRef,
+            hints: gemini.hints,
+            params: {
+              reasoning: 'low',
+              timeoutMs: 90000,
+              maxOutputTokens: 4096,
+              mediaResolution: 'medium',
+            },
+            minConfidence: 0.9,
+          },
+          tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+          tiebreakAgreeWith: 'other_provider',
+        },
+      });
+    });
+  });
+
   it('los fixtures en disco coinciden con su generador y el manifiesto v1 sigue siendo válido', async () => {
     const onDisk: unknown = JSON.parse(await readFile(join(FIXTURES_DIR, 'manifest.json'), 'utf8'));
     expect(onDisk).toEqual(FIXTURES_MANIFEST);
@@ -208,6 +251,54 @@ describe('arnés answer-reading:eval', () => {
       const second = await runEvalCommand(real, { transcriberFor: () => null });
       expect(second.cacheStats).toEqual({ hits: 10, misses: 0, writes: 0 });
       expect(second.report.metrics.short.autoAccepted.count).toBe(5);
+    } finally {
+      await rm(cacheDir, { recursive: true, force: true });
+    }
+  });
+
+  it('las lecturas de desempate son condicionales: no bloquean el tope previo, pero exigen --budget-usd', async () => {
+    const { routes } = await loadRouteSet(DEFAULT_ROUTE);
+    const [route] = routes;
+    if (!route) throw new Error('Sin ruta por defecto');
+    const [firstReader] = route.readers;
+    if (!firstReader) throw new Error('Sin lector');
+    const withTiebreak = {
+      ...route,
+      policy: {
+        ...route.policy,
+        onDisagreement: 'tiebreak_reader',
+        tiebreakReader: {
+          ...firstReader,
+          key: 'desempate',
+          model: 'gpt-6.1-sol',
+          provider: 'openai',
+        },
+        tiebreakOn: ['readers_disagree', 'low_confidence', 'reader_requested_review'],
+        tiebreakAgreeWith: 'other_provider',
+      },
+    };
+    const routesFile = join(outDir, 'rutas-desempate.json');
+    await writeFile(
+      routesFile,
+      JSON.stringify({ description: 'desempate', routes: [withTiebreak] }),
+    );
+    const dataset = await loadDataset(FIXTURES_DIR);
+    const fake = dryRunTranscribers(dataset);
+    const cacheDir = await mkdtemp(join(tmpdir(), 'answer-reading-eval-cache-'));
+    try {
+      const real = options({
+        dryRun: false,
+        cacheDir,
+        cacheMode: 'use',
+        repetitions: 1,
+        routesFile,
+      });
+      await expect(runEvalCommand(real, { transcriberFor: fake })).rejects.toThrow('--budget-usd');
+      const result = await runEvalCommand(
+        { ...real, budgetUsd: 0.012 },
+        { transcriberFor: fake, estimateCallUsd: () => 0.001 },
+      );
+      expect(result.cacheStats.writes).toBe(10);
     } finally {
       await rm(cacheDir, { recursive: true, force: true });
     }

@@ -42,6 +42,7 @@ const FALLBACK_MODEL_PRICING_PER_MTOK: ReadonlyArray<{
   { prefix: 'gemini-2.0-flash', inputUsd: 0.1, outputUsd: 0.4 },
   { prefix: 'gemini-1.5-flash', inputUsd: 0.075, outputUsd: 0.3 },
   { prefix: 'gemini-1.5-pro', inputUsd: 1.25, outputUsd: 5 },
+  { prefix: 'gpt-6.1-sol', inputUsd: 2, outputUsd: 10 },
   { prefix: 'jev-', inputUsd: 0.042, outputUsd: 0 },
 ];
 

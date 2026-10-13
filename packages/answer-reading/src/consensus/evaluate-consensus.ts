@@ -9,6 +9,7 @@ import {
   type ResponseFormat,
   type ReviewReason,
   type ScoringOutcome,
+  type TiebreakTrigger,
   type TranscriptionOutput,
   type TranscriptionStatus,
 } from '@soe/types';
@@ -29,6 +30,8 @@ export interface ConsensusReading {
   readonly output: TranscriptionOutput | null;
   /** `tiebreak`: lectura de desempate pedida tras un desacuerdo (política `tiebreak_reader`). */
   readonly role?: 'primary' | 'tiebreak';
+  /** Proveedor del lector; lo exige `tiebreakAgreeWith: 'other_provider'`. */
+  readonly provider?: string;
   /** Umbral propio del lector (`ReaderSpec.minConfidence`); si falta, rige el de la política. */
   readonly minConfidence?: number;
 }
@@ -122,7 +125,10 @@ function distinctFamilies(readings: readonly ConsensusReading[]): number {
  *  9. corrección indecidible → revisión [undecidable];
  * 10. la política no autoacepta ese resultado → revisión [policy_requires_review];
  * 11. auto_accepted (o auto_blank), salvo que caiga en la muestra de auditoría →
- *     revisión [audit_sample].
+ *     revisión [audit_sample];
+ * 12. con `tiebreakOn` (escalamiento), una revisión solo por motivos de esa lista
+ *     puede confirmarse con la lectura de desempate (`confirmByEscalation`); en el
+ *     paso 6 el desempate ya no se suma al grupo.
  *
  * Formatos de rúbrica (`free_text`, `math_work`): solo se transcriben. Nunca se
  * autoaceptan ni se corrigen contra una clave (`scoringOutcome` null): toda
@@ -130,6 +136,16 @@ function distinctFamilies(readings: readonly ConsensusReading[]): number {
  * (desacuerdo, confianza baja, ilegible…), que se resuelven primero.
  */
 export function evaluateConsensus(
+  readings: readonly ConsensusReading[],
+  policy: ConsensusPolicy,
+  scoreOf: ScoreOf,
+  options: ConsensusOptions,
+): ConsensusResult {
+  const result = evaluatePrimaries(readings, policy, scoreOf, options);
+  return confirmByEscalation(result, readings, policy, scoreOf, options) ?? result;
+}
+
+function evaluatePrimaries(
   readings: readonly ConsensusReading[],
   policy: ConsensusPolicy,
   scoreOf: ScoreOf,
@@ -320,7 +336,7 @@ function agreeingGroup(
 ): Normalized[] | null {
   const keys = new Set(normalized.map(keyOf));
   if (keys.size === 1) return [...normalized];
-  if (policy.onDisagreement !== 'tiebreak_reader') return null;
+  if (policy.onDisagreement !== 'tiebreak_reader' || escalates(policy)) return null;
   const tiebreaks: Normalized[] = readings
     .filter((reading) => reading.role === 'tiebreak')
     .filter(isValid)
@@ -340,22 +356,138 @@ function agreeingGroup(
 
 /**
  * Indica si conviene pedir una lectura de desempate: la política lo usa, hay
- * lector configurado, todas las primarias respondieron pero leyeron valores
- * distintos y aún no hay desempate. Quien llama corre el lector de desempate y
- * vuelve a evaluar con esa lectura (`role: 'tiebreak'`).
+ * lector configurado y aún no hay desempate. Sin `tiebreakOn`, solo cuando todas
+ * las primarias respondieron pero leyeron valores distintos. Con `tiebreakOn`
+ * (escalamiento), cuando todos los motivos de revisión están en esa lista y hay
+ * una primaria contestada con la que el desempate podría coincidir. Quien llama
+ * corre el lector de desempate y vuelve a evaluar con esa lectura (`role: 'tiebreak'`).
  */
 export function needsTiebreak(
   result: ConsensusResult,
   readings: readonly ConsensusReading[],
   policy: ConsensusPolicy,
 ): boolean {
+  if (
+    policy.onDisagreement !== 'tiebreak_reader' ||
+    policy.tiebreakReader === null ||
+    readings.some((reading) => reading.role === 'tiebreak')
+  ) {
+    return false;
+  }
+  if (escalates(policy)) {
+    const tiebreakProvider = policy.tiebreakReader.provider;
+    return (
+      isEscalationTrigger(result, policy) &&
+      readings.some(
+        (reading) =>
+          isValid(reading) &&
+          reading.output.state === 'answered' &&
+          canConfirm(reading, tiebreakProvider, policy),
+      )
+    );
+  }
   return (
-    policy.onDisagreement === 'tiebreak_reader' &&
-    policy.tiebreakReader !== null &&
     result.outcome === 'needs_review' &&
     result.reasons.length === 1 &&
     result.reasons[0] === 'readers_disagree' &&
     result.value === null &&
-    readings.every((reading) => reading.role !== 'tiebreak' && reading.output?.state === 'answered')
+    readings.every((reading) => reading.output?.state === 'answered')
   );
+}
+
+function escalates(policy: ConsensusPolicy): boolean {
+  return policy.tiebreakOn !== undefined;
+}
+
+function isEscalationTrigger(result: ConsensusResult, policy: ConsensusPolicy): boolean {
+  const triggers = new Set<ReviewReason>(policy.tiebreakOn ?? ([] as TiebreakTrigger[]));
+  return (
+    result.outcome === 'needs_review' &&
+    result.reasons.length > 0 &&
+    result.reasons.every((reason) => triggers.has(reason))
+  );
+}
+
+/** ¿Esta primaria puede corroborar al desempate? Con `other_provider`, solo si se sabe que es de otro proveedor. */
+function canConfirm(
+  reading: ConsensusReading,
+  tiebreakProvider: string | undefined,
+  policy: ConsensusPolicy,
+): boolean {
+  if (policy.tiebreakAgreeWith !== 'other_provider') return true;
+  return (
+    reading.provider !== undefined &&
+    tiebreakProvider !== undefined &&
+    reading.provider !== tiebreakProvider
+  );
+}
+
+/**
+ * Escalamiento (`tiebreakOn`): si la casilla fue a revisión solo por motivos de
+ * lectura de la lista, la lectura de desempate (contestada, sobre su umbral y sin
+ * pedir revisión) la confirma cuando coincide con una primaria contestada que
+ * `canConfirm` admite; se prefiere una de otro proveedor. No se exige la confianza
+ * de esa primaria: el desempate lee de forma independiente. El valor es el de la
+ * primaria y pasa por formato, corrección, política y auditoría. Si algo falla,
+ * `null`: queda la revisión original.
+ */
+function confirmByEscalation(
+  result: ConsensusResult,
+  readings: readonly ConsensusReading[],
+  policy: ConsensusPolicy,
+  scoreOf: ScoreOf,
+  options: ConsensusOptions,
+): ConsensusResult | null {
+  const { format } = options;
+  if (!escalates(policy) || requiresRubricGrading(format) || !isEscalationTrigger(result, policy)) {
+    return null;
+  }
+  const keyOf = (answer: NormalizedAnswer): string =>
+    policy.agreeOn === 'canonical' ? (answer.canonical ?? '') : scoreOf(answer);
+  const tiebreak = readings
+    .filter((reading) => reading.role === 'tiebreak')
+    .filter(isValid)
+    .find(
+      (reading) =>
+        reading.output.state === 'answered' &&
+        !reading.output.reviewRequested &&
+        meetsConfidence(reading, policy),
+    );
+  if (!tiebreak) return null;
+  const tiebreakAnswer = normalizeTranscription(tiebreak.output, format);
+  if (tiebreakAnswer.canonical === null || hasFormatIssue(tiebreakAnswer)) return null;
+  const otherProvider = (reading: ConsensusReading) =>
+    reading.provider !== undefined &&
+    tiebreak.provider !== undefined &&
+    reading.provider !== tiebreak.provider;
+  const candidates = readings
+    .filter((reading) => (reading.role ?? 'primary') === 'primary')
+    .filter(isValid)
+    .filter(
+      (reading) =>
+        reading.output.state === 'answered' && canConfirm(reading, tiebreak.provider, policy),
+    )
+    .map((reading) => ({ reading, answer: normalizeTranscription(reading.output, format) }))
+    .filter(
+      (entry) => entry.answer.canonical !== null && keyOf(entry.answer) === keyOf(tiebreakAnswer),
+    );
+  const match = candidates.find((entry) => otherProvider(entry.reading)) ?? candidates[0] ?? null;
+  if (match === null || hasFormatIssue(match.answer)) return null;
+  const scoringOutcome = scoreOf(match.answer);
+  const acceptable = (policy.autoAcceptOutcomes as readonly ScoringOutcome[]).includes(
+    scoringOutcome,
+  );
+  if (!policy.autoAccept || !acceptable) return null;
+  const audited = isAuditSample(options.readingKey, policy.auditSampleRate);
+  const reasons: ReviewReason[] = audited ? ['audit_sample'] : [];
+  return {
+    outcome: audited ? 'needs_review' : 'auto_accepted',
+    value: match.answer,
+    scoringOutcome,
+    reasons,
+    reviewMode: audited ? reviewModeFor(reasons) : null,
+    usedReadingIds: [match.reading.readingId, tiebreak.readingId],
+    policyId: policy.id,
+    policyVersion: policy.version,
+  };
 }

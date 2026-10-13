@@ -58,9 +58,12 @@ const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [o
   --out <dir>                    Carpeta de salida (por defecto una carpeta temporal)
   --dry-run                      Transcriptor falso que lee la etiqueta: no llama a ninguna API
   --compare <informe.json>       Comparación pareada contra un informe v2 anterior
+  --injected-escalation          Las lecturas inyectadas (estrés) entran como lecturas dudosas
+                                 de los lectores de la ruta (confianza 0) para medir si el
+                                 escalamiento (tiebreakOn) las confirma
 `;
 
-const FLAGS = new Set(['dry-run', 'no-cache', 'refresh']);
+const FLAGS = new Set(['dry-run', 'no-cache', 'refresh', 'injected-escalation']);
 
 function numberOption(value: string | undefined, name: string, fallback: number): number {
   if (value === undefined) return fallback;
@@ -117,6 +120,7 @@ function parseArgs(argv: readonly string[]): EvalCommandOptions {
     cacheDir: resolve(values.get('cache-dir') ?? DEFAULT_CACHE_DIR),
     cacheMode: cacheModeOf(flags),
     readerMinConfidence: thresholds ? parseReaderMinConfidence(thresholds) : null,
+    injectedEscalation: flags.has('injected-escalation'),
   };
 }
 

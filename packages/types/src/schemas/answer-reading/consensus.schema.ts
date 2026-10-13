@@ -8,11 +8,26 @@ import { readerSpecSchema } from './reader.schema';
 // mandarla a revisión (`verifier_flagged` si duda, `verifier_failed` si no pudo
 // revisar). Ambos se revisan como lectura, sin clave a la vista ni corrección
 // preseleccionada. Nunca acepta ni cambia una nota.
+// `tiebreakOn` y `tiebreakAgreeWith` (opcionales, escalamiento): sin ellos el desempate
+// solo actúa ante `readers_disagree` y se suma al grupo de las primarias (comportamiento
+// original). Con `tiebreakOn`, el lector de desempate se llama ante cualquiera de esos
+// motivos de lectura y confirma de forma independiente: la casilla se autoacepta solo si su
+// lectura (que debe superar su propio umbral y no pedir revisión) coincide con la de una
+// primaria contestada, que con `other_provider` debe ser de otro proveedor. Lo confirmado
+// sigue pasando por la corrección, la política, la auditoría y el verificador.
 // Regla central: indecidible ≠ incorrecto. Lo que no se puede decidir con certeza
 // va a revisión humana y queda pendiente (final_score null), NUNCA 0.
 
 export const AGREE_ON = ['canonical', 'scoring_outcome'] as const;
 export const ON_DISAGREEMENT = ['review', 'tiebreak_reader'] as const;
+export const TIEBREAK_TRIGGERS = [
+  'readers_disagree',
+  'low_confidence',
+  'reader_requested_review',
+] as const;
+export type TiebreakTrigger = (typeof TIEBREAK_TRIGGERS)[number];
+export const TIEBREAK_AGREE_WITH = ['any', 'other_provider'] as const;
+export type TiebreakAgreeWith = (typeof TIEBREAK_AGREE_WITH)[number];
 export const AUTO_ACCEPT_OUTCOMES = ['correct', 'incorrect'] as const;
 export type AutoAcceptOutcome = (typeof AUTO_ACCEPT_OUTCOMES)[number];
 
@@ -28,6 +43,8 @@ export const consensusPolicySchema = z
     blankByInkBelow: z.number().min(0).max(1).nullable(),
     onDisagreement: z.enum(ON_DISAGREEMENT),
     tiebreakReader: readerSpecSchema.nullable(),
+    tiebreakOn: z.array(z.enum(TIEBREAK_TRIGGERS)).min(1).optional(),
+    tiebreakAgreeWith: z.enum(TIEBREAK_AGREE_WITH).optional(),
     incorrectVerifier: readerSpecSchema.optional(),
     autoAccept: z.boolean(),
     autoAcceptOutcomes: z.array(z.enum(AUTO_ACCEPT_OUTCOMES)),
