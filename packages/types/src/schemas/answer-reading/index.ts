@@ -11,3 +11,4 @@ export * from './persistence.schema';
 export * from './review-queue.schema';
 export * from './rubric-review.schema';
 export * from './verification.schema';
+export * from './reading-audit.schema';

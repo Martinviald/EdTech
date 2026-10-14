@@ -79,7 +79,7 @@ const FORMAT_ISSUES: ReadonlySet<NormalizationIssue> = new Set<NormalizationIssu
   'extra_tokens',
 ]);
 
-function hasFormatIssue(answer: NormalizedAnswer): boolean {
+export function hasFormatIssue(answer: NormalizedAnswer): boolean {
   return answer.issues.some((issue) => FORMAT_ISSUES.has(issue));
 }
 

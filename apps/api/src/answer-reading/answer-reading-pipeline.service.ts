@@ -711,8 +711,13 @@ export class AnswerReadingPipelineService implements OnModuleInit {
     const { policy } = route;
     const tiebreak = policy.onDisagreement === 'tiebreak_reader' && policy.tiebreakReader !== null;
     const verifier = policy.autoAccept && policy.incorrectVerifier !== undefined;
+    const auditor = policy.autoAccept && policy.readingAuditor !== undefined;
     return (
-      route.readers.length + route.shadowReaders.length + (tiebreak ? 1 : 0) + (verifier ? 1 : 0)
+      route.readers.length +
+      route.shadowReaders.length +
+      (tiebreak ? 1 : 0) +
+      (verifier ? 1 : 0) +
+      (auditor ? 1 : 0)
     );
   }
 

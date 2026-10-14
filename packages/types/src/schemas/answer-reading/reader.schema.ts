@@ -46,7 +46,12 @@ export const readerSpecSchema = z
   .strict();
 export type ReaderSpec = z.infer<typeof readerSpecSchema>;
 
-export const PROMPT_PURPOSES = ['transcription', 'rubric_grading', 'verification'] as const;
+export const PROMPT_PURPOSES = [
+  'transcription',
+  'rubric_grading',
+  'verification',
+  'reading_audit',
+] as const;
 export type PromptPurpose = (typeof PROMPT_PURPOSES)[number];
 
 // Lista cerrada. NUNCA hay variables con datos del alumno, y un prompt de

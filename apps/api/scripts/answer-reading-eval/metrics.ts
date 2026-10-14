@@ -1,5 +1,11 @@
-import type { ResponseFormatKind, ReviewReason } from '@soe/types';
-import type { ReadingRecord, SimulationResult, SkipReason, UnitRecord } from './simulate';
+import type { ReadingOutcome, ResponseFormatKind, ReviewReason } from '@soe/types';
+import type {
+  AutoAcceptedErrorKind,
+  ReadingRecord,
+  SimulationResult,
+  SkipReason,
+  UnitRecord,
+} from './simulate';
 import {
   mean,
   mcnemarExact,
@@ -118,6 +124,41 @@ export interface VerifierMetrics {
   readonly cases: readonly VerifiedCase[];
 }
 
+export interface AuditedCase {
+  readonly sampleId: string;
+  readonly repetition: number;
+  readonly formatKind: ResponseFormatKind;
+  readonly candidate: string | null;
+  readonly truth: string | null;
+  readonly status: string | null;
+  readonly verdict: string | null;
+  readonly confidence: number | null;
+  readonly suspiciousCharacters: readonly string[];
+  readonly approved: boolean;
+  readonly accepted: boolean;
+  readonly finalOutcome: ReadingOutcome;
+  readonly finalError: AutoAcceptedErrorKind | null;
+}
+
+export interface AuditorMetrics {
+  readonly readerKeys: readonly string[];
+  readonly audited: number;
+  readonly called: number;
+  readonly fromCache: number;
+  readonly failed: number;
+  readonly approved: number;
+  readonly accepted: number;
+  readonly autoAcceptedAfterVerifier: number;
+  readonly acceptedWrong: number;
+  readonly acceptedHarms: number;
+  readonly candidateCorrect: Proportion;
+  readonly approvedWhenCandidateCorrect: Proportion;
+  readonly approvedWhenCandidateWrong: Proportion;
+  readonly extraCostUsd: number;
+  readonly extraCostPerShortCropUsd: number | null;
+  readonly cases: readonly AuditedCase[];
+}
+
 export interface EvalMetricsV2 {
   readonly samples: {
     readonly total: number;
@@ -126,6 +167,7 @@ export interface EvalMetricsV2 {
   };
   readonly short: ShortDecisionMetrics;
   readonly verifier: VerifierMetrics | null;
+  readonly auditor: AuditorMetrics | null;
   readonly development: DevelopmentDecisionMetrics;
   readonly readers: readonly ReaderMetrics[];
   readonly cost: {
@@ -367,6 +409,55 @@ function verifierMetrics(
   };
 }
 
+function auditorMetrics(
+  shortUnits: readonly UnitRecord[],
+  truthBySample: ReadonlyMap<string, string | null>,
+): AuditorMetrics | null {
+  const audited = shortUnits.filter((unit) => unit.auditor !== null);
+  if (audited.length === 0) return null;
+  const cases: AuditedCase[] = audited.map((unit) => ({
+    sampleId: unit.sampleId,
+    repetition: unit.repetition,
+    formatKind: unit.formatKind,
+    candidate: unit.auditor?.candidate ?? null,
+    truth: truthBySample.get(unit.sampleId) ?? null,
+    status: unit.auditor?.status ?? null,
+    verdict: unit.auditor?.verdict ?? null,
+    confidence: unit.auditor?.confidence ?? null,
+    suspiciousCharacters: unit.auditor?.suspiciousCharacters ?? [],
+    approved: unit.auditor?.approved ?? false,
+    accepted: unit.auditor?.accepted ?? false,
+    finalOutcome: unit.outcome,
+    finalError: unit.autoAcceptedError,
+  }));
+  const withCandidate = cases.filter((entry) => entry.candidate !== null);
+  const correct = withCandidate.filter((entry) => entry.candidate === entry.truth);
+  const wrong = withCandidate.filter((entry) => entry.candidate !== entry.truth);
+  const approvedIn = (list: readonly AuditedCase[]) =>
+    list.filter((entry) => entry.approved).length;
+  const accepted = audited.filter((unit) => unit.auditor?.accepted);
+  const finallyAccepted = accepted.filter((unit) => unit.autoAccepted);
+  const extraCostUsd = audited.reduce((sum, unit) => sum + (unit.auditor?.costUsd ?? 0), 0);
+  return {
+    readerKeys: [...new Set(audited.map((unit) => unit.auditor?.readerKey ?? ''))].sort(),
+    audited: audited.length,
+    called: audited.filter((unit) => unit.auditor?.called).length,
+    fromCache: audited.filter((unit) => unit.auditor?.fromCache).length,
+    failed: audited.filter((unit) => unit.auditor?.status !== 'ok').length,
+    approved: audited.filter((unit) => unit.auditor?.approved).length,
+    accepted: accepted.length,
+    autoAcceptedAfterVerifier: finallyAccepted.length,
+    acceptedWrong: finallyAccepted.filter((unit) => unit.autoAcceptedError !== null).length,
+    acceptedHarms: finallyAccepted.filter((unit) => unit.autoAcceptedError === 'harms').length,
+    candidateCorrect: proportion(correct.length, withCandidate.length),
+    approvedWhenCandidateCorrect: proportion(approvedIn(correct), correct.length),
+    approvedWhenCandidateWrong: proportion(approvedIn(wrong), wrong.length),
+    extraCostUsd,
+    extraCostPerShortCropUsd: shortUnits.length > 0 ? extraCostUsd / shortUnits.length : null,
+    cases,
+  };
+}
+
 export function computeMetrics(
   result: SimulationResult,
   cacheStats: { hits: number },
@@ -389,6 +480,7 @@ export function computeMetrics(
     },
     short: shortDecisionMetrics(shortUnits, truthBySample),
     verifier: verifierMetrics(shortUnits, truthBySample),
+    auditor: auditorMetrics(shortUnits, truthBySample),
     development: {
       units: developmentUnits.length,
       autoAccepted: developmentUnits.filter((unit) => unit.autoAccepted).length,

@@ -1,4 +1,6 @@
 import type {
+  ReadingAuditRequest,
+  ReadingAuditResult,
   TranscriptionRequest,
   TranscriptionResult,
   VerificationRequest,
@@ -15,6 +17,7 @@ export interface VisionTranscriber {
   supports(reader: ReaderSpec): boolean;
   transcribe(request: VisionTranscriptionRequest): Promise<TranscriptionResult>;
   verify?(request: VerificationRequest): Promise<VerificationResult>;
+  audit?(request: ReadingAuditRequest): Promise<ReadingAuditResult>;
 }
 
 export const VISION_TRANSCRIBERS = 'VISION_TRANSCRIBERS';

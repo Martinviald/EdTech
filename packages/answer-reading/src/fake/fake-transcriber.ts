@@ -1,11 +1,15 @@
 import {
+  readingAuditOutputSchema,
   verificationOutputSchema,
   type ReaderSpec,
+  type ReadingAuditOutput,
   type TranscriptionOutput,
   type TranscriptionStatus,
   type VerificationOutput,
 } from '@soe/types';
 import type {
+  ReadingAuditRequest,
+  ReadingAuditResult,
   TranscriptionRequest,
   TranscriptionResult,
   VerificationRequest,
@@ -23,6 +27,8 @@ export type FakeReading = TranscriptionOutput | FakeFailure;
 
 export type FakeVerdict = VerificationOutput | FakeFailure;
 
+export type FakeAudit = ReadingAuditOutput | FakeFailure;
+
 export interface FakeTranscriberOptions {
   /** Default: `'fake'`. Atiende a los lectores con ese `transcriberId`. */
   readonly id?: string;
@@ -36,6 +42,8 @@ export interface FakeTranscriberOptions {
   readonly fallback?: FakeReading;
   /** Veredictos del verificador de incorrectas por clave del lector y luego por `sha256`. */
   readonly verdicts?: Readonly<Record<string, Readonly<Record<string, FakeVerdict>>>>;
+  /** Veredictos del auditor de lectura por clave del lector y luego por `sha256`. */
+  readonly audits?: Readonly<Record<string, Readonly<Record<string, FakeAudit>>>>;
 }
 
 export const FAKE_TRANSCRIBER_ID = 'fake';
@@ -48,6 +56,10 @@ function isFailedVerdict(verdict: FakeVerdict): verdict is FakeFailure {
   return !('couldBeKey' in verdict);
 }
 
+function isFailedAudit(audit: FakeAudit): audit is FakeFailure {
+  return !('verdict' in audit);
+}
+
 /**
  * Transcriptor determinístico para tests: no llama a ningún proveedor, valida la
  * salida con el esquema del request y registra cada request en `calls`.
@@ -56,6 +68,7 @@ export class FakeTranscriber implements VisionTranscriber {
   readonly id: string;
   readonly calls: TranscriptionRequest[] = [];
   readonly verifyCalls: VerificationRequest[] = [];
+  readonly auditCalls: ReadingAuditRequest[] = [];
 
   constructor(private readonly options: FakeTranscriberOptions = {}) {
     this.id = options.id ?? FAKE_TRANSCRIBER_ID;
@@ -118,6 +131,30 @@ export class FakeTranscriber implements VisionTranscriber {
     return { ...base, status: 'ok', output: parsed.data, rawText, errorCode: null };
   }
 
+  async audit(request: ReadingAuditRequest): Promise<ReadingAuditResult> {
+    this.auditCalls.push(request);
+    const audit = this.options.audits?.[request.reader.key]?.[request.image.sha256];
+    const base = { providerModel: request.reader.model, usage: null, costUsd: 0, latencyMs: 0 };
+    if (audit === undefined) {
+      return { ...base, status: 'error', output: null, rawText: null, errorCode: 'fake_missing' };
+    }
+    if (isFailedAudit(audit)) {
+      return {
+        ...base,
+        status: audit.status,
+        output: null,
+        rawText: null,
+        errorCode: audit.errorCode ?? `fake_${audit.status}`,
+      };
+    }
+    const parsed = readingAuditOutputSchema.safeParse(audit);
+    const rawText = JSON.stringify(audit);
+    if (!parsed.success) {
+      return { ...base, status: 'invalid_output', output: null, rawText, errorCode: 'schema' };
+    }
+    return { ...base, status: 'ok', output: parsed.data, rawText, errorCode: null };
+  }
+
   private programmedReading(request: TranscriptionRequest): FakeReading | undefined {
     const { byReadingKey, byReader, bySha256, fallback } = this.options;
     return (
@@ -132,6 +169,14 @@ export class FakeTranscriber implements VisionTranscriber {
 /** Veredicto del verificador para tests. */
 export function fakeVerdict(couldBeKey: boolean, confidence = 1): VerificationOutput {
   return { notes: '', differingCharacters: [], couldBeKey, confidence };
+}
+
+/** Veredicto del auditor de lectura para tests. */
+export function fakeAudit(
+  verdict: ReadingAuditOutput['verdict'],
+  confidence = 1,
+): ReadingAuditOutput {
+  return { notes: '', suspiciousCharacters: [], verdict, confidence };
 }
 
 /** Salida de lector mínima para tests: respondida, confianza 1 y sin alternativas. */

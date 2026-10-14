@@ -5,33 +5,46 @@ import {
   acceptedAnswersOf,
   agreedReadingOf,
   applyIncorrectVerification,
+  applyReadingAudit,
   evaluateConsensus,
   isAuditSample,
+  isReadingAuditPromptFor,
   isTranscriptionPromptFor,
   isVerificationPromptFor,
+  itemStemOf,
   needsIncorrectVerification,
+  needsReadingAudit,
   needsTiebreak,
   normalizeTranscription,
+  readingAuditCandidate,
+  renderReadingAuditPrompt,
   renderVerificationPrompt,
   renderTranscriptionPrompt,
   responseGeometryOf,
+  type ConsensusOptions,
   type ConsensusReading,
-  type IncorrectVerificationVerdict,
-  type RenderedVerificationPrompt,
+  type ReadingAuditCandidate,
+  type ReadingAuditJsonSchema,
+  type ReadingAuditResult,
   type ScoreOf,
+  type StructuredVisionResult,
   type TranscriptionImage,
   type TranscriptionJsonSchema,
   type TranscriptionResult,
+  type VerificationJsonSchema,
   type VerificationResult,
 } from '@soe/answer-reading';
 import { answerReadings, withOrgContext, type NewAnswerReadingRow } from '@soe/db';
 import {
   DEFAULT_CONSENSUS_POLICY,
+  readingAuditOutputSchema,
   reviewModeFor,
+  verificationOutputSchema,
   type ConsensusPolicy,
   type ConsensusResult,
   type CropEvidence,
   type ReaderSpec,
+  type ReadingAuditOutput,
   type ReadingMode,
   type RenderedPrompt,
   type ResponseFormat,
@@ -112,7 +125,7 @@ interface StoredReading extends ReuseFingerprint {
   readonly status: TranscriptionStatus;
   readonly family: string;
   readonly output: TranscriptionOutput | null;
-  readonly verificationOutput: VerificationOutput | null;
+  readonly verificationOutput: VerificationOutput | ReadingAuditOutput | null;
 }
 
 interface ExistingReadings {
@@ -134,18 +147,30 @@ interface PersistedAttempt {
   readonly costUsd: number;
 }
 
-interface VerificationPlan {
+interface JudgePlan<TSchema> {
   readonly reader: ReaderSpec;
-  readonly rendered: RenderedVerificationPrompt;
+  readonly prompt: RenderedPrompt;
+  readonly outputSchema: TSchema;
   readonly readingKey: string;
   readonly lookupKey: string;
   readonly reuseKey: string;
 }
 
-interface VerifiedAttempt {
-  readonly verdict: IncorrectVerificationVerdict;
+type VerificationPlan = JudgePlan<VerificationJsonSchema>;
+
+type AuditPlan = JudgePlan<ReadingAuditJsonSchema>;
+
+interface JudgedAttempt<TOutput> {
+  readonly status: TranscriptionStatus;
+  readonly output: TOutput | null;
   readonly errorCode: string | null;
   readonly costUsd: number;
+}
+
+interface JudgeRun<TSchema, TOutput> {
+  readonly plan: JudgePlan<TSchema>;
+  readonly failureMessage: string;
+  readonly call: () => Promise<StructuredVisionResult<TOutput>>;
 }
 
 interface VerifiedOutcome {
@@ -232,10 +257,18 @@ export class CropReadingService {
       consensusReadings = [...readings, tiebreak.reading];
       result = evaluateConsensus(consensusReadings, policy, scoreOf, consensusOptions);
     }
-    const verified = await this.verifyIncorrect(scope, policy, result, consensusReadings);
+    const audited = await this.auditReading(
+      scope,
+      policy,
+      result,
+      consensusReadings,
+      scoreOf,
+      consensusOptions,
+    );
+    const verified = await this.verifyIncorrect(scope, policy, audited.result, consensusReadings);
     return {
       result: verified.result,
-      costUsd: costUsd + verified.costUsd,
+      costUsd: costUsd + audited.costUsd + verified.costUsd,
       routeId: task.route.route.routeId,
       routeVersion: task.route.route.routeVersion,
     };
@@ -254,21 +287,91 @@ export class CropReadingService {
     const plan = this.verificationPlanFor(scope, verifier, result, readings);
     if (plan === null)
       return { result: applyIncorrectVerification(result, policy, null), costUsd: 0 };
+    const judged = await this.judge(scope, {
+      plan,
+      failureMessage: 'La verificación de una incorrecta terminó en',
+      call: async () => this.verify(scope, plan),
+    });
+    const output = this.verificationOutputOf(judged.output);
+    return {
+      result: applyIncorrectVerification(result, policy, { status: judged.status, output }),
+      costUsd: judged.costUsd,
+    };
+  }
+
+  private async auditReading(
+    scope: ReadingScope,
+    policy: ConsensusPolicy,
+    result: ConsensusResult,
+    readings: readonly ConsensusReading[],
+    scoreOf: ScoreOf,
+    options: Pick<ConsensusOptions, 'format' | 'readingKey'>,
+  ): Promise<VerifiedOutcome> {
+    const auditor = policy.readingAuditor;
+    if (auditor === undefined || !needsReadingAudit(result, policy, scope.task.format)) {
+      return { result, costUsd: 0 };
+    }
+    const candidate = readingAuditCandidate(readings, scope.task.format);
+    if (
+      candidate === null ||
+      !isReadingAuditPromptFor(auditor.reader.promptRef, scope.task.format)
+    ) {
+      return { result, costUsd: 0 };
+    }
+    const plan = this.auditPlanFor(scope, auditor.reader, candidate);
+    const judged = await this.judge(scope, {
+      plan,
+      failureMessage: 'La auditoría de una lectura terminó en',
+      call: async () => this.audit(scope, plan),
+    });
+    const output = this.auditOutputOf(judged.output);
+    return {
+      result: applyReadingAudit(
+        result,
+        policy,
+        candidate,
+        { status: judged.status, output },
+        scoreOf,
+        options,
+      ),
+      costUsd: judged.costUsd,
+    };
+  }
+
+  private async judge<TSchema, TOutput>(
+    scope: ReadingScope,
+    run: JudgeRun<TSchema, TOutput>,
+  ): Promise<JudgedAttempt<unknown>> {
+    const { plan } = run;
     const existing = await this.loadExisting(scope.task.orgId, [plan.readingKey]);
     const reused = existing.reusable.get(plan.reuseKey);
     if (reused?.verificationOutput) {
-      const verdict = { status: reused.status, output: reused.verificationOutput };
-      return { result: applyIncorrectVerification(result, policy, verdict), costUsd: 0 };
+      return {
+        status: reused.status,
+        output: reused.verificationOutput,
+        errorCode: null,
+        costUsd: 0,
+      };
     }
     const firstAttempt = (existing.lastAttempt.get(plan.lookupKey) ?? 0) + 1;
-    let attempt = await this.verifyAndPersist(scope, plan, firstAttempt);
+    let attempt = await this.judgeAndPersist(scope, run, firstAttempt);
     let costUsd = attempt.costUsd;
-    if (this.isTransient(attempt.verdict.status, attempt.errorCode)) {
+    if (this.isTransient(attempt.status, attempt.errorCode)) {
       await this.pause(this.options.retryDelayMs);
-      attempt = await this.verifyAndPersist(scope, plan, firstAttempt + 1);
+      attempt = await this.judgeAndPersist(scope, run, firstAttempt + 1);
       costUsd += attempt.costUsd;
     }
-    return { result: applyIncorrectVerification(result, policy, attempt.verdict), costUsd };
+    return { ...attempt, costUsd };
+  }
+
+  private verificationOutputOf(output: unknown): VerificationOutput | null {
+    const parsed = verificationOutputSchema.safeParse(output);
+    return parsed.success ? parsed.data : null;
+  }
+
+  private auditOutputOf(output: unknown): ReadingAuditOutput | null {
+    const parsed = readingAuditOutputSchema.safeParse(output);
+    return parsed.success ? parsed.data : null;
   }
 
   private verificationPlanFor(
@@ -294,46 +397,66 @@ export class CropReadingService {
       acceptedAnswers,
       gradeName: task.gradeName,
     });
+    return this.judgePlanFor(scope, verifier, rendered.prompt, rendered.outputSchema);
+  }
+
+  private auditPlanFor(
+    scope: ReadingScope,
+    auditor: ReaderSpec,
+    candidate: ReadingAuditCandidate,
+  ): AuditPlan {
+    const { task } = scope;
+    const rendered = renderReadingAuditPrompt({
+      reader: auditor,
+      format: task.format,
+      candidate,
+      stem: itemStemOf(task.item.content),
+      gradeName: task.gradeName,
+    });
+    return this.judgePlanFor(scope, auditor, rendered.prompt, rendered.outputSchema);
+  }
+
+  private judgePlanFor<TSchema>(
+    scope: ReadingScope,
+    reader: ReaderSpec,
+    prompt: RenderedPrompt,
+    outputSchema: TSchema,
+  ): JudgePlan<TSchema> {
+    const { task } = scope;
     const readingKey = this.sha256(
-      [
-        scope.cropSha256,
-        task.item.id,
-        rendered.prompt.ref,
-        rendered.prompt.hash,
-        task.cropProfileId,
-      ].join('|'),
+      [scope.cropSha256, task.item.id, prompt.ref, prompt.hash, task.cropProfileId].join('|'),
     );
-    const lookupKey = this.lookupKey(readingKey, verifier.key, 'verifier');
+    const lookupKey = this.lookupKey(readingKey, reader.key, 'verifier');
     return {
-      reader: verifier,
-      rendered,
+      reader,
+      prompt,
+      outputSchema,
       readingKey,
       lookupKey,
-      reuseKey: this.reuseKey(lookupKey, { ...verifier, promptHash: rendered.prompt.hash }),
+      reuseKey: this.reuseKey(lookupKey, { ...reader, promptHash: prompt.hash }),
     };
   }
 
-  private async verifyAndPersist(
+  private async judgeAndPersist<TSchema, TOutput>(
     scope: ReadingScope,
-    plan: VerificationPlan,
+    run: JudgeRun<TSchema, TOutput>,
     attempt: number,
-  ): Promise<VerifiedAttempt> {
+  ): Promise<JudgedAttempt<TOutput>> {
     const { task } = scope;
-    const result = await this.verify(scope, plan);
+    const { plan } = run;
+    const result = await run.call();
     if (result.status === 'error' || result.status === 'timeout') {
-      reportServerError(
-        new Error(`La verificación de una incorrecta terminó en ${result.status}`),
-        {
-          orgId: task.orgId,
-          runId: task.runId,
-          readerKey: plan.reader.key,
-          errorCode: result.errorCode,
-        },
-      );
+      reportServerError(new Error(`${run.failureMessage} ${result.status}`), {
+        orgId: task.orgId,
+        runId: task.runId,
+        readerKey: plan.reader.key,
+        errorCode: result.errorCode,
+      });
     }
     const output = result.status === 'ok' ? result.output : null;
     const usage = result.usage;
     const costUsd = result.costUsd ?? 0;
+    const judgement = this.verificationOutputOf(output) ?? this.auditOutputOf(output);
     await this.insertReading(task.orgId, {
       id: randomUUID(),
       orgId: task.orgId,
@@ -355,16 +478,16 @@ export class CropReadingService {
       family: plan.reader.family,
       model: plan.reader.model,
       providerModel: result.providerModel,
-      promptRef: plan.rendered.prompt.ref,
-      promptHash: plan.rendered.prompt.hash,
-      outputSchemaId: plan.rendered.prompt.outputSchemaId,
+      promptRef: plan.prompt.ref,
+      promptHash: plan.prompt.hash,
+      outputSchemaId: plan.prompt.outputSchemaId,
       params: plan.reader.params,
       status: result.status,
       output: null,
-      verificationOutput: output,
+      verificationOutput: judgement,
       readingState: null,
       literal: null,
-      confidence: output === null ? null : output.confidence.toFixed(3),
+      confidence: judgement === null ? null : judgement.confidence.toFixed(3),
       rawText: result.status === 'invalid_output' ? result.rawText : null,
       normalized: null,
       inputTokens: usage?.inputTokens ?? 0,
@@ -376,25 +499,21 @@ export class CropReadingService {
       latencyMs: result.latencyMs,
       errorCode: result.errorCode,
     });
-    return {
-      verdict: { status: result.status, output },
-      errorCode: result.errorCode,
-      costUsd,
-    };
+    return { status: result.status, output, errorCode: result.errorCode, costUsd };
   }
 
   private async verify(scope: ReadingScope, plan: VerificationPlan): Promise<VerificationResult> {
     const transcriber = this.transcribers.forReader(plan.reader);
     if (transcriber === null || transcriber.verify === undefined) {
-      return this.failedVerification(plan.reader, TRANSCRIPTION_ERROR_CODES.transcriberNotFound);
+      return this.failedJudgement(plan.reader, TRANSCRIPTION_ERROR_CODES.transcriberNotFound);
     }
     try {
       return await transcriber.verify({
         readingKey: plan.readingKey,
         image: await scope.image(),
         reader: plan.reader,
-        prompt: plan.rendered.prompt,
-        outputSchema: plan.rendered.outputSchema,
+        prompt: plan.prompt,
+        outputSchema: plan.outputSchema,
       });
     } catch (error) {
       reportServerError(error, {
@@ -402,11 +521,37 @@ export class CropReadingService {
         runId: scope.task.runId,
         readerKey: plan.reader.key,
       });
-      return this.failedVerification(plan.reader, TRANSCRIPTION_ERROR_CODES.providerError);
+      return this.failedJudgement(plan.reader, TRANSCRIPTION_ERROR_CODES.providerError);
     }
   }
 
-  private failedVerification(reader: ReaderSpec, errorCode: string): VerificationResult {
+  private async audit(scope: ReadingScope, plan: AuditPlan): Promise<ReadingAuditResult> {
+    const transcriber = this.transcribers.forReader(plan.reader);
+    if (transcriber === null || transcriber.audit === undefined) {
+      return this.failedJudgement(plan.reader, TRANSCRIPTION_ERROR_CODES.transcriberNotFound);
+    }
+    try {
+      return await transcriber.audit({
+        readingKey: plan.readingKey,
+        image: await scope.image(),
+        reader: plan.reader,
+        prompt: plan.prompt,
+        outputSchema: plan.outputSchema,
+      });
+    } catch (error) {
+      reportServerError(error, {
+        orgId: scope.task.orgId,
+        runId: scope.task.runId,
+        readerKey: plan.reader.key,
+      });
+      return this.failedJudgement(plan.reader, TRANSCRIPTION_ERROR_CODES.providerError);
+    }
+  }
+
+  private failedJudgement<TOutput>(
+    reader: ReaderSpec,
+    errorCode: string,
+  ): StructuredVisionResult<TOutput> {
     return {
       status: 'error',
       output: null,

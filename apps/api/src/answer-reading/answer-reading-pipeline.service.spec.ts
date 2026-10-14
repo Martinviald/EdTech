@@ -6,8 +6,10 @@ jest.mock('drizzle-orm', () => ({
 import { createHash } from 'node:crypto';
 import {
   FakeTranscriber,
+  fakeAudit,
   fakeOutput,
   fakeVerdict,
+  type FakeAudit,
   type FakeReading,
   type FakeVerdict,
 } from '@soe/answer-reading';
@@ -200,6 +202,7 @@ class FakeDispatcher implements JobDispatcher {
 interface SetupOptions {
   readonly readings?: Record<string, Record<string, FakeReading>>;
   readonly verdicts?: Record<string, Record<string, FakeVerdict>>;
+  readonly audits?: Record<string, Record<string, FakeAudit>>;
   readonly policy?: ConsensusPolicy;
   readonly readers?: ReaderSpec[];
   readonly shadowReaders?: ReaderSpec[];
@@ -301,6 +304,7 @@ function setup(setupOptions: SetupOptions = {}) {
   const transcriber = new FakeTranscriber({
     byReader: setupOptions.readings ?? {},
     verdicts: setupOptions.verdicts ?? {},
+    audits: setupOptions.audits ?? {},
   });
   const activeTranscriber = setupOptions.wrapTranscriber?.(transcriber, memory) ?? transcriber;
   const files = {
@@ -968,6 +972,150 @@ describe('AnswerReadingPipelineService — verificador de incorrectas', () => {
     expect(transcriber.verifyCalls).toHaveLength(1);
     expect(readingsOf(memory).filter((row) => row.mode === 'verifier')).toHaveLength(1);
     expect(currentDecision(memory)).toMatchObject({ reasons: ['verifier_flagged'] });
+  });
+});
+
+describe('AnswerReadingPipelineService — auditor de lectura', () => {
+  const AUDITOR = reader('auditor', 'gemini-flash', {
+    provider: 'gemini',
+    promptRef: 'audit.reading@1',
+    hints: 'format',
+  });
+  const VERIFIER = reader('verificador', 'openai-luna', {
+    provider: 'openai',
+    promptRef: 'verify.incorrect@1',
+    hints: 'format',
+    minConfidence: 0.9,
+  });
+  const withAuditor: ConsensusPolicy = {
+    ...POLICY,
+    readingAuditor: { reader: AUDITOR, minConfidence: 0.9, candidate: 'agreement_or_top' },
+  };
+  const doubtfulIncorrect = {
+    haiku: { [SHA_1]: fakeOutput('7,4', { confidence: 0.6 }) },
+    flash: { [SHA_1]: fakeOutput('7.4', { confidence: 0.7 }) },
+  };
+
+  it('una revisión por confianza baja se autoacepta si el auditor aprueba, sin mostrarle la clave', async () => {
+    const { memory, transcriber, runScan } = setup({
+      policy: withAuditor,
+      readings: doubtfulIncorrect,
+      audits: { auditor: { [SHA_1]: fakeAudit('approve', 0.95) } },
+    });
+
+    await runScan();
+
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'incorrect',
+      reasons: [],
+    });
+    expect(transcriber.auditCalls).toHaveLength(1);
+    const [call] = transcriber.auditCalls;
+    expect(call?.prompt.ref).toBe('audit.reading@1');
+    expect(call?.prompt.user).toContain('7.4');
+    expect(call?.prompt.user).toContain('¿Cuánto mide?');
+    expect(`${call?.prompt.system}${call?.prompt.user}`).not.toContain('7,3');
+    const audit = readingsOf(memory).filter((row) => row.readerKey === 'auditor');
+    expect(audit).toHaveLength(1);
+    expect(audit[0]).toMatchObject({
+      mode: 'verifier',
+      promptRef: 'audit.reading@1',
+      outputSchemaId: 'reading-audit-output@1',
+      status: 'ok',
+      output: null,
+      verificationOutput: { verdict: 'approve', confidence: 0.95 },
+    });
+    expect(currentDecision(memory).usedReadingIds).not.toContain(audit[0]?.id);
+  });
+
+  it('un rechazo, un approve bajo el umbral o una falla dejan la revisión con sus motivos originales', async () => {
+    for (const audit of [
+      fakeAudit('reject', 0.99),
+      fakeAudit('approve', 0.85),
+      { status: 'refused' as const },
+    ]) {
+      const { memory, runScan } = setup({
+        policy: withAuditor,
+        readings: doubtfulIncorrect,
+        audits: { auditor: { [SHA_1]: audit } },
+      });
+
+      await runScan();
+
+      expect(currentDecision(memory)).toMatchObject({
+        outcome: 'needs_review',
+        reasons: ['low_confidence'],
+        reviewMode: 'reading',
+      });
+    }
+  });
+
+  it('lo que acepta el auditor pasa por el verificador de incorrectas, que puede mandarlo a revisión', async () => {
+    const { memory, transcriber, runScan } = setup({
+      policy: { ...withAuditor, incorrectVerifier: VERIFIER },
+      readings: doubtfulIncorrect,
+      audits: { auditor: { [SHA_1]: fakeAudit('approve', 0.95) } },
+      verdicts: { verificador: { [SHA_1]: fakeVerdict(true, 0.95) } },
+    });
+
+    await runScan();
+
+    expect(transcriber.auditCalls).toHaveLength(1);
+    expect(transcriber.verifyCalls).toHaveLength(1);
+    expect(currentDecision(memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['verifier_flagged'],
+      reviewMode: 'reading',
+    });
+  });
+
+  it('no llama al auditor sin auditor en la política ni ante un motivo que no es de lectura', async () => {
+    const withoutAuditor = setup({ readings: doubtfulIncorrect });
+    await withoutAuditor.runScan();
+    expect(withoutAuditor.transcriber.auditCalls).toHaveLength(0);
+    expect(currentDecision(withoutAuditor.memory)).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['low_confidence'],
+    });
+
+    const unparsed = setup({
+      policy: withAuditor,
+      readings: { haiku: { [SHA_1]: fakeOutput('siete') }, flash: { [SHA_1]: fakeOutput('7,3') } },
+      audits: { auditor: { [SHA_1]: fakeAudit('approve', 1) } },
+    });
+    await unparsed.runScan();
+    expect(unparsed.transcriber.auditCalls).toHaveLength(0);
+    expect(currentDecision(unparsed.memory).outcome).toBe('needs_review');
+  });
+
+  it('reprocesar el mismo recorte reutiliza el veredicto del auditor sin volver a llamar', async () => {
+    const { memory, transcriber, runScan } = setup({
+      policy: withAuditor,
+      readings: doubtfulIncorrect,
+      audits: { auditor: { [SHA_1]: fakeAudit('approve', 0.95) } },
+    });
+
+    await runScan();
+    await runScan();
+
+    expect(transcriber.auditCalls).toHaveLength(1);
+    expect(readingsOf(memory).filter((row) => row.readerKey === 'auditor')).toHaveLength(1);
+    expect(currentDecision(memory)).toMatchObject({ outcome: 'auto_accepted' });
+  });
+
+  it('el presupuesto previo cuenta la llamada del auditor', async () => {
+    const { isExceeded, runScan } = setup({
+      readings: agree,
+      budgetExceeded: true,
+      policy: withAuditor,
+    });
+
+    await runScan();
+
+    expect(isExceeded).toHaveBeenCalledWith(
+      expect.objectContaining({ orgId: ORG_ID, plannedReadings: 3 }),
+    );
   });
 });
 

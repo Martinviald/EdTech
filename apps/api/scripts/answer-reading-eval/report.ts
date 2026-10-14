@@ -4,6 +4,7 @@ import type {
   PairedComparison,
   ReaderMetrics,
   VerifiedCase,
+  AuditorMetrics,
   VerifierMetrics,
 } from './metrics';
 import type { ReaderMinConfidence } from './route-set';
@@ -253,6 +254,47 @@ function verifierSection(verifier: VerifierMetrics): string[] {
   return lines;
 }
 
+const ERROR_LABELS: Readonly<Record<string, string>> = {
+  harms: 'perjudica',
+  favors: 'favorece',
+  neutral: 'sin efecto en el puntaje',
+};
+
+function auditorSection(auditor: AuditorMetrics): string[] {
+  const lines = [
+    '## Auditor de lectura',
+    '',
+    `Auditor: ${auditor.readerKeys.map((key) => `\`${key}\``).join(', ')}. Revisa la candidata de las casillas que quedan en revisión solo por motivos de lectura, sin ver la clave ni las otras lecturas. Solo acepta con un \`approve\` sobre su umbral; lo aceptado pasa por la corrección, la política y el verificador.`,
+    '',
+    '| Métrica | Valor [IC 95 % de Wilson] |',
+    '|---|---|',
+    `| Casillas auditadas | ${auditor.audited} |`,
+    `| Candidata igual a la verdad | ${rate(auditor.candidateCorrect)} |`,
+    `| Aprueba la candidata correcta | ${rate(auditor.approvedWhenCandidateCorrect)} |`,
+    `| **Aprueba una candidata equivocada** | ${rate(auditor.approvedWhenCandidateWrong)} |`,
+    `| Aprobadas / aceptadas por el auditor / siguen aceptadas tras el verificador | ${auditor.approved} / ${auditor.accepted} / ${auditor.autoAcceptedAfterVerifier} |`,
+    `| Aceptadas por el auditor equivocadas (de ellas perjudican) | ${auditor.acceptedWrong} (${auditor.acceptedHarms}) |`,
+    `| Llamadas / desde el caché / fallidas | ${auditor.called} / ${auditor.fromCache} / ${auditor.failed} |`,
+    `| Costo extra total / por recorte corto | ${usd(auditor.extraCostUsd)} / ${usd(auditor.extraCostPerShortCropUsd)} |`,
+    '',
+    '| Muestra | Rep. | Candidata | Verdad | Veredicto | Sospechosos | Decisión final |',
+    '|---|---|---|---|---|---|---|',
+  ];
+  for (const entry of auditor.cases) {
+    const verdict =
+      entry.status !== 'ok'
+        ? `falla (${entry.status ?? 'sin llamada'})`
+        : `${entry.verdict} ${num(entry.confidence)}`;
+    const outcome = entry.finalError
+      ? `${entry.finalOutcome} (equivocada, ${ERROR_LABELS[entry.finalError]})`
+      : entry.finalOutcome;
+    lines.push(
+      `| ${entry.sampleId} | ${entry.repetition} | \`${entry.candidate}\` | \`${entry.truth}\` | ${verdict} | ${entry.suspiciousCharacters.join('; ')} | ${outcome} |`,
+    );
+  }
+  return lines;
+}
+
 export function renderReportMarkdown(
   report: EvalReportV2,
   comparison: PairedComparison | null,
@@ -353,6 +395,7 @@ export function renderReportMarkdown(
     'El costo y la latencia de una lectura del caché son los de la llamada original.',
     '',
   );
+  if (metrics.auditor) lines.push(...auditorSection(metrics.auditor), '');
   if (metrics.verifier) lines.push(...verifierSection(metrics.verifier), '');
   if (comparison) lines.push(...comparisonSection(comparison), '');
   lines.push(

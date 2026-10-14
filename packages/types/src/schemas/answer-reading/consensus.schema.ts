@@ -15,6 +15,13 @@ import { readerSpecSchema } from './reader.schema';
 // lectura (que debe superar su propio umbral y no pedir revisión) coincide con la de una
 // primaria contestada, que con `other_provider` debe ser de otro proveedor. Lo confirmado
 // sigue pasando por la corrección, la política, la auditoría y el verificador.
+// `readingAuditor` (opcional, auditor de lectura): si la casilla, después del consenso y del
+// escalamiento, sigue en revisión solo por motivos de lectura (`READING_AUDIT_REASONS`), un
+// lector con un prompt de propósito `reading_audit` revisa una transcripción candidata (la
+// canónica en que coinciden dos lectores o, si ninguna coincide, la contestada de mayor
+// confianza) sin ver la clave ni las otras lecturas. Solo si aprueba con confianza ≥
+// `minConfidence` la casilla se autoacepta, y lo aceptado sigue pasando por la corrección, la
+// política, la auditoría y el verificador. Si rechaza o falla, quedan los motivos originales.
 // Regla central: indecidible ≠ incorrecto. Lo que no se puede decidir con certeza
 // va a revisión humana y queda pendiente (final_score null), NUNCA 0.
 
@@ -28,6 +35,24 @@ export const TIEBREAK_TRIGGERS = [
 export type TiebreakTrigger = (typeof TIEBREAK_TRIGGERS)[number];
 export const TIEBREAK_AGREE_WITH = ['any', 'other_provider'] as const;
 export type TiebreakAgreeWith = (typeof TIEBREAK_AGREE_WITH)[number];
+export const READING_AUDIT_REASONS = [
+  'readers_disagree',
+  'low_confidence',
+  'reader_requested_review',
+] as const;
+export type ReadingAuditReason = (typeof READING_AUDIT_REASONS)[number];
+export const READING_AUDIT_CANDIDATES = ['agreement_or_top'] as const;
+export type ReadingAuditCandidate = (typeof READING_AUDIT_CANDIDATES)[number];
+export const readingAuditorSchema = z
+  .object({
+    reader: readerSpecSchema.refine((reader) => reader.minConfidence === undefined, {
+      message: 'El umbral del auditor va en readingAuditor.minConfidence, no en su lector',
+    }),
+    minConfidence: z.number().min(0).max(1),
+    candidate: z.enum(READING_AUDIT_CANDIDATES),
+  })
+  .strict();
+export type ReadingAuditor = z.infer<typeof readingAuditorSchema>;
 export const AUTO_ACCEPT_OUTCOMES = ['correct', 'incorrect'] as const;
 export type AutoAcceptOutcome = (typeof AUTO_ACCEPT_OUTCOMES)[number];
 
@@ -46,6 +71,7 @@ export const consensusPolicySchema = z
     tiebreakOn: z.array(z.enum(TIEBREAK_TRIGGERS)).min(1).optional(),
     tiebreakAgreeWith: z.enum(TIEBREAK_AGREE_WITH).optional(),
     incorrectVerifier: readerSpecSchema.optional(),
+    readingAuditor: readingAuditorSchema.optional(),
     autoAccept: z.boolean(),
     autoAcceptOutcomes: z.array(z.enum(AUTO_ACCEPT_OUTCOMES)),
     auditSampleRate: z.number().min(0).max(1),

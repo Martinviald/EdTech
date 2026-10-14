@@ -1,7 +1,9 @@
 import { ServiceUnavailableException } from '@nestjs/common';
 import {
+  fakeAudit,
   fakeOutput,
   fakeVerdict,
+  renderReadingAuditPrompt,
   renderTranscriptionPrompt,
   renderVerificationPrompt,
 } from '@soe/answer-reading';
@@ -207,6 +209,39 @@ describe('LlmVisionTranscriber', () => {
     });
     expect(call['prompt']).toContain('2,8');
     expect(ok).toMatchObject({ status: 'ok', output: { couldBeKey: true, confidence: 0.9 } });
+    expect(invalid).toMatchObject({ status: 'invalid_output', output: null });
+  });
+
+  it('audita con el esquema del auditor y valida el veredicto', async () => {
+    const auditor: ReaderSpec = { ...READER, key: 'auditor', promptRef: 'audit.reading@1' };
+    const rendered = renderReadingAuditPrompt({
+      reader: auditor,
+      format: FORMAT,
+      candidate: { literal: '2,5', parts: null },
+      stem: null,
+    });
+    const auditRequest = {
+      readingKey: 'w'.repeat(64),
+      image: { mimeType: 'image/jpeg' as const, base64: 'aGVsbG8=', sha256: 'a'.repeat(64) },
+      reader: auditor,
+      ...rendered,
+    };
+    const completeStructured = jest
+      .fn()
+      .mockResolvedValueOnce(structured({ data: fakeAudit('approve', 0.92) }))
+      .mockResolvedValueOnce(structured({ data: fakeVerdict(true, 0.9) }));
+    const transcriber = makeTranscriber(completeStructured);
+
+    const ok = await transcriber.audit(auditRequest);
+    const invalid = await transcriber.audit(auditRequest);
+
+    const [call] = completeStructured.mock.calls[0] as [Record<string, unknown>];
+    expect(call).toMatchObject({
+      schemaName: 'reading_audit',
+      propertyOrder: ['notes', 'suspiciousCharacters', 'verdict', 'confidence'],
+    });
+    expect(call['prompt']).toContain('2,5');
+    expect(ok).toMatchObject({ status: 'ok', output: { verdict: 'approve', confidence: 0.92 } });
     expect(invalid).toMatchObject({ status: 'invalid_output', output: null });
   });
 });

@@ -122,6 +122,10 @@ de `resolveReadingRoute`, igual que en producción: la de formato gana a la por 
   autoaceptan, con `tiebreakOn` (`readers_disagree`, `low_confidence`, `reader_requested_review`) y
   `tiebreakAgreeWith: other_provider`; idéntica a lo que siembra 0054. Un test comprueba que solo
   difiere de la final en eso.
+- `routes/pipeline-b-auditor.json`: `pipeline-b-escalamiento.json` + auditor de lectura
+  `gemini-3.8-flash` (`audit.reading@1`, umbral 0,9, candidata `agreement_or_top`) en las 6 rutas
+  que autoaceptan, con los umbrales de los lectores sin cambio; idéntica a lo que siembra el SQL
+  0055. Un test comprueba que solo difiere de la de escalamiento en eso.
 - `routes/default.json`: la ruta por defecto sola (fixtures sintéticos).
 
 **Umbral por lector.** Desde T1 la ruta trae `minConfidence` por lector y el consenso lo aplica.
@@ -317,6 +321,27 @@ Resultado (2026-10-13): **46/72 autoaceptadas [52,4–74,0], 0 equivocadas** (32
 perdidas, McNemar p < 0,001, optimista), las mismas 14 casillas que rescató el experimento. Estrés:
 de 30 ceros injustos inyectados, el escalamiento no confirma ninguno; confirma 8 de 16 incorrectas
 verdaderas y el verificador no marca ninguna.
+
+## Auditor de lectura
+
+Si la política trae `readingAuditor`, la simulación aplica el mismo código que la API: después del
+escalamiento, una casilla en revisión solo por `readers_disagree`, `low_confidence` o
+`reader_requested_review` pasa al auditor con la candidata `agreement_or_top`; con `approve` sobre
+su umbral se corrige y sigue al verificador. Los veredictos van al mismo caché y al mismo tope de
+gasto (`--budget-usd` obligatorio). `informe.md` suma la sección «Auditor de lectura» (auditadas,
+aprobadas, aceptadas, candidatas equivocadas aprobadas y el detalle por unidad).
+
+```bash
+pnpm answer-reading:eval --dataset "$P/datasets/fotos-reales-v1-sin-rotulo" \
+  --routes scripts/answer-reading-eval/routes/pipeline-b-auditor.json \
+  --repetitions 3 --budget-usd 0.03 --out "$P/resultados/auditor/final" \
+  --compare "$P/resultados/auditor/esc/informe.json"
+```
+
+Resultado (2026-10-14, desde el caché, US$0): **51/72 [59,5–80,1], 0 equivocadas** (46 → 51; 5
+ganadas, 0 perdidas). Los veredictos del experimento se importaron al caché solo tras comprobar que
+el prompt renderizado y el esquema son idénticos. Frontera de umbrales y estrés en la bitácora
+(«Auditor de lectura»).
 
 ## Fixtures sintéticos
 

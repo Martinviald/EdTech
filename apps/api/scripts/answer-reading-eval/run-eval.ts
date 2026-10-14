@@ -95,6 +95,21 @@ function assertVerifiersCovered(
   }
 }
 
+function assertAuditorsCovered(
+  auditors: readonly ReaderSpec[],
+  transcriberFor: (reader: ReaderSpec) => HarnessTranscriber | null,
+): void {
+  const missing = auditors.filter((reader) => {
+    const transcriber = transcriberFor(reader);
+    return !transcriber || !transcriber.supports(reader) || !transcriber.audit;
+  });
+  if (missing.length > 0) {
+    throw new Error(
+      `No hay auditor de lectura disponible para: ${missing.map((r) => `${r.key} (${r.provider})`).join(', ')}`,
+    );
+  }
+}
+
 async function missingReadings(
   dataset: LoadedDataset,
   routeSet: RouteSet,
@@ -146,12 +161,23 @@ export async function runEvalCommand(
       route.policy.incorrectVerifier ? [route.policy.incorrectVerifier] : [],
     ),
   );
+  const auditors = uniqueReaders(
+    routeSet.routes.flatMap((route) =>
+      route.policy.readingAuditor ? [route.policy.readingAuditor.reader] : [],
+    ),
+  );
   if (!options.dryRun) {
     assertReadersCovered(uniqueReaders(missing.map((reading) => reading.reader)), transcriberFor);
     assertVerifiersCovered(verifiers, transcriberFor);
+    assertAuditorsCovered(auditors, transcriberFor);
     if (verifiers.length > 0 && options.budgetUsd === null) {
       throw new Error(
         'Las rutas traen verificador de incorrectas: fija --budget-usd (sus llamadas no se estiman de antemano)',
+      );
+    }
+    if (auditors.length > 0 && options.budgetUsd === null) {
+      throw new Error(
+        'Las rutas traen auditor de lectura: fija --budget-usd (sus llamadas no se estiman de antemano)',
       );
     }
   }

@@ -4,8 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   FakeTranscriber,
+  fakeAudit,
   fakeOutput,
   fakeVerdict,
+  type FakeAudit,
   type FakeReading,
   type FakeVerdict,
   type TranscriptionResult,
@@ -131,11 +133,13 @@ function bySample<T>(
 function fakeFor(
   byReader: Record<string, Partial<Record<SampleId, FakeReading>>>,
   verdicts: Record<string, Partial<Record<SampleId, FakeVerdict>>> = {},
+  audits: Record<string, Partial<Record<SampleId, FakeAudit>>> = {},
 ): FakeTranscriber {
   return new FakeTranscriber({
     id: 'llm',
     byReader: bySample(byReader),
     verdicts: bySample(verdicts),
+    audits: bySample(audits),
   });
 }
 
@@ -546,6 +550,144 @@ describe('verificador de incorrectas en el arnés', () => {
     } finally {
       await rm(cacheDir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('auditor de lectura en el arnés', () => {
+  let dir: string;
+  let routeSet: RouteSet;
+  const AUDITOR: ReaderSpec = {
+    key: 'auditor',
+    transcriberId: 'llm',
+    provider: 'gemini',
+    family: 'gemini-flash',
+    model: 'gemini-3.8-flash',
+    promptRef: 'audit.reading@1',
+    hints: 'format',
+    params: { maxOutputTokens: 4096, reasoning: 'off', timeoutMs: 90000 },
+  };
+
+  beforeAll(async () => {
+    dir = await mkdtemp(join(tmpdir(), 'answer-reading-auditor-spec-'));
+    await Promise.all(
+      Object.values(SAMPLES).map((sample) =>
+        writeFile(join(dir, sample.image), renderAnswerBox(sample.drawn)),
+      ),
+    );
+    await writeFile(join(dir, 'manifest.json'), JSON.stringify(MANIFEST), 'utf8');
+    const base = withVerifier(await loadRouteSet(ACTUAL_ROUTES));
+    routeSet = {
+      ...base,
+      routes: base.routes.map((route) => ({
+        ...route,
+        policy: {
+          ...route.policy,
+          readingAuditor: { reader: AUDITOR, minConfidence: 0.9, candidate: 'agreement_or_top' },
+        },
+      })),
+    };
+  });
+
+  afterAll(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  async function simulate(transcriber: HarnessTranscriber, cache = new ReadingCache(null, 'off')) {
+    const dataset = await loadDataset(dir);
+    return runSimulation({
+      samples: dataset.samples,
+      routeSet,
+      repetitions: 1,
+      concurrency: 2,
+      readerMinConfidence: null,
+      transcriberFor: () => transcriber,
+      cache,
+      budget: null,
+    });
+  }
+
+  const doubtful = perfectReadings(0.6);
+  const auditedFake = () =>
+    fakeFor(
+      { [HAIKU]: doubtful, [FLASH_LITE]: doubtful },
+      { verificador: { decimal: fakeVerdict(false, 0.95) } },
+      {
+        auditor: {
+          entero: fakeAudit('approve', 0.95),
+          decimal: fakeAudit('approve', 0.9),
+          secuencia: fakeAudit('reject', 0.99),
+          desarrollo: fakeAudit('approve', 1),
+        },
+      },
+    );
+
+  it('acepta lo que el auditor aprueba, pasa las incorrectas por el verificador y deja el resto en revisión', async () => {
+    const fake = auditedFake();
+
+    const result = await simulate(fake);
+
+    const unitOf = (id: string) => result.units.find((unit) => unit.sampleId === id);
+    expect(unitOf('entero')).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'correct',
+      auditor: { verdict: 'approve', confidence: 0.95, accepted: true, candidate: 'n:100' },
+      verifier: null,
+    });
+    expect(unitOf('decimal')).toMatchObject({
+      outcome: 'auto_accepted',
+      scoringOutcome: 'incorrect',
+      auditor: { accepted: true },
+      verifier: { couldBeKey: false, flagged: false },
+    });
+    expect(unitOf('secuencia')).toMatchObject({
+      outcome: 'needs_review',
+      reasons: ['low_confidence'],
+      auditor: { verdict: 'reject', accepted: false },
+    });
+    expect(unitOf('desarrollo')?.auditor).toBeNull();
+    expect(fake.auditCalls).toHaveLength(3);
+    const decimalCall = fake.auditCalls.find((call) => call.image.sha256 === SHA.decimal);
+    expect(decimalCall?.prompt.user).toContain('2,73');
+    expect(`${decimalCall?.prompt.system}${decimalCall?.prompt.user}`).not.toContain('3,75');
+    const auditor = computeMetrics(result, { hits: 0 }).auditor;
+    expect(auditor).toMatchObject({ audited: 3, approved: 2, accepted: 2, acceptedWrong: 0 });
+  });
+
+  it('el veredicto del auditor se guarda en el caché y la segunda corrida no vuelve a llamar', async () => {
+    const cacheDir = await mkdtemp(join(tmpdir(), 'answer-reading-auditor-cache-'));
+    try {
+      await simulate(auditedFake(), new ReadingCache(cacheDir, 'use'));
+      const second = auditedFake();
+      const rerun = await simulate(second, new ReadingCache(cacheDir, 'use'));
+      expect(second.auditCalls).toEqual([]);
+      expect(rerun.units.find((unit) => unit.sampleId === 'entero')).toMatchObject({
+        outcome: 'auto_accepted',
+        auditor: { fromCache: true, accepted: true },
+      });
+    } finally {
+      await rm(cacheDir, { recursive: true, force: true });
+    }
+  });
+
+  it('sin auditor en la ruta la decisión no cambia', async () => {
+    const dataset = await loadDataset(dir);
+    const plain = withVerifier(await loadRouteSet(ACTUAL_ROUTES));
+    const fake = auditedFake();
+    const result = await runSimulation({
+      samples: dataset.samples,
+      routeSet: plain,
+      repetitions: 1,
+      concurrency: 2,
+      readerMinConfidence: null,
+      transcriberFor: () => fake,
+      cache: new ReadingCache(null, 'off'),
+      budget: null,
+    });
+    expect(fake.auditCalls).toEqual([]);
+    expect(result.units.every((unit) => unit.auditor === null)).toBe(true);
+    expect(
+      result.units.filter((unit) => unit.group === 'short').map((unit) => unit.outcome),
+    ).toEqual(['needs_review', 'needs_review', 'needs_review']);
   });
 });
 

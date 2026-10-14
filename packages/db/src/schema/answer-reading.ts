@@ -17,6 +17,7 @@ import type {
   ConsensusPolicy,
   NormalizedAnswer,
   ReaderSpec,
+  ReadingAuditOutput,
   ResponseFormat,
   ResponseFormatKind,
   ReviewReason,
@@ -233,8 +234,13 @@ export const answerReadings = pgTable(
     params: jsonb('params').$type<ReaderSpec['params']>().notNull(),
     status: transcriptionStatusEnum('status').notNull(),
     output: jsonb('output').$type<TranscriptionOutput>(),
-    /** Solo en `mode = 'verifier'`: veredicto del verificador de incorrectas (T4). */
-    verificationOutput: jsonb('verification_output').$type<VerificationOutput>(),
+    /**
+     * Solo en `mode = 'verifier'`: veredicto del verificador de incorrectas (T4) o, si
+     * `output_schema_id` es `reading-audit-output@1`, del auditor de lectura.
+     */
+    verificationOutput: jsonb('verification_output').$type<
+      VerificationOutput | ReadingAuditOutput
+    >(),
     readingState: readingStateEnum('reading_state'),
     literal: text('literal'),
     confidence: decimal('confidence', { precision: 4, scale: 3 }),

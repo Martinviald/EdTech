@@ -843,3 +843,95 @@ lectura independiente, variante «otra familia»: 46/72, 0 equivocadas).
   `not_read`; van juntas, como 0051–0053. (4) La org debe permitir el proveedor OpenAI; si no,
   `resolveReadingRoute` quita el desempate y la ruta se comporta como la final.
 - Gasto de IA: US$0 (todo desde el caché).
+
+## Auditor de lectura (`feat/vision-auditor`)
+
+Base: `pruebas-vlm-manuscrito/hojas-sinteticas/experimento-auditor/analisis.md` (auditor Flash, variante A,
+candidata C2: 52/72 sin equivocadas; con Flash 0,90 · luna 0,80, 54/72 con 1 neutra) y
+`experimento-contexto/analisis.md` (barrido de umbrales sin contexto).
+
+**Criterio de tolerancia (usuario, 2026-10-13).** Se acepta un error ocasional a cambio de más
+autoaceptación, porque libera tiempo docente: objetivo ≤ ~2 % de lo autoaceptado equivocado,
+priorizando que el error no perjudique al alumno. Siguen fijos: lo indecidible nunca va a 0, ni los
+lectores ni el auditor ven la clave, y el verificador de incorrectas se mantiene.
+
+- **Decisión E1-6 — auditor de lectura después del escalamiento, umbrales sin cambio.**
+  `ConsensusPolicy` suma `readingAuditor` opcional: `{ reader, minConfidence, candidate:
+  'agreement_or_top' }` (el umbral va en el auditor y su lector no puede traer otro). Prompt
+  `audit.reading@1` (propósito nuevo `reading_audit`, esquema `reading-audit-output@1`, en el lock):
+  es el texto exacto del experimento, con recorte, formato, curso, enunciado del ítem y la
+  candidata; nunca la clave ni las otras lecturas (variante A). Corre cuando la casilla, tras el
+  consenso y el escalamiento, sigue en revisión **solo** por `readers_disagree`, `low_confidence`
+  o `reader_requested_review`. Candidata: la canónica en que coinciden más lecturas contestadas
+  (primarias o de escalamiento, al menos dos) o, si ninguna coincide, la de mayor confianza; se
+  audita el literal de la de mayor confianza del grupo. Con `approve` ≥ 0,9 la candidata se
+  corrige y, si la política autoacepta el resultado, queda aceptada (o en la muestra de
+  auditoría); después pasa por el verificador de incorrectas. Rechazo, falla o candidata fuera de
+  formato: quedan los motivos originales (no hace falta un motivo nuevo ni cambios en la web). Sin
+  `readingAuditor` las rutas se comportan igual (tests). Funciones puras en `@soe/answer-reading`
+  (`needsReadingAudit`, `readingAuditCandidate`, `renderReadingAuditPrompt`, `applyReadingAudit`),
+  usadas por `CropReadingService` y por el arnés.
+- **El enunciado.** Los lectores de producción no reciben el enunciado, pero el experimento sí se
+  lo dio al auditor (`content.prompt` del ítem). Se replicó lo medido: el auditor lo recibe «solo
+  como contexto». Es información cercana a la clave en aritmética simple; queda anotado como riesgo.
+- **Persistencia.** El veredicto va a `answer_readings` con modo `verifier` y su salida en
+  `verification_output` (se distingue del verificador por `output_schema_id`); no entra al
+  consenso ni a la cola de revisión, y se reutiliza al reprocesar con la misma clave de
+  reutilización que el verificador. Sin cambios de esquema. El presupuesto previo suma una
+  llamada si la política autoacepta y trae auditor. Un auditor de un proveedor que la org no
+  permite se quita de la ruta (lo que habría auditado queda en revisión).
+- **Diferencia con el experimento (−1 casilla×repetición).** Celeste P6 rep 2: la candidata de Flash
+  es `(3,5)` con las casillas `c1 = "(3,5)"` y `c2 = ""` (`empty_part`). El auditor la aprueba, pero
+  producción nunca acepta un valor con problemas de formato (el consenso lo manda a
+  `format_mismatch`, que no se audita); el experimento no aplicaba esa regla. Por eso 51 en vez de
+  52 y 53 en vez de 54. Las otras 5 casillas rescatadas son las del experimento y las 24 lecturas
+  del auditor salieron del caché (se importaron los 70 veredictos Flash/A del experimento tras
+  comprobar que el prompt renderizado, el esquema y los parámetros son idénticos byte a byte).
+- **Umbrales (frontera, `fotos-reales-v1-sin-rotulo`, 3 repeticiones, verdad Bruno P3 = 2,75, desde el caché):**
+
+  | Flash · luna | Sin auditor | Con auditor |
+  | --- | --- | --- |
+  | 0,97 · 0,85 (vigente) | 46/72, 0 eq. | **51/72, 0 eq.** |
+  | 0,95 · 0,85 | 46, 0 | 51, 0 |
+  | 0,93 · 0,85 | 46, 0 | 51, 0 |
+  | 0,93 · 0,80 | 48, 0 | 51, 0 |
+  | 0,90 · 0,85 | 48, 1 neutra | 53, 1 neutra |
+  | 0,90 · 0,80 | 50, 1 neutra | 53, 1 neutra (1,9 %) |
+
+  Con auditor, bajar Flash a 0,93 no suma nada: el auditor ya rescata esas casillas. Bajar a 0,90
+  suma exactamente 2 unidades, **las dos que el auditor rechazó**: Celeste P3 rep 0 (correcta) y
+  Bruno P3 rep 2 («2,73» por «2,75», neutra solo porque la clave es 3,75; el auditor marca `3 → 5`).
+  La banda que agrega la relajación tiene 1 error en 2 aceptaciones. Si el auditor revisa también
+  lo que acepta la relajación, el resultado es idéntico a no relajar (51/72, 0 eq.). Decisión: **no
+  se relajan los umbrales** (es la forma más simple de «auditar lo que acepta la relajación»).
+  Cumple el criterio con margen (0 % equivocadas) y no gasta la tolerancia del 2 % en una banda
+  cuyo error observado es del 50 %.
+- **Compuerta (`pipeline-b-auditor.json` vs `pipeline-b-escalamiento.json`):**
+
+  | | Escalamiento | Auditor |
+  | --- | --- | --- |
+  | Autoaceptadas | 46/72 = 63,9 % [52,4–74,0] | **51/72 = 70,8 % [59,5–80,1]** (5 ganadas, 0 perdidas; McNemar p = 0,063, optimista) |
+  | Equivocadas (perjudica / favorece / neutra) | 0 | **0** (0 / 0 / 0) |
+  | Decisión con el valor correcto | 58/72 | 58/72 |
+  | Casillas auditadas / aprobadas / aceptadas | — | 22 / 8 / 5 (aprueba 0 de 8 candidatas equivocadas) |
+  | Costo nominal por recorte corto | US$0,00536 | US$0,00698 (+0,0016; US$0,0044 por auditoría) |
+  | Latencia por recorte p50 / p95 | 6,2 s / 20,6 s | 6,2 s / 27,6 s |
+
+  Ganadas: Ámbar P3 ×3 y Celeste P3 rep 1 y 2 (decimales «2,75»). Rechaza los tres errores
+  compartidos medibles (Celeste P7 «triángulo» sin «lo», Bruno P7 «isóceles», Bruno P3 «2,73»).
+- **Estrés (`estres-verificador-v1`, 2 repeticiones, `--injected-escalation`):** 36 de 46 unidades
+  se auditan; de 30 candidatas equivocadas el auditor aprueba 1 (Ámbar P7 «cuedrilátero», que la
+  corrección da por indecidible y queda en revisión) y **ningún 0 injusto se cuela** (0
+  autoaceptadas que perjudican). Autoaceptadas 8 → 9 de 46, 0 equivocadas; el verificador manda a
+  revisión las 2 de Celeste P7 «triángulo lo» (incorrecta verdadera) que el auditor había aprobado.
+- **SQL 0055** (entregado aparte, sin migración generada): retira las 6 rutas de 0054 que
+  autoaceptan e inserta su versión siguiente con `readingAuditor` (ids `…0022`–`…0027`,
+  `supersedes_id` a las de 0054), idempotente. Probado en PG14 desechable aplicándolo dos veces:
+  las 8 rutas globales activas son idénticas a `pipeline-b-auditor.json` (`readingRouteSchema`).
+- **Riesgos.** (1) Muestra chica: lo rescatado son 5 unidades en 2 casillas, todas decimales; las
+  repeticiones no son independientes. (2) Flash audita lecturas que en parte son suyas (mismo
+  proveedor): atajó los errores compartidos de esta muestra, sin evidencia sobre errores propios
+  más sutiles. (3) El enunciado en el prompt del auditor (ver arriba). (4) La p95 sube ~7 s por la
+  llamada extra. (5) Orden de despliegue: una API anterior a este cambio rechaza las rutas de 0055
+  (`.strict()`) y los recortes quedan `not_read`; van juntas, como 0051–0054.
+- Gasto de IA: US$0 (todo desde el caché).

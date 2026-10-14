@@ -35,5 +35,14 @@
   "verify.incorrect@1 × sequence": "b4ec4cd141ef6d20a3d048e4c8d04cb6cb467f8f45b4123e639401897b32ef01",
   "verify.incorrect@1 × word_list": "50daf38f24a1875f8af2f184e867fe6968de05142812a0c74c9c7b41deb67171",
   "verify.incorrect@1 × short_text": "34457bb0416c2f13d2f915e6b8fbe478214015cef3e8d5b042ae0de98e10565c",
-  "verify.incorrect@1 × multi_box": "cdf836b8ff6e905e0b45ff8b85394030ca25c9dfdccb615a171e0f6d573f6faa"
+  "verify.incorrect@1 × multi_box": "cdf836b8ff6e905e0b45ff8b85394030ca25c9dfdccb615a171e0f6d573f6faa",
+  "audit.reading@1": "7fe38d4226672fb368200baab93e4ce986fb2436afc49c1c3ee1eb2acf9ef2b0",
+  "audit.reading@1 × integer": "5c9315162e4d124c25781b3e3d0439d01a22534cf352f1b65a5596cd78a18dd7",
+  "audit.reading@1 × decimal": "f5786c8c9326230ceb66930517320247456ec1c1a304ba3d57f2382b31f25d7f",
+  "audit.reading@1 × fraction": "b18acb8b53ff59f8ad39c7ae5ac13799fe607867c242cbc4820a7c1e2a6bff19",
+  "audit.reading@1 × ordered_tuple": "68ba62add62f7ace1a9b824248c38d3445b2639cb4f16a2ce1a376464c5f74ff",
+  "audit.reading@1 × sequence": "115b6fc8f385330d7043764f69b16bf7bc35fc9bf5669aa68224bbc91d291904",
+  "audit.reading@1 × word_list": "c9c9daae3eb3e95d49bb6d50bdd27debff525760b5b6cb0d74b07c6a420715fe",
+  "audit.reading@1 × short_text": "e1d16738dd9ef0139cee6b6c82b8e26bae59b89d22c3c08cdca9bb520b8a02e8",
+  "audit.reading@1 × multi_box": "0983d77445fafe18e68416f80e3812bb1d456c76367e92cdaf5f776b034695a5"
 }
