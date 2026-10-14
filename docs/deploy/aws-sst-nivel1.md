@@ -189,16 +189,23 @@ Abrí la URL `web`. Con `AuthMode=mock` entrás con el dropdown del seed.
 Un solo workflow, `.github/workflows/deploy.yml`. Un job `changes` (`dorny/paths-filter`)
 decide qué ramas corren:
 
-| Rama     | Dispara con                                           | Hace                                                                                                                                                                          |
-| -------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| backend  | `apps/api`, `packages/{db,types,decisions}`, lockfile | `migrate` (RDS + read-models) **en paralelo con** `backend-image` (build → ECR `:sha`) → `backend-release` mueve `:latest` a ese `:sha` → App Runner **auto-deploya**         |
-| OMR      | `services/omr`                                        | build → ECR `:latest` y `:sha` → App Runner **auto-deploya**                                                                                                                  |
-| frontend | `apps/web`, `packages/types`, `sst.config.ts`         | `sst deploy` completo. Si el mismo push publica una imagen, espera a los releases (`frontend-after-images`); siempre espera a que App Runner salga de `OPERATION_IN_PROGRESS` |
+| Rama     | Dispara con                                           | Hace                                                                                                                                                                                                   |
+| -------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| backend  | `apps/api`, `packages/{db,types,decisions}`, lockfile | `migrate` (RDS + read-models) **en paralelo con** `backend-image` (build → ECR `:sha`) → `backend-release` mueve `:latest` a ese `:sha` → App Runner **auto-deploya**                                  |
+| OMR      | `services/omr`                                        | build → ECR `:latest` y `:sha` → App Runner **auto-deploya**                                                                                                                                           |
+| frontend | `apps/web`, `packages/types`, `sst.config.ts`         | `sst deploy` completo. Si el mismo push cambia `sst.config.ts` y publica una imagen, espera a los releases (`frontend-after-images`); siempre espera a que App Runner salga de `OPERATION_IN_PROGRESS` |
 
-Backend y OMR corren en paralelo. El frontend sólo corre en paralelo con ellos si el push no
-publica ninguna imagen: hoy `sst deploy` actualiza el servicio `Api` de App Runner en **cada**
-corrida (un diff que no converge desde #247), y si coincide con el auto-deploy de una imagen
-nueva choca con `OPERATION_IN_PROGRESS`.
+Backend, OMR y frontend corren en paralelo. La excepción es un push que cambia
+`sst.config.ts` y además publica una imagen: ahí `sst deploy` puede actualizar un servicio de
+App Runner, y si coincide con el auto-deploy de la imagen nueva choca con
+`OPERATION_IN_PROGRESS`, así que el front espera a los releases. Sin cambios en
+`sst.config.ts`, `sst deploy` no toca App Runner (converge desde #297; antes actualizaba
+`Api` en cada corrida por una variable vacía).
+
+⚠️ En paralelo, el front nuevo puede quedar publicado **antes** que la API nueva (la API
+tarda más si hay backfill) e incluso si `migrate` falla. Un cambio del front que dependa de
+un endpoint o un campo nuevo de la API tiene que tolerar la API anterior, o entrar en dos
+merges: primero la API, después el front.
 
 **No corre los checks.** Los corre `ci.yml` en la PR, y la branch protection de `main` los
 exige con `strict` (la PR tiene que estar al día con `main`, así que lo que se mergea es lo
