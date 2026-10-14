@@ -105,7 +105,8 @@ function completeWithFallback(
  * después. `allowExternalVision: false` deja la ruta sin lectores; los proveedores
  * no permitidos se quitan y, si no alcanzan, se completan con `fallbackReaders`.
  * `reviewAll` endurece la política (nada se autoacepta). Nunca la relaja. Un lector
- * de desempate no permitido se quita y el desacuerdo pasa a revisión.
+ * de desempate no permitido se quita y el desacuerdo pasa a revisión; un auditor de
+ * lectura no permitido se quita y lo que habría auditado queda en revisión.
  */
 export function isProviderAllowedByOrg(
   settings: OrgAnswerReadingSettings,
@@ -131,7 +132,12 @@ export function applyOrgRestrictions(
     tiebreak !== null && !allowed(tiebreak)
       ? { ...resolved.policy, tiebreakReader: null, onDisagreement: 'review' as const }
       : resolved.policy;
-  const policy = settings.reviewAll ? { ...withoutTiebreak, autoAccept: false } : withoutTiebreak;
+  const { readingAuditor, ...withoutAuditor } = withoutTiebreak;
+  const allowedPolicy =
+    readingAuditor !== undefined && !allowed(readingAuditor.reader)
+      ? withoutAuditor
+      : withoutTiebreak;
+  const policy = settings.reviewAll ? { ...allowedPolicy, autoAccept: false } : allowedPolicy;
   const strict: ResolvedRoute = { ...resolved, policy };
   if (!allowExternalVision) {
     return {

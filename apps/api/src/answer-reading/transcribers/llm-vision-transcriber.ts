@@ -1,5 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import {
+  type ReadingAuditRequest,
+  type ReadingAuditResult,
   type StructuredVisionResult,
   type TranscriptionImage,
   type TranscriptionResult,
@@ -8,6 +10,7 @@ import {
 } from '@soe/answer-reading';
 import {
   LLM_PROVIDERS,
+  readingAuditOutputSchema,
   verificationOutputSchema,
   type LlmProviderId,
   type ReaderSpec,
@@ -31,6 +34,8 @@ export const LLM_VISION_TRANSCRIBER_ID = 'llm';
 const STRUCTURED_SCHEMA_NAME = 'answer_transcription';
 
 const VERIFICATION_SCHEMA_NAME = 'incorrect_verification';
+
+const READING_AUDIT_SCHEMA_NAME = 'reading_audit';
 
 const TIMEOUT_PATTERN = /time(d)?\s?out/i;
 
@@ -78,6 +83,18 @@ export class LlmVisionTranscriber implements VisionTranscriber {
       propertyOrder: request.outputSchema.propertyOrder,
       schemaName: VERIFICATION_SCHEMA_NAME,
       outputSchema: verificationOutputSchema,
+    });
+  }
+
+  async audit(request: ReadingAuditRequest): Promise<ReadingAuditResult> {
+    return this.complete({
+      reader: request.reader,
+      image: request.image,
+      prompt: request.prompt,
+      jsonSchema: request.outputSchema.schema as unknown as Record<string, unknown>,
+      propertyOrder: request.outputSchema.propertyOrder,
+      schemaName: READING_AUDIT_SCHEMA_NAME,
+      outputSchema: readingAuditOutputSchema,
     });
   }
 

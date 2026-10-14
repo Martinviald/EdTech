@@ -225,6 +225,31 @@ describe('revisión F2 — rutas', () => {
       ).toMatchObject({ tiebreakReader: GPT, onDisagreement: 'tiebreak_reader' });
     });
   });
+
+  describe('el auditor de lectura respeta las restricciones de la org', () => {
+    const policy = {
+      ...DEFAULT_CONSENSUS_POLICY,
+      readingAuditor: {
+        reader: { ...GPT, key: 'auditor', promptRef: 'audit.reading@1' },
+        minConfidence: 0.9,
+        candidate: 'agreement_or_top' as const,
+      },
+    };
+    const resolved = resolveReadingRoute(CONTEXT, [route({ level: 'default', policy })]);
+    if (!resolved) throw new Error('sin ruta');
+
+    it('proveedor no permitido → sin auditor', () => {
+      const restricted = applyOrgRestrictions(resolved, { allowedProviders: ['anthropic'] });
+      expect(restricted.route.policy.readingAuditor).toBeUndefined();
+    });
+
+    it('proveedor permitido → el auditor se conserva', () => {
+      expect(
+        applyOrgRestrictions(resolved, { allowedProviders: ['anthropic', 'gemini', 'openai'] })
+          .route.policy.readingAuditor?.reader.key,
+      ).toBe('auditor');
+    });
+  });
 });
 
 describe('isProviderAllowedByOrg', () => {
