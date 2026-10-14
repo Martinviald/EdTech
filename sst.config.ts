@@ -92,6 +92,18 @@ export default $config({
     const workosIssuer = new sst.Secret('WorkosIssuer', ''); // AuthKit issuer
     const workosJwksUrl = new sst.Secret('WorkosJwksUrl', ''); // jwks_uri del issuer
 
+    // App Runner DESCARTA las variables de entorno con valor vacío. Si se le pasa una
+    // (p. ej. un secret con default '' que nunca se seteó), el servicio queda sin ella, el
+    // estado de Pulumi también, y el próximo `sst deploy` vuelve a ver la diferencia: un
+    // "Updated Api aws:apprunner:Service" en CADA deploy que reinicia la API y choca con el
+    // auto-deploy de una imagen nueva (OPERATION_IN_PROGRESS). Pasó con TYPESAFE_API_KEY
+    // desde #247. Filtrarlas acá deja al servicio exactamente como ya estaba (sin la
+    // variable) y hace que el deploy converja.
+    const withoutEmptyEnv = (vars: Record<string, $util.Input<string>>) =>
+      $resolve(vars).apply((resolved) =>
+        Object.fromEntries(Object.entries(resolved).filter(([, value]) => value !== '')),
+      );
+
     // ── Red: VPC con bastion (para `sst tunnel`) + NAT ec2 (fck-nat, ~$3-4/mes). ──
     // El NAT da salida a internet a las subredes privadas. App Runner enruta TODO su
     // egress por la VPC (lo necesita para el RDS privado); el asistente E21 llama a la
@@ -258,10 +270,10 @@ export default $config({
           imageIdentifier: $interpolate`${omrRepo.repositoryUrl}:latest`,
           imageConfiguration: {
             port: '8090',
-            runtimeEnvironmentVariables: {
+            runtimeEnvironmentVariables: withoutEmptyEnv({
               OMR_SERVICE_TOKEN: omrServiceToken.value,
               OMR_PAGE_TIMEOUT_S: omrPageTimeoutS,
-            },
+            }),
           },
         },
       },
@@ -338,7 +350,7 @@ export default $config({
           imageIdentifier: $interpolate`${apiRepo.repositoryUrl}:latest`,
           imageConfiguration: {
             port: '4000',
-            runtimeEnvironmentVariables: {
+            runtimeEnvironmentVariables: withoutEmptyEnv({
               NODE_ENV: 'production',
               API_PORT: '4000',
               // soe_app -> RLS activo (§11). El admin NO va al runtime (least privilege).
@@ -364,7 +376,7 @@ export default $config({
               MCP_CANONICAL_URI: mcpCanonicalUri.value,
               WORKOS_ISSUER: workosIssuer.value,
               WORKOS_JWKS_URL: workosJwksUrl.value,
-            },
+            }),
           },
         },
       },
