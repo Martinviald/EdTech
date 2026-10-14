@@ -20,7 +20,9 @@ import {
   type TranscriptionJsonSchema,
 } from '../formats/transcription-json-schema';
 import { rubricGradeJsonSchema } from '../grading/rubric-grade-schema';
+import { readingAuditJsonSchema } from '../audit/reading-audit-json-schema';
 import { verificationJsonSchema } from '../verification/verification-json-schema';
+import { AUDIT_READING_V1 } from './audit-reading';
 import { GRADE_RUBRIC_V1 } from './grade-rubric';
 import { promptHash, promptRef, renderPrompt } from './render';
 import { TRANSCRIBE_BOXES_V1 } from './transcribe-boxes';
@@ -41,6 +43,7 @@ export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   TRANSCRIBE_BOXES_V1,
   GRADE_RUBRIC_V1,
   VERIFY_INCORRECT_V1,
+  AUDIT_READING_V1,
 ].map((prompt) => promptVersionSchema.parse(prompt));
 
 const BY_REF = new Map(PROMPT_VERSIONS.map((prompt) => [promptRef(prompt), prompt]));
@@ -70,6 +73,7 @@ const TEMPLATE_OUTPUT_SCHEMAS: Record<
     ).schema,
   rubric_grading: () => rubricGradeJsonSchema().schema,
   verification: () => verificationJsonSchema().schema,
+  reading_audit: () => readingAuditJsonSchema().schema,
 };
 
 /**
@@ -182,6 +186,17 @@ export function verificationFormatLockParts(format: ResponseFormat): FormatLockP
   };
 }
 
+/** Lo que el formato agrega a un prompt de auditoría de lectura: solo su etiqueta (nunca la guía). */
+export function readingAuditFormatLockParts(format: ResponseFormat): FormatLockParts {
+  const output = readingAuditJsonSchema();
+  return {
+    label: formatLabelFor(format),
+    guide: '',
+    outputSchemaId: output.schemaId,
+    outputSchema: output.schema,
+  };
+}
+
 const FORMAT_LOCK_PARTS_BY_PURPOSE: Record<
   PromptVersion['purpose'],
   ((prompt: PromptVersion, format: ResponseFormat) => readonly FormatLockParts[]) | null
@@ -189,6 +204,7 @@ const FORMAT_LOCK_PARTS_BY_PURPOSE: Record<
   transcription: (prompt, format) => lockPartsFor(prompt, format),
   rubric_grading: null,
   verification: (_prompt, format) => [verificationFormatLockParts(format)],
+  reading_audit: (_prompt, format) => [readingAuditFormatLockParts(format)],
 };
 
 /**

@@ -1,5 +1,6 @@
 import type {
   ReaderSpec,
+  ReadingAuditOutput,
   ReadingUsage,
   RenderedPrompt,
   TranscriptionOutput,
@@ -7,6 +8,7 @@ import type {
   VerificationOutput,
 } from '@soe/types';
 import type { ZodTypeAny } from 'zod';
+import type { ReadingAuditJsonSchema } from './audit/reading-audit-json-schema';
 import type { TranscriptionJsonSchema } from './formats/transcription-json-schema';
 import type { VerificationJsonSchema } from './verification/verification-json-schema';
 
@@ -53,10 +55,25 @@ export interface VerificationRequest {
 
 export type VerificationResult = StructuredVisionResult<VerificationOutput>;
 
-/** `verify` es opcional: un transcriptor que no verifica deja la casilla en revisión. */
+/** Pedido al auditor de lectura: el prompt ya lleva la transcripción candidata (nunca la clave). */
+export interface ReadingAuditRequest {
+  readonly readingKey: string;
+  readonly image: TranscriptionImage;
+  readonly reader: ReaderSpec;
+  readonly prompt: RenderedPrompt;
+  readonly outputSchema: ReadingAuditJsonSchema;
+}
+
+export type ReadingAuditResult = StructuredVisionResult<ReadingAuditOutput>;
+
+/**
+ * `verify` y `audit` son opcionales: un transcriptor que no verifica deja la casilla en
+ * revisión, y uno que no audita no acepta nada que no haya aceptado el consenso.
+ */
 export interface VisionTranscriber {
   readonly id: string;
   supports(reader: ReaderSpec): boolean;
   transcribe(request: TranscriptionRequest): Promise<TranscriptionResult>;
   verify?(request: VerificationRequest): Promise<VerificationResult>;
+  audit?(request: ReadingAuditRequest): Promise<ReadingAuditResult>;
 }

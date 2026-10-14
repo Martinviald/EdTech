@@ -2,6 +2,7 @@ import {
   CROP_PROFILES,
   DEFAULT_CONSENSUS_POLICY,
   DEFAULT_ORG_ANSWER_READING_SETTINGS,
+  READING_AUDIT_REASONS,
   REVIEW_MODE_BY_REASON,
   REVIEW_REASONS,
   TRANSCRIPTION_OUTPUT_KEYS,
@@ -12,6 +13,7 @@ import {
   readerSpecSchema,
   responseFormatSchema,
   reviewModeFor,
+  readingAuditOutputSchema,
   reviewQueueQuerySchema,
   submitReviewSchema,
   transcriptionOutputSchema,
@@ -86,6 +88,78 @@ describe('contratos de lectura por visión', () => {
     expect(
       consensusPolicySchema.safeParse({ ...escalation, tiebreakAgreeWith: 'same_family' }).success,
     ).toBe(false);
+  });
+
+  it('el auditor de lectura es opcional, acotado y con su propio umbral', () => {
+    const auditor = {
+      reader: {
+        key: 'gemini-3.8-flash-auditor',
+        transcriberId: 'llm',
+        provider: 'gemini',
+        family: 'gemini-flash',
+        model: 'gemini-3.8-flash',
+        promptRef: 'audit.reading@1',
+        hints: 'format',
+        params: { maxOutputTokens: 4096, reasoning: 'off', timeoutMs: 90000 },
+      },
+      minConfidence: 0.9,
+      candidate: 'agreement_or_top',
+    };
+    expect(consensusPolicySchema.parse(DEFAULT_CONSENSUS_POLICY).readingAuditor).toBeUndefined();
+    expect(
+      consensusPolicySchema.parse({ ...DEFAULT_CONSENSUS_POLICY, readingAuditor: auditor })
+        .readingAuditor,
+    ).toEqual(auditor);
+    const withAuditor = (readingAuditor: unknown) =>
+      consensusPolicySchema.safeParse({ ...DEFAULT_CONSENSUS_POLICY, readingAuditor }).success;
+    expect(withAuditor({ ...auditor, minConfidence: 1.2 })).toBe(false);
+    expect(withAuditor({ ...auditor, candidate: 'any' })).toBe(false);
+    expect(withAuditor({ ...auditor, extra: true })).toBe(false);
+    expect(withAuditor({ ...auditor, reader: { ...auditor.reader, minConfidence: 0.5 } })).toBe(
+      false,
+    );
+    expect(READING_AUDIT_REASONS).toEqual([
+      'readers_disagree',
+      'low_confidence',
+      'reader_requested_review',
+    ]);
+    expect(
+      readingAuditOutputSchema.safeParse({
+        notes: 'trazos',
+        suspiciousCharacters: ['3 → 5'],
+        verdict: 'reject',
+        confidence: 0.9,
+      }).success,
+    ).toBe(true);
+    expect(
+      readingAuditOutputSchema.safeParse({
+        notes: '',
+        suspiciousCharacters: [],
+        verdict: 'maybe',
+        confidence: 0.9,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('un prompt de auditoría de lectura nunca declara la clave ni la lectura acordada', () => {
+    const prompt = {
+      id: 'audit.reading',
+      version: 9,
+      purpose: 'reading_audit',
+      formatKinds: ['integer'],
+      outputSchemaId: 'reading-audit-output@1',
+      variables: ['gradeName', 'formatLabel', 'stem', 'transcription'],
+      system: 'x',
+      user: 'y',
+      status: 'draft',
+    };
+    expect(promptVersionSchema.safeParse(prompt).success).toBe(true);
+    for (const forbidden of ['acceptedAnswers', 'agreedReading']) {
+      expect(
+        promptVersionSchema.safeParse({ ...prompt, variables: [...prompt.variables, forbidden] })
+          .success,
+      ).toBe(false);
+    }
   });
 
   it('la clave y la lectura acordada solo se declaran en prompts de verificación (T4)', () => {
