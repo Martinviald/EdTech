@@ -139,6 +139,48 @@ describe('arnés answer-reading:eval', () => {
     });
   });
 
+  it('la ruta del auditor es la de escalamiento más el auditor de lectura, sin cambiar umbrales', async () => {
+    const escalation = await loadRouteSet(
+      join(__dirname, 'routes', 'pipeline-b-escalamiento.json'),
+    );
+    const audited = await loadRouteSet(join(__dirname, 'routes', 'pipeline-b-auditor.json'));
+    expect(audited.routes).toHaveLength(escalation.routes.length);
+    escalation.routes.forEach((route, index) => {
+      const next = audited.routes[index]!;
+      if (!route.policy.autoAccept) {
+        expect(next).toEqual(route);
+        return;
+      }
+      expect(next).toEqual({
+        ...route,
+        id: next.id,
+        version: route.version + 1,
+        policy: {
+          ...route.policy,
+          readingAuditor: {
+            reader: {
+              key: 'gemini-3.8-flash-auditor',
+              transcriberId: 'llm',
+              provider: 'gemini',
+              family: 'gemini-flash',
+              model: 'gemini-3.8-flash',
+              promptRef: 'audit.reading@1',
+              hints: 'format',
+              params: {
+                reasoning: 'off',
+                timeoutMs: 90000,
+                maxOutputTokens: 4096,
+                mediaResolution: 'medium',
+              },
+            },
+            minConfidence: 0.9,
+            candidate: 'agreement_or_top',
+          },
+        },
+      });
+    });
+  });
+
   it('los fixtures en disco coinciden con su generador y el manifiesto v1 sigue siendo válido', async () => {
     const onDisk: unknown = JSON.parse(await readFile(join(FIXTURES_DIR, 'manifest.json'), 'utf8'));
     expect(onDisk).toEqual(FIXTURES_MANIFEST);

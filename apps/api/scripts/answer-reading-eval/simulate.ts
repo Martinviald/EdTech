@@ -2,18 +2,28 @@ import {
   acceptedAnswersOf,
   agreedReadingOf,
   applyIncorrectVerification,
+  applyReadingAudit,
   evaluateConsensus,
   fakeOutput,
   isTranscriptionPromptFor,
+  isReadingAuditPromptFor,
   isVerificationPromptFor,
+  itemStemOf,
   needsIncorrectVerification,
+  needsReadingAudit,
   needsTiebreak,
   normalizeTranscription,
+  readingAuditApproves,
+  readingAuditCandidate,
   readingKeyFor,
+  renderReadingAuditPrompt,
   renderTranscriptionPrompt,
   responseGeometryOf,
   renderVerificationPrompt,
   type ConsensusReading,
+  type ReadingAuditCandidate,
+  type ReadingAuditRequest,
+  type ReadingAuditResult,
   type ResolvedRouteWithFallback,
   type StructuredVisionResult,
   type TranscriptionRequest,
@@ -26,6 +36,8 @@ import type {
   ConsensusResult,
   ItemType,
   ReaderSpec,
+  ReadingAuditOutput,
+  ReadingAuditor,
   ReadingOutcome,
   ReadingState,
   ResponseFormat,
@@ -55,6 +67,7 @@ export interface HarnessTranscriber {
   supports(reader: ReaderSpec): boolean;
   transcribe(request: HarnessTranscriptionRequest): Promise<TranscriptionResult>;
   verify?(request: VerificationRequest): Promise<VerificationResult>;
+  audit?(request: ReadingAuditRequest): Promise<ReadingAuditResult>;
 }
 
 export interface SimulationBudget {
@@ -116,6 +129,23 @@ export interface VerifierRecord {
   readonly latencyMs: number;
 }
 
+export interface AuditorRecord {
+  readonly readerKey: string;
+  readonly model: string;
+  readonly candidate: string | null;
+  readonly called: boolean;
+  readonly fromCache: boolean;
+  readonly status: TranscriptionStatus | null;
+  readonly errorCode: string | null;
+  readonly verdict: ReadingAuditOutput['verdict'] | null;
+  readonly confidence: number | null;
+  readonly suspiciousCharacters: readonly string[];
+  readonly approved: boolean;
+  readonly accepted: boolean;
+  readonly costUsd: number;
+  readonly latencyMs: number;
+}
+
 export interface BeforeVerifierRecord {
   readonly outcome: ReadingOutcome;
   readonly autoAcceptedError: AutoAcceptedErrorKind | null;
@@ -144,6 +174,7 @@ export interface UnitRecord {
   readonly autoAcceptedError: AutoAcceptedErrorKind | null;
   readonly usedTiebreak: boolean;
   readonly injected: boolean;
+  readonly auditor: AuditorRecord | null;
   readonly verifier: VerifierRecord | null;
   readonly beforeVerifier: BeforeVerifierRecord | null;
   readonly costUsd: number;
@@ -516,11 +547,77 @@ class UnitRunner {
     );
     return { fromCache: false, result: verification };
   }
+
+  async audit(
+    prepared: PreparedSample,
+    auditor: ReadingAuditor,
+    candidate: ReadingAuditCandidate,
+    repetition: number,
+  ): Promise<AuditorRun | null> {
+    const image = prepared.image;
+    const reader = auditor.reader;
+    if (image === null || !isReadingAuditPromptFor(reader.promptRef, prepared.sample.format)) {
+      return null;
+    }
+    const rendered = renderReadingAuditPrompt({
+      reader,
+      format: prepared.sample.format,
+      candidate,
+      stem: itemStemOf(prepared.sample.item?.content),
+      gradeName: prepared.sample.gradeName ?? null,
+    });
+    const keyInput = {
+      reader,
+      prompt: rendered.prompt,
+      outputJsonSchema: rendered.outputSchema,
+      imageSha256: image.sha256,
+      repetition,
+    };
+    const cacheKey = readingCacheKey(keyInput);
+    const cached = await this.options.cache.get<ReadingAuditOutput>(cacheKey);
+    if (cached) return { fromCache: true, result: cached.result };
+    const transcriber = this.options.transcriberFor(reader);
+    if (!transcriber?.audit) {
+      return { fromCache: false, result: failedResult(reader, 'no_transcriber') };
+    }
+    const estimate = this.gate.reserve(reader);
+    if (estimate === null) {
+      return { fromCache: false, result: failedResult(reader, 'budget_exceeded') };
+    }
+    let audit: ReadingAuditResult;
+    try {
+      audit = await transcriber.audit({
+        readingKey: cacheKey,
+        image,
+        reader,
+        prompt: rendered.prompt,
+        outputSchema: rendered.outputSchema,
+      });
+    } catch (error) {
+      audit = failedResult(reader, error instanceof Error ? error.name || 'error' : 'error');
+    }
+    this.gate.settle(reader, estimate, audit.costUsd);
+    await this.options.cache.put(
+      cachedReadingEntry(
+        cacheKey,
+        keyInput,
+        rendered.prompt,
+        audit,
+        this.options.cacheSource ?? 'api',
+      ),
+    );
+    return { fromCache: false, result: audit };
+  }
 }
 
 interface VerifierRun {
   readonly fromCache: boolean;
   readonly result: VerificationResult;
+}
+
+interface AuditorRun {
+  readonly fromCache: boolean;
+  readonly result: ReadingAuditResult;
 }
 
 function toConsensusReading(run: ReaderRun, index: number): ConsensusReading {
@@ -625,6 +722,7 @@ function errorKind(delta: number | null): AutoAcceptedErrorKind {
 
 interface UnitExtras {
   readonly injected: boolean;
+  readonly auditor: AuditorRecord | null;
   readonly verifier: VerifierRecord | null;
   readonly beforeVerifier: ConsensusResult | null;
 }
@@ -678,7 +776,7 @@ function unitRecord(
   const tiebreakLatency = runs
     .filter((run) => run.role === 'tiebreak')
     .reduce((sum, run) => sum + run.result.latencyMs, 0);
-  const verifierCost = extras.verifier?.costUsd ?? 0;
+  const verifierCost = (extras.verifier?.costUsd ?? 0) + (extras.auditor?.costUsd ?? 0);
   return {
     sampleId: prepared.sample.id,
     repetition,
@@ -702,6 +800,7 @@ function unitRecord(
     autoAcceptedError: scored.autoAcceptedError,
     usedTiebreak,
     injected: extras.injected,
+    auditor: extras.auditor,
     verifier: extras.verifier,
     beforeVerifier: extras.beforeVerifier
       ? {
@@ -710,7 +809,11 @@ function unitRecord(
         }
       : null,
     costUsd: runs.reduce((sum, run) => sum + (run.result.costUsd ?? 0), 0) + verifierCost,
-    latencyMs: primaryLatency + tiebreakLatency + (extras.verifier?.latencyMs ?? 0),
+    latencyMs:
+      primaryLatency +
+      tiebreakLatency +
+      (extras.auditor?.latencyMs ?? 0) +
+      (extras.verifier?.latencyMs ?? 0),
   };
 }
 
@@ -741,6 +844,46 @@ function injectedReadings(
     output,
     role: 'primary' as const,
   }));
+}
+
+async function auditUnit(
+  runner: UnitRunner,
+  prepared: PreparedSample,
+  policy: ConsensusPolicy,
+  result: ConsensusResult,
+  readings: readonly ConsensusReading[],
+  repetition: number,
+): Promise<{ result: ConsensusResult; record: AuditorRecord | null }> {
+  const auditor = policy.readingAuditor;
+  const format = prepared.sample.format;
+  if (!auditor || !needsReadingAudit(result, policy, format)) return { result, record: null };
+  const candidate = readingAuditCandidate(readings, format);
+  const run = candidate ? await runner.audit(prepared, auditor, candidate, repetition) : null;
+  const output = run?.result.status === 'ok' ? run.result.output : null;
+  const verdict = run ? { status: run.result.status, output } : null;
+  const audited = applyReadingAudit(result, policy, candidate, verdict, prepared.scorer.outcome, {
+    format,
+    readingKey: `${prepared.sample.id}#${repetition}`,
+  });
+  return {
+    result: audited,
+    record: {
+      readerKey: auditor.reader.key,
+      model: auditor.reader.model,
+      candidate: candidate?.answer.canonical ?? null,
+      called: run !== null && !run.fromCache && run.result.errorCode !== 'no_transcriber',
+      fromCache: run?.fromCache ?? false,
+      status: run?.result.status ?? null,
+      errorCode: run?.result.errorCode ?? null,
+      verdict: output?.verdict ?? null,
+      confidence: output?.confidence ?? null,
+      suspiciousCharacters: output?.suspiciousCharacters ?? [],
+      approved: verdict !== null && readingAuditApproves(verdict, auditor.minConfidence),
+      accepted: audited !== result,
+      costUsd: run?.result.costUsd ?? 0,
+      latencyMs: run?.result.latencyMs ?? 0,
+    },
+  };
 }
 
 async function verifyUnit(
@@ -842,7 +985,7 @@ async function runUnit(
   const adjusted = thresholds
     ? applyReaderMinConfidence(result, runs, thresholds, route.policy.minConfidence)
     : { result, applied: false };
-  const verified = await verifyUnit(
+  const audited = await auditUnit(
     runner,
     prepared,
     basePolicy,
@@ -850,11 +993,20 @@ async function runUnit(
     readings,
     repetition,
   );
+  const verified = await verifyUnit(
+    runner,
+    prepared,
+    basePolicy,
+    audited.result,
+    readings,
+    repetition,
+  );
   return {
     unit: unitRecord(planned, repetition, verified.result, runs, adjusted.applied, usedTiebreak, {
       injected,
+      auditor: audited.record,
       verifier: verified.record,
-      beforeVerifier: verified.record ? adjusted.result : null,
+      beforeVerifier: verified.record ? audited.result : null,
     }),
     readings: runs.map((run) => readingRecord(run, prepared, repetition)),
   };
