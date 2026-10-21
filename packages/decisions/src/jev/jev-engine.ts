@@ -8,11 +8,14 @@ import { TypeSafeClient, type RequestOptions, type TypeSafeClientConfig } from '
 import {
   DecisionError,
   type DecisionEngine,
+  type DecisionEngineCapabilities,
+  type DecisionEngineLimits,
   type DecisionQuestions,
   type DecisionRequest,
   type DecisionResult,
 } from '../contracts';
-import { assertWithinLimits } from '../questions';
+import { assertImagesSupported, assertValidTimeout, assertWithinLimits } from '../questions';
+import { JEV_LIMITS } from './jev-limits';
 import { mapSdkError, parseSystemOneResponse, toSdkQuestions } from './jev-mapping';
 
 /** Versión fijada: los umbrales se calibran contra ella, no contra `jev-latest`. */
@@ -39,6 +42,9 @@ export interface JevEngineConfig {
 
 export class JevDecisionEngine implements DecisionEngine {
   readonly name = 'jev';
+  /** Jev solo evalúa texto: un request con `images` falla con `invalid_request`. */
+  readonly capabilities: DecisionEngineCapabilities = { images: false };
+  readonly limits: DecisionEngineLimits = JEV_LIMITS;
   private client: TypeSafeClient | undefined;
 
   constructor(private readonly config: JevEngineConfig = {}) {}
@@ -51,7 +57,8 @@ export class JevDecisionEngine implements DecisionEngine {
   async evaluate<Q extends DecisionQuestions>(
     request: DecisionRequest<Q>,
   ): Promise<DecisionResult<Q>> {
-    assertWithinLimits(request.state, request.questions);
+    assertImagesSupported(this, request.images);
+    assertWithinLimits(request.state, request.questions, this.limits);
     assertValidTimeout(request.timeoutMs);
     const client = this.getClient();
 
@@ -116,15 +123,5 @@ export class JevDecisionEngine implements DecisionEngine {
     }
     this.client = client;
     return client;
-  }
-}
-
-function assertValidTimeout(timeoutMs: number | undefined): void {
-  if (timeoutMs === undefined) return;
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-    throw new DecisionError(
-      'invalid_request',
-      `timeoutMs debe ser un número positivo de ms (llegó ${timeoutMs}).`,
-    );
   }
 }

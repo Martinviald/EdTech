@@ -1,0 +1,42 @@
+{
+  "model": "gpt-6-luna",
+  "answers": [
+    {
+      "type": "predicate",
+      "name": "es_triangulo",
+      "probability": 1
+    },
+    {
+      "type": "choice",
+      "name": "tipo_figura",
+      "choice": "geometrica",
+      "probabilities": [
+        {
+          "value": "geometrica",
+          "probability": 1
+        },
+        {
+          "value": "grafico",
+          "probability": 0
+        },
+        {
+          "value": "fotografia",
+          "probability": 0
+        }
+      ],
+      "confidence": 1
+    }
+  ],
+  "usage": {
+    "input_tokens": 438,
+    "input_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0
+    },
+    "output_tokens": 0,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 438
+  }
+}

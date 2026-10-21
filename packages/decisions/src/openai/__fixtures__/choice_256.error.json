@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "ms": 269,
+  "ctor": "BadRequestError",
+  "status": 400,
+  "code": "array_above_max_length",
+  "type": "invalid_request_error",
+  "param": "questions[0].choices",
+  "message": "400 Invalid 'questions[0].choices': array too long. Expected an array with maximum length 255, but got an array with length 256 instead.",
+  "body": {
+    "message": "Invalid 'questions[0].choices': array too long. Expected an array with maximum length 255, but got an array with length 256 instead.",
+    "type": "invalid_request_error",
+    "param": "questions[0].choices",
+    "code": "array_above_max_length"
+  }
+}
