@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "ms": 169,
+  "ctor": "NotFoundError",
+  "status": 404,
+  "code": "model_not_found",
+  "type": "invalid_request_error",
+  "param": null,
+  "message": "404 The model `gpt-6-luna-no-existe` does not exist or you do not have access to it.",
+  "body": {
+    "message": "The model `gpt-6-luna-no-existe` does not exist or you do not have access to it.",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": "model_not_found"
+  }
+}

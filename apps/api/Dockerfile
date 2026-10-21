@@ -8,7 +8,7 @@
 # Orden de build obligatorio: types -> db -> decisions -> answer-reading -> api.
 # ============================================================================
 
-FROM node:20-bookworm-slim AS base
+FROM node:22-bookworm-slim AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 # corepack respeta el packageManager (pnpm@10.x) declarado en package.json

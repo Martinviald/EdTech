@@ -32,7 +32,16 @@ import {
   type ScoreAnswer,
   type ScoreQuestion,
 } from '../contracts';
+import {
+  argmax,
+  choiceProbabilities,
+  isFiniteNumber,
+  levelProbabilitiesToArray,
+  malformed as malformedFrom,
+} from '../mapping-helpers';
 import { assertAnswerMatches, isPlainObject, toTypedAnswers } from '../questions';
+
+const PROVIDER = 'Jev';
 
 /** Status no estándar de Jev para "sobrecargado"; se trata como rate limit. */
 export const JEV_OVERLOADED_STATUS = 529;
@@ -147,17 +156,12 @@ function parseChoice(
   if (!isPlainObject(probabilities))
     throw malformed(`la respuesta a "${id}" no trae \`probabilities\``);
 
-  const byOption: Record<string, number> = {};
-  for (const option of Object.keys(question.criteria)) {
-    const p = probabilities[option];
-    if (p === undefined) {
-      byOption[option] = 0;
-      continue;
-    }
-    if (!isFiniteNumber(p))
-      throw malformed(`la probabilidad de "${option}" en "${id}" no es numérica`);
-    byOption[option] = p;
-  }
+  const byOption = choiceProbabilities(
+    Object.keys(question.criteria),
+    (option) => probabilities[option],
+    PROVIDER,
+    id,
+  );
   return { type: 'choice', choice, probabilities: byOption, confidence };
 }
 
@@ -185,27 +189,7 @@ export function scoreProbabilitiesToArray(
   map: Readonly<Record<string, unknown>>,
   levels: number,
 ): number[] {
-  const out = new Array<number>(levels).fill(0);
-  for (const [key, value] of Object.entries(map)) {
-    const index = Number(key);
-    if (!Number.isInteger(index) || index < 0 || index >= levels) continue;
-    if (!isFiniteNumber(value)) throw malformed(`la probabilidad del nivel ${key} no es numérica`);
-    out[index] = value;
-  }
-  return out;
-}
-
-/** Índice del máximo; ante empate gana el índice menor. `-1` si el arreglo está vacío. */
-export function argmax(values: readonly number[]): number {
-  let best = -1;
-  let bestValue = Number.NEGATIVE_INFINITY;
-  values.forEach((value, index) => {
-    if (value > bestValue) {
-      best = index;
-      bestValue = value;
-    }
-  });
-  return best;
+  return levelProbabilitiesToArray(Object.entries(map), levels, PROVIDER);
 }
 
 // ── Errores ──────────────────────────────────────────────────────────────────
@@ -260,10 +244,6 @@ export function mapSdkError(error: unknown): DecisionError {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
-}
-
 function malformed(detail: string): DecisionError {
-  return new DecisionError('upstream', `Respuesta inesperada de Jev: ${detail}.`);
+  return malformedFrom(PROVIDER, detail);
 }

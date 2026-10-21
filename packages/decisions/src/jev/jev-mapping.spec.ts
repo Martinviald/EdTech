@@ -9,12 +9,12 @@ import {
 import { DecisionError } from '../contracts';
 import { choice, noul, score } from '../questions';
 import {
-  argmax,
   mapSdkError,
   parseSystemOneResponse,
   scoreProbabilitiesToArray,
   toSdkQuestions,
 } from './jev-mapping';
+import { argmax } from '../mapping-helpers';
 
 const questions = {
   urgente: noul('¿Es urgente?'),

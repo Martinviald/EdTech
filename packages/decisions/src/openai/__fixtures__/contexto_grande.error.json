@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "ms": 1180,
+  "ctor": "BadRequestError",
+  "status": 400,
+  "code": null,
+  "type": "invalid_request_error",
+  "param": null,
+  "message": "400 Decision input exceeds the token limit.",
+  "body": {
+    "message": "Decision input exceeds the token limit.",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": null
+  }
+}

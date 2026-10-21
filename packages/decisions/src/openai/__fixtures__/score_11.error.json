@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "ms": 417,
+  "ctor": "BadRequestError",
+  "status": 400,
+  "code": "array_above_max_length",
+  "type": "invalid_request_error",
+  "param": "questions[0].levels",
+  "message": "400 Invalid 'questions[0].levels': array too long. Expected an array with maximum length 10, but got an array with length 11 instead.",
+  "body": {
+    "message": "Invalid 'questions[0].levels': array too long. Expected an array with maximum length 10, but got an array with length 11 instead.",
+    "type": "invalid_request_error",
+    "param": "questions[0].levels",
+    "code": "array_above_max_length"
+  }
+}

@@ -51,6 +51,44 @@ describe('DecisionCallsRecorder', () => {
     expect(tx.execute).toHaveBeenCalled();
   });
 
+  describe('hash con imágenes', () => {
+    async function hashOf(overrides: Partial<DecisionCallEntry>): Promise<string> {
+      const { db, values } = makeDb();
+      await new DecisionCallsRecorder(db).record(entry(overrides));
+      return ((values.mock.calls[0] as unknown[])[0] as Record<string, string>).stateHash as string;
+    }
+
+    it('sin imágenes o con lista vacía conserva el hash anterior', async () => {
+      const legacy = createHash('sha256')
+        .update(JSON.stringify({ pregunta: '¿Qué producen las abejas?' }))
+        .digest('hex');
+      await expect(hashOf({ images: undefined })).resolves.toBe(legacy);
+      await expect(hashOf({ images: [] })).resolves.toBe(legacy);
+    });
+
+    it('cambia al agregar una imagen y distingue imágenes distintas', async () => {
+      const base = await hashOf({});
+      const a = await hashOf({ images: [{ mimeType: 'image/png', data: 'aGVsbG8=' }] });
+      const b = await hashOf({ images: [{ mimeType: 'image/png', data: 'bXVuZG8=' }] });
+      expect(a).not.toBe(base);
+      expect(b).not.toBe(a);
+    });
+
+    it('ignora la query string de una URL firmada', async () => {
+      const first = await hashOf({
+        images: [{ url: 'https://s3.test/f.png?X-Amz-Signature=aaa' }],
+      });
+      const second = await hashOf({
+        images: [{ url: 'https://s3.test/f.png?X-Amz-Signature=bbb' }],
+      });
+      const other = await hashOf({
+        images: [{ url: 'https://s3.test/g.png?X-Amz-Signature=aaa' }],
+      });
+      expect(second).toBe(first);
+      expect(other).not.toBe(first);
+    });
+  });
+
   it('persiste respuestas, estado ok, latencia entera y costo con 9 decimales', async () => {
     const { db, values } = makeDb();
     await new DecisionCallsRecorder(db).record(entry());

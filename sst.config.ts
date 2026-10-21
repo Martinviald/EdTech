@@ -80,6 +80,7 @@ export default $config({
     const geminiApiKey = new sst.Secret('GeminiApiKey', '');
     const anthropicApiKey = new sst.Secret('AnthropicApiKey', '');
     const typesafeApiKey = new sst.Secret('TypesafeApiKey', ''); // motor de decisiones Jev (@soe/decisions)
+    const openAiApiKey = new sst.Secret('OpenAiApiKey', ''); // OpenAI Decisions (@soe/decisions) y OpenAiProvider
     const authMode = new sst.Secret('AuthMode', 'mock'); // 'mock' (demo) | 'sso'
     const googleClientId = new sst.Secret('GoogleClientId', '');
     const googleClientSecret = new sst.Secret('GoogleClientSecret', '');
@@ -361,6 +362,7 @@ export default $config({
               GEMINI_API_KEY: geminiApiKey.value,
               ANTHROPIC_API_KEY: anthropicApiKey.value,
               TYPESAFE_API_KEY: typesafeApiKey.value,
+              OPENAI_API_KEY: openAiApiKey.value,
               AWS_S3_BUCKET: uploads.name,
               // E22: el backend habla con el servicio de visión OMR por HTTP.
               // El egress del API sale por el VPC connector, que es justo lo que le

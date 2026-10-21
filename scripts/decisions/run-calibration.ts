@@ -1,11 +1,13 @@
 /**
- * Calibración del motor de decisiones (Jev) contra los goldsets locales.
+ * Calibración de los motores de decisiones (Jev, OpenAI) contra los goldsets locales.
  *
  *   packages/db/node_modules/.bin/tsx --tsconfig scripts/decisions/tsconfig.json \
- *     scripts/decisions/run-calibration.ts [--engine jev|fake] [--set remedial|taxonomy|all] \
+ *     scripts/decisions/run-calibration.ts [--engine jev|openai|fake] [--set remedial|taxonomy|all] \
  *     [--limit N] [--concurrency N] [--min-confidence X] [--out ruta.md]
  *
  * - `--engine jev` (default) necesita `TYPESAFE_API_KEY` (entorno o `repositorio/.env`).
+ *   `--engine openai` (OpenAI Decisions, `gpt-6-luna`) necesita `OPENAI_API_KEY`. Corre los
+ *   mismos goldsets para comparar motores: los umbrales NO se transfieren entre ellos.
  *   `--engine fake` usa `FakeDecisionEngine` con respuestas pseudoaleatorias
  *   deterministas: solo prueba el flujo, sus números no significan nada.
  * - Juez remedial: usa `buildJudgeDecision` de la API TAL CUAL (mismo estado y mismas
@@ -17,8 +19,8 @@
  * de `judge-decision.ts`; las de taxonomía están abajo). Jev rinde mejor en inglés: lo
  * que medimos aquí es su desempeño con el español que usará el producto.
  *
- * Salida: `docs/calibracion-jev.md` (solo con `--engine jev`; con `fake` va a
- * `scripts/decisions/data/`) + JSON crudo en `scripts/decisions/data/results-<fecha>.json`.
+ * Salida: `docs/calibracion-jev.md` (`--engine jev`), `docs/calibracion-openai-decisions.md`
+ * (`--engine openai`) o `scripts/decisions/data/` (`--engine fake`) + JSON crudo en `scripts/decisions/data/results-<fecha>.json`.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, relative, resolve } from 'path';
@@ -28,6 +30,9 @@ import {
   JevDecisionEngine,
   JEV_API_KEY_ENV,
   JEV_DEFAULT_MODEL,
+  OPENAI_API_KEY_ENV,
+  OPENAI_DECISIONS_DEFAULT_MODEL,
+  OpenAiDecisionEngine,
   hierarchicalChoice,
   type DecisionAnswer,
   type DecisionEngine,
@@ -67,14 +72,31 @@ import type {
 } from './goldset-types';
 
 const INSTRUCTION_LANGUAGE = 'es (español neutro)';
-/** USD por millón de tokens de entrada (Jev no cobra salida). */
-const JEV_INPUT_USD_PER_MTOK = 0.042;
+/** USD por millón de tokens de entrada por motor (ninguno cobra salida). */
+const INPUT_USD_PER_MTOK: Readonly<Record<EngineId, number>> = { jev: 0.042, openai: 0.1, fake: 0 };
+const REQUESTED_MODEL: Readonly<Record<EngineId, string>> = {
+  jev: JEV_DEFAULT_MODEL,
+  openai: OPENAI_DECISIONS_DEFAULT_MODEL,
+  fake: 'fake',
+};
+/** Tarifa de entrada según el modelo que respondió (las corridas fake cuestan 0). */
+function inputPriceForModel(model: string): number {
+  if (model.startsWith(OPENAI_DECISIONS_DEFAULT_MODEL)) return INPUT_USD_PER_MTOK.openai;
+  if (model.startsWith('jev-')) return INPUT_USD_PER_MTOK.jev;
+  return INPUT_USD_PER_MTOK.fake;
+}
+const ENGINE_LABEL: Readonly<Record<EngineId, string>> = {
+  jev: 'Jev',
+  openai: 'OpenAI Decisions',
+  fake: 'motor falso',
+};
 const DATA_DIR = resolve(__dirname, 'data');
 const TAXONOMY_THRESHOLDS: readonly number[] = [0, 0.5, 0.6, 0.7, 0.8, 0.9];
 
 // ── Argumentos ───────────────────────────────────────────────────────────────
 
-type EngineId = 'jev' | 'fake';
+const ENGINE_IDS = ['jev', 'openai', 'fake'] as const;
+type EngineId = (typeof ENGINE_IDS)[number];
 type SetId = 'remedial' | 'taxonomy' | 'all';
 
 interface CliOptions {
@@ -92,9 +114,9 @@ function parseArgs(argv: readonly string[]): CliOptions {
     const eq = argv.find((a) => a.startsWith(`--${name}=`));
     return eq ? eq.slice(name.length + 3) : undefined;
   };
-  const engine = value('engine') ?? 'jev';
-  if (engine !== 'jev' && engine !== 'fake')
-    fail(`--engine debe ser jev o fake (llegó "${engine}")`);
+  const engineRaw = value('engine') ?? 'jev';
+  const engine = ENGINE_IDS.find((id) => id === engineRaw);
+  if (engine === undefined) fail(`--engine debe ser jev, openai o fake (llegó "${engineRaw}")`);
   const set = value('set') ?? 'all';
   if (set !== 'remedial' && set !== 'taxonomy' && set !== 'all')
     fail(`--set debe ser remedial, taxonomy o all`);
@@ -126,9 +148,13 @@ interface CallRecord {
 class RecordingEngine implements DecisionEngine {
   readonly calls: CallRecord[] = [];
   readonly name: string;
+  readonly capabilities: DecisionEngine['capabilities'];
+  readonly limits: DecisionEngine['limits'];
 
   constructor(private readonly inner: DecisionEngine) {
     this.name = inner.name;
+    this.capabilities = inner.capabilities;
+    this.limits = inner.limits;
   }
 
   isAvailable(): boolean {
@@ -195,11 +221,15 @@ function buildEngine(id: EngineId): DecisionEngine {
     );
     return new FakeDecisionEngine({ answers, usage: { inputTokens: 500, outputTokens: 30 } });
   }
-  const engine = new JevDecisionEngine({ maxRetries: 3 });
+  const engine =
+    id === 'openai'
+      ? new OpenAiDecisionEngine({ maxRetries: 3 })
+      : new JevDecisionEngine({ maxRetries: 3 });
+  const keyEnv = id === 'openai' ? OPENAI_API_KEY_ENV : JEV_API_KEY_ENV;
   if (!engine.isAvailable()) {
     fail(
-      `Falta ${JEV_API_KEY_ENV}. Defínela en el entorno o en repositorio/.env, ` +
-        'o corre con --engine fake para probar el flujo sin llamar a Jev.',
+      `Falta ${keyEnv}. Defínela en el entorno o en repositorio/.env, ` +
+        `o corre con --engine fake para probar el flujo sin llamar a ${ENGINE_LABEL[id]}.`,
     );
   }
   return engine;
@@ -484,7 +514,10 @@ function usageSection(label: string, calls: readonly CallRecord[]): string[] {
   const latencies = calls.map((c) => c.latencyMs);
   const input = calls.reduce((s, c) => s + c.inputTokens, 0);
   const output = calls.reduce((s, c) => s + c.outputTokens, 0);
-  const cost = (input / 1_000_000) * JEV_INPUT_USD_PER_MTOK;
+  const cost = calls.reduce(
+    (sum, c) => sum + (c.inputTokens / 1_000_000) * inputPriceForModel(c.model),
+    0,
+  );
   return [
     mdTable(
       [
@@ -645,7 +678,7 @@ function remedialReport(runs: readonly RemedialRun[], calls: readonly CallRecord
     '',
     mdTable(
       [
-        'Pregunta Jev',
+        'Pregunta del motor',
         'n',
         'LLM dijo sí',
         'Acuerdo',
@@ -670,7 +703,7 @@ function remedialReport(runs: readonly RemedialRun[], calls: readonly CallRecord
           ],
     ),
     '',
-    `\`clave\` de Jev = \`derivedAnswer\` del juez LLM en ${derivedAgree}/${derived.length} ítems.`,
+    `\`clave\` del motor = \`derivedAnswer\` del juez LLM en ${derivedAgree}/${derived.length} ítems.`,
     '',
     '### Distribución de los Noul en todos los ítems',
     '',
@@ -846,16 +879,24 @@ async function main(): Promise<void> {
       'Corrida con **motor falso**: respuestas pseudoaleatorias; los números NO significan nada.',
     );
   if (opts.limit !== null) warnings.push(`Corrida parcial: \`--limit ${opts.limit}\` por set.`);
+  if (opts.engine === 'jev')
+    warnings.push(
+      'Instrucciones en español: Jev rinde mejor en inglés (docs de TypeSafe); los números miden el español que usará el producto.',
+      'Aritmética y conteo son puntos débiles documentados de Jev (jaggedness #2): mira por separado las filas de matemática.',
+    );
+  if (opts.engine === 'openai')
+    warnings.push(
+      'OpenAI Decisions está en beta pública: el modelo responde `gpt-6-luna` sin versión, así que una corrida posterior puede no ser comparable.',
+      'Los umbrales de Jev NO se transfieren: calibra por motor y por tipo de pregunta.',
+    );
   warnings.push(
-    'Instrucciones en español: Jev rinde mejor en inglés (docs de TypeSafe); los números miden el español que usará el producto.',
-    'Aritmética y conteo son puntos débiles documentados de Jev (jaggedness #2): mira por separado las filas de matemática.',
     'Los ítems remediales con veredicto del juez LLM son pocos y de una sola asignatura (Lenguaje); el acuerdo de los Noul es indicativo.',
     'Ítems del banco con fórmulas extraídas de PDF pueden tener símbolos perdidos (exponentes, fracciones): el extractor filtra los casos evidentes, no todos.',
     'Taxonomía: el estado incluye asignatura y curso del instrumento (lo que sabría el producto al etiquetar).',
   );
 
   const lines: string[] = [
-    '# Calibración del motor de decisiones (Jev)',
+    `# Calibración del motor de decisiones (${ENGINE_LABEL[opts.engine]})`,
     '',
     `> Generado por \`scripts/decisions/run-calibration.ts\` el ${started.toISOString().slice(0, 10)}. No editar a mano: vuelve a correr el script.`,
     '',
@@ -864,13 +905,13 @@ async function main(): Promise<void> {
       [
         ['Fecha', started.toISOString()],
         ['Motor', engine.name],
-        ['Modelo pedido', opts.engine === 'jev' ? JEV_DEFAULT_MODEL : 'fake'],
+        ['Modelo pedido', REQUESTED_MODEL[opts.engine]],
         ['Modelo que respondió', models.length ? models.join(', ') : '—'],
         ['Idioma de las instrucciones', INSTRUCTION_LANGUAGE],
         ['n remedial', remedial ? String(remedial.runs.length) : 'no corrido'],
         ['n taxonomía (tareas)', taxonomy ? String(taxonomy.runs.length) : 'no corrido'],
         ['Concurrencia', String(opts.concurrency)],
-        ['Precio', `${JEV_INPUT_USD_PER_MTOK} USD / millón de tokens de entrada`],
+        ['Precio', `${INPUT_USD_PER_MTOK[opts.engine]} USD / millón de tokens de entrada`],
       ],
     ),
     '',
@@ -916,7 +957,9 @@ async function main(): Promise<void> {
     ? resolve(opts.out)
     : opts.engine === 'jev'
       ? resolve(REPO_ROOT, 'docs', 'calibracion-jev.md')
-      : resolve(DATA_DIR, `calibracion-fake-${stamp}.md`);
+      : opts.engine === 'openai'
+        ? resolve(REPO_ROOT, 'docs', 'calibracion-openai-decisions.md')
+        : resolve(DATA_DIR, `calibracion-fake-${stamp}.md`);
   mkdirSync(dirname(reportPath), { recursive: true });
   writeFileSync(reportPath, lines.join('\n'));
   console.log(`Reporte: ${relative(REPO_ROOT, reportPath)}`);

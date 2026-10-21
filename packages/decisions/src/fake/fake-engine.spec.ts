@@ -1,4 +1,5 @@
 import { DecisionError } from '../contracts';
+import { JEV_LIMITS } from '../jev/jev-limits';
 import { choice, noul, score } from '../questions';
 import { FAKE_MODEL, FakeDecisionEngine } from './fake-engine';
 
@@ -125,6 +126,32 @@ describe('FakeDecisionEngine', () => {
     });
     await expect(wrongOption.evaluate({ state: 's', questions })).rejects.toMatchObject({
       code: 'upstream',
+    });
+  });
+
+  it('acepta imágenes por defecto y las registra en calls', async () => {
+    const engine = new FakeDecisionEngine();
+    const images = [{ mimeType: 'image/png', data: 'QUJD' }, { url: 'https://cdn.test/a.png' }];
+    await engine.evaluate({ state: 's', images, questions });
+
+    expect(engine.capabilities.images).toBe(true);
+    expect(engine.calls[0]?.images).toEqual(images);
+  });
+
+  it('con capabilities.images en false rechaza las imágenes', async () => {
+    const engine = new FakeDecisionEngine({ capabilities: { images: false } });
+    await expect(
+      engine.evaluate({ state: 's', images: [{ url: 'https://cdn.test/a.png' }], questions }),
+    ).rejects.toMatchObject({ code: 'invalid_request' });
+    await expect(engine.evaluate({ state: 's', questions })).resolves.toBeDefined();
+  });
+
+  it('usa los límites de Jev por defecto y acepta unos propios', async () => {
+    expect(new FakeDecisionEngine().limits).toBe(JEV_LIMITS);
+
+    const engine = new FakeDecisionEngine({ limits: { ...JEV_LIMITS, maxChoiceOptions: 2 } });
+    await expect(engine.evaluate({ state: 's', questions })).rejects.toMatchObject({
+      code: 'invalid_request',
     });
   });
 });
