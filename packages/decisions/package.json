@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@typesafe-ai/sdk": "0.6.0",
+    "openai": "7.41.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
