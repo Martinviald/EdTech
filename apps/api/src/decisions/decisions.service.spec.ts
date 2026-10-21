@@ -3,6 +3,7 @@ import {
   FakeDecisionEngine,
   choice,
   noul,
+  JEV_LIMITS,
   type DecisionEngine,
 } from '@soe/decisions';
 import type { DecisionMode } from '@soe/types';
@@ -50,6 +51,8 @@ function makeRecorder() {
 function jevNamed(engine: FakeDecisionEngine): DecisionEngine {
   return {
     name: 'jev',
+    capabilities: engine.capabilities,
+    limits: engine.limits,
     isAvailable: () => engine.isAvailable(),
     evaluate: (request) => engine.evaluate(request),
   };
@@ -120,9 +123,26 @@ describe('DecisionsService.evaluate', () => {
     expect(entries[0]?.latencyMs).toEqual(expect.any(Number));
   });
 
+  it('pasa las imágenes al motor y al recorder en éxito y en error', async () => {
+    const images = [{ mimeType: 'image/png', data: 'aGVsbG8=' }, { url: 'https://s3/x.png?sig=1' }];
+    const ok = makeService('live', answeredEngine());
+    await ok.service.evaluate(ORG_ID, 'remedial_judge', { state: 's', images, questions });
+    expect(ok.engine.calls[0]?.images).toEqual(images);
+    expect(ok.entries[0]?.images).toEqual(images);
+
+    const failing = new FakeDecisionEngine({ error: new DecisionError('timeout', 'lento') });
+    const bad = makeService('live', failing);
+    await expect(
+      bad.service.evaluate(ORG_ID, 'remedial_judge', { state: 's', images, questions }),
+    ).rejects.toMatchObject({ code: 'timeout' });
+    expect(bad.entries[0]?.images).toEqual(images);
+  });
+
   it('normaliza un error que no es DecisionError a upstream', async () => {
     const engine: DecisionEngine = {
       name: 'jev',
+      capabilities: { images: false },
+      limits: JEV_LIMITS,
       isAvailable: () => true,
       evaluate: () => Promise.reject(new Error('socket colgado')),
     };
@@ -242,6 +262,8 @@ describe('DecisionsService: protecciones', () => {
     const release: Array<() => void> = [];
     const blocking: DecisionEngine = {
       name: 'jev',
+      capabilities: { images: false },
+      limits: JEV_LIMITS,
       isAvailable: () => true,
       evaluate: () =>
         new Promise((_, reject) => {

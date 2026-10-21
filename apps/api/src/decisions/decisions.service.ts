@@ -124,6 +124,7 @@ export class DecisionsService {
       engine: cfg.engine,
       mode,
       state,
+      images: request.images,
       baseline: options.baseline ?? null,
       correlationId: options.correlationId ?? null,
     };
