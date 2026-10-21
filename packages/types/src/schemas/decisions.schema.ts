@@ -3,7 +3,7 @@ import { z } from 'zod';
 /**
  * Motor de decisiones (`@soe/decisions`) — tipos compartidos FE/BE/BD.
  *
- * Un motor de decisiones (hoy Jev, de TypeSafe AI) evalúa un estado contra
+ * Un motor de decisiones (Jev, de TypeSafe AI, u OpenAI) evalúa un estado contra
  * preguntas tipadas (Noul / Choice / Score) y devuelve respuestas con
  * probabilidades y confianza calibrada. Este archivo fija lo que se PERSISTE y
  * se configura: funcionalidades, modos, umbrales de enrutamiento y la forma de
@@ -24,7 +24,7 @@ export type DecisionMode = (typeof DECISION_MODES)[number];
 export const decisionModeSchema = z.enum(DECISION_MODES);
 
 // ── Motores ──────────────────────────────────────────────────────────────────
-export const decisionEngineIdSchema = z.enum(['jev']);
+export const decisionEngineIdSchema = z.enum(['jev', 'openai']);
 export type DecisionEngineId = z.infer<typeof decisionEngineIdSchema>;
 
 // ── Umbrales de enrutamiento ─────────────────────────────────────────────────
