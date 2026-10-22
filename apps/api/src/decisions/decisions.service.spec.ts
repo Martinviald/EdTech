@@ -160,13 +160,14 @@ describe('DecisionsService.shadow', () => {
   it('en modo shadow corre el motor y registra respuesta, baseline y correlationId', async () => {
     const { service, entries } = makeService('shadow', answeredEngine());
 
-    await service.shadow(
+    const result = await service.shadow(
       ORG_ID,
       'remedial_judge',
       { state: 's', questions },
       { baseline: { realKey: 'A' }, correlationId: 'item-1' },
     );
 
+    expect(result?.answers.clave.choice).toBe('A');
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({
       mode: 'shadow',
@@ -179,7 +180,9 @@ describe('DecisionsService.shadow', () => {
   it.each<DecisionMode>(['off', 'live'])('en modo %s no llama al motor', async (mode) => {
     const { service, entries, engine } = makeService(mode, answeredEngine());
 
-    await service.shadow(ORG_ID, 'remedial_judge', { state: 's', questions });
+    await expect(
+      service.shadow(ORG_ID, 'remedial_judge', { state: 's', questions }),
+    ).resolves.toBeNull();
 
     expect(engine.calls).toHaveLength(0);
     expect(entries).toHaveLength(0);
@@ -196,13 +199,13 @@ describe('DecisionsService.shadow', () => {
     expect(entries).toHaveLength(0);
   });
 
-  it('nunca rechaza: una falla del motor queda registrada', async () => {
+  it('nunca rechaza: una falla del motor queda registrada y devuelve null', async () => {
     const failing = new FakeDecisionEngine({ error: new DecisionError('timeout', 'lento') });
     const { service, entries } = makeService('shadow', failing);
 
     await expect(
       service.shadow(ORG_ID, 'remedial_judge', { state: 's', questions }),
-    ).resolves.toBeUndefined();
+    ).resolves.toBeNull();
     expect(entries[0]).toMatchObject({ mode: 'shadow', errorCode: 'timeout' });
   });
 
@@ -215,8 +218,57 @@ describe('DecisionsService.shadow', () => {
 
     await expect(
       service.shadow(ORG_ID, 'remedial_judge', { state: 's', questions }),
-    ).resolves.toBeUndefined();
+    ).resolves.toBeNull();
     expect(entries).toHaveLength(0);
+  });
+});
+
+describe('DecisionsService.settingsOf', () => {
+  it('devuelve modo, motor, modelo, umbrales y disponibilidad, también en sombra', async () => {
+    const { service } = makeService('shadow');
+
+    await expect(service.settingsOf(ORG_ID, 'remedial_judge')).resolves.toEqual({
+      mode: 'shadow',
+      engine: 'jev',
+      model: 'jev-1.13.0',
+      thresholds: { clave: { auto: 0.9, review: 0.6 } },
+      available: true,
+    });
+  });
+
+  it('marca available=false si el motor no tiene credenciales o no está registrado', async () => {
+    const offline = makeService('live', new FakeDecisionEngine({ available: false }));
+    await expect(offline.service.settingsOf(ORG_ID, 'remedial_judge')).resolves.toMatchObject({
+      available: false,
+    });
+
+    const { recorder } = makeRecorder();
+    const unregistered = new DecisionsService(configFor('live', { engine: 'openai' }), recorder, [
+      jevNamed(answeredEngine()),
+    ]);
+    await expect(unregistered.settingsOf(ORG_ID, 'remedial_judge')).resolves.toMatchObject({
+      engine: 'openai',
+      available: false,
+    });
+  });
+});
+
+describe('DecisionsService.evaluate con opciones de registro', () => {
+  it('registra baseline y correlationId también en live', async () => {
+    const { service, entries } = makeService('live', answeredEngine());
+
+    await service.evaluate(
+      ORG_ID,
+      'remedial_judge',
+      { state: 's', questions },
+      { baseline: { omr: 'B' }, correlationId: 'mark-1' },
+    );
+
+    expect(entries[0]).toMatchObject({
+      mode: 'live',
+      baseline: { omr: 'B' },
+      correlationId: 'mark-1',
+    });
   });
 });
 
@@ -280,7 +332,7 @@ describe('DecisionsService: protecciones', () => {
     );
     await new Promise<void>((resolve) => setImmediate(resolve));
     const dropped = service.shadow(ORG_ID, 'remedial_judge', request);
-    await expect(dropped).resolves.toBeUndefined();
+    await expect(dropped).resolves.toBeNull();
 
     let settled = false;
     const all = Promise.all(inFlight).then(() => {

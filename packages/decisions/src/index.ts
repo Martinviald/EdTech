@@ -9,6 +9,13 @@ export {
   validateImages,
 } from './questions';
 export { routeByConfidence, routeNoul, assertValidThresholds } from './routing';
+export {
+  pairConsensus,
+  PAIR_VERDICT_VALUES,
+  type PairSide,
+  type PairVerdict,
+  type PairConsensus,
+} from './consensus';
 export { redactState, REDACTED, SENSITIVE_KEYS, type RedactionResult } from './redact';
 export {
   hierarchicalChoice,
