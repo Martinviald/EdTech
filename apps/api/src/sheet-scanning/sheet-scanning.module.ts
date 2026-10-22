@@ -3,6 +3,8 @@ import { AnswerReadingModule } from '../answer-reading/answer-reading.module';
 import { AnswerSheetsModule } from '../answer-sheets/answer-sheets.module';
 import { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
 import { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
+import { AssessmentResultsModule } from '../assessment-results/assessment-results.module';
+import { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import { FilesModule } from '../files/files.module';
 import { JobsModule } from '../jobs/jobs.module';
 import { LlmModule } from '../llm/llm.module';
@@ -44,7 +46,14 @@ import { SheetScanMetricsService } from './sheet-scan-metrics.service';
 import { SheetScanService } from './sheet-scan.service';
 
 @Module({
-  imports: [FilesModule, JobsModule, AnswerSheetsModule, LlmModule, AnswerReadingModule],
+  imports: [
+    FilesModule,
+    JobsModule,
+    AnswerSheetsModule,
+    LlmModule,
+    AnswerReadingModule,
+    AssessmentResultsModule,
+  ],
   controllers: [
     SheetLayoutsController,
     SheetPrintRunsController,
@@ -78,7 +87,7 @@ import { SheetScanService } from './sheet-scan.service';
     {
       provide: ANSWER_SHEET_CONFIRMER,
       useFactory: createAnswerSheetConfirmer,
-      inject: [AnswerSheetsService, AnswerSheetPreviewStore],
+      inject: [AnswerSheetsService, AnswerSheetPreviewStore, AssessmentResultsService],
     },
   ],
 })
