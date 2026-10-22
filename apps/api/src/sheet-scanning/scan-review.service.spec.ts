@@ -975,7 +975,8 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(rows[0].rowNumber).toBe(1);
     expect(rows[0].studentRut).toBe('12345678-5');
     expect(rows[0].studentFullName).toBe('Ana Pérez');
-    expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
+    expect(rows[0].answers).toEqual({ '1': 'A', '3': 'F' });
+    expect(rows[0].pendingReviewLabels).toEqual(['2']);
 
     expect(updates).toHaveLength(2);
     expect(updates[0]).toMatchObject({ status: 'confirmed' });
@@ -989,7 +990,7 @@ describe('ScanReviewService.confirmBatch', () => {
     });
   });
 
-  it('cuenta como assumedPending las marcas ambiguas sin revisar y les registra el error ambiguous_mark', async () => {
+  it('deja pendientes de revisión, nunca en 0, las marcas dudosas sin revisar y les registra el error ambiguous_mark', async () => {
     const { service, confirmCalls } = makeService([
       [CONFIRM_BATCH_ROW],
       CONFIRM_SCANS,
@@ -1002,6 +1003,36 @@ describe('ScanReviewService.confirmBatch', () => {
     const rows = confirmCalls[0].input.parserResult.rows;
     expect(rows[0].errors).toHaveLength(1);
     expect(rows[0].errors[0]).toMatchObject({ code: 'ambiguous_mark', field: '2' });
+    expect(rows[0].answers).not.toHaveProperty('2');
+    expect(rows[0].pendingReviewLabels).toEqual(['2']);
+    expect(result.summary.assumedPending).toBe(1);
+  });
+
+  it('una página con recortes y su burbuja indecidible no deja la alternativa en 0 al confirmar sin revisarla', async () => {
+    const undecidedBubble = {
+      markId: 'm-undecided',
+      scanId: 'scan-1a',
+      printedNumber: '1',
+      state: 'ambiguous',
+      value: null,
+      reviewedValue: null,
+      reviewDecision: null,
+      reviewedAt: null,
+    };
+    const { service, confirmCalls } = makeService([
+      [{ ...CONFIRM_BATCH_ROW, spec: SPEC_WITH_CROP }],
+      CONFIRM_SCANS.filter((scan) => scan.printedSheetId === 'sheet-1'),
+      [undecidedBubble, CROP_MARK],
+      CONFIRM_STUDENTS,
+    ]);
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const [row] = confirmCalls[0].input.parserResult.rows;
+    expect(row.answers).toEqual({});
+    expect(row.pendingReviewLabels).toEqual(['1']);
+    expect(row.pendingReadingLabels).toEqual(['4']);
+    expect(row.errors).toEqual([expect.objectContaining({ code: 'ambiguous_mark', field: '1' })]);
     expect(result.summary.assumedPending).toBe(1);
   });
 
@@ -1198,7 +1229,8 @@ describe('ScanReviewService.confirmBatch', () => {
     const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
 
     const rows = confirmCalls[0].input.parserResult.rows;
-    expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
+    expect(rows[0].answers).toEqual({ '1': 'A', '3': 'F' });
+    expect(rows[0].pendingReviewLabels).toEqual(['2']);
     expect(rows[0].answers).not.toHaveProperty('4');
     expect(rows[0].pendingReadingLabels).toEqual(['4']);
     expect(rows[0].prescoredAnswers).toBeUndefined();
