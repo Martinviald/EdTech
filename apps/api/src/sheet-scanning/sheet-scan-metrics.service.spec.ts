@@ -229,10 +229,109 @@ describe('SheetScanMetricsService', () => {
     const markQueries = selectWheres.slice(2).map((condition) => {
       return dialect.sqlToQuery(condition as Parameters<PgDialect['sqlToQuery']>[0]);
     });
-    expect(markQueries).toHaveLength(5);
+    expect(markQueries).toHaveLength(6);
     for (const query of markQueries) {
       expect(query.sql).toContain('"sheet_scans"."state" <>');
       expect(query.params).toContain('superseded');
     }
+  });
+
+  describe('aiResolutions', () => {
+    const resolution = (overrides: Record<string, unknown>) => ({
+      version: 'mark-disambiguation-v1',
+      mode: 'live',
+      verdict: 'agree',
+      route: 'auto',
+      value: 'B',
+      applied: true,
+      engines: [],
+      ...overrides,
+    });
+    const human = (decision: string, value: string | null) => ({
+      reviewDecision: decision,
+      reviewedValue: value,
+      reviewedById: 'user-1',
+    });
+    const noHuman = { reviewDecision: null, reviewedValue: null, reviewedById: null };
+    const aiRowsIndex = [[], [], [], [{ count: 0 }], [{ count: 0 }], [], []];
+
+    it('sin marcas con ai_resolution todo queda en cero', async () => {
+      const service = makeService([...aiRowsIndex, []]);
+
+      const metrics = await service.getMetrics(ORG_ID);
+
+      expect(metrics.aiResolutions).toEqual({
+        evaluated: 0,
+        autoSimulated: 0,
+        autoApplied: 0,
+        correctedByHuman: 0,
+        agreementWithHuman: { compared: 0, agreed: 0 },
+        byMode: { shadow: 0, live: 0 },
+      });
+    });
+
+    it('cuenta evaluadas, simuladas, aplicadas, corregidas y acuerdo con el humano', async () => {
+      const service = makeService([
+        ...aiRowsIndex,
+        [
+          { aiResolution: resolution({ mode: 'shadow', applied: false }), ...human('option', 'B') },
+          {
+            aiResolution: resolution({ mode: 'shadow', verdict: 'solo_a', applied: false }),
+            ...human('option', 'C'),
+          },
+          { aiResolution: resolution({ value: 'blank' }), ...human('blank', null) },
+          { aiResolution: resolution({ value: 'null' }), ...human('option', 'A') },
+          { aiResolution: resolution({ value: 'B' }), ...noHuman },
+          {
+            aiResolution: resolution({
+              verdict: 'audit_sample',
+              route: 'review',
+              applied: false,
+            }),
+            ...human('option', 'B'),
+          },
+          {
+            aiResolution: resolution({
+              verdict: 'conflict',
+              route: 'review',
+              value: null,
+              applied: false,
+            }),
+            ...human('option', 'B'),
+          },
+          { aiResolution: null, ...noHuman },
+        ],
+      ]);
+
+      const metrics = await service.getMetrics(ORG_ID);
+
+      expect(metrics.aiResolutions).toEqual({
+        evaluated: 7,
+        autoSimulated: 6,
+        autoApplied: 3,
+        correctedByHuman: 1,
+        agreementWithHuman: { compared: 5, agreed: 3 },
+        byMode: { shadow: 2, live: 5 },
+      });
+    });
+
+    it('una auto-anulada del OMR sin humano no cuenta en el acuerdo', async () => {
+      const service = makeService([
+        ...aiRowsIndex,
+        [
+          {
+            aiResolution: resolution({ mode: 'shadow', applied: false, value: 'null' }),
+            reviewDecision: 'annulled',
+            reviewedValue: null,
+            reviewedById: null,
+          },
+        ],
+      ]);
+
+      const metrics = await service.getMetrics(ORG_ID);
+
+      expect(metrics.aiResolutions.autoSimulated).toBe(1);
+      expect(metrics.aiResolutions.agreementWithHuman).toEqual({ compared: 0, agreed: 0 });
+    });
   });
 });

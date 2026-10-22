@@ -5,6 +5,7 @@ import {
   aiGradingJobs,
   answerReadings,
   assistantMessages,
+  decisionCalls,
   organizations,
   remedialMaterials,
   withOrgContext,
@@ -12,6 +13,7 @@ import {
   type AiGradingJob,
   type AnswerReadingRow,
   type AssistantMessage,
+  type DecisionCall,
   type RemedialMaterial,
 } from '@soe/db';
 import {
@@ -41,7 +43,7 @@ const REMEDIAL_COMPLETED: ReadonlySet<string> = new Set(['ready', 'approved', 'd
 
 /** Una fila normalizada de gasto IA, independiente de la tabla de origen. */
 interface NormalizedRow {
-  source: 'ai_analysis' | 'remedial' | 'assistant' | 'ai_grading' | 'answer_reading';
+  source: 'ai_analysis' | 'remedial' | 'assistant' | 'ai_grading' | 'answer_reading' | 'decision';
   type: string;
   model: string | null;
   status: string;
@@ -84,6 +86,7 @@ const SOURCE_LABELS: Record<NormalizedRow['source'], string> = {
   assistant: 'Asistente IA',
   ai_grading: 'Corrección IA',
   answer_reading: 'Lectura de respuestas escritas',
+  decision: 'Motor de decisiones',
 };
 
 const AI_GRADING_COMPLETED = 'completed';
@@ -96,6 +99,12 @@ const ANSWER_READING_TYPE_LABELS: Record<string, string> = {
   primary: 'Lectura principal',
   tiebreak: 'Lectura de desempate',
   shadow: 'Lectura en sombra',
+};
+
+const DECISION_FEATURE_LABELS: Record<string, string> = {
+  remedial_judge: 'Juez de material remedial',
+  mark_disambiguation_jev: 'Desambiguación de marcas (Jev)',
+  mark_disambiguation_openai: 'Desambiguación de marcas (OpenAI)',
 };
 
 /** Etiqueta única de tipo para los turnos del asistente conversacional. */
@@ -261,12 +270,24 @@ export class AiObservabilityService {
           ),
         )) as AnswerReadingRow[];
 
+      const decisionRows = (await tx
+        .select()
+        .from(decisionCalls)
+        .where(
+          and(
+            eq(decisionCalls.orgId, orgId),
+            gte(decisionCalls.createdAt, start),
+            lte(decisionCalls.createdAt, end),
+          ),
+        )) as DecisionCall[];
+
       return [
         ...analysisRows.map((r) => normalizeAnalysis(r)),
         ...remedialRows.map((r) => normalizeRemedial(r)),
         ...assistantRows.map((r) => normalizeAssistant(r)),
         ...gradingRows.map((r) => normalizeGradingJob(r)),
         ...readingRows.map((r) => normalizeAnswerReading(r)),
+        ...decisionRows.map((r) => normalizeDecisionCall(r)),
       ];
     });
   }
@@ -457,6 +478,21 @@ function normalizeAnswerReading(row: AnswerReadingRow): NormalizedRow {
   };
 }
 
+function normalizeDecisionCall(row: DecisionCall): NormalizedRow {
+  return {
+    source: 'decision',
+    type: row.feature,
+    model: row.model,
+    status: row.status,
+    costUsd: parseCost(row.costUsd),
+    inputTokens: row.inputTokens,
+    outputTokens: row.outputTokens,
+    latencyMs: row.latencyMs,
+    createdAt: row.createdAt,
+    isFailed: row.status === 'error',
+  };
+}
+
 /** `costUsd` viene como decimal (string) o null → Number, null→0. */
 function parseCost(value: string | null): number {
   if (value === null) return 0;
@@ -488,6 +524,9 @@ function typeLabel(row: NormalizedRow): string {
   }
   if (row.source === 'ai_grading') {
     return AI_GRADING_TYPE_LABELS[row.type] ?? row.type;
+  }
+  if (row.source === 'decision') {
+    return DECISION_FEATURE_LABELS[row.type] ?? row.type;
   }
   if (row.source === 'answer_reading') {
     return ANSWER_READING_TYPE_LABELS[row.type] ?? row.type;

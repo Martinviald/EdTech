@@ -10,8 +10,11 @@ import {
 } from '@soe/db';
 import {
   PAGE_REJECT_REASONS,
+  reviewToMarkAnswer,
   REGISTRATION_ALERT_FALLBACK_RATIO,
   REGISTRATION_ALERT_OFF_MEDIAN_PX,
+  type AiResolutionMetricsModel,
+  type MarkAiResolution,
   type RegistrationMetricsModel,
   type SheetScanMetricsResponse,
   type SuggestionMetricsModel,
@@ -21,6 +24,12 @@ import { InjectDb, type Database } from '../database/database.types';
 const REVIEW_MARK_STATES = ['ambiguous', 'multiple'] as const;
 const FIRM_MARK_STATES = ['marked', 'blank'] as const;
 const UNKNOWN_REJECT_REASON = 'unknown';
+const AUTO_SIMULATED_VERDICTS: ReadonlySet<string> = new Set([
+  'agree',
+  'solo_a',
+  'solo_b',
+  'audit_sample',
+]);
 
 const CROP_FIXED_MARK_CONDITION = sql`${sheetScanMarks.state} = 'marked' AND ${sheetScanMarks.fill} = 0 AND ${sheetScanMarks.threshold} = 0.5 AND ${sheetScanMarks.margin} = 1`;
 
@@ -29,6 +38,13 @@ type SuggestionRow = {
   marksWithSuggestion: number;
   reviewed: number;
   confirmed: number;
+};
+
+type AiResolutionRow = {
+  aiResolution: MarkAiResolution | null;
+  reviewDecision: (typeof sheetScanMarks.$inferSelect)['reviewDecision'];
+  reviewedValue: string | null;
+  reviewedById: string | null;
 };
 
 type RegistrationRow = {
@@ -127,6 +143,17 @@ export class SheetScanMetricsService {
         .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
         .where(and(activeScanMarks, isNotNull(sheetScanMarks.suggestedValue)));
 
+      const aiResolutionRows = await tx
+        .select({
+          aiResolution: sheetScanMarks.aiResolution,
+          reviewDecision: sheetScanMarks.reviewDecision,
+          reviewedValue: sheetScanMarks.reviewedValue,
+          reviewedById: sheetScanMarks.reviewedById,
+        })
+        .from(sheetScanMarks)
+        .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
+        .where(and(activeScanMarks, isNotNull(sheetScanMarks.aiResolution)));
+
       return this.assembleResponse(
         batchRows,
         rejectRows,
@@ -135,8 +162,44 @@ export class SheetScanMetricsService {
         cropFixedRow?.count ?? 0,
         this.registrationMetrics(registrationRow),
         this.suggestionMetrics(suggestionRow),
+        this.aiResolutionMetrics(aiResolutionRows),
       );
     });
+  }
+
+  private aiResolutionMetrics(rows: AiResolutionRow[]): AiResolutionMetricsModel {
+    const metrics: AiResolutionMetricsModel = {
+      evaluated: 0,
+      autoSimulated: 0,
+      autoApplied: 0,
+      correctedByHuman: 0,
+      agreementWithHuman: { compared: 0, agreed: 0 },
+      byMode: { shadow: 0, live: 0 },
+    };
+    for (const row of rows) {
+      const resolution = row.aiResolution;
+      if (!resolution) continue;
+      metrics.evaluated += 1;
+      metrics.byMode[resolution.mode] += 1;
+      const humanAnswer =
+        row.reviewedById === null
+          ? null
+          : reviewToMarkAnswer(row.reviewDecision, row.reviewedValue);
+      if (AUTO_SIMULATED_VERDICTS.has(resolution.verdict)) {
+        metrics.autoSimulated += 1;
+        if (humanAnswer !== null) {
+          metrics.agreementWithHuman.compared += 1;
+          if (humanAnswer === resolution.value) metrics.agreementWithHuman.agreed += 1;
+        }
+      }
+      if (resolution.applied) {
+        metrics.autoApplied += 1;
+        if (humanAnswer !== null && humanAnswer !== resolution.value) {
+          metrics.correctedByHuman += 1;
+        }
+      }
+    }
+    return metrics;
   }
 
   private suggestionMetrics(row: SuggestionRow | undefined): SuggestionMetricsModel {
@@ -174,6 +237,7 @@ export class SheetScanMetricsService {
     cropFixedMarks: number,
     registration: RegistrationMetricsModel,
     suggestions: SuggestionMetricsModel,
+    aiResolutions: AiResolutionMetricsModel,
   ): SheetScanMetricsResponse {
     const marksByState = this.countsToRecord(markRows, markStateEnum.enumValues);
     return {
@@ -184,6 +248,7 @@ export class SheetScanMetricsService {
       firmReadingOverrides,
       registration,
       suggestions,
+      aiResolutions,
     };
   }
 

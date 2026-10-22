@@ -557,6 +557,15 @@ export type SuggestionMetricsModel = {
   rejected: number;
 };
 
+export type AiResolutionMetricsModel = {
+  evaluated: number;
+  autoSimulated: number;
+  autoApplied: number;
+  correctedByHuman: number;
+  agreementWithHuman: { compared: number; agreed: number };
+  byMode: { shadow: number; live: number };
+};
+
 export type SheetScanMetricsResponse = {
   batchesByStatus: Record<string, number>;
   rejectedPagesByReason: Record<string, number>;
@@ -565,6 +574,7 @@ export type SheetScanMetricsResponse = {
   firmReadingOverrides: number;
   registration: RegistrationMetricsModel;
   suggestions: SuggestionMetricsModel;
+  aiResolutions: AiResolutionMetricsModel;
 };
 
 export type ConfirmBatchResponse = {

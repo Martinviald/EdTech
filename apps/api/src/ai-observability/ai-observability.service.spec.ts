@@ -152,7 +152,78 @@ function answerReadingRow(overrides: Record<string, unknown> = {}): Record<strin
   };
 }
 
+function decisionCallRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: 'd-1',
+    orgId: 'org-1',
+    feature: 'mark_disambiguation_jev',
+    engine: 'jev',
+    model: 'jev-1.14.0',
+    mode: 'shadow',
+    status: 'ok',
+    inputTokens: 400,
+    outputTokens: 20,
+    latencyMs: 700,
+    costUsd: '0.000400',
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
 describe('AiObservabilityService', () => {
+  describe('getSummary — llamadas del motor de decisiones (decision_calls)', () => {
+    it('suma el costo, los tokens y la latencia de las llamadas y las agrupa por feature', async () => {
+      const db = makeDb([
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          decisionCallRow(),
+          decisionCallRow({
+            id: 'd-2',
+            feature: 'remedial_judge',
+            engine: 'openai',
+            model: 'gpt-6-luna',
+            status: 'error',
+            costUsd: null,
+          }),
+        ],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getSummary(makeUser());
+
+      const bucket = result.bySource.find((b) => b.key === 'decision');
+      expect(bucket?.count).toBe(2);
+      expect(bucket?.totalCostUsd).toBeCloseTo(0.0004, 6);
+      expect(bucket?.inputTokens).toBe(800);
+      expect(result.totals.failedCount).toBe(1);
+      expect(result.byType.map((b) => b.key).sort()).toEqual([
+        'decision:mark_disambiguation_jev',
+        'decision:remedial_judge',
+      ]);
+    });
+
+    it('el gasto de decision_calls entra en el presupuesto del mes', async () => {
+      const db = makeDb([
+        [],
+        [],
+        [],
+        [],
+        [],
+        [decisionCallRow({ costUsd: '40' })],
+        [{ config: { aiBudgetUsd: 100 } }],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getBudget(makeUser());
+
+      expect(result.monthSpendUsd).toBeCloseTo(40, 6);
+    });
+  });
+
   describe('getSummary — lectura de respuestas escritas (answer_readings)', () => {
     it('suma el costo, los tokens y la latencia de las lecturas por visión', async () => {
       const db = makeDb([
@@ -235,6 +306,7 @@ describe('AiObservabilityService', () => {
         [],
         [],
         [gradingJobRow({ costUsd: '90' })],
+        [],
         [],
         [{ config: { aiBudgetUsd: 100 } }],
       ]);
@@ -388,7 +460,7 @@ describe('AiObservabilityService', () => {
 
   describe('getBudget', () => {
     it('sin tope (config sin aiBudgetUsd) → budgetUsd null, pctUsed null, alertLevel ok', async () => {
-      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [], [], [], [{ config: {} }]]);
+      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [], [], [], [], [{ config: {} }]]);
       const service = makeService(db);
 
       const result = await service.getBudget(makeUser());
@@ -403,6 +475,7 @@ describe('AiObservabilityService', () => {
     it('gasto en zona warning (80-100%) → alertLevel warning', async () => {
       const db = makeDb([
         [analysisRow({ costUsd: '85' })],
+        [],
         [],
         [],
         [],
@@ -422,6 +495,7 @@ describe('AiObservabilityService', () => {
       const db = makeDb([
         [analysisRow({ costUsd: '60' })],
         [remedialRow({ costUsd: '60' })],
+        [],
         [],
         [],
         [],
