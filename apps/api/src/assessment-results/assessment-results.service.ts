@@ -197,39 +197,46 @@ export class AssessmentResultsService {
     orgId: string,
     assessmentIds: readonly string[],
   ): Promise<string[]> {
+    if (assessmentIds.length === 0) return [];
+    const recalculated = await withOrgContext(this.db, orgId, (tx) =>
+      this.recalculateAnswerSheetResultsWithin(tx, orgId, assessmentIds),
+    );
+    this.refreshBenchmarksAfterRecalculation(orgId, recalculated);
+    return recalculated;
+  }
+
+  async recalculateAnswerSheetResultsWithin(
+    tx: Database,
+    orgId: string,
+    assessmentIds: readonly string[],
+  ): Promise<string[]> {
     const uniqueIds = [...new Set(assessmentIds)];
     if (uniqueIds.length === 0) return [];
-    const recalculated = await withOrgContext(this.db, orgId, async (tx) => {
-      const rows = await tx
-        .select({
-          id: assessments.id,
-          instrumentId: assessments.instrumentId,
-          dataGranularity: assessments.dataGranularity,
-        })
-        .from(assessments)
-        .where(and(eq(assessments.orgId, orgId), inArray(assessments.id, uniqueIds)));
-      const scales = new Map<string, GradingScaleParams>();
-      const done: string[] = [];
-      for (const row of rows) {
-        if (row.dataGranularity === 'aggregate_only') continue;
-        let scale = scales.get(row.instrumentId);
-        if (!scale) {
-          scale = await this.resolveInstrumentScaleOrDefault(tx, row.instrumentId);
-          scales.set(row.instrumentId, scale);
-        }
-        await this.computeAndPersist(
-          tx,
-          row.id,
-          row.instrumentId,
-          scale,
-          ANSWER_SHEET_IMPORT_POLICY,
-        );
-        done.push(row.id);
+    const rows = await tx
+      .select({
+        id: assessments.id,
+        instrumentId: assessments.instrumentId,
+        dataGranularity: assessments.dataGranularity,
+      })
+      .from(assessments)
+      .where(and(eq(assessments.orgId, orgId), inArray(assessments.id, uniqueIds)));
+    const scales = new Map<string, GradingScaleParams>();
+    const done: string[] = [];
+    for (const row of rows) {
+      if (row.dataGranularity === 'aggregate_only') continue;
+      let scale = scales.get(row.instrumentId);
+      if (!scale) {
+        scale = await this.resolveInstrumentScaleOrDefault(tx, row.instrumentId);
+        scales.set(row.instrumentId, scale);
       }
-      return done;
-    });
+      await this.computeAndPersist(tx, row.id, row.instrumentId, scale, ANSWER_SHEET_IMPORT_POLICY);
+      done.push(row.id);
+    }
+    return done;
+  }
+
+  refreshBenchmarksAfterRecalculation(orgId: string, recalculated: readonly string[]): void {
     if (recalculated.length > 0) this.benchmarkRefresh?.refreshOrgInBackground(orgId);
-    return recalculated;
   }
 
   /**

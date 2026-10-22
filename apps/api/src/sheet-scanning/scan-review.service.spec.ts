@@ -46,15 +46,20 @@ type QueryChain = {
   orderBy: (..._: unknown[]) => QueryChain;
   limit: (..._: unknown[]) => QueryChain;
   offset: (..._: unknown[]) => QueryChain;
+  for: (..._: unknown[]) => QueryChain;
   then: <T>(resolve: (rows: unknown[]) => T, reject?: (err: unknown) => unknown) => Promise<T>;
 };
 
 function makeDb(selectResults: unknown[][]): {
   db: Database;
   updates: Array<Record<string, unknown>>;
+  locks: unknown[][];
+  transactions: { opened: number };
 } {
   let selectIdx = 0;
   const updates: Array<Record<string, unknown>> = [];
+  const locks: unknown[][] = [];
+  const transactions = { opened: 0 };
 
   function chain(rows: unknown[]): QueryChain {
     const c: QueryChain = {
@@ -65,6 +70,10 @@ function makeDb(selectResults: unknown[][]): {
       orderBy: () => c,
       limit: () => c,
       offset: () => c,
+      for: (...args: unknown[]) => {
+        locks.push(args);
+        return c;
+      },
       then: (resolve, reject) => Promise.resolve(rows).then(resolve, reject) as never,
     };
     return c;
@@ -84,30 +93,38 @@ function makeDb(selectResults: unknown[][]): {
       },
     }),
     execute: async () => [],
-    transaction: async (fn: (tx: unknown) => unknown) => fn(db),
+    transaction: async (fn: (tx: unknown) => unknown) => {
+      transactions.opened += 1;
+      return fn(db);
+    },
   } as unknown as Database;
 
-  return { db, updates };
+  return { db, updates, locks, transactions };
 }
 
-function makeConfirmer(db?: Database): {
+function makeConfirmer(): {
   confirmer: AnswerSheetConfirmer;
   calls: Array<{ user: JwtPayload; input: AnswerSheetConfirmInput }>;
-  rescoreCalls: Array<{ orgId: string; input: RescoreScannedAnswerInput }>;
+  rescoreCalls: Array<{ tx: Database; orgId: string; input: RescoreScannedAnswerInput }>;
+  refreshCalls: Array<{ orgId: string; recalculated: readonly string[] }>;
 } {
   const calls: Array<{ user: JwtPayload; input: AnswerSheetConfirmInput }> = [];
-  const rescoreCalls: Array<{ orgId: string; input: RescoreScannedAnswerInput }> = [];
+  const rescoreCalls: Array<{ tx: Database; orgId: string; input: RescoreScannedAnswerInput }> = [];
+  const refreshCalls: Array<{ orgId: string; recalculated: readonly string[] }> = [];
   const confirmer: AnswerSheetConfirmer = {
     confirmParserResult: async (user, input) => {
       calls.push({ user, input });
       return { jobId: 'job-1', responsesCreated: 24 };
     },
-    rescoreScannedAnswer: async (orgId, input, withinTransaction) => {
-      rescoreCalls.push({ orgId, input });
-      if (withinTransaction && db) await withinTransaction(db);
+    rescoreScannedAnswer: async (tx, orgId, input) => {
+      rescoreCalls.push({ tx, orgId, input });
+      return [input.assessmentId];
+    },
+    refreshResultsAfterRescore: (orgId, recalculated) => {
+      refreshCalls.push({ orgId, recalculated });
     },
   };
-  return { confirmer, calls, rescoreCalls };
+  return { confirmer, calls, rescoreCalls, refreshCalls };
 }
 
 const filesServiceFake = {
@@ -154,8 +171,8 @@ function makeService(
   linkError: Error | null = null,
   engine: RubricEngine | Error = 'legacy',
 ) {
-  const { db, updates } = makeDb(selectResults);
-  const { confirmer, calls: confirmCalls, rescoreCalls } = makeConfirmer(db);
+  const { db, updates, locks, transactions } = makeDb(selectResults);
+  const { confirmer, calls: confirmCalls, rescoreCalls, refreshCalls } = makeConfirmer();
   const gradingCalls: ScheduleConfirmedBatchParams[] = [];
   const developmentGradingFake = {
     scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
@@ -181,6 +198,10 @@ function makeService(
     readingCalls,
     rubricBatches,
     rescoreCalls,
+    refreshCalls,
+    locks,
+    transactions,
+    db,
   };
 }
 
@@ -1394,7 +1415,8 @@ describe('ScanReviewService.confirmBatch', () => {
       confirmParserResult: async () => {
         throw new Error('falló la ingesta');
       },
-      rescoreScannedAnswer: async () => undefined,
+      rescoreScannedAnswer: async () => [],
+      refreshResultsAfterRescore: () => undefined,
     };
     const developmentGradingFake = {
       scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
@@ -1720,10 +1742,13 @@ const SHEET_MARKS = [
 
 const PAGES_READ = [{ pageIndex: 0 }, { pageIndex: 1 }];
 
+const ASSESSMENT_LOCK = [{ id: ASSESSMENT_ID }];
+
 describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)', () => {
   it('rechaza una hoja que quedó incompleta al confirmar', async () => {
     const { service, updates, rescoreCalls } = makeService([
       [correctionRow()],
+      ASSESSMENT_LOCK,
       SHEET_MARKS,
       [{ pageIndex: 0 }],
     ]);
@@ -1738,6 +1763,7 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
   it('reescribe la respuesta con la hoja completa, recalcula y deja la decisión como humana', async () => {
     const { service, updates, rescoreCalls } = makeService([
       [correctionRow()],
+      ASSESSMENT_LOCK,
       SHEET_MARKS,
       PAGES_READ,
     ]);
@@ -1749,6 +1775,7 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
 
     expect(rescoreCalls).toEqual([
       {
+        tx: expect.anything(),
         orgId: ORG_ID,
         input: {
           assessmentId: ASSESSMENT_ID,
@@ -1777,7 +1804,12 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
   });
 
   it('anular la respuesta la marca como anulada al reescribirla', async () => {
-    const { service, rescoreCalls } = makeService([[correctionRow()], SHEET_MARKS, PAGES_READ]);
+    const { service, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
 
     await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'annulled' });
 
@@ -1800,7 +1832,12 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
   });
 
   it('rechaza una alternativa inexistente', async () => {
-    const { service, rescoreCalls } = makeService([[correctionRow()], SHEET_MARKS, PAGES_READ]);
+    const { service, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
 
     await expect(
       service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, {
@@ -1811,13 +1848,15 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
     expect(rescoreCalls).toHaveLength(0);
   });
 
-  it('si la reescritura de la respuesta falla, la marca queda como estaba', async () => {
-    const { db, updates } = makeDb([[correctionRow()], SHEET_MARKS, PAGES_READ]);
+  it('si la reescritura de la respuesta falla, la marca queda como estaba y no se refresca nada', async () => {
+    const { db, updates } = makeDb([[correctionRow()], ASSESSMENT_LOCK, SHEET_MARKS, PAGES_READ]);
+    const refreshResultsAfterRescore = jest.fn();
     const failingConfirmer: AnswerSheetConfirmer = {
       confirmParserResult: async () => ({ jobId: 'job-1', responsesCreated: 0 }),
       rescoreScannedAnswer: async () => {
         throw new ConflictException('no se registró');
       },
+      refreshResultsAfterRescore,
     };
     const service = new ScanReviewService(
       db,
@@ -1832,6 +1871,24 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
       service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(updates).toHaveLength(0);
+    expect(refreshResultsAfterRescore).not.toHaveBeenCalled();
+  });
+
+  it('marca, respuestas y recálculo corren en una sola transacción, con la marca y la evaluación bloqueadas', async () => {
+    const { service, db, updates, rescoreCalls, refreshCalls, locks, transactions } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' });
+
+    expect(transactions.opened).toBe(2);
+    expect(rescoreCalls[0]?.tx).toBe(db);
+    expect(updates).toHaveLength(1);
+    expect(locks).toEqual([['update', { of: expect.anything() }], ['no key update']]);
+    expect(refreshCalls).toEqual([{ orgId: ORG_ID, recalculated: [ASSESSMENT_ID] }]);
   });
 
   it('rechaza una marca que no está en la BD', async () => {
@@ -1880,16 +1937,31 @@ describe('ScanReviewService.getCorrections', () => {
 });
 
 describe('createAnswerSheetConfirmer.rescoreScannedAnswer', () => {
-  it('reescribe la respuesta y recalcula los resultados de la evaluación', async () => {
-    const rescored: RescoreScannedAnswerInput[] = [];
+  it('reescribe la respuesta y recalcula la evaluación con la misma transacción', async () => {
+    const rescored: Array<{ tx: unknown; input: RescoreScannedAnswerInput }> = [];
     const svc = {
-      rescoreScannedAnswer: async (_orgId: string, input: RescoreScannedAnswerInput) => {
-        rescored.push(input);
+      rescoreScannedAnswer: async (tx: unknown, input: RescoreScannedAnswerInput) => {
+        rescored.push({ tx, input });
         return 'item-1';
       },
     } as unknown as AnswerSheetsService;
-    const { results, recalculated } = makeResultsFake();
+    const recalculatedWithin: Array<{ tx: unknown; orgId: string; ids: readonly string[] }> = [];
+    const refreshed: Array<{ orgId: string; ids: readonly string[] }> = [];
+    const results = {
+      recalculateAnswerSheetResultsWithin: async (
+        tx: unknown,
+        orgId: string,
+        ids: readonly string[],
+      ) => {
+        recalculatedWithin.push({ tx, orgId, ids });
+        return [...ids];
+      },
+      refreshBenchmarksAfterRecalculation: (orgId: string, ids: readonly string[]) => {
+        refreshed.push({ orgId, ids });
+      },
+    } as unknown as AssessmentResultsService;
     const confirmer = createAnswerSheetConfirmer(svc, makePreviewStoreFake().store, results);
+    const tx = makeDb([]).db;
     const input: RescoreScannedAnswerInput = {
       assessmentId: ASSESSMENT_ID,
       instrumentId: INSTRUMENT_ID,
@@ -1899,9 +1971,12 @@ describe('createAnswerSheetConfirmer.rescoreScannedAnswer', () => {
       annulledLabels: [],
     };
 
-    await confirmer.rescoreScannedAnswer(ORG_ID, input);
+    const recalculated = await confirmer.rescoreScannedAnswer(tx, ORG_ID, input);
+    confirmer.refreshResultsAfterRescore(ORG_ID, recalculated);
 
-    expect(rescored).toEqual([input]);
-    expect(recalculated).toEqual([{ orgId: ORG_ID, assessmentIds: [ASSESSMENT_ID] }]);
+    expect(rescored).toEqual([{ tx, input }]);
+    expect(recalculatedWithin).toEqual([{ tx, orgId: ORG_ID, ids: [ASSESSMENT_ID] }]);
+    expect(recalculated).toEqual([ASSESSMENT_ID]);
+    expect(refreshed).toEqual([{ orgId: ORG_ID, ids: [ASSESSMENT_ID] }]);
   });
 });

@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { Database } from '@soe/db';
-import type { JwtPayload, } from '../auth/jwt-payload.types';
+import type { JwtPayload } from '../auth/jwt-payload.types';
 import type { UserRole } from '@soe/types';
 import { AssessmentResultsService } from './assessment-results.service';
 import { ANSWER_SHEET_IMPORT_POLICY } from './lib/persist-results';
@@ -161,9 +161,7 @@ describe('AssessmentResultsService.calculate', () => {
   });
 
   it('lanza NotFoundException si el assessment pertenece a otra org (multi-tenancy)', async () => {
-    const db = makeDb([
-      [{ id: 'a1', orgId: 'OTHER-ORG', instrumentId: 'i1' }],
-    ]);
+    const db = makeDb([[{ id: 'a1', orgId: 'OTHER-ORG', instrumentId: 'i1' }]]);
     const svc = makeService(db);
     await expect(
       svc.calculate(makeUser({ orgId: 'org-1' }), 'a1', { force: false }),
@@ -176,10 +174,42 @@ describe('AssessmentResultsService.calculate', () => {
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }],
       // 2) responses + items
       [
-        { studentId: 's1', itemId: 'it1', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
-        { studentId: 's1', itemId: 'it2', isCorrect: false, rawScore: '0.00', finalScore: '0.00', maxScore: '1.00', itemPosition: 2 },
-        { studentId: 's2', itemId: 'it1', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
-        { studentId: 's2', itemId: 'it2', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 2 },
+        {
+          studentId: 's1',
+          itemId: 'it1',
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          maxScore: '1.00',
+          itemPosition: 1,
+        },
+        {
+          studentId: 's1',
+          itemId: 'it2',
+          isCorrect: false,
+          rawScore: '0.00',
+          finalScore: '0.00',
+          maxScore: '1.00',
+          itemPosition: 2,
+        },
+        {
+          studentId: 's2',
+          itemId: 'it1',
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          maxScore: '1.00',
+          itemPosition: 1,
+        },
+        {
+          studentId: 's2',
+          itemId: 'it2',
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          maxScore: '1.00',
+          itemPosition: 2,
+        },
       ],
       // 3) itemTaxonomyTags
       [
@@ -204,14 +234,54 @@ describe('AssessmentResultsService.calculate', () => {
     // Rehacemos el mock con el orden correcto:
     const db2 = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1', dataGranularity: 'item_level' }], // 1
-      [{ gradingScaleId: null }],                          // 2 (instruments)
+      [{ gradingScaleId: null }], // 2 (instruments)
       // 3 (responses+items). `itemContent.alternatives` → hasAlternatives: sin él, un
       // MCQ se bucketizaría como ítem de desarrollo (RC/RPC/RI) en el read-model.
       [
-        { studentId: 's1', itemId: 'it1', value: { raw: 'A' }, itemContent: MCQ_CONTENT, isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
-        { studentId: 's1', itemId: 'it2', value: { raw: 'C' }, itemContent: MCQ_CONTENT, isCorrect: false, rawScore: '0.00', finalScore: '0.00', maxScore: '1.00', itemPosition: 2 },
-        { studentId: 's2', itemId: 'it1', value: { raw: 'A' }, itemContent: MCQ_CONTENT, isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
-        { studentId: 's2', itemId: 'it2', value: { raw: 'B' }, itemContent: MCQ_CONTENT, isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 2 },
+        {
+          studentId: 's1',
+          itemId: 'it1',
+          value: { raw: 'A' },
+          itemContent: MCQ_CONTENT,
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          maxScore: '1.00',
+          itemPosition: 1,
+        },
+        {
+          studentId: 's1',
+          itemId: 'it2',
+          value: { raw: 'C' },
+          itemContent: MCQ_CONTENT,
+          isCorrect: false,
+          rawScore: '0.00',
+          finalScore: '0.00',
+          maxScore: '1.00',
+          itemPosition: 2,
+        },
+        {
+          studentId: 's2',
+          itemId: 'it1',
+          value: { raw: 'A' },
+          itemContent: MCQ_CONTENT,
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          maxScore: '1.00',
+          itemPosition: 1,
+        },
+        {
+          studentId: 's2',
+          itemId: 'it2',
+          value: { raw: 'B' },
+          itemContent: MCQ_CONTENT,
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          maxScore: '1.00',
+          itemPosition: 2,
+        },
       ],
       // 4 (tags)
       [
@@ -242,11 +312,9 @@ describe('AssessmentResultsService.calculate', () => {
     void db;
 
     const svc = makeService(db2);
-    const result = await svc.calculate(
-      makeUser({ activeRole: 'school_admin' }),
-      'a1',
-      { force: false },
-    );
+    const result = await svc.calculate(makeUser({ activeRole: 'school_admin' }), 'a1', {
+      force: false,
+    });
 
     expect(result.studentsProcessed).toBe(2);
     expect(result.assessmentId).toBe('a1');
@@ -308,13 +376,21 @@ describe('AssessmentResultsService.calculate', () => {
   it('cae al default linear_chilean cuando no hay escala en dto ni en el instrument', async () => {
     const db = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // 1: assessment
-      [{ gradingScaleId: null }],                          // 2: instrument sin escala
+      [{ gradingScaleId: null }], // 2: instrument sin escala
       [
-        { studentId: 's1', itemId: 'it1', isCorrect: true, rawScore: '1.00', finalScore: '1.00', maxScore: '1.00', itemPosition: 1 },
+        {
+          studentId: 's1',
+          itemId: 'it1',
+          isCorrect: true,
+          rawScore: '1.00',
+          finalScore: '1.00',
+          maxScore: '1.00',
+          itemPosition: 1,
+        },
       ],
-      [],                                                  // 4: tags vacío
-      ...noEffectiveBandsSelects('i1'),                    // 5-7: resolveEffectiveBands (sin bandas)
-      [{ priorResults: 0, priorSkillResults: 0 }],         // 8: prior counts
+      [], // 4: tags vacío
+      ...noEffectiveBandsSelects('i1'), // 5-7: resolveEffectiveBands (sin bandas)
+      [{ priorResults: 0, priorSkillResults: 0 }], // 8: prior counts
     ]);
     const svc = makeService(db);
     const result = await svc.calculate(makeUser(), 'a1', { force: false });
@@ -327,8 +403,8 @@ describe('AssessmentResultsService.calculate', () => {
   it('retorna 0/0 sin escrituras cuando no hay responses', async () => {
     const db = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // assessment
-      [{ gradingScaleId: null }],                         // instrument
-      [],                                                 // responses vacío
+      [{ gradingScaleId: null }], // instrument
+      [], // responses vacío
     ]);
     const svc = makeService(db);
     const result = await svc.calculate(makeUser(), 'a1', { force: false });
@@ -449,14 +525,13 @@ describe('AssessmentResultsService.list', () => {
   it('teacher sin asignaciones retorna lista vacía sin filtrar PII de otros cursos', async () => {
     const db = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // assessment
-      [],                                                  // teacher_assignments vacío
+      [], // teacher_assignments vacío
     ]);
     const svc = makeService(db);
-    const resp = await svc.list(
-      makeUser({ activeRole: 'teacher', roles: ['teacher'] }),
-      'a1',
-      { page: 1, limit: 50 },
-    );
+    const resp = await svc.list(makeUser({ activeRole: 'teacher', roles: ['teacher'] }), 'a1', {
+      page: 1,
+      limit: 50,
+    });
     expect(resp.total).toBe(0);
     expect(resp.data).toEqual([]);
   });
@@ -466,7 +541,7 @@ describe('AssessmentResultsService.list', () => {
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // assessment
       // sin select adicional para teacher_assignments — scope.scopeAll = true
       [{ total: 5 }], // count
-      [],             // rows (no nos importa el contenido en este test)
+      [], // rows (no nos importa el contenido en este test)
     ]);
     const svc = makeService(db);
     const resp = await svc.list(
@@ -487,7 +562,7 @@ describe('AssessmentResultsService.getStudentDetail', () => {
     const db = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // assessment
       // admin-like → no teacher_assignments select
-      [],                                                  // resultRow vacío
+      [], // resultRow vacío
     ]);
     const svc = makeService(db);
     await expect(
@@ -502,8 +577,8 @@ describe('AssessmentResultsService.getStudentDetail', () => {
   it('teacher sin acceso al alumno recibe 404 (no filtra existencia entre cursos)', async () => {
     const db = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // assessment
-      [{ classGroupId: 'cg-A' }],                         // teacher_assignments
-      [],                                                  // enrollment lookup vacío → 404
+      [{ classGroupId: 'cg-A' }], // teacher_assignments
+      [], // enrollment lookup vacío → 404
     ]);
     const svc = makeService(db);
     await expect(
@@ -545,11 +620,10 @@ describe('AssessmentResultsService.listSkillResults', () => {
       ],
     ]);
     const svc = makeService(db);
-    const resp = await svc.listSkillResults(
-      makeUser({ activeRole: 'academic_director' }),
-      'a1',
-      { page: 1, limit: 50 },
-    );
+    const resp = await svc.listSkillResults(makeUser({ activeRole: 'academic_director' }), 'a1', {
+      page: 1,
+      limit: 50,
+    });
     expect(resp.total).toBe(1);
     expect(resp.data[0]!.nodeName).toBe('Localizar información');
     expect(resp.data[0]!.nodeType).toBe('skill');
@@ -564,7 +638,7 @@ describe('AssessmentResultsService.calculate teacher scoping', () => {
   it('lanza ForbiddenException si el caller teacher no tiene class_groups asignados', async () => {
     const db = makeDb([
       [{ id: 'a1', orgId: 'org-1', instrumentId: 'i1' }], // assessment
-      [],                                                  // teacher_assignments vacío
+      [], // teacher_assignments vacío
     ]);
     const svc = makeService(db);
     await expect(
@@ -609,5 +683,55 @@ describe('AssessmentResultsService.recalculateAnswerSheetResults', () => {
 
     await expect(service.recalculateAnswerSheetResults('org-1', [])).resolves.toEqual([]);
     expect(db.__transactionRan).toBe(false);
+  });
+
+  it('refresca el benchmarking una vez después de recalcular', async () => {
+    const db = makeDb([
+      [{ id: 'a-1', instrumentId: 'inst-1', dataGranularity: 'student_level' }],
+      [{ gradingScaleId: null }],
+    ]);
+    const refreshOrgInBackground = jest.fn();
+    const service = new (AssessmentResultsService as new (
+      db: Database,
+      benchmarkRefresh: unknown,
+    ) => AssessmentResultsService)(db, { refreshOrgInBackground });
+    jest
+      .spyOn(
+        service as unknown as { computeAndPersist: (...args: unknown[]) => Promise<unknown> },
+        'computeAndPersist',
+      )
+      .mockResolvedValue({});
+
+    await service.recalculateAnswerSheetResults('org-1', ['a-1']);
+
+    expect(refreshOrgInBackground).toHaveBeenCalledTimes(1);
+    expect(refreshOrgInBackground).toHaveBeenCalledWith('org-1');
+  });
+});
+
+describe('AssessmentResultsService.recalculateAnswerSheetResultsWithin', () => {
+  it('recalcula con la transacción del llamador, sin abrir otra ni refrescar el benchmarking', async () => {
+    const db = makeDb([
+      [{ id: 'a-1', instrumentId: 'inst-1', dataGranularity: 'student_level' }],
+      [{ gradingScaleId: null }],
+    ]);
+    const refreshOrgInBackground = jest.fn();
+    const service = new (AssessmentResultsService as new (
+      db: Database,
+      benchmarkRefresh: unknown,
+    ) => AssessmentResultsService)(makeDb([]), { refreshOrgInBackground });
+    const compute = jest
+      .spyOn(
+        service as unknown as { computeAndPersist: (...args: unknown[]) => Promise<unknown> },
+        'computeAndPersist',
+      )
+      .mockResolvedValue({});
+
+    const done = await service.recalculateAnswerSheetResultsWithin(db, 'org-1', ['a-1', 'a-1']);
+
+    expect(done).toEqual(['a-1']);
+    expect(compute.mock.calls[0]?.[0]).toBe(db);
+    expect(db.__transactionRan).toBe(false);
+    expect(refreshOrgInBackground).not.toHaveBeenCalled();
   });
 });

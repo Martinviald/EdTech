@@ -180,8 +180,13 @@ calibración. No se reimplementa en otro lado.
   `aiResolution` según C8.
 - `PATCH /sheet-scan-marks/:id/correction` (mismo `reviewMarkSchema`): `correctConfirmedMark`
   exige lote `confirmed`, actualiza la marca como decisión humana (C7), reescribe la fila de
-  `responses` de ese alumno e ítem con la misma corrección que la ingesta y llama a
-  `AssessmentResultsService.recalculateAnswerSheetResults`.
+  `responses` de ese alumno e ítem con la misma corrección que la ingesta y recalcula
+  `assessment_results` (`AssessmentResultsService.recalculateAnswerSheetResultsWithin`).
+  Todo corre en **una sola transacción**: lee la marca con `FOR UPDATE OF sheet_scan_marks` y
+  toma `FOR NO KEY UPDATE` sobre la fila de la evaluación antes de leer las demás marcas de la
+  hoja, así dos correcciones concurrentes de la misma evaluación se serializan (el recálculo es
+  de la evaluación completa, no de la hoja). El refresco del benchmarking se dispara después del
+  commit.
 - Desvío del diseño: no existe hoy una "vista de la hoja del alumno"; el botón "Corregir" vive
   en la página del lote confirmado (`/hojas/lotes/[batchId]/revisar`), con filtro por alumno.
 

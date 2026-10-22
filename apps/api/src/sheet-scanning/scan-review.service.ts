@@ -8,6 +8,7 @@ import {
 import { and, eq, inArray, isNull, isNotNull, ne, notInArray, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
+  assessments,
   files,
   printedSheets,
   sheetLayouts,
@@ -54,7 +55,6 @@ import { InjectDb, type Database } from '../database/database.types';
 import type {
   AnswerSheetsService,
   RescoreScannedAnswerInput,
-  RescoreWithinTransaction,
 } from '../answer-sheets/answer-sheets.service';
 import type { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
@@ -87,10 +87,11 @@ export interface AnswerSheetConfirmer {
     input: AnswerSheetConfirmInput,
   ): Promise<AnswerSheetConfirmOutcome>;
   rescoreScannedAnswer(
+    tx: Database,
     orgId: string,
     input: RescoreScannedAnswerInput,
-    withinTransaction?: RescoreWithinTransaction,
-  ): Promise<void>;
+  ): Promise<string[]>;
+  refreshResultsAfterRescore(orgId: string, recalculated: readonly string[]): void;
 }
 
 export function createAnswerSheetConfirmer(
@@ -99,9 +100,12 @@ export function createAnswerSheetConfirmer(
   results: AssessmentResultsService,
 ): AnswerSheetConfirmer {
   return {
-    async rescoreScannedAnswer(orgId, input, withinTransaction) {
-      await answerSheets.rescoreScannedAnswer(orgId, input, withinTransaction);
-      await results.recalculateAnswerSheetResults(orgId, [input.assessmentId]);
+    async rescoreScannedAnswer(tx, orgId, input) {
+      await answerSheets.rescoreScannedAnswer(tx, input);
+      return results.recalculateAnswerSheetResultsWithin(tx, orgId, [input.assessmentId]);
+    },
+    refreshResultsAfterRescore(orgId, recalculated) {
+      results.refreshBenchmarksAfterRecalculation(orgId, recalculated);
     },
     async confirmParserResult(user, input) {
       const entry = previewStore.set({
@@ -465,7 +469,8 @@ export class ScanReviewService {
         .leftJoin(students, eq(students.id, printedSheets.studentId))
         .leftJoin(resolvedStudents, eq(resolvedStudents.id, sheetScans.resolvedStudentId))
         .where(and(eq(sheetScanMarks.orgId, orgId), eq(sheetScanMarks.id, markId)))
-        .limit(1);
+        .limit(1)
+        .for('update', { of: sheetScanMarks });
       if (!row) throw new NotFoundException('Marca no encontrada');
       this.assertBatchConfirmed(row.batchStatus);
       if (row.scanState === 'superseded' || row.scanState === 'quality_rejected') {
@@ -479,6 +484,7 @@ export class ScanReviewService {
           'La hoja de esta marca no quedó asociada a un alumno y una evaluación al confirmar el lote.',
         );
       }
+      await this.lockAssessmentForCorrection(tx, orgId, row.assessmentId);
       const field = row.spec.fields.find((candidate) => candidate.fieldId === row.mark.fieldId);
       if (!field || field.kind !== 'bubble_group') {
         throw new BadRequestException(
@@ -555,36 +561,29 @@ export class ScanReviewService {
         answers[mark.printedNumber] = mark.state === 'marked' ? mark.value : null;
       }
 
-      return {
-        row,
-        studentId,
+      const recalculated = await this.answerSheetConfirmer.rescoreScannedAnswer(tx, orgId, {
         assessmentId: row.assessmentId,
-        options,
-        reviewedValue,
-        reviewDecision,
-        rescore: {
-          assessmentId: row.assessmentId,
-          instrumentId: row.instrumentId,
-          studentId,
-          label: row.mark.printedNumber,
-          answers,
-          annulledLabels,
-        },
-      };
-    });
-
-    await this.answerSheetConfirmer.rescoreScannedAnswer(orgId, prepared.rescore, async (tx) => {
+        instrumentId: row.instrumentId,
+        studentId,
+        label: row.mark.printedNumber,
+        answers,
+        annulledLabels,
+      });
       await tx
         .update(sheetScanMarks)
         .set({
-          reviewedValue: prepared.reviewedValue,
-          reviewDecision: prepared.reviewDecision,
+          reviewedValue,
+          reviewDecision,
           reviewedById: userId,
           reviewedAt: new Date(),
           autoResolved: false,
         })
         .where(and(eq(sheetScanMarks.id, markId), eq(sheetScanMarks.orgId, orgId)));
+
+      return { row, options, reviewedValue, reviewDecision, recalculated };
     });
+
+    this.answerSheetConfirmer.refreshResultsAfterRescore(orgId, prepared.recalculated);
 
     return withOrgContext(this.db, orgId, async (tx) => {
       const mark = prepared.row.mark;
@@ -619,6 +618,18 @@ export class ScanReviewService {
         cropUrl,
       );
     });
+  }
+
+  private async lockAssessmentForCorrection(
+    tx: Database,
+    orgId: string,
+    assessmentId: string,
+  ): Promise<void> {
+    await tx
+      .select({ id: assessments.id })
+      .from(assessments)
+      .where(and(eq(assessments.orgId, orgId), eq(assessments.id, assessmentId)))
+      .for('no key update');
   }
 
   private assertBatchConfirmed(status: string): void {

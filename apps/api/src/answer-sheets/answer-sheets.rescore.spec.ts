@@ -4,7 +4,6 @@ import type { Database } from '../database/database.types';
 import { AnswerSheetsService, type RescoreScannedAnswerInput } from './answer-sheets.service';
 import { AnswerSheetPreviewStore } from './lib/preview-store';
 
-const ORG_ID = 'aaaaaaaa-0000-0000-0000-000000000001';
 const INSTRUMENT_ID = 'cccccccc-0000-0000-0000-000000000001';
 const ASSESSMENT_ID = 'dddddddd-0000-0000-0000-000000000001';
 const STUDENT_ID = '11110000-0000-0000-0000-000000000001';
@@ -83,7 +82,7 @@ describe('AnswerSheetsService.rescoreScannedAnswer', () => {
     const { db, upserts } = makeDb(true);
     const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
 
-    await expect(service.rescoreScannedAnswer(ORG_ID, input())).resolves.toBe(ITEM_1);
+    await expect(service.rescoreScannedAnswer(db, input())).resolves.toBe(ITEM_1);
 
     expect(upserts).toHaveLength(1);
     expect(upserts[0]?.values).toMatchObject({
@@ -103,7 +102,7 @@ describe('AnswerSheetsService.rescoreScannedAnswer', () => {
     const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
 
     await service.rescoreScannedAnswer(
-      ORG_ID,
+      db,
       input({ answers: { '1': null, '2': 'A' }, annulledLabels: ['1'] }),
     );
 
@@ -115,35 +114,33 @@ describe('AnswerSheetsService.rescoreScannedAnswer', () => {
     });
   });
 
-  it('corre el callback dentro de la misma transacción que la reescritura', async () => {
+  it('usa la transacción del llamador y no abre otra', async () => {
     const { db, upserts } = makeDb(true);
-    const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
-    const seen: number[] = [];
+    const transaction = jest.fn();
+    const service = new AnswerSheetsService(makeDb(true).db, new AnswerSheetPreviewStore());
+    const tx = { ...db, transaction } as unknown as Database;
 
-    await service.rescoreScannedAnswer(ORG_ID, input(), async () => {
-      seen.push(upserts.length);
-    });
+    await service.rescoreScannedAnswer(tx, input());
 
-    expect(seen).toEqual([1]);
+    expect(upserts).toHaveLength(1);
+    expect(transaction).not.toHaveBeenCalled();
   });
 
   it('rechaza con 409 una respuesta con puntaje manual y no la toca', async () => {
     const { db, upserts } = makeDb(true, '1.00');
     const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
-    const callback = jest.fn();
 
-    await expect(service.rescoreScannedAnswer(ORG_ID, input(), callback)).rejects.toBeInstanceOf(
+    await expect(service.rescoreScannedAnswer(db, input())).rejects.toBeInstanceOf(
       ConflictException,
     );
     expect(upserts).toHaveLength(0);
-    expect(callback).not.toHaveBeenCalled();
   });
 
   it('rechaza con 409 si la respuesta no se registró al confirmar', async () => {
     const { db, upserts } = makeDb(false);
     const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
 
-    await expect(service.rescoreScannedAnswer(ORG_ID, input())).rejects.toBeInstanceOf(
+    await expect(service.rescoreScannedAnswer(db, input())).rejects.toBeInstanceOf(
       ConflictException,
     );
     expect(upserts).toHaveLength(0);
@@ -153,8 +150,8 @@ describe('AnswerSheetsService.rescoreScannedAnswer', () => {
     const { db } = makeDb(true);
     const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
 
-    await expect(
-      service.rescoreScannedAnswer(ORG_ID, input({ label: '99' })),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.rescoreScannedAnswer(db, input({ label: '99' }))).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 });
