@@ -171,7 +171,7 @@ El SDK 0.7.0 requiere Node 22. `apps/api/Dockerfile` (`node:22-bookworm-slim`), 
 
 **Cambios** (nuevos):
 
-- **Opción de constructor `experimentalImages`.** `JevEngineConfig.experimentalImages?: boolean` (default `false`). `capabilities.images` refleja esa opción. `DecisionsModule` lo enciende con la variable `JEV_EXPERIMENTAL_IMAGES=true`. Apagarlo hace que todo vaya a revisión.
+- **Opción de constructor `experimentalImages`.** `JevEngineConfig.experimentalImages?: boolean` (default `false`). `capabilities.images` refleja esa opción. `DecisionsModule` lo enciende con la variable `JEV_EXPERIMENTAL_IMAGES=true`. Apagarlo hace que todo vaya a revisión. En AWS la variable sale del secreto SST `JevExperimentalImages` (default `'false'`, en `sst.config.ts`): para encenderla, `sst secret set JevExperimentalImages true --stage <stage>` y redeploy; sin cambio de código.
 - **Restricciones de imagen en los límites.** `DecisionEngineLimits.imageConstraints: { minSidePx; maxSidePx; minPixels; maxPixels; maxBytes } | null` en `contracts.ts`. `JEV_LIMITS` lleva los valores de la doc. `OPENAI_LIMITS` y `FakeDecisionEngine` llevan `null`.
 - **Tokens por imagen.** `JEV_LIMITS.tokensPerImage` pasa de `0` a `3_000`. Es conservador: en la PoC, 1103×300 dio unos 1.300 tokens de imagen. La doc todavía no publica cómo estimarlos.
 - **Validación previa.** `JevDecisionEngine.evaluate` pasa `request.images` a `assertWithinLimits` (hoy no lo hace porque las rechaza).
