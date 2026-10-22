@@ -15,6 +15,7 @@ import { useRetryBatch } from '../../../hooks/use-review-queue';
 import { SCAN_ROUTES } from '../../../escanear/batch-meta';
 import { AssignAssessmentControl } from '../../../components/AssignAssessmentControl';
 import { ReviewWizard } from './ReviewWizard';
+import { CorrectionsSection } from './CorrectionsSection';
 
 export type StudentOption = { studentId: string; name: string };
 
@@ -159,17 +160,20 @@ function BatchBody({
 
   if (batch.status === 'confirmed') {
     return (
-      <AlertCallout tone="success" title="Este lote ya fue confirmado">
-        <p>Sus resultados están persistidos y disponibles en los dashboards.</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button asChild size="sm">
-            <Link href={resultadosHref}>Ver resultados</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={SCAN_ROUTES.escanear}>Escanear otro lote</Link>
-          </Button>
-        </div>
-      </AlertCallout>
+      <div className="space-y-6">
+        <AlertCallout tone="success" title="Este lote ya fue confirmado">
+          <p>Sus resultados están persistidos y disponibles en los dashboards.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button asChild size="sm">
+              <Link href={resultadosHref}>Ver resultados</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href={SCAN_ROUTES.escanear}>Escanear otro lote</Link>
+            </Button>
+          </div>
+        </AlertCallout>
+        <CorrectionsSection batchId={batchId} />
+      </div>
     );
   }
 

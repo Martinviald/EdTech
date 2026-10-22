@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
+  BatchCorrectionsModel,
   BatchStatusModel,
   ConfirmBatchResponse,
   ReviewMarkDto,
@@ -14,6 +15,7 @@ import { batchStatusKeys } from './use-batch-status';
 
 export const reviewQueueKeys = {
   detail: (batchId: string) => ['sheet-scan-batch', batchId, 'review'] as const,
+  corrections: (batchId: string) => ['sheet-scan-batch', batchId, 'corrections'] as const,
 };
 
 const OPTIMISTIC_REVIEWER = 'optimistic';
@@ -83,6 +85,7 @@ export function useResolveMark(batchId: string) {
               reviewedDecision: decision.decision === 'confirm' ? 'option' : decision.decision,
               reviewedById: OPTIMISTIC_REVIEWER,
               autoResolved: false,
+              aiResolution: mark.aiResolution,
             }))
           : old,
       );
@@ -183,6 +186,39 @@ export function useStartBatchProcessing(batchId: string) {
     mutationFn: () => apiClientPost<BatchStatusModel>(`/sheet-scan-batches/${batchId}/start`, {}),
     onSuccess: (updated) => {
       queryClient.setQueryData<BatchStatusModel>(batchStatusKeys.detail(batchId), updated);
+    },
+  });
+}
+
+/** Marcas dudosas de un lote ya confirmado, para corregir una respuesta tras un reclamo. */
+export function useBatchCorrections(batchId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: reviewQueueKeys.corrections(batchId),
+    queryFn: () =>
+      apiClientGet<BatchCorrectionsModel>(`/sheet-scan-batches/${batchId}/corrections`),
+    enabled,
+  });
+}
+
+/** Corrige una marca de un lote confirmado: el backend reescribe la respuesta y recalcula resultados. */
+export function useCorrectMark(batchId: string) {
+  const queryClient = useQueryClient();
+  const correctionsKey = reviewQueueKeys.corrections(batchId);
+
+  return useMutation({
+    mutationFn: ({ markId, decision }: { markId: string; decision: ReviewMarkDto }) =>
+      apiClientPatch<ReviewMarkModel>(`/sheet-scan-marks/${markId}/correction`, decision),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<BatchCorrectionsModel>(correctionsKey, (old) =>
+        old
+          ? {
+              ...old,
+              marks: old.marks.map((mark) =>
+                mark.markId === updated.markId ? { ...mark, ...updated } : mark,
+              ),
+            }
+          : old,
+      );
     },
   });
 }
