@@ -17,6 +17,7 @@ import type { IdentityCandidate } from './identity/identity-resolver.types';
 import type { SheetIdentityResolverRegistry } from './identity/identity-resolver.registry';
 import { deriveLayoutDraft, type DerivableItem } from './sheet-layout.helpers';
 import type { OmrCalibrationService } from './omr-calibration.service';
+import type { MarkDisambiguationService } from './mark-disambiguation.service';
 import { OmrServiceUnavailableError, OmrSourceUnreadableError } from './omr-client.types';
 import { FakeOmrClient } from './testing/fake-omr-client';
 import { SheetScanService } from './sheet-scan.service';
@@ -183,6 +184,7 @@ function makeService(
   createUploadIntent: jest.Mock;
   confirm: jest.Mock;
   scheduleForScan: jest.Mock;
+  resolveBatch: jest.Mock;
 } {
   const { db, inserts, updates } = makeDb(selectResults, insertReturning);
   const { filesService, createUploadIntent, confirm } = makeFilesService();
@@ -195,6 +197,8 @@ function makeService(
   const dispatcher = new FakeDispatcher();
   const scheduleForScan = jest.fn();
   const answerReading = { scheduleForScan } as unknown as AnswerReadingPipelineService;
+  const resolveBatch = jest.fn().mockResolvedValue(undefined);
+  const markDisambiguation = { resolveBatch } as unknown as MarkDisambiguationService;
   const service = new SheetScanService(
     db,
     filesService,
@@ -203,6 +207,7 @@ function makeService(
     omr,
     dispatcher,
     answerReading,
+    markDisambiguation,
   );
   return {
     service,
@@ -216,6 +221,7 @@ function makeService(
     createUploadIntent,
     confirm,
     scheduleForScan,
+    resolveBatch,
   };
 }
 
@@ -954,6 +960,126 @@ describe('SheetScanService job', () => {
     await runJob(service);
 
     expect(scheduleForScan).not.toHaveBeenCalled();
+  });
+});
+
+describe('SheetScanService job — desambiguación de marcas con IA', () => {
+  it('pasa a resolveBatch las marcas dudosas con recorte, antes de finalizeBatch', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({ ok: true, status: 200 } as Response);
+    const { service, resolve, omr, resolveBatch, updates } = makeService([
+      [{ ...CTX_ROW, orgConfig: { review: { autoAnnulMinConfidence: 0.9 } } }],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 2 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [
+        makePage({
+          identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 },
+          marks: [
+            makeMark({ fieldId: 'item-1', state: 'marked', value: 'A', cropJpegBase64: null }),
+            makeMark({
+              fieldId: 'item-2',
+              printedNumber: '2',
+              state: 'ambiguous',
+              value: null,
+              suggestedValue: 'B',
+              doubtReason: 'margin',
+              cropJpegBase64: 'Y3JvcC0y',
+            }),
+            makeMark({
+              fieldId: 'item-3',
+              printedNumber: '3',
+              state: 'multiple',
+              value: null,
+              nullConfidence: 0.95,
+              cropJpegBase64: 'Y3JvcC0z',
+            }),
+            makeMark({
+              fieldId: 'item-4',
+              printedNumber: '4',
+              state: 'multiple',
+              value: null,
+              cropJpegBase64: null,
+            }),
+          ],
+        }),
+      ],
+    });
+    resolve.mockResolvedValueOnce(candidate());
+    let updatesWhenResolving = -1;
+    resolveBatch.mockImplementation(async () => {
+      updatesWhenResolving = updates.length;
+    });
+
+    await runJob(service);
+
+    expect(resolveBatch).toHaveBeenCalledTimes(1);
+    const [orgId, batchId, spec, candidates] = resolveBatch.mock.calls[0] as [
+      string,
+      string,
+      LayoutSpec,
+      Array<Record<string, unknown>>,
+    ];
+    expect({ orgId, batchId, spec }).toEqual({ orgId: ORG_ID, batchId: BATCH_ID, spec: SPEC });
+    expect(candidates).toHaveLength(2);
+    expect(candidates[0]).toMatchObject({
+      fieldId: 'item-2',
+      state: 'ambiguous',
+      cropJpegBase64: 'Y3JvcC0y',
+      scanState: 'read',
+      autoAnnulled: false,
+      suggestedValue: 'B',
+      doubtReason: 'margin',
+    });
+    expect(candidates[1]).toMatchObject({ fieldId: 'item-3', autoAnnulled: true });
+    const finalize = updates.findIndex((u) => u.set.status === 'needs_review');
+    expect(finalize).toBeGreaterThanOrEqual(updatesWhenResolving);
+    expect(updates[finalize]?.set).toMatchObject({ status: 'needs_review', reviewPending: 2 });
+  });
+
+  it('el lote termina needs_review aunque la etapa no resuelva nada', async () => {
+    const { service, resolve, omr, resolveBatch, updates } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 0 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [makePage({ identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 } })],
+    });
+    resolve.mockResolvedValueOnce(candidate());
+
+    await runJob(service);
+
+    expect(resolveBatch).toHaveBeenCalledWith(ORG_ID, BATCH_ID, SPEC, []);
+    expect(updates.at(-1)?.set).toMatchObject({ status: 'needs_review' });
+  });
+
+  it('un lote rechazado por diseño no llama a la etapa', async () => {
+    const { service, omr, resolveBatch } = makeService([[CTX_ROW], [FILE_ROW]]);
+    omr.enqueueResponse({
+      pages: [
+        makePage({
+          identity: {
+            mode: 'qr',
+            raw: buildOmrQrPayload({
+              printedSheetId: SHEET_1,
+              layoutHash: 'ffffffffffffffff',
+              pageIndex: 0,
+              pageCount: 2,
+            }),
+            confidence: 1,
+          },
+        }),
+      ],
+    });
+
+    await runJob(service);
+
+    expect(resolveBatch).not.toHaveBeenCalled();
   });
 });
 

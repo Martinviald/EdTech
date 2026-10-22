@@ -33,3 +33,14 @@ Flags de `run-calibration.ts`: `--engine jev|fake` (default `jev`), `--set remed
 - Tablas de calibración por tramos de confianza, cobertura vs exactitud, latencia p50/p95, tokens y costo (0.042 USD por millón de tokens de entrada). Matemática va aparte: la aritmética es un punto débil documentado de Jev.
 
 Las instrucciones van en español (Jev rinde mejor en inglés; medimos el idioma del producto).
+
+## Desambiguación de marcas (`run-mark-replay.ts`)
+
+Replay de la PoC de marcas (`analisis-omr-marcas/poc-decisions-2026-10-21/`, 100 recortes con verdad conocida) con el builder de producción (`apps/api/src/sheet-scanning/mark-disambiguation-decision.ts`) y los adaptadores reales: Jev `jev-1.14.0` con imágenes experimentales y OpenAI `gpt-6-luna`. Simula `pairConsensus` con los umbrales provisorios de §7.2 del diseño y el veto de dominio. Es el gate de §4.4 antes de activar la sombra y de subir de versión un modelo.
+
+```bash
+$TSX --tsconfig scripts/decisions/tsconfig.json scripts/decisions/run-mark-replay.ts \
+  [--poc ruta/a/poc-decisions-2026-10-21] [--limit N] [--concurrency 4] [--engine jev|openai|both]
+```
+
+Necesita `TYPESAFE_API_KEY` y `OPENAI_API_KEY`. Una corrida completa cuesta menos de US$0,02. Deja el JSON crudo en `scripts/decisions/data/mark-replay-<fecha>.json`.

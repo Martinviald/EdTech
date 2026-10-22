@@ -17,6 +17,7 @@ import {
 } from './identity';
 import { OmrCalibrationController } from './omr-calibration.controller';
 import { OmrCalibrationService } from './omr-calibration.service';
+import { MarkDisambiguationService } from './mark-disambiguation.service';
 import { OMR_CLIENT } from './omr-client.types';
 import { HttpOmrClient } from './omr-http.client';
 import { ReviewSettingsController } from './review-settings.controller';
@@ -63,6 +64,7 @@ import { SheetScanService } from './sheet-scan.service';
     SheetLayoutService,
     SheetPrintService,
     SheetScanService,
+    MarkDisambiguationService,
     SheetScanMetricsService,
     ScanReviewService,
     DevelopmentGradingService,
