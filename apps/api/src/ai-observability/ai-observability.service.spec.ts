@@ -27,10 +27,19 @@ function makeUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
   };
 }
 
-/** Cadena de select() que resuelve `rows` tanto en .where() como en .limit(). */
-function selectChain(rows: unknown[]) {
+interface SelectCall {
+  projection: Record<string, unknown> | undefined;
+  groupedBy: number;
+  inTransaction: boolean;
+}
+
+function selectChain(rows: unknown[], call: SelectCall) {
   const whereResult: Record<string, unknown> = {
     limit: () => Promise.resolve(rows),
+    groupBy: (...columns: unknown[]) => {
+      call.groupedBy = columns.length;
+      return Promise.resolve(rows);
+    },
     then: (resolve: (v: unknown[]) => unknown) => resolve(rows),
   };
   const chain: Record<string, unknown> = {
@@ -40,16 +49,26 @@ function selectChain(rows: unknown[]) {
   return chain;
 }
 
-function makeDb(selectResults: unknown[][]): Database {
+function makeDb(selectResults: unknown[][], calls: SelectCall[] = []): Database {
   let idx = 0;
+  let transactionDepth = 0;
   const db = {
-    select: () => {
+    select: (projection?: Record<string, unknown>) => {
       const rows = selectResults[idx] ?? [];
       idx++;
-      return selectChain(rows);
+      const call: SelectCall = { projection, groupedBy: 0, inTransaction: transactionDepth > 0 };
+      calls.push(call);
+      return selectChain(rows, call);
     },
     execute: async () => [],
-    transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => fn(db),
+    transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => {
+      transactionDepth++;
+      try {
+        return await fn(db);
+      } finally {
+        transactionDepth--;
+      }
+    },
   } as unknown as Database;
   return db;
 }
@@ -152,27 +171,25 @@ function answerReadingRow(overrides: Record<string, unknown> = {}): Record<strin
   };
 }
 
-function decisionCallRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+function decisionBucketRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
-    id: 'd-1',
-    orgId: 'org-1',
     feature: 'mark_disambiguation_jev',
-    engine: 'jev',
     model: 'jev-1.14.0',
-    mode: 'shadow',
     status: 'ok',
-    inputTokens: 400,
-    outputTokens: 20,
-    latencyMs: 700,
+    day: '2026-06-05',
+    calls: 3,
     costUsd: '0.000400',
-    createdAt: new Date(),
+    inputTokens: '1200',
+    outputTokens: '60',
+    latencySumMs: '2100',
+    latencyCount: 3,
     ...overrides,
   };
 }
 
 describe('AiObservabilityService', () => {
   describe('getSummary — llamadas del motor de decisiones (decision_calls)', () => {
-    it('suma el costo, los tokens y la latencia de las llamadas y las agrupa por feature', async () => {
+    it('pondera cada grupo agregado por su número de llamadas y lo agrupa por feature', async () => {
       const db = makeDb([
         [],
         [],
@@ -180,14 +197,17 @@ describe('AiObservabilityService', () => {
         [],
         [],
         [
-          decisionCallRow(),
-          decisionCallRow({
-            id: 'd-2',
+          decisionBucketRow(),
+          decisionBucketRow({
             feature: 'remedial_judge',
-            engine: 'openai',
             model: 'gpt-6-luna',
             status: 'error',
+            calls: 2,
             costUsd: null,
+            inputTokens: '0',
+            outputTokens: '0',
+            latencySumMs: null,
+            latencyCount: 0,
           }),
         ],
       ]);
@@ -196,13 +216,40 @@ describe('AiObservabilityService', () => {
       const result = await service.getSummary(makeUser());
 
       const bucket = result.bySource.find((b) => b.key === 'decision');
-      expect(bucket?.count).toBe(2);
+      expect(bucket?.count).toBe(5);
       expect(bucket?.totalCostUsd).toBeCloseTo(0.0004, 6);
-      expect(bucket?.inputTokens).toBe(800);
-      expect(result.totals.failedCount).toBe(1);
+      expect(bucket?.inputTokens).toBe(1200);
+      expect(bucket?.outputTokens).toBe(60);
+      expect(bucket?.avgLatencyMs).toBe(700);
+      expect(result.totals.count).toBe(5);
+      expect(result.totals.failedCount).toBe(2);
       expect(result.byType.map((b) => b.key).sort()).toEqual([
         'decision:mark_disambiguation_jev',
         'decision:remedial_judge',
+      ]);
+    });
+
+    it('agrega decision_calls en SQL dentro del contexto de la org, sin leer los JSONB', async () => {
+      const calls: SelectCall[] = [];
+      const db = makeDb([[], [], [], [], [], [decisionBucketRow()]], calls);
+      const service = makeService(db);
+
+      await service.getSummary(makeUser());
+
+      const decisionCall = calls[5];
+      expect(decisionCall?.inTransaction).toBe(true);
+      expect(decisionCall?.groupedBy).toBe(4);
+      expect(Object.keys(decisionCall?.projection ?? {}).sort()).toEqual([
+        'calls',
+        'costUsd',
+        'day',
+        'feature',
+        'inputTokens',
+        'latencyCount',
+        'latencySumMs',
+        'model',
+        'outputTokens',
+        'status',
       ]);
     });
 
@@ -213,14 +260,34 @@ describe('AiObservabilityService', () => {
         [],
         [],
         [],
-        [decisionCallRow({ costUsd: '40' })],
+        [
+          decisionBucketRow({ costUsd: '40' }),
+          decisionBucketRow({ status: 'error', costUsd: '2.5' }),
+        ],
         [{ config: { aiBudgetUsd: 100 } }],
       ]);
       const service = makeService(db);
 
       const result = await service.getBudget(makeUser());
 
-      expect(result.monthSpendUsd).toBeCloseTo(40, 6);
+      expect(result.monthSpendUsd).toBeCloseTo(42.5, 6);
+      expect(result.pctUsed).toBeCloseTo(42.5, 2);
+    });
+
+    it('cada grupo diario de decision_calls cae en su día de la serie', async () => {
+      const db = makeDb([
+        [analysisRow({ createdAt: new Date('2026-06-05T08:00:00Z'), costUsd: '0.01' })],
+        [],
+        [],
+        [],
+        [],
+        [decisionBucketRow({ day: '2026-06-05', costUsd: '0.02' })],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getTimeseries(makeUser(), '2026-06-01', '2026-06-30');
+
+      expect(result.points).toEqual([{ date: '2026-06-05', costUsd: 0.03, count: 4 }]);
     });
   });
 
