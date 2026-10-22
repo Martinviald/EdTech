@@ -64,10 +64,22 @@ import {
   buildPrintedLabelIndex,
   resolveRowAnswers,
   resolveAnnulledAnswers,
+  resolveScanLabel,
+  type AnnulledAnswers,
+  type ResolvedRow,
   resolvePendingReadingPositions,
   resolvePrescoredAnswers,
   toScoringAnswer,
 } from './lib/composite-answers';
+
+export interface RescoreScannedAnswerInput {
+  assessmentId: string;
+  instrumentId: string;
+  studentId: string;
+  label: string;
+  answers: Record<string, string | null>;
+  annulledLabels: string[];
+}
 
 interface ItemForAssessment {
   id: string;
@@ -441,41 +453,7 @@ export class AnswerSheetsService {
           continue;
         }
 
-        const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
-        const evidence = annulmentEvidence(annulled, item.position);
-        const answerValue =
-          evidence === null ? { answer: rawAnswer } : { answer: rawAnswer, ...evidence };
-        const result = getScoringStrategy(item.type).score({
-          item: {
-            id: item.id,
-            type: item.type,
-            content: item.content,
-            maxScore: item.maxScore,
-            scoringConfig: item.scoringConfig,
-          },
-          rawAnswer,
-        });
-
-        if (result.requiresManualGrading) {
-          responseRows.push(this.pendingResponseRow(studentId, item, answerValue));
-          continue;
-        }
-
-        const rawScore = result.rawScore ?? 0;
-        const finalScore = rawScore;
-
-        responseRows.push({
-          assessmentId: '', // se completa una vez creado el assessment
-          studentId,
-          itemId: item.id,
-          value: answerValue,
-          isCorrect: result.isCorrect,
-          rawScore: rawScore.toFixed(2),
-          maxScore: item.maxScore.toFixed(2),
-          finalScore: finalScore.toFixed(2),
-          scoredBy: 'auto',
-          scoredAt: now,
-        });
+        responseRows.push(this.scoredResponseRow(studentId, item, resolvedRow, annulled, now));
       }
     }
 
@@ -666,6 +644,96 @@ export class AnswerSheetsService {
 
   // ---------- helpers ----------
 
+  async rescoreScannedAnswer(tx: Database, input: RescoreScannedAnswerInput): Promise<string> {
+    const instrumentItems = await this.loadInstrumentItems(input.instrumentId, tx);
+    const labelIndex = buildPrintedLabelIndex(instrumentItems);
+    const target = resolveScanLabel(labelIndex, input.label, null);
+    if (target.kind === 'unmatched') {
+      throw new BadRequestException(
+        `La pregunta ${input.label} no corresponde a ningún ítem del instrumento.`,
+      );
+    }
+    const item = instrumentItems.find((candidate) => candidate.position === target.item.position);
+    if (!item) {
+      throw new BadRequestException(
+        `La pregunta ${input.label} no corresponde a ningún ítem del instrumento.`,
+      );
+    }
+    const resolvedRow = resolveRowAnswers(labelIndex, input.answers);
+    const annulled = resolveAnnulledAnswers(labelIndex, input.annulledLabels);
+    const now = new Date();
+    const row = this.scoredResponseRow(input.studentId, item, resolvedRow, annulled, now);
+
+    const [existing] = await tx
+      .select({ id: responses.id, humanScore: responses.humanScore })
+      .from(responses)
+      .where(
+        and(
+          eq(responses.assessmentId, input.assessmentId),
+          eq(responses.studentId, input.studentId),
+          eq(responses.itemId, item.id),
+        ),
+      )
+      .limit(1);
+    if (!existing) {
+      throw new ConflictException(
+        `La respuesta de la pregunta ${input.label} no se registró al confirmar el lote: no hay nada que corregir en los resultados.`,
+      );
+    }
+    if (existing.humanScore !== null) {
+      throw new ConflictException(
+        `La pregunta ${input.label} tiene un puntaje asignado a mano: corrígelo desde la revisión de puntajes.`,
+      );
+    }
+    await tx
+      .insert(responses)
+      .values({ ...row, assessmentId: input.assessmentId })
+      .onConflictDoUpdate({
+        target: [responses.assessmentId, responses.studentId, responses.itemId],
+        set: this.responseUpsertSet(now),
+      });
+    return item.id;
+  }
+
+  private scoredResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    resolvedRow: ResolvedRow,
+    annulled: AnnulledAnswers,
+    now: Date,
+  ): typeof responses.$inferInsert {
+    const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
+    const evidence = annulmentEvidence(annulled, item.position);
+    const answerValue =
+      evidence === null ? { answer: rawAnswer } : { answer: rawAnswer, ...evidence };
+    const result = getScoringStrategy(item.type).score({
+      item: {
+        id: item.id,
+        type: item.type,
+        content: item.content,
+        maxScore: item.maxScore,
+        scoringConfig: item.scoringConfig,
+      },
+      rawAnswer,
+    });
+    if (result.requiresManualGrading) {
+      return this.pendingResponseRow(studentId, item, answerValue);
+    }
+    const rawScore = result.rawScore ?? 0;
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value: answerValue,
+      isCorrect: result.isCorrect,
+      rawScore: rawScore.toFixed(2),
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: rawScore.toFixed(2),
+      scoredBy: 'auto',
+      scoredAt: now,
+    };
+  }
+
   private responseUpsertSet(now: Date) {
     const keepsScore = sql`${responses.humanScore} IS NOT NULL OR (excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL)`;
     const kept = (column: AnyPgColumn, incoming: string) =>
@@ -795,8 +863,11 @@ export class AnswerSheetsService {
     return loadSectionRoles(this.db, instrumentId);
   }
 
-  private async loadInstrumentItems(instrumentId: string): Promise<ItemForAssessment[]> {
-    const rows = await this.db
+  private async loadInstrumentItems(
+    instrumentId: string,
+    db: Database = this.db,
+  ): Promise<ItemForAssessment[]> {
+    const rows = await db
       .select({
         id: items.id,
         position: items.position,

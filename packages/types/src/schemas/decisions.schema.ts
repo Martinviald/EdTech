@@ -13,7 +13,13 @@ import { z } from 'zod';
 
 // ── Funcionalidades ──────────────────────────────────────────────────────────
 // Cada funcionalidad es un punto de llamada al motor. Se amplía agregando valores.
-export const DECISION_FEATURES = ['remedial_judge'] as const;
+// `mark_disambiguation_*`: un slot por motor (Jev y OpenAI) para desambiguar marcas de
+// burbuja; cada uno con su modelo fijado y sus umbrales (docs/diseno-desambiguacion-marcas-ia.md §3.5).
+export const DECISION_FEATURES = [
+  'remedial_judge',
+  'mark_disambiguation_jev',
+  'mark_disambiguation_openai',
+] as const;
 export type DecisionFeature = (typeof DECISION_FEATURES)[number];
 export const decisionFeatureSchema = z.enum(DECISION_FEATURES);
 
@@ -51,9 +57,23 @@ export const noulThresholdsSchema = z
   });
 export type NoulThresholds = z.infer<typeof noulThresholdsSchema>;
 
+/**
+ * Par de motores (`pairConsensus` de `@soe/decisions`): umbrales de UN motor para
+ * combinarlo con otro. `>= agree` basta si coinciden; `>= solo` basta si el otro no
+ * sabe; `< unsure` es "no sabe". Invariante: `0 <= unsure <= agree <= solo <= 1`.
+ */
+export const pairThresholdsSchema = z
+  .object({ agree: probabilitySchema, solo: probabilitySchema, unsure: probabilitySchema })
+  .strict()
+  .refine((t) => t.unsure <= t.agree && t.agree <= t.solo, {
+    message: 'Los umbrales de par deben cumplir unsure <= agree <= solo',
+    path: ['agree'],
+  });
+export type PairThresholds = z.infer<typeof pairThresholdsSchema>;
+
 export const decisionThresholdsSchema = z.record(
   z.string(),
-  z.union([confidenceThresholdsSchema, noulThresholdsSchema]),
+  z.union([confidenceThresholdsSchema, noulThresholdsSchema, pairThresholdsSchema]),
 );
 export type DecisionThresholds = z.infer<typeof decisionThresholdsSchema>;
 
@@ -93,4 +113,11 @@ export interface DecisionFeatureDefault {
 /** Default `off`: activar una funcionalidad es una decisión explícita de configuración. */
 export const DECISION_FEATURE_DEFAULTS: Record<DecisionFeature, DecisionFeatureDefault> = {
   remedial_judge: { engine: 'jev', model: 'jev-1.13.0', mode: 'off', thresholds: {} },
+  mark_disambiguation_jev: { engine: 'jev', model: 'jev-1.14.0', mode: 'off', thresholds: {} },
+  mark_disambiguation_openai: {
+    engine: 'openai',
+    model: 'gpt-6-luna',
+    mode: 'off',
+    thresholds: {},
+  },
 };

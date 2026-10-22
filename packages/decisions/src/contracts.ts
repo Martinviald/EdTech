@@ -175,6 +175,20 @@ export interface DecisionEngineLimits {
   readonly charsPerToken: number;
   /** Tokens que se cuentan por imagen (estimación conservadora; 0 si no acepta imágenes). */
   readonly tokensPerImage: number;
+  /**
+   * Restricciones que el proveedor exige a cada imagen, o `null` si no exige ninguna
+   * (o reescala por su cuenta). El adaptador ajusta la imagen a ellas antes de enviarla.
+   */
+  readonly imageConstraints: ImageConstraints | null;
+}
+
+/** Tamaño admitido por imagen: lados, píxeles totales y bytes del archivo. */
+export interface ImageConstraints {
+  readonly minSidePx: number;
+  readonly maxSidePx: number;
+  readonly minPixels: number;
+  readonly maxPixels: number;
+  readonly maxBytes: number;
 }
 
 export interface DecisionEngine {
@@ -252,3 +266,17 @@ export interface NoulThresholds {
   readonly no: number;
 }
 export type NoulVerdict = 'yes' | 'no' | 'uncertain';
+
+// ── Consenso de dos motores ─────────────────────────────────────────────────
+
+/**
+ * Umbrales de UN motor para combinarlo con otro (`pairConsensus`). Sobre la
+ * confianza de su respuesta: `>= agree` basta cuando ambos motores coinciden;
+ * `>= solo` basta para aceptarlo solo cuando el otro no sabe; `< unsure` significa
+ * que el motor "no sabe". Invariante: `0 <= unsure <= agree <= solo <= 1`.
+ */
+export interface PairThresholds {
+  readonly agree: number;
+  readonly solo: number;
+  readonly unsure: number;
+}

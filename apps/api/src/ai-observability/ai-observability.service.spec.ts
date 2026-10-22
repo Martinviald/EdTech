@@ -27,10 +27,19 @@ function makeUser(overrides: Partial<JwtPayload> = {}): JwtPayload {
   };
 }
 
-/** Cadena de select() que resuelve `rows` tanto en .where() como en .limit(). */
-function selectChain(rows: unknown[]) {
+interface SelectCall {
+  projection: Record<string, unknown> | undefined;
+  groupedBy: number;
+  inTransaction: boolean;
+}
+
+function selectChain(rows: unknown[], call: SelectCall) {
   const whereResult: Record<string, unknown> = {
     limit: () => Promise.resolve(rows),
+    groupBy: (...columns: unknown[]) => {
+      call.groupedBy = columns.length;
+      return Promise.resolve(rows);
+    },
     then: (resolve: (v: unknown[]) => unknown) => resolve(rows),
   };
   const chain: Record<string, unknown> = {
@@ -40,16 +49,26 @@ function selectChain(rows: unknown[]) {
   return chain;
 }
 
-function makeDb(selectResults: unknown[][]): Database {
+function makeDb(selectResults: unknown[][], calls: SelectCall[] = []): Database {
   let idx = 0;
+  let transactionDepth = 0;
   const db = {
-    select: () => {
+    select: (projection?: Record<string, unknown>) => {
       const rows = selectResults[idx] ?? [];
       idx++;
-      return selectChain(rows);
+      const call: SelectCall = { projection, groupedBy: 0, inTransaction: transactionDepth > 0 };
+      calls.push(call);
+      return selectChain(rows, call);
     },
     execute: async () => [],
-    transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => fn(db),
+    transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => {
+      transactionDepth++;
+      try {
+        return await fn(db);
+      } finally {
+        transactionDepth--;
+      }
+    },
   } as unknown as Database;
   return db;
 }
@@ -152,7 +171,126 @@ function answerReadingRow(overrides: Record<string, unknown> = {}): Record<strin
   };
 }
 
+function decisionBucketRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    feature: 'mark_disambiguation_jev',
+    model: 'jev-1.14.0',
+    status: 'ok',
+    day: '2026-06-05',
+    calls: 3,
+    costUsd: '0.000400',
+    inputTokens: '1200',
+    outputTokens: '60',
+    latencySumMs: '2100',
+    latencyCount: 3,
+    ...overrides,
+  };
+}
+
 describe('AiObservabilityService', () => {
+  describe('getSummary — llamadas del motor de decisiones (decision_calls)', () => {
+    it('pondera cada grupo agregado por su número de llamadas y lo agrupa por feature', async () => {
+      const db = makeDb([
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          decisionBucketRow(),
+          decisionBucketRow({
+            feature: 'remedial_judge',
+            model: 'gpt-6-luna',
+            status: 'error',
+            calls: 2,
+            costUsd: null,
+            inputTokens: '0',
+            outputTokens: '0',
+            latencySumMs: null,
+            latencyCount: 0,
+          }),
+        ],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getSummary(makeUser());
+
+      const bucket = result.bySource.find((b) => b.key === 'decision');
+      expect(bucket?.count).toBe(5);
+      expect(bucket?.totalCostUsd).toBeCloseTo(0.0004, 6);
+      expect(bucket?.inputTokens).toBe(1200);
+      expect(bucket?.outputTokens).toBe(60);
+      expect(bucket?.avgLatencyMs).toBe(700);
+      expect(result.totals.count).toBe(5);
+      expect(result.totals.failedCount).toBe(2);
+      expect(result.byType.map((b) => b.key).sort()).toEqual([
+        'decision:mark_disambiguation_jev',
+        'decision:remedial_judge',
+      ]);
+    });
+
+    it('agrega decision_calls en SQL dentro del contexto de la org, sin leer los JSONB', async () => {
+      const calls: SelectCall[] = [];
+      const db = makeDb([[], [], [], [], [], [decisionBucketRow()]], calls);
+      const service = makeService(db);
+
+      await service.getSummary(makeUser());
+
+      const decisionCall = calls[5];
+      expect(decisionCall?.inTransaction).toBe(true);
+      expect(decisionCall?.groupedBy).toBe(4);
+      expect(Object.keys(decisionCall?.projection ?? {}).sort()).toEqual([
+        'calls',
+        'costUsd',
+        'day',
+        'feature',
+        'inputTokens',
+        'latencyCount',
+        'latencySumMs',
+        'model',
+        'outputTokens',
+        'status',
+      ]);
+    });
+
+    it('el gasto de decision_calls entra en el presupuesto del mes', async () => {
+      const db = makeDb([
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          decisionBucketRow({ costUsd: '40' }),
+          decisionBucketRow({ status: 'error', costUsd: '2.5' }),
+        ],
+        [{ config: { aiBudgetUsd: 100 } }],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getBudget(makeUser());
+
+      expect(result.monthSpendUsd).toBeCloseTo(42.5, 6);
+      expect(result.pctUsed).toBeCloseTo(42.5, 2);
+    });
+
+    it('cada grupo diario de decision_calls cae en su día de la serie', async () => {
+      const db = makeDb([
+        [analysisRow({ createdAt: new Date('2026-06-05T08:00:00Z'), costUsd: '0.01' })],
+        [],
+        [],
+        [],
+        [],
+        [decisionBucketRow({ day: '2026-06-05', costUsd: '0.02' })],
+      ]);
+      const service = makeService(db);
+
+      const result = await service.getTimeseries(makeUser(), '2026-06-01', '2026-06-30');
+
+      expect(result.points).toEqual([{ date: '2026-06-05', costUsd: 0.03, count: 4 }]);
+    });
+  });
+
   describe('getSummary — lectura de respuestas escritas (answer_readings)', () => {
     it('suma el costo, los tokens y la latencia de las lecturas por visión', async () => {
       const db = makeDb([
@@ -235,6 +373,7 @@ describe('AiObservabilityService', () => {
         [],
         [],
         [gradingJobRow({ costUsd: '90' })],
+        [],
         [],
         [{ config: { aiBudgetUsd: 100 } }],
       ]);
@@ -388,7 +527,7 @@ describe('AiObservabilityService', () => {
 
   describe('getBudget', () => {
     it('sin tope (config sin aiBudgetUsd) → budgetUsd null, pctUsed null, alertLevel ok', async () => {
-      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [], [], [], [{ config: {} }]]);
+      const db = makeDb([[analysisRow({ costUsd: '0.50' })], [], [], [], [], [], [{ config: {} }]]);
       const service = makeService(db);
 
       const result = await service.getBudget(makeUser());
@@ -403,6 +542,7 @@ describe('AiObservabilityService', () => {
     it('gasto en zona warning (80-100%) → alertLevel warning', async () => {
       const db = makeDb([
         [analysisRow({ costUsd: '85' })],
+        [],
         [],
         [],
         [],
@@ -422,6 +562,7 @@ describe('AiObservabilityService', () => {
       const db = makeDb([
         [analysisRow({ costUsd: '60' })],
         [remedialRow({ costUsd: '60' })],
+        [],
         [],
         [],
         [],

@@ -5,9 +5,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, inArray, isNull, isNotNull, ne, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, isNotNull, ne, notInArray, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
+  assessments,
   files,
   printedSheets,
   sheetLayouts,
@@ -22,13 +23,16 @@ import {
 } from '@soe/db';
 import type {
   AssignScanIdentityDto,
+  BatchCorrectionsModel,
   ConfirmBatchResponse,
   DiscardScanDto,
   LayoutSpec,
   DoubtReason,
+  MarkAiResolution,
   MarkReviewDecision,
   MarkState,
   PageQuality,
+  ReviewMarkAiResolutionModel,
   ReviewMarkDto,
   ReviewMarkModel,
   ReviewQueueModel,
@@ -48,7 +52,11 @@ import { RubricGradingService } from '../answer-reading/rubric-grading.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
-import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
+import type {
+  AnswerSheetsService,
+  RescoreScannedAnswerInput,
+} from '../answer-sheets/answer-sheets.service';
+import type { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { ParserResult } from '../answer-sheets/lib/parsers/parser.types';
 import { FilesService } from '../files/files.service';
@@ -78,13 +86,27 @@ export interface AnswerSheetConfirmer {
     user: JwtPayload,
     input: AnswerSheetConfirmInput,
   ): Promise<AnswerSheetConfirmOutcome>;
+  rescoreScannedAnswer(
+    tx: Database,
+    orgId: string,
+    input: RescoreScannedAnswerInput,
+  ): Promise<string[]>;
+  refreshResultsAfterRescore(orgId: string, recalculated: readonly string[]): void;
 }
 
 export function createAnswerSheetConfirmer(
   answerSheets: AnswerSheetsService,
   previewStore: AnswerSheetPreviewStore,
+  results: AssessmentResultsService,
 ): AnswerSheetConfirmer {
   return {
+    async rescoreScannedAnswer(tx, orgId, input) {
+      await answerSheets.rescoreScannedAnswer(tx, input);
+      return results.recalculateAnswerSheetResultsWithin(tx, orgId, [input.assessmentId]);
+    },
+    refreshResultsAfterRescore(orgId, recalculated) {
+      results.refreshBenchmarksAfterRecalculation(orgId, recalculated);
+    },
     async confirmParserResult(user, input) {
       const entry = previewStore.set({
         orgId: input.orgId,
@@ -152,6 +174,7 @@ type MarkQueueRow = {
   reviewDecision: MarkReviewDecision | null;
   reviewedById: string | null;
   autoResolved: boolean;
+  aiResolution: MarkAiResolution | null;
 };
 
 type ConfirmMarkRow = {
@@ -296,6 +319,7 @@ export class ScanReviewService {
           suggestedValue: sheetScanMarks.suggestedValue,
           doubtReason: sheetScanMarks.doubtReason,
           nullConfidence: sheetScanMarks.nullConfidence,
+          aiResolution: sheetScanMarks.aiResolution,
           batchId: sheetScans.batchId,
           batchStatus: sheetScanBatches.status,
           scanState: sheetScans.state,
@@ -372,8 +396,248 @@ export class ScanReviewService {
         reviewedDecision: reviewDecision,
         reviewedById: userId,
         autoResolved: false,
+        aiResolution: this.teacherAiResolution(row.aiResolution),
       };
     });
+  }
+
+  async getCorrections(orgId: string, batchId: string): Promise<BatchCorrectionsModel> {
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const [batch] = await tx
+        .select({ status: sheetScanBatches.status, spec: sheetLayouts.spec })
+        .from(sheetScanBatches)
+        .innerJoin(sheetPrintRuns, eq(sheetPrintRuns.id, sheetScanBatches.printRunId))
+        .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .where(and(eq(sheetScanBatches.orgId, orgId), eq(sheetScanBatches.id, batchId)))
+        .limit(1);
+      if (!batch) throw new NotFoundException('Lote de escaneo no encontrado');
+      this.assertBatchConfirmed(batch.status);
+
+      const scanRows = await this.selectBatchScans(tx, orgId, batchId);
+      const scanById = new Map(scanRows.map((scan) => [scan.scanId, scan]));
+      const markRows = await this.selectPendingMarks(tx, orgId, batchId, 'all');
+      const urlByFileId = await this.buildFileUrlIndex(
+        tx,
+        orgId,
+        markRows.flatMap((mark) => (mark.cropFileId ? [mark.cropFileId] : [])),
+      );
+      const optionsByFieldId = this.buildOptionsIndex(batch.spec);
+      const marks = markRows.map((mark) => {
+        const scan = scanById.get(mark.scanId);
+        return this.toReviewMarkModel(
+          mark,
+          scan ? this.studentNameOf(scan) : null,
+          optionsByFieldId.get(mark.fieldId) ?? [],
+          mark.cropFileId ? (urlByFileId.get(mark.cropFileId) ?? null) : null,
+        );
+      });
+      return { batchId, marks };
+    });
+  }
+
+  async correctConfirmedMark(
+    orgId: string,
+    userId: string,
+    markId: string,
+    dto: ReviewMarkDto,
+  ): Promise<ReviewMarkModel> {
+    const prepared = await withOrgContext(this.db, orgId, async (tx) => {
+      const resolvedStudents = alias(students, 'resolved_students');
+      const [row] = await tx
+        .select({
+          mark: sheetScanMarks,
+          sheetFirstName: students.firstName,
+          sheetLastName: students.lastName,
+          resolvedFirstName: resolvedStudents.firstName,
+          resolvedLastName: resolvedStudents.lastName,
+          batchId: sheetScans.batchId,
+          batchStatus: sheetScanBatches.status,
+          scanState: sheetScans.state,
+          printedSheetId: sheetScans.printedSheetId,
+          resolvedStudentId: sheetScans.resolvedStudentId,
+          sheetStudentId: printedSheets.studentId,
+          assessmentId: sheetPrintRuns.assessmentId,
+          instrumentId: sheetLayouts.instrumentId,
+          spec: sheetLayouts.spec,
+        })
+        .from(sheetScanMarks)
+        .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
+        .innerJoin(sheetScanBatches, eq(sheetScanBatches.id, sheetScans.batchId))
+        .innerJoin(sheetPrintRuns, eq(sheetPrintRuns.id, sheetScanBatches.printRunId))
+        .innerJoin(sheetLayouts, eq(sheetLayouts.id, sheetPrintRuns.layoutId))
+        .leftJoin(printedSheets, eq(printedSheets.id, sheetScans.printedSheetId))
+        .leftJoin(students, eq(students.id, printedSheets.studentId))
+        .leftJoin(resolvedStudents, eq(resolvedStudents.id, sheetScans.resolvedStudentId))
+        .where(and(eq(sheetScanMarks.orgId, orgId), eq(sheetScanMarks.id, markId)))
+        .limit(1)
+        .for('update', { of: sheetScanMarks });
+      if (!row) throw new NotFoundException('Marca no encontrada');
+      this.assertBatchConfirmed(row.batchStatus);
+      if (row.scanState === 'superseded' || row.scanState === 'quality_rejected') {
+        throw new ConflictException(
+          'Esta marca pertenece a un escaneo que no entró a los resultados: no hay respuesta que corregir.',
+        );
+      }
+      const studentId = row.resolvedStudentId ?? row.sheetStudentId;
+      if (!row.assessmentId || !row.printedSheetId || !studentId) {
+        throw new ConflictException(
+          'La hoja de esta marca no quedó asociada a un alumno y una evaluación al confirmar el lote.',
+        );
+      }
+      await this.lockAssessmentForCorrection(tx, orgId, row.assessmentId);
+      const field = row.spec.fields.find((candidate) => candidate.fieldId === row.mark.fieldId);
+      if (!field || field.kind !== 'bubble_group') {
+        throw new BadRequestException(
+          `La pregunta ${row.mark.printedNumber} no es de alternativas: corrígela desde su propia revisión.`,
+        );
+      }
+      const options = field.bubbles.map((bubble) => bubble.value);
+      const reviewedValue = this.reviewedValueFor(
+        dto,
+        row.mark.suggestedValue,
+        row.mark.printedNumber,
+      );
+      const reviewDecision: MarkReviewDecision =
+        dto.decision === 'confirm' ? 'option' : dto.decision;
+      if (reviewedValue !== null && !options.includes(reviewedValue)) {
+        throw new BadRequestException(
+          `"${reviewedValue}" no es una alternativa válida para la pregunta ${row.mark.printedNumber}. Alternativas: ${options.join(', ')}`,
+        );
+      }
+
+      const sheetMarks = await tx
+        .select({
+          markId: sheetScanMarks.id,
+          fieldId: sheetScanMarks.fieldId,
+          printedNumber: sheetScanMarks.printedNumber,
+          state: sheetScanMarks.state,
+          value: sheetScanMarks.value,
+          reviewedValue: sheetScanMarks.reviewedValue,
+          reviewDecision: sheetScanMarks.reviewDecision,
+          reviewedAt: sheetScanMarks.reviewedAt,
+        })
+        .from(sheetScanMarks)
+        .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
+        .where(
+          and(
+            eq(sheetScanMarks.orgId, orgId),
+            eq(sheetScans.batchId, row.batchId),
+            eq(sheetScans.printedSheetId, row.printedSheetId),
+            notInArray(sheetScans.state, ['superseded', 'quality_rejected']),
+          ),
+        );
+      const pagesRead = await tx
+        .selectDistinct({ pageIndex: sheetScans.pageIndex })
+        .from(sheetScans)
+        .where(
+          and(
+            eq(sheetScans.orgId, orgId),
+            eq(sheetScans.batchId, row.batchId),
+            eq(sheetScans.printedSheetId, row.printedSheetId),
+            notInArray(sheetScans.state, ['superseded', 'quality_rejected']),
+          ),
+        );
+      if (pagesRead.length < row.spec.pageCount) {
+        throw new ConflictException(
+          'La hoja de esta marca quedó incompleta al confirmar el lote: sus respuestas no entraron a los resultados.',
+        );
+      }
+
+      const bubbleFieldIds = new Set(
+        row.spec.fields.filter((f) => f.kind === 'bubble_group').map((f) => f.fieldId),
+      );
+      const answers: Record<string, string | null> = {};
+      const annulledLabels: string[] = [];
+      for (const mark of sheetMarks) {
+        if (!bubbleFieldIds.has(mark.fieldId)) continue;
+        const corrected = mark.markId === markId;
+        const decision = corrected ? reviewDecision : mark.reviewDecision;
+        const reviewed = corrected || mark.reviewedAt !== null;
+        if (reviewed) {
+          answers[mark.printedNumber] = corrected ? reviewedValue : mark.reviewedValue;
+          if (decision === 'annulled') annulledLabels.push(mark.printedNumber);
+          continue;
+        }
+        answers[mark.printedNumber] = mark.state === 'marked' ? mark.value : null;
+      }
+
+      const recalculated = await this.answerSheetConfirmer.rescoreScannedAnswer(tx, orgId, {
+        assessmentId: row.assessmentId,
+        instrumentId: row.instrumentId,
+        studentId,
+        label: row.mark.printedNumber,
+        answers,
+        annulledLabels,
+      });
+      await tx
+        .update(sheetScanMarks)
+        .set({
+          reviewedValue,
+          reviewDecision,
+          reviewedById: userId,
+          reviewedAt: new Date(),
+          autoResolved: false,
+        })
+        .where(and(eq(sheetScanMarks.id, markId), eq(sheetScanMarks.orgId, orgId)));
+
+      return { row, options, reviewedValue, reviewDecision, recalculated };
+    });
+
+    this.answerSheetConfirmer.refreshResultsAfterRescore(orgId, prepared.recalculated);
+
+    return withOrgContext(this.db, orgId, async (tx) => {
+      const mark = prepared.row.mark;
+      const cropUrl = mark.cropFileId
+        ? ((await this.buildFileUrlIndex(tx, orgId, [mark.cropFileId])).get(mark.cropFileId) ??
+          null)
+        : null;
+      return this.toReviewMarkModel(
+        {
+          markId: mark.id,
+          scanId: mark.scanId,
+          fieldId: mark.fieldId,
+          printedNumber: mark.printedNumber,
+          state: mark.state,
+          value: mark.value,
+          fill: mark.fill,
+          threshold: mark.threshold,
+          margin: mark.margin,
+          cropFileId: mark.cropFileId,
+          suggestedValue: mark.suggestedValue,
+          doubtReason: mark.doubtReason,
+          nullConfidence: mark.nullConfidence,
+          reviewedValue: prepared.reviewedValue,
+          reviewDecision: prepared.reviewDecision,
+          reviewedById: userId,
+          autoResolved: false,
+          aiResolution: mark.aiResolution,
+        },
+        this.fullName(prepared.row.resolvedFirstName, prepared.row.resolvedLastName) ??
+          this.fullName(prepared.row.sheetFirstName, prepared.row.sheetLastName),
+        prepared.options,
+        cropUrl,
+      );
+    });
+  }
+
+  private async lockAssessmentForCorrection(
+    tx: Database,
+    orgId: string,
+    assessmentId: string,
+  ): Promise<void> {
+    await tx
+      .select({ id: assessments.id })
+      .from(assessments)
+      .where(and(eq(assessments.orgId, orgId), eq(assessments.id, assessmentId)))
+      .for('no key update');
+  }
+
+  private assertBatchConfirmed(status: string): void {
+    if (status !== 'confirmed') {
+      throw new ConflictException(
+        `El lote todavía no está confirmado (estado actual: ${status}): corrige la marca desde la revisión del lote.`,
+      );
+    }
   }
 
   private reviewedValueFor(
@@ -878,12 +1142,14 @@ export class ScanReviewService {
     tx: Database,
     orgId: string,
     batchId: string,
-    kind: 'pending' | 'auto',
+    kind: 'pending' | 'auto' | 'all',
   ): Promise<MarkQueueRow[]> {
     const condition =
-      kind === 'pending'
-        ? isNull(sheetScanMarks.reviewedAt)
-        : and(eq(sheetScanMarks.autoResolved, true), isNull(sheetScanMarks.reviewedById));
+      kind === 'all'
+        ? and(ne(sheetScans.state, 'quality_rejected'), isNotNull(sheetScans.printedSheetId))
+        : kind === 'pending'
+          ? isNull(sheetScanMarks.reviewedAt)
+          : and(eq(sheetScanMarks.autoResolved, true), isNull(sheetScanMarks.reviewedById));
     return tx
       .select({
         markId: sheetScanMarks.id,
@@ -903,6 +1169,7 @@ export class ScanReviewService {
         reviewDecision: sheetScanMarks.reviewDecision,
         reviewedById: sheetScanMarks.reviewedById,
         autoResolved: sheetScanMarks.autoResolved,
+        aiResolution: sheetScanMarks.aiResolution,
       })
       .from(sheetScanMarks)
       .innerJoin(sheetScans, eq(sheetScans.id, sheetScanMarks.scanId))
@@ -1101,7 +1368,27 @@ export class ScanReviewService {
       reviewedDecision: mark.reviewDecision,
       reviewedById: mark.reviewedById,
       autoResolved: mark.autoResolved ?? false,
+      aiResolution: this.teacherAiResolution(mark.aiResolution),
     };
+  }
+
+  private teacherAiResolution(
+    resolution: MarkAiResolution | null | undefined,
+  ): ReviewMarkAiResolutionModel | null {
+    if (!resolution || resolution.mode !== 'live') return null;
+    if (resolution.applied) {
+      if (resolution.verdict === 'agree') {
+        return { verdict: 'agree', value: resolution.value, agreement: 'both' };
+      }
+      if (resolution.verdict === 'solo_a' || resolution.verdict === 'solo_b') {
+        return { verdict: resolution.verdict, value: resolution.value, agreement: 'single' };
+      }
+      return null;
+    }
+    if (resolution.verdict === 'conflict') {
+      return { verdict: 'conflict', value: null, agreement: null };
+    }
+    return null;
   }
 
   private decimalOrNull(value: string | null | undefined): number | null {

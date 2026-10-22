@@ -93,6 +93,11 @@ export default $config({
     const workosIssuer = new sst.Secret('WorkosIssuer', ''); // AuthKit issuer
     const workosJwksUrl = new sst.Secret('WorkosJwksUrl', ''); // jwks_uri del issuer
 
+    // ── Imágenes a Jev (desambiguación de marcas, @soe/decisions) ──
+    // Apagado por default: con "false" Jev no recibe imágenes y la desambiguación no corre.
+    // Encender = `sst secret set JevExperimentalImages true --stage <stage>` y redeploy.
+    const jevExperimentalImages = new sst.Secret('JevExperimentalImages', 'false');
+
     // App Runner DESCARTA las variables de entorno con valor vacío. Si se le pasa una
     // (p. ej. un secret con default '' que nunca se seteó), el servicio queda sin ella, el
     // estado de Pulumi también, y el próximo `sst deploy` vuelve a ver la diferencia: un
@@ -363,6 +368,7 @@ export default $config({
               ANTHROPIC_API_KEY: anthropicApiKey.value,
               TYPESAFE_API_KEY: typesafeApiKey.value,
               OPENAI_API_KEY: openAiApiKey.value,
+              JEV_EXPERIMENTAL_IMAGES: jevExperimentalImages.value,
               AWS_S3_BUCKET: uploads.name,
               // E22: el backend habla con el servicio de visión OMR por HTTP.
               // El egress del API sale por el VPC connector, que es justo lo que le

@@ -14,7 +14,9 @@ import { DecisionsService } from './decisions.service';
     {
       provide: DECISION_ENGINES,
       useFactory: () => [
-        new JevDecisionEngine(),
+        new JevDecisionEngine({
+          experimentalImages: process.env.JEV_EXPERIMENTAL_IMAGES === 'true',
+        }),
         new OpenAiDecisionEngine({ apiKey: process.env[LLM_PROVIDER_DEFAULTS.openai.apiKeyEnv] }),
       ],
     },

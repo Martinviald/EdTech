@@ -9,6 +9,7 @@ import {
   type ConfidenceThresholds,
   type NoulThresholds,
   type NoulVerdict,
+  type PairThresholds,
 } from './contracts';
 
 const inUnitRange = (n: unknown): n is number =>
@@ -16,9 +17,28 @@ const inUnitRange = (n: unknown): n is number =>
 
 /**
  * Verifica la invariante de los umbrales. Choice/Score: `0 <= review <= auto <= 1`.
- * Noul: `0 <= no < yes <= 1`. Lanza `DecisionError('invalid_request')`.
+ * Noul: `0 <= no < yes <= 1`. Par de motores: `0 <= unsure <= agree <= solo <= 1`.
+ * Lanza `DecisionError('invalid_request')`.
  */
-export function assertValidThresholds(thresholds: ConfidenceThresholds | NoulThresholds): void {
+export function assertValidThresholds(
+  thresholds: ConfidenceThresholds | NoulThresholds | PairThresholds,
+): void {
+  if ('agree' in thresholds) {
+    const { agree, solo, unsure } = thresholds;
+    if (
+      !inUnitRange(agree) ||
+      !inUnitRange(solo) ||
+      !inUnitRange(unsure) ||
+      unsure > agree ||
+      agree > solo
+    ) {
+      throw new DecisionError(
+        'invalid_request',
+        `Umbrales de par inválidos (agree=${String(agree)}, solo=${String(solo)}, unsure=${String(unsure)}); se requiere 0 <= unsure <= agree <= solo <= 1.`,
+      );
+    }
+    return;
+  }
   if ('auto' in thresholds) {
     const { auto, review } = thresholds;
     if (!inUnitRange(auto) || !inUnitRange(review) || review > auto) {

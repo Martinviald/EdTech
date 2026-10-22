@@ -30,6 +30,7 @@ import {
 } from '../../../hooks/use-review-queue';
 import { ConfirmBatchDialog, isLikelyBlankScan, PagesReviewStep } from './ReviewQueue';
 import { MarkReviewPanel } from './MarkReviewPanel';
+import { autoResolvedSummary, countAutoResolved } from './review-labels';
 import { SCAN_ROUTES } from '../../../escanear/batch-meta';
 import type { StudentOption } from './ReviewShell';
 import {
@@ -155,12 +156,8 @@ export function ReviewWizard({
           )}
 
           {step === 'marcas' && autoAnnulled.length > 0 && (
-            <AlertCallout tone="info" title="Dobles marcas anuladas automáticamente">
-              {autoAnnulled.length === 1
-                ? 'Una doble marca evidente se anuló sola'
-                : `${autoAnnulled.length} dobles marcas evidentes se anularon solas`}{' '}
-              (ambas burbujas rellenas). No requieren revisión; quedan al final de la lista por si
-              quieres corregir alguna.
+            <AlertCallout tone="info" title="Marcas resueltas automáticamente">
+              {autoResolvedSummary(countAutoResolved(autoAnnulled))}
             </AlertCallout>
           )}
 

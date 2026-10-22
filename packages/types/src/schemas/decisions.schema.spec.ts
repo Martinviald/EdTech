@@ -7,7 +7,47 @@ import {
   decisionModeSchema,
   decisionThresholdsSchema,
   noulThresholdsSchema,
+  pairThresholdsSchema,
 } from '../index';
+
+describe('pairThresholdsSchema', () => {
+  it('acepta unsure <= agree <= solo', () => {
+    expect(pairThresholdsSchema.safeParse({ agree: 0.6, solo: 0.85, unsure: 0.5 }).success).toBe(
+      true,
+    );
+    expect(pairThresholdsSchema.safeParse({ agree: 0.5, solo: 0.5, unsure: 0.5 }).success).toBe(
+      true,
+    );
+  });
+
+  it('rechaza la invariante violada, valores fuera de 0–1 y claves extra', () => {
+    expect(pairThresholdsSchema.safeParse({ agree: 0.4, solo: 0.85, unsure: 0.5 }).success).toBe(
+      false,
+    );
+    expect(pairThresholdsSchema.safeParse({ agree: 0.9, solo: 0.85, unsure: 0.5 }).success).toBe(
+      false,
+    );
+    expect(pairThresholdsSchema.safeParse({ agree: 0.6, solo: 1.2, unsure: 0.5 }).success).toBe(
+      false,
+    );
+    expect(
+      pairThresholdsSchema.safeParse({ agree: 0.6, solo: 0.85, unsure: 0.5, auto: 1 }).success,
+    ).toBe(false);
+  });
+
+  it('entra en decisionThresholdsSchema bajo el id de la pregunta sin chocar con los otros', () => {
+    const parsed = decisionThresholdsSchema.safeParse({
+      respuesta: { agree: 0.5, solo: 0.8, unsure: 0.5 },
+      clave: { auto: 0.9, review: 0.6 },
+      unica: { yes: 0.8, no: 0.2 },
+    });
+    expect(parsed.success).toBe(true);
+    expect(
+      decisionThresholdsSchema.safeParse({ respuesta: { agree: 0.9, solo: 0.8, unsure: 0.5 } })
+        .success,
+    ).toBe(false);
+  });
+});
 
 describe('confidenceThresholdsSchema', () => {
   it('acepta review menor o igual que auto', () => {
@@ -147,6 +187,8 @@ describe('decisionAnswerRecordSchema', () => {
 describe('enums y defaults', () => {
   it('valida funcionalidades y modos', () => {
     expect(decisionFeatureSchema.safeParse('remedial_judge').success).toBe(true);
+    expect(decisionFeatureSchema.safeParse('mark_disambiguation_jev').success).toBe(true);
+    expect(decisionFeatureSchema.safeParse('mark_disambiguation_openai').success).toBe(true);
     expect(decisionFeatureSchema.safeParse('otra').success).toBe(false);
     expect(decisionModeSchema.options).toEqual(['off', 'shadow', 'live']);
   });
@@ -158,5 +200,16 @@ describe('enums y defaults', () => {
       expect(def.model).not.toBe('jev-latest');
       expect(decisionThresholdsSchema.safeParse(def.thresholds).success).toBe(true);
     }
+  });
+
+  it('cada feature de marcas fija su motor', () => {
+    expect(DECISION_FEATURE_DEFAULTS.mark_disambiguation_jev).toMatchObject({
+      engine: 'jev',
+      model: 'jev-1.14.0',
+    });
+    expect(DECISION_FEATURE_DEFAULTS.mark_disambiguation_openai).toMatchObject({
+      engine: 'openai',
+      model: 'gpt-6-luna',
+    });
   });
 });

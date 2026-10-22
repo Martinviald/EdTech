@@ -22,6 +22,14 @@ const EMPTY_METRICS: SheetScanMetricsResponse = {
     alerts: { offMedianPx: 10, fallbackRatio: 0.1 },
   },
   suggestions: { marksWithSuggestion: 0, reviewed: 0, confirmed: 0, rejected: 0 },
+  aiResolutions: {
+    evaluated: 0,
+    autoSimulated: 0,
+    autoApplied: 0,
+    correctedByHuman: 0,
+    agreementWithHuman: { compared: 0, agreed: 0 },
+    byMode: { shadow: 0, live: 0 },
+  },
 };
 
 function makeController(): { controller: SheetScanMetricsController; getMetrics: jest.Mock } {

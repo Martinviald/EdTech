@@ -19,6 +19,7 @@ import type {
   CropEvidence,
   LayoutSpec,
   DoubtReason,
+  MarkAiResolution,
   PageDiagnostics,
   PageQuality,
 } from '@soe/types';
@@ -267,6 +268,13 @@ export const sheetScanMarks = pgTable(
     reviewDecision: markReviewDecisionEnum('review_decision'),
     reviewedById: uuid('reviewed_by_id').references(() => users.id),
     reviewedAt: timestamp('reviewed_at'),
+    /**
+     * Evidencia de la desambiguación con IA (dos motores, umbrales y veredicto). Es
+     * evidencia, no la decisión vigente: esa sigue en `reviewed_value`/`review_decision`.
+     * La IA es autora sólo si `auto_resolved` y `applied = true`. Ver
+     * docs/diseno-desambiguacion-marcas-ia.contratos.md (C7).
+     */
+    aiResolution: jsonb('ai_resolution').$type<MarkAiResolution>(),
   },
   (t) => ({
     scanFieldUq: unique('sheet_scan_marks_scan_field_uq').on(t.scanId, t.fieldId),

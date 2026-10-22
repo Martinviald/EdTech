@@ -7,7 +7,12 @@ import {
   type DecisionRequest,
   type DecisionResult,
 } from '@soe/decisions';
-import type { DecisionFeature, DecisionThresholds } from '@soe/types';
+import type {
+  DecisionEngineId,
+  DecisionFeature,
+  DecisionMode,
+  DecisionThresholds,
+} from '@soe/types';
 import { reportServerError } from '../common/observability/report-error';
 import { ConcurrencyLimiter } from '../common/concurrency/concurrency-limiter';
 import { DecisionCallsRecorder } from './decision-calls.recorder';
@@ -23,12 +28,21 @@ export type DecisionOutcome<Q extends DecisionQuestions> = DecisionResult<Q> & {
   readonly thresholds: DecisionThresholds;
 };
 
-export interface ShadowOptions {
+export interface DecisionCallOptions {
   baseline?: Record<string, unknown>;
   correlationId?: string;
 }
 
 type RecordedMode = 'shadow' | 'live';
+
+export interface DecisionFeatureSettings {
+  mode: DecisionMode;
+  engine: DecisionEngineId;
+  model: string;
+  thresholds: DecisionThresholds;
+  available: boolean;
+  acceptsImages: boolean;
+}
 
 @Injectable()
 export class DecisionsService {
@@ -49,10 +63,24 @@ export class DecisionsService {
     return cfg.mode === 'live' && (this.registry.get(cfg.engine)?.isAvailable() ?? false);
   }
 
+  async settingsOf(orgId: string, feature: DecisionFeature): Promise<DecisionFeatureSettings> {
+    const cfg = await this.config.resolve(orgId, feature);
+    const engine = this.registry.get(cfg.engine);
+    return {
+      mode: cfg.mode,
+      engine: cfg.engine,
+      model: cfg.model,
+      thresholds: cfg.thresholds,
+      available: engine?.isAvailable() ?? false,
+      acceptsImages: engine?.capabilities.images ?? false,
+    };
+  }
+
   async evaluate<Q extends DecisionQuestions>(
     orgId: string,
     feature: DecisionFeature,
     request: DecisionRequest<Q>,
+    options: DecisionCallOptions = {},
   ): Promise<DecisionOutcome<Q>> {
     const cfg = await this.config.resolve(orgId, feature);
     if (cfg.mode !== 'live') {
@@ -62,7 +90,7 @@ export class DecisionsService {
       );
     }
     const engine = this.requireAvailableEngine(cfg);
-    const result = await this.runAndRecord(engine, cfg, orgId, feature, 'live', request, {});
+    const result = await this.runAndRecord(engine, cfg, orgId, feature, 'live', request, options);
     return { ...result, thresholds: cfg.thresholds };
   }
 
@@ -70,17 +98,17 @@ export class DecisionsService {
     orgId: string,
     feature: DecisionFeature,
     request: DecisionRequest<Q>,
-    options: ShadowOptions = {},
-  ): Promise<void> {
+    options: DecisionCallOptions = {},
+  ): Promise<DecisionResult<Q> | null> {
     const cfg = await this.resolveForShadow(orgId, feature);
-    if (cfg?.mode !== 'shadow') return;
+    if (cfg?.mode !== 'shadow') return null;
     const engine = this.registry.get(cfg.engine);
-    if (!engine?.isAvailable()) return;
+    if (!engine?.isAvailable()) return null;
     if (this.limiter.pending >= DECISION_MAX_SHADOW_BACKLOG) {
       this.logger.warn(
         `Sombra ${feature}: se descarta, hay ${this.limiter.pending} llamadas en espera`,
       );
-      return;
+      return null;
     }
 
     const shadowRequest = {
@@ -88,10 +116,11 @@ export class DecisionsService {
       timeoutMs: request.timeoutMs ?? DECISION_SHADOW_TIMEOUT_MS,
     };
     try {
-      await this.runAndRecord(engine, cfg, orgId, feature, 'shadow', shadowRequest, options);
+      return await this.runAndRecord(engine, cfg, orgId, feature, 'shadow', shadowRequest, options);
     } catch (error) {
       const decisionError = this.toDecisionError(error);
       this.logger.warn(`Sombra ${feature}: ${decisionError.code} — ${decisionError.message}`);
+      return null;
     }
   }
 
@@ -114,7 +143,7 @@ export class DecisionsService {
     feature: DecisionFeature,
     mode: RecordedMode,
     request: DecisionRequest<Q>,
-    options: ShadowOptions,
+    options: DecisionCallOptions,
   ): Promise<DecisionResult<Q>> {
     const { state } = redactState(request.state);
     const model = request.model ?? cfg.model;

@@ -11,7 +11,9 @@ import type { DecisionEngineLimits } from '../contracts';
  *   "Decision input exceeds the token limit." No distingue estado + pregunta más
  *   larga de estado + todas: ambos topes quedan iguales y bajo lo observado.
  * - Imágenes: un PNG de 480×320 costó ~150 tokens y uno de 2800×2800 (23 MB), ~7 750.
- *   Se cuentan 8 000 por imagen para no depender del tamaño.
+ *   Se cuentan 8 000 por imagen para no depender del tamaño. OpenAI reescala por su
+ *   cuenta (y ampliar un recorte chico le empeora la lectura), así que no hay
+ *   restricciones de imagen que el adaptador deba aplicar.
  */
 export const OPENAI_LIMITS: DecisionEngineLimits = {
   minChoiceOptions: 2,
@@ -22,4 +24,5 @@ export const OPENAI_LIMITS: DecisionEngineLimits = {
   maxRequestTokens: 900_000,
   charsPerToken: 3,
   tokensPerImage: 8_000,
+  imageConstraints: null,
 };

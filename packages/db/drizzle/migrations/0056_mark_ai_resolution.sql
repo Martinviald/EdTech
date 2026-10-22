@@ -1,0 +1,1 @@
+ALTER TABLE "sheet_scan_marks" ADD COLUMN "ai_resolution" jsonb;

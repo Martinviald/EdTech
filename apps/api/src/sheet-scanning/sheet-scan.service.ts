@@ -61,6 +61,12 @@ import { SheetIdentityResolverRegistry } from './identity/identity-resolver.regi
 import type { IdentityCandidate } from './identity/identity-resolver.types';
 import { identityModeOf } from './sheet-layout.helpers';
 import { OmrCalibrationService } from './omr-calibration.service';
+import {
+  MARK_DISAMBIGUATION_MAX_MARKS_PER_BATCH,
+  MarkDisambiguationService,
+  type MarkDisambiguationCandidate,
+  type MarkDisambiguationPipeline,
+} from './mark-disambiguation.service';
 
 const ALLOWED_SOURCE_MIME_TYPES = new Set([
   'application/pdf',
@@ -160,6 +166,7 @@ export class SheetScanService {
     @Inject(OMR_CLIENT) private readonly omrClient: OmrClient,
     @Inject(JOB_DISPATCHER) private readonly dispatcher: JobDispatcher,
     private readonly answerReading: AnswerReadingPipelineService,
+    private readonly markDisambiguation: MarkDisambiguationService,
   ) {}
 
   async createBatch(
@@ -560,7 +567,31 @@ export class SheetScanService {
         });
         return;
       }
+      const pipeline = await this.markDisambiguation.pipelineFor(orgId, batchId);
+      if (pipeline?.mode === 'live') {
+        if (outcome.disambiguationCandidates.length > 0) {
+          await this.markProcessingAlive(orgId, batchId);
+        }
+        await this.markDisambiguation.resolveBatch(
+          orgId,
+          batchId,
+          context.spec,
+          outcome.disambiguationCandidates,
+          pipeline,
+        );
+        await this.finalizeBatch(orgId, batchId, outcome.pagesTotal);
+        return;
+      }
       await this.finalizeBatch(orgId, batchId, outcome.pagesTotal);
+      if (pipeline !== null) {
+        this.startShadowDisambiguation(
+          orgId,
+          batchId,
+          context.spec,
+          outcome.disambiguationCandidates,
+          pipeline,
+        );
+      }
     } catch (err) {
       if (err instanceof OmrSourceUnreadableError) {
         reportServerError(err, { batchId, orgId, userId });
@@ -583,6 +614,20 @@ export class SheetScanService {
         failureReason: UNEXPECTED_FAILURE_MESSAGE,
       });
     }
+  }
+
+  private startShadowDisambiguation(
+    orgId: string,
+    batchId: string,
+    spec: LayoutSpec,
+    candidates: readonly MarkDisambiguationCandidate[],
+    pipeline: MarkDisambiguationPipeline,
+  ): void {
+    void this.markDisambiguation
+      .resolveBatch(orgId, batchId, spec, candidates, pipeline)
+      .catch((error: unknown) => {
+        reportServerError(error, { scope: 'mark_disambiguation.shadow', orgId, batchId });
+      });
   }
 
   private async loadJobContext(orgId: string, batchId: string): Promise<JobContext> {
@@ -625,8 +670,13 @@ export class SheetScanService {
     orgId: string,
     batchId: string,
     context: JobContext,
-  ): Promise<{ rejectionReason: string | null; pagesTotal: number }> {
+  ): Promise<{
+    rejectionReason: string | null;
+    pagesTotal: number;
+    disambiguationCandidates: MarkDisambiguationCandidate[];
+  }> {
     let pagesTotal = 0;
+    const disambiguationCandidates: MarkDisambiguationCandidate[] = [];
     const resolver = this.identityResolvers.forMode(identityModeOf(context.spec));
     for (const [sourceIndex, sourceFile] of context.sourceFiles.entries()) {
       if (sourceIndex > 0) await this.markProcessingAlive(orgId, batchId);
@@ -635,19 +685,32 @@ export class SheetScanService {
       for (const page of result.pages) {
         const batchHashMismatch = this.detectBatchLayoutMismatch(context, page);
         if (batchHashMismatch !== null) {
-          return { rejectionReason: batchHashMismatch, pagesTotal };
+          return { rejectionReason: batchHashMismatch, pagesTotal, disambiguationCandidates };
         }
         const candidate = await resolver.resolve(orgId, page, {
           printRunId: context.printRunId,
           specHash: context.specHash,
         });
         if (candidate.batchRejection !== null) {
-          return { rejectionReason: candidate.batchRejection.reason, pagesTotal };
+          return {
+            rejectionReason: candidate.batchRejection.reason,
+            pagesTotal,
+            disambiguationCandidates,
+          };
         }
-        await this.persistPage(orgId, batchId, sourceFile.id, page, candidate, context);
+        const pageCandidates = await this.persistPage(
+          orgId,
+          batchId,
+          sourceFile.id,
+          page,
+          candidate,
+          context,
+        );
+        const room = MARK_DISAMBIGUATION_MAX_MARKS_PER_BATCH - disambiguationCandidates.length;
+        if (room > 0) disambiguationCandidates.push(...pageCandidates.slice(0, room));
       }
     }
-    return { rejectionReason: null, pagesTotal };
+    return { rejectionReason: null, pagesTotal, disambiguationCandidates };
   }
 
   private qrPayloadOf(identity: ScannedPage['identity']): OmrQrPayload | null {
@@ -683,7 +746,7 @@ export class SheetScanService {
     page: ScannedPageWithDiagnostics,
     candidate: IdentityCandidate,
     context: Pick<JobContext, 'autoAnnulMinConfidence'>,
-  ): Promise<void> {
+  ): Promise<MarkDisambiguationCandidate[]> {
     const qrPayload = this.qrPayloadOf(page.identity);
     const pageIndex = qrPayload?.pageIndex ?? page.pageIndex;
 
@@ -691,7 +754,7 @@ export class SheetScanService {
       candidate.printedSheetId === null
         ? await this.checkUnidentifiedDuplicate(orgId, batchId, page.imageSha256)
         : await this.checkIdempotency(orgId, candidate.printedSheetId, pageIndex, page.imageSha256);
-    if (decision.skip) return;
+    if (decision.skip) return [];
 
     const scanId = randomUUID();
     const markIdByField = new Map(page.marks.map((mark) => [mark.fieldId, randomUUID()]));
@@ -721,6 +784,14 @@ export class SheetScanService {
       );
     }
 
+    const scanState = this.resolveScanState(page, candidate);
+    const annulmentByField = new Map(
+      page.marks.map((mark) => [
+        mark.fieldId,
+        this.autoAnnulment(mark, context.autoAnnulMinConfidence),
+      ]),
+    );
+
     await withOrgContext(this.db, orgId, async (tx) => {
       if (decision.supersededIds.length > 0) {
         await tx
@@ -738,7 +809,7 @@ export class SheetScanService {
         sourceFileId,
         sourcePageIndex: page.pageIndex,
         imageHash: page.imageSha256,
-        state: this.resolveScanState(page, candidate),
+        state: scanState,
         quality: page.quality,
         diagnostics: page.diagnostics ?? null,
         resolvedStudentId: candidate.studentId,
@@ -766,7 +837,7 @@ export class SheetScanService {
             suggestedValue: mark.suggestedValue ?? null,
             doubtReason: mark.doubtReason ?? null,
             nullConfidence: mark.nullConfidence == null ? null : mark.nullConfidence.toFixed(3),
-            ...this.autoAnnulment(mark, context.autoAnnulMinConfidence),
+            ...annulmentByField.get(mark.fieldId),
           })),
         );
       }
@@ -775,6 +846,44 @@ export class SheetScanService {
     if (cropFileIdByField.size > 0) {
       this.answerReading.scheduleForScan({ orgId, batchId, scanId });
     }
+
+    return this.disambiguationCandidatesOf(
+      page,
+      scanId,
+      scanState,
+      markIdByField,
+      annulmentByField,
+    );
+  }
+
+  private disambiguationCandidatesOf(
+    page: ScannedPage,
+    scanId: string,
+    scanState: SheetScanState,
+    markIdByField: Map<string, string>,
+    annulmentByField: Map<string, ReturnType<SheetScanService['autoAnnulment']>>,
+  ): MarkDisambiguationCandidate[] {
+    const candidates: MarkDisambiguationCandidate[] = [];
+    for (const mark of page.marks) {
+      if (mark.state !== 'multiple' && mark.state !== 'ambiguous') continue;
+      const markId = markIdByField.get(mark.fieldId);
+      if (mark.cropJpegBase64 === null || markId === undefined) continue;
+      candidates.push({
+        markId,
+        scanId,
+        fieldId: mark.fieldId,
+        state: mark.state,
+        cropJpegBase64: mark.cropJpegBase64,
+        scanState,
+        autoAnnulled: annulmentByField.get(mark.fieldId)?.autoResolved === true,
+        doubtReason: mark.doubtReason ?? null,
+        suggestedValue: mark.suggestedValue ?? null,
+        nullConfidence: mark.nullConfidence ?? null,
+        fill: mark.fill,
+        margin: mark.margin,
+      });
+    }
+    return candidates;
   }
 
   private autoAnnulment(

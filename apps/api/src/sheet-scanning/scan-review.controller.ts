@@ -14,6 +14,7 @@ import {
   assignScanIdentitySchema,
   discardScanSchema,
   reviewMarkSchema,
+  type BatchCorrectionsModel,
   type ConfirmBatchResponse,
   type ReviewMarkModel,
   type ReviewQueueModel,
@@ -44,6 +45,17 @@ export class ScanReviewBatchesController {
     return this.scanReviewService.getQueue(getEffectiveOrgId(user, orgId), id);
   }
 
+  @Get(':id/corrections')
+  @Roles(...SHEET_REVIEW_ROLES)
+  @UseGuards(SensitiveDataGuard)
+  getCorrections(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<BatchCorrectionsModel> {
+    return this.scanReviewService.getCorrections(getEffectiveOrgId(user, orgId), id);
+  }
+
   @Post(':id/confirm')
   @Roles(...SHEET_REVIEW_ROLES)
   confirmBatch(
@@ -71,6 +83,24 @@ export class ScanReviewMarksController {
   ): Promise<ReviewMarkModel> {
     const dto = parseDtoOrBadRequest(reviewMarkSchema, body);
     return this.scanReviewService.resolveMark(getEffectiveOrgId(user, orgId), user.userId, id, dto);
+  }
+
+  @Patch(':id/correction')
+  @UseGuards(SensitiveDataGuard)
+  @Roles(...SHEET_REVIEW_ROLES)
+  correctConfirmedMark(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+    @Query('orgId') orgId?: string,
+  ): Promise<ReviewMarkModel> {
+    const dto = parseDtoOrBadRequest(reviewMarkSchema, body);
+    return this.scanReviewService.correctConfirmedMark(
+      getEffectiveOrgId(user, orgId),
+      user.userId,
+      id,
+      dto,
+    );
   }
 }
 

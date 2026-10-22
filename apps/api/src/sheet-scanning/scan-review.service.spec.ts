@@ -9,7 +9,11 @@ import type {
 import type { RubricGradingService } from '../answer-reading/rubric-grading.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
 import * as observability from '../common/observability/report-error';
-import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
+import type {
+  AnswerSheetsService,
+  RescoreScannedAnswerInput,
+} from '../answer-sheets/answer-sheets.service';
+import type { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { FilesService } from '../files/files.service';
 import type {
@@ -42,15 +46,20 @@ type QueryChain = {
   orderBy: (..._: unknown[]) => QueryChain;
   limit: (..._: unknown[]) => QueryChain;
   offset: (..._: unknown[]) => QueryChain;
+  for: (..._: unknown[]) => QueryChain;
   then: <T>(resolve: (rows: unknown[]) => T, reject?: (err: unknown) => unknown) => Promise<T>;
 };
 
 function makeDb(selectResults: unknown[][]): {
   db: Database;
   updates: Array<Record<string, unknown>>;
+  locks: unknown[][];
+  transactions: { opened: number };
 } {
   let selectIdx = 0;
   const updates: Array<Record<string, unknown>> = [];
+  const locks: unknown[][] = [];
+  const transactions = { opened: 0 };
 
   function chain(rows: unknown[]): QueryChain {
     const c: QueryChain = {
@@ -61,6 +70,10 @@ function makeDb(selectResults: unknown[][]): {
       orderBy: () => c,
       limit: () => c,
       offset: () => c,
+      for: (...args: unknown[]) => {
+        locks.push(args);
+        return c;
+      },
       then: (resolve, reject) => Promise.resolve(rows).then(resolve, reject) as never,
     };
     return c;
@@ -68,6 +81,7 @@ function makeDb(selectResults: unknown[][]): {
 
   const db = {
     select: () => chain(selectResults[selectIdx++] ?? []),
+    selectDistinct: () => chain(selectResults[selectIdx++] ?? []),
     update: () => ({
       set: (values: Record<string, unknown>) => {
         updates.push(values);
@@ -79,24 +93,38 @@ function makeDb(selectResults: unknown[][]): {
       },
     }),
     execute: async () => [],
-    transaction: async (fn: (tx: unknown) => unknown) => fn(db),
+    transaction: async (fn: (tx: unknown) => unknown) => {
+      transactions.opened += 1;
+      return fn(db);
+    },
   } as unknown as Database;
 
-  return { db, updates };
+  return { db, updates, locks, transactions };
 }
 
 function makeConfirmer(): {
   confirmer: AnswerSheetConfirmer;
   calls: Array<{ user: JwtPayload; input: AnswerSheetConfirmInput }>;
+  rescoreCalls: Array<{ tx: Database; orgId: string; input: RescoreScannedAnswerInput }>;
+  refreshCalls: Array<{ orgId: string; recalculated: readonly string[] }>;
 } {
   const calls: Array<{ user: JwtPayload; input: AnswerSheetConfirmInput }> = [];
+  const rescoreCalls: Array<{ tx: Database; orgId: string; input: RescoreScannedAnswerInput }> = [];
+  const refreshCalls: Array<{ orgId: string; recalculated: readonly string[] }> = [];
   const confirmer: AnswerSheetConfirmer = {
     confirmParserResult: async (user, input) => {
       calls.push({ user, input });
       return { jobId: 'job-1', responsesCreated: 24 };
     },
+    rescoreScannedAnswer: async (tx, orgId, input) => {
+      rescoreCalls.push({ tx, orgId, input });
+      return [input.assessmentId];
+    },
+    refreshResultsAfterRescore: (orgId, recalculated) => {
+      refreshCalls.push({ orgId, recalculated });
+    },
   };
-  return { confirmer, calls };
+  return { confirmer, calls, rescoreCalls, refreshCalls };
 }
 
 const filesServiceFake = {
@@ -143,8 +171,8 @@ function makeService(
   linkError: Error | null = null,
   engine: RubricEngine | Error = 'legacy',
 ) {
-  const { db, updates } = makeDb(selectResults);
-  const { confirmer, calls: confirmCalls } = makeConfirmer();
+  const { db, updates, locks, transactions } = makeDb(selectResults);
+  const { confirmer, calls: confirmCalls, rescoreCalls, refreshCalls } = makeConfirmer();
   const gradingCalls: ScheduleConfirmedBatchParams[] = [];
   const developmentGradingFake = {
     scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
@@ -161,7 +189,20 @@ function makeService(
     consolidation,
     rubricGrading,
   );
-  return { service, updates, confirmCalls, gradingCalls, linkCalls, readingCalls, rubricBatches };
+  return {
+    service,
+    updates,
+    confirmCalls,
+    gradingCalls,
+    linkCalls,
+    readingCalls,
+    rubricBatches,
+    rescoreCalls,
+    refreshCalls,
+    locks,
+    transactions,
+    db,
+  };
 }
 
 function bubbleField(fieldId: string, printedNumber: string, pageIndex: number, values: string[]) {
@@ -261,6 +302,22 @@ function markQueueRow(overrides: Record<string, unknown>) {
     reviewDecision: null,
     reviewedById: null,
     autoResolved: false,
+    aiResolution: null,
+    ...overrides,
+  };
+}
+
+function aiResolution(overrides: Record<string, unknown> = {}) {
+  return {
+    version: 'mark-disambiguation-v1',
+    mode: 'live',
+    verdict: 'agree',
+    route: 'auto',
+    value: 'B',
+    applied: true,
+    engines: [],
+    thresholds: { jev: null, openai: null },
+    decidedAt: '2026-10-22T12:00:00.000Z',
     ...overrides,
   };
 }
@@ -1358,6 +1415,8 @@ describe('ScanReviewService.confirmBatch', () => {
       confirmParserResult: async () => {
         throw new Error('falló la ingesta');
       },
+      rescoreScannedAnswer: async () => [],
+      refreshResultsAfterRescore: () => undefined,
     };
     const developmentGradingFake = {
       scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
@@ -1447,7 +1506,7 @@ describe('createAnswerSheetConfirmer', () => {
   it('siembra el preview store y confirma con token de un solo uso, sin crear assessment nuevo', async () => {
     const { store, calls: storeCalls } = makePreviewStoreFake();
     const { svc, calls: confirmCalls } = makeAnswerSheetsFake();
-    const confirmer = createAnswerSheetConfirmer(svc, store);
+    const confirmer = createAnswerSheetConfirmer(svc, store, makeResultsFake().results);
 
     const outcome = await confirmer.confirmParserResult(USER, {
       orgId: ORG_ID,
@@ -1481,7 +1540,7 @@ describe('createAnswerSheetConfirmer', () => {
   it('confirma con la org efectiva aunque el JWT no la traiga (platform_admin cross-org)', async () => {
     const { store } = makePreviewStoreFake();
     const { svc, calls: confirmCalls } = makeAnswerSheetsFake();
-    const confirmer = createAnswerSheetConfirmer(svc, store);
+    const confirmer = createAnswerSheetConfirmer(svc, store, makeResultsFake().results);
     const platformAdmin: JwtPayload = { ...USER, orgId: null, isPlatformAdmin: true };
 
     await confirmer.confirmParserResult(platformAdmin, {
@@ -1493,5 +1552,431 @@ describe('createAnswerSheetConfirmer', () => {
     });
 
     expect(confirmCalls[0].user.orgId).toBe(ORG_ID);
+  });
+});
+
+function makeResultsFake() {
+  const recalculated: Array<{ orgId: string; assessmentIds: readonly string[] }> = [];
+  const results = {
+    recalculateAnswerSheetResults: async (orgId: string, assessmentIds: readonly string[]) => {
+      recalculated.push({ orgId, assessmentIds });
+      return [...assessmentIds];
+    },
+  } as unknown as AssessmentResultsService;
+  return { results, recalculated };
+}
+
+describe('desambiguación con IA: lo que ve el profesor', () => {
+  it('getQueue expone la resolución de IA aplicada y el conflicto, y oculta auditoría y sombra', async () => {
+    const pending = [
+      markQueueRow({
+        markId: 'mark-conflicto',
+        scanId: 'scan-read',
+        aiResolution: aiResolution({
+          verdict: 'conflict',
+          route: 'review',
+          value: null,
+          applied: false,
+        }),
+      }),
+      markQueueRow({
+        markId: 'mark-auditoria',
+        scanId: 'scan-read',
+        fieldId: 'f2',
+        printedNumber: '2',
+        aiResolution: aiResolution({ verdict: 'audit_sample', route: 'review', applied: false }),
+      }),
+      markQueueRow({
+        markId: 'mark-sombra',
+        scanId: 'scan-read',
+        fieldId: 'f3',
+        printedNumber: '3',
+        aiResolution: aiResolution({ mode: 'shadow', applied: false }),
+      }),
+    ];
+    const auto = [
+      markQueueRow({
+        markId: 'mark-ia',
+        scanId: 'scan-read',
+        autoResolved: true,
+        reviewDecision: 'option',
+        reviewedValue: 'B',
+        aiResolution: aiResolution(),
+      }),
+      markQueueRow({
+        markId: 'mark-ia-solo',
+        scanId: 'scan-read',
+        autoResolved: true,
+        reviewDecision: 'blank',
+        aiResolution: aiResolution({ verdict: 'solo_b', value: 'blank' }),
+      }),
+      markQueueRow({
+        markId: 'mark-omr',
+        scanId: 'scan-read',
+        state: 'multiple',
+        autoResolved: true,
+        reviewDecision: 'annulled',
+      }),
+    ];
+    const { service } = makeService([
+      [{ id: BATCH_ID, spec: SPEC }],
+      [scanQueueRow({ scanId: 'scan-read' })],
+      pending,
+      auto,
+    ]);
+
+    const queue = await service.getQueue(ORG_ID, BATCH_ID);
+
+    const byId = new Map(
+      [...queue.ambiguousMarks, ...queue.autoAnnulled].map((mark) => [mark.markId, mark]),
+    );
+    expect(byId.get('mark-conflicto')?.aiResolution).toEqual({
+      verdict: 'conflict',
+      value: null,
+      agreement: null,
+    });
+    expect(byId.get('mark-auditoria')?.aiResolution).toBeNull();
+    expect(byId.get('mark-sombra')?.aiResolution).toBeNull();
+    expect(byId.get('mark-ia')?.aiResolution).toEqual({
+      verdict: 'agree',
+      value: 'B',
+      agreement: 'both',
+    });
+    expect(byId.get('mark-ia-solo')?.aiResolution).toEqual({
+      verdict: 'solo_b',
+      value: 'blank',
+      agreement: 'single',
+    });
+    expect(byId.get('mark-omr')?.aiResolution).toBeNull();
+  });
+
+  it('resolveMark posterior deja autoResolved=false y no toca ai_resolution', async () => {
+    const { service, updates } = makeService([
+      [resolveMarkRow({ aiResolution: aiResolution() })],
+      [{ total: 0 }],
+      [{ total: 0 }],
+    ]);
+
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, {
+      decision: 'option',
+      reviewedValue: 'C',
+    });
+
+    expect(updates[0]).toMatchObject({ autoResolved: false, reviewedById: USER_ID });
+    expect(updates[0]).not.toHaveProperty('aiResolution');
+    expect(model.aiResolution).toEqual({ verdict: 'agree', value: 'B', agreement: 'both' });
+  });
+});
+
+function correctionRow(overrides: Record<string, unknown> = {}) {
+  return {
+    mark: {
+      id: MARK_ID,
+      scanId: SCAN_ID,
+      fieldId: 'f1',
+      printedNumber: '1',
+      state: 'ambiguous',
+      value: null,
+      fill: '0.400',
+      threshold: '0.500',
+      margin: '0.200',
+      cropFileId: null,
+      suggestedValue: 'B',
+      doubtReason: 'margin',
+      nullConfidence: null,
+      reviewedValue: 'B',
+      reviewDecision: 'option',
+      reviewedById: null,
+      autoResolved: true,
+      aiResolution: aiResolution(),
+    },
+    sheetFirstName: 'Ana',
+    sheetLastName: 'Pérez',
+    resolvedFirstName: null,
+    resolvedLastName: null,
+    batchId: BATCH_ID,
+    batchStatus: 'confirmed',
+    scanState: 'read',
+    printedSheetId: 'sheet-1',
+    resolvedStudentId: null,
+    sheetStudentId: STUDENT_1,
+    assessmentId: ASSESSMENT_ID,
+    instrumentId: INSTRUMENT_ID,
+    spec: SPEC,
+    ...overrides,
+  };
+}
+
+const SHEET_MARKS = [
+  {
+    markId: MARK_ID,
+    fieldId: 'f1',
+    printedNumber: '1',
+    state: 'ambiguous',
+    value: null,
+    reviewedValue: 'B',
+    reviewDecision: 'option',
+    reviewedAt: new Date(),
+  },
+  {
+    markId: 'mark-2',
+    fieldId: 'f2',
+    printedNumber: '2',
+    state: 'marked',
+    value: 'A',
+    reviewedValue: null,
+    reviewDecision: null,
+    reviewedAt: null,
+  },
+  {
+    markId: 'mark-3',
+    fieldId: 'f3',
+    printedNumber: '3',
+    state: 'multiple',
+    value: null,
+    reviewedValue: null,
+    reviewDecision: 'annulled',
+    reviewedAt: new Date(),
+  },
+];
+
+const PAGES_READ = [{ pageIndex: 0 }, { pageIndex: 1 }];
+
+const ASSESSMENT_LOCK = [{ id: ASSESSMENT_ID }];
+
+describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)', () => {
+  it('rechaza una hoja que quedó incompleta al confirmar', async () => {
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      [{ pageIndex: 0 }],
+    ]);
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(rescoreCalls).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('reescribe la respuesta con la hoja completa, recalcula y deja la decisión como humana', async () => {
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    const model = await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, {
+      decision: 'option',
+      reviewedValue: 'C',
+    });
+
+    expect(rescoreCalls).toEqual([
+      {
+        tx: expect.anything(),
+        orgId: ORG_ID,
+        input: {
+          assessmentId: ASSESSMENT_ID,
+          instrumentId: INSTRUMENT_ID,
+          studentId: STUDENT_1,
+          label: '1',
+          answers: { '1': 'C', '2': 'A', '3': null },
+          annulledLabels: ['3'],
+        },
+      },
+    ]);
+    expect(updates).toHaveLength(1);
+    expect(updates[0]).toMatchObject({
+      reviewedValue: 'C',
+      reviewDecision: 'option',
+      reviewedById: USER_ID,
+      autoResolved: false,
+    });
+    expect(updates[0]).not.toHaveProperty('aiResolution');
+    expect(model).toMatchObject({
+      reviewedValue: 'C',
+      autoResolved: false,
+      studentName: 'Ana Pérez',
+      aiResolution: { verdict: 'agree', value: 'B', agreement: 'both' },
+    });
+  });
+
+  it('anular la respuesta la marca como anulada al reescribirla', async () => {
+    const { service, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'annulled' });
+
+    expect(rescoreCalls[0]?.input).toMatchObject({
+      answers: { '1': null, '2': 'A', '3': null },
+      annulledLabels: ['1', '3'],
+    });
+  });
+
+  it('rechaza un lote que todavía no está confirmado sin tocar nada', async () => {
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow({ batchStatus: 'needs_review' })],
+    ]);
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(rescoreCalls).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('rechaza una alternativa inexistente', async () => {
+    const { service, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, {
+        decision: 'option',
+        reviewedValue: 'Z',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(rescoreCalls).toHaveLength(0);
+  });
+
+  it('si la reescritura de la respuesta falla, la marca queda como estaba y no se refresca nada', async () => {
+    const { db, updates } = makeDb([[correctionRow()], ASSESSMENT_LOCK, SHEET_MARKS, PAGES_READ]);
+    const refreshResultsAfterRescore = jest.fn();
+    const failingConfirmer: AnswerSheetConfirmer = {
+      confirmParserResult: async () => ({ jobId: 'job-1', responsesCreated: 0 }),
+      rescoreScannedAnswer: async () => {
+        throw new ConflictException('no se registró');
+      },
+      refreshResultsAfterRescore,
+    };
+    const service = new ScanReviewService(
+      db,
+      failingConfirmer,
+      filesServiceFake,
+      {} as DevelopmentGradingService,
+      makeReadingConsolidation().consolidation,
+      makeRubricGrading().rubricGrading,
+    );
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(updates).toHaveLength(0);
+    expect(refreshResultsAfterRescore).not.toHaveBeenCalled();
+  });
+
+  it('marca, respuestas y recálculo corren en una sola transacción, con la marca y la evaluación bloqueadas', async () => {
+    const { service, db, updates, rescoreCalls, refreshCalls, locks, transactions } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' });
+
+    expect(transactions.opened).toBe(2);
+    expect(rescoreCalls[0]?.tx).toBe(db);
+    expect(updates).toHaveLength(1);
+    expect(locks).toEqual([['update', { of: expect.anything() }], ['no key update']]);
+    expect(refreshCalls).toEqual([{ orgId: ORG_ID, recalculated: [ASSESSMENT_ID] }]);
+  });
+
+  it('rechaza una marca que no está en la BD', async () => {
+    const { service } = makeService([[]]);
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('ScanReviewService.getCorrections', () => {
+  it('lista las marcas dudosas de un lote confirmado con su resolución de IA', async () => {
+    const { service } = makeService([
+      [{ status: 'confirmed', spec: SPEC }],
+      [scanQueueRow({ scanId: 'scan-read' })],
+      [
+        markQueueRow({
+          markId: 'mark-ia',
+          scanId: 'scan-read',
+          autoResolved: true,
+          reviewDecision: 'option',
+          reviewedValue: 'B',
+          aiResolution: aiResolution(),
+        }),
+        markQueueRow({ markId: 'mark-humana', scanId: 'scan-read', reviewedById: USER_ID }),
+      ],
+    ]);
+
+    const corrections = await service.getCorrections(ORG_ID, BATCH_ID);
+
+    expect(corrections.batchId).toBe(BATCH_ID);
+    expect(corrections.marks.map((mark) => mark.markId)).toEqual(['mark-ia', 'mark-humana']);
+    expect(corrections.marks[0]).toMatchObject({
+      studentName: 'Ana Pérez',
+      options: ['A', 'B', 'C', 'D'],
+      aiResolution: { verdict: 'agree', agreement: 'both' },
+    });
+  });
+
+  it('rechaza un lote que no está confirmado', async () => {
+    const { service } = makeService([[{ status: 'needs_review', spec: SPEC }]]);
+    await expect(service.getCorrections(ORG_ID, BATCH_ID)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+  });
+});
+
+describe('createAnswerSheetConfirmer.rescoreScannedAnswer', () => {
+  it('reescribe la respuesta y recalcula la evaluación con la misma transacción', async () => {
+    const rescored: Array<{ tx: unknown; input: RescoreScannedAnswerInput }> = [];
+    const svc = {
+      rescoreScannedAnswer: async (tx: unknown, input: RescoreScannedAnswerInput) => {
+        rescored.push({ tx, input });
+        return 'item-1';
+      },
+    } as unknown as AnswerSheetsService;
+    const recalculatedWithin: Array<{ tx: unknown; orgId: string; ids: readonly string[] }> = [];
+    const refreshed: Array<{ orgId: string; ids: readonly string[] }> = [];
+    const results = {
+      recalculateAnswerSheetResultsWithin: async (
+        tx: unknown,
+        orgId: string,
+        ids: readonly string[],
+      ) => {
+        recalculatedWithin.push({ tx, orgId, ids });
+        return [...ids];
+      },
+      refreshBenchmarksAfterRecalculation: (orgId: string, ids: readonly string[]) => {
+        refreshed.push({ orgId, ids });
+      },
+    } as unknown as AssessmentResultsService;
+    const confirmer = createAnswerSheetConfirmer(svc, makePreviewStoreFake().store, results);
+    const tx = makeDb([]).db;
+    const input: RescoreScannedAnswerInput = {
+      assessmentId: ASSESSMENT_ID,
+      instrumentId: INSTRUMENT_ID,
+      studentId: STUDENT_1,
+      label: '1',
+      answers: { '1': 'C' },
+      annulledLabels: [],
+    };
+
+    const recalculated = await confirmer.rescoreScannedAnswer(tx, ORG_ID, input);
+    confirmer.refreshResultsAfterRescore(ORG_ID, recalculated);
+
+    expect(rescored).toEqual([{ tx, input }]);
+    expect(recalculatedWithin).toEqual([{ tx, orgId: ORG_ID, ids: [ASSESSMENT_ID] }]);
+    expect(recalculated).toEqual([ASSESSMENT_ID]);
+    expect(refreshed).toEqual([{ orgId: ORG_ID, ids: [ASSESSMENT_ID] }]);
   });
 });

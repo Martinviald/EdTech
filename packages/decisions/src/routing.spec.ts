@@ -61,4 +61,14 @@ describe('assertValidThresholds', () => {
     expect(invalid({ yes: 0.4, no: 0.6 })).toBe('invalid_request');
     expect(invalid({ yes: 0.9, no: -0.01 })).toBe('invalid_request');
   });
+
+  it('valida los umbrales de par: 0 <= unsure <= agree <= solo <= 1', () => {
+    expect(invalid({ agree: 0.6, solo: 0.85, unsure: 0.5 })).toBeUndefined();
+    expect(invalid({ agree: 0.5, solo: 0.5, unsure: 0.5 })).toBeUndefined();
+    expect(invalid({ agree: 0, solo: 1, unsure: 0 })).toBeUndefined();
+    expect(invalid({ agree: 0.4, solo: 0.85, unsure: 0.5 })).toBe('invalid_request');
+    expect(invalid({ agree: 0.9, solo: 0.85, unsure: 0.5 })).toBe('invalid_request');
+    expect(invalid({ agree: 0.6, solo: 1.01, unsure: 0.5 })).toBe('invalid_request');
+    expect(invalid({ agree: 0.6, solo: 0.85, unsure: Number.NaN })).toBe('invalid_request');
+  });
 });
