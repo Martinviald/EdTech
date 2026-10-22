@@ -1,0 +1,804 @@
+{
+  "paper": "letter",
+  "fields": [
+    {
+      "kind": "bubble_group",
+      "region": null,
+      "bubbles": [
+        {
+          "value": "A",
+          "center": {
+            "x": 0.095,
+            "y": 0.1958
+          },
+          "radius": 0.011
+        },
+        {
+          "value": "B",
+          "center": {
+            "x": 0.14500000000000002,
+            "y": 0.1958
+          },
+          "radius": 0.011
+        },
+        {
+          "value": "C",
+          "center": {
+            "x": 0.195,
+            "y": 0.1958
+          },
+          "radius": 0.011
+        },
+        {
+          "value": "D",
+          "center": {
+            "x": 0.24500000000000002,
+            "y": 0.1958
+          },
+          "radius": 0.011
+        }
+      ],
+      "fieldId": "f_001",
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "1"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.226923
+        },
+        "bottomRight": {
+          "x": 0.378661,
+          "y": 0.284383
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_002",
+      "response": {
+        "boxes": [
+          {
+            "role": "char",
+            "partId": "char.0",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.238415
+              },
+              "bottomRight": {
+                "x": 0.140745,
+                "y": 0.272891
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.1",
+            "region": {
+              "topLeft": {
+                "x": 0.150869,
+                "y": 0.238415
+              },
+              "bottomRight": {
+                "x": 0.196427,
+                "y": 0.272891
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.2",
+            "region": {
+              "topLeft": {
+                "x": 0.206551,
+                "y": 0.238415
+              },
+              "bottomRight": {
+                "x": 0.25211,
+                "y": 0.272891
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.3",
+            "region": {
+              "topLeft": {
+                "x": 0.262234,
+                "y": 0.238415
+              },
+              "bottomRight": {
+                "x": 0.307792,
+                "y": 0.272891
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.4",
+            "region": {
+              "topLeft": {
+                "x": 0.317916,
+                "y": 0.238415
+              },
+              "bottomRight": {
+                "x": 0.363475,
+                "y": 0.272891
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "integer",
+          "maxChars": 5,
+          "allowNegative": false
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001002",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "2"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.299706
+        },
+        "bottomRight": {
+          "x": 0.414095,
+          "y": 0.357167
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_003",
+      "response": {
+        "boxes": [
+          {
+            "role": "char",
+            "partId": "char.0",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.311198
+              },
+              "bottomRight": {
+                "x": 0.140745,
+                "y": 0.345675
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.1",
+            "region": {
+              "topLeft": {
+                "x": 0.150869,
+                "y": 0.311198
+              },
+              "bottomRight": {
+                "x": 0.196427,
+                "y": 0.345675
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.2",
+            "region": {
+              "topLeft": {
+                "x": 0.206551,
+                "y": 0.311198
+              },
+              "bottomRight": {
+                "x": 0.25211,
+                "y": 0.345675
+              }
+            }
+          },
+          {
+            "role": "decimal_separator",
+            "partId": "decimal_separator",
+            "region": {
+              "topLeft": {
+                "x": 0.262234,
+                "y": 0.311198
+              },
+              "bottomRight": {
+                "x": 0.287544,
+                "y": 0.345675
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.3",
+            "region": {
+              "topLeft": {
+                "x": 0.297668,
+                "y": 0.311198
+              },
+              "bottomRight": {
+                "x": 0.343226,
+                "y": 0.345675
+              }
+            }
+          },
+          {
+            "role": "char",
+            "partId": "char.4",
+            "region": {
+              "topLeft": {
+                "x": 0.353351,
+                "y": 0.311198
+              },
+              "bottomRight": {
+                "x": 0.398909,
+                "y": 0.345675
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "decimal",
+          "maxChars": 6,
+          "allowNegative": false
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001003",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "3"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.37249
+        },
+        "bottomRight": {
+          "x": 0.231861,
+          "y": 0.48358
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_004",
+      "response": {
+        "boxes": [
+          {
+            "role": "numerator",
+            "partId": "numerator",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.383982
+              },
+              "bottomRight": {
+                "x": 0.216675,
+                "y": 0.418458
+              }
+            }
+          },
+          {
+            "role": "denominator",
+            "partId": "denominator",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.437612
+              },
+              "bottomRight": {
+                "x": 0.216675,
+                "y": 0.472088
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "fraction",
+          "allowMixed": false,
+          "allowNegative": false
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001004",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "4"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.498903
+        },
+        "bottomRight": {
+          "x": 0.287544,
+          "y": 0.556364
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_005",
+      "response": {
+        "boxes": [
+          {
+            "role": "sequence_element",
+            "partId": "elements.0",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.510395
+              },
+              "bottomRight": {
+                "x": 0.140745,
+                "y": 0.544871
+              }
+            }
+          },
+          {
+            "role": "sequence_element",
+            "partId": "elements.1",
+            "region": {
+              "topLeft": {
+                "x": 0.160993,
+                "y": 0.510395
+              },
+              "bottomRight": {
+                "x": 0.206551,
+                "y": 0.544871
+              }
+            }
+          },
+          {
+            "role": "sequence_element",
+            "partId": "elements.2",
+            "region": {
+              "topLeft": {
+                "x": 0.226799,
+                "y": 0.510395
+              },
+              "bottomRight": {
+                "x": 0.272358,
+                "y": 0.544871
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "sequence",
+          "length": 3
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001005",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "5"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.571686
+        },
+        "bottomRight": {
+          "x": 0.439405,
+          "y": 0.629147
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_006",
+      "response": {
+        "boxes": [
+          {
+            "role": "tuple_component",
+            "partId": "components.0",
+            "region": {
+              "topLeft": {
+                "x": 0.120496,
+                "y": 0.583178
+              },
+              "bottomRight": {
+                "x": 0.241986,
+                "y": 0.617655
+              }
+            }
+          },
+          {
+            "role": "tuple_component",
+            "partId": "components.1",
+            "region": {
+              "topLeft": {
+                "x": 0.27742,
+                "y": 0.583178
+              },
+              "bottomRight": {
+                "x": 0.398909,
+                "y": 0.617655
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "ordered_tuple",
+          "arity": 2,
+          "componentKind": "integer"
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001006",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "6"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.64447
+        },
+        "bottomRight": {
+          "x": 0.52546,
+          "y": 0.705761
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_007",
+      "response": {
+        "boxes": [
+          {
+            "role": "word",
+            "partId": "words.0",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.655962
+              },
+              "bottomRight": {
+                "x": 0.297668,
+                "y": 0.694269
+              }
+            }
+          },
+          {
+            "role": "word",
+            "partId": "words.1",
+            "region": {
+              "topLeft": {
+                "x": 0.307792,
+                "y": 0.655962
+              },
+              "bottomRight": {
+                "x": 0.510274,
+                "y": 0.694269
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "word_list",
+          "count": 2
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001007",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "7"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.721084
+        },
+        "bottomRight": {
+          "x": 0.95,
+          "y": 0.782375
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_008",
+      "response": {
+        "boxes": [
+          {
+            "role": "line",
+            "partId": "lines.0",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.732576
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.770883
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "short_text",
+          "maxWords": 3
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001008",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "8"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.797698
+        },
+        "bottomRight": {
+          "x": 0.814503,
+          "y": 0.858989
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_009",
+      "response": {
+        "boxes": [
+          {
+            "role": "word",
+            "partId": "d",
+            "region": {
+              "topLeft": {
+                "x": 0.174154,
+                "y": 0.80919
+              },
+              "bottomRight": {
+                "x": 0.295643,
+                "y": 0.847497
+              }
+            }
+          },
+          {
+            "role": "word",
+            "partId": "u",
+            "region": {
+              "topLeft": {
+                "x": 0.438899,
+                "y": 0.80919
+              },
+              "bottomRight": {
+                "x": 0.560388,
+                "y": 0.847497
+              }
+            }
+          },
+          {
+            "role": "word",
+            "partId": "t",
+            "region": {
+              "topLeft": {
+                "x": 0.677828,
+                "y": 0.80919
+              },
+              "bottomRight": {
+                "x": 0.799317,
+                "y": 0.847497
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "multi_box",
+          "boxes": [
+            {
+              "kind": "integer",
+              "label": "Decenas:",
+              "partId": "d"
+            },
+            {
+              "kind": "integer",
+              "label": "Unidades:",
+              "partId": "u",
+              "operatorBefore": "+"
+            },
+            {
+              "kind": "integer",
+              "label": "Total:",
+              "partId": "t",
+              "operatorBefore": "="
+            }
+          ]
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001009",
+        "cropProfileId": "short-answer@1"
+      },
+      "pageIndex": 0,
+      "selectMode": "single",
+      "printedNumber": "9"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.18
+        },
+        "bottomRight": {
+          "x": 0.95,
+          "y": 0.432827
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_010",
+      "response": {
+        "boxes": [
+          {
+            "role": "line",
+            "partId": "lines.0",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.191492
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.229799
+              }
+            }
+          },
+          {
+            "role": "line",
+            "partId": "lines.1",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.229799
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.268106
+              }
+            }
+          },
+          {
+            "role": "line",
+            "partId": "lines.2",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.268106
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.306413
+              }
+            }
+          },
+          {
+            "role": "line",
+            "partId": "lines.3",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.306413
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.34472
+              }
+            }
+          },
+          {
+            "role": "line",
+            "partId": "lines.4",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.34472
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.383027
+              }
+            }
+          },
+          {
+            "role": "line",
+            "partId": "lines.5",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.383027
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.421334
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "free_text",
+          "lines": 6
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001010",
+        "cropProfileId": "free-text@1"
+      },
+      "pageIndex": 1,
+      "selectMode": "single",
+      "printedNumber": "10"
+    },
+    {
+      "kind": "crop_region",
+      "region": {
+        "topLeft": {
+          "x": 0.08,
+          "y": 0.448149
+        },
+        "bottomRight": {
+          "x": 0.95,
+          "y": 0.701238
+        }
+      },
+      "bubbles": [],
+      "fieldId": "f_011",
+      "response": {
+        "boxes": [
+          {
+            "role": "area",
+            "partId": "work",
+            "region": {
+              "topLeft": {
+                "x": 0.095186,
+                "y": 0.459642
+              },
+              "bottomRight": {
+                "x": 0.934814,
+                "y": 0.689746
+              }
+            }
+          }
+        ],
+        "format": {
+          "kind": "math_work",
+          "heightRatio": 0.3
+        },
+        "itemId": "51e70000-0000-0000-0000-000000001011",
+        "cropProfileId": "free-text@1"
+      },
+      "pageIndex": 1,
+      "selectMode": "single",
+      "printedNumber": "11"
+    }
+  ],
+  "identity": {
+    "mode": "qr",
+    "region": {
+      "topLeft": {
+        "x": 0.78,
+        "y": 0.02
+      },
+      "bottomRight": {
+        "x": 0.98,
+        "y": 0.18
+      }
+    }
+  },
+  "fiducials": {
+    "kind": "corner_squares",
+    "sizeRatio": 0.025,
+    "marginRatio": 0.03
+  },
+  "pageCount": 2,
+  "specVersion": 1,
+  "instrumentId": "51e70000-0000-0000-0000-000000000001"
+}
