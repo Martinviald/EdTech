@@ -8,7 +8,7 @@ para eso está `LlmService`.
 
 | Motor (`name`) | Proveedor y modelo                                  | Imágenes          | Choice                       | Score | Contexto (estimado)              | Precio (USD / M tokens de entrada) | Adaptador     |
 | -------------- | --------------------------------------------------- | ----------------- | ---------------------------- | ----- | -------------------------------- | ---------------------------------- | ------------- |
-| `jev`          | TypeSafe AI, `jev-1.13.0` (versión fijada)          | No                | 1–255                        | 2–10  | 32k estado + pregunta, 64k total | 0,042                              | `src/jev/`    |
+| `jev`          | TypeSafe AI, `jev-1.13.0` (versión fijada)          | Experimental (\*) | 1–255                        | 2–10  | 32k estado + pregunta, 64k total | 0,042                              | `src/jev/`    |
 | `openai`       | OpenAI Decisions (beta), `gpt-6-luna` (sin versión) | Sí                | 2–255                        | 2–10  | ~900k en total                   | 0,10                               | `src/openai/` |
 | `fake`         | `FakeDecisionEngine` para tests                     | Sí (configurable) | según `limits` (default Jev) |       |                                  | 0                                  | `src/fake/`   |
 
@@ -87,7 +87,16 @@ const result = await engine.evaluate({
 });
 ```
 
-Con imágenes (solo motores con `capabilities.images`, hoy `openai`):
+(\*) Jev 1.13/1.14 acepta imágenes PNG o JPEG en fase experimental. El adaptador solo las
+envía con `new JevDecisionEngine({ experimentalImages: true })` (en la API,
+`JEV_EXPERIMENTAL_IMAGES=true`): manda el header `TypeSafe-Danger-Zone-Images`, inserta la
+referencia en la clave reservada `imagen` del estado (o `imagenes`), descarga las `{ url }` y
+ajusta cada imagen a las restricciones de Jev (lados de 280 a 1568 px; ver
+`src/images/fit-image.ts`: el lado menor queda en 300 px, Lanczos, JPEG 92). El reescalado vive
+en el adaptador porque depende del motor: ampliar un recorte chico ayuda a Jev y perjudica a
+OpenAI.
+
+Con imágenes (solo motores con `capabilities.images`: `openai`, y `jev` con `experimentalImages`):
 
 ```ts
 import { OpenAiDecisionEngine, noul } from '@soe/decisions';
@@ -116,8 +125,8 @@ y nuestra calibración:
 - **Estados grandes con ruido.** Filtra antes y manda solo lo que la pregunta necesita
   (límite: 32k tokens estado + pregunta, 64k en total).
 - **Generar texto.** Para eso está `LlmService`.
-- **Imágenes a Jev.** Hoy el adaptador de Jev solo acepta texto (lanza `invalid_request`);
-  para imágenes usa `openai`.
+- **Imágenes a Jev sin interruptor.** Son experimentales: sin `experimentalImages` el
+  adaptador lanza `invalid_request`. Recalibra al cambiar de versión de Jev.
 - **Datos de alumnos**, hasta tener el DPA firmado (Ley 19.628). `redactState()` ayuda,
   pero no reemplaza esa decisión.
 

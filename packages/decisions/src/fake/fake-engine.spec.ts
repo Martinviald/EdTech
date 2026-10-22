@@ -147,7 +147,7 @@ describe('FakeDecisionEngine', () => {
   });
 
   it('usa los límites de Jev por defecto y acepta unos propios', async () => {
-    expect(new FakeDecisionEngine().limits).toBe(JEV_LIMITS);
+    expect(new FakeDecisionEngine().limits).toEqual({ ...JEV_LIMITS, imageConstraints: null });
 
     const engine = new FakeDecisionEngine({ limits: { ...JEV_LIMITS, maxChoiceOptions: 2 } });
     await expect(engine.evaluate({ state: 's', questions })).rejects.toMatchObject({

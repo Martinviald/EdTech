@@ -42,7 +42,7 @@ export interface FakeDecisionEngineOptions {
   readonly usage?: DecisionUsage;
   /** Default: `{ images: true }`. */
   readonly capabilities?: DecisionEngineCapabilities;
-  /** Default: `JEV_LIMITS`. */
+  /** Default: `JEV_LIMITS` sin restricciones de imagen (el falso no ajusta imágenes). */
   readonly limits?: DecisionEngineLimits;
 }
 
@@ -68,7 +68,7 @@ export class FakeDecisionEngine implements DecisionEngine {
     this.model = options.model ?? FAKE_MODEL;
     this.usage = options.usage ?? { inputTokens: 0, outputTokens: 0 };
     this.capabilities = options.capabilities ?? { images: true };
-    this.limits = options.limits ?? JEV_LIMITS;
+    this.limits = options.limits ?? { ...JEV_LIMITS, imageConstraints: null };
   }
 
   isAvailable(): boolean {

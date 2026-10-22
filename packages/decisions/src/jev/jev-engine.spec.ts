@@ -274,7 +274,7 @@ describe('JevDecisionEngine', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it('no acepta imágenes: capabilities.images es false y las rechaza sin llamar a fetch', async () => {
+  it('sin experimentalImages no acepta imágenes: capabilities.images es false y las rechaza sin llamar a fetch', async () => {
     const fetch = fetchReturning(() => jsonResponse(200, okBody));
     const engine = engineWith(fetch);
 
