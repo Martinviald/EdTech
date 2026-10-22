@@ -94,7 +94,8 @@ referencia en la clave reservada `imagen` del estado (o `imagenes`), descarga la
 ajusta cada imagen a las restricciones de Jev (lados de 280 a 1568 px; ver
 `src/images/fit-image.ts`: el lado menor queda en 300 px, Lanczos, JPEG 92). El reescalado vive
 en el adaptador porque depende del motor: ampliar un recorte chico ayuda a Jev y perjudica a
-OpenAI.
+OpenAI. `sharp` (binario nativo) se carga recién en el primer ajuste, no al importar el paquete:
+si no carga, la llamada falla con `DecisionError('unavailable')` y el proceso sigue vivo.
 
 Con imágenes (solo motores con `capabilities.images`: `openai`, y `jev` con `experimentalImages`):
 

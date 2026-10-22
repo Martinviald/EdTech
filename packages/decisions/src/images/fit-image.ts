@@ -12,11 +12,38 @@
  * 3. Codificar en JPEG calidad 92.
  *
  * Ejemplo: 250×68 → 1103×300.
+ *
+ * `sharp` es un binario nativo: se carga recién en la primera llamada (y se memoiza),
+ * para que importar `@soe/decisions` no lo cargue en procesos que nunca ajustan imágenes.
+ * Si la carga falla, la llamada falla con `unavailable` y el proceso sigue vivo.
  */
 
-import sharp from 'sharp';
+import type sharp from 'sharp';
 
 import { DecisionError, type ImageConstraints } from '../contracts';
+
+type SharpFactory = typeof sharp;
+
+let sharpFactory: Promise<SharpFactory> | null = null;
+
+/**
+ * Devuelve `sharp`, cargándolo la primera vez. Un fallo de carga se traduce a
+ * `DecisionError('unavailable')` y no se memoiza, para que una llamada posterior reintente.
+ */
+async function loadSharp(): Promise<SharpFactory> {
+  sharpFactory ??= import('sharp').then(
+    (module) => module.default,
+    (error: unknown) => {
+      sharpFactory = null;
+      throw new DecisionError(
+        'unavailable',
+        'No se pudo cargar la librería de imágenes (sharp): el ajuste de imágenes no está disponible en este proceso.',
+        error,
+      );
+    },
+  );
+  return sharpFactory;
+}
 
 /** Calidad JPEG de la PoC. */
 export const FIT_IMAGE_JPEG_QUALITY = 92;
@@ -87,9 +114,10 @@ export async function fitImage(
   constraints: ImageConstraints,
   targetMinSidePx: number,
 ): Promise<FittedImage> {
+  const loadedSharp = await loadSharp();
   let metadata: sharp.Metadata;
   try {
-    metadata = await sharp(bytes).metadata();
+    metadata = await loadedSharp(bytes).metadata();
   } catch (error) {
     throw new DecisionError('invalid_request', 'No se pudo leer la imagen.', error);
   }
@@ -98,7 +126,7 @@ export async function fitImage(
 
   let data: Buffer;
   try {
-    data = await sharp(bytes)
+    data = await loadedSharp(bytes)
       .rotate()
       .flatten({ background: '#ffffff' })
       .resize(plan.width, plan.height, { kernel: 'lanczos3', fit: 'fill' })
