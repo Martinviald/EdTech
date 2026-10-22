@@ -150,6 +150,7 @@ function settings(mode: DecisionMode, overrides: SettingsOverrides = {}) {
     model: 'jev-1.14.0',
     thresholds: { respuesta: JEV_THRESHOLDS },
     available: true,
+    acceptsImages: true,
     ...overrides.jev,
   };
   const openai: DecisionFeatureSettings = {
@@ -158,6 +159,7 @@ function settings(mode: DecisionMode, overrides: SettingsOverrides = {}) {
     model: 'gpt-6-luna',
     thresholds: { respuesta: OPENAI_THRESHOLDS },
     available: true,
+    acceptsImages: true,
     ...overrides.openai,
   };
   return { jev, openai };
@@ -313,6 +315,28 @@ describe('MarkDisambiguationService.resolveBatch', () => {
       expect(reportSpy.mock.calls[0]?.[1]).toMatchObject({
         scope: 'mark_disambiguation.misconfigured',
       });
+    });
+
+    it('no corre si Jev no acepta imágenes o un motor no tiene credenciales', async () => {
+      for (const overrides of [
+        { jev: { acceptsImages: false } },
+        { openai: { available: false } },
+      ]) {
+        reportSpy.mockClear();
+        const { service, evaluate, updates } = makeService(
+          'live',
+          { jev: answer('B', 0.9), openai: answer('B', 0.9) },
+          { overrides },
+        );
+
+        await service.resolveBatch(ORG_ID, BATCH_ID, SPEC, [candidate()]);
+
+        expect(evaluate).not.toHaveBeenCalled();
+        expect(updates).toHaveLength(0);
+        expect(reportSpy.mock.calls[0]?.[1]).toMatchObject({
+          scope: 'mark_disambiguation.misconfigured',
+        });
+      }
     });
 
     it('nunca lanza: una falla al leer la configuración se reporta', async () => {

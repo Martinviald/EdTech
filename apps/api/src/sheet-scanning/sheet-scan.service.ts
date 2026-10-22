@@ -62,6 +62,7 @@ import type { IdentityCandidate } from './identity/identity-resolver.types';
 import { identityModeOf } from './sheet-layout.helpers';
 import { OmrCalibrationService } from './omr-calibration.service';
 import {
+  MARK_DISAMBIGUATION_MAX_MARKS_PER_BATCH,
   MarkDisambiguationService,
   type MarkDisambiguationCandidate,
 } from './mark-disambiguation.service';
@@ -675,7 +676,8 @@ export class SheetScanService {
           candidate,
           context,
         );
-        disambiguationCandidates.push(...pageCandidates);
+        const room = MARK_DISAMBIGUATION_MAX_MARKS_PER_BATCH - disambiguationCandidates.length;
+        if (room > 0) disambiguationCandidates.push(...pageCandidates.slice(0, room));
       }
     }
     return { rejectionReason: null, pagesTotal, disambiguationCandidates };

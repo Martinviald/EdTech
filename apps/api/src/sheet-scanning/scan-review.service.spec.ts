@@ -72,6 +72,7 @@ function makeDb(selectResults: unknown[][]): {
 
   const db = {
     select: () => chain(selectResults[selectIdx++] ?? []),
+    selectDistinct: () => chain(selectResults[selectIdx++] ?? []),
     update: () => ({
       set: (values: Record<string, unknown>) => {
         updates.push(values);
@@ -89,7 +90,7 @@ function makeDb(selectResults: unknown[][]): {
   return { db, updates };
 }
 
-function makeConfirmer(): {
+function makeConfirmer(db?: Database): {
   confirmer: AnswerSheetConfirmer;
   calls: Array<{ user: JwtPayload; input: AnswerSheetConfirmInput }>;
   rescoreCalls: Array<{ orgId: string; input: RescoreScannedAnswerInput }>;
@@ -101,8 +102,9 @@ function makeConfirmer(): {
       calls.push({ user, input });
       return { jobId: 'job-1', responsesCreated: 24 };
     },
-    rescoreScannedAnswer: async (orgId, input) => {
+    rescoreScannedAnswer: async (orgId, input, withinTransaction) => {
       rescoreCalls.push({ orgId, input });
+      if (withinTransaction && db) await withinTransaction(db);
     },
   };
   return { confirmer, calls, rescoreCalls };
@@ -153,7 +155,7 @@ function makeService(
   engine: RubricEngine | Error = 'legacy',
 ) {
   const { db, updates } = makeDb(selectResults);
-  const { confirmer, calls: confirmCalls, rescoreCalls } = makeConfirmer();
+  const { confirmer, calls: confirmCalls, rescoreCalls } = makeConfirmer(db);
   const gradingCalls: ScheduleConfirmedBatchParams[] = [];
   const developmentGradingFake = {
     scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
@@ -1716,9 +1718,29 @@ const SHEET_MARKS = [
   },
 ];
 
+const PAGES_READ = [{ pageIndex: 0 }, { pageIndex: 1 }];
+
 describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)', () => {
+  it('rechaza una hoja que quedó incompleta al confirmar', async () => {
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow()],
+      SHEET_MARKS,
+      [{ pageIndex: 0 }],
+    ]);
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(rescoreCalls).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+  });
+
   it('reescribe la respuesta con la hoja completa, recalcula y deja la decisión como humana', async () => {
-    const { service, updates, rescoreCalls } = makeService([[correctionRow()], SHEET_MARKS]);
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow()],
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
 
     const model = await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, {
       decision: 'option',
@@ -1755,7 +1777,7 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
   });
 
   it('anular la respuesta la marca como anulada al reescribirla', async () => {
-    const { service, rescoreCalls } = makeService([[correctionRow()], SHEET_MARKS]);
+    const { service, rescoreCalls } = makeService([[correctionRow()], SHEET_MARKS, PAGES_READ]);
 
     await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'annulled' });
 
@@ -1778,7 +1800,7 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
   });
 
   it('rechaza una alternativa inexistente', async () => {
-    const { service, rescoreCalls } = makeService([[correctionRow()], SHEET_MARKS]);
+    const { service, rescoreCalls } = makeService([[correctionRow()], SHEET_MARKS, PAGES_READ]);
 
     await expect(
       service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, {
@@ -1790,7 +1812,7 @@ describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)',
   });
 
   it('si la reescritura de la respuesta falla, la marca queda como estaba', async () => {
-    const { db, updates } = makeDb([[correctionRow()], SHEET_MARKS]);
+    const { db, updates } = makeDb([[correctionRow()], SHEET_MARKS, PAGES_READ]);
     const failingConfirmer: AnswerSheetConfirmer = {
       confirmParserResult: async () => ({ jobId: 'job-1', responsesCreated: 0 }),
       rescoreScannedAnswer: async () => {

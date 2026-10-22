@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, inArray, isNull, isNotNull, ne, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, isNotNull, ne, notInArray, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
   files,
@@ -54,6 +54,7 @@ import { InjectDb, type Database } from '../database/database.types';
 import type {
   AnswerSheetsService,
   RescoreScannedAnswerInput,
+  RescoreWithinTransaction,
 } from '../answer-sheets/answer-sheets.service';
 import type { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
@@ -85,7 +86,11 @@ export interface AnswerSheetConfirmer {
     user: JwtPayload,
     input: AnswerSheetConfirmInput,
   ): Promise<AnswerSheetConfirmOutcome>;
-  rescoreScannedAnswer(orgId: string, input: RescoreScannedAnswerInput): Promise<void>;
+  rescoreScannedAnswer(
+    orgId: string,
+    input: RescoreScannedAnswerInput,
+    withinTransaction?: RescoreWithinTransaction,
+  ): Promise<void>;
 }
 
 export function createAnswerSheetConfirmer(
@@ -94,8 +99,8 @@ export function createAnswerSheetConfirmer(
   results: AssessmentResultsService,
 ): AnswerSheetConfirmer {
   return {
-    async rescoreScannedAnswer(orgId, input) {
-      await answerSheets.rescoreScannedAnswer(orgId, input);
+    async rescoreScannedAnswer(orgId, input, withinTransaction) {
+      await answerSheets.rescoreScannedAnswer(orgId, input, withinTransaction);
       await results.recalculateAnswerSheetResults(orgId, [input.assessmentId]);
     },
     async confirmParserResult(user, input) {
@@ -512,9 +517,25 @@ export class ScanReviewService {
             eq(sheetScanMarks.orgId, orgId),
             eq(sheetScans.batchId, row.batchId),
             eq(sheetScans.printedSheetId, row.printedSheetId),
-            ne(sheetScans.state, 'superseded'),
+            notInArray(sheetScans.state, ['superseded', 'quality_rejected']),
           ),
         );
+      const pagesRead = await tx
+        .selectDistinct({ pageIndex: sheetScans.pageIndex })
+        .from(sheetScans)
+        .where(
+          and(
+            eq(sheetScans.orgId, orgId),
+            eq(sheetScans.batchId, row.batchId),
+            eq(sheetScans.printedSheetId, row.printedSheetId),
+            notInArray(sheetScans.state, ['superseded', 'quality_rejected']),
+          ),
+        );
+      if (pagesRead.length < row.spec.pageCount) {
+        throw new ConflictException(
+          'La hoja de esta marca quedó incompleta al confirmar el lote: sus respuestas no entraron a los resultados.',
+        );
+      }
 
       const bubbleFieldIds = new Set(
         row.spec.fields.filter((f) => f.kind === 'bubble_group').map((f) => f.fieldId),
@@ -552,9 +573,7 @@ export class ScanReviewService {
       };
     });
 
-    await this.answerSheetConfirmer.rescoreScannedAnswer(orgId, prepared.rescore);
-
-    return withOrgContext(this.db, orgId, async (tx) => {
+    await this.answerSheetConfirmer.rescoreScannedAnswer(orgId, prepared.rescore, async (tx) => {
       await tx
         .update(sheetScanMarks)
         .set({
@@ -565,7 +584,9 @@ export class ScanReviewService {
           autoResolved: false,
         })
         .where(and(eq(sheetScanMarks.id, markId), eq(sheetScanMarks.orgId, orgId)));
+    });
 
+    return withOrgContext(this.db, orgId, async (tx) => {
       const mark = prepared.row.mark;
       const cropUrl = mark.cropFileId
         ? ((await this.buildFileUrlIndex(tx, orgId, [mark.cropFileId])).get(mark.cropFileId) ??
@@ -1114,7 +1135,7 @@ export class ScanReviewService {
   ): Promise<MarkQueueRow[]> {
     const condition =
       kind === 'all'
-        ? undefined
+        ? and(ne(sheetScans.state, 'quality_rejected'), isNotNull(sheetScans.printedSheetId))
         : kind === 'pending'
           ? isNull(sheetScanMarks.reviewedAt)
           : and(eq(sheetScanMarks.autoResolved, true), isNull(sheetScanMarks.reviewedById));

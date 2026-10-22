@@ -85,5 +85,7 @@ export function autoResolvedSummary({ byAi, evident }: AutoResolvedCounts): stri
         : `${evident} dobles marcas evidentes se anularon solas`;
     return `${head} (ambas burbujas rellenas). ${keep}`;
   }
-  return `Resueltas automáticamente: ${byAi} por IA, ${evident} dobles marcas evidentes. ${keep}`;
+  const evidentLabel =
+    evident === 1 ? '1 doble marca evidente' : `${evident} dobles marcas evidentes`;
+  return `Resueltas automáticamente: ${byAi} por IA, ${evidentLabel}. ${keep}`;
 }

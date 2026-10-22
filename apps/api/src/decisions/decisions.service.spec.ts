@@ -233,6 +233,7 @@ describe('DecisionsService.settingsOf', () => {
       model: 'jev-1.13.0',
       thresholds: { clave: { auto: 0.9, review: 0.6 } },
       available: true,
+      acceptsImages: true,
     });
   });
 

@@ -144,6 +144,15 @@ export class MarkDisambiguationService {
         });
         return null;
       }
+      if (!slot.settings.available || !slot.settings.acceptsImages) {
+        this.report('misconfigured', orgId, batchId, {
+          feature: slot.feature,
+          reason: slot.settings.available
+            ? 'el motor no acepta imágenes (JEV_EXPERIMENTAL_IMAGES)'
+            : 'el motor no está disponible (falta su API key)',
+        });
+        return null;
+      }
       if (mode === 'live' && slot.thresholds === null) {
         this.report('misconfigured', orgId, batchId, {
           feature: slot.feature,
@@ -435,6 +444,14 @@ export class MarkDisambiguationService {
         model: result.model,
       };
     } catch (error) {
+      if (!(error instanceof DecisionError)) {
+        reportServerError(error, {
+          scope: 'mark_disambiguation.engine',
+          orgId,
+          feature: slot.feature,
+          markId: item.markId,
+        });
+      }
       const code = error instanceof DecisionError ? error.code : 'upstream';
       return { side: { status: 'failed', code }, model: slot.settings.model };
     }

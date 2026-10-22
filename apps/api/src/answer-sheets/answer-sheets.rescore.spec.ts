@@ -33,12 +33,12 @@ interface Upsert {
   target: unknown;
 }
 
-function makeDb(existingResponse: boolean) {
+function makeDb(existingResponse: boolean, humanScore: string | null = null) {
   const upserts: Upsert[] = [];
   const rowsFor = (table: unknown): unknown[] => {
     const name = getTableName(table as Parameters<typeof getTableName>[0]);
     if (name === 'items') return [mcq(ITEM_1, 1, 'B'), mcq(ITEM_2, 2, 'C')];
-    if (name === 'responses') return existingResponse ? [{ id: 'resp-1' }] : [];
+    if (name === 'responses') return existingResponse ? [{ id: 'resp-1', humanScore }] : [];
     return [];
   };
   const chain = (rows: unknown[]) => {
@@ -113,6 +113,30 @@ describe('AnswerSheetsService.rescoreScannedAnswer', () => {
       isCorrect: false,
       finalScore: '0.00',
     });
+  });
+
+  it('corre el callback dentro de la misma transacción que la reescritura', async () => {
+    const { db, upserts } = makeDb(true);
+    const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
+    const seen: number[] = [];
+
+    await service.rescoreScannedAnswer(ORG_ID, input(), async () => {
+      seen.push(upserts.length);
+    });
+
+    expect(seen).toEqual([1]);
+  });
+
+  it('rechaza con 409 una respuesta con puntaje manual y no la toca', async () => {
+    const { db, upserts } = makeDb(true, '1.00');
+    const service = new AnswerSheetsService(db, new AnswerSheetPreviewStore());
+    const callback = jest.fn();
+
+    await expect(service.rescoreScannedAnswer(ORG_ID, input(), callback)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(upserts).toHaveLength(0);
+    expect(callback).not.toHaveBeenCalled();
   });
 
   it('rechaza con 409 si la respuesta no se registró al confirmar', async () => {

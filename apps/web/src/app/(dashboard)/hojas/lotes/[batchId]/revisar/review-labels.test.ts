@@ -67,7 +67,7 @@ describe('autoResolvedSummary', () => {
     ]);
     expect(counts).toEqual({ byAi: 2, evident: 1 });
     expect(autoResolvedSummary(counts)).toBe(
-      'Resueltas automáticamente: 2 por IA, 1 dobles marcas evidentes. No requieren revisión; quedan al final de la lista por si quieres corregir alguna.',
+      'Resueltas automáticamente: 2 por IA, 1 doble marca evidente. No requieren revisión; quedan al final de la lista por si quieres corregir alguna.',
     );
   });
 

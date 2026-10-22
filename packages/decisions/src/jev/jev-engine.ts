@@ -96,7 +96,9 @@ export class JevDecisionEngine implements DecisionEngine {
     if (images.length > 0) options.headers = { [JEV_IMAGES_HEADER]: 'true' };
 
     const sdkState =
-      state === null ? request.state : await this.attachImages(state, images, request.signal);
+      state === null
+        ? request.state
+        : await this.attachImages(state, images, request.signal, request.timeoutMs);
 
     const started = performance.now();
     let raw: unknown;
@@ -140,11 +142,12 @@ export class JevDecisionEngine implements DecisionEngine {
     state: Record<string, unknown>,
     images: readonly DecisionImage[],
     signal: AbortSignal | undefined,
+    timeoutMs: number | undefined,
   ): Promise<SystemOneRequest['state']> {
     const constraints = this.limits.imageConstraints;
     const sdkImages: Image[] = [];
     for (const image of images) {
-      const bytes = await this.imageBytes(image, signal);
+      const bytes = await this.imageBytes(image, signal, timeoutMs);
       const fitted =
         constraints === null
           ? bytes
@@ -159,18 +162,31 @@ export class JevDecisionEngine implements DecisionEngine {
   }
 
   /** Bytes de la imagen. Jev necesita los bytes: una `{ url }` se descarga; un 404 u otra falla → `upstream`. */
+  /** Con `timeoutMs`, la descarga también tiene ese tope (además del `signal` del llamador). */
   private async imageBytes(
     image: DecisionImage,
     signal: AbortSignal | undefined,
+    timeoutMs: number | undefined,
   ): Promise<Uint8Array> {
     if (!('url' in image)) return Buffer.from(image.data, 'base64');
     const fetchImpl: JevFetch = this.config.fetch ?? ((input, init) => fetch(input, init));
+    const signals = [
+      signal,
+      timeoutMs === undefined ? undefined : AbortSignal.timeout(timeoutMs),
+    ].filter((s): s is AbortSignal => s !== undefined);
+    const combined = signals.length === 0 ? undefined : AbortSignal.any(signals);
     let response: Response;
     try {
-      response = await fetchImpl(image.url, signal === undefined ? {} : { signal });
+      response = await fetchImpl(image.url, combined === undefined ? {} : { signal: combined });
     } catch (error) {
       if (signal?.aborted)
         throw new DecisionError('aborted', 'La descarga de la imagen se canceló.', error);
+      if (combined?.aborted)
+        throw new DecisionError(
+          'timeout',
+          'La descarga de la imagen para Jev excedió el plazo.',
+          error,
+        );
       throw new DecisionError('upstream', 'No se pudo descargar la imagen para Jev.', error);
     }
     if (!response.ok) {

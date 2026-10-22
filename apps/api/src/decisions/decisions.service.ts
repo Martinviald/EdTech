@@ -41,6 +41,7 @@ export interface DecisionFeatureSettings {
   model: string;
   thresholds: DecisionThresholds;
   available: boolean;
+  acceptsImages: boolean;
 }
 
 @Injectable()
@@ -64,12 +65,14 @@ export class DecisionsService {
 
   async settingsOf(orgId: string, feature: DecisionFeature): Promise<DecisionFeatureSettings> {
     const cfg = await this.config.resolve(orgId, feature);
+    const engine = this.registry.get(cfg.engine);
     return {
       mode: cfg.mode,
       engine: cfg.engine,
       model: cfg.model,
       thresholds: cfg.thresholds,
-      available: this.registry.get(cfg.engine)?.isAvailable() ?? false,
+      available: engine?.isAvailable() ?? false,
+      acceptsImages: engine?.capabilities.images ?? false,
     };
   }
 

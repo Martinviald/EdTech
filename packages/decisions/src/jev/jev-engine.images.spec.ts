@@ -236,6 +236,23 @@ describe('JevDecisionEngine con imágenes', () => {
     expect(requests).toHaveLength(0);
   });
 
+  it('corta con timeout una descarga de imagen que no responde', async () => {
+    const fetch: jest.MockedFunction<JevFetch> = jest.fn(
+      (_url, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => reject(new Error('abortado')));
+        }),
+    );
+    await expect(
+      engineWith(fetch).evaluate({
+        state: { descripcion: 'x' },
+        images: [{ url: 'https://files.test/lenta.jpg' }],
+        questions,
+        timeoutMs: 50,
+      }),
+    ).rejects.toMatchObject({ code: 'timeout' });
+  });
+
   it('sin experimentalImages rechaza imágenes con invalid_request', async () => {
     const { fetch } = recordingFetch();
     const engine = engineWith(fetch, { experimentalImages: false });

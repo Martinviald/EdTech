@@ -81,6 +81,8 @@ export interface RescoreScannedAnswerInput {
   annulledLabels: string[];
 }
 
+export type RescoreWithinTransaction = (tx: Database) => Promise<void>;
+
 interface ItemForAssessment {
   id: string;
   position: number;
@@ -644,7 +646,11 @@ export class AnswerSheetsService {
 
   // ---------- helpers ----------
 
-  async rescoreScannedAnswer(orgId: string, input: RescoreScannedAnswerInput): Promise<string> {
+  async rescoreScannedAnswer(
+    orgId: string,
+    input: RescoreScannedAnswerInput,
+    withinTransaction?: RescoreWithinTransaction,
+  ): Promise<string> {
     const instrumentItems = await this.loadInstrumentItems(input.instrumentId);
     const labelIndex = buildPrintedLabelIndex(instrumentItems);
     const target = resolveScanLabel(labelIndex, input.label, null);
@@ -666,7 +672,7 @@ export class AnswerSheetsService {
 
     await withOrgContext(this.db, orgId, async (tx) => {
       const [existing] = await tx
-        .select({ id: responses.id })
+        .select({ id: responses.id, humanScore: responses.humanScore })
         .from(responses)
         .where(
           and(
@@ -681,6 +687,11 @@ export class AnswerSheetsService {
           `La respuesta de la pregunta ${input.label} no se registró al confirmar el lote: no hay nada que corregir en los resultados.`,
         );
       }
+      if (existing.humanScore !== null) {
+        throw new ConflictException(
+          `La pregunta ${input.label} tiene un puntaje asignado a mano: corrígelo desde la revisión de puntajes.`,
+        );
+      }
       await tx
         .insert(responses)
         .values({ ...row, assessmentId: input.assessmentId })
@@ -688,6 +699,7 @@ export class AnswerSheetsService {
           target: [responses.assessmentId, responses.studentId, responses.itemId],
           set: this.responseUpsertSet(now),
         });
+      if (withinTransaction) await withinTransaction(tx);
     });
     return item.id;
   }
