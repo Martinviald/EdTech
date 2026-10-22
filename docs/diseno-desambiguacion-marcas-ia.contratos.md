@@ -184,3 +184,22 @@ calibración. No se reimplementa en otro lado.
   con `tx`. Tests con `Database` falso (`01-testing.md`).
 - `packages/decisions`: mantiene su estilo (con JSDoc).
 - Texto en español con tuteo neutro.
+
+## C11. Métricas de IA (PR 4)
+
+`SheetScanMetricsResponse.aiResolutions: AiResolutionMetricsModel`, sobre las marcas de la org
+con `ai_resolution IS NOT NULL` en escaneos no `superseded`:
+
+- `evaluated`: cuántas tienen `ai_resolution`.
+- `autoSimulated`: `verdict IN ('agree','solo_a','solo_b','audit_sample')` (las que la IA habría
+  aplicado; en `live` incluye las de auditoría).
+- `autoApplied`: `applied = true`.
+- `correctedByHuman`: `applied = true`, `reviewed_by_id IS NOT NULL` y
+  `reviewToMarkAnswer(review_decision, reviewed_value) !== ai_resolution.value`.
+- `agreementWithHuman: { compared; agreed }`: entre las `autoSimulated` con `reviewed_by_id IS NOT
+  NULL`, cuántas se pueden comparar y en cuántas `reviewToMarkAnswer(...) === value`.
+- Además, `byMode: { shadow: number; live: number }` con `evaluated` por modo.
+
+La traducción usa `reviewToMarkAnswer` de `@soe/types` (C6). La verdad de una auto-anulada por el
+OMR (sin `reviewed_by_id`) es débil y NO cuenta en `agreementWithHuman`; la calibración la reporta
+aparte.
