@@ -76,6 +76,7 @@ runJob
   finalizeBatch                  (sin cambios)
 ```
 
+- **Orden según el modo (corrección de auditoría):** lo anterior vale para `live`. En `shadow` el lote se finaliza primero y la etapa corre en segundo plano sin esperarla: la sombra no escribe `reviewed_*`, así que no hay carrera con el profesor y no tiene sentido retrasar el lote hasta 90 s. El modo efectivo se resuelve (`pipelineFor`) antes de decidir el orden.
 - **Por qué dentro del job y no en un job aparte:** mientras corre, el lote sigue en `processing`. `resolveMark` exige `needs_review` (`assertBatchInReview`), así que no hay carrera entre el profesor y la IA, ni carrera con `confirmBatch`. Además `finalizeBatch` calcula `reviewPending` ya descontando lo que resolvió la IA, sin código de recuento nuevo.
 - **Costo de hacerlo así:** unos 10 a 25 s más por lote (§9). Lo acotan un plazo total (`MARK_DISAMBIGUATION_BATCH_DEADLINE_MS = 90_000`, nuevo) y un `AbortSignal`. Lo que no alcance queda pendiente para el humano, como hoy.
 - **Candidatos:** `persistPage` ya tiene en memoria `mark.cropJpegBase64`. Propongo que devuelva los candidatos y que `processSources` los acumule. Cada candidato lleva `markId`, `fieldId`, `state`, el base64 y la *baseline* OMR.

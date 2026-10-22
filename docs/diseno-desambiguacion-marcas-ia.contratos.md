@@ -54,9 +54,17 @@ Comparaciones: `>=` para superar un umbral alto (`agree`, `solo`) y `<` estricto
   y `cropJpegBase64 !== null`, con: `markId`, `scanId`, `fieldId`, `state`, `cropJpegBase64`,
   `scanState` (el `SheetScanState` con que se insertó el escaneo), `autoAnnulled` (si
   `autoAnnulment` la resolvió) y la baseline OMR (`doubtReason`, `suggestedValue`,
-  `nullConfidence`, `fill`, `margin`). `processSources` los acumula y `runJob` los pasa a
-  `MarkDisambiguationService.resolveBatch(orgId, batchId, spec, candidates)` antes de
-  `finalizeBatch`. `resolveBatch` **nunca lanza**.
+  `nullConfidence`, `fill`, `margin`). `processSources` los acumula. `runJob` resuelve primero
+  el modo efectivo con `MarkDisambiguationService.pipelineFor(orgId, batchId)` y luego:
+  - en `live`, espera `resolveBatch(orgId, batchId, spec, candidates, pipeline)` **antes** de
+    `finalizeBatch`, para que la IA resuelva antes de que el lote pase a `needs_review` y no
+    compita con el profesor;
+  - en `shadow`, llama primero a `finalizeBatch` y lanza `resolveBatch` en segundo plano, sin
+    esperarlo (`void`; una falla se reporta con `reportServerError` y no toca el lote). La
+    sombra solo escribe `ai_resolution` y usa los candidatos en memoria, así que no depende de
+    nada que cambie `finalizeBatch`;
+  - si no corre (`null`), solo `finalizeBatch`.
+  `pipelineFor` y `resolveBatch` **nunca lanzan**.
 - `MarkDisambiguationService` aplica **todo** el filtro de §3.4 del diseño más la guardia de
   identidad (§10):
   - campo del layout `kind = 'bubble_group'`, `selectMode = 'single'`, ≥ 2 burbujas;

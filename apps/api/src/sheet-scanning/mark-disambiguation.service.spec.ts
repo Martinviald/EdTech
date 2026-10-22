@@ -252,6 +252,38 @@ describe('MarkDisambiguationService.resolveBatch', () => {
   });
 
   describe('modo efectivo', () => {
+    it('pipelineFor resuelve el modo antes de correr: sombra, live u off', async () => {
+      const shadowService = makeService('shadow', { jev: null, openai: null }).service;
+      const liveService = makeService('live', { jev: null, openai: null }).service;
+      const offService = makeService('off', { jev: null, openai: null }).service;
+
+      expect((await shadowService.pipelineFor(ORG_ID, BATCH_ID))?.mode).toBe('shadow');
+      expect((await liveService.pipelineFor(ORG_ID, BATCH_ID))?.mode).toBe('live');
+      expect(await offService.pipelineFor(ORG_ID, BATCH_ID)).toBeNull();
+    });
+
+    it('pipelineFor nunca lanza: una falla al leer la configuración se reporta y devuelve null', async () => {
+      const { service, settingsOf } = makeService('live', { jev: null, openai: null });
+      settingsOf.mockRejectedValueOnce(new Error('sin conexión'));
+
+      await expect(service.pipelineFor(ORG_ID, BATCH_ID)).resolves.toBeNull();
+      expect(reportSpy.mock.calls[0]?.[1]).toMatchObject({ scope: 'mark_disambiguation' });
+    });
+
+    it('resolveBatch con el pipeline ya resuelto no vuelve a leer la configuración', async () => {
+      const { service, settingsOf, shadow } = makeService('shadow', {
+        jev: answer('B', 0.9),
+        openai: answer('B', 0.9),
+      });
+      const pipeline = await service.pipelineFor(ORG_ID, BATCH_ID);
+      settingsOf.mockClear();
+
+      await service.resolveBatch(ORG_ID, BATCH_ID, SPEC, [candidate()], pipeline ?? undefined);
+
+      expect(settingsOf).not.toHaveBeenCalled();
+      expect(shadow).toHaveBeenCalledTimes(2);
+    });
+
     it('con las dos features en off no llama a nadie ni reporta', async () => {
       const { service, evaluate, shadow, updates } = makeService('off', {
         jev: answer('B', 0.9),

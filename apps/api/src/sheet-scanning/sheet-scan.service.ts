@@ -65,6 +65,7 @@ import {
   MARK_DISAMBIGUATION_MAX_MARKS_PER_BATCH,
   MarkDisambiguationService,
   type MarkDisambiguationCandidate,
+  type MarkDisambiguationPipeline,
 } from './mark-disambiguation.service';
 
 const ALLOWED_SOURCE_MIME_TYPES = new Set([
@@ -566,16 +567,31 @@ export class SheetScanService {
         });
         return;
       }
-      if (outcome.disambiguationCandidates.length > 0) {
-        await this.markProcessingAlive(orgId, batchId);
+      const pipeline = await this.markDisambiguation.pipelineFor(orgId, batchId);
+      if (pipeline?.mode === 'live') {
+        if (outcome.disambiguationCandidates.length > 0) {
+          await this.markProcessingAlive(orgId, batchId);
+        }
+        await this.markDisambiguation.resolveBatch(
+          orgId,
+          batchId,
+          context.spec,
+          outcome.disambiguationCandidates,
+          pipeline,
+        );
+        await this.finalizeBatch(orgId, batchId, outcome.pagesTotal);
+        return;
       }
-      await this.markDisambiguation.resolveBatch(
-        orgId,
-        batchId,
-        context.spec,
-        outcome.disambiguationCandidates,
-      );
       await this.finalizeBatch(orgId, batchId, outcome.pagesTotal);
+      if (pipeline !== null) {
+        this.startShadowDisambiguation(
+          orgId,
+          batchId,
+          context.spec,
+          outcome.disambiguationCandidates,
+          pipeline,
+        );
+      }
     } catch (err) {
       if (err instanceof OmrSourceUnreadableError) {
         reportServerError(err, { batchId, orgId, userId });
@@ -598,6 +614,20 @@ export class SheetScanService {
         failureReason: UNEXPECTED_FAILURE_MESSAGE,
       });
     }
+  }
+
+  private startShadowDisambiguation(
+    orgId: string,
+    batchId: string,
+    spec: LayoutSpec,
+    candidates: readonly MarkDisambiguationCandidate[],
+    pipeline: MarkDisambiguationPipeline,
+  ): void {
+    void this.markDisambiguation
+      .resolveBatch(orgId, batchId, spec, candidates, pipeline)
+      .catch((error: unknown) => {
+        reportServerError(error, { scope: 'mark_disambiguation.shadow', orgId, batchId });
+      });
   }
 
   private async loadJobContext(orgId: string, batchId: string): Promise<JobContext> {

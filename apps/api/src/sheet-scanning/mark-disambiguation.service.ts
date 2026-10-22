@@ -63,18 +63,18 @@ export interface MarkDisambiguationCandidate {
   margin: number;
 }
 
-type PipelineMode = 'shadow' | 'live';
+export type PipelineMode = 'shadow' | 'live';
 
-type EngineSlot = 'jev' | 'openai';
+export type EngineSlot = 'jev' | 'openai';
 
-interface SlotConfig {
+export interface SlotConfig {
   slot: EngineSlot;
   feature: DecisionFeature;
   settings: DecisionFeatureSettings;
   thresholds: PairThresholds | null;
 }
 
-interface PipelineConfig {
+export interface MarkDisambiguationPipeline {
   mode: PipelineMode;
   jev: SlotConfig;
   openai: SlotConfig;
@@ -106,14 +106,24 @@ export class MarkDisambiguationService {
     private readonly filesService: FilesService,
   ) {}
 
+  async pipelineFor(orgId: string, batchId: string): Promise<MarkDisambiguationPipeline | null> {
+    try {
+      return await this.resolvePipeline(orgId, batchId);
+    } catch (error) {
+      reportServerError(error, { scope: 'mark_disambiguation', orgId, batchId });
+      return null;
+    }
+  }
+
   async resolveBatch(
     orgId: string,
     batchId: string,
     spec: LayoutSpec,
     candidates: readonly MarkDisambiguationCandidate[],
+    pipeline?: MarkDisambiguationPipeline,
   ): Promise<void> {
     try {
-      const config = await this.resolvePipeline(orgId, batchId);
+      const config = pipeline ?? (await this.resolvePipeline(orgId, batchId));
       if (config === null) return;
       const items = await this.collectWork(orgId, batchId, spec, candidates, config.mode);
       if (items.length === 0) return;
@@ -123,7 +133,10 @@ export class MarkDisambiguationService {
     }
   }
 
-  private async resolvePipeline(orgId: string, batchId: string): Promise<PipelineConfig | null> {
+  private async resolvePipeline(
+    orgId: string,
+    batchId: string,
+  ): Promise<MarkDisambiguationPipeline | null> {
     const [jev, openai] = await Promise.all([
       this.slotConfig(orgId, 'jev'),
       this.slotConfig(orgId, 'openai'),
@@ -365,7 +378,7 @@ export class MarkDisambiguationService {
   private async runWithDeadline(
     orgId: string,
     batchId: string,
-    config: PipelineConfig,
+    config: MarkDisambiguationPipeline,
     items: readonly WorkItem[],
   ): Promise<void> {
     const controller = new AbortController();
@@ -396,7 +409,7 @@ export class MarkDisambiguationService {
 
   private async resolveItem(
     orgId: string,
-    config: PipelineConfig,
+    config: MarkDisambiguationPipeline,
     item: WorkItem,
     signal: AbortSignal,
   ): Promise<void> {
@@ -462,7 +475,7 @@ export class MarkDisambiguationService {
   }
 
   private decide(
-    config: PipelineConfig,
+    config: MarkDisambiguationPipeline,
     item: WorkItem,
     jev: SideOutcome,
     openai: SideOutcome,

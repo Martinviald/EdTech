@@ -17,7 +17,10 @@ import type { IdentityCandidate } from './identity/identity-resolver.types';
 import type { SheetIdentityResolverRegistry } from './identity/identity-resolver.registry';
 import { deriveLayoutDraft, type DerivableItem } from './sheet-layout.helpers';
 import type { OmrCalibrationService } from './omr-calibration.service';
-import type { MarkDisambiguationService } from './mark-disambiguation.service';
+import type {
+  MarkDisambiguationPipeline,
+  MarkDisambiguationService,
+} from './mark-disambiguation.service';
 import { OmrServiceUnavailableError, OmrSourceUnreadableError } from './omr-client.types';
 import { FakeOmrClient } from './testing/fake-omr-client';
 import { SheetScanService } from './sheet-scan.service';
@@ -185,6 +188,7 @@ function makeService(
   confirm: jest.Mock;
   scheduleForScan: jest.Mock;
   resolveBatch: jest.Mock;
+  pipelineFor: jest.Mock;
 } {
   const { db, inserts, updates } = makeDb(selectResults, insertReturning);
   const { filesService, createUploadIntent, confirm } = makeFilesService();
@@ -198,7 +202,8 @@ function makeService(
   const scheduleForScan = jest.fn();
   const answerReading = { scheduleForScan } as unknown as AnswerReadingPipelineService;
   const resolveBatch = jest.fn().mockResolvedValue(undefined);
-  const markDisambiguation = { resolveBatch } as unknown as MarkDisambiguationService;
+  const pipelineFor = jest.fn().mockResolvedValue(null);
+  const markDisambiguation = { resolveBatch, pipelineFor } as unknown as MarkDisambiguationService;
   const service = new SheetScanService(
     db,
     filesService,
@@ -222,6 +227,7 @@ function makeService(
     confirm,
     scheduleForScan,
     resolveBatch,
+    pipelineFor,
   };
 }
 
@@ -964,9 +970,12 @@ describe('SheetScanService job', () => {
 });
 
 describe('SheetScanService job — desambiguación de marcas con IA', () => {
-  it('pasa a resolveBatch las marcas dudosas con recorte, antes de finalizeBatch', async () => {
+  const LIVE_PIPELINE = { mode: 'live' } as MarkDisambiguationPipeline;
+  const SHADOW_PIPELINE = { mode: 'shadow' } as MarkDisambiguationPipeline;
+
+  it('en live pasa a resolveBatch las marcas dudosas con recorte y espera antes de finalizeBatch', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue({ ok: true, status: 200 } as Response);
-    const { service, resolve, omr, resolveBatch, updates } = makeService([
+    const { service, resolve, omr, resolveBatch, pipelineFor, updates } = makeService([
       [{ ...CTX_ROW, orgConfig: { review: { autoAnnulMinConfidence: 0.9 } } }],
       [FILE_ROW],
       [],
@@ -1008,21 +1017,26 @@ describe('SheetScanService job — desambiguación de marcas con IA', () => {
       ],
     });
     resolve.mockResolvedValueOnce(candidate());
-    let updatesWhenResolving = -1;
+    pipelineFor.mockResolvedValue(LIVE_PIPELINE);
+    let finalizedWhenResolving: boolean | null = null;
     resolveBatch.mockImplementation(async () => {
-      updatesWhenResolving = updates.length;
+      finalizedWhenResolving = updates.some((u) => u.set.status === 'needs_review');
     });
 
     await runJob(service);
 
+    expect(pipelineFor).toHaveBeenCalledWith(ORG_ID, BATCH_ID);
     expect(resolveBatch).toHaveBeenCalledTimes(1);
-    const [orgId, batchId, spec, candidates] = resolveBatch.mock.calls[0] as [
+    const [orgId, batchId, spec, candidates, pipeline] = resolveBatch.mock.calls[0] as [
       string,
       string,
       LayoutSpec,
       Array<Record<string, unknown>>,
+      unknown,
     ];
     expect({ orgId, batchId, spec }).toEqual({ orgId: ORG_ID, batchId: BATCH_ID, spec: SPEC });
+    expect(pipeline).toBe(LIVE_PIPELINE);
+    expect(finalizedWhenResolving).toBe(false);
     expect(candidates).toHaveLength(2);
     expect(candidates[0]).toMatchObject({
       fieldId: 'item-2',
@@ -1035,11 +1049,71 @@ describe('SheetScanService job — desambiguación de marcas con IA', () => {
     });
     expect(candidates[1]).toMatchObject({ fieldId: 'item-3', autoAnnulled: true });
     const finalize = updates.findIndex((u) => u.set.status === 'needs_review');
-    expect(finalize).toBeGreaterThanOrEqual(updatesWhenResolving);
     expect(updates[finalize]?.set).toMatchObject({ status: 'needs_review', reviewPending: 2 });
   });
 
-  it('el lote termina needs_review aunque la etapa no resuelva nada', async () => {
+  it('en sombra finaliza el lote primero y lanza la etapa sin esperarla', async () => {
+    const { service, resolve, omr, resolveBatch, pipelineFor, updates } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 0 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [makePage({ identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 } })],
+    });
+    resolve.mockResolvedValueOnce(candidate());
+    pipelineFor.mockResolvedValue(SHADOW_PIPELINE);
+    let finalizedWhenResolving: boolean | null = null;
+    let settled = false;
+    resolveBatch.mockImplementation(() => {
+      finalizedWhenResolving = updates.some((u) => u.set.status === 'needs_review');
+      return new Promise<void>(() => undefined);
+    });
+
+    await runJob(service).then(() => {
+      settled = true;
+    });
+
+    expect(settled).toBe(true);
+    expect(finalizedWhenResolving).toBe(true);
+    expect(resolveBatch).toHaveBeenCalledWith(ORG_ID, BATCH_ID, SPEC, [], SHADOW_PIPELINE);
+    expect(updates.at(-1)?.set).toMatchObject({ status: 'needs_review' });
+  });
+
+  it('en sombra una falla de la etapa no cambia el estado del lote y se reporta', async () => {
+    const reportSpy = jest
+      .spyOn(observability, 'reportServerError')
+      .mockImplementation(() => undefined);
+    const { service, resolve, omr, resolveBatch, pipelineFor, updates } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 0 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [makePage({ identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 } })],
+    });
+    resolve.mockResolvedValueOnce(candidate());
+    pipelineFor.mockResolvedValue(SHADOW_PIPELINE);
+    const failure = new Error('falla en sombra');
+    resolveBatch.mockRejectedValue(failure);
+
+    await runJob(service);
+    await new Promise((resolveTick) => setImmediate(resolveTick));
+
+    expect(updates.some((u) => u.set.status === 'failed')).toBe(false);
+    expect(updates.at(-1)?.set).toMatchObject({ status: 'needs_review' });
+    expect(reportSpy).toHaveBeenCalledWith(
+      failure,
+      expect.objectContaining({ scope: 'mark_disambiguation.shadow', batchId: BATCH_ID }),
+    );
+    reportSpy.mockRestore();
+  });
+
+  it('con la desambiguación apagada no llama a la etapa y finaliza el lote', async () => {
     const { service, resolve, omr, resolveBatch, updates } = makeService([
       [CTX_ROW],
       [FILE_ROW],
@@ -1054,12 +1128,33 @@ describe('SheetScanService job — desambiguación de marcas con IA', () => {
 
     await runJob(service);
 
-    expect(resolveBatch).toHaveBeenCalledWith(ORG_ID, BATCH_ID, SPEC, []);
+    expect(resolveBatch).not.toHaveBeenCalled();
+    expect(updates.at(-1)?.set).toMatchObject({ status: 'needs_review' });
+  });
+
+  it('en live el lote termina needs_review aunque la etapa no resuelva nada', async () => {
+    const { service, resolve, omr, resolveBatch, pipelineFor, updates } = makeService([
+      [CTX_ROW],
+      [FILE_ROW],
+      [],
+      [{ state: 'read', count: 1 }],
+      [{ count: 0 }],
+    ]);
+    omr.enqueueResponse({
+      pages: [makePage({ identity: { mode: 'qr', raw: qrRaw(SHEET_1, 0), confidence: 1 } })],
+    });
+    resolve.mockResolvedValueOnce(candidate());
+    pipelineFor.mockResolvedValue(LIVE_PIPELINE);
+
+    await runJob(service);
+
+    expect(resolveBatch).toHaveBeenCalledWith(ORG_ID, BATCH_ID, SPEC, [], LIVE_PIPELINE);
     expect(updates.at(-1)?.set).toMatchObject({ status: 'needs_review' });
   });
 
   it('un lote rechazado por diseño no llama a la etapa', async () => {
-    const { service, omr, resolveBatch } = makeService([[CTX_ROW], [FILE_ROW]]);
+    const { service, omr, resolveBatch, pipelineFor } = makeService([[CTX_ROW], [FILE_ROW]]);
+    pipelineFor.mockResolvedValue(LIVE_PIPELINE);
     omr.enqueueResponse({
       pages: [
         makePage({
