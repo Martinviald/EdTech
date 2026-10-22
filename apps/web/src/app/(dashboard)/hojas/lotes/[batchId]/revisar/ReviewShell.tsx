@@ -199,8 +199,9 @@ function ConfirmedSummary({
   return (
     <div className="space-y-6">
       <AlertCallout tone="success" icon={CheckCircle2} title="Lote confirmado">
-        Las lecturas revisadas quedaron persistidas como resultados. Los pendientes que asumiste
-        quedaron registrados como decisión tuya.
+        Las lecturas revisadas quedaron persistidas como resultados. Las marcas dudosas que no
+        revisaste quedaron pendientes de corrección (no cuentan como 0): puedes corregirlas desde
+        este mismo lote.
       </AlertCallout>
 
       <Card>
@@ -212,7 +213,7 @@ function ConfirmedSummary({
               value={String(result.summary.responsesPersisted)}
             />
             <CounterItem
-              label="Pendientes asumidos"
+              label="Marcas pendientes de corrección"
               value={String(result.summary.assumedPending)}
             />
           </dl>

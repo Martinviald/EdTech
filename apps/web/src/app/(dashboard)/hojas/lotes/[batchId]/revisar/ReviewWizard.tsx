@@ -542,7 +542,9 @@ function FinalStep({
             )}
             {marksPending > 0 && (
               <li>
-                {marksPending} {marksPending === 1 ? 'marca dudosa' : 'marcas dudosas'} sin revisar.
+                {marksPending} {marksPending === 1 ? 'marca dudosa' : 'marcas dudosas'} sin revisar:
+                quedan pendientes de corrección (no cuentan como 0) y puedes corregirlas después
+                desde este lote.
               </li>
             )}
             {writtenPending > 0 && (
