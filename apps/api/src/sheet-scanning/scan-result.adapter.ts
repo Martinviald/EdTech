@@ -31,6 +31,7 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
     const answers: Record<string, string | null> = {};
     const annulledLabels: string[] = [];
     const pendingReadingLabels: string[] = [];
+    const pendingReviewLabels: string[] = [];
     const prescoredAnswers: Record<string, PrescoredAnswer> = {};
     const errors: AnswerSheetRowError[] = [];
 
@@ -61,11 +62,13 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
         continue;
       }
 
-      answers[mark.printedNumber] = null;
-
       if (mark.state === 'multiple' || mark.state === 'ambiguous') {
+        pendingReviewLabels.push(mark.printedNumber);
         errors.push(buildAmbiguousMarkError(scan.sequence, mark));
+        continue;
       }
+
+      answers[mark.printedNumber] = null;
     }
 
     rows.push({
@@ -75,6 +78,7 @@ export function toParserResult(scans: ConfirmedScanInput[]): ParserResult {
       answers,
       ...(annulledLabels.length > 0 ? { annulledLabels } : {}),
       ...(pendingReadingLabels.length > 0 ? { pendingReadingLabels } : {}),
+      ...(pendingReviewLabels.length > 0 ? { pendingReviewLabels } : {}),
       ...(Object.keys(prescoredAnswers).length > 0 ? { prescoredAnswers } : {}),
       errors,
     });
@@ -92,6 +96,6 @@ function buildAmbiguousMarkError(
     rowNumber,
     field: mark.printedNumber,
     code: 'ambiguous_mark',
-    message: `Marca ${kind} sin revisar en la pregunta ${mark.printedNumber}`,
+    message: `Marca ${kind} sin revisar en la pregunta ${mark.printedNumber}: quedó pendiente de revisión, sin puntaje`,
   };
 }

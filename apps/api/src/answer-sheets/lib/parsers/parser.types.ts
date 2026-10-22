@@ -36,6 +36,7 @@ export interface ParsedAnswerSheetRow {
   answers: Record<string, string | null>;
   annulledLabels?: string[];
   pendingReadingLabels?: string[];
+  pendingReviewLabels?: string[];
   prescoredAnswers?: Record<string, PrescoredAnswer>;
   errors: AnswerSheetRowError[];
 }

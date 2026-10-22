@@ -849,6 +849,82 @@ describe('AnswerSheetsService', () => {
       });
     });
 
+    it('deja pendiente de revisión, nunca en 0, una alternativa con marca dudosa sin revisar', async () => {
+      const captured = { responses: [] as unknown[][], assessmentResults: [] as unknown[][] };
+      const db = buildCapturingDb(captured, {
+        items: [
+          {
+            id: ITEM_1,
+            position: 1,
+            type: 'multiple_choice',
+            content: { correctKey: 'A', alternatives: mcqAlternatives('A') },
+            scoringConfig: { points: 1 },
+          },
+          {
+            id: ITEM_2,
+            position: 2,
+            type: 'multiple_choice',
+            content: { correctKey: 'B', alternatives: mcqAlternatives('B') },
+            scoringConfig: { points: 1 },
+          },
+        ],
+      });
+      const service = new AnswerSheetsService(db, store);
+      const entry = store.set({
+        orgId: ORG_A,
+        userId: USER_A_ID,
+        format: 'generic_csv',
+        instrumentId: INSTRUMENT_ID,
+        classGroupId: null,
+        assessmentId: null,
+        assessmentName: null,
+        columnMapping: null,
+        rows: [
+          {
+            rowNumber: 1,
+            studentRut: '12345678-5',
+            studentFullName: 'Juan Pérez',
+            answers: { '1': 'A' },
+            pendingReviewLabels: ['2'],
+            errors: [],
+          },
+        ],
+        detectedColumns: ['1', '2'],
+        warnings: [],
+      });
+
+      const result = await service.confirm(makeJwt(), {
+        previewToken: entry.previewToken,
+        createAssessment: true,
+        skipErrorRows: false,
+      });
+
+      expect(result.responsesCreated).toBe(2);
+      const byItem = new Map(
+        (
+          captured.responses.flat() as Array<{
+            itemId: string;
+            value: Record<string, unknown>;
+            isCorrect: boolean | null;
+            finalScore: string | null;
+            rawScore: string | null;
+          }>
+        ).map((r) => [r.itemId, r]),
+      );
+      expect(byItem.get(ITEM_1)).toMatchObject({ isCorrect: true, scoredBy: 'auto' });
+      expect(byItem.get(ITEM_2)).toMatchObject({
+        value: { answer: null, pendingMarkReview: true },
+        isCorrect: null,
+        rawScore: null,
+        finalScore: null,
+      });
+      const studentResult = (
+        captured.assessmentResults.flat() as Array<{ percentage: string; isComplete: boolean }>
+      )[0]!;
+      expect(Number(studentResult.percentage)).toBeCloseTo(100, 5);
+      expect(studentResult.isComplete).toBe(false);
+    });
+
     describe('respuestas leídas por recorte ya corregidas', () => {
       const prescored = {
         itemId: ITEM_3,

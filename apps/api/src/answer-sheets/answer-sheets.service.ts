@@ -437,12 +437,20 @@ export class AnswerSheetsService {
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
       const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
       const pendingReading = resolvePendingReadingPositions(labelIndex, row.pendingReadingLabels);
+      const pendingReview = resolvePendingReadingPositions(labelIndex, row.pendingReviewLabels);
       const prescored = resolvePrescoredAnswers(labelIndex, row.prescoredAnswers);
 
       for (const item of scopedItems) {
         if (pendingReading.has(item.position) || prescored.pendingPositions.has(item.position)) {
           responseRows.push(
             this.pendingResponseRow(studentId, item, { answer: null, pendingReading: true }),
+          );
+          continue;
+        }
+
+        if (pendingReview.has(item.position)) {
+          responseRows.push(
+            this.pendingResponseRow(studentId, item, { answer: null, pendingMarkReview: true }),
           );
           continue;
         }
