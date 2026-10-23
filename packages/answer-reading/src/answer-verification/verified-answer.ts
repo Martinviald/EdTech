@@ -65,6 +65,13 @@ export interface AnswerVerificationStep {
   readonly to: string;
 }
 
+export interface VerifiedCandidate {
+  readonly canonical: string;
+  readonly answerText: string;
+  readonly strength: AnswerStrength;
+  readonly crossSupport: CrossSupport;
+}
+
 interface VerifiedBase {
   readonly ruleset: string;
   readonly trace: readonly AnswerVerificationStep[];
@@ -82,8 +89,8 @@ export type VerifiedAnswer =
     })
   | (VerifiedBase & {
       readonly status: 'ambiguous';
-      /** Candidatos canónicos dentro del espacio: la entrada del desempate. */
-      readonly candidates: readonly string[];
+      /** Candidatos dentro del espacio que se desprenden de lo escrito: la entrada del desempate. */
+      readonly candidates: readonly VerifiedCandidate[];
     })
   | (VerifiedBase & { readonly status: 'blank'; readonly blankEvidence: BlankEvidence })
   | (VerifiedBase & {
