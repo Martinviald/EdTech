@@ -550,7 +550,12 @@ Resultado simulado: §1.1 (verificado sobre los resultados guardados de la PoC).
 ## 13. Preguntas abiertas (no bloquean)
 
 1. **Recorte nativo más grande:** ¿vale la pena que el OMR emita un recorte de mayor resolución (por ejemplo 300 px de alto desde la página rectificada) para Jev, en vez de ampliar en el adaptador? Se puede medir en sombra con un subconjunto.
-2. ~~**Interruptor para el colegio:**~~ Resuelto (2026-10-23): **no**. El colegio no configura nada y no hay pantalla ni toggle en Configuración. La operación se maneja con `decision_settings` y el interruptor de emergencia (§14).
+2. **Pendientes conocidos (2026-10-23):**
+   - `sharp` no se ha probado en la imagen Docker. Si no carga, la API no se cae, pero Jev queda `unavailable` y **todas** las dudosas van a revisión sin aviso visible. Hay que verificarlo en el primer deploy.
+   - Las features pasaron a `live` sin el periodo de sombra. La auditoría del 5 % es la única medición de errores: hay que revisarla (`scripts/decisions/run-mark-calibration.ts`) hasta juntar ≥ 300 casos de ≥ 3 colegios, y entonces recalibrar §7.2.
+   - El presupuesto de IA por org no cuenta estas llamadas (~US$0,0001 por marca).
+   - Queda una carrera menor entre `confirmBatch` y "Corregir" sobre la misma evaluación. Los locks de la corrección no se han corrido contra un Postgres real, y "Corregir" no se ha probado en navegador.
+3. ~~**Interruptor para el colegio:**~~ Resuelto (2026-10-23): **no**. El colegio no configura nada y no hay pantalla ni toggle en Configuración. La operación se maneja con `decision_settings` y el interruptor de emergencia (§14).
 
 ## 14. Operación: default, overrides e interruptor de emergencia (runbook)
 
@@ -594,5 +599,15 @@ Las filas son un override **interno** (operaciones), no una configuración del c
   ```
 
   El secreto llega a App Runner como variable de entorno, así que **requiere redeploy** (reinicia la API). Si necesitas apagar una sola organización, o no puedes esperar el deploy, usa las filas `off` de §14.2: rigen en ≤ 30 s y sin deploy.
+- **Apagado global sin deploy (primer paso en una emergencia):** inserta las dos filas **globales** (`org_id = NULL`) en `off`, con el rol admin (`DATABASE_ADMIN_URL`; RLS no deja a la API escribir filas globales). Rigen en ≤ 30 s para todas las organizaciones que no tengan fila propia (una fila de org manda sobre la global). Después, si hace falta, activa el secreto.
+
+  ```sql
+  INSERT INTO decision_settings (org_id, feature, engine, model, mode, thresholds)
+  VALUES
+    (NULL, 'mark_disambiguation_jev', 'jev', 'jev-1.14.0', 'off', '{}'),
+    (NULL, 'mark_disambiguation_openai', 'openai', 'gpt-6-luna', 'off', '{}')
+  ON CONFLICT (feature) WHERE org_id IS NULL
+  DO UPDATE SET mode = EXCLUDED.mode, updated_at = now();
+  ```
 - Para volver a prender: `sst secret set MarkDisambiguationAiDisabled false --stage <stage>` y redeploy.
 - En local: `MARK_DISAMBIGUATION_AI_DISABLED=true` en el `.env` de la raíz y reinicia la API.

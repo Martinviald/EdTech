@@ -71,7 +71,11 @@ respondió, latencia, tokens y costo.
    `apps/api/src/remedial/judge-decision.ts`), para que la calibración use las mismas.
 3. Llama a `shadow()` junto al sistema actual, activa `shadow` con una fila en
    `decision_settings` y mide con `scripts/decisions/`.
-4. Pasa a `live` solo con umbrales calibrados, y guárdalos en `thresholds`.
+4. Pasa a `live` solo con umbrales calibrados. Cuando la funcionalidad es para todos los
+   colegios, el `live` va en el **default de código** (`DECISION_FEATURE_DEFAULTS`), no en
+   filas por org: el colegio no configura nada (CLAUDE.md §8.4). Las filas quedan como
+   override interno, y conviene sumar un interruptor de emergencia por env. Ejemplo:
+   desambiguación de marcas, §14 de `docs/diseno-desambiguacion-marcas-ia.md`.
 
 ## Fuera de la API
 

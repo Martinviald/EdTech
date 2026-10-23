@@ -266,6 +266,15 @@ Cada módulo contiene: `*.module.ts`, `*.controller.ts`, `*.service.ts`, `dto/` 
 - El etiquetado IA de ítems (H3.11) es sugerencia. Un administrador siempre confirma antes de guardar.
 - Los jobs de IA (`ai_grading_jobs`) corren de forma asíncrona. Nunca bloquean el event loop transaccional.
 
+### 8.4 Ocultar Complejidad
+
+- **Nuestra misión es ocultar complejidad.** A los ojos del colegio, la plataforma resuelve su problema de la forma más simple posible. Por detrás corre toda la complejidad: modelos de IA, consenso, umbrales, auditorías.
+- Las capacidades nuevas llegan **prendidas por default para todas las orgs**, con defaults sensatos en código (p. ej. `DECISION_FEATURE_DEFAULTS`). No se agregan toggles en Ajustes para lo que el colegio no tiene por qué decidir: cada ajuste le suma carga cognitiva, capacitación y trabajo.
+- Para emergencias existe un **kill switch interno** (variable de entorno operada por el equipo). Los overrides por org (p. ej. filas de `decision_settings`) son internos e invisibles para el colegio.
+- Cómo convive con §8.3: la IA puede resolver sola cuando se guarda la evidencia de lo que decidió (p. ej. `sheet_scan_marks.ai_resolution`), una auditoría mide sus errores y un humano puede corregir después ("Corregir").
+- Ejemplo: la IA para alternativas dudosas corrige sola en todas las orgs (`docs/diseno-desambiguacion-marcas-ia.md`). El colegio no la configura; el profesor solo ve cuándo resolvió una marca.
+- Pregunta de diseño: *¿el colegio necesita saber que esto existe?* Si la respuesta es no, no se le expone la configuración.
+
 ---
 
 ## 9. Convenciones de Nombres
