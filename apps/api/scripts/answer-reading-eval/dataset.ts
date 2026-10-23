@@ -14,6 +14,7 @@ import {
   toScoringOutcome,
   type TranscriptionImage,
 } from '@soe/answer-reading';
+import { answerSpaceSchema } from '@soe/types';
 import type {
   ItemContent,
   NormalizedAnswer,
@@ -70,6 +71,7 @@ const injectedReadingSchema = z
   .strict();
 
 export const datasetSampleSchema = evalSampleSchema.extend({
+  answerSpace: answerSpaceSchema.optional(),
   label: datasetLabelSchema,
   injectedReading: injectedReadingSchema.optional(),
   item: datasetItemSchema.optional(),

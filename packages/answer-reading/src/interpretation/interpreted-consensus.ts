@@ -187,7 +187,13 @@ export function planInterpretedConsensus(input: InterpretedPlanInput): Interpret
   const verified = readers.map((reader, index) => {
     if (reader.reading === null) return null;
     const other = readers.find((_, otherIndex) => otherIndex !== index)?.reading ?? null;
-    return verify({ reading: reader.reading, otherReading: other, format, space, ink: ink ?? null });
+    return verify({
+      reading: reader.reading,
+      otherReading: other,
+      format,
+      space,
+      ink: ink ?? null,
+    });
   });
   const agreement = agreementOf(readers, verified);
   if (agreement) return { readers, verified, agreement, tiebreakCandidates: [], reasons: [] };

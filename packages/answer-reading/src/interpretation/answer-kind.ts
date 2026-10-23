@@ -16,7 +16,10 @@ export type AnswerKindGroup =
   | 'matching'
   | 'short';
 
-export function answerKindGroup(format: ResponseFormat, space: AnswerSpace | null): AnswerKindGroup {
+export function answerKindGroup(
+  format: ResponseFormat,
+  space: AnswerSpace | null,
+): AnswerKindGroup {
   if (space?.kind === 'matching') return 'matching';
   if (space?.kind === 'option_set' && !space.ordered) return 'option_set';
   switch (format.kind) {

@@ -16,7 +16,12 @@ export const INTERPRETATION_PROPERTY_ORDER = [
   'confianza',
 ] as const;
 
-export const INTERPRETATION_MODEL_STATES = ['respondida', 'ambigua', 'en_blanco', 'ilegible'] as const;
+export const INTERPRETATION_MODEL_STATES = [
+  'respondida',
+  'ambigua',
+  'en_blanco',
+  'ilegible',
+] as const;
 export type InterpretationModelState = (typeof INTERPRETATION_MODEL_STATES)[number];
 
 export interface InterpretationJsonSchema {
@@ -56,13 +61,12 @@ export const interpretationOutputSchema = z.object({
 });
 export type InterpretationOutput = z.infer<typeof interpretationOutputSchema>;
 
-const STATE_BY_MODEL_STATE: Readonly<Record<InterpretationModelState, InterpretedReadingState>> =
-  {
-    respondida: 'answered',
-    ambigua: 'ambiguous',
-    en_blanco: 'blank',
-    ilegible: 'illegible',
-  };
+const STATE_BY_MODEL_STATE: Readonly<Record<InterpretationModelState, InterpretedReadingState>> = {
+  respondida: 'answered',
+  ambigua: 'ambiguous',
+  en_blanco: 'blank',
+  ilegible: 'illegible',
+};
 
 export function toInterpretedReading(output: InterpretationOutput): InterpretedReading {
   return {

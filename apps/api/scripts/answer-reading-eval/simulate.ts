@@ -583,17 +583,36 @@ class UnitRunner {
     const image = prepared.image;
     const { keyInput, rendered } = interpretationKeyInputFor(prepared, reader, repetition);
     const cacheKey = readingCacheKey(keyInput);
-    const cached = await this.options.cache.get<InterpretedOutputOf<InterpretationResult>>(cacheKey);
+    const cached =
+      await this.options.cache.get<InterpretedOutputOf<InterpretationResult>>(cacheKey);
     if (cached) {
-      return { reader, cacheKey, fromCache: true, cacheSource: cached.source, result: cached.result };
+      return {
+        reader,
+        cacheKey,
+        fromCache: true,
+        cacheSource: cached.source,
+        result: cached.result,
+      };
     }
     const transcriber = this.options.transcriberFor(reader);
     if (transcriber?.interpret === undefined || image === null) {
-      return { reader, cacheKey, fromCache: false, cacheSource: null, result: failedResult(reader, 'no_transcriber') };
+      return {
+        reader,
+        cacheKey,
+        fromCache: false,
+        cacheSource: null,
+        result: failedResult(reader, 'no_transcriber'),
+      };
     }
     const estimate = this.gate.reserve(reader);
     if (estimate === null) {
-      return { reader, cacheKey, fromCache: false, cacheSource: null, result: failedResult(reader, 'budget_exceeded') };
+      return {
+        reader,
+        cacheKey,
+        fromCache: false,
+        cacheSource: null,
+        result: failedResult(reader, 'budget_exceeded'),
+      };
     }
     let result: InterpretationResult;
     try {
@@ -610,7 +629,13 @@ class UnitRunner {
     }
     this.gate.settle(reader, estimate, result.costUsd);
     await this.options.cache.put(
-      cachedReadingEntry(cacheKey, keyInput, rendered.prompt, result, this.options.cacheSource ?? 'api'),
+      cachedReadingEntry(
+        cacheKey,
+        keyInput,
+        rendered.prompt,
+        result,
+        this.options.cacheSource ?? 'api',
+      ),
     );
     return { reader, cacheKey, fromCache: false, cacheSource: null, result };
   }
@@ -648,7 +673,15 @@ class UnitRunner {
       };
     }
     if (simulation.decider === null || image === null) {
-      return { called: false, fromCache: false, missing: true, choice: null, accepted: false, costUsd: 0, latencyMs: 0 };
+      return {
+        called: false,
+        fromCache: false,
+        missing: true,
+        choice: null,
+        accepted: false,
+        costUsd: 0,
+        latencyMs: 0,
+      };
     }
     const outcome = await simulation.decider.decide({
       state: decision.state,
@@ -965,11 +998,16 @@ function scoredOutcome(
   };
 }
 
+interface CostedRun {
+  readonly role: ReaderRole;
+  readonly result: { readonly latencyMs: number; readonly costUsd: number | null };
+}
+
 function unitRecord(
   planned: PlannedSample & { route: ResolvedRouteWithFallback },
   repetition: number,
   result: ConsensusResult,
-  runs: readonly ReaderRun[],
+  runs: readonly CostedRun[],
   readerThresholdApplied: boolean,
   usedTiebreak: boolean,
   extras: UnitExtras,
@@ -1151,13 +1189,188 @@ function withReaderThresholds(
   };
 }
 
+const INTERPRETED_READING_STATES: Readonly<Record<InterpretedReading['state'], ReadingState>> = {
+  answered: 'answered',
+  ambiguous: 'multiple_answers',
+  blank: 'blank',
+  illegible: 'illegible',
+};
+
+function interpretedReadingRecord(
+  run: InterpretationRun,
+  prepared: PreparedSample,
+  repetition: number,
+): ReadingRecord {
+  const { result, reader } = run;
+  const { sample, truth, group } = prepared;
+  const reading =
+    result.status === 'ok' && result.output ? toInterpretedReading(result.output) : null;
+  const answer =
+    reading === null
+      ? null
+      : agreedValue(
+          reading.state === 'blank'
+            ? { kind: 'blank', blankEvidence: 'unverified' }
+            : {
+                kind: 'answer',
+                canonical: reading.answer,
+                answerText: reading.answer,
+                via: 'consensus',
+                strength: 'direct',
+                crossSupport: 'no_other',
+              },
+          sample.format,
+        );
+  const exact =
+    group !== 'short' || answer === null
+      ? null
+      : answer.state === truth.state &&
+        (truth.state !== 'answered' ||
+          (answer.canonical !== null && answer.canonical === truth.canonical));
+  return {
+    sampleId: sample.id,
+    repetition,
+    group,
+    formatKind: sample.format.kind,
+    readerKey: reader.key,
+    provider: reader.provider,
+    model: reader.model,
+    family: reader.family,
+    promptRef: reader.promptRef,
+    hints: reader.hints,
+    role: 'primary',
+    cacheKey: run.cacheKey,
+    fromCache: run.fromCache,
+    cacheSource: run.cacheSource,
+    status: result.status,
+    errorCode: result.errorCode,
+    state: reading ? INTERPRETED_READING_STATES[reading.state] : null,
+    literal: reading?.answer ?? null,
+    parts: null,
+    canonical: answer?.canonical ?? null,
+    confidence: reading?.confidence ?? null,
+    reviewRequested: null,
+    exact,
+    fidelity: null,
+    costUsd: result.costUsd,
+    latencyMs: result.latencyMs,
+  };
+}
+
+async function runInterpretedUnit(
+  runner: UnitRunner,
+  planned: PlannedSample & { route: ResolvedRouteWithFallback },
+  repetition: number,
+  thresholds: ReaderMinConfidence | null,
+  simulation: InterpretationSimulation,
+): Promise<{ unit: UnitRecord; readings: ReadingRecord[] }> {
+  const { prepared } = planned;
+  const { sample } = prepared;
+  const route = withReaderThresholds(planned.route, thresholds);
+  const policy: ConsensusPolicy = { ...route.policy, auditSampleRate: 0 };
+  const space: AnswerSpace = sample.answerSpace ?? { kind: 'open' };
+  const runs = await Promise.all(
+    route.readers.map((reader) => runner.interpret(prepared, reader, repetition)),
+  );
+  const readers: InterpretedReaderResult[] = runs.map((run, index) => ({
+    readingId: `${run.reader.key}#primary#${index}`,
+    provider: run.reader.provider,
+    family: run.reader.family,
+    minConfidence: run.reader.minConfidence ?? policy.minConfidence,
+    reading:
+      run.result.status === 'ok' && run.result.output
+        ? toInterpretedReading(run.result.output)
+        : null,
+  }));
+  const plan = planInterpretedConsensus({
+    readers,
+    verify: simulation.verify,
+    format: sample.format,
+    space,
+  });
+  let agreement = plan.agreement;
+  let decision: DecisionRecord | null = null;
+  if (agreement === null && policy.decisionTiebreak && plan.tiebreakCandidates.length > 0) {
+    decision = await runner.decide(prepared, plan.tiebreakCandidates, space, simulation);
+    agreement = applyDecisionTiebreak(plan, decision.choice, policy.decisionTiebreak);
+    decision = { ...decision, accepted: agreement !== null };
+  }
+  const value = agreement ? agreedValue(agreement, sample.format) : null;
+  const scoring = agreement?.kind === 'answer' && value ? prepared.scorer.outcome(value) : null;
+  const acceptance = simulation.decideAcceptance({
+    verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
+    agreement,
+    scoring,
+    readings: readers.flatMap((reader) => (reader.reading ? [reader.reading] : [])),
+  });
+  const consensus = finalizeInterpretedConsensus({
+    plan,
+    agreement,
+    value,
+    scoring,
+    decision: acceptance,
+    policy,
+    readingKey: `${sample.id}#${repetition}`,
+  });
+  const verified =
+    acceptance.action === 'verify_incorrect' && agreement !== null
+      ? await verifyUnit(
+          runner,
+          prepared,
+          policy,
+          consensus,
+          agreedConsensusReadings(plan, agreement),
+          repetition,
+        )
+      : { result: consensus, record: null };
+  const unit = unitRecord(
+    planned,
+    repetition,
+    verified.result,
+    runs.map((run) => ({ role: 'primary' as const, result: run.result })),
+    false,
+    decision?.accepted ?? false,
+    {
+      injected: false,
+      auditor: null,
+      verifier: verified.record,
+      beforeVerifier: verified.record ? consensus : null,
+    },
+  );
+  return {
+    unit: {
+      ...unit,
+      costUsd: unit.costUsd + (decision?.costUsd ?? 0),
+      latencyMs: unit.latencyMs + (decision?.latencyMs ?? 0),
+      interpretation: {
+        verified: plan.verified.map((entry) => entry?.status ?? null),
+        agreementVia: agreement?.kind === 'answer' ? agreement.via : agreement ? 'consensus' : null,
+        agreementStrength: agreement?.kind === 'answer' ? agreement.strength : null,
+        crossSupport: agreement?.kind === 'answer' ? agreement.crossSupport : null,
+        acceptance: acceptance.action,
+        decision,
+      },
+    },
+    readings: runs.map((run) => interpretedReadingRecord(run, prepared, repetition)),
+  };
+}
+
 async function runUnit(
   runner: UnitRunner,
   planned: PlannedSample & { route: ResolvedRouteWithFallback },
   repetition: number,
   thresholds: ReaderMinConfidence | null,
   injectedEscalation: boolean,
+  interpretation: InterpretationSimulation | null,
 ): Promise<{ unit: UnitRecord; readings: ReadingRecord[] }> {
+  if (planned.route.policy.readMode === 'interpreted') {
+    if (!interpretation) {
+      throw new Error(
+        'La ruta es de lectura interpretada: falta configurar verifyAnswer y la política',
+      );
+    }
+    return runInterpretedUnit(runner, planned, repetition, thresholds, interpretation);
+  }
   const { prepared } = planned;
   const route = withReaderThresholds(planned.route, thresholds);
   const basePolicy: ConsensusPolicy = { ...route.policy, auditSampleRate: 0 };
@@ -1270,6 +1483,7 @@ export async function runSimulation(options: SimulationOptions): Promise<Simulat
         job.rep,
         options.readerMinConfidence,
         options.injectedEscalation ?? false,
+        options.interpretation ?? null,
       );
       units.push(outcome.unit);
       readings.push(...outcome.readings);

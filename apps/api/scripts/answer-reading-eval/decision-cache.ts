@@ -1,12 +1,7 @@
 import { createHash } from 'node:crypto';
 import { access, appendFile, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type {
-  ChoiceAnswer,
-  DecisionQuestions,
-  DecisionState,
-  DecisionUsage,
-} from '@soe/decisions';
+import type { ChoiceAnswer, DecisionQuestions, DecisionState, DecisionUsage } from '@soe/decisions';
 import { CALL_LEDGER_FILE, canonicalJson, type CacheMode } from './reading-cache';
 
 export interface DecisionCacheKeyInput {

@@ -354,7 +354,9 @@ export function renderInterpretationPrompt(
     throw new Error(`El prompt ${reader.promptRef} no interpreta el formato ${format.kind}`);
   }
   const outputSchema = interpretationJsonSchema();
-  const variables: PromptVariables = { answerKind: readingAnswerKind(format, context.space ?? null) };
+  const variables: PromptVariables = {
+    answerKind: readingAnswerKind(format, context.space ?? null),
+  };
   if (context.gradeName) variables.gradeName = context.gradeName;
   return {
     prompt: renderPrompt(prompt, variables, outputSchema),

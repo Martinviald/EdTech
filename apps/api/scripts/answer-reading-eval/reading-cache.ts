@@ -122,9 +122,12 @@ export class ReadingCache {
     }
   }
 
-  async put<TOutput>(entry: CachedReading<TOutput>): Promise<boolean> {
+  async put<TOutput>(
+    entry: CachedReading<TOutput>,
+    options: { readonly ledger?: boolean } = {},
+  ): Promise<boolean> {
     if (this.mode === 'off' || this.dir === null) return false;
-    await this.appendToLedger(entry);
+    if (options.ledger !== false) await this.appendToLedger(entry);
     if (entry.result.status !== 'ok') return false;
     const path = this.pathFor(entry.key);
     await mkdir(join(this.dir, entry.key.slice(0, 2)), { recursive: true });
