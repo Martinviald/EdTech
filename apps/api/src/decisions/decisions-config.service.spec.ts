@@ -6,7 +6,7 @@ const ORG_ID = '00000000-0000-0000-0000-0000000000aa';
 
 interface SettingRow {
   orgId: string | null;
-  engine: 'jev';
+  engine: 'jev' | 'openai';
   model: string;
   mode: 'off' | 'shadow' | 'live';
   thresholds: unknown;
@@ -33,6 +33,51 @@ describe('DecisionsConfigService', () => {
     const cfg = await new DecisionsConfigService(db).resolve(ORG_ID, 'remedial_judge');
 
     expect(cfg).toEqual({ ...DECISION_FEATURE_DEFAULTS.remedial_judge, source: 'default' });
+  });
+
+  it('sin filas, las dos features de marcas resuelven a live con los umbrales por defecto', async () => {
+    const service = new DecisionsConfigService(makeDb([]).db);
+
+    const jev = await service.resolve(ORG_ID, 'mark_disambiguation_jev');
+    const openai = await service.resolve(ORG_ID, 'mark_disambiguation_openai');
+
+    expect(jev).toEqual({
+      engine: 'jev',
+      model: 'jev-1.14.0',
+      mode: 'live',
+      thresholds: { respuesta: { agree: 0.6, solo: 0.85, unsure: 0.5 } },
+      source: 'default',
+    });
+    expect(openai).toEqual({
+      engine: 'openai',
+      model: 'gpt-6-luna',
+      mode: 'live',
+      thresholds: { respuesta: { agree: 0.5, solo: 0.8, unsure: 0.5 } },
+      source: 'default',
+    });
+  });
+
+  it('sin filas, las otras features de decisiones siguen en off', async () => {
+    const cfg = await new DecisionsConfigService(makeDb([]).db).resolve(ORG_ID, 'remedial_judge');
+
+    expect(cfg.mode).toBe('off');
+  });
+
+  it('con una fila de la org, la fila manda sobre el default de marcas', async () => {
+    const thresholds = { respuesta: { agree: 0.7, solo: 0.9, unsure: 0.55 } };
+    const { db } = makeDb([
+      { orgId: ORG_ID, engine: 'openai', model: 'gpt-6-luna', mode: 'off', thresholds },
+    ]);
+
+    const cfg = await new DecisionsConfigService(db).resolve(ORG_ID, 'mark_disambiguation_openai');
+
+    expect(cfg).toEqual({
+      engine: 'openai',
+      model: 'gpt-6-luna',
+      mode: 'off',
+      thresholds,
+      source: 'org',
+    });
   });
 
   it('marca el origen global u org según la fila encontrada', async () => {

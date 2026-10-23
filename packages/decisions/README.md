@@ -88,8 +88,8 @@ const result = await engine.evaluate({
 ```
 
 (\*) Jev 1.13/1.14 acepta imágenes PNG o JPEG en fase experimental. El adaptador solo las
-envía con `new JevDecisionEngine({ experimentalImages: true })` (en la API,
-`JEV_EXPERIMENTAL_IMAGES=true`): manda el header `TypeSafe-Danger-Zone-Images`, inserta la
+envía con `new JevDecisionEngine({ experimentalImages: true })` (en la API, prendido salvo
+`JEV_EXPERIMENTAL_IMAGES=false`): manda el header `TypeSafe-Danger-Zone-Images`, inserta la
 referencia en la clave reservada `imagen` del estado (o `imagenes`), descarga las `{ url }` y
 ajusta cada imagen a las restricciones de Jev (lados de 280 a 1568 px; ver
 `src/images/fit-image.ts`: el lado menor queda en 300 px, Lanczos, JPEG 92). El reescalado vive
