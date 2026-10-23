@@ -25,6 +25,10 @@ export const REVIEW_REASON_LABELS: Record<ReviewReason, string> = {
   verifier_flagged: 'El verificador cree que podría ser la respuesta correcta mal leída',
   verifier_failed: 'El verificador no pudo revisar esta respuesta: confirma qué escribió el alumno',
   scoring_changed: 'La clave cambió después de la lectura: confirma qué escribió el alumno',
+  answer_out_of_space: 'La respuesta leída no es una de las opciones de la pregunta',
+  answer_not_derivable: 'La respuesta interpretada no calza con lo escrito',
+  blank_unverified: 'Se leyó en blanco, pero no hay certeza de que la casilla esté vacía',
+  selection_incorrect: 'Lo escrito trae más de una respuesta y la elegida resultó incorrecta',
 };
 
 export const REVIEW_MODE_LABELS: Record<ReviewMode, string> = {

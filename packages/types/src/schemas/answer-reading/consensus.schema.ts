@@ -130,6 +130,10 @@ export const REVIEW_REASONS = [
   'verifier_flagged',
   'verifier_failed',
   'scoring_changed',
+  'answer_out_of_space',
+  'answer_not_derivable',
+  'blank_unverified',
+  'selection_incorrect',
 ] as const;
 export type ReviewReason = (typeof REVIEW_REASONS)[number];
 export const reviewReasonSchema = z.enum(REVIEW_REASONS);
@@ -161,6 +165,10 @@ export const REVIEW_MODE_BY_REASON: Record<ReviewReason, ReviewMode> = {
   verifier_flagged: 'reading',
   verifier_failed: 'reading',
   scoring_changed: 'reading',
+  answer_out_of_space: 'reading',
+  answer_not_derivable: 'reading',
+  blank_unverified: 'reading',
+  selection_incorrect: 'reading',
   undecidable: 'grading',
   unparsed_format: 'grading',
   policy_requires_review: 'grading',

@@ -25,3 +25,4 @@ export * from './transcriber';
 export * from './fake/fake-transcriber';
 export * from './eval';
 export * from './answer-verification/verified-answer';
+export * from './answer-verification/acceptance';

@@ -75,6 +75,8 @@ export type VerifiedAnswer =
       readonly status: 'unique';
       /** Valor canónico: lo que se compara en el consenso y entra a la corrección. */
       readonly canonical: string;
+      /** La respuesta escrita en la sintaxis del formato: lo que recibe la corrección. */
+      readonly answerText: string;
       readonly strength: AnswerStrength;
       readonly crossSupport: CrossSupport;
     })
