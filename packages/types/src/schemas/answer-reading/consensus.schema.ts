@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { normalizedAnswerSchema } from './normalized-answer.schema';
-import { readerSpecSchema } from './reader.schema';
+import { VISION_PROVIDERS, readerSpecSchema } from './reader.schema';
 
 // Política de consenso y resultado de la decisión (diseño §8).
 // `incorrectVerifier` (opcional, etapa 1 T4): lector con un prompt de propósito
@@ -53,6 +53,21 @@ export const readingAuditorSchema = z
   })
   .strict();
 export type ReadingAuditor = z.infer<typeof readingAuditorSchema>;
+// Modo de lectura: `literal` transcribe y normaliza; `interpreted` pide al lector la
+// respuesta que el alumno quiso dar y la verifica en código (diseño v5).
+export const READ_MODES = ['literal', 'interpreted'] as const;
+export type ReadMode = (typeof READ_MODES)[number];
+
+// Desempate con el motor de decisiones (función `answer_reading_tiebreak`): elige entre
+// las respuestas de los lectores y solo vale si coincide con el lector de `agreeWithProvider`.
+export const decisionTiebreakSchema = z
+  .object({
+    minConfidence: z.number().min(0).max(1),
+    agreeWithProvider: z.enum(VISION_PROVIDERS),
+  })
+  .strict();
+export type DecisionTiebreak = z.infer<typeof decisionTiebreakSchema>;
+
 export const AUTO_ACCEPT_OUTCOMES = ['correct', 'incorrect'] as const;
 export type AutoAcceptOutcome = (typeof AUTO_ACCEPT_OUTCOMES)[number];
 
@@ -72,6 +87,8 @@ export const consensusPolicySchema = z
     tiebreakAgreeWith: z.enum(TIEBREAK_AGREE_WITH).optional(),
     incorrectVerifier: readerSpecSchema.optional(),
     readingAuditor: readingAuditorSchema.optional(),
+    readMode: z.enum(READ_MODES).optional(),
+    decisionTiebreak: decisionTiebreakSchema.optional(),
     autoAccept: z.boolean(),
     autoAcceptOutcomes: z.array(z.enum(AUTO_ACCEPT_OUTCOMES)),
     auditSampleRate: z.number().min(0).max(1),
