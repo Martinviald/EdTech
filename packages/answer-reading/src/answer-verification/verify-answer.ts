@@ -39,6 +39,8 @@ interface Canonicalized {
 interface SpaceAdapter {
   canonicalize(proposal: string): Canonicalized;
   derive(literal: string, value: SpaceValue): Derivation;
+  /** Valores que lo escrito nombra cuando la respuesta propuesta no existe en el espacio. */
+  rescue?(literal: string): SpaceValue[];
 }
 
 const STRENGTH_ORDER: Record<AnswerStrength, number> = { direct: 0, inferred: 1, selection: 2 };
@@ -143,6 +145,13 @@ function matchingAdapter(space: Extract<AnswerSpace, { kind: 'matching' }>): Spa
         };
       }
       return { values: [], outOfSpace: true };
+    },
+    rescue(literal) {
+      return textMentions(literal, space.codes).map((option) => ({
+        canonical: option.code,
+        answerText: option.code,
+        steps: [step('matching_option_text', option.text ?? '', option.code)],
+      }));
     },
     derive(literal, value) {
       const byCode = codeMentions(literal, codes);
@@ -386,9 +395,16 @@ export function verifyAnswer(input: AnswerVerificationInput): VerifiedAnswer {
       if (!inSpace.has(value.canonical)) inSpace.set(value.canonical, value);
     }
   }
+  const otherLiteral = otherReading?.literal.trim() ?? '';
+  if (inSpace.size === 0 && adapter.rescue) {
+    for (const literal of [reading.literal, otherLiteral]) {
+      for (const value of adapter.rescue(literal)) {
+        if (!inSpace.has(value.canonical)) inSpace.set(value.canonical, value);
+      }
+    }
+  }
   if (inSpace.size === 0) return { ...base, status: 'out_of_space', trace: [] };
 
-  const otherLiteral = otherReading?.literal.trim() ?? '';
   const candidates: (VerifiedCandidate & { steps: AnswerVerificationStep[] })[] = [];
   for (const value of inSpace.values()) {
     const own = adapter.derive(reading.literal, value);

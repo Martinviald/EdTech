@@ -112,7 +112,14 @@ describe('verifyAnswer · pareo', () => {
       ),
     );
     expect(result.canonical).toBe('A.1');
-    expect(result.strength).not.toBe('direct');
+    expect(result.strength).toBe('selection');
+    expect(result.trace.map((entry) => entry.rule)).toContain('matching_option_text');
+  });
+
+  it('un código fuera del espacio sin texto de opción sigue fuera', () => {
+    expect(verify(reading('B3', 'B.3'), SHORT, ELECTRONS, reading('B.3', 'B.3')).status).toBe(
+      'out_of_space',
+    );
   });
 
   it('una letra sola no existe en el espacio', () => {
