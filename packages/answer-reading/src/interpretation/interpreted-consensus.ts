@@ -245,6 +245,35 @@ export function applyDecisionTiebreak(
   };
 }
 
+/**
+ * Corrección en un espacio cerrado (pareo, conjunto): la clave pasa por la misma verificación
+ * que las lecturas y se compara en el mismo canónico (`A2`, `a.2` y «Esófago» son A.2). Así una
+ * opción válida distinta de la clave es incorrecta de forma determinística, en vez de
+ * indecidible. `null` si el espacio es abierto o la clave no se pudo llevar al espacio.
+ */
+export function closedSpaceScoring(
+  agreement: AcceptanceAgreement | null,
+  acceptedAnswers: readonly string[],
+  verify: VerifyAnswer,
+  format: ResponseFormat,
+  space: AnswerSpace,
+): ScoringOutcome | null {
+  if (agreement?.kind !== 'answer' || space.kind === 'open') return null;
+  const keyCanonicals = new Set(
+    acceptedAnswers.flatMap((answer) => {
+      const verified = verify({
+        reading: { literal: answer, state: 'answered', answer, candidates: [], confidence: 1 },
+        otherReading: null,
+        format,
+        space,
+      });
+      return verified.status === 'unique' ? [verified.canonical] : [];
+    }),
+  );
+  if (keyCanonicals.size === 0) return null;
+  return keyCanonicals.has(agreement.canonical) ? 'correct' : 'incorrect';
+}
+
 /** Valor normalizado de lo acordado, con el mismo normalizador que el modo literal. */
 export function agreedValue(
   agreement: AcceptanceAgreement,

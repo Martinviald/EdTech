@@ -7,6 +7,7 @@ import {
   agreedReadingOf,
   agreedValue,
   applyDecisionTiebreak,
+  closedSpaceScoring,
   decideAcceptance,
   finalizeInterpretedConsensus,
   planInterpretedConsensus,
@@ -355,7 +356,16 @@ export class CropReadingService {
     });
     const agreement = plan.agreement ?? (await this.tiebreak(scope, policy, plan, space));
     const value = agreement ? agreedValue(agreement, task.format) : null;
-    const scoring = agreement?.kind === 'answer' && value ? scoreOf(value) : null;
+    const scoring =
+      agreement?.kind === 'answer' && value
+        ? (closedSpaceScoring(
+            agreement,
+            acceptedAnswersOf({ type: task.item.type, content: task.item.content }),
+            verifyAnswer,
+            task.format,
+            space,
+          ) ?? scoreOf(value))
+        : null;
     const acceptance = decideAcceptance({
       verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
       agreement,

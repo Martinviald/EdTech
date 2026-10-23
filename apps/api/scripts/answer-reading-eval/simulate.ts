@@ -4,6 +4,7 @@ import {
   agreedReadingOf,
   agreedValue,
   applyDecisionTiebreak,
+  closedSpaceScoring,
   finalizeInterpretedConsensus,
   isInterpretationPromptFor,
   planInterpretedConsensus,
@@ -1257,6 +1258,15 @@ function interpretedReadingRecord(
   };
 }
 
+function acceptedAnswersOfSample(prepared: PreparedSample): string[] {
+  return prepared.sample.item
+    ? acceptedAnswersOf({
+        type: prepared.sample.item.type as ItemType,
+        content: prepared.sample.item.content,
+      })
+    : [...(prepared.sample.acceptedAnswers ?? [])];
+}
+
 async function runInterpretedUnit(
   runner: UnitRunner,
   planned: PlannedSample & { route: ResolvedRouteWithFallback },
@@ -1296,7 +1306,16 @@ async function runInterpretedUnit(
     decision = { ...decision, accepted: agreement !== null };
   }
   const value = agreement ? agreedValue(agreement, sample.format) : null;
-  const scoring = agreement?.kind === 'answer' && value ? prepared.scorer.outcome(value) : null;
+  const scoring =
+    agreement?.kind === 'answer' && value
+      ? (closedSpaceScoring(
+          agreement,
+          acceptedAnswersOfSample(prepared),
+          simulation.verify,
+          sample.format,
+          space,
+        ) ?? prepared.scorer.outcome(value))
+      : null;
   const acceptance = simulation.decideAcceptance({
     verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
     agreement,
