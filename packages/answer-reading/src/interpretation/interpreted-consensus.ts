@@ -20,6 +20,7 @@ import type {
   VerifiedAnswer,
   VerifyAnswer,
 } from '../answer-verification/verified-answer';
+import { confusableDigitVariants } from '../answer-verification/decide-acceptance';
 import { isAuditSample } from '../consensus/audit-sample';
 import type { ConsensusReading } from '../consensus/evaluate-consensus';
 import { normalizeTranscription } from '../formats/registry';
@@ -272,6 +273,49 @@ export function closedSpaceScoring(
   );
   if (keyCanonicals.size === 0) return null;
   return keyCanonicals.has(agreement.canonical) ? 'correct' : 'incorrect';
+}
+
+export interface ConfusableFlipInput {
+  readonly agreement: AcceptanceAgreement | null;
+  readonly acceptedAnswers: readonly string[];
+  readonly verify: VerifyAnswer;
+  readonly format: ResponseFormat;
+  readonly space: AnswerSpace;
+  readonly scoreOf: (value: NormalizedAnswer) => ScoringOutcome;
+}
+
+/**
+ * ¿Alguna confusión de un dígito (1↔7/4) le daría el punto al alumno? Cada variante se corrige
+ * por el mismo camino que la respuesta acordada (espacio cerrado o corrección del ítem). Es la
+ * condición para mandar una incorrecta al verificador por dígito dudoso.
+ */
+export function confusableFlipsToCorrect(input: ConfusableFlipInput): boolean {
+  const { agreement, acceptedAnswers, verify, format, space, scoreOf } = input;
+  if (agreement?.kind !== 'answer') return false;
+  return confusableDigitVariants(agreement.answerText).some((variant) => {
+    const verified = verify({
+      reading: {
+        literal: variant,
+        state: 'answered',
+        answer: variant,
+        candidates: [],
+        confidence: 1,
+      },
+      otherReading: null,
+      format,
+      space,
+    });
+    if (verified.status !== 'unique') return false;
+    const flipped: AcceptanceAgreement = {
+      ...agreement,
+      canonical: verified.canonical,
+      answerText: verified.answerText,
+    };
+    const outcome =
+      closedSpaceScoring(flipped, acceptedAnswers, verify, format, space) ??
+      scoreOf(agreedValue(flipped, format));
+    return outcome === 'correct';
+  });
 }
 
 /** Valor normalizado de lo acordado, con el mismo normalizador que el modo literal. */

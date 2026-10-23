@@ -8,6 +8,7 @@ import {
   agreedValue,
   applyDecisionTiebreak,
   closedSpaceScoring,
+  confusableFlipsToCorrect,
   decideAcceptance,
   finalizeInterpretedConsensus,
   planInterpretedConsensus,
@@ -356,20 +357,24 @@ export class CropReadingService {
     });
     const agreement = plan.agreement ?? (await this.tiebreak(scope, policy, plan, space));
     const value = agreement ? agreedValue(agreement, task.format) : null;
+    const acceptedAnswers = acceptedAnswersOf({ type: task.item.type, content: task.item.content });
     const scoring =
       agreement?.kind === 'answer' && value
-        ? (closedSpaceScoring(
-            agreement,
-            acceptedAnswersOf({ type: task.item.type, content: task.item.content }),
-            verifyAnswer,
-            task.format,
-            space,
-          ) ?? scoreOf(value))
+        ? (closedSpaceScoring(agreement, acceptedAnswers, verifyAnswer, task.format, space) ??
+          scoreOf(value))
         : null;
     const acceptance = decideAcceptance({
       verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
       agreement,
       scoring,
+      confusableFlipsToCorrect: confusableFlipsToCorrect({
+        agreement,
+        acceptedAnswers,
+        verify: verifyAnswer,
+        format: task.format,
+        space,
+        scoreOf,
+      }),
       readings: readers.flatMap((reader) => (reader.reading ? [reader.reading] : [])),
     });
     const result = finalizeInterpretedConsensus({

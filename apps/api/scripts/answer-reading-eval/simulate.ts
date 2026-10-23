@@ -5,6 +5,7 @@ import {
   agreedValue,
   applyDecisionTiebreak,
   closedSpaceScoring,
+  confusableFlipsToCorrect,
   finalizeInterpretedConsensus,
   isInterpretationPromptFor,
   planInterpretedConsensus,
@@ -1346,6 +1347,14 @@ async function runInterpretedUnit(
     verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
     agreement,
     scoring,
+    confusableFlipsToCorrect: confusableFlipsToCorrect({
+      agreement,
+      acceptedAnswers: acceptedAnswersOfSample(prepared),
+      verify: simulation.verify,
+      format: sample.format,
+      space,
+      scoreOf: prepared.scorer.outcome,
+    }),
     readings: readers.flatMap((reader) => (reader.reading ? [reader.reading] : [])),
   });
   const consensus = finalizeInterpretedConsensus({
