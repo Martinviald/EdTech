@@ -10,6 +10,7 @@ import {
   planInterpretedConsensus,
   renderInterpretationPrompt,
   toInterpretedReading,
+  type AcceptanceAgreement,
   type DecideAcceptance,
   type InterpretationResult,
   type InterpretationRequest,
@@ -1267,6 +1268,31 @@ function acceptedAnswersOfSample(prepared: PreparedSample): string[] {
     : [...(prepared.sample.acceptedAnswers ?? [])];
 }
 
+function closedSpaceTruthMatches(
+  prepared: PreparedSample,
+  simulation: InterpretationSimulation,
+  space: AnswerSpace,
+  agreement: AcceptanceAgreement | null,
+): boolean | null {
+  const { truth, sample } = prepared;
+  if (space.kind === 'open' || agreement?.kind !== 'answer' || truth.state !== 'answered') {
+    return null;
+  }
+  const verified = simulation.verify({
+    reading: {
+      literal: truth.literal,
+      state: 'answered',
+      answer: truth.literal,
+      candidates: [],
+      confidence: 1,
+    },
+    otherReading: null,
+    format: sample.format,
+    space,
+  });
+  return verified.status === 'unique' ? verified.canonical === agreement.canonical : null;
+}
+
 async function runInterpretedUnit(
   runner: UnitRunner,
   planned: PlannedSample & { route: ResolvedRouteWithFallback },
@@ -1356,9 +1382,16 @@ async function runInterpretedUnit(
       beforeVerifier: verified.record ? consensus : null,
     },
   );
+  const closedTruth = closedSpaceTruthMatches(prepared, simulation, space, agreement);
+  const decisionCorrect = closedTruth ?? unit.decisionCorrect;
   return {
     unit: {
       ...unit,
+      decisionCorrect,
+      autoAcceptedError:
+        unit.autoAccepted && prepared.group === 'short' && !decisionCorrect
+          ? errorKind(unit.pointsDelta)
+          : null,
       costUsd: unit.costUsd + (decision?.costUsd ?? 0),
       latencyMs: unit.latencyMs + (decision?.latencyMs ?? 0),
       interpretation: {
