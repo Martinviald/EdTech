@@ -337,7 +337,7 @@ export class CropReadingService {
     scoreOf: ScoreOf,
   ): Promise<CropReadingOutcome> {
     const { task, route } = scope;
-    const space: AnswerSpace = task.item.content.answerSpace ?? { kind: 'open' };
+    const space = this.answerSpaceOf(task.item);
     const attempts = await Promise.all(
       route.route.readers.map((reader) => this.interpretWithReader(scope, reader, space)),
     );
@@ -401,6 +401,11 @@ export class CropReadingService {
       routeId: route.route.routeId,
       routeVersion: route.route.routeVersion,
     };
+  }
+
+  private answerSpaceOf(item: ReadingScoringItem): AnswerSpace {
+    const { content } = item;
+    return 'answerSpace' in content && content.answerSpace ? content.answerSpace : { kind: 'open' };
   }
 
   private inkEvidenceOf(policy: ConsensusPolicy, task: CropReadingTask): InkEvidence | null {
