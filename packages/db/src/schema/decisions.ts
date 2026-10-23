@@ -24,7 +24,8 @@ import { organizations } from './organizations';
  *
  * Patrón idéntico a `llm_settings`: `org_id = NULL` ⇒ configuración GLOBAL de
  * plataforma; filas con `org_id` ⇒ override per-org. Sin fila, rigen los
- * `DECISION_FEATURE_DEFAULTS` de `@soe/types` (modo `off`). RLS admite las filas
+ * `DECISION_FEATURE_DEFAULTS` de `@soe/types` (modo `off`, salvo la desambiguación
+ * de marcas, que llega en `live`). RLS admite las filas
  * globales (ver `packages/db/sql/rls-policies.sql`).
  */
 export const decisionSettings = pgTable(
