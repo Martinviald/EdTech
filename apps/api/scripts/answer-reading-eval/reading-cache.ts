@@ -1,10 +1,12 @@
 import { createHash } from 'node:crypto';
-import { access, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { access, appendFile, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { StructuredVisionResult } from '@soe/answer-reading';
 import type { ReaderSpec, RenderedPrompt, TranscriptionOutput } from '@soe/types';
 
 export const READING_CACHE_KEY_VERSION = 1;
+
+export const CALL_LEDGER_FILE = 'llamadas.jsonl';
 
 export type CacheMode = 'use' | 'refresh' | 'off';
 
@@ -121,7 +123,9 @@ export class ReadingCache {
   }
 
   async put<TOutput>(entry: CachedReading<TOutput>): Promise<boolean> {
-    if (this.mode === 'off' || this.dir === null || entry.result.status !== 'ok') return false;
+    if (this.mode === 'off' || this.dir === null) return false;
+    await this.appendToLedger(entry);
+    if (entry.result.status !== 'ok') return false;
     const path = this.pathFor(entry.key);
     await mkdir(join(this.dir, entry.key.slice(0, 2)), { recursive: true });
     const temporary = `${path}.${process.pid}.tmp`;
@@ -129,6 +133,11 @@ export class ReadingCache {
     await rename(temporary, path);
     this.writes += 1;
     return true;
+  }
+
+  private async appendToLedger<TOutput>(entry: CachedReading<TOutput>): Promise<void> {
+    await mkdir(this.dir ?? '', { recursive: true });
+    await appendFile(join(this.dir ?? '', CALL_LEDGER_FILE), `${JSON.stringify(entry)}\n`, 'utf8');
   }
 }
 

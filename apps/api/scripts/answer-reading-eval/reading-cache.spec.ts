@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -8,6 +8,7 @@ import {
 } from '@soe/answer-reading';
 import type { ReaderSpec, ResponseFormat } from '@soe/types';
 import {
+  CALL_LEDGER_FILE,
   ReadingCache,
   cachedReadingEntry,
   readingCacheKey,
@@ -125,6 +126,32 @@ describe('caché de lecturas', () => {
       false,
     );
     expect(await cache.has(key)).toBe(false);
+  });
+
+  it('anota en el registro cada llamada, también las fallidas, y nada con --no-cache', async () => {
+    const input = keyInput();
+    const key = readingCacheKey(input);
+    const rendered = renderTranscriptionPrompt(READER, FORMAT, { gradeName: '6° Básico' });
+    const failed: TranscriptionResult = {
+      ...okResult(''),
+      status: 'timeout',
+      output: null,
+      errorCode: 'timeout',
+    };
+    const cache = new ReadingCache(dir, 'use');
+    await cache.put(cachedReadingEntry(key, input, rendered.prompt, okResult('48'), 'api'));
+    await cache.put(cachedReadingEntry(key, input, rendered.prompt, failed, 'api'));
+    await new ReadingCache(dir, 'off').put(
+      cachedReadingEntry(key, input, rendered.prompt, okResult('48'), 'api'),
+    );
+    const lines = (await readFile(join(dir, CALL_LEDGER_FILE), 'utf8')).trim().split('\n');
+    const calls = lines.map(
+      (line) => JSON.parse(line) as { key: string; result: TranscriptionResult },
+    );
+    expect(calls.map((call) => call.result.status)).toEqual(['ok', 'timeout']);
+    expect(calls[1]?.result.errorCode).toBe('timeout');
+    expect(calls[1]?.result.costUsd).toBe(0.001);
+    expect(calls.every((call) => call.key === key)).toBe(true);
   });
 
   it('--refresh no lee pero reescribe; --no-cache ni lee ni escribe', async () => {
