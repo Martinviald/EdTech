@@ -1,6 +1,6 @@
 # Desambiguación de marcas de burbuja con IA
 
-> Estado: diseño CERRADO (2026-10-22), en implementación. Decisiones de cierre en §12.
+> Estado: diseño CERRADO (2026-10-22), implementado (PR #313). Desde 2026-10-23 llega **prendido en `live` para todas las organizaciones** sin configurar nada; operación, overrides e interruptor de emergencia en §14.
 > Entrega: una sola PR a `dev` con los PR 1–6 de §11 como fases (commits) de la misma rama.
 > Fecha original: 2026-10-21. Base: `origin/dev` @ `25f92b71` (incluye PR #312).
 > Alcance: marcas `multiple` y `ambiguous` de campos `bubble_group` que el motor OMR no logra decidir.
@@ -117,8 +117,10 @@ Quedan fuera en v1: `digit_grid`, `selectMode = 'multiple'` y `crop_region`.
 
 `decision_settings` tiene índice único `(org_id, feature)` y una sola columna `engine`. Propongo **dos features** (nuevas):
 
-- `mark_disambiguation_jev`, con default `{ engine: 'jev', model: 'jev-1.14.0', mode: 'off', thresholds: {} }`;
-- `mark_disambiguation_openai`, con default `{ engine: 'openai', model: 'gpt-6-luna', mode: 'off', thresholds: {} }`.
+- `mark_disambiguation_jev`, con default `{ engine: 'jev', model: 'jev-1.14.0', mode: 'live', thresholds: { respuesta: { agree: 0.60, solo: 0.85, unsure: 0.50 } } }`;
+- `mark_disambiguation_openai`, con default `{ engine: 'openai', model: 'gpt-6-luna', mode: 'live', thresholds: { respuesta: { agree: 0.50, solo: 0.80, unsure: 0.50 } } }`.
+
+Los defaults viven en un solo lugar, `DECISION_FEATURE_DEFAULTS` (`packages/types/src/schemas/decisions.schema.ts`), y se aplican cuando no hay fila en `decision_settings`. Son las **únicas** features que llegan prendidas: `remedial_judge` y cualquier feature nueva siguen con default `off`. Una fila (global u org) manda sobre el default; ver §14.
 
 Por qué dos features y no una feature con dos motores:
 
@@ -171,7 +173,7 @@ El SDK 0.7.0 requiere Node 22. `apps/api/Dockerfile` (`node:22-bookworm-slim`), 
 
 **Cambios** (nuevos):
 
-- **Opción de constructor `experimentalImages`.** `JevEngineConfig.experimentalImages?: boolean` (default `false`). `capabilities.images` refleja esa opción. `DecisionsModule` lo enciende con la variable `JEV_EXPERIMENTAL_IMAGES=true`. Apagarlo hace que todo vaya a revisión. En AWS la variable sale del secreto SST `JevExperimentalImages` (default `'false'`, en `sst.config.ts`): para encenderla, `sst secret set JevExperimentalImages true --stage <stage>` y redeploy; sin cambio de código.
+- **Opción de constructor `experimentalImages`.** `JevEngineConfig.experimentalImages?: boolean` (default `false`). `capabilities.images` refleja esa opción. `DecisionsModule` lo enciende salvo que la variable `JEV_EXPERIMENTAL_IMAGES` valga `false`: sin la variable, o con cualquier otro valor, Jev acepta imágenes. Apagarlo (`false`) hace que todo vaya a revisión. En AWS la variable sale del secreto SST `JevExperimentalImages` (default `'true'`, en `sst.config.ts`): para apagarla, `sst secret set JevExperimentalImages false --stage <stage>` y redeploy; sin cambio de código.
 - **Restricciones de imagen en los límites.** `DecisionEngineLimits.imageConstraints: { minSidePx; maxSidePx; minPixels; maxPixels; maxBytes } | null` en `contracts.ts`. `JEV_LIMITS` lleva los valores de la doc. `OPENAI_LIMITS` y `FakeDecisionEngine` llevan `null`.
 - **Tokens por imagen.** `JEV_LIMITS.tokensPerImage` pasa de `0` a `3_000`. Es conservador: en la PoC, 1103×300 dio unos 1.300 tokens de imagen. La doc todavía no publica cómo estimarlos.
 - **Validación previa.** `JevDecisionEngine.evaluate` pasa `request.images` a `assertWithinLimits` (hoy no lo hace porque las rechaza).
@@ -369,13 +371,13 @@ ALTER TABLE "sheet_scan_marks" ADD COLUMN "ai_resolution" jsonb;
 
 ### 7.1 Dónde viven
 
-En `decision_settings.thresholds` de cada feature, bajo el id de pregunta `respuesta`: `{ "respuesta": { "agree": …, "solo": …, "unsure": … } }`.
+Por default, en el código (`DECISION_FEATURE_DEFAULTS`, valores de §7.2). Para ajustarlos tras calibrar, en `decision_settings.thresholds` de cada feature, bajo el id de pregunta `respuesta`: `{ "respuesta": { "agree": …, "solo": …, "unsure": … } }`. Si la fila trae umbrales inválidos, se reporta y se usan los del default.
 
 - Se agrega `pairThresholdsSchema` (`.strict()`, con el refine de la invariante) a la unión de `decisionThresholdsSchema` en `packages/types/src/schemas/decisions.schema.ts`.
 - No choca con `{auto, review}` ni con `{yes, no}`, que también son `.strict()`.
 - Las filas pueden ser globales (`org_id IS NULL`) o por organización.
 
-### 7.2 Valores iniciales (PROVISORIOS, salen de 100 casos)
+### 7.2 Valores iniciales (PROVISORIOS, salen de 100 casos; son el default de código en `live`)
 
 | Motor | `agree` | `solo` | `unsure` | Justificación |
 |---|---|---|---|---|
@@ -385,6 +387,8 @@ En `decision_settings.thresholds` de cada feature, bajo el id de pregunta `respu
 Resultado simulado: §1.1 (verificado sobre los resultados guardados de la PoC). Con estos valores, el caso `IMG_1626_q12` (Jev `null` 0,83 contra OpenAI B 0,46) va a revisión por `conflict`, que es lo deseable mientras no haya más nulas.
 
 ### 7.3 Plan de calibración en sombra
+
+> **Cambio 2026-10-23:** se decidió pasar a `live` para todas las organizaciones **sin** cumplir antes este plan. Los umbrales de §7.2 rigen en producción desde el primer lote. El plan sigue valiendo como calibración posterior: la verdad pasa a ser la auditoría ciega del 5 % y las correcciones del profesor ("Corregir"), y una organización se puede devolver a `shadow` con filas de `decision_settings` (§14.2) para medir sin decidir.
 
 - **Verdad:** en sombra el profesor sigue revisando **todas** las dudosas. La verdad es su decisión (`reviewed_by_id IS NOT NULL`), traducida con la tabla de §4.3. Para las auto-anuladas del OMR la verdad es débil y se reporta aparte. Cada desacuerdo entre la IA y el humano se revisa a mano, porque el humano también se equivoca.
 - **Métricas:**
@@ -527,7 +531,8 @@ Resultado simulado: §1.1 (verificado sobre los resultados guardados de la PoC).
 
 | Riesgo | Mitigación |
 |---|---|
-| Las imágenes de Jev son experimentales ("Dreamer-ready"): formato, límites o precisión pueden cambiar entre versiones | Interruptor `JEV_EXPERIMENTAL_IMAGES`; modelo fijado en `jev-1.14.0` en `decision_settings`; si Jev falla, todo a revisión (fila 1); replay obligatorio antes de subir de versión |
+| Se pasa a `live` sin el periodo de sombra ni la calibración de §7.3 | Auditoría ciega del 5 %; lista de auto-resueltas visible antes de confirmar; "Corregir" después de confirmar; interruptor de emergencia `MARK_DISAMBIGUATION_AI_DISABLED` (§14.3); filas de `decision_settings` para devolver una organización a `shadow` |
+| Las imágenes de Jev son experimentales ("Dreamer-ready"): formato, límites o precisión pueden cambiar entre versiones | Interruptor `JEV_EXPERIMENTAL_IMAGES` (prendido por default); modelo fijado en `jev-1.14.0` en `decision_settings`; si Jev falla, todo a revisión (fila 1); replay obligatorio antes de subir de versión |
 | `gpt-6-luna` no tiene versión fijable: puede cambiar sin aviso | Monitoreo semanal de la distribución de confianza (p10 y fracción < 0,5) en `decision_calls`; auditoría ciega del 5 %; si la tasa de corrección o error de la auditoría supera 1 %, volver a `shadow` con una fila de `decision_settings`, sin deploy |
 | Deriva de los modelos o de las capturas (nuevos lápices, celulares) | La auditoría y `correctedByHuman` se miden por corte (§7.3); recalibrar al cambiar el perfil de captura |
 | Sesgo de la muestra: pocas nulas, sin borrones, pocos colegios | Cortes obligatorios con n ≥ 30; set sintético; ≥ 3 colegios y ambas fuentes de captura antes de `live` |
@@ -545,4 +550,49 @@ Resultado simulado: §1.1 (verificado sobre los resultados guardados de la PoC).
 ## 13. Preguntas abiertas (no bloquean)
 
 1. **Recorte nativo más grande:** ¿vale la pena que el OMR emita un recorte de mayor resolución (por ejemplo 300 px de alto desde la página rectificada) para Jev, en vez de ampliar en el adaptador? Se puede medir en sombra con un subconjunto.
-2. **Interruptor para el colegio:** ¿la organización necesita un control propio (`organizations.config.review`, vía `ReviewSettingsService`) además de `decision_settings`, que maneja operaciones?
+2. ~~**Interruptor para el colegio:**~~ Resuelto (2026-10-23): **no**. El colegio no configura nada y no hay pantalla ni toggle en Configuración. La operación se maneja con `decision_settings` y el interruptor de emergencia (§14).
+
+## 14. Operación: default, overrides e interruptor de emergencia (runbook)
+
+### 14.1 Comportamiento por default
+
+- Sin filas en `decision_settings` para `mark_disambiguation_jev` y `mark_disambiguation_openai`, las dos features resuelven a `live` con los umbrales de §7.2 (`DECISION_FEATURE_DEFAULTS`). Aplica a **todas** las organizaciones.
+- Jev recibe imágenes salvo `JEV_EXPERIMENTAL_IMAGES=false` (§4.1).
+- El colegio no configura nada. Se mantiene lo de §8 y §12: el profesor ve el distintivo "IA", el alumno no ve nada, auditoría ciega del 5 % y "Corregir" después de confirmar.
+- Comportamiento seguro intacto: si falta `OPENAI_API_KEY` o `TYPESAFE_API_KEY`, o Jev no acepta imágenes, el pipeline no corre (`mark_disambiguation.misconfigured`) y todas las dudosas quedan para revisión humana. Si un motor falla en una marca, esa marca va a revisión (fila 1 de §5.2).
+
+### 14.2 Override interno con `decision_settings`
+
+Las filas son un override **interno** (operaciones), no una configuración del colegio. Una fila de la organización manda sobre la global, y la global sobre el default de código. El modo efectivo sigue la regla de §3.5: las dos features tienen que coincidir.
+
+- **Apagar una organización puntual:** inserta **las dos** filas con `mode = 'off'` (con el rol privilegiado, `DATABASE_ADMIN_URL`). Con una sola fila en `off`, la otra queda en `live` por default; el pipeline tampoco corre, pero se reporta `mode_mismatch` en cada lote.
+
+  ```sql
+  INSERT INTO decision_settings (org_id, feature, engine, model, mode, thresholds)
+  VALUES
+    ('<org_id>', 'mark_disambiguation_jev', 'jev', 'jev-1.14.0', 'off', '{}'),
+    ('<org_id>', 'mark_disambiguation_openai', 'openai', 'gpt-6-luna', 'off', '{}')
+  ON CONFLICT (org_id, feature) WHERE org_id IS NOT NULL
+  DO UPDATE SET mode = EXCLUDED.mode, updated_at = now();
+  ```
+
+- **Volver a sombra** (medir sin decidir): las dos filas con `mode = 'shadow'` y los umbrales que quieras simular.
+- **Ajustar umbrales tras calibrar:** las dos filas en `live` con `thresholds = '{"respuesta": {"agree": …, "solo": …, "unsure": …}}'`.
+- Los cambios se leen con un caché de 30 s por organización (`DECISION_CONFIG_CACHE_TTL_MS`); no hace falta deploy.
+- Borrar las filas devuelve la organización al default (`live`).
+
+### 14.3 Interruptor de emergencia: `MARK_DISAMBIGUATION_AI_DISABLED`
+
+- Con `MARK_DISAMBIGUATION_AI_DISABLED=true` (sin distinguir mayúsculas ni espacios), `MarkDisambiguationService` no resuelve el pipeline: no lee `decision_settings`, no llama a ningún motor y las marcas dudosas quedan para revisión humana, como antes de la IA. Manda sobre cualquier fila `live` o `shadow`, para **todas** las organizaciones.
+- Sin la variable, o con cualquier otro valor (`false`, vacío, `1`, `no`), la IA sigue prendida.
+- No borra nada: las marcas ya resueltas por la IA conservan su `ai_resolution` y siguen corrigiéndose con "Corregir".
+- En AWS la variable sale del secreto SST `MarkDisambiguationAiDisabled` (default `'false'`, en `sst.config.ts`). Para activarlo rápido:
+
+  ```bash
+  sst secret set MarkDisambiguationAiDisabled true --stage <stage>
+  sst deploy --stage <stage>
+  ```
+
+  El secreto llega a App Runner como variable de entorno, así que **requiere redeploy** (reinicia la API). Si necesitas apagar una sola organización, o no puedes esperar el deploy, usa las filas `off` de §14.2: rigen en ≤ 30 s y sin deploy.
+- Para volver a prender: `sst secret set MarkDisambiguationAiDisabled false --stage <stage>` y redeploy.
+- En local: `MARK_DISAMBIGUATION_AI_DISABLED=true` en el `.env` de la raíz y reinicia la API.
