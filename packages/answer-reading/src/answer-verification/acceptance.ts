@@ -31,8 +31,13 @@ export interface AcceptanceInput {
   readonly agreement: AcceptanceAgreement | null;
   /** Resultado de corregir `agreement.answerText`; `null` si no se corrigió. */
   readonly scoring: ScoringOutcome | null;
-  /** Lecturas crudas, para la regla del dígito dudoso (1, 7, 4). */
   readonly readings: readonly InterpretedReading[];
+  /**
+   * `true` si alguna variante de `confusableDigitVariants(agreement.answerText)`
+   * resulta correcta: el «1» chileno leído como 7 o 4 le estaría quitando el
+   * punto al alumno. Lo calcula quien corrige, con la clave.
+   */
+  readonly confusableFlipsToCorrect?: boolean;
 }
 
 export type AcceptanceDecision =

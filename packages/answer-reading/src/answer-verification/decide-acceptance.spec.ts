@@ -1,5 +1,5 @@
 import type { AcceptanceAgreement, AcceptanceInput } from './acceptance';
-import { decideAcceptance } from './decide-acceptance';
+import { confusableDigitVariants, decideAcceptance } from './decide-acceptance';
 
 function answer(
   overrides: Partial<Extract<AcceptanceAgreement, { kind: 'answer' }>> = {},
@@ -36,11 +36,25 @@ describe('decideAcceptance', () => {
     expect(decideAcceptance(input({}))).toEqual({ action: 'accept' });
   });
 
-  it('una incorrecta con 1, 7 o 4 pasa por el verificador', () => {
-    expect(decideAcceptance(input({ agreement: answer({ answerText: '27/10' }) }))).toEqual({
-      action: 'verify_incorrect',
-      because: ['doubtful_digit'],
-    });
+  it('una incorrecta que un 1↔7 o 1↔4 volvería correcta pasa por el verificador', () => {
+    expect(
+      decideAcceptance(
+        input({ agreement: answer({ answerText: '27/10' }), confusableFlipsToCorrect: true }),
+      ),
+    ).toEqual({ action: 'verify_incorrect', because: ['doubtful_digit'] });
+  });
+
+  it('una incorrecta con 1, 7 o 4 que ninguna confusión vuelve correcta se acepta', () => {
+    expect(
+      decideAcceptance(
+        input({ agreement: answer({ answerText: '4 1 3 2' }), confusableFlipsToCorrect: false }),
+      ),
+    ).toEqual({ action: 'accept' });
+  });
+
+  it('las variantes cambian un solo dígito confundible', () => {
+    expect(confusableDigitVariants('21/10')).toEqual(['27/10', '24/10', '21/70', '21/40']);
+    expect(confusableDigitVariants('65')).toEqual([]);
   });
 
   it('una incorrecta inferida o resuelta por desempate pasa por el verificador', () => {
