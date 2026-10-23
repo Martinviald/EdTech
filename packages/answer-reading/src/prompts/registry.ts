@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   promptVersionSchema,
+  type AnswerSpace,
   type PromptVariable,
   type PromptVariables,
   type PromptVersion,
@@ -22,6 +23,13 @@ import {
 import { rubricGradeJsonSchema } from '../grading/rubric-grade-schema';
 import { readingAuditJsonSchema } from '../audit/reading-audit-json-schema';
 import { verificationJsonSchema } from '../verification/verification-json-schema';
+import { readingAnswerKind } from '../interpretation/answer-kind';
+import {
+  interpretationJsonSchema,
+  interpretationOutputSchema,
+  type InterpretationJsonSchema,
+} from '../interpretation/interpretation-output';
+import { TRANSCRIBE_INTERPRET_V1 } from './transcribe-interpret';
 import { AUDIT_READING_V1 } from './audit-reading';
 import { GRADE_RUBRIC_V1 } from './grade-rubric';
 import { promptHash, promptRef, renderPrompt } from './render';
@@ -44,6 +52,7 @@ export const PROMPT_VERSIONS: readonly PromptVersion[] = [
   GRADE_RUBRIC_V1,
   VERIFY_INCORRECT_V1,
   AUDIT_READING_V1,
+  TRANSCRIBE_INTERPRET_V1,
 ].map((prompt) => promptVersionSchema.parse(prompt));
 
 const BY_REF = new Map(PROMPT_VERSIONS.map((prompt) => [promptRef(prompt), prompt]));
@@ -74,6 +83,7 @@ const TEMPLATE_OUTPUT_SCHEMAS: Record<
   rubric_grading: () => rubricGradeJsonSchema().schema,
   verification: () => verificationJsonSchema().schema,
   reading_audit: () => readingAuditJsonSchema().schema,
+  interpretation: () => interpretationJsonSchema().schema,
 };
 
 /**
@@ -197,6 +207,17 @@ export function readingAuditFormatLockParts(format: ResponseFormat): FormatLockP
   };
 }
 
+/** Lo que el formato agrega a un prompt de interpretación: la descripción del tipo de respuesta. */
+export function interpretationFormatLockParts(format: ResponseFormat): FormatLockParts {
+  const output = interpretationJsonSchema();
+  return {
+    label: readingAnswerKind(format, null),
+    guide: '',
+    outputSchemaId: output.schemaId,
+    outputSchema: output.schema,
+  };
+}
+
 const FORMAT_LOCK_PARTS_BY_PURPOSE: Record<
   PromptVersion['purpose'],
   ((prompt: PromptVersion, format: ResponseFormat) => readonly FormatLockParts[]) | null
@@ -205,6 +226,7 @@ const FORMAT_LOCK_PARTS_BY_PURPOSE: Record<
   rubric_grading: null,
   verification: (_prompt, format) => [verificationFormatLockParts(format)],
   reading_audit: (_prompt, format) => [readingAuditFormatLockParts(format)],
+  interpretation: (_prompt, format) => [interpretationFormatLockParts(format)],
 };
 
 /**
@@ -298,5 +320,45 @@ export function renderTranscriptionPrompt(
     ),
     outputSchema,
     outputZodSchema: transcriptionZodSchema(format, cells),
+  };
+}
+
+/** ¿El prompt interpreta el formato? Solo un prompt de interpretación sirve al modo `interpreted`. */
+export function isInterpretationPromptFor(ref: string, kind: ResponseFormatKind): boolean {
+  const prompt = getPrompt(ref);
+  return (
+    prompt !== null && prompt.purpose === 'interpretation' && prompt.formatKinds.includes(kind)
+  );
+}
+
+export interface InterpretationPromptContext {
+  readonly gradeName?: string | null;
+  /** Espacio de respuestas del ítem (opciones, nunca la clave). */
+  readonly space?: AnswerSpace | null;
+}
+
+export interface RenderedInterpretationPrompt {
+  readonly prompt: RenderedPrompt;
+  readonly outputSchema: InterpretationJsonSchema;
+  readonly outputZodSchema: typeof interpretationOutputSchema;
+}
+
+export function renderInterpretationPrompt(
+  reader: Pick<ReaderSpec, 'promptRef'>,
+  format: ResponseFormat,
+  context: InterpretationPromptContext = {},
+): RenderedInterpretationPrompt {
+  const prompt = getPrompt(reader.promptRef);
+  if (!prompt) throw new Error(`No existe el prompt ${reader.promptRef}`);
+  if (prompt.purpose !== 'interpretation' || !prompt.formatKinds.includes(format.kind)) {
+    throw new Error(`El prompt ${reader.promptRef} no interpreta el formato ${format.kind}`);
+  }
+  const outputSchema = interpretationJsonSchema();
+  const variables: PromptVariables = { answerKind: readingAnswerKind(format, context.space ?? null) };
+  if (context.gradeName) variables.gradeName = context.gradeName;
+  return {
+    prompt: renderPrompt(prompt, variables, outputSchema),
+    outputSchema,
+    outputZodSchema: interpretationOutputSchema,
   };
 }

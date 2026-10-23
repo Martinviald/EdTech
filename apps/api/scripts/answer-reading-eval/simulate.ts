@@ -1,6 +1,22 @@
 import {
   acceptedAnswersOf,
+  agreedConsensusReadings,
   agreedReadingOf,
+  agreedValue,
+  applyDecisionTiebreak,
+  finalizeInterpretedConsensus,
+  isInterpretationPromptFor,
+  planInterpretedConsensus,
+  renderInterpretationPrompt,
+  toInterpretedReading,
+  type DecideAcceptance,
+  type InterpretationResult,
+  type InterpretationRequest,
+  type InterpretedReaderResult,
+  type TiebreakCandidate,
+  type TiebreakChoice,
+  type VerifiedAnswer,
+  type VerifyAnswer,
   applyIncorrectVerification,
   applyReadingAudit,
   evaluateConsensus,
@@ -32,8 +48,10 @@ import {
   type VerificationResult,
 } from '@soe/answer-reading';
 import type {
+  AnswerSpace,
   ConsensusPolicy,
   ConsensusResult,
+  InterpretedReading,
   ItemType,
   ReaderSpec,
   ReadingAuditOutput,
@@ -48,7 +66,12 @@ import type {
   TranscriptionStatus,
   VerificationOutput,
 } from '@soe/types';
+import {
+  buildAnswerReadingTiebreakDecision,
+  tiebreakChoiceOf,
+} from '../../src/answer-reading/answer-reading-tiebreak-decision';
 import type { PreparedSample, SampleGroup } from './dataset';
+import { DecisionCache, decisionCacheKey, type HarnessDecider } from './decision-cache';
 import {
   ReadingCache,
   cachedReadingEntry,
@@ -68,6 +91,35 @@ export interface HarnessTranscriber {
   transcribe(request: HarnessTranscriptionRequest): Promise<TranscriptionResult>;
   verify?(request: VerificationRequest): Promise<VerificationResult>;
   audit?(request: ReadingAuditRequest): Promise<ReadingAuditResult>;
+  interpret?(request: InterpretationRequest): Promise<InterpretationResult>;
+}
+
+export interface InterpretationSimulation {
+  readonly verify: VerifyAnswer;
+  readonly decideAcceptance: DecideAcceptance;
+  readonly decisionCache: DecisionCache;
+  readonly decider: HarnessDecider | null;
+  readonly decisionEngine: string;
+  readonly decisionModel: string;
+}
+
+export interface DecisionRecord {
+  readonly called: boolean;
+  readonly fromCache: boolean;
+  readonly missing: boolean;
+  readonly choice: TiebreakChoice | null;
+  readonly accepted: boolean;
+  readonly costUsd: number;
+  readonly latencyMs: number;
+}
+
+export interface InterpretationUnitRecord {
+  readonly verified: readonly (VerifiedAnswer['status'] | null)[];
+  readonly agreementVia: 'consensus' | 'tiebreak' | null;
+  readonly agreementStrength: string | null;
+  readonly crossSupport: string | null;
+  readonly acceptance: string;
+  readonly decision: DecisionRecord | null;
 }
 
 export interface SimulationBudget {
@@ -179,6 +231,7 @@ export interface UnitRecord {
   readonly beforeVerifier: BeforeVerifierRecord | null;
   readonly costUsd: number;
   readonly latencyMs: number;
+  readonly interpretation?: InterpretationUnitRecord;
 }
 
 export interface SampleRecord {
@@ -209,6 +262,7 @@ export interface SimulationOptions {
   readonly budget: SimulationBudget | null;
   readonly cacheSource?: string;
   readonly injectedEscalation?: boolean;
+  readonly interpretation?: InterpretationSimulation | null;
   readonly onUnitDone?: (progress: { done: number; total: number; spentUsd: number }) => void;
 }
 
@@ -233,6 +287,16 @@ export interface PlannedReading {
   readonly reader: ReaderSpec;
   readonly role: ReaderRole;
   readonly cacheKey: string;
+}
+
+type InterpretedOutputOf<T> = T extends StructuredVisionResult<infer O> ? O : never;
+
+interface InterpretationRun {
+  readonly reader: ReaderSpec;
+  readonly cacheKey: string;
+  readonly fromCache: boolean;
+  readonly cacheSource: string | null;
+  readonly result: InterpretationResult;
 }
 
 interface ReaderRun {
@@ -262,6 +326,17 @@ function skipFor(
   }
   if (route === null) {
     return { reason: 'no_route', detail: `Ninguna ruta activa atiende ${sample.format.kind}` };
+  }
+  if (route.policy.readMode === 'interpreted') {
+    const notInterpreting = route.readers.find(
+      (reader) => !isInterpretationPromptFor(reader.promptRef, sample.format.kind),
+    );
+    return notInterpreting
+      ? {
+          reason: 'prompt_unsupported_format',
+          detail: `El prompt ${notInterpreting.promptRef} no interpreta el formato ${sample.format.kind}`,
+        }
+      : null;
   }
   const readers = route.policy.tiebreakReader
     ? [...route.readers, route.policy.tiebreakReader]
@@ -313,6 +388,31 @@ function keyInputFor(
   };
 }
 
+function interpretationKeyInputFor(
+  prepared: PreparedSample,
+  reader: ReaderSpec,
+  repetition: number,
+): {
+  keyInput: ReadingCacheKeyInput;
+  rendered: ReturnType<typeof renderInterpretationPrompt>;
+} {
+  const { sample } = prepared;
+  const rendered = renderInterpretationPrompt(reader, sample.format, {
+    gradeName: sample.gradeName ?? null,
+    space: sample.answerSpace ?? null,
+  });
+  return {
+    rendered,
+    keyInput: {
+      reader,
+      prompt: rendered.prompt,
+      outputJsonSchema: rendered.outputSchema,
+      imageSha256: prepared.image?.sha256 ?? '',
+      repetition,
+    },
+  };
+}
+
 export function planReadings(
   planned: readonly PlannedSample[],
   repetitions: number,
@@ -326,8 +426,11 @@ export function planReadings(
         'primary',
       ]);
       if (route.policy.tiebreakReader) roles.push([route.policy.tiebreakReader, 'tiebreak']);
+      const interpreted = route.policy.readMode === 'interpreted';
       for (const [reader, role] of roles) {
-        const { keyInput } = keyInputFor(prepared, reader, repetition);
+        const { keyInput } = interpreted
+          ? interpretationKeyInputFor(prepared, reader, repetition)
+          : keyInputFor(prepared, reader, repetition);
         readings.push({
           sampleId: prepared.sample.id,
           repetition,
@@ -470,6 +573,110 @@ class UnitRunner {
     result: TranscriptionResult,
   ): ReaderRun {
     return { reader, role, cacheKey, fromCache: false, cacheSource: null, result };
+  }
+
+  async interpret(
+    prepared: PreparedSample,
+    reader: ReaderSpec,
+    repetition: number,
+  ): Promise<InterpretationRun> {
+    const image = prepared.image;
+    const { keyInput, rendered } = interpretationKeyInputFor(prepared, reader, repetition);
+    const cacheKey = readingCacheKey(keyInput);
+    const cached = await this.options.cache.get<InterpretedOutputOf<InterpretationResult>>(cacheKey);
+    if (cached) {
+      return { reader, cacheKey, fromCache: true, cacheSource: cached.source, result: cached.result };
+    }
+    const transcriber = this.options.transcriberFor(reader);
+    if (transcriber?.interpret === undefined || image === null) {
+      return { reader, cacheKey, fromCache: false, cacheSource: null, result: failedResult(reader, 'no_transcriber') };
+    }
+    const estimate = this.gate.reserve(reader);
+    if (estimate === null) {
+      return { reader, cacheKey, fromCache: false, cacheSource: null, result: failedResult(reader, 'budget_exceeded') };
+    }
+    let result: InterpretationResult;
+    try {
+      result = await transcriber.interpret({
+        readingKey: readingKeyFor(prepared.sample, image),
+        image,
+        reader,
+        prompt: rendered.prompt,
+        outputSchema: rendered.outputSchema,
+        outputZodSchema: rendered.outputZodSchema,
+      });
+    } catch (error) {
+      result = failedResult(reader, error instanceof Error ? error.name || 'error' : 'error');
+    }
+    this.gate.settle(reader, estimate, result.costUsd);
+    await this.options.cache.put(
+      cachedReadingEntry(cacheKey, keyInput, rendered.prompt, result, this.options.cacheSource ?? 'api'),
+    );
+    return { reader, cacheKey, fromCache: false, cacheSource: null, result };
+  }
+
+  async decide(
+    prepared: PreparedSample,
+    candidates: readonly TiebreakCandidate[],
+    space: AnswerSpace,
+    simulation: InterpretationSimulation,
+  ): Promise<DecisionRecord> {
+    const image = prepared.image;
+    const decision = buildAnswerReadingTiebreakDecision(candidates, {
+      gradeName: prepared.sample.gradeName ?? null,
+      format: prepared.sample.format,
+      space,
+    });
+    const imageSha256 = image?.sha256 ?? '';
+    const key = decisionCacheKey({
+      engine: simulation.decisionEngine,
+      model: simulation.decisionModel,
+      state: decision.state,
+      questions: decision.questions,
+      imageSha256,
+    });
+    const cached = await simulation.decisionCache.get(key);
+    if (cached?.answer) {
+      return {
+        called: false,
+        fromCache: true,
+        missing: false,
+        choice: tiebreakChoiceOf(decision, cached.answer),
+        accepted: false,
+        costUsd: 0,
+        latencyMs: cached.latencyMs,
+      };
+    }
+    if (simulation.decider === null || image === null) {
+      return { called: false, fromCache: false, missing: true, choice: null, accepted: false, costUsd: 0, latencyMs: 0 };
+    }
+    const outcome = await simulation.decider.decide({
+      state: decision.state,
+      questions: decision.questions,
+      image: { mimeType: image.mimeType, base64: image.base64 },
+    });
+    await simulation.decisionCache.put({
+      key,
+      storedAt: new Date().toISOString(),
+      engine: simulation.decisionEngine,
+      model: outcome.model,
+      status: outcome.answer ? 'ok' : 'error',
+      ...(outcome.answer ? { answer: outcome.answer } : {}),
+      ...(outcome.usage ? { usage: outcome.usage } : {}),
+      costUsd: outcome.costUsd,
+      latencyMs: outcome.latencyMs,
+      imageSha256,
+      ...(outcome.errorCode ? { errorCode: outcome.errorCode } : {}),
+    });
+    return {
+      called: true,
+      fromCache: false,
+      missing: outcome.answer === null,
+      choice: outcome.answer ? tiebreakChoiceOf(decision, outcome.answer) : null,
+      accepted: false,
+      costUsd: outcome.costUsd,
+      latencyMs: outcome.latencyMs,
+    };
   }
 
   async verify(
