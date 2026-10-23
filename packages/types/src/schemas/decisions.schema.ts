@@ -110,14 +110,27 @@ export interface DecisionFeatureDefault {
   thresholds: DecisionThresholds;
 }
 
-/** Default `off`: activar una funcionalidad es una decisión explícita de configuración. */
+/**
+ * Default `off`: activar una funcionalidad es una decisión explícita de configuración.
+ * Excepción: la desambiguación de marcas (`mark_disambiguation_*`) llega prendida en `live`
+ * para todas las organizaciones, con los umbrales provisorios del diseño
+ * (docs/diseno-desambiguacion-marcas-ia.md §7.2). Una fila de `decision_settings` la
+ * sobrescribe y el interruptor `MARK_DISAMBIGUATION_AI_DISABLED=true` la apaga entera.
+ * La clave `respuesta` es `MARK_DISAMBIGUATION_QUESTION_ID` (no se importa para no
+ * crear un ciclo con mark-disambiguation.schema.ts; un test fija que coincidan).
+ */
 export const DECISION_FEATURE_DEFAULTS: Record<DecisionFeature, DecisionFeatureDefault> = {
   remedial_judge: { engine: 'jev', model: 'jev-1.13.0', mode: 'off', thresholds: {} },
-  mark_disambiguation_jev: { engine: 'jev', model: 'jev-1.14.0', mode: 'off', thresholds: {} },
+  mark_disambiguation_jev: {
+    engine: 'jev',
+    model: 'jev-1.14.0',
+    mode: 'live',
+    thresholds: { respuesta: { agree: 0.6, solo: 0.85, unsure: 0.5 } },
+  },
   mark_disambiguation_openai: {
     engine: 'openai',
     model: 'gpt-6-luna',
-    mode: 'off',
-    thresholds: {},
+    mode: 'live',
+    thresholds: { respuesta: { agree: 0.5, solo: 0.8, unsure: 0.5 } },
   },
 };

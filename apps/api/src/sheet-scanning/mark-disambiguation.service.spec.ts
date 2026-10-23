@@ -10,6 +10,7 @@ import type { FilesService } from '../files/files.service';
 import {
   MARK_DISAMBIGUATION_AUDIT_RATE,
   MARK_DISAMBIGUATION_BATCH_DEADLINE_MS,
+  MARK_DISAMBIGUATION_KILL_SWITCH_ENV,
   MarkDisambiguationService,
   type MarkDisambiguationCandidate,
 } from './mark-disambiguation.service';
@@ -379,6 +380,48 @@ describe('MarkDisambiguationService.resolveBatch', () => {
         service.resolveBatch(ORG_ID, BATCH_ID, SPEC, [candidate()]),
       ).resolves.toBeUndefined();
       expect(reportSpy.mock.calls[0]?.[1]).toMatchObject({ scope: 'mark_disambiguation' });
+    });
+  });
+
+  describe('interruptor de emergencia', () => {
+    afterEach(() => {
+      delete process.env[MARK_DISAMBIGUATION_KILL_SWITCH_ENV];
+    });
+
+    it('prendido, no llama a ningún motor y deja las marcas para el humano aunque haya filas live', async () => {
+      process.env[MARK_DISAMBIGUATION_KILL_SWITCH_ENV] = 'true';
+      const { service, settingsOf, evaluate, shadow, updates } = makeService('live', {
+        jev: answer('B', 0.95),
+        openai: answer('B', 0.95),
+      });
+
+      expect(await service.pipelineFor(ORG_ID, BATCH_ID)).toBeNull();
+      await service.resolveBatch(ORG_ID, BATCH_ID, SPEC, [candidate()]);
+
+      expect(settingsOf).not.toHaveBeenCalled();
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(shadow).not.toHaveBeenCalled();
+      expect(updates).toHaveLength(0);
+      expect(reportSpy).not.toHaveBeenCalled();
+    });
+
+    it('acepta TRUE con espacios como prendido', async () => {
+      process.env[MARK_DISAMBIGUATION_KILL_SWITCH_ENV] = ' TRUE ';
+      const { service } = makeService('live', { jev: null, openai: null });
+
+      expect(await service.pipelineFor(ORG_ID, BATCH_ID)).toBeNull();
+    });
+
+    it.each(['false', '', '1', 'no'])('con el valor "%s" la IA sigue prendida', async (value) => {
+      process.env[MARK_DISAMBIGUATION_KILL_SWITCH_ENV] = value;
+      const { service, evaluate } = makeService('live', {
+        jev: answer('B', 0.95),
+        openai: answer('B', 0.95),
+      });
+
+      await service.resolveBatch(ORG_ID, BATCH_ID, SPEC, [candidate()]);
+
+      expect(evaluate).toHaveBeenCalledTimes(2);
     });
   });
 

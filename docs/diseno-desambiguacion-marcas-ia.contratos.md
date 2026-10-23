@@ -86,6 +86,10 @@ Comparaciones: `>=` para superar un umbral alto (`agree`, `solo`) y `<` estricto
 
 ## C4. Modo efectivo y motores
 
+- Interruptor de emergencia: con `MARK_DISAMBIGUATION_AI_DISABLED=true` no corre, sin leer
+  `decision_settings` ni llamar a ningún motor, y no se reporta (diseño §14.3).
+- Sin filas, las dos features llegan en `live` con los umbrales de §7.2 del diseño
+  (`DECISION_FEATURE_DEFAULTS`); una fila de `decision_settings` manda sobre el default.
 - `live` si las dos features están en `live`; `shadow` si las dos están en `shadow`; cualquier
   otra combinación (incluido `off`/`off`) → no corre. `off`/`off` no se reporta; el resto se
   reporta como `mark_disambiguation.mode_mismatch`.

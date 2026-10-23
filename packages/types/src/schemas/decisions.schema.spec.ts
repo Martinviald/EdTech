@@ -6,6 +6,8 @@ import {
   decisionFeatureSchema,
   decisionModeSchema,
   decisionThresholdsSchema,
+  MARK_DISAMBIGUATION_FEATURES,
+  MARK_DISAMBIGUATION_QUESTION_ID,
   noulThresholdsSchema,
   pairThresholdsSchema,
 } from '../index';
@@ -193,12 +195,38 @@ describe('enums y defaults', () => {
     expect(decisionModeSchema.options).toEqual(['off', 'shadow', 'live']);
   });
 
-  it('cada funcionalidad tiene default apagado, con modelo fijado y umbrales válidos', () => {
+  it('cada funcionalidad tiene modelo fijado y umbrales válidos', () => {
     for (const feature of DECISION_FEATURES) {
       const def = DECISION_FEATURE_DEFAULTS[feature];
-      expect(def.mode).toBe('off');
       expect(def.model).not.toBe('jev-latest');
       expect(decisionThresholdsSchema.safeParse(def.thresholds).success).toBe(true);
+    }
+  });
+
+  it('solo la desambiguación de marcas llega prendida; el resto queda en off', () => {
+    const live = DECISION_FEATURES.filter(
+      (feature) => DECISION_FEATURE_DEFAULTS[feature].mode !== 'off',
+    );
+
+    expect(live).toEqual([MARK_DISAMBIGUATION_FEATURES.jev, MARK_DISAMBIGUATION_FEATURES.openai]);
+    expect(DECISION_FEATURE_DEFAULTS.remedial_judge.mode).toBe('off');
+  });
+
+  it('las features de marcas llegan en live con los umbrales provisorios del diseño', () => {
+    expect(DECISION_FEATURE_DEFAULTS.mark_disambiguation_jev).toMatchObject({
+      mode: 'live',
+      thresholds: { [MARK_DISAMBIGUATION_QUESTION_ID]: { agree: 0.6, solo: 0.85, unsure: 0.5 } },
+    });
+    expect(DECISION_FEATURE_DEFAULTS.mark_disambiguation_openai).toMatchObject({
+      mode: 'live',
+      thresholds: { [MARK_DISAMBIGUATION_QUESTION_ID]: { agree: 0.5, solo: 0.8, unsure: 0.5 } },
+    });
+    for (const feature of Object.values(MARK_DISAMBIGUATION_FEATURES)) {
+      const thresholds = DECISION_FEATURE_DEFAULTS[feature].thresholds;
+      expect(Object.keys(thresholds)).toEqual([MARK_DISAMBIGUATION_QUESTION_ID]);
+      expect(
+        pairThresholdsSchema.safeParse(thresholds[MARK_DISAMBIGUATION_QUESTION_ID]).success,
+      ).toBe(true);
     }
   });
 

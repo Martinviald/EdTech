@@ -47,6 +47,7 @@ export const MARK_DISAMBIGUATION_MAX_MARKS_PER_BATCH = 500;
 export const MARK_DISAMBIGUATION_AUDIT_RATE = 0.05;
 export const MARK_DISAMBIGUATION_CALL_TIMEOUT_MS = 8_000;
 export const MARK_DISAMBIGUATION_IDENTITY_MARGIN_RADII = 1.5;
+export const MARK_DISAMBIGUATION_KILL_SWITCH_ENV = 'MARK_DISAMBIGUATION_AI_DISABLED';
 
 export interface MarkDisambiguationCandidate {
   markId: string;
@@ -137,6 +138,7 @@ export class MarkDisambiguationService {
     orgId: string,
     batchId: string,
   ): Promise<MarkDisambiguationPipeline | null> {
+    if (this.isDisabledByKillSwitch()) return null;
     const [jev, openai] = await Promise.all([
       this.slotConfig(orgId, 'jev'),
       this.slotConfig(orgId, 'openai'),
@@ -175,6 +177,10 @@ export class MarkDisambiguationService {
       }
     }
     return { mode, jev, openai };
+  }
+
+  private isDisabledByKillSwitch(): boolean {
+    return process.env[MARK_DISAMBIGUATION_KILL_SWITCH_ENV]?.trim().toLowerCase() === 'true';
   }
 
   private async slotConfig(orgId: string, slot: EngineSlot): Promise<SlotConfig> {
