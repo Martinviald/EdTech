@@ -1,23 +1,17 @@
 import 'reflect-metadata';
-import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { Module, type DynamicModule, type INestApplicationContext } from '@nestjs/common';
+import type { INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { config as loadEnv } from 'dotenv';
-import type { Database } from '@soe/db';
-import type { LlmModel, LlmProviderId, ReaderSpec } from '@soe/types';
+import type { ReaderSpec } from '@soe/types';
 import { LlmVisionTranscriber } from '../src/answer-reading/transcribers/llm-vision-transcriber';
-import { LlmConfigService } from '../src/llm/llm.config';
-import { LLM_PROVIDERS } from '../src/llm/llm.constants';
-import { LlmModelsService } from '../src/llm/llm-models.service';
-import { estimateLlmCostUsd, setCatalogTariffs } from '../src/llm/llm.pricing';
-import { LlmService } from '../src/llm/llm.service';
+import { estimateLlmCostUsd } from '../src/llm/llm.pricing';
 import type { LlmProvider } from '../src/llm/llm.types';
 import { AnthropicProvider } from '../src/llm/providers/anthropic.provider';
 import { GeminiProvider } from '../src/llm/providers/gemini.provider';
 import { OpenAiProvider } from '../src/llm/providers/openai.provider';
-import { EVAL_TARIFFS, type EvalTariff } from './answer-reading-eval/tariffs';
+import { EvalLlmModule, applyEvalTariffs } from './answer-reading-eval/llm-context';
 import type { CacheMode } from './answer-reading-eval/reading-cache';
 import {
   allRouteReaders,
@@ -32,15 +26,6 @@ const DEFAULT_ROUTES = resolve(__dirname, 'answer-reading-eval', 'routes', 'actu
 const DEFAULT_CACHE_DIR = resolve(REPO_ROOT, '..', 'pruebas-vlm-manuscrito', 'cache-lecturas');
 const ESTIMATED_INPUT_TOKENS = 3000;
 const OBSERVED_COST_MARGIN = 1.25;
-
-const NO_DATABASE = new Proxy(
-  {},
-  {
-    get: () => {
-      throw new Error('El arnés de evaluación no usa la base de datos');
-    },
-  },
-) as Database;
 
 const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [opciones]
 
@@ -124,104 +109,6 @@ function parseArgs(argv: readonly string[]): EvalCommandOptions {
   };
 }
 
-function tariffFor(model: string): EvalTariff {
-  const tariff = EVAL_TARIFFS[model];
-  if (!tariff) throw new Error(`Sin tarifa para ${model}: agrégala a tariffs.ts con su fuente`);
-  return tariff;
-}
-
-class EvalModelCatalog extends LlmModelsService {
-  private readonly models: Map<string, LlmModel>;
-
-  constructor(readers: readonly ReaderSpec[]) {
-    super(NO_DATABASE);
-    const now = new Date().toISOString();
-    this.models = new Map();
-    for (const reader of readers) {
-      const tariff = tariffFor(reader.model);
-      if (tariff.provider !== reader.provider) {
-        throw new Error(`El lector ${reader.key} pide ${reader.model} a ${reader.provider}`);
-      }
-      this.models.set(`${tariff.provider}:${reader.model}`, {
-        id: randomUUID(),
-        provider: tariff.provider,
-        modelId: reader.model,
-        label: reader.model,
-        maxOutputTokens: tariff.maxOutputTokens,
-        supportsImages: true,
-        supportsStructuredOutput: true,
-        supportsBatch: false,
-        supportsSamplingParams: tariff.supportsSamplingParams,
-        inputUsdPerMtok: tariff.inputUsdPerMtok,
-        outputUsdPerMtok: tariff.outputUsdPerMtok,
-        cachedInputUsdPerMtok: tariff.cachedInputUsdPerMtok,
-        batchDiscount: null,
-        enabled: true,
-        deprecatedAt: null,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
-  }
-
-  override async onModuleInit(): Promise<void> {}
-
-  override async findModel(
-    provider: LlmProviderId,
-    modelId: string,
-  ): Promise<LlmModel | undefined> {
-    return this.models.get(`${provider}:${modelId}`);
-  }
-
-  override async findSelectableModel(
-    provider: LlmProviderId,
-    modelId: string,
-  ): Promise<LlmModel | undefined> {
-    return this.findModel(provider, modelId);
-  }
-}
-
-@Module({})
-class EvalLlmModule {
-  static forReaders(readers: readonly ReaderSpec[]): DynamicModule {
-    return {
-      module: EvalLlmModule,
-      providers: [
-        { provide: LlmModelsService, useValue: new EvalModelCatalog(readers) },
-        {
-          provide: LlmConfigService,
-          useFactory: (catalog: LlmModelsService) => new LlmConfigService(NO_DATABASE, catalog),
-          inject: [LlmModelsService],
-        },
-        AnthropicProvider,
-        GeminiProvider,
-        OpenAiProvider,
-        {
-          provide: LLM_PROVIDERS,
-          useFactory: (anthropic: LlmProvider, gemini: LlmProvider, openai: LlmProvider) => [
-            anthropic,
-            gemini,
-            openai,
-          ],
-          inject: [AnthropicProvider, GeminiProvider, OpenAiProvider],
-        },
-        {
-          provide: LlmService,
-          useFactory: (config: LlmConfigService, providers: LlmProvider[]) =>
-            new LlmService(config, providers),
-          inject: [LlmConfigService, LLM_PROVIDERS],
-        },
-        {
-          provide: LlmVisionTranscriber,
-          useFactory: (llm: LlmService) => new LlmVisionTranscriber(llm),
-          inject: [LlmService],
-        },
-      ],
-      exports: [LlmVisionTranscriber],
-    };
-  }
-}
-
 function estimateCallUsd(reader: ReaderSpec, observedUsd: readonly number[]): number {
   if (observedUsd.length > 0) return Math.max(...observedUsd) * OBSERVED_COST_MARGIN;
   const worstCase = estimateLlmCostUsd(reader.model, {
@@ -251,18 +138,7 @@ async function main(): Promise<void> {
   loadEnv({ path: join(REPO_ROOT, '.env') });
   const options = parseArgs(process.argv.slice(2));
   const log = (message: string) => process.stderr.write(`${message}\n`);
-  setCatalogTariffs(
-    new Map(
-      Object.entries(EVAL_TARIFFS).map(([model, tariff]) => [
-        model,
-        {
-          inputUsdPerMtok: tariff.inputUsdPerMtok,
-          outputUsdPerMtok: tariff.outputUsdPerMtok,
-          cachedInputUsdPerMtok: tariff.cachedInputUsdPerMtok,
-        },
-      ]),
-    ),
-  );
+  applyEvalTariffs();
   const context = options.dryRun
     ? null
     : await NestFactory.createApplicationContext(
