@@ -1,0 +1,513 @@
+{
+  "description": "Lectura interpretada sin verificador de incorrectas: gemini-3.8-flash (>= 0,95) y gpt-6-luna low (>= 0,85) con transcribe.interpret@1 y desempate con Jev (answer_reading_tiebreak, coincide con Gemini y confianza >= 0,9). Lo que pediría el verificador queda en revisión. Para medir con imágenes nuevas sin el costo del verificador.",
+  "routes": [
+    {
+      "id": "7ead0000-0000-4000-8000-000000000028",
+      "version": 6,
+      "orgId": null,
+      "status": "active",
+      "level": "default",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": null,
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "none",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.95
+        },
+        {
+          "key": "gpt-6-luna",
+          "transcriberId": "llm",
+          "provider": "openai",
+          "family": "openai-luna",
+          "model": "gpt-6-luna",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "none",
+          "params": {
+            "reasoning": "low",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.85
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "short-answer-interpreted",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2,
+        "readMode": "interpreted",
+        "decisionTiebreak": {
+          "minConfidence": 0.9,
+          "agreeWithProvider": "gemini"
+        }
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000000d",
+      "version": 2,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "free_text",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.free-text@1",
+          "hints": "none",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 60000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "free-text-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": false,
+        "minReaders": 1,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": [],
+        "requireDistinctFamilies": false,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000000e",
+      "version": 2,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "math_work",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.free-text@1",
+          "hints": "none",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 60000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          }
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "free-text-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": false,
+        "minReaders": 1,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": [],
+        "requireDistinctFamilies": false,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-000000000029",
+      "version": 6,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "sequence",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.95
+        },
+        {
+          "key": "gpt-6-luna",
+          "transcriberId": "llm",
+          "provider": "openai",
+          "family": "openai-luna",
+          "model": "gpt-6-luna",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "low",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.85
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "short-answer-interpreted",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2,
+        "readMode": "interpreted",
+        "decisionTiebreak": {
+          "minConfidence": 0.9,
+          "agreeWithProvider": "gemini"
+        }
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000002a",
+      "version": 6,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "ordered_tuple",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.95
+        },
+        {
+          "key": "gpt-6-luna",
+          "transcriberId": "llm",
+          "provider": "openai",
+          "family": "openai-luna",
+          "model": "gpt-6-luna",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "low",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.85
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "short-answer-interpreted",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2,
+        "readMode": "interpreted",
+        "decisionTiebreak": {
+          "minConfidence": 0.9,
+          "agreeWithProvider": "gemini"
+        }
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000002b",
+      "version": 7,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "word_list",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.95
+        },
+        {
+          "key": "gpt-6-luna",
+          "transcriberId": "llm",
+          "provider": "openai",
+          "family": "openai-luna",
+          "model": "gpt-6-luna",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "low",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.85
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "short-answer-interpreted",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2,
+        "readMode": "interpreted",
+        "decisionTiebreak": {
+          "minConfidence": 0.9,
+          "agreeWithProvider": "gemini"
+        }
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000002c",
+      "version": 7,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "short_text",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.95
+        },
+        {
+          "key": "gpt-6-luna",
+          "transcriberId": "llm",
+          "provider": "openai",
+          "family": "openai-luna",
+          "model": "gpt-6-luna",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "low",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.85
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "short-answer-interpreted",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2,
+        "readMode": "interpreted",
+        "decisionTiebreak": {
+          "minConfidence": 0.9,
+          "agreeWithProvider": "gemini"
+        }
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000002d",
+      "version": 7,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "multi_box",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "gemini-3.8-flash",
+          "transcriberId": "llm",
+          "provider": "gemini",
+          "family": "gemini-flash",
+          "model": "gemini-3.8-flash",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.95
+        },
+        {
+          "key": "gpt-6-luna",
+          "transcriberId": "llm",
+          "provider": "openai",
+          "family": "openai-luna",
+          "model": "gpt-6-luna",
+          "promptRef": "transcribe.interpret@1",
+          "hints": "format",
+          "params": {
+            "reasoning": "low",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "minConfidence": 0.85
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0,
+      "policy": {
+        "id": "short-answer-interpreted",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2,
+        "readMode": "interpreted",
+        "decisionTiebreak": {
+          "minConfidence": 0.9,
+          "agreeWithProvider": "gemini"
+        }
+      }
+    }
+  ]
+}
