@@ -9,6 +9,8 @@ import {
   finalizeInterpretedConsensus,
   isInterpretationPromptFor,
   planInterpretedConsensus,
+  recoverAgreement,
+  recoveryRulesOf,
   renderInterpretationPrompt,
   toInterpretedReading,
   type AcceptanceAgreement,
@@ -62,6 +64,7 @@ import type {
   ReadingAuditor,
   ReadingOutcome,
   ReadingState,
+  RecoveryRule,
   ResponseFormat,
   ResponseFormatKind,
   ReviewMode,
@@ -125,6 +128,7 @@ export interface InterpretationUnitRecord {
   readonly crossSupport: string | null;
   readonly acceptance: string;
   readonly decision: DecisionRecord | null;
+  readonly recovery: RecoveryRule | null;
 }
 
 export interface SimulationBudget {
@@ -1335,17 +1339,28 @@ async function runInterpretedUnit(
     agreement = applyDecisionTiebreak(plan, decision.choice, policy.decisionTiebreak);
     decision = { ...decision, accepted: agreement !== null };
   }
-  const value = agreement ? agreedValue(agreement, sample.format) : null;
-  const scoring =
-    agreement?.kind === 'answer' && value
+  const scoreAgreement = (candidate: AcceptanceAgreement): ScoringOutcome | null =>
+    candidate.kind === 'answer'
       ? (closedSpaceScoring(
-          agreement,
+          candidate,
           acceptedAnswersOfSample(prepared),
           simulation.verify,
           sample.format,
           space,
-        ) ?? prepared.scorer.outcome(value))
+        ) ?? prepared.scorer.outcome(agreedValue(candidate, sample.format)))
       : null;
+  const recovered =
+    agreement === null
+      ? recoverAgreement(plan, recoveryRulesOf(policy), {
+          verify: simulation.verify,
+          format: sample.format,
+          space,
+          scoreOf: scoreAgreement,
+        })
+      : null;
+  if (recovered) agreement = recovered.agreement;
+  const value = agreement ? agreedValue(agreement, sample.format) : null;
+  const scoring = agreement?.kind === 'answer' && value ? scoreAgreement(agreement) : null;
   const acceptance = simulation.decideAcceptance({
     verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
     agreement,
@@ -1413,6 +1428,7 @@ async function runInterpretedUnit(
         crossSupport: agreement?.kind === 'answer' ? agreement.crossSupport : null,
         acceptance: acceptance.action,
         decision,
+        recovery: recovered?.rule ?? null,
       },
     },
     readings: runs.map((run) => interpretedReadingRecord(run, prepared, repetition)),

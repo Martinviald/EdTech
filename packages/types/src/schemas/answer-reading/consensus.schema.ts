@@ -68,6 +68,25 @@ export const decisionTiebreakSchema = z
   .strict();
 export type DecisionTiebreak = z.infer<typeof decisionTiebreakSchema>;
 
+// Reglas de recuperación (lectura interpretada): solo actúan si después del desempate sigue
+// sin haber acuerdo, y lo recuperado pasa igual por la política de aceptación.
+// `matchingColumn`: en un pareo, todos los lectores apuntan a un único código y es el mismo.
+// `keyAnchor`: el lector de `provider`, sobre su umbral, verifica una respuesta única correcta
+// y ningún otro lector leyó una variante confundible de un dígito (1↔7/4). `null` la apaga.
+// Sin `recoveryRules`, ambas quedan prendidas (el ancla con el lector del desempate).
+export const RECOVERY_RULES = ['matching_column', 'key_anchor'] as const;
+export type RecoveryRule = (typeof RECOVERY_RULES)[number];
+export const recoveryRulesSchema = z
+  .object({
+    matchingColumn: z.boolean(),
+    keyAnchor: z
+      .object({ provider: z.enum(VISION_PROVIDERS) })
+      .strict()
+      .nullable(),
+  })
+  .strict();
+export type RecoveryRules = z.infer<typeof recoveryRulesSchema>;
+
 export const AUTO_ACCEPT_OUTCOMES = ['correct', 'incorrect'] as const;
 export type AutoAcceptOutcome = (typeof AUTO_ACCEPT_OUTCOMES)[number];
 
@@ -89,6 +108,7 @@ export const consensusPolicySchema = z
     readingAuditor: readingAuditorSchema.optional(),
     readMode: z.enum(READ_MODES).optional(),
     decisionTiebreak: decisionTiebreakSchema.optional(),
+    recoveryRules: recoveryRulesSchema.optional(),
     autoAccept: z.boolean(),
     autoAcceptOutcomes: z.array(z.enum(AUTO_ACCEPT_OUTCOMES)),
     auditSampleRate: z.number().min(0).max(1),

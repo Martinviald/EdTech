@@ -34,6 +34,7 @@ export interface EvalCommandOptions {
   readonly readerMinConfidence: ReaderMinConfidence | null;
   readonly injectedEscalation?: boolean;
   readonly offline?: boolean;
+  readonly stopAtBudget?: boolean;
 }
 
 export interface EvalCommandDeps {
@@ -208,7 +209,11 @@ export async function runEvalCommand(
     if (options.budgetUsd === null) {
       throw new Error('Faltan lecturas en el caché: fija --budget-usd para pedirlas');
     }
-    if (estimate && missingUsd > options.budgetUsd) {
+    if (estimate && missingUsd > options.budgetUsd && options.stopAtBudget === true) {
+      log(
+        `El peor caso (US$${missingUsd.toFixed(4)}) supera el tope de US$${options.budgetUsd}: la corrida se detiene al alcanzarlo`,
+      );
+    } else if (estimate && missingUsd > options.budgetUsd) {
       throw new Error(
         `Pedir las ${required.length} lecturas que faltan costaría hasta US$${missingUsd.toFixed(4)} (peor caso), sobre el tope de US$${options.budgetUsd}. Sube el tope o reduce las repeticiones.`,
       );

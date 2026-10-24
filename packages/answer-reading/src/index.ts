@@ -15,6 +15,7 @@ export * from './prompts/transcribe-interpret';
 export * from './interpretation/interpretation-output';
 export * from './interpretation/answer-kind';
 export * from './interpretation/interpreted-consensus';
+export * from './interpretation/recovery-rules';
 export * from './verification/verification-json-schema';
 export * from './verification/verify-incorrect';
 export * from './audit/reading-audit-json-schema';

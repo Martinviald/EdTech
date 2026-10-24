@@ -12,6 +12,8 @@ import {
   decideAcceptance,
   finalizeInterpretedConsensus,
   planInterpretedConsensus,
+  recoverAgreement,
+  recoveryRulesOf,
   renderInterpretationPrompt,
   toInterpretedReading,
   verifyAnswer,
@@ -69,6 +71,7 @@ import {
   type RenderedPrompt,
   type ResponseFormat,
   type ReviewReason,
+  type ScoringOutcome,
   type TranscriptionOutput,
   type TranscriptionStatus,
   type VerificationOutput,
@@ -232,6 +235,7 @@ type ReadingInsert = NewAnswerReadingRow & { readonly attempt: number; readonly 
 const MAX_READING_INSERT_TRIES = 3;
 
 export const ANSWER_READING_TIEBREAK_KILL_SWITCH_ENV = 'ANSWER_READING_TIEBREAK_AI_DISABLED';
+export const ANSWER_READING_RECOVERY_KILL_SWITCH_ENV = 'ANSWER_READING_RECOVERY_RULES_DISABLED';
 
 const ANSWER_READING_TIEBREAK_TIMEOUT_MS = 8000;
 
@@ -355,14 +359,15 @@ export class CropReadingService {
       space,
       ink: this.inkEvidenceOf(policy, task),
     });
-    const agreement = plan.agreement ?? (await this.tiebreak(scope, policy, plan, space));
-    const value = agreement ? agreedValue(agreement, task.format) : null;
     const acceptedAnswers = acceptedAnswersOf({ type: task.item.type, content: task.item.content });
-    const scoring =
-      agreement?.kind === 'answer' && value
-        ? (closedSpaceScoring(agreement, acceptedAnswers, verifyAnswer, task.format, space) ??
-          scoreOf(value))
-        : null;
+    const scoreAgreement = (candidate: AcceptanceAgreement): ScoringOutcome | null =>
+      this.scoreAgreement(candidate, acceptedAnswers, task.format, space, scoreOf);
+    const agreement =
+      plan.agreement ??
+      (await this.tiebreak(scope, policy, plan, space)) ??
+      this.recover(policy, plan, task.format, space, scoreAgreement);
+    const value = agreement ? agreedValue(agreement, task.format) : null;
+    const scoring = agreement ? scoreAgreement(agreement) : null;
     const acceptance = decideAcceptance({
       verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
       agreement,
@@ -401,6 +406,38 @@ export class CropReadingService {
       routeId: route.route.routeId,
       routeVersion: route.route.routeVersion,
     };
+  }
+
+  private scoreAgreement(
+    agreement: AcceptanceAgreement,
+    acceptedAnswers: readonly string[],
+    format: ResponseFormat,
+    space: AnswerSpace,
+    scoreOf: ScoreOf,
+  ): ScoringOutcome | null {
+    if (agreement.kind !== 'answer') return null;
+    return (
+      closedSpaceScoring(agreement, acceptedAnswers, verifyAnswer, format, space) ??
+      scoreOf(agreedValue(agreement, format))
+    );
+  }
+
+  private recover(
+    policy: ConsensusPolicy,
+    plan: InterpretedPlan,
+    format: ResponseFormat,
+    space: AnswerSpace,
+    scoreOf: (agreement: AcceptanceAgreement) => ScoringOutcome | null,
+  ): AcceptanceAgreement | null {
+    if (process.env[ANSWER_READING_RECOVERY_KILL_SWITCH_ENV] === 'true') return null;
+    return (
+      recoverAgreement(plan, recoveryRulesOf(policy), {
+        verify: verifyAnswer,
+        format,
+        space,
+        scoreOf,
+      })?.agreement ?? null
+    );
   }
 
   private answerSpaceOf(item: ReadingScoringItem): AnswerSpace {
