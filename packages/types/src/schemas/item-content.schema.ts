@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { answerSpaceSchema } from './answer-reading/answer-space.schema';
 import { responseFormatSchema } from './answer-reading/response-format.schema';
 import type { ItemType } from '../enums';
 // `multiple_choice` ya tiene su schema canónico en item.schema.ts. Lo reutilizamos
@@ -35,6 +36,7 @@ const baseContent = {
   audioUrl: z.string().url().optional(),
   explanation: z.string().optional(),
   responseFormat: responseFormatSchema.optional(),
+  answerSpace: answerSpaceSchema.optional(),
 };
 
 // ── Schemas de content por tipo ──────────────────────────────────────────────
