@@ -19,6 +19,7 @@ export const DECISION_FEATURES = [
   'remedial_judge',
   'mark_disambiguation_jev',
   'mark_disambiguation_openai',
+  'answer_reading_tiebreak',
 ] as const;
 export type DecisionFeature = (typeof DECISION_FEATURES)[number];
 export const decisionFeatureSchema = z.enum(DECISION_FEATURES);
@@ -116,6 +117,9 @@ export interface DecisionFeatureDefault {
  * para todas las organizaciones, con los umbrales provisorios del diseño
  * (docs/diseno-desambiguacion-marcas-ia.md §7.2). Una fila de `decision_settings` la
  * sobrescribe y el interruptor `MARK_DISAMBIGUATION_AI_DISABLED=true` la apaga entera.
+ * El desempate de la lectura interpretada (`answer_reading_tiebreak`) también llega en `live`
+ * (lineamiento «ocultar complejidad»): su umbral vive en la política de la ruta y el
+ * interruptor `ANSWER_READING_TIEBREAK_AI_DISABLED=true` lo apaga entero.
  * La clave `respuesta` es `MARK_DISAMBIGUATION_QUESTION_ID` (no se importa para no
  * crear un ciclo con mark-disambiguation.schema.ts; un test fija que coincidan).
  */
@@ -133,4 +137,5 @@ export const DECISION_FEATURE_DEFAULTS: Record<DecisionFeature, DecisionFeatureD
     mode: 'live',
     thresholds: { respuesta: { agree: 0.5, solo: 0.8, unsure: 0.5 } },
   },
+  answer_reading_tiebreak: { engine: 'jev', model: 'jev-1.14.0', mode: 'live', thresholds: {} },
 };

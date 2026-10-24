@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { normalizedAnswerSchema } from './normalized-answer.schema';
-import { readerSpecSchema } from './reader.schema';
+import { VISION_PROVIDERS, readerSpecSchema } from './reader.schema';
 
 // Política de consenso y resultado de la decisión (diseño §8).
 // `incorrectVerifier` (opcional, etapa 1 T4): lector con un prompt de propósito
@@ -53,6 +53,40 @@ export const readingAuditorSchema = z
   })
   .strict();
 export type ReadingAuditor = z.infer<typeof readingAuditorSchema>;
+// Modo de lectura: `literal` transcribe y normaliza; `interpreted` pide al lector la
+// respuesta que el alumno quiso dar y la verifica en código (diseño v5).
+export const READ_MODES = ['literal', 'interpreted'] as const;
+export type ReadMode = (typeof READ_MODES)[number];
+
+// Desempate con el motor de decisiones (función `answer_reading_tiebreak`): elige entre
+// las respuestas de los lectores y solo vale si coincide con el lector de `agreeWithProvider`.
+export const decisionTiebreakSchema = z
+  .object({
+    minConfidence: z.number().min(0).max(1),
+    agreeWithProvider: z.enum(VISION_PROVIDERS),
+  })
+  .strict();
+export type DecisionTiebreak = z.infer<typeof decisionTiebreakSchema>;
+
+// Reglas de recuperación (lectura interpretada): solo actúan si después del desempate sigue
+// sin haber acuerdo, y lo recuperado pasa igual por la política de aceptación.
+// `matchingColumn`: en un pareo, todos los lectores apuntan a un único código y es el mismo.
+// `keyAnchor`: el lector de `provider`, sobre su umbral, verifica una respuesta única correcta
+// y ningún otro lector leyó una variante confundible de un dígito (1↔7/4). `null` la apaga.
+// Sin `recoveryRules`, ambas quedan prendidas (el ancla con el lector del desempate).
+export const RECOVERY_RULES = ['matching_column', 'key_anchor'] as const;
+export type RecoveryRule = (typeof RECOVERY_RULES)[number];
+export const recoveryRulesSchema = z
+  .object({
+    matchingColumn: z.boolean(),
+    keyAnchor: z
+      .object({ provider: z.enum(VISION_PROVIDERS) })
+      .strict()
+      .nullable(),
+  })
+  .strict();
+export type RecoveryRules = z.infer<typeof recoveryRulesSchema>;
+
 export const AUTO_ACCEPT_OUTCOMES = ['correct', 'incorrect'] as const;
 export type AutoAcceptOutcome = (typeof AUTO_ACCEPT_OUTCOMES)[number];
 
@@ -72,6 +106,9 @@ export const consensusPolicySchema = z
     tiebreakAgreeWith: z.enum(TIEBREAK_AGREE_WITH).optional(),
     incorrectVerifier: readerSpecSchema.optional(),
     readingAuditor: readingAuditorSchema.optional(),
+    readMode: z.enum(READ_MODES).optional(),
+    decisionTiebreak: decisionTiebreakSchema.optional(),
+    recoveryRules: recoveryRulesSchema.optional(),
     autoAccept: z.boolean(),
     autoAcceptOutcomes: z.array(z.enum(AUTO_ACCEPT_OUTCOMES)),
     auditSampleRate: z.number().min(0).max(1),
@@ -130,6 +167,10 @@ export const REVIEW_REASONS = [
   'verifier_flagged',
   'verifier_failed',
   'scoring_changed',
+  'answer_out_of_space',
+  'answer_not_derivable',
+  'blank_unverified',
+  'selection_incorrect',
 ] as const;
 export type ReviewReason = (typeof REVIEW_REASONS)[number];
 export const reviewReasonSchema = z.enum(REVIEW_REASONS);
@@ -161,6 +202,10 @@ export const REVIEW_MODE_BY_REASON: Record<ReviewReason, ReviewMode> = {
   verifier_flagged: 'reading',
   verifier_failed: 'reading',
   scoring_changed: 'reading',
+  answer_out_of_space: 'reading',
+  answer_not_derivable: 'reading',
+  blank_unverified: 'reading',
+  selection_incorrect: 'reading',
   undecidable: 'grading',
   unparsed_format: 'grading',
   policy_requires_review: 'grading',

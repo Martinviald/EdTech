@@ -13,6 +13,7 @@ import {
   runSimulation,
   type HarnessTranscriber,
   type SimulationBudget,
+  type InterpretationSimulation,
 } from './simulate';
 
 export const REPORT_FILE = 'informe.json';
@@ -32,10 +33,13 @@ export interface EvalCommandOptions {
   readonly cacheMode: CacheMode;
   readonly readerMinConfidence: ReaderMinConfidence | null;
   readonly injectedEscalation?: boolean;
+  readonly offline?: boolean;
+  readonly stopAtBudget?: boolean;
 }
 
 export interface EvalCommandDeps {
   readonly transcriberFor?: (reader: ReaderSpec) => HarnessTranscriber | null;
+  readonly interpretation?: InterpretationSimulation | null;
   readonly estimateCallUsd?: SimulationBudget['estimateCallUsd'];
   readonly log?: (message: string) => void;
 }
@@ -150,8 +154,14 @@ export async function runEvalCommand(
     loadRouteSet(options.routesFile),
   ]);
   const previous = options.compareFile ? await loadPrevious(options.compareFile) : null;
-  const transcriberFor = options.dryRun ? dryRunTranscribers(dataset) : deps.transcriberFor;
-  if (!transcriberFor) throw new Error('Sin --dry-run hace falta un transcriptor real');
+  const offline = options.offline === true && !options.dryRun;
+  const transcriberFor = options.dryRun
+    ? dryRunTranscribers(dataset)
+    : offline
+      ? () => null
+      : deps.transcriberFor;
+  if (!transcriberFor)
+    throw new Error('Sin --dry-run ni --offline hace falta un transcriptor real');
   const cacheMode: CacheMode = options.dryRun ? 'off' : options.cacheMode;
   const cache = new ReadingCache(options.cacheDir, cacheMode);
 
@@ -166,7 +176,7 @@ export async function runEvalCommand(
       route.policy.readingAuditor ? [route.policy.readingAuditor.reader] : [],
     ),
   );
-  if (!options.dryRun) {
+  if (!options.dryRun && !offline) {
     assertReadersCovered(uniqueReaders(missing.map((reading) => reading.reader)), transcriberFor);
     assertVerifiersCovered(verifiers, transcriberFor);
     assertAuditorsCovered(auditors, transcriberFor);
@@ -190,18 +200,27 @@ export async function runEvalCommand(
   log(
     `Dataset ${dataset.manifest.name} v${dataset.manifest.datasetVersion}: ${dataset.samples.length} muestras × ${options.repetitions} repeticiones; ${planned.length} lecturas, ${planned.length - missing.length} en caché, ${required.length} por pedir (peor caso US$${missingUsd.toFixed(4)}) y ${conditional} de desempate que solo se piden si hacen falta, dentro del tope`,
   );
-  if (!options.dryRun && missing.length > 0) {
+  if (offline && missing.length > 0) {
+    log(
+      `Modo offline: ${missing.length} lecturas no están en el caché y quedan como falla del lector (no se llama a ninguna API)`,
+    );
+  }
+  if (!options.dryRun && !offline && missing.length > 0) {
     if (options.budgetUsd === null) {
       throw new Error('Faltan lecturas en el caché: fija --budget-usd para pedirlas');
     }
-    if (estimate && missingUsd > options.budgetUsd) {
+    if (estimate && missingUsd > options.budgetUsd && options.stopAtBudget === true) {
+      log(
+        `El peor caso (US$${missingUsd.toFixed(4)}) supera el tope de US$${options.budgetUsd}: la corrida se detiene al alcanzarlo`,
+      );
+    } else if (estimate && missingUsd > options.budgetUsd) {
       throw new Error(
         `Pedir las ${required.length} lecturas que faltan costaría hasta US$${missingUsd.toFixed(4)} (peor caso), sobre el tope de US$${options.budgetUsd}. Sube el tope o reduce las repeticiones.`,
       );
     }
   }
   const budget: SimulationBudget | null =
-    !options.dryRun && options.budgetUsd !== null && estimate
+    !options.dryRun && !offline && options.budgetUsd !== null && estimate
       ? { limitUsd: options.budgetUsd, estimateCallUsd: estimate }
       : null;
 
@@ -213,6 +232,7 @@ export async function runEvalCommand(
     concurrency: options.concurrency,
     readerMinConfidence: options.readerMinConfidence,
     injectedEscalation: options.injectedEscalation ?? false,
+    interpretation: deps.interpretation ?? null,
     transcriberFor,
     cache,
     budget,

@@ -12,3 +12,5 @@ export * from './review-queue.schema';
 export * from './rubric-review.schema';
 export * from './verification.schema';
 export * from './reading-audit.schema';
+export * from './answer-space.schema';
+export * from './interpreted-reading.schema';

@@ -400,6 +400,20 @@
       "when": 1792638839575,
       "tag": "0056_mark_ai_resolution",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1792788813643,
+      "tag": "0057_lectura_interpretada",
+      "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1792855590113,
+      "tag": "0058_reglas_recuperacion",
+      "breakpoints": true
     }
   ]
 }
