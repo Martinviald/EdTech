@@ -15,6 +15,7 @@ import {
   type DecideAcceptance,
   type InterpretationResult,
   type InterpretationRequest,
+  type InkEvidence,
   type InterpretedReaderResult,
   type TiebreakCandidate,
   type TiebreakChoice,
@@ -104,6 +105,7 @@ export interface InterpretationSimulation {
   readonly decider: HarnessDecider | null;
   readonly decisionEngine: string;
   readonly decisionModel: string;
+  readonly inkBySample?: ReadonlyMap<string, InkEvidence>;
 }
 
 export interface DecisionRecord {
@@ -1324,6 +1326,7 @@ async function runInterpretedUnit(
     verify: simulation.verify,
     format: sample.format,
     space,
+    ink: simulation.inkBySample?.get(sample.id) ?? null,
   });
   let agreement = plan.agreement;
   let decision: DecisionRecord | null = null;

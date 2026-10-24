@@ -1,10 +1,11 @@
 import 'reflect-metadata';
+import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import type { INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { config as loadEnv } from 'dotenv';
-import { decideAcceptance, verifyAnswer } from '@soe/answer-reading';
+import { decideAcceptance, verifyAnswer, type InkEvidence } from '@soe/answer-reading';
 import { JevDecisionEngine } from '@soe/decisions';
 import { DECISION_FEATURE_DEFAULTS } from '@soe/types';
 import type { ReaderSpec } from '@soe/types';
@@ -59,6 +60,8 @@ const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [o
   --out <dir>                    Carpeta de salida (por defecto una carpeta temporal)
   --dry-run                      Transcriptor falso que lee la etiqueta: no llama a ninguna API
   --offline                      Solo caché: nunca llama a una API; lo que falta queda como falla
+  --ink <archivo.json>           Evidencia de tinta por muestra ({ id: { hasInk } }) para el
+                                 blanco con evidencia de la lectura interpretada
   --decision-cache-dir <dir>     Caché del desempate con el motor de decisiones
                                  (por defecto ../pruebas-vlm-manuscrito/cache-decisiones)
   --compare <informe.json>       Comparación pareada contra un informe v2 anterior
@@ -171,10 +174,25 @@ class JevHarnessDecider implements HarnessDecider {
   }
 }
 
+function argumentOf(argv: readonly string[], name: string): string | null {
+  const index = argv.indexOf(`--${name}`);
+  return index >= 0 ? (argv[index + 1] ?? null) : null;
+}
+
+function inkBySampleOf(file: string | null): ReadonlyMap<string, InkEvidence> | undefined {
+  if (file === null) return undefined;
+  const raw = JSON.parse(readFileSync(resolve(file), 'utf8')) as Record<
+    string,
+    { hasInk: boolean }
+  >;
+  return new Map(Object.entries(raw).map(([id, entry]) => [id, { hasInk: entry.hasInk }]));
+}
+
 function interpretationSimulation(
   cacheMode: CacheMode,
   decisionCacheDir: string,
   offline: boolean,
+  inkBySample: ReadonlyMap<string, InkEvidence> | undefined,
 ): InterpretationSimulation {
   const defaults = DECISION_FEATURE_DEFAULTS.answer_reading_tiebreak;
   return {
@@ -184,6 +202,7 @@ function interpretationSimulation(
     decider: offline ? null : new JevHarnessDecider(),
     decisionEngine: defaults.engine,
     decisionModel: defaults.model,
+    ...(inkBySample ? { inkBySample } : {}),
   };
 }
 
@@ -232,6 +251,7 @@ async function main(): Promise<void> {
         options.cacheMode,
         decisionCacheDirOf(process.argv.slice(2)),
         options.offline === true,
+        inkBySampleOf(argumentOf(process.argv.slice(2), 'ink')),
       ),
       ...(context ? { transcriberFor: availableTranscriber(context) } : {}),
     });
