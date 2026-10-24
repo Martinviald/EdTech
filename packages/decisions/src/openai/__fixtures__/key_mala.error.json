@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "ms": 181,
+  "ctor": "AuthenticationError",
+  "status": 401,
+  "code": "invalid_api_key",
+  "type": "invalid_request_error",
+  "param": null,
+  "message": "401 Incorrect API key provided: sk-inval***-000. You can find your API key at https://platform.openai.com/account/api-keys.",
+  "body": {
+    "message": "Incorrect API key provided: sk-inval***-000. You can find your API key at https://platform.openai.com/account/api-keys.",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key",
+    "param": null
+  }
+}

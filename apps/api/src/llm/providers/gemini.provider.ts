@@ -1,16 +1,85 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { LLM_PROVIDER_DEFAULTS } from '../llm.constants';
+import { runWithinDeadline, type LlmDeadline } from './llm-deadline.helpers';
 import type {
   LlmAgentContent,
   LlmAgentEvent,
   LlmAgentRequest,
   LlmAgentStopReason,
+  LlmCompletionOptions,
   LlmCompletionRequest,
   LlmCompletionResult,
+  LlmMediaResolution,
   LlmProvider,
   LlmProviderName,
+  LlmReasoningLevel,
+  LlmStructuredFinishReason,
+  LlmStructuredRequest,
+  LlmStructuredResult,
+  LlmStructuredUsage,
   LlmUsage,
 } from '../llm.types';
+
+type GeminiThinkingConfig = { thinkingBudget: number } | { thinkingLevel: string };
+
+interface GeminiUsageMetadata {
+  promptTokenCount?: number;
+  candidatesTokenCount?: number;
+  thoughtsTokenCount?: number;
+  cachedContentTokenCount?: number;
+  promptTokensDetails?: Array<{ modality?: string; tokenCount?: number }>;
+}
+
+interface GeminiStructuredResponse {
+  responseId?: string;
+  modelVersion?: string;
+  promptFeedback?: { blockReason?: string };
+  candidates?: Array<{
+    finishReason?: string;
+    content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+  }>;
+  usageMetadata?: GeminiUsageMetadata;
+}
+
+type GeminiStructuredClient = {
+  models: {
+    generateContent(req: {
+      model: string;
+      contents: GeminiPart[];
+      config: Record<string, unknown>;
+    }): Promise<GeminiStructuredResponse>;
+  };
+};
+
+const GEMINI_MEDIA_RESOLUTION: Record<LlmMediaResolution, string> = {
+  low: 'MEDIA_RESOLUTION_LOW',
+  medium: 'MEDIA_RESOLUTION_MEDIUM',
+  high: 'MEDIA_RESOLUTION_HIGH',
+};
+
+const GEMINI_THINKING_BUDGET: Record<Exclude<LlmReasoningLevel, 'off'>, number> = {
+  low: 1024,
+  medium: 8192,
+};
+
+const GEMINI_PRO_MIN_THINKING_BUDGET = 128;
+
+const GEMINI_OFF_THINKING_LEVELS = ['MINIMAL', 'LOW'] as const;
+
+const BAD_REQUEST_STATUS = 400;
+
+const THINKING_LEVEL_REJECTION = /thinking level \w+ is not supported/i;
+
+const GEMINI_MAX_THINKING_SHARE = 0.5;
+
+const GEMINI_SAFETY_FINISH_REASONS = new Set([
+  'SAFETY',
+  'PROHIBITED_CONTENT',
+  'BLOCKLIST',
+  'SPII',
+  'IMAGE_SAFETY',
+  'IMAGE_PROHIBITED_CONTENT',
+]);
 
 /**
  * Integración con la API de Google Gemini sobre `@google/genai`.
@@ -82,7 +151,7 @@ interface GeminiFunctionResponse {
 /** Una "part" de contenido en el historial agéntico de Gemini. */
 type GeminiAgentPart =
   | { text: string }
-  | { functionCall: { name: string; args: unknown } }
+  | { functionCall: { name: string; args: unknown }; thoughtSignature?: string }
   | { functionResponse: GeminiFunctionResponse };
 /** Un mensaje del historial: rol 'user' o 'model' (Gemini NO usa 'assistant'). */
 interface GeminiContent {
@@ -105,12 +174,17 @@ interface GeminiStreamChunk {
   candidates?: Array<{
     finishReason?: string;
     content?: {
-      parts?: Array<{ text?: string; functionCall?: GeminiFunctionCall }>;
+      parts?: Array<{
+        text?: string;
+        functionCall?: GeminiFunctionCall;
+        thoughtSignature?: string;
+      }>;
     };
   }>;
   usageMetadata?: {
     promptTokenCount?: number;
     candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
   };
 }
 
@@ -124,6 +198,7 @@ export class GeminiProvider implements LlmProvider {
   readonly name: LlmProviderName = 'gemini';
   private readonly logger = new Logger(GeminiProvider.name);
   private client: GeminiClient | null = null;
+  private readonly offThinkingStepByModel = new Map<string, number>();
 
   constructor() {
     this.initClient();
@@ -196,7 +271,7 @@ export class GeminiProvider implements LlmProvider {
     return {
       systemInstruction: request.system,
       maxOutputTokens: request.options.maxTokens,
-      temperature: request.options.temperature,
+      ...this.samplingParams(request.options),
       responseMimeType: 'application/json',
       ...(thinking ? { thinkingConfig: thinking } : {}),
     };
@@ -240,11 +315,188 @@ export class GeminiProvider implements LlmProvider {
       if (chunk.usageMetadata) {
         usage = {
           inputTokens: chunk.usageMetadata.promptTokenCount ?? 0,
-          outputTokens: chunk.usageMetadata.candidatesTokenCount ?? 0,
+          outputTokens:
+            (chunk.usageMetadata.candidatesTokenCount ?? 0) +
+            (chunk.usageMetadata.thoughtsTokenCount ?? 0),
         };
       }
     }
     return { text, usage };
+  }
+
+  async completeStructured(request: LlmStructuredRequest): Promise<LlmStructuredResult> {
+    if (!this.client) {
+      throw new Error('Gemini provider no está disponible');
+    }
+
+    const client = this.client as unknown as GeminiStructuredClient;
+    const response = await runWithinDeadline(request.options.timeoutMs, (deadline) =>
+      this.generateWithThinking(client, request, deadline),
+    );
+
+    const candidate = response.candidates?.[0];
+    const rawText = (candidate?.content?.parts ?? [])
+      .filter((part) => !part.thought && typeof part.text === 'string')
+      .map((part) => part.text)
+      .join('');
+    return {
+      data: this.parseStructuredText(rawText),
+      rawText,
+      model: request.options.model,
+      providerModel: response.modelVersion || request.options.model,
+      finishReason: this.toStructuredFinishReason(response),
+      usage: this.toStructuredUsage(response.usageMetadata),
+      providerRequestId: response.responseId ?? null,
+    };
+  }
+
+  private async generateWithThinking(
+    client: GeminiStructuredClient,
+    request: LlmStructuredRequest,
+    deadline: LlmDeadline,
+  ): Promise<GeminiStructuredResponse> {
+    const { model, reasoning, maxTokens } = request.options;
+    if (!this.usesOffThinkingLevels(model, reasoning)) {
+      return this.generateStructured(
+        client,
+        request,
+        this.structuredThinkingConfig(model, reasoning, maxTokens),
+        deadline,
+      );
+    }
+    let step = this.offThinkingStepByModel.get(model) ?? 0;
+    for (;;) {
+      const thinkingLevel = GEMINI_OFF_THINKING_LEVELS[step] ?? 'LOW';
+      try {
+        const response = await this.generateStructured(
+          client,
+          request,
+          { thinkingLevel },
+          deadline,
+        );
+        this.offThinkingStepByModel.set(model, step);
+        return response;
+      } catch (error) {
+        if (
+          step + 1 >= GEMINI_OFF_THINKING_LEVELS.length ||
+          !this.isThinkingLevelRejection(error)
+        ) {
+          throw error;
+        }
+        this.logger.warn(
+          `El modelo ${model} rechazó thinkingLevel=${thinkingLevel}; se reintenta con el siguiente nivel`,
+        );
+        step += 1;
+      }
+    }
+  }
+
+  private usesOffThinkingLevels(model: string, reasoning: LlmReasoningLevel): boolean {
+    return reasoning === 'off' && /^gemini-[3-9]/i.test(model) && !/pro/i.test(model);
+  }
+
+  private generateStructured(
+    client: GeminiStructuredClient,
+    request: LlmStructuredRequest,
+    thinkingConfig: GeminiThinkingConfig | undefined,
+    deadline: LlmDeadline,
+  ): Promise<GeminiStructuredResponse> {
+    return client.models.generateContent({
+      model: request.options.model,
+      contents: [
+        ...request.images.map((img) => ({
+          inlineData: { mimeType: img.mimeType, data: img.data },
+        })),
+        { text: request.prompt },
+      ],
+      config: this.structuredConfig(request, thinkingConfig, deadline),
+    });
+  }
+
+  private isThinkingLevelRejection(error: unknown): boolean {
+    if (!(error instanceof Error)) return false;
+    const { status } = error as Error & { status?: unknown };
+    return status === BAD_REQUEST_STATUS && THINKING_LEVEL_REJECTION.test(error.message);
+  }
+
+  private samplingParams(options: LlmCompletionOptions): { temperature?: number } {
+    return options.temperature !== undefined ? { temperature: options.temperature } : {};
+  }
+
+  private structuredConfig(
+    request: LlmStructuredRequest,
+    thinkingConfig: GeminiThinkingConfig | undefined,
+    deadline: LlmDeadline,
+  ): Record<string, unknown> {
+    return {
+      systemInstruction: request.system,
+      maxOutputTokens: request.options.maxTokens,
+      responseMimeType: 'application/json',
+      responseJsonSchema: request.jsonSchema,
+      httpOptions: { timeout: deadline.remainingMs() },
+      abortSignal: deadline.signal,
+      ...(request.options.mediaResolution
+        ? { mediaResolution: GEMINI_MEDIA_RESOLUTION[request.options.mediaResolution] }
+        : {}),
+      ...(thinkingConfig ? { thinkingConfig } : {}),
+    };
+  }
+
+  private structuredThinkingConfig(
+    model: string,
+    reasoning: LlmReasoningLevel,
+    maxTokens: number,
+  ): GeminiThinkingConfig | undefined {
+    const isPro = /pro/i.test(model);
+    if (/^gemini-2\.5/i.test(model)) {
+      const minBudget = isPro ? GEMINI_PRO_MIN_THINKING_BUDGET : 0;
+      if (reasoning === 'off') return { thinkingBudget: minBudget };
+      const budget = Math.min(
+        GEMINI_THINKING_BUDGET[reasoning],
+        Math.floor(maxTokens * GEMINI_MAX_THINKING_SHARE),
+      );
+      return { thinkingBudget: Math.max(budget, minBudget) };
+    }
+    if (/^gemini-[3-9]/i.test(model)) {
+      if (reasoning === 'off') return { thinkingLevel: isPro ? 'LOW' : 'MINIMAL' };
+      return { thinkingLevel: reasoning.toUpperCase() };
+    }
+    return undefined;
+  }
+
+  private parseStructuredText(rawText: string): unknown {
+    try {
+      return JSON.parse(rawText);
+    } catch {
+      return null;
+    }
+  }
+
+  private toStructuredFinishReason(response: GeminiStructuredResponse): LlmStructuredFinishReason {
+    if (response.promptFeedback?.blockReason) return 'safety';
+    const reason = response.candidates?.[0]?.finishReason;
+    if (reason === 'STOP') return 'stop';
+    if (reason === 'MAX_TOKENS') return 'max_tokens';
+    if (reason !== undefined && GEMINI_SAFETY_FINISH_REASONS.has(reason)) return 'safety';
+    return 'other';
+  }
+
+  private toStructuredUsage(metadata: GeminiUsageMetadata | undefined): LlmStructuredUsage | null {
+    if (!metadata) return null;
+    const reasoningTokens = metadata.thoughtsTokenCount ?? 0;
+    const imageDetails = (metadata.promptTokensDetails ?? []).filter(
+      (detail) => detail.modality === 'IMAGE',
+    );
+    return {
+      inputTokens: metadata.promptTokenCount ?? 0,
+      outputTokens: (metadata.candidatesTokenCount ?? 0) + reasoningTokens,
+      reasoningTokens,
+      cachedInputTokens: metadata.cachedContentTokenCount ?? 0,
+      imageTokens:
+        metadata.promptTokensDetails === undefined
+          ? null
+          : imageDetails.reduce((sum, detail) => sum + (detail.tokenCount ?? 0), 0),
+    };
   }
 
   /**
@@ -345,7 +597,7 @@ export class GeminiProvider implements LlmProvider {
         systemInstruction: request.system,
         tools: functionDeclarations.length > 0 ? [{ functionDeclarations }] : undefined,
         maxOutputTokens: request.options.maxTokens,
-        temperature: request.options.temperature,
+        ...this.samplingParams(request.options),
       },
     });
 
@@ -355,6 +607,7 @@ export class GeminiProvider implements LlmProvider {
     let sawFunctionCall = false;
     // Último finishReason visto (Gemini lo entrega en el último chunk).
     let finishReason: string | undefined;
+    let lastUsage: GeminiStreamChunk['usageMetadata'];
 
     for await (const chunk of stream) {
       // Recorremos las parts del primer candidate: cada chunk trae texto
@@ -370,23 +623,29 @@ export class GeminiProvider implements LlmProvider {
             id: `${part.functionCall.name ?? 'tool'}-${callIndex++}`,
             name: part.functionCall.name ?? '',
             input: part.functionCall.args ?? {},
+            ...(part.thoughtSignature
+              ? { providerMetadata: { thoughtSignature: part.thoughtSignature } }
+              : {}),
           };
         }
       }
 
-      // Uso de tokens: Gemini lo reporta acumulado en `usageMetadata`.
       if (chunk.usageMetadata) {
-        yield {
-          type: 'usage',
-          inputTokens: chunk.usageMetadata.promptTokenCount ?? 0,
-          outputTokens: chunk.usageMetadata.candidatesTokenCount ?? 0,
-        };
+        lastUsage = chunk.usageMetadata;
       }
 
       const reason = chunk.candidates?.[0]?.finishReason;
       if (reason) {
         finishReason = reason;
       }
+    }
+
+    if (lastUsage) {
+      yield {
+        type: 'usage',
+        inputTokens: lastUsage.promptTokenCount ?? 0,
+        outputTokens: (lastUsage.candidatesTokenCount ?? 0) + (lastUsage.thoughtsTokenCount ?? 0),
+      };
     }
 
     yield {
@@ -469,9 +728,7 @@ export class GeminiProvider implements LlmProvider {
         case 'text':
           return { text: block.text };
         case 'tool_use':
-          return {
-            functionCall: { name: block.name, args: block.input },
-          };
+          return this.toFunctionCallPart(block);
         case 'tool_result':
           return {
             functionResponse: {
@@ -483,6 +740,16 @@ export class GeminiProvider implements LlmProvider {
           };
       }
     });
+  }
+
+  private toFunctionCallPart(
+    block: Extract<LlmAgentContent, { type: 'tool_use' }>,
+  ): GeminiAgentPart {
+    const thoughtSignature = block.providerMetadata?.thoughtSignature;
+    return {
+      functionCall: { name: block.name, args: block.input },
+      ...(typeof thoughtSignature === 'string' ? { thoughtSignature } : {}),
+    };
   }
 
   /**

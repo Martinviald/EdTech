@@ -50,6 +50,46 @@ describe('toParserResult', () => {
     expect(result.warnings).toEqual([]);
   });
 
+  it('un campo leído por recorte queda pendiente de lectura, sin respuesta ni error', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({ printedNumber: '1', value: 'B' }),
+          mark({ printedNumber: '2', state: 'marked', value: null, pendingReading: true }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '1': 'B' });
+    expect(result.rows[0]?.pendingReadingLabels).toEqual(['2']);
+    expect(result.rows[0]?.errors).toEqual([]);
+    expect(result.detectedColumns).toEqual(['1', '2']);
+  });
+
+  it('una lectura ya corregida viaja aparte, sin respuesta cruda ni etiqueta pendiente', () => {
+    const prescored = {
+      itemId: 'item-2',
+      value: { answer: '7', reading: { canonical: 'n:7', decisionId: 'dec-1' } },
+      isCorrect: true,
+      rawScore: 1,
+      scoredBy: 'ai' as const,
+      aiScore: { score: 1, decisionId: 'dec-1' },
+    };
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({ printedNumber: '1', value: 'B' }),
+          mark({ printedNumber: '2', state: 'marked', value: null, prescored }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '1': 'B' });
+    expect(result.rows[0]?.prescoredAnswers).toEqual({ '2': prescored });
+    expect(result.rows[0]?.pendingReadingLabels).toBeUndefined();
+    expect(result.detectedColumns).toEqual(['1', '2']);
+  });
+
   it('blank produce null sin error de fila', () => {
     const result = toParserResult([
       scan({ marks: [mark({ printedNumber: '4', state: 'blank', value: null })] }),
@@ -59,12 +99,13 @@ describe('toParserResult', () => {
     expect(result.rows[0]?.errors).toEqual([]);
   });
 
-  it('multiple sin revisar produce null + error ambiguous_mark', () => {
+  it('multiple sin revisar queda pendiente de revisión, sin respuesta, con error ambiguous_mark', () => {
     const result = toParserResult([
       scan({ sequence: 7, marks: [mark({ printedNumber: '5', state: 'multiple', value: null })] }),
     ]);
 
-    expect(result.rows[0]?.answers).toEqual({ '5': null });
+    expect(result.rows[0]?.answers).toEqual({});
+    expect(result.rows[0]?.pendingReviewLabels).toEqual(['5']);
     expect(result.rows[0]?.errors).toEqual([
       {
         rowNumber: 7,
@@ -75,7 +116,7 @@ describe('toParserResult', () => {
     ]);
   });
 
-  it('ambiguous sin revisar produce null + error ambiguous_mark', () => {
+  it('ambiguous sin revisar queda pendiente de revisión, sin respuesta, con error ambiguous_mark', () => {
     const result = toParserResult([
       scan({
         sequence: 2,
@@ -83,7 +124,8 @@ describe('toParserResult', () => {
       }),
     ]);
 
-    expect(result.rows[0]?.answers).toEqual({ '9': null });
+    expect(result.rows[0]?.answers).toEqual({});
+    expect(result.rows[0]?.pendingReviewLabels).toEqual(['9']);
     expect(result.rows[0]?.errors).toEqual([
       {
         rowNumber: 2,
@@ -92,6 +134,28 @@ describe('toParserResult', () => {
         message: expect.stringContaining('ambigua'),
       },
     ]);
+  });
+
+  it('una sub-marca dudosa sin revisar deja pendiente su etiqueta y conserva las demás', () => {
+    const result = toParserResult([
+      scan({
+        marks: [
+          mark({ printedNumber: '7B1', state: 'ambiguous', value: null }),
+          mark({ printedNumber: '7B2', state: 'marked', value: 'A' }),
+        ],
+      }),
+    ]);
+
+    expect(result.rows[0]?.answers).toEqual({ '7B2': 'A' });
+    expect(result.rows[0]?.pendingReviewLabels).toEqual(['7B1']);
+  });
+
+  it('una hoja sin marcas dudosas no lleva pendingReviewLabels', () => {
+    const result = toParserResult([
+      scan({ marks: [mark({ printedNumber: '1', state: 'blank', value: null })] }),
+    ]);
+
+    expect(result.rows[0]?.pendingReviewLabels).toBeUndefined();
   });
 
   it('reviewedValue corrige un multiple: usa el valor revisado y no emite error', () => {

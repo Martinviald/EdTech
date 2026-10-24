@@ -1,3 +1,5 @@
+import type { LlmModelChoice } from '@soe/types';
+
 /**
  * Contratos del módulo LLM provider-agnóstico.
  *
@@ -28,6 +30,7 @@ export interface LlmCompletionOptions {
 export interface LlmUsage {
   inputTokens: number;
   outputTokens: number;
+  cachedInputTokens?: number;
 }
 
 /**
@@ -106,6 +109,63 @@ export interface LlmProvider {
    * conversacional requiere tool-use nativo). Ver `LlmAgentRequest`/`LlmAgentEvent`.
    */
   streamWithTools?(request: LlmAgentRequest): AsyncIterable<LlmAgentEvent>;
+  completeStructured?(request: LlmStructuredRequest): Promise<LlmStructuredResult>;
+}
+
+export type LlmReasoningLevel = 'off' | 'low' | 'medium';
+
+export type LlmMediaResolution = 'low' | 'medium' | 'high';
+
+export interface LlmStructuredOptions {
+  model: string;
+  maxTokens: number;
+  reasoning: LlmReasoningLevel;
+  mediaResolution?: LlmMediaResolution;
+  timeoutMs: number;
+}
+
+export interface LlmStructuredRequest {
+  system: string;
+  prompt: string;
+  images: LlmImagePart[];
+  jsonSchema: Record<string, unknown>;
+  schemaName: string;
+  propertyOrder: string[];
+  options: LlmStructuredOptions;
+}
+
+export interface LlmStructuredCall {
+  system: string;
+  prompt: string;
+  images: LlmImagePart[];
+  jsonSchema: Record<string, unknown>;
+  schemaName: string;
+  propertyOrder: string[];
+  reasoning?: LlmReasoningLevel;
+  mediaResolution?: LlmMediaResolution;
+  maxTokens?: number;
+  timeoutMs?: number;
+  target?: LlmModelChoice;
+}
+
+export type LlmStructuredFinishReason = 'stop' | 'max_tokens' | 'refusal' | 'safety' | 'other';
+
+export interface LlmStructuredUsage {
+  inputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  cachedInputTokens: number;
+  imageTokens: number | null;
+}
+
+export interface LlmStructuredResult {
+  data: unknown;
+  rawText: string;
+  model: string;
+  providerModel: string;
+  finishReason: LlmStructuredFinishReason;
+  usage: LlmStructuredUsage | null;
+  providerRequestId: string | null;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -137,7 +197,13 @@ export type LlmAgentRole = 'user' | 'assistant';
  */
 export type LlmAgentContent =
   | { type: 'text'; text: string }
-  | { type: 'tool_use'; id: string; name: string; input: unknown }
+  | {
+      type: 'tool_use';
+      id: string;
+      name: string;
+      input: unknown;
+      providerMetadata?: Record<string, unknown>;
+    }
   | {
       type: 'tool_result';
       /** Referencia al `id` del `tool_use` que originó este resultado. */
@@ -164,7 +230,13 @@ export type LlmAgentStopReason = 'end_turn' | 'tool_use' | 'max_tokens' | 'other
  */
 export type LlmAgentEvent =
   | { type: 'text_delta'; text: string }
-  | { type: 'tool_call'; id: string; name: string; input: unknown }
+  | {
+      type: 'tool_call';
+      id: string;
+      name: string;
+      input: unknown;
+      providerMetadata?: Record<string, unknown>;
+    }
   | { type: 'usage'; inputTokens: number; outputTokens: number }
   | { type: 'done'; stopReason: LlmAgentStopReason };
 

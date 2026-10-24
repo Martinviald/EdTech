@@ -7,6 +7,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import {
   assessments,
   gradingScales,
@@ -56,15 +57,29 @@ import { parseZipgradeCsv } from './lib/parsers/zipgrade-parser';
 import { parseDiaOfficialCsv } from './lib/parsers/dia-official-parser';
 import { parseGenericCsv } from './lib/parsers/generic-csv-parser';
 import { getTemplate, listTemplates } from './lib/templates';
-import type { ParserResult } from './lib/parsers/parser.types';
+import type { ParserResult, PrescoredAnswer } from './lib/parsers/parser.types';
 import { matchStudents } from './lib/student-matcher';
 import {
   annulmentEvidence,
   buildPrintedLabelIndex,
   resolveRowAnswers,
   resolveAnnulledAnswers,
+  resolveScanLabel,
+  type AnnulledAnswers,
+  type ResolvedRow,
+  resolvePendingReadingPositions,
+  resolvePrescoredAnswers,
   toScoringAnswer,
 } from './lib/composite-answers';
+
+export interface RescoreScannedAnswerInput {
+  assessmentId: string;
+  instrumentId: string;
+  studentId: string;
+  label: string;
+  answers: Record<string, string | null>;
+  annulledLabels: string[];
+}
 
 interface ItemForAssessment {
   id: string;
@@ -421,57 +436,32 @@ export class AnswerSheetsService {
       // contra los ítems del instrumento antes de corregir.
       const resolvedRow = resolveRowAnswers(labelIndex, row.answers);
       const annulled = resolveAnnulledAnswers(labelIndex, row.annulledLabels);
+      const pendingReading = resolvePendingReadingPositions(labelIndex, row.pendingReadingLabels);
+      const pendingReview = resolvePendingReadingPositions(labelIndex, row.pendingReviewLabels);
+      const prescored = resolvePrescoredAnswers(labelIndex, row.prescoredAnswers);
 
       for (const item of scopedItems) {
-        const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
-        const evidence = annulmentEvidence(annulled, item.position);
-        const answerValue =
-          evidence === null ? { answer: rawAnswer } : { answer: rawAnswer, ...evidence };
-        const result = getScoringStrategy(item.type).score({
-          item: {
-            id: item.id,
-            type: item.type,
-            content: item.content,
-            maxScore: item.maxScore,
-            scoringConfig: item.scoringConfig,
-          },
-          rawAnswer,
-        });
-
-        if (result.requiresManualGrading) {
-          // Pendiente de corrección humana/IA (F4). NUNCA puntuar 0/incorrecto:
-          // scores en null → el calculador puro excluye `isCorrect === null` del
-          // denominador, así no contaminan el % de los autocorregidos.
-          responseRows.push({
-            assessmentId: '', // se completa una vez creado el assessment
-            studentId,
-            itemId: item.id,
-            value: answerValue,
-            isCorrect: null,
-            rawScore: null,
-            maxScore: item.maxScore.toFixed(2),
-            finalScore: null,
-            scoredBy: 'human',
-            scoredAt: null,
-          });
+        if (pendingReading.has(item.position) || prescored.pendingPositions.has(item.position)) {
+          responseRows.push(
+            this.pendingResponseRow(studentId, item, { answer: null, pendingReading: true }),
+          );
           continue;
         }
 
-        const rawScore = result.rawScore ?? 0;
-        const finalScore = rawScore;
+        if (pendingReview.has(item.position)) {
+          responseRows.push(
+            this.pendingResponseRow(studentId, item, { answer: null, pendingMarkReview: true }),
+          );
+          continue;
+        }
 
-        responseRows.push({
-          assessmentId: '', // se completa una vez creado el assessment
-          studentId,
-          itemId: item.id,
-          value: answerValue,
-          isCorrect: result.isCorrect,
-          rawScore: rawScore.toFixed(2),
-          maxScore: item.maxScore.toFixed(2),
-          finalScore: finalScore.toFixed(2),
-          scoredBy: 'auto',
-          scoredAt: now,
-        });
+        const prescoredAnswer = prescored.byPosition.get(item.position);
+        if (prescoredAnswer) {
+          responseRows.push(this.prescoredResponseRow(studentId, item, prescoredAnswer, now));
+          continue;
+        }
+
+        responseRows.push(this.scoredResponseRow(studentId, item, resolvedRow, annulled, now));
       }
     }
 
@@ -546,22 +536,12 @@ export class AnswerSheetsService {
       }));
 
       // Batch insert con upsert (assessmentId, studentId, itemId).
-      const keepsExistingScore = sql`excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL`;
       await tx
         .insert(responses)
         .values(responsesWithAssessment)
         .onConflictDoUpdate({
           target: [responses.assessmentId, responses.studentId, responses.itemId],
-          set: {
-            value: sql`excluded.value`,
-            isCorrect: sql`excluded.is_correct`,
-            rawScore: sql`excluded.raw_score`,
-            maxScore: sql`excluded.max_score`,
-            finalScore: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.finalScore} ELSE excluded.final_score END`,
-            scoredBy: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredBy} ELSE excluded.scored_by END`,
-            scoredAt: sql`CASE WHEN ${keepsExistingScore} THEN ${responses.scoredAt} ELSE excluded.scored_at END`,
-            updatedAt: now,
-          },
+          set: this.responseUpsertSet(now),
         });
 
       // Delete + reinsert de assessment_results / skill_results / read-model de
@@ -672,6 +652,154 @@ export class AnswerSheetsService {
 
   // ---------- helpers ----------
 
+  async rescoreScannedAnswer(tx: Database, input: RescoreScannedAnswerInput): Promise<string> {
+    const instrumentItems = await this.loadInstrumentItems(input.instrumentId, tx);
+    const labelIndex = buildPrintedLabelIndex(instrumentItems);
+    const target = resolveScanLabel(labelIndex, input.label, null);
+    if (target.kind === 'unmatched') {
+      throw new BadRequestException(
+        `La pregunta ${input.label} no corresponde a ningún ítem del instrumento.`,
+      );
+    }
+    const item = instrumentItems.find((candidate) => candidate.position === target.item.position);
+    if (!item) {
+      throw new BadRequestException(
+        `La pregunta ${input.label} no corresponde a ningún ítem del instrumento.`,
+      );
+    }
+    const resolvedRow = resolveRowAnswers(labelIndex, input.answers);
+    const annulled = resolveAnnulledAnswers(labelIndex, input.annulledLabels);
+    const now = new Date();
+    const row = this.scoredResponseRow(input.studentId, item, resolvedRow, annulled, now);
+
+    const [existing] = await tx
+      .select({ id: responses.id, humanScore: responses.humanScore })
+      .from(responses)
+      .where(
+        and(
+          eq(responses.assessmentId, input.assessmentId),
+          eq(responses.studentId, input.studentId),
+          eq(responses.itemId, item.id),
+        ),
+      )
+      .limit(1);
+    if (!existing) {
+      throw new ConflictException(
+        `La respuesta de la pregunta ${input.label} no se registró al confirmar el lote: no hay nada que corregir en los resultados.`,
+      );
+    }
+    if (existing.humanScore !== null) {
+      throw new ConflictException(
+        `La pregunta ${input.label} tiene un puntaje asignado a mano: corrígelo desde la revisión de puntajes.`,
+      );
+    }
+    await tx
+      .insert(responses)
+      .values({ ...row, assessmentId: input.assessmentId })
+      .onConflictDoUpdate({
+        target: [responses.assessmentId, responses.studentId, responses.itemId],
+        set: this.responseUpsertSet(now),
+      });
+    return item.id;
+  }
+
+  private scoredResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    resolvedRow: ResolvedRow,
+    annulled: AnnulledAnswers,
+    now: Date,
+  ): typeof responses.$inferInsert {
+    const rawAnswer = toScoringAnswer(item, resolvedRow.byPosition.get(item.position));
+    const evidence = annulmentEvidence(annulled, item.position);
+    const answerValue =
+      evidence === null ? { answer: rawAnswer } : { answer: rawAnswer, ...evidence };
+    const result = getScoringStrategy(item.type).score({
+      item: {
+        id: item.id,
+        type: item.type,
+        content: item.content,
+        maxScore: item.maxScore,
+        scoringConfig: item.scoringConfig,
+      },
+      rawAnswer,
+    });
+    if (result.requiresManualGrading) {
+      return this.pendingResponseRow(studentId, item, answerValue);
+    }
+    const rawScore = result.rawScore ?? 0;
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value: answerValue,
+      isCorrect: result.isCorrect,
+      rawScore: rawScore.toFixed(2),
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: rawScore.toFixed(2),
+      scoredBy: 'auto',
+      scoredAt: now,
+    };
+  }
+
+  private responseUpsertSet(now: Date) {
+    const keepsScore = sql`${responses.humanScore} IS NOT NULL OR (excluded.final_score IS NULL AND ${responses.finalScore} IS NOT NULL)`;
+    const kept = (column: AnyPgColumn, incoming: string) =>
+      sql`CASE WHEN ${keepsScore} THEN ${column} ELSE ${sql.raw(`excluded.${incoming}`)} END`;
+    return {
+      value: kept(responses.value, 'value'),
+      isCorrect: kept(responses.isCorrect, 'is_correct'),
+      rawScore: kept(responses.rawScore, 'raw_score'),
+      maxScore: sql`excluded.max_score`,
+      finalScore: kept(responses.finalScore, 'final_score'),
+      scoredBy: kept(responses.scoredBy, 'scored_by'),
+      scoredAt: kept(responses.scoredAt, 'scored_at'),
+      aiScore: sql`COALESCE(excluded.ai_score, ${responses.aiScore})`,
+      updatedAt: now,
+    };
+  }
+
+  private pendingResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    value: Record<string, unknown>,
+  ): typeof responses.$inferInsert {
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value,
+      isCorrect: null,
+      rawScore: null,
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: null,
+      scoredBy: 'human',
+      scoredAt: null,
+    };
+  }
+
+  private prescoredResponseRow(
+    studentId: string,
+    item: ItemForAssessment,
+    prescored: PrescoredAnswer,
+    now: Date,
+  ): typeof responses.$inferInsert {
+    const score = prescored.rawScore.toFixed(2);
+    return {
+      assessmentId: '',
+      studentId,
+      itemId: item.id,
+      value: prescored.value,
+      isCorrect: prescored.isCorrect,
+      rawScore: score,
+      maxScore: item.maxScore.toFixed(2),
+      finalScore: score,
+      aiScore: prescored.aiScore,
+      scoredBy: prescored.scoredBy,
+      scoredAt: now,
+    };
+  }
+
   private requireOrgId(user: JwtPayload): string {
     if (!user.orgId) {
       throw new ForbiddenException(
@@ -743,8 +871,11 @@ export class AnswerSheetsService {
     return loadSectionRoles(this.db, instrumentId);
   }
 
-  private async loadInstrumentItems(instrumentId: string): Promise<ItemForAssessment[]> {
-    const rows = await this.db
+  private async loadInstrumentItems(
+    instrumentId: string,
+    db: Database = this.db,
+  ): Promise<ItemForAssessment[]> {
+    const rows = await db
       .select({
         id: items.id,
         position: items.position,

@@ -63,6 +63,35 @@ describe('ejemplos compartidos del contrato OMR', () => {
     expect(scanResultSchema.safeParse(example).success).toBe(true);
   });
 
+  it('contrato v2: el ejemplo trae la evidencia del recorte y sin ella también parsea', () => {
+    const example = loadExample('scan-result') as {
+      pages: Array<{ marks: Array<Record<string, unknown>> }>;
+    };
+    const marks = example.pages.flatMap((page) => page.marks);
+    expect(
+      marks.some(
+        (mark) =>
+          (mark.crop as { cropProfileId?: string } | undefined)?.cropProfileId === 'short-answer@1',
+      ),
+    ).toBe(true);
+    const withoutCrop = {
+      pages: example.pages.map((page) => ({
+        ...page,
+        marks: page.marks.map(({ crop: _c, ...rest }) => rest),
+      })),
+    };
+    expect(scanResultSchema.safeParse(withoutCrop).success).toBe(true);
+    const withBadInk = {
+      pages: example.pages.map((page) => ({
+        ...page,
+        marks: page.marks.map((mark) =>
+          mark.crop ? { ...mark, crop: { ...(mark.crop as object), inkRatio: 1.5 } } : mark,
+        ),
+      })),
+    };
+    expect(scanResultSchema.safeParse(withBadInk).success).toBe(false);
+  });
+
   it('contrato v2: un doubtReason desconocido o una nullConfidence fuera de 0–1 no parsean', () => {
     const example = loadExample('scan-result') as { pages: Array<{ marks: Array<object> }> };
     const withBadReason = {

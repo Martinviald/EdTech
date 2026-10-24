@@ -1,12 +1,15 @@
 /**
  * Motor falso para tests y desarrollo sin API key. Valida los mismos límites que
- * el real y registra cada request recibido en `calls`.
+ * un motor real (por defecto, los de Jev) y registra cada request recibido en
+ * `calls`, imágenes incluidas.
  */
 
 import {
   DecisionError,
   type DecisionAnswer,
   type DecisionEngine,
+  type DecisionEngineCapabilities,
+  type DecisionEngineLimits,
   type DecisionQuestion,
   type DecisionQuestions,
   type DecisionRequest,
@@ -14,7 +17,13 @@ import {
   type DecisionState,
   type DecisionUsage,
 } from '../contracts';
-import { assertAnswerMatches, assertWithinLimits, toTypedAnswers } from '../questions';
+import { JEV_LIMITS } from '../jev/jev-limits';
+import {
+  assertAnswerMatches,
+  assertImagesSupported,
+  assertWithinLimits,
+  toTypedAnswers,
+} from '../questions';
 
 /** Respuesta programada: un valor fijo o una función del estado y la pregunta. */
 export type FakeAnswer =
@@ -31,12 +40,18 @@ export interface FakeDecisionEngineOptions {
   /** Default: `'fake-1.0.0'`. */
   readonly model?: string;
   readonly usage?: DecisionUsage;
+  /** Default: `{ images: true }`. */
+  readonly capabilities?: DecisionEngineCapabilities;
+  /** Default: `JEV_LIMITS` sin restricciones de imagen (el falso no ajusta imágenes). */
+  readonly limits?: DecisionEngineLimits;
 }
 
 export const FAKE_MODEL = 'fake-1.0.0';
 
 export class FakeDecisionEngine implements DecisionEngine {
   readonly name = 'fake';
+  readonly capabilities: DecisionEngineCapabilities;
+  readonly limits: DecisionEngineLimits;
   /** Requests recibidos, en orden (también los que fallaron). */
   readonly calls: DecisionRequest<DecisionQuestions>[] = [];
   answers: Record<string, FakeAnswer>;
@@ -52,6 +67,8 @@ export class FakeDecisionEngine implements DecisionEngine {
     this.error = options.error;
     this.model = options.model ?? FAKE_MODEL;
     this.usage = options.usage ?? { inputTokens: 0, outputTokens: 0 };
+    this.capabilities = options.capabilities ?? { images: true };
+    this.limits = options.limits ?? { ...JEV_LIMITS, imageConstraints: null };
   }
 
   isAvailable(): boolean {
@@ -62,7 +79,8 @@ export class FakeDecisionEngine implements DecisionEngine {
     request: DecisionRequest<Q>,
   ): Promise<DecisionResult<Q>> {
     this.calls.push(request);
-    assertWithinLimits(request.state, request.questions);
+    assertImagesSupported(this, request.images);
+    assertWithinLimits(request.state, request.questions, this.limits, request.images);
     if (!this.available)
       throw new DecisionError('unavailable', 'El motor falso está marcado como no disponible.');
     if (this.error !== undefined) throw this.error;

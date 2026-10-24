@@ -1,0 +1,471 @@
+{
+  "description": "Rutas globales vigentes en la rama (migraciones 0048, 0049 y 0050): Haiku 5.5 + Gemini 3.5 Flash-Lite; hints format en sequence, ordered_tuple, word_list, short_text y multi_box; desarrollo con Haiku 5.5.",
+  "routes": [
+    {
+      "id": "7ead0000-0000-4000-8000-000000000001",
+      "version": 1,
+      "orgId": null,
+      "status": "active",
+      "level": "default",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": null,
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "none",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.short-answer@2",
+          "transcriberId": "llm"
+        },
+        {
+          "key": "gemini-3.5-flash-lite",
+          "hints": "none",
+          "model": "gemini-3.5-flash-lite",
+          "family": "gemini-flash-lite",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "gemini",
+          "promptRef": "transcribe.short-answer@2",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "short-answer-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-000000000005",
+      "version": 1,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "free_text",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "none",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 60000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.free-text@1",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "free-text-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": false,
+        "minReaders": 1,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": [],
+        "requireDistinctFamilies": false,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-000000000006",
+      "version": 1,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "math_work",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "none",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 60000,
+            "maxOutputTokens": 4096,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.free-text@1",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "free-text-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": false,
+        "minReaders": 1,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": [],
+        "requireDistinctFamilies": false,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-000000000007",
+      "version": 1,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "sequence",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "format",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.short-answer@2",
+          "transcriberId": "llm"
+        },
+        {
+          "key": "gemini-3.5-flash-lite",
+          "hints": "format",
+          "model": "gemini-3.5-flash-lite",
+          "family": "gemini-flash-lite",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "gemini",
+          "promptRef": "transcribe.short-answer@2",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "short-answer-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-000000000008",
+      "version": 1,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "ordered_tuple",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "format",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.short-answer@2",
+          "transcriberId": "llm"
+        },
+        {
+          "key": "gemini-3.5-flash-lite",
+          "hints": "format",
+          "model": "gemini-3.5-flash-lite",
+          "family": "gemini-flash-lite",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "gemini",
+          "promptRef": "transcribe.short-answer@2",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "short-answer-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-000000000009",
+      "version": 2,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "word_list",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "format",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.short-text@2",
+          "transcriberId": "llm"
+        },
+        {
+          "key": "gemini-3.5-flash-lite",
+          "hints": "format",
+          "model": "gemini-3.5-flash-lite",
+          "family": "gemini-flash-lite",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "gemini",
+          "promptRef": "transcribe.short-text@2",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "short-text-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000000a",
+      "version": 2,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "short_text",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "format",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.short-text@2",
+          "transcriberId": "llm"
+        },
+        {
+          "key": "gemini-3.5-flash-lite",
+          "hints": "format",
+          "model": "gemini-3.5-flash-lite",
+          "family": "gemini-flash-lite",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "gemini",
+          "promptRef": "transcribe.short-text@2",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "short-text-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2
+      }
+    },
+    {
+      "id": "7ead0000-0000-4000-8000-00000000000b",
+      "version": 2,
+      "orgId": null,
+      "status": "active",
+      "level": "format",
+      "itemId": null,
+      "instrumentId": null,
+      "formatKind": "multi_box",
+      "subjectId": null,
+      "gradeId": null,
+      "readers": [
+        {
+          "key": "claude-haiku-5-5",
+          "hints": "format",
+          "model": "claude-haiku-5-5",
+          "family": "anthropic-haiku",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "anthropic",
+          "promptRef": "transcribe.short-text@2",
+          "transcriberId": "llm"
+        },
+        {
+          "key": "gemini-3.5-flash-lite",
+          "hints": "format",
+          "model": "gemini-3.5-flash-lite",
+          "family": "gemini-flash-lite",
+          "params": {
+            "reasoning": "off",
+            "timeoutMs": 30000,
+            "maxOutputTokens": 2048,
+            "mediaResolution": "medium"
+          },
+          "provider": "gemini",
+          "promptRef": "transcribe.short-text@2",
+          "transcriberId": "llm"
+        }
+      ],
+      "fallbackReaders": [],
+      "shadowReaders": [],
+      "shadowSampleRate": 0.0,
+      "policy": {
+        "id": "short-text-default",
+        "agreeOn": "canonical",
+        "version": 1,
+        "autoAccept": true,
+        "minReaders": 2,
+        "minConfidence": 0.85,
+        "onDisagreement": "review",
+        "tiebreakReader": null,
+        "auditSampleRate": 0.1,
+        "blankByInkBelow": null,
+        "autoAcceptOutcomes": ["correct", "incorrect"],
+        "requireDistinctFamilies": true,
+        "alternativePlausibilityFloor": 0.2
+      }
+    }
+  ]
+}

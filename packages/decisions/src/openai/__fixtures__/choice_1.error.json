@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "ms": 202,
+  "ctor": "BadRequestError",
+  "status": 400,
+  "code": "array_below_min_length",
+  "type": "invalid_request_error",
+  "param": "questions[0].choices",
+  "message": "400 Invalid 'questions[0].choices': array too short. Expected an array with minimum length 2, but got an array with length 1 instead.",
+  "body": {
+    "message": "Invalid 'questions[0].choices': array too short. Expected an array with minimum length 2, but got an array with length 1 instead.",
+    "type": "invalid_request_error",
+    "param": "questions[0].choices",
+    "code": "array_below_min_length"
+  }
+}

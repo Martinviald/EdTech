@@ -1,6 +1,7 @@
 import {
   boolean,
   decimal,
+  index,
   jsonb,
   pgTable,
   text,
@@ -13,6 +14,7 @@ import { scoredByEnum } from './enums';
 import { assessments, assessmentForms } from './assessments';
 import { students } from './students';
 import { items } from './items';
+import { organizations } from './organizations';
 
 export const responses = pgTable(
   'responses',
@@ -38,11 +40,16 @@ export const responses = pgTable(
       justification?: string;
       model?: string;
       promptVersion?: string;
+      decisionId?: string;
+      levelCode?: string;
+      rationale?: string;
+      evidenceQuotes?: string[];
     }>(),
     humanScore: jsonb('human_score').$type<{
       score?: number;
       overrideReason?: string;
       scoredById?: string;
+      levelCode?: string;
     }>(),
     finalScore: decimal('final_score', { precision: 7, scale: 2 }),
     scoredBy: scoredByEnum('scored_by'),
@@ -53,24 +60,31 @@ export const responses = pgTable(
   (table) => [unique().on(table.assessmentId, table.studentId, table.itemId)],
 );
 
-export const aiGradingJobs = pgTable('ai_grading_jobs', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  responseId: uuid('response_id')
-    .notNull()
-    .references(() => responses.id, { onDelete: 'cascade' }),
-  type: text('type').notNull(),
-  status: text('status').default('pending').notNull(),
-  model: text('model'),
-  promptVersion: text('prompt_version'),
-  input: jsonb('input').$type<Record<string, unknown>>(),
-  output: jsonb('output').$type<Record<string, unknown>>(),
-  score: decimal('score', { precision: 7, scale: 2 }),
-  confidence: decimal('confidence', { precision: 3, scale: 2 }),
-  justification: text('justification'),
-  costUsd: decimal('cost_usd', { precision: 10, scale: 6 }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  completedAt: timestamp('completed_at'),
-});
+export const aiGradingJobs = pgTable(
+  'ai_grading_jobs',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    responseId: uuid('response_id')
+      .notNull()
+      .references(() => responses.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(),
+    status: text('status').default('pending').notNull(),
+    model: text('model'),
+    promptVersion: text('prompt_version'),
+    input: jsonb('input').$type<Record<string, unknown>>(),
+    output: jsonb('output').$type<Record<string, unknown>>(),
+    score: decimal('score', { precision: 7, scale: 2 }),
+    confidence: decimal('confidence', { precision: 3, scale: 2 }),
+    justification: text('justification'),
+    costUsd: decimal('cost_usd', { precision: 10, scale: 6 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    completedAt: timestamp('completed_at'),
+  },
+  (table) => [index('idx_ai_grading_jobs_org').on(table.orgId)],
+);
 
 export const responsesRelations = relations(responses, ({ one }) => ({
   assessment: one(assessments, {
@@ -79,6 +93,11 @@ export const responsesRelations = relations(responses, ({ one }) => ({
   }),
   student: one(students, { fields: [responses.studentId], references: [students.id] }),
   item: one(items, { fields: [responses.itemId], references: [items.id] }),
+}));
+
+export const aiGradingJobsRelations = relations(aiGradingJobs, ({ one }) => ({
+  org: one(organizations, { fields: [aiGradingJobs.orgId], references: [organizations.id] }),
+  response: one(responses, { fields: [aiGradingJobs.responseId], references: [responses.id] }),
 }));
 
 export type Response = typeof responses.$inferSelect;

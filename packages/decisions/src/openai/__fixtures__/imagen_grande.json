@@ -1,0 +1,26 @@
+{
+  "model": "gpt-6-luna",
+  "answers": [
+    {
+      "type": "predicate",
+      "name": "ruido",
+      "probability": 1
+    }
+  ],
+  "usage": {
+    "input_tokens": 7903,
+    "input_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 7750,
+      "cache_write_tokens_details": {
+        "ttl_30m_tokens": 7750,
+        "ttl_12h_tokens": 0
+      }
+    },
+    "output_tokens": 0,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 7903
+  }
+}

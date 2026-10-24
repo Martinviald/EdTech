@@ -1,12 +1,17 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { and, eq, gte, isNull, lte } from 'drizzle-orm';
+import { and, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 import {
   aiAnalyses,
+  aiGradingJobs,
+  answerReadings,
   assistantMessages,
+  decisionCalls,
   organizations,
   remedialMaterials,
   withOrgContext,
   type AiAnalysis,
+  type AiGradingJob,
+  type AnswerReadingRow,
   type AssistantMessage,
   type RemedialMaterial,
 } from '@soe/db';
@@ -35,9 +40,16 @@ import { InjectDb, type Database } from '../database/database.types';
 const ANALYSIS_COMPLETED = 'completed';
 const REMEDIAL_COMPLETED: ReadonlySet<string> = new Set(['ready', 'approved', 'discarded']);
 
-/** Una fila normalizada de gasto IA, independiente de la tabla de origen. */
-interface NormalizedRow {
-  source: 'ai_analysis' | 'remedial' | 'assistant';
+type AiSpendSource =
+  | 'ai_analysis'
+  | 'remedial'
+  | 'assistant'
+  | 'ai_grading'
+  | 'answer_reading'
+  | 'decision';
+
+interface SingleSpendRow {
+  source: AiSpendSource;
   type: string;
   model: string | null;
   status: string;
@@ -47,6 +59,33 @@ interface NormalizedRow {
   latencyMs: number | null;
   createdAt: Date;
   isFailed: boolean;
+}
+
+interface NormalizedRow {
+  source: AiSpendSource;
+  type: string;
+  model: string | null;
+  costUsd: number;
+  inputTokens: number;
+  outputTokens: number;
+  count: number;
+  latencySumMs: number;
+  latencyCount: number;
+  failedCount: number;
+  createdAt: Date;
+}
+
+interface DecisionCallBucketRow {
+  feature: string;
+  model: string | null;
+  status: string;
+  day: string;
+  calls: number;
+  costUsd: string | null;
+  inputTokens: string | null;
+  outputTokens: string | null;
+  latencySumMs: string | null;
+  latencyCount: number;
 }
 
 /** Acumulador mutable de un bucket (luego se materializa a AiCostBucket). */
@@ -74,10 +113,32 @@ const REMEDIAL_TYPE_LABELS: Record<string, string> = {
   group_plan: 'Plan por grupo',
 };
 
-const SOURCE_LABELS: Record<NormalizedRow['source'], string> = {
+const SOURCE_LABELS: Record<AiSpendSource, string> = {
   ai_analysis: 'Análisis IA',
   remedial: 'Material remedial',
   assistant: 'Asistente IA',
+  ai_grading: 'Corrección IA',
+  answer_reading: 'Lectura de respuestas escritas',
+  decision: 'Motor de decisiones',
+};
+
+const AI_GRADING_COMPLETED = 'completed';
+
+const AI_GRADING_TYPE_LABELS: Record<string, string> = {
+  development_crop: 'Corrección de respuestas de desarrollo',
+};
+
+const ANSWER_READING_TYPE_LABELS: Record<string, string> = {
+  primary: 'Lectura principal',
+  tiebreak: 'Lectura de desempate',
+  shadow: 'Lectura en sombra',
+};
+
+const DECISION_FEATURE_LABELS: Record<string, string> = {
+  remedial_judge: 'Juez de material remedial',
+  mark_disambiguation_jev: 'Desambiguación de marcas (Jev)',
+  mark_disambiguation_openai: 'Desambiguación de marcas (OpenAI)',
+  answer_reading_tiebreak: 'Desempate de respuestas escritas (Jev)',
 };
 
 /** Etiqueta única de tipo para los turnos del asistente conversacional. */
@@ -121,11 +182,7 @@ export class AiObservabilityService {
   async getBudget(user: JwtPayload): Promise<AiBudgetStatus> {
     const orgId = this.requireOrgId(user);
     const now = new Date();
-    const start = startOfMonth(now);
-    const end = endOfMonth(now);
-
-    const rows = await this.fetchRows(orgId, start, end);
-    const monthSpendUsd = round6(rows.reduce((sum, r) => sum + r.costUsd, 0));
+    const monthSpendUsd = await this.monthSpendUsd(orgId, now);
 
     const budgetUsd = await this.resolveBudget(orgId);
 
@@ -139,6 +196,11 @@ export class AiObservabilityService {
       pctUsed,
       alertLevel: resolveAlertLevel(pctUsed),
     };
+  }
+
+  async monthSpendUsd(orgId: string, now: Date = new Date()): Promise<number> {
+    const rows = await this.fetchRows(orgId, startOfMonth(now), endOfMonth(now));
+    return round6(rows.reduce((sum, r) => sum + r.costUsd, 0));
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -160,7 +222,7 @@ export class AiObservabilityService {
       const date = toIsoDate(row.createdAt);
       const entry = byDay.get(date) ?? { costUsd: 0, count: 0 };
       entry.costUsd += row.costUsd;
-      entry.count += 1;
+      entry.count += row.count;
       byDay.set(date, entry);
     }
 
@@ -220,12 +282,70 @@ export class AiObservabilityService {
           ),
         )) as AssistantMessage[];
 
+      const gradingRows = (await tx
+        .select()
+        .from(aiGradingJobs)
+        .where(
+          and(
+            eq(aiGradingJobs.orgId, orgId),
+            gte(aiGradingJobs.createdAt, start),
+            lte(aiGradingJobs.createdAt, end),
+          ),
+        )) as AiGradingJob[];
+
+      const readingRows = (await tx
+        .select()
+        .from(answerReadings)
+        .where(
+          and(
+            eq(answerReadings.orgId, orgId),
+            gte(answerReadings.createdAt, start),
+            lte(answerReadings.createdAt, end),
+          ),
+        )) as AnswerReadingRow[];
+
+      const decisionBuckets = await this.decisionCallBuckets(tx, orgId, start, end);
+
       return [
-        ...analysisRows.map((r) => normalizeAnalysis(r)),
-        ...remedialRows.map((r) => normalizeRemedial(r)),
-        ...assistantRows.map((r) => normalizeAssistant(r)),
+        ...analysisRows.map((r) => fromSingleRow(normalizeAnalysis(r))),
+        ...remedialRows.map((r) => fromSingleRow(normalizeRemedial(r))),
+        ...assistantRows.map((r) => fromSingleRow(normalizeAssistant(r))),
+        ...gradingRows.map((r) => fromSingleRow(normalizeGradingJob(r))),
+        ...readingRows.map((r) => fromSingleRow(normalizeAnswerReading(r))),
+        ...decisionBuckets.map((r) => normalizeDecisionCallBucket(r)),
       ];
     });
+  }
+
+  private async decisionCallBuckets(
+    tx: Database,
+    orgId: string,
+    start: Date,
+    end: Date,
+  ): Promise<DecisionCallBucketRow[]> {
+    const day = sql`(${decisionCalls.createdAt})::date`;
+    return tx
+      .select({
+        feature: decisionCalls.feature,
+        model: decisionCalls.model,
+        status: decisionCalls.status,
+        day: sql<string>`${day}::text`,
+        calls: sql<number>`count(*)::int`,
+        costUsd: sql<string | null>`sum(${decisionCalls.costUsd})`,
+        inputTokens: sql<string | null>`sum(${decisionCalls.inputTokens})`,
+        outputTokens: sql<string | null>`sum(${decisionCalls.outputTokens})`,
+        latencySumMs: sql<string | null>`sum(${decisionCalls.latencyMs})`,
+        latencyCount: sql<number>`count(${decisionCalls.latencyMs})::int`,
+      })
+      .from(decisionCalls)
+      .where(
+        and(
+          eq(decisionCalls.orgId, orgId),
+          gte(decisionCalls.createdAt, start),
+          lte(decisionCalls.createdAt, end),
+        ),
+      )
+      .groupBy(decisionCalls.feature, decisionCalls.model, decisionCalls.status, day);
   }
 
   /** Lee `org.config.aiBudgetUsd` (tabla sin RLS, this.db directo). */
@@ -256,20 +376,20 @@ export class AiObservabilityService {
     let latencySum = 0;
     let latencyCount = 0;
     let failedCount = 0;
+    let count = 0;
 
     for (const row of rows) {
       totalCostUsd += row.costUsd;
       inputTokens += row.inputTokens;
       outputTokens += row.outputTokens;
-      if (row.latencyMs !== null) {
-        latencySum += row.latencyMs;
-        latencyCount += 1;
-      }
-      if (row.isFailed) failedCount += 1;
+      latencySum += row.latencySumMs;
+      latencyCount += row.latencyCount;
+      failedCount += row.failedCount;
+      count += row.count;
     }
 
     return {
-      count: rows.length,
+      count,
       totalCostUsd: round6(totalCostUsd),
       inputTokens,
       outputTokens,
@@ -297,14 +417,12 @@ export class AiObservabilityService {
         latencySum: 0,
         latencyCount: 0,
       };
-      bucket.count += 1;
+      bucket.count += row.count;
       bucket.totalCostUsd += row.costUsd;
       bucket.inputTokens += row.inputTokens;
       bucket.outputTokens += row.outputTokens;
-      if (row.latencyMs !== null) {
-        bucket.latencySum += row.latencyMs;
-        bucket.latencyCount += 1;
-      }
+      bucket.latencySum += row.latencySumMs;
+      bucket.latencyCount += row.latencyCount;
       acc.set(key, bucket);
     }
 
@@ -333,13 +451,13 @@ export class AiObservabilityService {
 // Helpers puros (fáciles de testear)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function normalizeAnalysis(row: AiAnalysis): NormalizedRow {
+function normalizeAnalysis(row: AiAnalysis): SingleSpendRow {
   return {
     source: 'ai_analysis',
     type: row.analysisType,
     model: row.model,
     status: row.status,
-    costUsd: parseCost(row.costUsd),
+    costUsd: parseNumeric(row.costUsd),
     inputTokens: row.tokens?.input ?? 0,
     outputTokens: row.tokens?.output ?? 0,
     latencyMs: computeLatency(row.status === ANALYSIS_COMPLETED, row.startedAt, row.completedAt),
@@ -348,13 +466,13 @@ function normalizeAnalysis(row: AiAnalysis): NormalizedRow {
   };
 }
 
-function normalizeRemedial(row: RemedialMaterial): NormalizedRow {
+function normalizeRemedial(row: RemedialMaterial): SingleSpendRow {
   return {
     source: 'remedial',
     type: row.type,
     model: row.model,
     status: row.status,
-    costUsd: parseCost(row.costUsd),
+    costUsd: parseNumeric(row.costUsd),
     inputTokens: row.tokens?.input ?? 0,
     outputTokens: row.tokens?.output ?? 0,
     latencyMs: computeLatency(REMEDIAL_COMPLETED.has(row.status), row.startedAt, row.completedAt),
@@ -369,13 +487,13 @@ function normalizeRemedial(row: RemedialMaterial): NormalizedRow {
  * de inicio/fin separados → latencia null; no hay estado de fallo → isFailed
  * false (un turno que falla no persiste como mensaje del asistente).
  */
-function normalizeAssistant(row: AssistantMessage): NormalizedRow {
+function normalizeAssistant(row: AssistantMessage): SingleSpendRow {
   return {
     source: 'assistant',
     type: ASSISTANT_TYPE,
     model: row.model,
     status: 'completed',
-    costUsd: parseCost(row.costUsd),
+    costUsd: parseNumeric(row.costUsd),
     inputTokens: row.tokens?.input ?? 0,
     outputTokens: row.tokens?.output ?? 0,
     latencyMs: null,
@@ -384,8 +502,70 @@ function normalizeAssistant(row: AssistantMessage): NormalizedRow {
   };
 }
 
-/** `costUsd` viene como decimal (string) o null → Number, null→0. */
-function parseCost(value: string | null): number {
+function normalizeGradingJob(row: AiGradingJob): SingleSpendRow {
+  return {
+    source: 'ai_grading',
+    type: row.type,
+    model: row.model,
+    status: row.status,
+    costUsd: parseNumeric(row.costUsd),
+    inputTokens: 0,
+    outputTokens: 0,
+    latencyMs: computeLatency(row.status === AI_GRADING_COMPLETED, row.createdAt, row.completedAt),
+    createdAt: row.createdAt,
+    isFailed: row.status === 'failed',
+  };
+}
+
+function normalizeAnswerReading(row: AnswerReadingRow): SingleSpendRow {
+  return {
+    source: 'answer_reading',
+    type: row.mode,
+    model: row.model,
+    status: row.status,
+    costUsd: parseNumeric(row.costUsd),
+    inputTokens: row.inputTokens,
+    outputTokens: row.outputTokens,
+    latencyMs: row.latencyMs,
+    createdAt: row.createdAt,
+    isFailed: row.status !== 'ok',
+  };
+}
+
+function fromSingleRow(row: SingleSpendRow): NormalizedRow {
+  return {
+    source: row.source,
+    type: row.type,
+    model: row.model,
+    costUsd: row.costUsd,
+    inputTokens: row.inputTokens,
+    outputTokens: row.outputTokens,
+    count: 1,
+    latencySumMs: row.latencyMs ?? 0,
+    latencyCount: row.latencyMs === null ? 0 : 1,
+    failedCount: row.isFailed ? 1 : 0,
+    createdAt: row.createdAt,
+  };
+}
+
+function normalizeDecisionCallBucket(row: DecisionCallBucketRow): NormalizedRow {
+  return {
+    source: 'decision',
+    type: row.feature,
+    model: row.model,
+    costUsd: parseNumeric(row.costUsd),
+    inputTokens: parseNumeric(row.inputTokens),
+    outputTokens: parseNumeric(row.outputTokens),
+    count: row.calls,
+    latencySumMs: parseNumeric(row.latencySumMs),
+    latencyCount: row.latencyCount,
+    failedCount: row.status === 'error' ? row.calls : 0,
+    createdAt: new Date(`${row.day}T00:00:00.000Z`),
+  };
+}
+
+/** Un decimal o bigint de Postgres (string) o null → Number, null→0. */
+function parseNumeric(value: string | null): number {
   if (value === null) return 0;
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -412,6 +592,15 @@ function typeLabel(row: NormalizedRow): string {
   }
   if (row.source === 'assistant') {
     return ASSISTANT_TYPE_LABEL;
+  }
+  if (row.source === 'ai_grading') {
+    return AI_GRADING_TYPE_LABELS[row.type] ?? row.type;
+  }
+  if (row.source === 'decision') {
+    return DECISION_FEATURE_LABELS[row.type] ?? row.type;
+  }
+  if (row.source === 'answer_reading') {
+    return ANSWER_READING_TYPE_LABELS[row.type] ?? row.type;
   }
   return REMEDIAL_TYPE_LABELS[row.type] ?? row.type;
 }

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { decisionCalls, withOrgContext } from '@soe/db';
-import type { DecisionAnswer, DecisionState } from '@soe/decisions';
+import type { DecisionAnswer, DecisionImage, DecisionState } from '@soe/decisions';
 import type {
   DecisionAnswerRecord,
   DecisionEngineId,
@@ -20,6 +20,7 @@ export interface DecisionCallEntry {
   engine: DecisionEngineId;
   mode: Extract<DecisionMode, 'shadow' | 'live'>;
   state: DecisionState;
+  images?: readonly DecisionImage[];
   model: string | null;
   answers: Readonly<Record<string, DecisionAnswer>> | null;
   errorCode: string | null;
@@ -47,7 +48,7 @@ export class DecisionCallsRecorder {
           errorCode: entry.errorCode,
           answers: entry.answers ? this.toAnswerRecords(entry.answers) : null,
           baseline: entry.baseline ?? null,
-          stateHash: this.hashState(entry.state),
+          stateHash: this.hashState(entry.state, entry.images),
           correlationId: entry.correlationId ?? null,
           inputTokens: entry.inputTokens,
           outputTokens: entry.outputTokens,
@@ -68,9 +69,22 @@ export class DecisionCallsRecorder {
     }
   }
 
-  private hashState(state: DecisionState): string {
+  private hashState(state: DecisionState, images?: readonly DecisionImage[]): string {
     const serialized = typeof state === 'string' ? state : JSON.stringify(state);
-    return createHash('sha256').update(serialized).digest('hex');
+    const hash = createHash('sha256').update(serialized);
+    for (const image of images ?? []) {
+      hash.update(`\n${this.hashImage(image)}`);
+    }
+    return hash.digest('hex');
+  }
+
+  private hashImage(image: DecisionImage): string {
+    if ('url' in image) {
+      return createHash('sha256')
+        .update(image.url.split(/[?#]/)[0] ?? '')
+        .digest('hex');
+    }
+    return createHash('sha256').update(Buffer.from(image.data, 'base64')).digest('hex');
   }
 
   private toAnswerRecords(

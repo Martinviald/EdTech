@@ -1,8 +1,19 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import type { Database } from '@soe/db';
-import type { LayoutSpec, PageQuality } from '@soe/types';
+import type { LayoutSpec, PageQuality, RubricEngine } from '@soe/types';
+import type {
+  AnswerReadingConsolidationService,
+  ConfirmedReadingsInput,
+  ReadingConfirmation,
+} from '../answer-reading/answer-reading-consolidation.service';
+import type { RubricGradingService } from '../answer-reading/rubric-grading.service';
 import type { JwtPayload } from '../auth/jwt-payload.types';
-import type { AnswerSheetsService } from '../answer-sheets/answer-sheets.service';
+import * as observability from '../common/observability/report-error';
+import type {
+  AnswerSheetsService,
+  RescoreScannedAnswerInput,
+} from '../answer-sheets/answer-sheets.service';
+import type { AssessmentResultsService } from '../assessment-results/assessment-results.service';
 import type { AnswerSheetPreviewStore } from '../answer-sheets/lib/preview-store';
 import type { FilesService } from '../files/files.service';
 import type {
@@ -35,15 +46,20 @@ type QueryChain = {
   orderBy: (..._: unknown[]) => QueryChain;
   limit: (..._: unknown[]) => QueryChain;
   offset: (..._: unknown[]) => QueryChain;
+  for: (..._: unknown[]) => QueryChain;
   then: <T>(resolve: (rows: unknown[]) => T, reject?: (err: unknown) => unknown) => Promise<T>;
 };
 
 function makeDb(selectResults: unknown[][]): {
   db: Database;
   updates: Array<Record<string, unknown>>;
+  locks: unknown[][];
+  transactions: { opened: number };
 } {
   let selectIdx = 0;
   const updates: Array<Record<string, unknown>> = [];
+  const locks: unknown[][] = [];
+  const transactions = { opened: 0 };
 
   function chain(rows: unknown[]): QueryChain {
     const c: QueryChain = {
@@ -54,6 +70,10 @@ function makeDb(selectResults: unknown[][]): {
       orderBy: () => c,
       limit: () => c,
       offset: () => c,
+      for: (...args: unknown[]) => {
+        locks.push(args);
+        return c;
+      },
       then: (resolve, reject) => Promise.resolve(rows).then(resolve, reject) as never,
     };
     return c;
@@ -61,6 +81,7 @@ function makeDb(selectResults: unknown[][]): {
 
   const db = {
     select: () => chain(selectResults[selectIdx++] ?? []),
+    selectDistinct: () => chain(selectResults[selectIdx++] ?? []),
     update: () => ({
       set: (values: Record<string, unknown>) => {
         updates.push(values);
@@ -72,41 +93,116 @@ function makeDb(selectResults: unknown[][]): {
       },
     }),
     execute: async () => [],
-    transaction: async (fn: (tx: unknown) => unknown) => fn(db),
+    transaction: async (fn: (tx: unknown) => unknown) => {
+      transactions.opened += 1;
+      return fn(db);
+    },
   } as unknown as Database;
 
-  return { db, updates };
+  return { db, updates, locks, transactions };
 }
 
 function makeConfirmer(): {
   confirmer: AnswerSheetConfirmer;
   calls: Array<{ user: JwtPayload; input: AnswerSheetConfirmInput }>;
+  rescoreCalls: Array<{ tx: Database; orgId: string; input: RescoreScannedAnswerInput }>;
+  refreshCalls: Array<{ orgId: string; recalculated: readonly string[] }>;
 } {
   const calls: Array<{ user: JwtPayload; input: AnswerSheetConfirmInput }> = [];
+  const rescoreCalls: Array<{ tx: Database; orgId: string; input: RescoreScannedAnswerInput }> = [];
+  const refreshCalls: Array<{ orgId: string; recalculated: readonly string[] }> = [];
   const confirmer: AnswerSheetConfirmer = {
     confirmParserResult: async (user, input) => {
       calls.push({ user, input });
       return { jobId: 'job-1', responsesCreated: 24 };
     },
+    rescoreScannedAnswer: async (tx, orgId, input) => {
+      rescoreCalls.push({ tx, orgId, input });
+      return [input.assessmentId];
+    },
+    refreshResultsAfterRescore: (orgId, recalculated) => {
+      refreshCalls.push({ orgId, recalculated });
+    },
   };
-  return { confirmer, calls };
+  return { confirmer, calls, rescoreCalls, refreshCalls };
 }
 
 const filesServiceFake = {
   buildDownloadUrl: (row: { id: string }) => `https://signed/${row.id}`,
 } as unknown as FilesService;
 
-function makeService(selectResults: unknown[][]) {
-  const { db, updates } = makeDb(selectResults);
-  const { confirmer, calls: confirmCalls } = makeConfirmer();
+function makeReadingConsolidation(
+  readings: Map<string, ReadingConfirmation> = new Map(),
+  linkError: Error | null = null,
+) {
+  const linkCalls: Array<{ orgId: string; input: ConfirmedReadingsInput }> = [];
+  const readingCalls: Array<{ orgId: string; batchId: string }> = [];
+  const consolidation = {
+    readingsForConfirmation: async (orgId: string, batchId: string) => {
+      readingCalls.push({ orgId, batchId });
+      return readings;
+    },
+    linkConfirmedResponses: async (orgId: string, input: ConfirmedReadingsInput) => {
+      linkCalls.push({ orgId, input });
+      if (linkError) throw linkError;
+      return null;
+    },
+  } as unknown as AnswerReadingConsolidationService;
+  return { consolidation, linkCalls, readingCalls };
+}
+
+function makeRubricGrading(engine: RubricEngine | Error = 'legacy') {
+  const rubricBatches: Array<{ orgId: string; batchId: string }> = [];
+  const rubricGrading = {
+    engineFor: async () => {
+      if (engine instanceof Error) throw engine;
+      return engine;
+    },
+    scheduleForBatch: (orgId: string, batchId: string) => {
+      rubricBatches.push({ orgId, batchId });
+    },
+  } as unknown as RubricGradingService;
+  return { rubricGrading, rubricBatches };
+}
+
+function makeService(
+  selectResults: unknown[][],
+  readings?: Map<string, ReadingConfirmation>,
+  linkError: Error | null = null,
+  engine: RubricEngine | Error = 'legacy',
+) {
+  const { db, updates, locks, transactions } = makeDb(selectResults);
+  const { confirmer, calls: confirmCalls, rescoreCalls, refreshCalls } = makeConfirmer();
   const gradingCalls: ScheduleConfirmedBatchParams[] = [];
   const developmentGradingFake = {
     scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
       gradingCalls.push(params);
     },
   } as unknown as DevelopmentGradingService;
-  const service = new ScanReviewService(db, confirmer, filesServiceFake, developmentGradingFake);
-  return { service, updates, confirmCalls, gradingCalls };
+  const { consolidation, linkCalls, readingCalls } = makeReadingConsolidation(readings, linkError);
+  const { rubricGrading, rubricBatches } = makeRubricGrading(engine);
+  const service = new ScanReviewService(
+    db,
+    confirmer,
+    filesServiceFake,
+    developmentGradingFake,
+    consolidation,
+    rubricGrading,
+  );
+  return {
+    service,
+    updates,
+    confirmCalls,
+    gradingCalls,
+    linkCalls,
+    readingCalls,
+    rubricBatches,
+    rescoreCalls,
+    refreshCalls,
+    locks,
+    transactions,
+    db,
+  };
 }
 
 function bubbleField(fieldId: string, printedNumber: string, pageIndex: number, values: string[]) {
@@ -206,6 +302,22 @@ function markQueueRow(overrides: Record<string, unknown>) {
     reviewDecision: null,
     reviewedById: null,
     autoResolved: false,
+    aiResolution: null,
+    ...overrides,
+  };
+}
+
+function aiResolution(overrides: Record<string, unknown> = {}) {
+  return {
+    version: 'mark-disambiguation-v1',
+    mode: 'live',
+    verdict: 'agree',
+    route: 'auto',
+    value: 'B',
+    applied: true,
+    engines: [],
+    thresholds: { jev: null, openai: null },
+    decidedAt: '2026-10-22T12:00:00.000Z',
     ...overrides,
   };
 }
@@ -798,10 +910,46 @@ const CONFIRM_MARKS = [
   },
 ];
 
+const SPEC_WITH_CROP: LayoutSpec = {
+  ...SPEC,
+  fields: [
+    ...SPEC.fields,
+    {
+      fieldId: 'f_dev',
+      kind: 'crop_region',
+      printedNumber: '4',
+      pageIndex: 1,
+      selectMode: 'single',
+      bubbles: [],
+      region: { topLeft: { x: 0.1, y: 0.5 }, bottomRight: { x: 0.9, y: 0.8 } },
+    },
+  ],
+};
+
+const CROP_MARK = {
+  markId: 'm-crop',
+  scanId: 'scan-1b',
+  printedNumber: '4',
+  state: 'marked',
+  value: null,
+  reviewedValue: null,
+  reviewDecision: null,
+  reviewedAt: null,
+};
+
 const CONFIRM_STUDENTS = [
   { id: STUDENT_1, rut: '12345678-5', firstName: 'Ana', lastName: 'Pérez' },
   { id: STUDENT_2, rut: '87654321-4', firstName: 'Benjamín', lastName: 'Soto' },
 ];
+
+function cropSelectResults(): unknown[][] {
+  return [
+    [{ ...CONFIRM_BATCH_ROW, spec: SPEC_WITH_CROP }],
+    CONFIRM_SCANS,
+    [...CONFIRM_MARKS, CROP_MARK],
+    CONFIRM_STUDENTS,
+  ];
+}
 
 describe('ScanReviewService.confirmBatch', () => {
   it('confirma el lote por el camino de answer-sheets con el ParserResult del adaptador', async () => {
@@ -827,7 +975,8 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(rows[0].rowNumber).toBe(1);
     expect(rows[0].studentRut).toBe('12345678-5');
     expect(rows[0].studentFullName).toBe('Ana Pérez');
-    expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
+    expect(rows[0].answers).toEqual({ '1': 'A', '3': 'F' });
+    expect(rows[0].pendingReviewLabels).toEqual(['2']);
 
     expect(updates).toHaveLength(2);
     expect(updates[0]).toMatchObject({ status: 'confirmed' });
@@ -841,7 +990,7 @@ describe('ScanReviewService.confirmBatch', () => {
     });
   });
 
-  it('cuenta como assumedPending las marcas ambiguas sin revisar y les registra el error ambiguous_mark', async () => {
+  it('deja pendientes de revisión, nunca en 0, las marcas dudosas sin revisar y les registra el error ambiguous_mark', async () => {
     const { service, confirmCalls } = makeService([
       [CONFIRM_BATCH_ROW],
       CONFIRM_SCANS,
@@ -854,6 +1003,36 @@ describe('ScanReviewService.confirmBatch', () => {
     const rows = confirmCalls[0].input.parserResult.rows;
     expect(rows[0].errors).toHaveLength(1);
     expect(rows[0].errors[0]).toMatchObject({ code: 'ambiguous_mark', field: '2' });
+    expect(rows[0].answers).not.toHaveProperty('2');
+    expect(rows[0].pendingReviewLabels).toEqual(['2']);
+    expect(result.summary.assumedPending).toBe(1);
+  });
+
+  it('una página con recortes y su burbuja indecidible no deja la alternativa en 0 al confirmar sin revisarla', async () => {
+    const undecidedBubble = {
+      markId: 'm-undecided',
+      scanId: 'scan-1a',
+      printedNumber: '1',
+      state: 'ambiguous',
+      value: null,
+      reviewedValue: null,
+      reviewDecision: null,
+      reviewedAt: null,
+    };
+    const { service, confirmCalls } = makeService([
+      [{ ...CONFIRM_BATCH_ROW, spec: SPEC_WITH_CROP }],
+      CONFIRM_SCANS.filter((scan) => scan.printedSheetId === 'sheet-1'),
+      [undecidedBubble, CROP_MARK],
+      CONFIRM_STUDENTS,
+    ]);
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const [row] = confirmCalls[0].input.parserResult.rows;
+    expect(row.answers).toEqual({});
+    expect(row.pendingReviewLabels).toEqual(['1']);
+    expect(row.pendingReadingLabels).toEqual(['4']);
+    expect(row.errors).toEqual([expect.objectContaining({ code: 'ambiguous_mark', field: '1' })]);
     expect(result.summary.assumedPending).toBe(1);
   });
 
@@ -1044,44 +1223,152 @@ describe('ScanReviewService.confirmBatch', () => {
     expect(confirmCalls).toHaveLength(0);
   });
 
-  it('excluye las marcas crop_region del ParserResult (CD-9: el recorte no es una alternativa)', async () => {
-    const specWithCrop: LayoutSpec = {
-      ...SPEC,
-      fields: [
-        ...SPEC.fields,
-        {
-          fieldId: 'f_dev',
-          kind: 'crop_region',
-          printedNumber: '4',
-          pageIndex: 1,
-          selectMode: 'single',
-          bubbles: [],
-          region: { topLeft: { x: 0.1, y: 0.5 }, bottomRight: { x: 0.9, y: 0.8 } },
-        },
-      ],
-    };
-    const cropMark = {
-      markId: 'm-crop',
-      scanId: 'scan-1b',
-      printedNumber: '4',
-      state: 'marked',
-      value: null,
-      reviewedValue: null,
-      reviewedAt: null,
-    };
-    const { service, confirmCalls } = makeService([
-      [{ ...CONFIRM_BATCH_ROW, spec: specWithCrop }],
-      CONFIRM_SCANS,
-      [...CONFIRM_MARKS, cropMark],
-      CONFIRM_STUDENTS,
-    ]);
+  it('sin decisión de lectura todavía, la marca de recorte queda pendiente, nunca en blanco', async () => {
+    const { service, confirmCalls, linkCalls } = makeService(cropSelectResults());
 
     const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
 
     const rows = confirmCalls[0].input.parserResult.rows;
-    expect(rows[0].answers).toEqual({ '1': 'A', '2': null, '3': 'F' });
+    expect(rows[0].answers).toEqual({ '1': 'A', '3': 'F' });
+    expect(rows[0].pendingReviewLabels).toEqual(['2']);
     expect(rows[0].answers).not.toHaveProperty('4');
+    expect(rows[0].pendingReadingLabels).toEqual(['4']);
+    expect(rows[0].prescoredAnswers).toBeUndefined();
     expect(result.summary.assumedPending).toBe(1);
+    expect(linkCalls).toEqual([
+      {
+        orgId: ORG_ID,
+        input: {
+          assessmentId: ASSESSMENT_ID,
+          links: [],
+          cropMarks: [{ markId: 'm-crop', studentId: STUDENT_1, itemId: null }],
+        },
+      },
+    ]);
+  });
+
+  it('informa el ítem de cada marca de recorte confirmada para reservar su respuesta', async () => {
+    const [batchRows, ...rest] = cropSelectResults();
+    const cropField = SPEC_WITH_CROP.fields.find((field) => field.fieldId === 'f_dev');
+    const specWithResponse: LayoutSpec = {
+      ...SPEC_WITH_CROP,
+      fields: [
+        ...SPEC_WITH_CROP.fields.filter((field) => field.fieldId !== 'f_dev'),
+        {
+          ...(cropField as LayoutSpec['fields'][number]),
+          response: {
+            itemId: 'item-4',
+            format: { kind: 'integer', maxChars: 3, allowNegative: false },
+            boxes: [],
+            cropProfileId: 'short-answer@1',
+          },
+        },
+      ],
+    };
+    const { service, linkCalls } = makeService([
+      [{ ...(batchRows?.[0] as object), spec: specWithResponse }],
+      ...rest,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(linkCalls[0].input.cropMarks).toEqual([
+      { markId: 'm-crop', studentId: STUDENT_1, itemId: 'item-4' },
+    ]);
+  });
+
+  it('una lectura autoaceptada llega corregida al parser y se vincula a la respuesta', async () => {
+    const prescored = {
+      itemId: 'item-4',
+      value: { answer: '21/10', reading: { canonical: 'q:21/10', decisionId: 'dec-1' } },
+      isCorrect: true,
+      rawScore: 1,
+      scoredBy: 'ai' as const,
+      aiScore: { score: 1, confidence: 0.91, decisionId: 'dec-1' },
+    };
+    const { service, confirmCalls, linkCalls } = makeService(
+      cropSelectResults(),
+      new Map([['m-crop', { decisionId: 'dec-1', itemId: 'item-4', prescored }]]),
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].prescoredAnswers).toEqual({ '4': prescored });
+    expect(rows[0].pendingReadingLabels).toBeUndefined();
+    expect(linkCalls[0].input.links).toEqual([
+      { decisionId: 'dec-1', studentId: STUDENT_1, itemId: 'item-4', consolidated: true },
+    ]);
+  });
+
+  it('una lectura que espera revisión queda pendiente y se vincula sin consolidar', async () => {
+    const { service, confirmCalls, linkCalls } = makeService(
+      cropSelectResults(),
+      new Map([['m-crop', { decisionId: 'dec-2', itemId: 'item-4', prescored: null }]]),
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].pendingReadingLabels).toEqual(['4']);
+    expect(rows[0].prescoredAnswers).toBeUndefined();
+    expect(linkCalls[0].input.links).toEqual([
+      { decisionId: 'dec-2', studentId: STUDENT_1, itemId: 'item-4', consolidated: false },
+    ]);
+  });
+
+  it('ignora la decisión de una marca de hoja reemplazada (no viene entre las marcas vigentes)', async () => {
+    const prescored = {
+      itemId: 'item-4',
+      value: { answer: '7', reading: { canonical: 'n:7', decisionId: 'dec-old' } },
+      isCorrect: false,
+      rawScore: 0,
+      scoredBy: 'ai' as const,
+      aiScore: null,
+    };
+    const { service, confirmCalls, linkCalls } = makeService(
+      cropSelectResults(),
+      new Map([['m-crop-superseded', { decisionId: 'dec-old', itemId: 'item-4', prescored }]]),
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    const rows = confirmCalls[0].input.parserResult.rows;
+    expect(rows[0].pendingReadingLabels).toEqual(['4']);
+    expect(rows[0].prescoredAnswers).toBeUndefined();
+    expect(linkCalls[0].input.links).toEqual([]);
+    expect(linkCalls[0].input.cropMarks).toEqual([
+      { markId: 'm-crop', studentId: STUDENT_1, itemId: null },
+    ]);
+  });
+
+  it('un fallo al vincular las lecturas se reporta sin deshacer la confirmación', async () => {
+    const reportSpy = jest.spyOn(observability, 'reportServerError').mockImplementation(() => {});
+    const { service } = makeService(cropSelectResults(), new Map(), new Error('sin conexión'));
+
+    const result = await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(result.status).toBe('confirmed');
+    expect(reportSpy).toHaveBeenCalledWith(expect.any(Error), {
+      orgId: ORG_ID,
+      batchId: BATCH_ID,
+      stage: 'link_answer_readings',
+    });
+    reportSpy.mockRestore();
+  });
+
+  it('sin campos de recorte no consulta lecturas', async () => {
+    const { service, readingCalls, linkCalls } = makeService([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(readingCalls).toHaveLength(0);
+    expect(linkCalls[0].input).toEqual({ assessmentId: ASSESSMENT_ID, links: [], cropMarks: [] });
   });
 
   it('agenda la corrección de desarrollo con los datos del lote tras confirmar', async () => {
@@ -1105,6 +1392,54 @@ describe('ScanReviewService.confirmBatch', () => {
     ]);
   });
 
+  it('con el motor legacy no agenda la calificación con rúbrica', async () => {
+    const { service, gradingCalls, rubricBatches } = makeService([
+      [CONFIRM_BATCH_ROW],
+      CONFIRM_SCANS,
+      CONFIRM_MARKS,
+      CONFIRM_STUDENTS,
+    ]);
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(gradingCalls).toHaveLength(1);
+    expect(rubricBatches).toHaveLength(0);
+  });
+
+  it('con el motor rubric_grading agenda la calificación con rúbrica y apaga el servicio viejo', async () => {
+    const { service, gradingCalls, rubricBatches } = makeService(
+      [[CONFIRM_BATCH_ROW], CONFIRM_SCANS, CONFIRM_MARKS, CONFIRM_STUDENTS],
+      undefined,
+      null,
+      'rubric_grading',
+    );
+
+    await service.confirmBatch(ORG_ID, USER, BATCH_ID);
+
+    expect(gradingCalls).toHaveLength(0);
+    expect(rubricBatches).toEqual([{ orgId: ORG_ID, batchId: BATCH_ID }]);
+  });
+
+  it('si no se puede leer el motor, confirma igual y no agenda ninguna calificación', async () => {
+    const reportSpy = jest
+      .spyOn(observability, 'reportServerError')
+      .mockImplementation(() => undefined);
+    const { service, gradingCalls, rubricBatches } = makeService(
+      [[CONFIRM_BATCH_ROW], CONFIRM_SCANS, CONFIRM_MARKS, CONFIRM_STUDENTS],
+      undefined,
+      null,
+      new Error('bdd caída'),
+    );
+
+    await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).resolves.toMatchObject({
+      status: 'confirmed',
+    });
+    expect(gradingCalls).toHaveLength(0);
+    expect(rubricBatches).toHaveLength(0);
+    expect(reportSpy).toHaveBeenCalled();
+    reportSpy.mockRestore();
+  });
+
   it('no agenda corrección de desarrollo si el confirm de answer-sheets falla', async () => {
     const { db } = makeDb([[CONFIRM_BATCH_ROW], CONFIRM_SCANS, CONFIRM_MARKS, CONFIRM_STUDENTS]);
     const gradingCalls: ScheduleConfirmedBatchParams[] = [];
@@ -1112,6 +1447,8 @@ describe('ScanReviewService.confirmBatch', () => {
       confirmParserResult: async () => {
         throw new Error('falló la ingesta');
       },
+      rescoreScannedAnswer: async () => [],
+      refreshResultsAfterRescore: () => undefined,
     };
     const developmentGradingFake = {
       scheduleConfirmedBatch: (params: ScheduleConfirmedBatchParams) => {
@@ -1123,6 +1460,8 @@ describe('ScanReviewService.confirmBatch', () => {
       failingConfirmer,
       filesServiceFake,
       developmentGradingFake,
+      makeReadingConsolidation().consolidation,
+      makeRubricGrading().rubricGrading,
     );
 
     await expect(service.confirmBatch(ORG_ID, USER, BATCH_ID)).rejects.toThrow('falló la ingesta');
@@ -1199,7 +1538,7 @@ describe('createAnswerSheetConfirmer', () => {
   it('siembra el preview store y confirma con token de un solo uso, sin crear assessment nuevo', async () => {
     const { store, calls: storeCalls } = makePreviewStoreFake();
     const { svc, calls: confirmCalls } = makeAnswerSheetsFake();
-    const confirmer = createAnswerSheetConfirmer(svc, store);
+    const confirmer = createAnswerSheetConfirmer(svc, store, makeResultsFake().results);
 
     const outcome = await confirmer.confirmParserResult(USER, {
       orgId: ORG_ID,
@@ -1233,7 +1572,7 @@ describe('createAnswerSheetConfirmer', () => {
   it('confirma con la org efectiva aunque el JWT no la traiga (platform_admin cross-org)', async () => {
     const { store } = makePreviewStoreFake();
     const { svc, calls: confirmCalls } = makeAnswerSheetsFake();
-    const confirmer = createAnswerSheetConfirmer(svc, store);
+    const confirmer = createAnswerSheetConfirmer(svc, store, makeResultsFake().results);
     const platformAdmin: JwtPayload = { ...USER, orgId: null, isPlatformAdmin: true };
 
     await confirmer.confirmParserResult(platformAdmin, {
@@ -1245,5 +1584,431 @@ describe('createAnswerSheetConfirmer', () => {
     });
 
     expect(confirmCalls[0].user.orgId).toBe(ORG_ID);
+  });
+});
+
+function makeResultsFake() {
+  const recalculated: Array<{ orgId: string; assessmentIds: readonly string[] }> = [];
+  const results = {
+    recalculateAnswerSheetResults: async (orgId: string, assessmentIds: readonly string[]) => {
+      recalculated.push({ orgId, assessmentIds });
+      return [...assessmentIds];
+    },
+  } as unknown as AssessmentResultsService;
+  return { results, recalculated };
+}
+
+describe('desambiguación con IA: lo que ve el profesor', () => {
+  it('getQueue expone la resolución de IA aplicada y el conflicto, y oculta auditoría y sombra', async () => {
+    const pending = [
+      markQueueRow({
+        markId: 'mark-conflicto',
+        scanId: 'scan-read',
+        aiResolution: aiResolution({
+          verdict: 'conflict',
+          route: 'review',
+          value: null,
+          applied: false,
+        }),
+      }),
+      markQueueRow({
+        markId: 'mark-auditoria',
+        scanId: 'scan-read',
+        fieldId: 'f2',
+        printedNumber: '2',
+        aiResolution: aiResolution({ verdict: 'audit_sample', route: 'review', applied: false }),
+      }),
+      markQueueRow({
+        markId: 'mark-sombra',
+        scanId: 'scan-read',
+        fieldId: 'f3',
+        printedNumber: '3',
+        aiResolution: aiResolution({ mode: 'shadow', applied: false }),
+      }),
+    ];
+    const auto = [
+      markQueueRow({
+        markId: 'mark-ia',
+        scanId: 'scan-read',
+        autoResolved: true,
+        reviewDecision: 'option',
+        reviewedValue: 'B',
+        aiResolution: aiResolution(),
+      }),
+      markQueueRow({
+        markId: 'mark-ia-solo',
+        scanId: 'scan-read',
+        autoResolved: true,
+        reviewDecision: 'blank',
+        aiResolution: aiResolution({ verdict: 'solo_b', value: 'blank' }),
+      }),
+      markQueueRow({
+        markId: 'mark-omr',
+        scanId: 'scan-read',
+        state: 'multiple',
+        autoResolved: true,
+        reviewDecision: 'annulled',
+      }),
+    ];
+    const { service } = makeService([
+      [{ id: BATCH_ID, spec: SPEC }],
+      [scanQueueRow({ scanId: 'scan-read' })],
+      pending,
+      auto,
+    ]);
+
+    const queue = await service.getQueue(ORG_ID, BATCH_ID);
+
+    const byId = new Map(
+      [...queue.ambiguousMarks, ...queue.autoAnnulled].map((mark) => [mark.markId, mark]),
+    );
+    expect(byId.get('mark-conflicto')?.aiResolution).toEqual({
+      verdict: 'conflict',
+      value: null,
+      agreement: null,
+    });
+    expect(byId.get('mark-auditoria')?.aiResolution).toBeNull();
+    expect(byId.get('mark-sombra')?.aiResolution).toBeNull();
+    expect(byId.get('mark-ia')?.aiResolution).toEqual({
+      verdict: 'agree',
+      value: 'B',
+      agreement: 'both',
+    });
+    expect(byId.get('mark-ia-solo')?.aiResolution).toEqual({
+      verdict: 'solo_b',
+      value: 'blank',
+      agreement: 'single',
+    });
+    expect(byId.get('mark-omr')?.aiResolution).toBeNull();
+  });
+
+  it('resolveMark posterior deja autoResolved=false y no toca ai_resolution', async () => {
+    const { service, updates } = makeService([
+      [resolveMarkRow({ aiResolution: aiResolution() })],
+      [{ total: 0 }],
+      [{ total: 0 }],
+    ]);
+
+    const model = await service.resolveMark(ORG_ID, USER_ID, MARK_ID, {
+      decision: 'option',
+      reviewedValue: 'C',
+    });
+
+    expect(updates[0]).toMatchObject({ autoResolved: false, reviewedById: USER_ID });
+    expect(updates[0]).not.toHaveProperty('aiResolution');
+    expect(model.aiResolution).toEqual({ verdict: 'agree', value: 'B', agreement: 'both' });
+  });
+});
+
+function correctionRow(overrides: Record<string, unknown> = {}) {
+  return {
+    mark: {
+      id: MARK_ID,
+      scanId: SCAN_ID,
+      fieldId: 'f1',
+      printedNumber: '1',
+      state: 'ambiguous',
+      value: null,
+      fill: '0.400',
+      threshold: '0.500',
+      margin: '0.200',
+      cropFileId: null,
+      suggestedValue: 'B',
+      doubtReason: 'margin',
+      nullConfidence: null,
+      reviewedValue: 'B',
+      reviewDecision: 'option',
+      reviewedById: null,
+      autoResolved: true,
+      aiResolution: aiResolution(),
+    },
+    sheetFirstName: 'Ana',
+    sheetLastName: 'Pérez',
+    resolvedFirstName: null,
+    resolvedLastName: null,
+    batchId: BATCH_ID,
+    batchStatus: 'confirmed',
+    scanState: 'read',
+    printedSheetId: 'sheet-1',
+    resolvedStudentId: null,
+    sheetStudentId: STUDENT_1,
+    assessmentId: ASSESSMENT_ID,
+    instrumentId: INSTRUMENT_ID,
+    spec: SPEC,
+    ...overrides,
+  };
+}
+
+const SHEET_MARKS = [
+  {
+    markId: MARK_ID,
+    fieldId: 'f1',
+    printedNumber: '1',
+    state: 'ambiguous',
+    value: null,
+    reviewedValue: 'B',
+    reviewDecision: 'option',
+    reviewedAt: new Date(),
+  },
+  {
+    markId: 'mark-2',
+    fieldId: 'f2',
+    printedNumber: '2',
+    state: 'marked',
+    value: 'A',
+    reviewedValue: null,
+    reviewDecision: null,
+    reviewedAt: null,
+  },
+  {
+    markId: 'mark-3',
+    fieldId: 'f3',
+    printedNumber: '3',
+    state: 'multiple',
+    value: null,
+    reviewedValue: null,
+    reviewDecision: 'annulled',
+    reviewedAt: new Date(),
+  },
+];
+
+const PAGES_READ = [{ pageIndex: 0 }, { pageIndex: 1 }];
+
+const ASSESSMENT_LOCK = [{ id: ASSESSMENT_ID }];
+
+describe('ScanReviewService.correctConfirmedMark (corrección tras un reclamo)', () => {
+  it('rechaza una hoja que quedó incompleta al confirmar', async () => {
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      [{ pageIndex: 0 }],
+    ]);
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(rescoreCalls).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('reescribe la respuesta con la hoja completa, recalcula y deja la decisión como humana', async () => {
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    const model = await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, {
+      decision: 'option',
+      reviewedValue: 'C',
+    });
+
+    expect(rescoreCalls).toEqual([
+      {
+        tx: expect.anything(),
+        orgId: ORG_ID,
+        input: {
+          assessmentId: ASSESSMENT_ID,
+          instrumentId: INSTRUMENT_ID,
+          studentId: STUDENT_1,
+          label: '1',
+          answers: { '1': 'C', '2': 'A', '3': null },
+          annulledLabels: ['3'],
+        },
+      },
+    ]);
+    expect(updates).toHaveLength(1);
+    expect(updates[0]).toMatchObject({
+      reviewedValue: 'C',
+      reviewDecision: 'option',
+      reviewedById: USER_ID,
+      autoResolved: false,
+    });
+    expect(updates[0]).not.toHaveProperty('aiResolution');
+    expect(model).toMatchObject({
+      reviewedValue: 'C',
+      autoResolved: false,
+      studentName: 'Ana Pérez',
+      aiResolution: { verdict: 'agree', value: 'B', agreement: 'both' },
+    });
+  });
+
+  it('anular la respuesta la marca como anulada al reescribirla', async () => {
+    const { service, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'annulled' });
+
+    expect(rescoreCalls[0]?.input).toMatchObject({
+      answers: { '1': null, '2': 'A', '3': null },
+      annulledLabels: ['1', '3'],
+    });
+  });
+
+  it('rechaza un lote que todavía no está confirmado sin tocar nada', async () => {
+    const { service, updates, rescoreCalls } = makeService([
+      [correctionRow({ batchStatus: 'needs_review' })],
+    ]);
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(rescoreCalls).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+  });
+
+  it('rechaza una alternativa inexistente', async () => {
+    const { service, rescoreCalls } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, {
+        decision: 'option',
+        reviewedValue: 'Z',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(rescoreCalls).toHaveLength(0);
+  });
+
+  it('si la reescritura de la respuesta falla, la marca queda como estaba y no se refresca nada', async () => {
+    const { db, updates } = makeDb([[correctionRow()], ASSESSMENT_LOCK, SHEET_MARKS, PAGES_READ]);
+    const refreshResultsAfterRescore = jest.fn();
+    const failingConfirmer: AnswerSheetConfirmer = {
+      confirmParserResult: async () => ({ jobId: 'job-1', responsesCreated: 0 }),
+      rescoreScannedAnswer: async () => {
+        throw new ConflictException('no se registró');
+      },
+      refreshResultsAfterRescore,
+    };
+    const service = new ScanReviewService(
+      db,
+      failingConfirmer,
+      filesServiceFake,
+      {} as DevelopmentGradingService,
+      makeReadingConsolidation().consolidation,
+      makeRubricGrading().rubricGrading,
+    );
+
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(updates).toHaveLength(0);
+    expect(refreshResultsAfterRescore).not.toHaveBeenCalled();
+  });
+
+  it('marca, respuestas y recálculo corren en una sola transacción, con la marca y la evaluación bloqueadas', async () => {
+    const { service, db, updates, rescoreCalls, refreshCalls, locks, transactions } = makeService([
+      [correctionRow()],
+      ASSESSMENT_LOCK,
+      SHEET_MARKS,
+      PAGES_READ,
+    ]);
+
+    await service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' });
+
+    expect(transactions.opened).toBe(2);
+    expect(rescoreCalls[0]?.tx).toBe(db);
+    expect(updates).toHaveLength(1);
+    expect(locks).toEqual([['update', { of: expect.anything() }], ['no key update']]);
+    expect(refreshCalls).toEqual([{ orgId: ORG_ID, recalculated: [ASSESSMENT_ID] }]);
+  });
+
+  it('rechaza una marca que no está en la BD', async () => {
+    const { service } = makeService([[]]);
+    await expect(
+      service.correctConfirmedMark(ORG_ID, USER_ID, MARK_ID, { decision: 'blank' }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('ScanReviewService.getCorrections', () => {
+  it('lista las marcas dudosas de un lote confirmado con su resolución de IA', async () => {
+    const { service } = makeService([
+      [{ status: 'confirmed', spec: SPEC }],
+      [scanQueueRow({ scanId: 'scan-read' })],
+      [
+        markQueueRow({
+          markId: 'mark-ia',
+          scanId: 'scan-read',
+          autoResolved: true,
+          reviewDecision: 'option',
+          reviewedValue: 'B',
+          aiResolution: aiResolution(),
+        }),
+        markQueueRow({ markId: 'mark-humana', scanId: 'scan-read', reviewedById: USER_ID }),
+      ],
+    ]);
+
+    const corrections = await service.getCorrections(ORG_ID, BATCH_ID);
+
+    expect(corrections.batchId).toBe(BATCH_ID);
+    expect(corrections.marks.map((mark) => mark.markId)).toEqual(['mark-ia', 'mark-humana']);
+    expect(corrections.marks[0]).toMatchObject({
+      studentName: 'Ana Pérez',
+      options: ['A', 'B', 'C', 'D'],
+      aiResolution: { verdict: 'agree', agreement: 'both' },
+    });
+  });
+
+  it('rechaza un lote que no está confirmado', async () => {
+    const { service } = makeService([[{ status: 'needs_review', spec: SPEC }]]);
+    await expect(service.getCorrections(ORG_ID, BATCH_ID)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+  });
+});
+
+describe('createAnswerSheetConfirmer.rescoreScannedAnswer', () => {
+  it('reescribe la respuesta y recalcula la evaluación con la misma transacción', async () => {
+    const rescored: Array<{ tx: unknown; input: RescoreScannedAnswerInput }> = [];
+    const svc = {
+      rescoreScannedAnswer: async (tx: unknown, input: RescoreScannedAnswerInput) => {
+        rescored.push({ tx, input });
+        return 'item-1';
+      },
+    } as unknown as AnswerSheetsService;
+    const recalculatedWithin: Array<{ tx: unknown; orgId: string; ids: readonly string[] }> = [];
+    const refreshed: Array<{ orgId: string; ids: readonly string[] }> = [];
+    const results = {
+      recalculateAnswerSheetResultsWithin: async (
+        tx: unknown,
+        orgId: string,
+        ids: readonly string[],
+      ) => {
+        recalculatedWithin.push({ tx, orgId, ids });
+        return [...ids];
+      },
+      refreshBenchmarksAfterRecalculation: (orgId: string, ids: readonly string[]) => {
+        refreshed.push({ orgId, ids });
+      },
+    } as unknown as AssessmentResultsService;
+    const confirmer = createAnswerSheetConfirmer(svc, makePreviewStoreFake().store, results);
+    const tx = makeDb([]).db;
+    const input: RescoreScannedAnswerInput = {
+      assessmentId: ASSESSMENT_ID,
+      instrumentId: INSTRUMENT_ID,
+      studentId: STUDENT_1,
+      label: '1',
+      answers: { '1': 'C' },
+      annulledLabels: [],
+    };
+
+    const recalculated = await confirmer.rescoreScannedAnswer(tx, ORG_ID, input);
+    confirmer.refreshResultsAfterRescore(ORG_ID, recalculated);
+
+    expect(rescored).toEqual([{ tx, input }]);
+    expect(recalculatedWithin).toEqual([{ tx, orgId: ORG_ID, ids: [ASSESSMENT_ID] }]);
+    expect(recalculated).toEqual([ASSESSMENT_ID]);
+    expect(refreshed).toEqual([{ orgId: ORG_ID, ids: [ASSESSMENT_ID] }]);
   });
 });

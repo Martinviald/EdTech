@@ -17,7 +17,12 @@ el campo ENTERO es ambiguous con evidencia — jamas un numero con un digito
 inventado. Todos los grupos vacios y claros => blank.
 
 crop_region (CD-9): el recorte ES la respuesta: state marked, value null,
-cropJpegBase64 siempre, fill/threshold/margin fijos 0/0.5/1.
+cropJpegBase64 siempre, fill/threshold/margin fijos 0/0.5/1. Si el campo trae
+`response.cropProfileId` el recorte usa ese perfil (margen, ancho, calidad;
+app/crop.py); sin perfil sale identico al historico (600 px, calidad 70, sin
+margen). Con contrato v2 la marca agrega `crop`: perfil aplicado, `inkRatio`
+descontando la plantilla impresa (y `inkRatioByPart` si hay `response.boxes`;
+app/ink.py), tamano y sha256 del JPEG.
 
 Contrato v2 (OMR_CONTRACT_V2, default encendido): cada marca lleva ademas tres
 campos que dicen QUE sugiere el motor y POR QUE duda, sin cambiar state/value:
@@ -41,7 +46,7 @@ campos que dicen QUE sugiere el motor y POR QUE duda, sin cambiar state/value:
                   (umbral 0.62) topa en 0.62 hasta para la doble mas evidente.
                   Medido en goldset/README-registro.md (pendientes fase 4).
 
-Con OMR_CONTRACT_V2=0 las tres claves no se emiten y el ScanResult vuelve a la
+Con OMR_CONTRACT_V2=0 las tres claves (y `crop`) no se emiten y el ScanResult vuelve a la
 forma v1 (los tres campos son opcionales en el contrato).
 """
 
@@ -49,8 +54,11 @@ from __future__ import annotations
 
 import base64
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
+
+import cv2
 
 from .classify import (
     AMBIGUITY_MARGIN,
@@ -61,7 +69,16 @@ from .classify import (
     crop_region_jpeg,
     margin_of,
 )
+from .crop import (
+    LEGACY_CROP_PROFILE,
+    CropImage,
+    crop_with_profile,
+    neighbor_footprints_px,
+    printed_label_footprints_px,
+    resolve_crop_profile,
+)
 from .geometry import point_to_px, radius_to_px
+from .ink import measure_ink
 from .rectify import RectifiedPage
 from .registration import RingFix, local_registration_enabled, register_group
 
@@ -115,6 +132,7 @@ class FieldReader(Protocol):
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]: ...
 
 
@@ -324,6 +342,7 @@ class BubbleGroupReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         threshold = page_threshold.threshold
         samples = bubble_samples(field["bubbles"], fills, page_threshold, ambiguity_margin)
@@ -382,6 +401,7 @@ class DigitGridReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
         groups = read_digit_groups(field["bubbles"], fills, page_threshold, ambiguity_margin)
         state, value, representative = self._classify(groups)
@@ -435,8 +455,21 @@ class CropRegionReader:
         fills: list[float],
         page_threshold: PageThreshold,
         ambiguity_margin: float = AMBIGUITY_MARGIN,
+        page_fields: Sequence[dict[str, Any]] = (),
     ) -> dict[str, Any]:
-        encoded = crop_region_jpeg(page, field["region"])
+        response = field.get("response") or {}
+        profile_id = response.get("cropProfileId")
+        if profile_id is None:
+            image = legacy_crop_image(page, field["region"])
+        else:
+            image = crop_with_profile(
+                page,
+                field["region"],
+                resolve_crop_profile(profile_id),
+                neighbor_footprints_px(field, page_fields, page.size),
+                printed_label_footprints_px(page_fields, page.size),
+            )
+        encoded = image.jpeg
         reading = {
             "fieldId": field["fieldId"],
             "printedNumber": field["printedNumber"],
@@ -449,7 +482,64 @@ class CropRegionReader:
         }
         if contract_v2_enabled():
             reading.update(empty_doubt_fields())
+            reading["crop"] = crop_evidence(page, field, image, response.get("boxes"))
         return reading
+
+
+def undecided_reading(
+    page: RectifiedPage, field: dict[str, Any], fills: list[float], page_threshold: PageThreshold
+) -> dict[str, Any]:
+    """Un campo de burbujas de una pagina cuyas burbujas no se pudieron separar.
+
+    Solo se usa cuando la pagina se conserva por sus recortes (ver
+    `_read_marks` en pipeline.py): la pagina no tiene dos grupos de fills, asi
+    que ninguna decision sobre la burbuja seria confiable. Sale `ambiguous`, sin
+    valor ni sugerencia y con el recorte de sus burbujas como evidencia: va a
+    revision, jamas como `blank` confiado. `fill` es el de la burbuja mas
+    oscura del campo, que es lo que el revisor necesita ver primero.
+    """
+    fill = max(fills, default=0.0)
+    threshold = min(1.0, max(0.0, page_threshold.threshold))
+    reading = {
+        "fieldId": field["fieldId"],
+        "printedNumber": field["printedNumber"],
+        "state": "ambiguous",
+        "value": None,
+        "fill": round(fill, 4),
+        "threshold": round(threshold, 4),
+        "margin": round(margin_of(fill, threshold), 4),
+        "cropJpegBase64": _bubbles_crop_base64(page, field) if field.get("bubbles") else None,
+    }
+    if contract_v2_enabled():
+        reading.update(empty_doubt_fields())
+    return reading
+
+
+def legacy_crop_image(page: RectifiedPage, region: dict[str, Any]) -> CropImage:
+    encoded = crop_region_jpeg(page, region)
+    decoded = cv2.imdecode(encoded, cv2.IMREAD_GRAYSCALE)
+    return CropImage(encoded, int(decoded.shape[1]), int(decoded.shape[0]), LEGACY_CROP_PROFILE)
+
+
+def crop_evidence(
+    page: RectifiedPage,
+    field: dict[str, Any],
+    image: CropImage,
+    boxes: list[dict[str, Any]] | None,
+) -> dict[str, Any]:
+    ink = measure_ink(page, field["region"], boxes or None)
+    evidence: dict[str, Any] = {
+        "cropProfileId": image.profile.key,
+        "inkRatio": round(ink.ratio, 4),
+        "widthPx": image.width_px,
+        "heightPx": image.height_px,
+        "sha256": image.sha256,
+    }
+    if ink.by_part is not None:
+        evidence["inkRatioByPart"] = {
+            part_id: round(ratio, 4) for part_id, ratio in ink.by_part.items()
+        }
+    return evidence
 
 
 def _bubbles_crop_base64(page: RectifiedPage, field: dict[str, Any]) -> str:

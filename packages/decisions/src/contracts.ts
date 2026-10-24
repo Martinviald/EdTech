@@ -8,7 +8,8 @@
  * Este archivo es la fuente de verdad compartida entre el paquete, la API
  * (`apps/api/src/decisions`) y los scripts de calibración. Ningún consumidor
  * importa el SDK del proveedor: solo estos tipos y la interfaz `DecisionEngine`.
- * El adaptador de Jev (`jev/jev-engine.ts`) es el único archivo que conoce el SDK.
+ * Cada adaptador (`jev/`, `openai/`) es el único lugar que conoce el SDK de su
+ * proveedor.
  */
 
 // ── JSON ─────────────────────────────────────────────────────────────────────
@@ -27,8 +28,17 @@ export type JsonArray = JsonValue[];
  */
 export type Description = string | JsonObject | JsonArray;
 
-/** El contenido a evaluar. Siempre texto: las imágenes se transcriben antes. */
+/** El contenido a evaluar, como texto o JSON. Las imágenes van aparte, en `DecisionRequest.images`. */
 export type DecisionState = string | JsonObject | JsonArray;
+
+/**
+ * Imagen adjunta al estado. Misma forma que `LlmImagePart` de la API:
+ * bytes en base64 (sin el prefijo `data:`) o una URL http(s) pública o firmada.
+ * Solo la aceptan los motores con `capabilities.images`.
+ */
+export type DecisionImage =
+  | { readonly mimeType: string; readonly data: string }
+  | { readonly url: string };
 
 // ── Preguntas ────────────────────────────────────────────────────────────────
 
@@ -39,7 +49,7 @@ export interface NoulQuestion {
   readonly criteria?: { readonly true?: Description; readonly false?: Description };
 }
 
-/** Elige UNA opción de un conjunto cerrado (máx. `DECISION_LIMITS.maxChoiceOptions`). */
+/** Elige UNA opción de un conjunto cerrado (entre `limits.minChoiceOptions` y `limits.maxChoiceOptions` del motor). */
 export interface ChoiceQuestion<K extends string = string> {
   readonly type: 'choice';
   readonly instructions: Description;
@@ -108,6 +118,12 @@ export type DecisionAnswers<Q extends DecisionQuestions> = {
 
 export interface DecisionRequest<Q extends DecisionQuestions> {
   readonly state: DecisionState;
+  /**
+   * Imágenes que se evalúan junto con `state`. Van fuera del estado para que
+   * `redactState`, el hash del estado y los consumidores de solo texto no cambien.
+   * Un motor sin `capabilities.images` las rechaza con `invalid_request`.
+   */
+  readonly images?: readonly DecisionImage[];
   readonly questions: Q;
   /** Modelo versionado o alias. Si falta, el default del motor. */
   readonly model?: string;
@@ -122,7 +138,10 @@ export interface DecisionUsage {
 
 export interface DecisionResult<Q extends DecisionQuestions> {
   readonly answers: DecisionAnswers<Q>;
-  /** Modelo VERSIONADO que respondió (p. ej. `jev-1.13.0`), no el alias. */
+  /**
+   * Modelo que respondió, tal como lo informa el proveedor. Jev devuelve la
+   * versión (`jev-1.13.0`); OpenAI devuelve `gpt-6-luna` sin versión.
+   */
   readonly model: string;
   readonly usage: DecisionUsage;
   /** Latencia de punta a punta medida por el adaptador, en ms. */
@@ -133,9 +152,50 @@ export interface DecisionResult<Q extends DecisionQuestions> {
 
 // ── Motor ────────────────────────────────────────────────────────────────────
 
+/** Qué acepta el motor además de texto. */
+export interface DecisionEngineCapabilities {
+  /** `true` si acepta `DecisionRequest.images`. */
+  readonly images: boolean;
+}
+
+/**
+ * Límites del motor, validados ANTES de llamar (`assertWithinLimits`). Los
+ * tokens se estiman: preferimos rechazar de más a que el proveedor rechace.
+ */
+export interface DecisionEngineLimits {
+  readonly minChoiceOptions: number;
+  readonly maxChoiceOptions: number;
+  readonly minScoreLevels: number;
+  readonly maxScoreLevels: number;
+  /** `state` (con sus imágenes) + la pregunta más larga. */
+  readonly maxStatePlusQuestionTokens: number;
+  /** `state` (con sus imágenes) + todas las preguntas. */
+  readonly maxRequestTokens: number;
+  /** Caracteres del JSON serializado por token (estimación conservadora). */
+  readonly charsPerToken: number;
+  /** Tokens que se cuentan por imagen (estimación conservadora; 0 si no acepta imágenes). */
+  readonly tokensPerImage: number;
+  /**
+   * Restricciones que el proveedor exige a cada imagen, o `null` si no exige ninguna
+   * (o reescala por su cuenta). El adaptador ajusta la imagen a ellas antes de enviarla.
+   */
+  readonly imageConstraints: ImageConstraints | null;
+}
+
+/** Tamaño admitido por imagen: lados, píxeles totales y bytes del archivo. */
+export interface ImageConstraints {
+  readonly minSidePx: number;
+  readonly maxSidePx: number;
+  readonly minPixels: number;
+  readonly maxPixels: number;
+  readonly maxBytes: number;
+}
+
 export interface DecisionEngine {
-  /** Identificador estable del motor: `'jev'`, `'fake'`. */
+  /** Identificador estable del motor: `'jev'`, `'openai'`, `'fake'`. */
   readonly name: string;
+  readonly capabilities: DecisionEngineCapabilities;
+  readonly limits: DecisionEngineLimits;
   /** `true` si tiene credenciales y puede atender llamadas. */
   isAvailable(): boolean;
   /**
@@ -166,6 +226,8 @@ export const DECISION_ERROR_CODES = [
   'auth',
   /** Cualquier otra falla del proveedor (5xx, conexión, respuesta inesperada). */
   'upstream',
+  /** El modelo se negó a responder al menos una pregunta (OpenAI: `type: "refusal"`). */
+  'refused',
 ] as const;
 export type DecisionErrorCode = (typeof DECISION_ERROR_CODES)[number];
 
@@ -179,23 +241,6 @@ export class DecisionError extends Error {
     this.name = 'DecisionError';
   }
 }
-
-// ── Límites (docs.typesafe.ai/models, /api — jev-1.13) ───────────────────────
-
-export const DECISION_LIMITS = {
-  maxChoiceOptions: 255,
-  minScoreLevels: 2,
-  maxScoreLevels: 10,
-  /** `state` + la pregunta más larga. */
-  maxStatePlusQuestionTokens: 32_000,
-  /** `state` + todas las preguntas. */
-  maxRequestTokens: 64_000,
-  /**
-   * Estimación CONSERVADORA de tokens: caracteres del JSON serializado / 3.
-   * El español tokeniza peor que el inglés; preferimos rechazar de más.
-   */
-  charsPerToken: 3,
-} as const;
 
 // ── Routing por confianza ────────────────────────────────────────────────────
 
@@ -221,3 +266,17 @@ export interface NoulThresholds {
   readonly no: number;
 }
 export type NoulVerdict = 'yes' | 'no' | 'uncertain';
+
+// ── Consenso de dos motores ─────────────────────────────────────────────────
+
+/**
+ * Umbrales de UN motor para combinarlo con otro (`pairConsensus`). Sobre la
+ * confianza de su respuesta: `>= agree` basta cuando ambos motores coinciden;
+ * `>= solo` basta para aceptarlo solo cuando el otro no sabe; `< unsure` significa
+ * que el motor "no sabe". Invariante: `0 <= unsure <= agree <= solo <= 1`.
+ */
+export interface PairThresholds {
+  readonly agree: number;
+  readonly solo: number;
+  readonly unsure: number;
+}

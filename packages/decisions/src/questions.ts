@@ -6,11 +6,13 @@
  */
 
 import {
-  DECISION_LIMITS,
   DecisionError,
   type ChoiceQuestion,
   type DecisionAnswer,
   type DecisionAnswers,
+  type DecisionEngine,
+  type DecisionEngineLimits,
+  type DecisionImage,
   type DecisionQuestion,
   type DecisionQuestions,
   type DecisionState,
@@ -48,30 +50,38 @@ export function score(instructions: Description, levels: readonly Description[])
 // ── Validación ───────────────────────────────────────────────────────────────
 
 /**
- * Valida la forma de las preguntas: al menos una; Choice con 1..255 opciones;
- * Score con 2..10 niveles. Lanza `DecisionError('invalid_request')`.
+ * Valida la forma de las preguntas contra los límites del motor: al menos una;
+ * Choice y Score con una cantidad de opciones/niveles dentro de `limits`.
+ * Lanza `DecisionError('invalid_request')`.
  */
-export function validateQuestions(questions: DecisionQuestions): void {
+export function validateQuestions(
+  questions: DecisionQuestions,
+  limits: DecisionEngineLimits,
+): void {
   const entries = Object.entries(questions);
   if (entries.length === 0) {
     throw new DecisionError('invalid_request', 'Se requiere al menos una pregunta.');
   }
   for (const [id, question] of entries) {
-    validateQuestion(id, question);
+    validateQuestion(id, question, limits);
   }
 }
 
-function validateQuestion(id: string, question: DecisionQuestion): void {
+function validateQuestion(
+  id: string,
+  question: DecisionQuestion,
+  limits: DecisionEngineLimits,
+): void {
   // `type` se revisa en runtime: el request puede venir de JSON no tipado.
   const type: unknown = question.type;
   if (type === 'noul') return;
   if (type === 'choice') {
     const q = question as ChoiceQuestion;
     const options = isPlainObject(q.criteria) ? Object.keys(q.criteria).length : 0;
-    if (options < 1 || options > DECISION_LIMITS.maxChoiceOptions) {
+    if (options < limits.minChoiceOptions || options > limits.maxChoiceOptions) {
       throw new DecisionError(
         'invalid_request',
-        `La pregunta "${id}" (choice) tiene ${options} opciones; se permiten entre 1 y ${DECISION_LIMITS.maxChoiceOptions}.`,
+        `La pregunta "${id}" (choice) tiene ${options} opciones; se permiten entre ${limits.minChoiceOptions} y ${limits.maxChoiceOptions}.`,
       );
     }
     return;
@@ -79,10 +89,10 @@ function validateQuestion(id: string, question: DecisionQuestion): void {
   if (type === 'score') {
     const q = question as ScoreQuestion;
     const levels = Array.isArray(q.criteria) ? q.criteria.length : 0;
-    if (levels < DECISION_LIMITS.minScoreLevels || levels > DECISION_LIMITS.maxScoreLevels) {
+    if (levels < limits.minScoreLevels || levels > limits.maxScoreLevels) {
       throw new DecisionError(
         'invalid_request',
-        `La pregunta "${id}" (score) tiene ${levels} niveles; se permiten entre ${DECISION_LIMITS.minScoreLevels} y ${DECISION_LIMITS.maxScoreLevels}.`,
+        `La pregunta "${id}" (score) tiene ${levels} niveles; se permiten entre ${limits.minScoreLevels} y ${limits.maxScoreLevels}.`,
       );
     }
     return;
@@ -94,39 +104,118 @@ function validateQuestion(id: string, question: DecisionQuestion): void {
 }
 
 /** Tokens estimados: `ceil(JSON.stringify(value).length / charsPerToken)`. */
-export function estimateTokens(value: unknown): number {
+export function estimateTokens(value: unknown, charsPerToken: number): number {
   const json = JSON.stringify(value);
   if (json === undefined) return 0;
-  return Math.ceil(json.length / DECISION_LIMITS.charsPerToken);
+  return Math.ceil(json.length / charsPerToken);
 }
 
 /**
- * Valida preguntas y contexto antes de la red. `state` + la pregunta más larga
- * ≤ 32k tokens y `state` + todas las preguntas ≤ 64k; si no, `context_exceeded`.
+ * Valida preguntas, imágenes y contexto antes de la red, con los límites del
+ * motor. Cada imagen cuenta `limits.tokensPerImage` dentro del estado. Si
+ * `state` + la pregunta más larga supera `maxStatePlusQuestionTokens`, o
+ * `state` + todas las preguntas supera `maxRequestTokens` → `context_exceeded`.
  */
-export function assertWithinLimits(state: DecisionState, questions: DecisionQuestions): void {
-  validateQuestions(questions);
+export function assertWithinLimits(
+  state: DecisionState,
+  questions: DecisionQuestions,
+  limits: DecisionEngineLimits,
+  images: readonly DecisionImage[] = [],
+): void {
+  validateQuestions(questions, limits);
+  validateImages(images);
 
-  const stateTokens = estimateTokens(state);
+  const stateTokens =
+    estimateTokens(state, limits.charsPerToken) + images.length * limits.tokensPerImage;
   let longest = 0;
   let total = stateTokens;
   for (const [id, question] of Object.entries(questions)) {
-    const tokens = estimateTokens({ [id]: question });
+    const tokens = estimateTokens({ [id]: question }, limits.charsPerToken);
     longest = Math.max(longest, tokens);
     total += tokens;
   }
 
-  if (stateTokens + longest > DECISION_LIMITS.maxStatePlusQuestionTokens) {
+  if (stateTokens + longest > limits.maxStatePlusQuestionTokens) {
     throw new DecisionError(
       'context_exceeded',
-      `El estado más la pregunta más larga suman ~${stateTokens + longest} tokens; el máximo es ${DECISION_LIMITS.maxStatePlusQuestionTokens}.`,
+      `El estado más la pregunta más larga suman ~${stateTokens + longest} tokens; el máximo es ${limits.maxStatePlusQuestionTokens}.`,
     );
   }
-  if (total > DECISION_LIMITS.maxRequestTokens) {
+  if (total > limits.maxRequestTokens) {
     throw new DecisionError(
       'context_exceeded',
-      `El estado más todas las preguntas suman ~${total} tokens; el máximo es ${DECISION_LIMITS.maxRequestTokens}.`,
+      `El estado más todas las preguntas suman ~${total} tokens; el máximo es ${limits.maxRequestTokens}.`,
     );
+  }
+}
+
+/**
+ * Valida la forma de cada imagen: bytes con `mimeType` `image/*` y `data` en
+ * base64 no vacío, o una `url` http(s). Lanza `invalid_request`.
+ */
+export function validateImages(images: readonly DecisionImage[]): void {
+  images.forEach((image, index) => {
+    if ('url' in image) {
+      if (!isHttpUrl(image.url)) {
+        throw new DecisionError(
+          'invalid_request',
+          `La imagen ${index} no tiene una URL http(s) válida.`,
+        );
+      }
+      return;
+    }
+    if (typeof image.mimeType !== 'string' || !image.mimeType.startsWith('image/')) {
+      throw new DecisionError(
+        'invalid_request',
+        `La imagen ${index} tiene un mimeType inválido: ${String(image.mimeType)}.`,
+      );
+    }
+    if (
+      typeof image.data !== 'string' ||
+      image.data.length === 0 ||
+      image.data.startsWith('data:')
+    ) {
+      throw new DecisionError(
+        'invalid_request',
+        `La imagen ${index} debe traer sus bytes en base64, sin el prefijo data:.`,
+      );
+    }
+  });
+}
+
+/**
+ * @internal Rechaza imágenes en un motor que no las acepta. Lo llaman los motores
+ * antes de `assertWithinLimits`.
+ */
+export function assertImagesSupported(
+  engine: Pick<DecisionEngine, 'name' | 'capabilities'>,
+  images: readonly DecisionImage[] | undefined,
+): void {
+  if (images === undefined || images.length === 0 || engine.capabilities.images) return;
+  throw new DecisionError(
+    'invalid_request',
+    `El motor ${engine.name} no acepta imágenes (llegaron ${images.length}).`,
+  );
+}
+
+/** @internal Valida el `timeoutMs` de un request (número positivo de ms). */
+export function assertValidTimeout(timeoutMs: number | undefined): void {
+  if (timeoutMs === undefined) return;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new DecisionError(
+      'invalid_request',
+      `timeoutMs debe ser un número positivo de ms (llegó ${timeoutMs}).`,
+    );
+  }
+}
+
+function isHttpUrl(value: unknown): boolean {
+  if (typeof value !== 'string') return false;
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
   }
 }
 

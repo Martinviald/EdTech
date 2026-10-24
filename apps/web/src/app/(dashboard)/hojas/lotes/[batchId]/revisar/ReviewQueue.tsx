@@ -618,7 +618,7 @@ export function ConfirmBatchDialog({
                 <li>
                   {pendingMarks === 0
                     ? 'No quedan marcas dudosas sin resolver.'
-                    : `${pendingMarks} ${pendingMarks === 1 ? 'marca dudosa' : 'marcas dudosas'} sin resolver.`}
+                    : `${pendingMarks} ${pendingMarks === 1 ? 'marca dudosa' : 'marcas dudosas'} sin resolver: quedan pendientes de corrección, no cuentan como 0.`}
                 </li>
                 <li>
                   {pendingIdentities === 0

@@ -7,8 +7,15 @@
     "incremental": false,
     "baseUrl": ".",
     "paths": {
-      "@soe/decisions": ["../../packages/decisions/src/index.ts"]
+      "@soe/decisions": [
+        "../../packages/decisions/src/index.ts"
+      ],
+      "@soe/types": [
+        "../../packages/types/src/index.ts"
+      ]
     }
   },
-  "include": ["./*.ts"]
+  "include": [
+    "./*.ts"
+  ]
 }

@@ -8,6 +8,7 @@ import {
   JevDecisionEngine,
   type JevEngineConfig,
 } from './jev-engine';
+import { JEV_LIMITS } from './jev-limits';
 
 const questions = {
   urgente: noul('¿Es urgente?'),
@@ -271,5 +272,24 @@ describe('JevDecisionEngine', () => {
       code: 'invalid_request',
     });
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('sin experimentalImages no acepta imágenes: capabilities.images es false y las rechaza sin llamar a fetch', async () => {
+    const fetch = fetchReturning(() => jsonResponse(200, okBody));
+    const engine = engineWith(fetch);
+
+    expect(engine.capabilities.images).toBe(false);
+    await expect(
+      engine.evaluate({
+        state: 's',
+        images: [{ url: 'https://cdn.test/a.png' }],
+        questions,
+      }),
+    ).rejects.toMatchObject({ code: 'invalid_request' });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('expone JEV_LIMITS como límites', () => {
+    expect(engineWith(fetchReturning(() => jsonResponse(200, okBody))).limits).toBe(JEV_LIMITS);
   });
 });

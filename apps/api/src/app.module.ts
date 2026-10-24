@@ -51,6 +51,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { McpModule } from './mcp/mcp.module';
 import { SheetScanningModule } from './sheet-scanning/sheet-scanning.module';
+import { AnswerReadingModule } from './answer-reading/answer-reading.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
 import { MeasurementProcessesModule } from './measurement-processes/measurement-processes.module';
 import { DecisionsModule } from './decisions/decisions.module';
@@ -125,6 +126,7 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
     McpModule,
     // ── E22: lector de marcas (hojas de respuesta propias: layout, impresión, OMR, revisión) ──
     SheetScanningModule,
+    AnswerReadingModule,
     // ── Telemetría de uso (analítica de producto): ingesta + agregación ──
     TelemetryModule,
     DecisionsModule,

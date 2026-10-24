@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
-import { JevDecisionEngine } from '@soe/decisions';
+import { JevDecisionEngine, OpenAiDecisionEngine } from '@soe/decisions';
+import { LLM_PROVIDER_DEFAULTS } from '../llm/llm.constants';
 import { DecisionCallsRecorder } from './decision-calls.recorder';
 import { DECISION_ENGINES } from './decisions.constants';
 import { DecisionsConfigService } from './decisions-config.service';
@@ -12,7 +13,12 @@ import { DecisionsService } from './decisions.service';
     DecisionCallsRecorder,
     {
       provide: DECISION_ENGINES,
-      useFactory: () => [new JevDecisionEngine()],
+      useFactory: () => [
+        new JevDecisionEngine({
+          experimentalImages: process.env.JEV_EXPERIMENTAL_IMAGES?.trim().toLowerCase() !== 'false',
+        }),
+        new OpenAiDecisionEngine({ apiKey: process.env[LLM_PROVIDER_DEFAULTS.openai.apiKeyEnv] }),
+      ],
     },
     DecisionsService,
   ],

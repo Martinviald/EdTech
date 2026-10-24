@@ -1,5 +1,6 @@
 import type { ChoiceAnswer, DecisionQuestion, Description } from './contracts';
 import { FakeDecisionEngine, type FakeAnswer } from './fake/fake-engine';
+import { JEV_LIMITS } from './jev/jev-limits';
 import { hierarchicalChoice, type DecisionTreeNode } from './hierarchical';
 
 const tree: DecisionTreeNode[] = [
@@ -189,5 +190,37 @@ describe('hierarchicalChoice', () => {
     ).rejects.toMatchObject({
       code: 'invalid_request',
     });
+  });
+
+  it('usa engine.limits.maxChoiceOptions: con máximo 3 rechaza 4 hermanos', async () => {
+    const engine = new FakeDecisionEngine({ limits: { ...JEV_LIMITS, maxChoiceOptions: 3 } });
+    const mk = (n: number): DecisionTreeNode[] =>
+      Array.from({ length: n }, (_, i) => ({ id: `n${i}`, label: `Nodo ${i}` }));
+    const base = { state: 's', instructions: '?', minConfidence: 0.5 };
+
+    await expect(hierarchicalChoice(engine, { ...base, tree: mk(4) })).rejects.toMatchObject({
+      code: 'invalid_request',
+    });
+    expect(engine.calls).toHaveLength(0);
+
+    await expect(hierarchicalChoice(engine, { ...base, tree: mk(3) })).resolves.toBeDefined();
+    expect(engine.calls).toHaveLength(1);
+  });
+
+  it('pasa las imágenes al motor en cada nivel', async () => {
+    const engine = new FakeDecisionEngine({
+      answers: { node: pickByLabel({ Matemática: 0.9, Geometría: 0.9, Área: 0.9 }) },
+    });
+    const images = [{ url: 'https://cdn.test/figura.png' }];
+    await hierarchicalChoice(engine, {
+      state: 's',
+      images,
+      instructions: '?',
+      tree,
+      minConfidence: 0.5,
+    });
+
+    expect(engine.calls).toHaveLength(3);
+    for (const call of engine.calls) expect(call.images).toEqual(images);
   });
 });

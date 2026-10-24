@@ -19,11 +19,11 @@
   "curriculum/skill": 25,
   "curriculum/subdomain": 41,
   "curriculum/text_type": 6,
-  "dia/descriptor": 1101,
+  "dia/descriptor": 1460,
   "dia/domain": 5,
-  "dia/subdomain": 29,
-  "descriptor": 1399,
-  "total": 2278
+  "dia/subdomain": 30,
+  "descriptor": 1460,
+  "total": 2339
  },
  "nodes": [
   {
@@ -26017,6 +26017,677 @@
    "source": "dia",
    "level": "1_basico",
    "order": 4
+  },
+  {
+   "code": "MATH-5B-OA01-I2",
+   "type": "descriptor",
+   "name": "Ubican un número natural de más de 6 dígitos y menor que 1 000 millones en la recta numérica.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "MATH-6B-OA02-I3",
+   "type": "descriptor",
+   "name": "Calculan el resultado de una adición de números naturales en ámbitos superiores a 10 000.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "MATH-6B-OA02-I4",
+   "type": "descriptor",
+   "name": "Calculan el resultado de una sustracción de números naturales en ámbitos superiores a 10 000.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-4B-OA11-I2",
+   "type": "descriptor",
+   "name": "Identifican un número decimal centésimo que está representado pictóricamente.",
+   "parentCode": "DIA-MATH-4B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "4_basico",
+   "order": 2
+  },
+  {
+   "code": "MATH-6B-OA07-I3",
+   "type": "descriptor",
+   "name": "Calculan el resultado de una multiplicación de números decimales hasta la milésima.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "MATH-6B-OA07-I4",
+   "type": "descriptor",
+   "name": "Calculan el resultado de una división de un número decimal por un número natural.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-5B-OA07-I11",
+   "type": "descriptor",
+   "name": "Identifican una fracción impropia equivalente a una fracción dada, simplificando.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 11
+  },
+  {
+   "code": "MATH-6B-OA03-I4",
+   "type": "descriptor",
+   "name": "Interpretan información expresada como razones.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-5B-OA10-I4",
+   "type": "descriptor",
+   "name": "Transforman una fracción propia, con denominador 5, a decimal.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-5B-OA14-I4",
+   "type": "descriptor",
+   "name": "Identifican la regla de formación, en lenguaje natural, de una relación de números presentada en una tabla.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-5B-OA22-I4",
+   "type": "descriptor",
+   "name": "Calculan el área de un triángulo presentado en una cuadrícula.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "MATH-3B-OA21-I6",
+   "type": "descriptor",
+   "name": "Resuelven un problema que requiere calcular el perímetro de un rectángulo.",
+   "parentCode": "DIA-MATH-3B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "3_basico",
+   "order": 6
+  },
+  {
+   "code": "MATH-4B-OA15-I1",
+   "type": "descriptor",
+   "name": "Identifican la ubicación de un objeto en un plano con coordenadas informales.",
+   "parentCode": "DIA-MATH-4B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "4_basico",
+   "order": 1
+  },
+  {
+   "code": "MATH-4B-OA15-I2",
+   "type": "descriptor",
+   "name": "Identifican la descripción de un trayecto de un objeto en un plano con coordenadas informales en lenguaje natural.",
+   "parentCode": "DIA-MATH-4B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "4_basico",
+   "order": 2
+  },
+  {
+   "code": "MATH-5B-OA16-I1",
+   "type": "descriptor",
+   "name": "Determinan las coordenadas de un punto en el plano cartesiano.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 1
+  },
+  {
+   "code": "MATH-5B-OA26-I7",
+   "type": "descriptor",
+   "name": "Identifican la tabla que representa un conjunto de datos dados.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 7
+  },
+  {
+   "code": "MATH-5B-OA26-I8",
+   "type": "descriptor",
+   "name": "Identifican el gráfico de línea que representa un conjunto de datos presentados en una tabla.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 8
+  },
+  {
+   "code": "MATH-6B-OA24-I9",
+   "type": "descriptor",
+   "name": "Identifican el gráfico de barras doble que representa un conjunto de datos presentados en una tabla.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 9
+  },
+  {
+   "code": "MATH-6B-OA24-I10",
+   "type": "descriptor",
+   "name": "Identifican el gráfico circular que representa un conjunto de datos presentados en una tabla.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 10
+  },
+  {
+   "code": "MATH-5B-OA26-I9",
+   "type": "descriptor",
+   "name": "Identifican la frecuencia total de un conjunto de datos representados en un gráfico de barras simples.",
+   "parentCode": "DIA-MATH-5B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 9
+  },
+  {
+   "code": "MATH-6B-OA02-I5",
+   "type": "descriptor",
+   "name": "Identifican la sustracción que permite resolver un problema con números naturales.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 5
+  },
+  {
+   "code": "MATH-6B-OA02-I6",
+   "type": "descriptor",
+   "name": "Resuelven un problema que requiere de adiciones de números naturales.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 6
+  },
+  {
+   "code": "MATH-6B-OA04-I3",
+   "type": "descriptor",
+   "name": "Representan un porcentaje de forma pictórica.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "MATH-6B-OA09-I1",
+   "type": "descriptor",
+   "name": "Identifican la regla de formación, en lenguaje algebraico, de una relación de números presentada en una tabla.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 1
+  },
+  {
+   "code": "MATH-6B-OA23-I3",
+   "type": "descriptor",
+   "name": "Identifican la tendencia de los resultados obtenidos de un experimento aleatorio presentado en una tabla.",
+   "parentCode": "DIA-MATH-6B",
+   "marco": "dia",
+   "subjectCode": "MATH",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "HIST-5B-OA02-I2",
+   "type": "descriptor",
+   "name": "Reconocen información que se encuentra implícita en una fuente secundaria referida a las motivaciones de los españoles para venir a América.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "HIST-5B-OA02-I3",
+   "type": "descriptor",
+   "name": "Reconocen el propósito que perseguía la educación de los indígenas, por parte de los españoles, a partir de una fuente secundaria.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 3
+  },
+  {
+   "code": "HIST-5B-OA02-I4",
+   "type": "descriptor",
+   "name": "Ordenan de manera precisa en una línea de tiempo diferentes hechos del periodo de conquista.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "HIST-5B-OA02-I5",
+   "type": "descriptor",
+   "name": "Aplican el concepto de periodo histórico, a partir de información de una línea de tiempo, de la época de la conquista.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 5
+  },
+  {
+   "code": "HIST-5B-OA03-I2",
+   "type": "descriptor",
+   "name": "Identifican una similitud entre dos puntos de vista respecto de las consecuencias de la conquista de América.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "HIST-5B-OA04-I2",
+   "type": "descriptor",
+   "name": "Reconocen la pregunta de investigación que puede ser respondida a partir de una fuente referida a la conquista de América.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "HIST-5B-OA06-I3",
+   "type": "descriptor",
+   "name": "Infieren información que se encuentra implícita en una fuente secundaria referida al rol de la iglesia católica en América, durante el periodo colonial.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 3
+  },
+  {
+   "code": "HIST-5B-OA07-I4",
+   "type": "descriptor",
+   "name": "Organizan correctamente en un esquema la información de un texto referido a la institución de la Encomienda.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "HIST-5B-OA06-I4",
+   "type": "descriptor",
+   "name": "Reconocen una pregunta que permite profundizar en el proceso de mestizaje durante el dominio español en América.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "HIST-5B-OA06-I5",
+   "type": "descriptor",
+   "name": "Identifican un elemento de continuidad y un elemento de cambio, en el ámbito político, durante el periodo colonial.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 5
+  },
+  {
+   "code": "HIST-5B-OA07-I5",
+   "type": "descriptor",
+   "name": "Reconocen las múltiples causas que influyeron en los cambios de la relación español-mapuche durante la Guerra de Arauco.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 5
+  },
+  {
+   "code": "HIST-5B-OA07-I6",
+   "type": "descriptor",
+   "name": "Aplican el concepto de década en la lectura de una línea de tiempo, referida a la relación español- mapuche, durante el periodo colonial.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 6
+  },
+  {
+   "code": "HIST-5B-OA07-I7",
+   "type": "descriptor",
+   "name": "Extraen una conclusión que se puede obtener a partir de la lectura de una línea de tiempo, referida a la relación español-mapuche, durante el periodo colonial.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 7
+  },
+  {
+   "code": "HIST-5B-OA07-I8",
+   "type": "descriptor",
+   "name": "Reconocen la duración, expresada en siglos, del periodo colonial en Chile.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 8
+  },
+  {
+   "code": "HIST-5B-OA09-I3",
+   "type": "descriptor",
+   "name": "Aplican categorías de ubicación relativa en la lectura de un mapa del Norte Grande de Chile.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 3
+  },
+  {
+   "code": "HIST-5B-OA12-I4",
+   "type": "descriptor",
+   "name": "Relacionan la ubicación geográfica de una localidad con eventuales riesgos naturales a partir de información que entrega un mapa del Norte Grande de Chile.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "HIST-5B-OA09-I4",
+   "type": "descriptor",
+   "name": "Ubican recursos naturales presentes en la Zona Sur de Chile, a partir de la comparación entre mapas.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 4
+  },
+  {
+   "code": "HIST-5B-OA10-I2",
+   "type": "descriptor",
+   "name": "Aplican categorías de ubicación relativa en la lectura de mapas de la Zona Sur de Chile, considerando la presencia de recursos naturales no renovables.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "HIST-5B-OA12-I5",
+   "type": "descriptor",
+   "name": "Organizan correctamente información a partir de la lectura de un afiche referido a cómo actuar frente a un sismo.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 5
+  },
+  {
+   "code": "HIST-5B-OA12-I6",
+   "type": "descriptor",
+   "name": "Identifican una acción que permite organizar información correctamente en un afiche referido a cómo actuar frente a un sismo.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 6
+  },
+  {
+   "code": "HIST-5B-OA12-I7",
+   "type": "descriptor",
+   "name": "Reconocen el objetivo de un afiche referido a cómo actuar frente a un sismo.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 7
+  },
+  {
+   "code": "HIST-5B-OA13-I2",
+   "type": "descriptor",
+   "name": "Fundamentan una opinión sobre el rol del Estado respecto del derecho a la salud en Chile, a partir de evidencia obtenida de una fuente secundaria.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "HIST-5B-OA14-I2",
+   "type": "descriptor",
+   "name": "Reconocen una pregunta que puede ser respondida con información que entrega un afiche sobre el acceso a salud de la población migrante en Chile.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "HIST-5B-OA13-I3",
+   "type": "descriptor",
+   "name": "Infieren información que se encuentra implícita en un afiche sobre el acceso a salud de la población migrante en Chile.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 3
+  },
+  {
+   "code": "HIST-5B-OA14-I3",
+   "type": "descriptor",
+   "name": "Reconocen la visión sobre el rol del Estado en educación, a partir de la lectura de una fuente secundaria.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 3
+  },
+  {
+   "code": "HIST-5B-OA22-I2",
+   "type": "descriptor",
+   "name": "Identifican información que corresponde a una opinión fundamentada respecto de la importancia del reciclaje.",
+   "parentCode": "DIA-HIST-5B",
+   "marco": "dia",
+   "subjectCode": "HIST",
+   "source": "dia",
+   "level": "5_basico",
+   "order": 2
+  },
+  {
+   "code": "SCI-6B-OA01-I3",
+   "type": "descriptor",
+   "name": "Identifican fortalezas y debilidades de una investigación relacionada con los requerimientos de agua, dióxido de carbono y energía lumínica para la producción de azúcar y la liberación de oxígeno en la fotosíntesis.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "SCI-6B-OA01-I4",
+   "type": "descriptor",
+   "name": "Seleccionan materiales para resolver un problema científico relacionado con los requerimientos de agua, dióxido de carbono y energía lumínica para la producción de azúcar y la liberación de oxígeno en la fotosíntesis.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 4
+  },
+  {
+   "code": "SCI-6B-OA02-I3",
+   "type": "descriptor",
+   "name": "Explican contextos relacionados con la transferencia de energía y materia por medio de modelos de cadenas y redes alimentarias en diferentes ecosistemas.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "SCI-6B-OA02-I4",
+   "type": "descriptor",
+   "name": "Formulan conclusiones a partir de contextos relacionados con el modelo de transferencia de energía y materia de las cadenas y redes alimentarias.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 4
+  },
+  {
+   "code": "SCI-6B-OA04-I3",
+   "type": "descriptor",
+   "name": "Identifican, utilizando representaciones como fotografías, dibujos o diagramas, las principales estructuras del sistema reproductor humano femenino y masculino.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "SCI-6B-OA13-I5",
+   "type": "descriptor",
+   "name": "Identifican las variables de una investigación relacionada con los cambios de estado de la materia.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 5
+  },
+  {
+   "code": "SCI-6B-OA13-I6",
+   "type": "descriptor",
+   "name": "Identifican fortalezas y debilidades de una investigación relacionada con los cambios de estado de la materia.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 6
+  },
+  {
+   "code": "SCI-6B-OA16-I3",
+   "type": "descriptor",
+   "name": "Identifican la capa de origen de distintos recursos naturales.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
+  },
+  {
+   "code": "SCI-6B-OA16-I4",
+   "type": "descriptor",
+   "name": "Interpretan información relacionada con la identificación de las propiedades de las capas de la Tierra (suelo o aire).",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 4
+  },
+  {
+   "code": "SCI-6B-OA18-I3",
+   "type": "descriptor",
+   "name": "Identifican un procedimiento que permita responder una pregunta de investigación relacionada con los agentes que provocan la erosión.",
+   "parentCode": "DIA-SCI-6B",
+   "marco": "dia",
+   "subjectCode": "SCI",
+   "source": "dia",
+   "level": "6_basico",
+   "order": 3
   }
  ],
  "mappings": [
@@ -31913,6 +32584,311 @@
   {
    "sourceCode": "MATH-1B-OA20-I4",
    "targetCode": "MATH-1B-OA20",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA01-I2",
+   "targetCode": "MATH-5B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA02-I3",
+   "targetCode": "MATH-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA02-I4",
+   "targetCode": "MATH-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-4B-OA11-I2",
+   "targetCode": "MATH-4B-OA11",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA07-I3",
+   "targetCode": "MATH-6B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA07-I4",
+   "targetCode": "MATH-6B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA07-I11",
+   "targetCode": "MATH-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA03-I4",
+   "targetCode": "MATH-6B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA10-I4",
+   "targetCode": "MATH-5B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA14-I4",
+   "targetCode": "MATH-5B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA22-I4",
+   "targetCode": "MATH-5B-OA22",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-3B-OA21-I6",
+   "targetCode": "MATH-3B-OA21",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-4B-OA15-I1",
+   "targetCode": "MATH-4B-OA15",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-4B-OA15-I2",
+   "targetCode": "MATH-4B-OA15",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA16-I1",
+   "targetCode": "MATH-5B-OA16",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA26-I7",
+   "targetCode": "MATH-5B-OA26",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA26-I8",
+   "targetCode": "MATH-5B-OA26",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA24-I9",
+   "targetCode": "MATH-6B-OA24",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA24-I10",
+   "targetCode": "MATH-6B-OA24",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-5B-OA26-I9",
+   "targetCode": "MATH-5B-OA26",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA02-I5",
+   "targetCode": "MATH-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA02-I6",
+   "targetCode": "MATH-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA04-I3",
+   "targetCode": "MATH-6B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA09-I1",
+   "targetCode": "MATH-6B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "MATH-6B-OA23-I3",
+   "targetCode": "MATH-6B-OA23",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA02-I2",
+   "targetCode": "HIST-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA02-I3",
+   "targetCode": "HIST-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA02-I4",
+   "targetCode": "HIST-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA02-I5",
+   "targetCode": "HIST-5B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA03-I2",
+   "targetCode": "HIST-5B-OA03",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA04-I2",
+   "targetCode": "HIST-5B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA06-I3",
+   "targetCode": "HIST-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA07-I4",
+   "targetCode": "HIST-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA06-I4",
+   "targetCode": "HIST-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA06-I5",
+   "targetCode": "HIST-5B-OA06",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA07-I5",
+   "targetCode": "HIST-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA07-I6",
+   "targetCode": "HIST-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA07-I7",
+   "targetCode": "HIST-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA07-I8",
+   "targetCode": "HIST-5B-OA07",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA09-I3",
+   "targetCode": "HIST-5B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA12-I4",
+   "targetCode": "HIST-5B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA09-I4",
+   "targetCode": "HIST-5B-OA09",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA10-I2",
+   "targetCode": "HIST-5B-OA10",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA12-I5",
+   "targetCode": "HIST-5B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA12-I6",
+   "targetCode": "HIST-5B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA12-I7",
+   "targetCode": "HIST-5B-OA12",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA13-I2",
+   "targetCode": "HIST-5B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA14-I2",
+   "targetCode": "HIST-5B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA13-I3",
+   "targetCode": "HIST-5B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA14-I3",
+   "targetCode": "HIST-5B-OA14",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "HIST-5B-OA22-I2",
+   "targetCode": "HIST-5B-OA22",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA01-I3",
+   "targetCode": "SCI-6B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA01-I4",
+   "targetCode": "SCI-6B-OA01",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA02-I3",
+   "targetCode": "SCI-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA02-I4",
+   "targetCode": "SCI-6B-OA02",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA04-I3",
+   "targetCode": "SCI-6B-OA04",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I5",
+   "targetCode": "SCI-6B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA13-I6",
+   "targetCode": "SCI-6B-OA13",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA16-I3",
+   "targetCode": "SCI-6B-OA16",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA16-I4",
+   "targetCode": "SCI-6B-OA16",
+   "mappingType": "subset"
+  },
+  {
+   "sourceCode": "SCI-6B-OA18-I3",
+   "targetCode": "SCI-6B-OA18",
    "mappingType": "subset"
   }
  ]

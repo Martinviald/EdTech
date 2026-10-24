@@ -1,4 +1,11 @@
 import { z } from 'zod';
+import { omrFieldResponseSchema } from './answer-reading/crop.schema';
+import {
+  omrPointSchema,
+  omrRegionSchema,
+  type OmrPoint,
+  type OmrRegion,
+} from './omr-geometry.schema';
 
 // ── Lector de marcas (E22) — LayoutSpec, el contrato central ─────────────────
 // Una sola pieza de datos compartida por TRES consumidores que se escriben por
@@ -10,15 +17,7 @@ import { z } from 'zod';
 // rectángulo definido por los 4 fiduciales de esquina — NUNCA de la página
 // (D7: inmune al "ajustar a página" de cualquier impresora).
 
-export const omrPointSchema = z.object({
-  x: z.number().min(0).max(1),
-  y: z.number().min(0).max(1),
-});
-
-export const omrRegionSchema = z.object({
-  topLeft: omrPointSchema,
-  bottomRight: omrPointSchema,
-});
+export { omrPointSchema, omrRegionSchema, type OmrPoint, type OmrRegion };
 
 export const omrBubbleSchema = z.object({
   value: z.string().min(1),
@@ -40,6 +39,12 @@ export const omrFieldSchema = z.object({
   selectMode: z.enum(['single', 'multiple']),
   bubbles: z.array(omrBubbleSchema),
   region: omrRegionSchema.nullable(),
+  /**
+   * Formato y casillas del campo de respuesta escrita (corrección por visión).
+   * Opcional y ausente en los campos de burbujas: `layoutHash` omite las claves
+   * `undefined`, así que los layouts ya congelados conservan su hash.
+   */
+  response: omrFieldResponseSchema.optional(),
 });
 
 export const CAPTURE_SOURCES = ['scanner', 'phone'] as const;
@@ -131,8 +136,6 @@ export const omrCalibrationSchema = z.object({
 
 export type OmrCalibration = z.infer<typeof omrCalibrationSchema>;
 
-export type OmrPoint = z.infer<typeof omrPointSchema>;
-export type OmrRegion = z.infer<typeof omrRegionSchema>;
 export type OmrBubble = z.infer<typeof omrBubbleSchema>;
 export type LayoutField = z.infer<typeof omrFieldSchema>;
 export type LayoutSpec = z.infer<typeof layoutSpecSchema>;

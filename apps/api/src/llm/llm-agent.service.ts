@@ -119,7 +119,12 @@ export class LlmAgentService {
     let lastText = '';
 
     for (let step = 1; step <= maxSteps; step++) {
-      const toolCalls: Array<{ id: string; name: string; input: unknown }> = [];
+      const toolCalls: Array<{
+        id: string;
+        name: string;
+        input: unknown;
+        providerMetadata?: Record<string, unknown>;
+      }> = [];
       let textBuffer = '';
 
       for await (const event of provider.streamWithTools!({
@@ -129,7 +134,7 @@ export class LlmAgentService {
         options: {
           model: cfg.model,
           maxTokens: cfg.maxTokens,
-          temperature: cfg.temperature,
+          ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
         },
       })) {
         switch (event.type) {
@@ -142,6 +147,7 @@ export class LlmAgentService {
               id: event.id,
               name: event.name,
               input: event.input,
+              ...(event.providerMetadata ? { providerMetadata: event.providerMetadata } : {}),
             });
             yield {
               type: 'tool_call',
@@ -172,6 +178,7 @@ export class LlmAgentService {
           id: call.id,
           name: call.name,
           input: call.input,
+          ...(call.providerMetadata ? { providerMetadata: call.providerMetadata } : {}),
         });
       }
       if (assistantContent.length > 0) {
@@ -196,7 +203,7 @@ export class LlmAgentService {
       for (const call of toolCalls) {
         let result: AgentToolResult;
         try {
-          result = await params.executeTool(call);
+          result = await params.executeTool({ id: call.id, name: call.name, input: call.input });
         } catch (err) {
           this.logger.warn(
             `Tool "${call.name}" lanzó una excepción: ${

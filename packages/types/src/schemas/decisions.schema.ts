@@ -3,7 +3,7 @@ import { z } from 'zod';
 /**
  * Motor de decisiones (`@soe/decisions`) — tipos compartidos FE/BE/BD.
  *
- * Un motor de decisiones (hoy Jev, de TypeSafe AI) evalúa un estado contra
+ * Un motor de decisiones (Jev, de TypeSafe AI, u OpenAI) evalúa un estado contra
  * preguntas tipadas (Noul / Choice / Score) y devuelve respuestas con
  * probabilidades y confianza calibrada. Este archivo fija lo que se PERSISTE y
  * se configura: funcionalidades, modos, umbrales de enrutamiento y la forma de
@@ -13,7 +13,14 @@ import { z } from 'zod';
 
 // ── Funcionalidades ──────────────────────────────────────────────────────────
 // Cada funcionalidad es un punto de llamada al motor. Se amplía agregando valores.
-export const DECISION_FEATURES = ['remedial_judge'] as const;
+// `mark_disambiguation_*`: un slot por motor (Jev y OpenAI) para desambiguar marcas de
+// burbuja; cada uno con su modelo fijado y sus umbrales (docs/diseno-desambiguacion-marcas-ia.md §3.5).
+export const DECISION_FEATURES = [
+  'remedial_judge',
+  'mark_disambiguation_jev',
+  'mark_disambiguation_openai',
+  'answer_reading_tiebreak',
+] as const;
 export type DecisionFeature = (typeof DECISION_FEATURES)[number];
 export const decisionFeatureSchema = z.enum(DECISION_FEATURES);
 
@@ -24,7 +31,7 @@ export type DecisionMode = (typeof DECISION_MODES)[number];
 export const decisionModeSchema = z.enum(DECISION_MODES);
 
 // ── Motores ──────────────────────────────────────────────────────────────────
-export const decisionEngineIdSchema = z.enum(['jev']);
+export const decisionEngineIdSchema = z.enum(['jev', 'openai']);
 export type DecisionEngineId = z.infer<typeof decisionEngineIdSchema>;
 
 // ── Umbrales de enrutamiento ─────────────────────────────────────────────────
@@ -51,9 +58,23 @@ export const noulThresholdsSchema = z
   });
 export type NoulThresholds = z.infer<typeof noulThresholdsSchema>;
 
+/**
+ * Par de motores (`pairConsensus` de `@soe/decisions`): umbrales de UN motor para
+ * combinarlo con otro. `>= agree` basta si coinciden; `>= solo` basta si el otro no
+ * sabe; `< unsure` es "no sabe". Invariante: `0 <= unsure <= agree <= solo <= 1`.
+ */
+export const pairThresholdsSchema = z
+  .object({ agree: probabilitySchema, solo: probabilitySchema, unsure: probabilitySchema })
+  .strict()
+  .refine((t) => t.unsure <= t.agree && t.agree <= t.solo, {
+    message: 'Los umbrales de par deben cumplir unsure <= agree <= solo',
+    path: ['agree'],
+  });
+export type PairThresholds = z.infer<typeof pairThresholdsSchema>;
+
 export const decisionThresholdsSchema = z.record(
   z.string(),
-  z.union([confidenceThresholdsSchema, noulThresholdsSchema]),
+  z.union([confidenceThresholdsSchema, noulThresholdsSchema, pairThresholdsSchema]),
 );
 export type DecisionThresholds = z.infer<typeof decisionThresholdsSchema>;
 
@@ -90,7 +111,31 @@ export interface DecisionFeatureDefault {
   thresholds: DecisionThresholds;
 }
 
-/** Default `off`: activar una funcionalidad es una decisión explícita de configuración. */
+/**
+ * Default `off`: activar una funcionalidad es una decisión explícita de configuración.
+ * Excepción: la desambiguación de marcas (`mark_disambiguation_*`) llega prendida en `live`
+ * para todas las organizaciones, con los umbrales provisorios del diseño
+ * (docs/diseno-desambiguacion-marcas-ia.md §7.2). Una fila de `decision_settings` la
+ * sobrescribe y el interruptor `MARK_DISAMBIGUATION_AI_DISABLED=true` la apaga entera.
+ * El desempate de la lectura interpretada (`answer_reading_tiebreak`) también llega en `live`
+ * (lineamiento «ocultar complejidad»): su umbral vive en la política de la ruta y el
+ * interruptor `ANSWER_READING_TIEBREAK_AI_DISABLED=true` lo apaga entero.
+ * La clave `respuesta` es `MARK_DISAMBIGUATION_QUESTION_ID` (no se importa para no
+ * crear un ciclo con mark-disambiguation.schema.ts; un test fija que coincidan).
+ */
 export const DECISION_FEATURE_DEFAULTS: Record<DecisionFeature, DecisionFeatureDefault> = {
   remedial_judge: { engine: 'jev', model: 'jev-1.13.0', mode: 'off', thresholds: {} },
+  mark_disambiguation_jev: {
+    engine: 'jev',
+    model: 'jev-1.14.0',
+    mode: 'live',
+    thresholds: { respuesta: { agree: 0.6, solo: 0.85, unsure: 0.5 } },
+  },
+  mark_disambiguation_openai: {
+    engine: 'openai',
+    model: 'gpt-6-luna',
+    mode: 'live',
+    thresholds: { respuesta: { agree: 0.5, solo: 0.8, unsure: 0.5 } },
+  },
+  answer_reading_tiebreak: { engine: 'jev', model: 'jev-1.14.0', mode: 'live', thresholds: {} },
 };

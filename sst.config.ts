@@ -80,6 +80,7 @@ export default $config({
     const geminiApiKey = new sst.Secret('GeminiApiKey', '');
     const anthropicApiKey = new sst.Secret('AnthropicApiKey', '');
     const typesafeApiKey = new sst.Secret('TypesafeApiKey', ''); // motor de decisiones Jev (@soe/decisions)
+    const openAiApiKey = new sst.Secret('OpenAiApiKey', ''); // OpenAI Decisions (@soe/decisions) y OpenAiProvider
     const authMode = new sst.Secret('AuthMode', 'mock'); // 'mock' (demo) | 'sso'
     const googleClientId = new sst.Secret('GoogleClientId', '');
     const googleClientSecret = new sst.Secret('GoogleClientSecret', '');
@@ -91,6 +92,15 @@ export default $config({
     const mcpCanonicalUri = new sst.Secret('McpCanonicalUri', ''); // https://<api>/mcp (== resource indicator en WorkOS)
     const workosIssuer = new sst.Secret('WorkosIssuer', ''); // AuthKit issuer
     const workosJwksUrl = new sst.Secret('WorkosJwksUrl', ''); // jwks_uri del issuer
+
+    // ── Desambiguación de marcas con IA (docs/diseno-desambiguacion-marcas-ia.md §14) ──
+    // Prendida por default en live para todas las orgs. Jev necesita imágenes: con "true"
+    // (default) las acepta; con "false" no, y la desambiguación no corre.
+    const jevExperimentalImages = new sst.Secret('JevExperimentalImages', 'true');
+    // Interruptor de emergencia: con "true" la IA no corre para ninguna org y las marcas
+    // dudosas vuelven a revisión humana; manda sobre las filas de decision_settings.
+    // Apagar la IA = `sst secret set MarkDisambiguationAiDisabled true --stage <stage>` y redeploy.
+    const markDisambiguationAiDisabled = new sst.Secret('MarkDisambiguationAiDisabled', 'false');
 
     // App Runner DESCARTA las variables de entorno con valor vacío. Si se le pasa una
     // (p. ej. un secret con default '' que nunca se seteó), el servicio queda sin ella, el
@@ -361,6 +371,9 @@ export default $config({
               GEMINI_API_KEY: geminiApiKey.value,
               ANTHROPIC_API_KEY: anthropicApiKey.value,
               TYPESAFE_API_KEY: typesafeApiKey.value,
+              OPENAI_API_KEY: openAiApiKey.value,
+              JEV_EXPERIMENTAL_IMAGES: jevExperimentalImages.value,
+              MARK_DISAMBIGUATION_AI_DISABLED: markDisambiguationAiDisabled.value,
               AWS_S3_BUCKET: uploads.name,
               // E22: el backend habla con el servicio de visión OMR por HTTP.
               // El egress del API sale por el VPC connector, que es justo lo que le

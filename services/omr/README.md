@@ -34,6 +34,8 @@ PageSource (sources.py) → Rectifier (rectify.py) → QualityGate (quality.py)
 | `app/readers.py` | D10 · registro `READERS` por tipo de campo (MVP: `bubble_group`) |
 | `app/identity.py` | T6 · lectura de QR (el payload NO se interpreta acá) |
 | `app/pipeline.py` | T7 · ensamblado, sha256 canónico, thumbs, timeout por página |
+| `app/crop.py` | S2 · perfiles de recorte versionados (`CROP_PROFILES`) y recorte con margen |
+| `app/ink.py` | S1 · `inkRatio` de un `crop_region` descontando la plantilla impresa |
 
 ## Convención del rectángulo fiducial (CD-5, compartida con el impresor, A1)
 
@@ -51,6 +53,29 @@ Ver `docs/e22-lector-contracts.md` (CD-5), `app/geometry.py` y el generador
 espejo `tests/synthetic.py`. Implementación gemela del impresor:
 `apps/api/src/sheet-scanning/sheet-print.helpers.ts` (`computeDrawPlan`).
 
+## Recorte de respuestas abiertas (`crop_region`, S1/S2)
+
+Diseño en `docs/diseno-correccion-vision-preguntas-abiertas.md` §4. Si el campo trae
+`response.cropProfileId` (F5b lo agrega a `omrFieldSchema`), el recorte usa ese perfil:
+margen de `bleedRatio` × el lado mayor (`bleedBasis: longer_side`, v1) o menor
+(`shorter_side`, v2) de la región, limitado en v2 a `neighborGapFraction` × la distancia al
+campo vecino de cada lado y recortado al borde de la página rectificada, ancho `targetWidthPx`, gris, calidad JPEG y contraste `clahe`
+opcional. **Nunca se binariza ni se limpian trazos**: puede borrar un punto decimal. Sin
+perfil (o con uno desconocido) el recorte es el histórico: sin margen, 600 px, calidad 70.
+
+Los perfiles se declaran en `@soe/types` (`CROP_PROFILES`) y se replican en `app/crop.py`;
+`gen:omr-contracts` escribe `contracts/crop-profiles.json` y
+`tests/test_crop_profiles_contract.py` compara ambos lados.
+
+Con contrato v2 la marca agrega `crop`: `cropProfileId` aplicado (el histórico se informa
+como `crop-region-legacy@1`), `inkRatio`, `inkRatioByPart` (si hay `response.boxes`),
+`widthPx`/`heightPx` y el `sha256` del JPEG. `inkRatio` usa el mismo corte relativo al
+fondo local que las burbujas, con el fondo estimado por cierre morfológico (robusto a
+sombras), y descuenta los bordes de las casillas: una banda fija pegada al borde y las
+líneas rectas largas cercanas a él, para que la plantilla corrida por la homografía
+tampoco cuente como tinta. Un relleno sólido más ancho que el kernel de fondo (~3 % del
+ancho) se subestima: sirve para distinguir "en blanco", no para medir cuánto se escribió.
+
 ## Principio rector del clasificador
 
 **Ante la duda, el clasificador duda o rechaza — nunca decide mal con
@@ -65,6 +90,22 @@ tiene dos grupos, pero se distingue del caso en blanco porque el fill es
 relativo al fondo local (un clúster único con todos los fills altos es tinta
 real). Re-escanear no la arregla, así que no se rechaza: cada campo `single`
 sale `multiple` y va a la cola.
+
+Excepción por recortes: si la página tiene campos `crop_region`, un problema de las
+burbujas no la rechaza. Queda `quality.ok: true` con `marksReadability` en `likely_blank` o
+`unreadable`, cada campo de burbujas sale `ambiguous` con su evidencia (a revisión, nunca
+`blank`) y los recortes salen como siempre: no dependen de las burbujas. Una página solo de
+burbujas se sigue rechazando.
+
+## Fotos de celular: encuadre de la hoja (`app/framing.py`)
+
+Con `captureProfile.source: phone`, si la primera pasada no queda confirmada se localiza la
+hoja en la foto, se recorta su rectángulo y la rectificación completa corre sobre el
+recorte. Así `cropped` significa que falta parte de la hoja, no que sobra fondo (mesa,
+ropa). La rectificación encuadrada se acepta solo si los 4 fiduciales forman un
+cuadrilátero coherente con la hoja (`fiducial_quad_consistent`) y, si la página que declara
+el QR tiene burbujas, si su firma calza. El debug lo registra en `sheetFramed`. El perfil
+`scanner` no cambia. Fixtures reales en `tests/fixtures/fotos-celular/`.
 
 ## Catálogo de suciedad real cubierto (`tests/test_dirty_catalog.py`)
 
@@ -145,7 +186,7 @@ prueba el harness de punta a punta).
 |---|---|---|
 | `OMR_PAGE_TIMEOUT_S` | `20` | Tiempo límite por página; una página que lo excede se omite del resultado (si TODAS lo exceden → 504) |
 | `OMR_DOWNLOAD_TIMEOUT_S` | `10` | Timeout de descarga de cada URL firmada |
-| `OMR_CONTRACT_V2` | `1` | Campos aditivos del contrato v2 en cada marca (`suggestedValue`, `doubtReason`, `nullConfidence`; `app/readers.py`). `0` = el ScanResult vuelve a la forma v1 (las claves no se emiten); nada aguas abajo depende de ellas hasta que la cola de revisión las use |
+| `OMR_CONTRACT_V2` | `1` | Campos aditivos del contrato v2 en cada marca (`suggestedValue`, `doubtReason`, `nullConfidence`, y `crop` en los `crop_region`; `app/readers.py`). `0` = el ScanResult vuelve a la forma v1 (las claves no se emiten); nada aguas abajo depende de ellas hasta que la cola de revisión las use |
 | `OMR_LOCAL_REGISTRATION` | `1` | Registro local de burbujas antes de muestrear (`app/registration.py`). `0` = apagado de emergencia (vuelve al muestreo en la posición del spec) mientras dure la observación en producción; después se retira |
 
 ## Desarrollo local

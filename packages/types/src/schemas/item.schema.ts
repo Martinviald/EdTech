@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { componentCreditSchema, equivalencesSchema } from './answer-reading/response-format.schema';
 import { ITEM_TYPES, type ItemType } from '../enums';
 
 export const ITEM_STATUS = ['draft', 'review', 'published', 'deprecated'] as const;
@@ -87,6 +88,8 @@ export const scoringConfigSchema = z
     partialCredit: z.boolean().optional(),
     matching: matchingScoringSchema.optional(),
     multiSelect: multiSelectScoringSchema.optional(),
+    equivalences: equivalencesSchema.optional(),
+    componentCredit: componentCreditSchema.optional(),
   })
   .passthrough()
   .optional();

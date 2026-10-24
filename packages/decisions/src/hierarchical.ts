@@ -4,9 +4,9 @@
  */
 
 import {
-  DECISION_LIMITS,
   DecisionError,
   type DecisionEngine,
+  type DecisionImage,
   type DecisionState,
   type Description,
   type JsonObject,
@@ -23,6 +23,8 @@ export interface DecisionTreeNode {
 
 export interface HierarchicalChoiceOptions {
   readonly state: DecisionState;
+  /** Imágenes que acompañan al estado en cada nivel (solo motores con `capabilities.images`). */
+  readonly images?: readonly DecisionImage[];
   /** Instrucción común a todos los niveles ("¿Qué categoría describe mejor…?"). */
   readonly instructions: Description;
   /** Nodos raíz. */
@@ -50,7 +52,8 @@ const QUESTION_ID = 'node';
 /**
  * En cada nivel pregunta un Choice sobre los hijos y baja mientras
  * `confidence >= minConfidence` y haya hijos. Un nivel con un solo nodo no
- * llama al motor: se toma con confianza 1. Más de 255 hermanos → `invalid_request`.
+ * llama al motor: se toma con confianza 1. Más hermanos que
+ * `engine.limits.maxChoiceOptions` → `invalid_request`.
  */
 export async function hierarchicalChoice(
   engine: DecisionEngine,
@@ -81,7 +84,7 @@ async function chooseAmong(
   options: HierarchicalChoiceOptions,
   siblings: readonly DecisionTreeNode[],
 ): Promise<{ node: DecisionTreeNode; confidence: number }> {
-  assertValidSiblings(siblings);
+  assertValidSiblings(siblings, engine.limits.maxChoiceOptions);
   const [only] = siblings;
   if (siblings.length === 1 && only !== undefined) return { node: only, confidence: 1 };
 
@@ -96,6 +99,7 @@ async function chooseAmong(
 
   const result = await engine.evaluate({
     state: options.state,
+    images: options.images,
     questions: { [QUESTION_ID]: choice(options.instructions, criteria) },
     model: options.model,
     timeoutMs: options.timeoutMs,
@@ -113,14 +117,17 @@ async function chooseAmong(
   return { node, confidence: answer.confidence };
 }
 
-function assertValidSiblings(siblings: readonly DecisionTreeNode[]): void {
+function assertValidSiblings(
+  siblings: readonly DecisionTreeNode[],
+  maxChoiceOptions: number,
+): void {
   if (siblings.length === 0) {
     throw new DecisionError('invalid_request', 'El árbol no tiene nodos en este nivel.');
   }
-  if (siblings.length > DECISION_LIMITS.maxChoiceOptions) {
+  if (siblings.length > maxChoiceOptions) {
     throw new DecisionError(
       'invalid_request',
-      `Un nivel del árbol tiene ${siblings.length} hermanos; el máximo es ${DECISION_LIMITS.maxChoiceOptions}. Agrupa los nodos en subniveles.`,
+      `Un nivel del árbol tiene ${siblings.length} hermanos; el máximo es ${maxChoiceOptions}. Agrupa los nodos en subniveles.`,
     );
   }
   const seen = new Set<string>();

@@ -3,12 +3,18 @@ import { LlmConfigService } from './llm.config';
 import { LLM_PROVIDERS } from './llm.constants';
 import type { LlmFeature } from '@soe/types';
 import type {
+  LlmCompletionOptions,
   LlmCompletionRequest,
   LlmCompletionResult,
   LlmImagePart,
   LlmProvider,
   LlmProviderName,
+  LlmRuntimeConfig,
+  LlmStructuredCall,
+  LlmStructuredResult,
 } from './llm.types';
+
+const DEFAULT_STRUCTURED_TIMEOUT_MS = 30_000;
 
 /**
  * Fachada provider-agnóstica para inferencia LLM.
@@ -69,11 +75,7 @@ export class LlmService {
     return provider.complete({
       system,
       prompt,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     });
   }
 
@@ -104,11 +106,7 @@ export class LlmService {
     const request: LlmCompletionRequest = {
       system,
       prompt,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     };
 
     if (provider.completeWithUsage) {
@@ -156,11 +154,7 @@ export class LlmService {
       system,
       prompt,
       images,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     };
 
     // Sin imágenes o sin soporte multimodal → solo texto (degradación elegante).
@@ -199,11 +193,7 @@ export class LlmService {
       system,
       prompt,
       images,
-      options: {
-        model: cfg.model,
-        maxTokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-      },
+      options: this.toCompletionOptions(cfg),
     };
 
     const hasImages = !!images && images.length > 0;
@@ -213,5 +203,74 @@ export class LlmService {
     }
     // Sin imágenes (o sin multimodal-con-uso): la ruta de solo-texto con uso.
     return this.completeWithUsage(system, prompt, orgId, feature);
+  }
+
+  async completeStructured(
+    call: LlmStructuredCall,
+    orgId: string | null | undefined,
+    feature: LlmFeature,
+  ): Promise<LlmStructuredResult> {
+    const cfg = call.target
+      ? await this.config.forTarget(call.target)
+      : await this.config.resolve(orgId, feature);
+    const provider = this.registry.get(cfg.provider);
+
+    if (!provider) {
+      throw new ServiceUnavailableException(`LLM provider "${cfg.provider}" no está registrado`);
+    }
+    if (!provider.isAvailable()) {
+      throw new ServiceUnavailableException(
+        `LLM provider "${cfg.provider}" no está disponible — revisa su API key`,
+      );
+    }
+    if (!provider.completeStructured) {
+      throw new ServiceUnavailableException(
+        `LLM provider "${cfg.provider}" no soporta salida estructurada`,
+      );
+    }
+
+    const result = await provider.completeStructured({
+      system: call.system,
+      prompt: call.prompt,
+      images: call.images,
+      jsonSchema: this.orderSchemaProperties(call.jsonSchema, call.propertyOrder),
+      schemaName: call.schemaName,
+      propertyOrder: call.propertyOrder,
+      options: {
+        model: cfg.model,
+        maxTokens: call.maxTokens ?? cfg.maxTokens,
+        reasoning: call.reasoning ?? 'off',
+        timeoutMs: call.timeoutMs ?? DEFAULT_STRUCTURED_TIMEOUT_MS,
+        ...(call.mediaResolution ? { mediaResolution: call.mediaResolution } : {}),
+      },
+    });
+    return { ...result, model: cfg.model };
+  }
+
+  private orderSchemaProperties(
+    schema: Record<string, unknown>,
+    propertyOrder: string[],
+  ): Record<string, unknown> {
+    const properties = schema.properties;
+    if (propertyOrder.length === 0 || properties === null || typeof properties !== 'object') {
+      return schema;
+    }
+    const source = properties as Record<string, unknown>;
+    const ordered: Record<string, unknown> = {};
+    for (const key of propertyOrder) {
+      if (key in source) ordered[key] = source[key];
+    }
+    for (const [key, value] of Object.entries(source)) {
+      if (!(key in ordered)) ordered[key] = value;
+    }
+    return { ...schema, properties: ordered };
+  }
+
+  private toCompletionOptions(cfg: LlmRuntimeConfig): LlmCompletionOptions {
+    return {
+      model: cfg.model,
+      maxTokens: cfg.maxTokens,
+      ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
+    };
   }
 }

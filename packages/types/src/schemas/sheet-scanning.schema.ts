@@ -442,6 +442,29 @@ export type ReviewMarkModel = {
    * posterior la vuelve `false`.
    */
   autoResolved: boolean;
+  /**
+   * Lo que el profesor puede ver de la desambiguación con IA (contratos C8). `null` en sombra,
+   * sin evidencia, en la auditoría ciega y en cualquier veredicto que no sea una automática
+   * aplicada o un conflicto. NUNCA se expone al alumno ni al apoderado.
+   */
+  aiResolution: ReviewMarkAiResolutionModel | null;
+};
+
+/**
+ * `agree`/`solo_a`/`solo_b`: la IA resolvió la marca (`value` = opción, `blank` o `null`;
+ * `agreement` = si coincidieron los dos modelos o decidió uno seguro). `conflict`: los
+ * modelos no coinciden y la marca quedó para el humano (`value` y `agreement` nulos).
+ */
+export type ReviewMarkAiResolutionModel = {
+  verdict: 'agree' | 'solo_a' | 'solo_b' | 'conflict';
+  value: string | null;
+  agreement: 'both' | 'single' | null;
+};
+
+/** Marcas dudosas de un lote YA confirmado, para corregir una respuesta tras un reclamo (PR 6). */
+export type BatchCorrectionsModel = {
+  batchId: string;
+  marks: ReviewMarkModel[];
 };
 
 /** Orden por daño (C16): calidad primero (el profesor aún tiene las hojas), identidades después, marcas por margin ascendente. */
@@ -534,6 +557,15 @@ export type SuggestionMetricsModel = {
   rejected: number;
 };
 
+export type AiResolutionMetricsModel = {
+  evaluated: number;
+  autoSimulated: number;
+  autoApplied: number;
+  correctedByHuman: number;
+  agreementWithHuman: { compared: number; agreed: number };
+  byMode: { shadow: number; live: number };
+};
+
 export type SheetScanMetricsResponse = {
   batchesByStatus: Record<string, number>;
   rejectedPagesByReason: Record<string, number>;
@@ -542,6 +574,7 @@ export type SheetScanMetricsResponse = {
   firmReadingOverrides: number;
   registration: RegistrationMetricsModel;
   suggestions: SuggestionMetricsModel;
+  aiResolutions: AiResolutionMetricsModel;
 };
 
 export type ConfirmBatchResponse = {

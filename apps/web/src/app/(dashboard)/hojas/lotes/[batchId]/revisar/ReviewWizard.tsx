@@ -3,12 +3,26 @@
 import { useRef, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, PlayCircle, Upload } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  PenLine,
+  PlayCircle,
+  Upload,
+} from 'lucide-react';
 import type { BatchStatusModel, ConfirmBatchResponse } from '@soe/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCallout, CardSkeleton, Stepper, TopProgressBar } from '@/components/shared';
+import { WrittenAnswersReview } from '@/components/answer-reading/WrittenAnswersReview';
+import {
+  hasWrittenAnswers,
+  pendingWrittenAnswers,
+  useWrittenAnswersSummary,
+} from '@/components/answer-reading/use-written-answers-review';
 import {
   isMarkResolved,
   useReviewQueue,
@@ -16,14 +30,14 @@ import {
 } from '../../../hooks/use-review-queue';
 import { ConfirmBatchDialog, isLikelyBlankScan, PagesReviewStep } from './ReviewQueue';
 import { MarkReviewPanel } from './MarkReviewPanel';
+import { autoResolvedSummary, countAutoResolved } from './review-labels';
 import { SCAN_ROUTES } from '../../../escanear/batch-meta';
 import type { StudentOption } from './ReviewShell';
 import {
   parseReviewStep,
-  REVIEW_STEPS,
-  REVIEW_STEP_IDS,
-  REVIEW_STEP_INDEX,
   REVIEW_STEP_PARAM,
+  reviewStepsFor,
+  visibleReviewStepIds,
   type ReviewStepId,
 } from './review-steps';
 
@@ -53,6 +67,7 @@ export function ReviewWizard({
   const stage = describeBatchStage(batch);
   const blocked = stage !== 'listo';
   const { data: queue, isPending: queueLoading } = useReviewQueue(batchId, !blocked);
+  const { data: writtenSummary } = useWrittenAnswersSummary({ batchId }, !blocked);
 
   const pagesBaselineRef = useRef<number | null>(null);
   const pagesPending = queue ? queue.qualityRejected.length + queue.identityUnresolved.length : 0;
@@ -68,16 +83,27 @@ export function ReviewWizard({
   const blankSheets = queue?.qualityRejected.filter(isLikelyBlankScan).length ?? 0;
   const unreadablePages = (queue?.qualityRejected.length ?? 0) - blankSheets;
 
+  const showWritten = hasWrittenAnswers(writtenSummary);
+  const writtenPending = pendingWrittenAnswers(writtenSummary);
+  const writtenInProgress = writtenSummary?.inProgress ?? 0;
+  const writtenDone = writtenSummary?.reviewed ?? 0;
+  const writtenTotal = writtenDone + writtenPending;
+
+  const stepIds = visibleReviewStepIds(showWritten);
+  const steps = reviewStepsFor(stepIds);
   const suggestedStep: ReviewStepId = blocked
     ? 'procesar'
     : pagesPending > 0
       ? 'paginas'
       : marksPending > 0
         ? 'marcas'
-        : 'finalizar';
+        : showWritten && writtenPending > 0
+          ? 'respuestas'
+          : 'finalizar';
   const requestedStep = parseReviewStep(searchParams.get(REVIEW_STEP_PARAM));
-  const step: ReviewStepId = blocked ? 'procesar' : (requestedStep ?? suggestedStep);
-  const stepIndex = REVIEW_STEP_INDEX[step];
+  const visibleRequested = requestedStep && stepIds.includes(requestedStep) ? requestedStep : null;
+  const step: ReviewStepId = blocked ? 'procesar' : (visibleRequested ?? suggestedStep);
+  const stepIndex = stepIds.indexOf(step);
 
   function goToStep(next: ReviewStepId) {
     const params = new URLSearchParams(searchParams.toString());
@@ -87,8 +113,8 @@ export function ReviewWizard({
     });
   }
 
-  const previousStep = REVIEW_STEP_IDS[stepIndex - 1];
-  const nextStep = REVIEW_STEP_IDS[stepIndex + 1];
+  const previousStep = stepIds[stepIndex - 1];
+  const nextStep = stepIds[stepIndex + 1];
 
   return (
     <div className="relative space-y-6">
@@ -96,15 +122,19 @@ export function ReviewWizard({
 
       <Card>
         <CardContent className="space-y-4 pt-6">
-          <Stepper steps={REVIEW_STEPS} currentStep={stepIndex} />
+          <Stepper steps={steps} currentStep={stepIndex} />
           <StepProgress
             step={step}
+            stepIndex={stepIndex}
+            stepCount={steps.length}
             batch={batch}
             stage={stage}
             pagesDone={pagesDone}
             pagesTotal={pagesTotal}
             marksDone={marksDone}
             marksTotal={marks.length}
+            writtenDone={writtenDone}
+            writtenTotal={writtenTotal}
           />
         </CardContent>
       </Card>
@@ -126,12 +156,8 @@ export function ReviewWizard({
           )}
 
           {step === 'marcas' && autoAnnulled.length > 0 && (
-            <AlertCallout tone="info" title="Dobles marcas anuladas automáticamente">
-              {autoAnnulled.length === 1
-                ? 'Una doble marca evidente se anuló sola'
-                : `${autoAnnulled.length} dobles marcas evidentes se anularon solas`}{' '}
-              (ambas burbujas rellenas). No requieren revisión; quedan al final de la lista por si
-              quieres corregir alguna.
+            <AlertCallout tone="info" title="Marcas resueltas automáticamente">
+              {autoResolvedSummary(countAutoResolved(autoAnnulled))}
             </AlertCallout>
           )}
 
@@ -149,10 +175,23 @@ export function ReviewWizard({
               </AlertCallout>
             ))}
 
+          {step === 'respuestas' && (
+            <>
+              <AlertCallout tone="info" icon={PenLine} title="Respuestas escritas a mano">
+                Revisa lo que los lectores no pudieron decidir solos. No es obligatorio terminar
+                ahora: lo que quede pendiente se guarda como pendiente de corrección (nunca como 0)
+                y puedes revisarlo después desde la evaluación.
+              </AlertCallout>
+              <WrittenAnswersReview scope={{ batchId }} />
+            </>
+          )}
+
           {step === 'finalizar' && (
             <FinalStep
               pagesPending={pagesPending}
               marksPending={marksPending}
+              writtenPending={writtenPending}
+              writtenInProgress={writtenInProgress}
               marksTotal={marks.length}
               blankSheets={blankSheets}
               unreadablePages={unreadablePages}
@@ -195,20 +234,28 @@ export function ReviewWizard({
 
 function StepProgress({
   step,
+  stepIndex,
+  stepCount,
   batch,
   stage,
   pagesDone,
   pagesTotal,
   marksDone,
   marksTotal,
+  writtenDone,
+  writtenTotal,
 }: {
   step: ReviewStepId;
+  stepIndex: number;
+  stepCount: number;
   batch: BatchStatusModel;
   stage: BatchStage;
   pagesDone: number;
   pagesTotal: number;
   marksDone: number;
   marksTotal: number;
+  writtenDone: number;
+  writtenTotal: number;
 }) {
   const { label, done, total } = describeStepProgress(
     step,
@@ -218,6 +265,8 @@ function StepProgress({
     pagesTotal,
     marksDone,
     marksTotal,
+    writtenDone,
+    writtenTotal,
   );
   const percent = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 100;
 
@@ -226,7 +275,7 @@ function StepProgress({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className="text-xs text-muted-foreground">
-          Paso {REVIEW_STEP_INDEX[step] + 1} de {REVIEW_STEPS.length}
+          Paso {stepIndex + 1} de {stepCount}
         </p>
       </div>
       <div
@@ -254,6 +303,8 @@ function describeStepProgress(
   pagesTotal: number,
   marksDone: number,
   marksTotal: number,
+  writtenDone: number,
+  writtenTotal: number,
 ): { label: string; done: number; total: number } {
   if (step === 'procesar') {
     if (stage === 'subiendo') {
@@ -302,6 +353,16 @@ function describeStepProgress(
           : `${marksDone} de ${marksTotal} ${marksTotal === 1 ? 'marca revisada' : 'marcas revisadas'}`,
       done: marksDone,
       total: marksTotal,
+    };
+  }
+  if (step === 'respuestas') {
+    return {
+      label:
+        writtenTotal === 0
+          ? 'Ninguna respuesta escrita quedó pendiente de revisión'
+          : `${writtenDone} de ${writtenTotal} ${writtenTotal === 1 ? 'respuesta escrita revisada' : 'respuestas escritas revisadas'}`,
+      done: writtenDone,
+      total: writtenTotal,
     };
   }
   return { label: 'Revisa el resumen y finaliza la corrección', done: 1, total: 1 };
@@ -416,6 +477,8 @@ function ProcessingStep({ batch }: { batch: BatchStatusModel }) {
 function FinalStep({
   pagesPending,
   marksPending,
+  writtenPending,
+  writtenInProgress,
   marksTotal,
   blankSheets,
   unreadablePages,
@@ -423,12 +486,14 @@ function FinalStep({
 }: {
   pagesPending: number;
   marksPending: number;
+  writtenPending: number;
+  writtenInProgress: number;
   marksTotal: number;
   blankSheets: number;
   unreadablePages: number;
   batch: BatchStatusModel;
 }) {
-  const pendingTotal = pagesPending + marksPending;
+  const pendingTotal = pagesPending + marksPending + writtenPending + writtenInProgress;
 
   return (
     <div className="space-y-4">
@@ -477,7 +542,24 @@ function FinalStep({
             )}
             {marksPending > 0 && (
               <li>
-                {marksPending} {marksPending === 1 ? 'marca dudosa' : 'marcas dudosas'} sin revisar.
+                {marksPending} {marksPending === 1 ? 'marca dudosa' : 'marcas dudosas'} sin revisar:
+                quedan pendientes de corrección (no cuentan como 0) y puedes corregirlas después
+                desde este lote.
+              </li>
+            )}
+            {writtenPending > 0 && (
+              <li>
+                {writtenPending}{' '}
+                {writtenPending === 1 ? 'respuesta escrita' : 'respuestas escritas'} sin revisar:
+                quedan pendientes de corrección (no cuentan como 0) y puedes revisarlas después
+                desde la evaluación.
+              </li>
+            )}
+            {writtenInProgress > 0 && (
+              <li>
+                {writtenInProgress}{' '}
+                {writtenInProgress === 1 ? 'respuesta escrita sigue' : 'respuestas escritas siguen'}{' '}
+                en lectura: quedan pendientes de corrección hasta que terminen.
               </li>
             )}
           </ul>

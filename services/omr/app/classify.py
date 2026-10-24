@@ -92,6 +92,7 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 
+from .crop import CropProfile, crop_with_profile
 from .geometry import point_to_px, radius_to_px
 from .rectify import RectifiedPage
 
@@ -332,7 +333,11 @@ def crop_region_jpeg(
     *,
     width_px: int = 600,
     jpeg_quality: int = 70,
+    profile: CropProfile | None = None,
 ) -> np.ndarray:
+    """Recorte JPEG de una region. Sin `profile`, el recorte historico (sin margen)."""
+    if profile is not None:
+        return crop_with_profile(page, region, profile).jpeg
     x0, y0 = point_to_px(region["topLeft"], page.size)
     x1, y1 = point_to_px(region["bottomRight"], page.size)
     crop = page.gray[min(y0, y1) : max(y0, y1) + 1, min(x0, x1) : max(x0, x1) + 1]

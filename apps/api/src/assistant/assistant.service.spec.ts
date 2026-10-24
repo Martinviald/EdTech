@@ -159,7 +159,6 @@ const LLM_CONFIG = {
     provider: 'anthropic' as const,
     model: 'claude-sonnet-4-20250514',
     maxTokens: 4096,
-    temperature: 0,
   })),
 } as unknown as LlmConfigService;
 

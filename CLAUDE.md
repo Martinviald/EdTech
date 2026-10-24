@@ -29,7 +29,7 @@
 | Validación | Zod (en `packages/types`) | Toda validación de entrada usa Zod. Sin class-validator standalone. |
 | Monorepo | Turborepo + pnpm workspaces | No mezclar npm ni yarn. |
 | IA | Gemini 2.0 Flash (multimodal) | Claude API para etiquetado IA de ítems (H3.11). |
-| Decisiones IA | Jev (TypeSafe AI) vía `@soe/decisions` | **Propuesta, pendiente de consenso.** Solo decisiones tipadas (Noul/Choice/Score) con confianza; nunca texto. Ver `packages/decisions/README.md`. |
+| Decisiones IA | Jev (TypeSafe AI) y OpenAI Decisions (`gpt-6-luna`) vía `@soe/decisions` | **Propuesta, pendiente de consenso.** Solo decisiones tipadas (Noul/Choice/Score) con confianza; nunca texto. El motor se elige por funcionalidad en `decision_settings`. Ver `packages/decisions/README.md`. |
 | Queue | BullMQ + Redis (F3+) | En F1 los jobs asíncronos usan `import_jobs` en DB. |
 | Infra | AWS + SST | No deployar en Vercel sin consultar. |
 
@@ -64,7 +64,7 @@
 │   │       ├── schemas/       # Un archivo por entidad
 │   │       ├── utils/         # Helpers compartidos (roles, rut, curso-parser)
 │   │       └── access-policies.ts  # Constantes de acceso por rol (CURRICULUM_ROLES, etc.)
-│   ├── decisions/    # Motor de decisiones tipadas (Jev); el SDK solo en src/jev/
+│   ├── decisions/    # Motores de decisiones tipadas (Jev, OpenAI); cada SDK solo en src/jev/ o src/openai/
 │   └── ui/           # Componentes shadcn/ui compartidos
 └── docs/             # Documentación del proyecto
 ```
@@ -241,10 +241,11 @@ Cada módulo contiene: `*.module.ts`, `*.controller.ts`, `*.service.ts`, `dto/` 
 - Dashboards de directivo y profesor
 - Exportación Excel/PDF
 - Design system base (H17.1)
+- Lector de hojas de respuesta (OMR) y lectura por visión de respuestas abiertas: el modelo de visión solo transcribe, el código corrige y lo dudoso va a revisión humana (`docs/diseno-correccion-vision-preguntas-abiertas.md`)
+- Calificación asistida de preguntas de desarrollo con rúbrica: la IA propone, el docente aprueba
 
 **Está FUERA de F1 (no implementar):**
 - Escaneo con cámara en tiempo real → F3
-- Corrección IA de preguntas de desarrollo → F4
 - Benchmarking inter-colegios → F2
 - Predicción ML → F3
 - Generación de contenido IA → F2
@@ -264,6 +265,15 @@ Cada módulo contiene: `*.module.ts`, `*.controller.ts`, `*.service.ts`, `dto/` 
 - Nunca sobreescribir evidencia de lo que generó la IA ni el override humano.
 - El etiquetado IA de ítems (H3.11) es sugerencia. Un administrador siempre confirma antes de guardar.
 - Los jobs de IA (`ai_grading_jobs`) corren de forma asíncrona. Nunca bloquean el event loop transaccional.
+
+### 8.4 Ocultar Complejidad
+
+- **Nuestra misión es ocultar complejidad.** A los ojos del colegio, la plataforma resuelve su problema de la forma más simple posible. Por detrás corre toda la complejidad: modelos de IA, consenso, umbrales, auditorías.
+- Las capacidades nuevas llegan **prendidas por default para todas las orgs**, con defaults sensatos en código (p. ej. `DECISION_FEATURE_DEFAULTS`). No se agregan toggles en Ajustes para lo que el colegio no tiene por qué decidir: cada ajuste le suma carga cognitiva, capacitación y trabajo.
+- Para emergencias existe un **kill switch interno** (variable de entorno operada por el equipo). Los overrides por org (p. ej. filas de `decision_settings`) son internos e invisibles para el colegio.
+- Cómo convive con §8.3: la IA puede resolver sola cuando se guarda la evidencia de lo que decidió (p. ej. `sheet_scan_marks.ai_resolution`), una auditoría mide sus errores y un humano puede corregir después ("Corregir").
+- Ejemplo: la IA para alternativas dudosas corrige sola en todas las orgs (`docs/diseno-desambiguacion-marcas-ia.md`). El colegio no la configura; el profesor solo ve cuándo resolvió una marca.
+- Pregunta de diseño: *¿el colegio necesita saber que esto existe?* Si la respuesta es no, no se le expone la configuración.
 
 ---
 
@@ -355,7 +365,7 @@ No hacer commit con errores de typecheck o lint. El CI bloquea PRs que fallen.
 | Borrar registros de alumnos con `DELETE` | Datos legalmente sensibles (Ley 19.628) | Soft delete con `deleted_at` |
 | Comparar `user.role === 'xxx'` directamente | No funciona con multi-rol; ignora los otros roles del usuario | `userHasRole(user.roles, 'xxx')` o `userHasAnyRole(user.roles, ALLOWED)` |
 | Duplicar listas de roles inline en páginas/controllers | DRY violation, riesgo de desincronización | Usar constantes de `packages/types/src/access-policies.ts` con `canAccess()` |
-| Importar `@typesafe-ai/sdk` fuera de `packages/decisions/src/jev/` | Acopla el producto a un proveedor y salta el registro y los modos | `DecisionsService` en la API, `@soe/decisions` fuera de ella |
+| Importar `@typesafe-ai/sdk` fuera de `packages/decisions/src/jev/` (o usar `client.decisions` de `openai` fuera de `packages/decisions/src/openai/`) | Acopla el producto a un proveedor y salta el registro y los modos | `DecisionsService` en la API, `@soe/decisions` fuera de ella |
 | Pedirle a Jev aritmética, conteo o fechas | Falla con confianza alta (calibración: 58 % en matemática PAES) | Calcula en código; a Jev solo juicios semánticos |
 
 ---

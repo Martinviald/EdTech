@@ -170,6 +170,284 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "response": {
+                    "type": "object",
+                    "properties": {
+                      "itemId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "format": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "integer"
+                              },
+                              "maxChars": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 12
+                              },
+                              "allowNegative": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": ["kind", "maxChars", "allowNegative"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "decimal"
+                              },
+                              "maxChars": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 12
+                              },
+                              "allowNegative": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": ["kind", "maxChars", "allowNegative"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "fraction"
+                              },
+                              "allowNegative": {
+                                "type": "boolean"
+                              },
+                              "allowMixed": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": ["kind", "allowNegative", "allowMixed"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "ordered_tuple"
+                              },
+                              "arity": {
+                                "type": "integer",
+                                "minimum": 2,
+                                "maximum": 4
+                              },
+                              "componentKind": {
+                                "type": "string",
+                                "enum": ["integer", "decimal", "fraction"]
+                              }
+                            },
+                            "required": ["kind", "arity", "componentKind"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "sequence"
+                              },
+                              "length": {
+                                "type": "integer",
+                                "minimum": 2,
+                                "maximum": 12
+                              }
+                            },
+                            "required": ["kind", "length"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "word_list"
+                              },
+                              "count": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 10
+                              }
+                            },
+                            "required": ["kind", "count"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "short_text"
+                              },
+                              "maxWords": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 40
+                              }
+                            },
+                            "required": ["kind", "maxWords"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "multi_box"
+                              },
+                              "boxes": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "partId": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "label": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "kind": {
+                                      "type": "string",
+                                      "enum": ["integer", "decimal", "fraction", "short_text"]
+                                    },
+                                    "operatorBefore": {
+                                      "type": "string",
+                                      "enum": ["+", "-", "×", "÷", "=", "<", ">"]
+                                    }
+                                  },
+                                  "required": ["partId", "label", "kind"],
+                                  "additionalProperties": false
+                                },
+                                "minItems": 2
+                              }
+                            },
+                            "required": ["kind", "boxes"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "free_text"
+                              },
+                              "lines": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 30
+                              }
+                            },
+                            "required": ["kind", "lines"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "math_work"
+                              },
+                              "heightRatio": {
+                                "type": "number",
+                                "minimum": 0.05,
+                                "maximum": 1
+                              }
+                            },
+                            "required": ["kind", "heightRatio"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "bubble_choice"
+                              }
+                            },
+                            "required": ["kind"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "score_bubbles"
+                              },
+                              "levels": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "minItems": 2
+                              }
+                            },
+                            "required": ["kind", "levels"],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "boxes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "partId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "region": {
+                              "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/region"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "char",
+                                "sign",
+                                "decimal_separator",
+                                "numerator",
+                                "denominator",
+                                "whole",
+                                "tuple_component",
+                                "sequence_element",
+                                "word",
+                                "line",
+                                "area"
+                              ]
+                            }
+                          },
+                          "required": ["partId", "region", "role"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "cropProfileId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "printedLabelRegion": {
+                        "$ref": "#/definitions/read-request/properties/layoutSpec/properties/identity/properties/region"
+                      }
+                    },
+                    "required": ["itemId", "format", "boxes", "cropProfileId"],
+                    "additionalProperties": false
                   }
                 },
                 "required": [

@@ -33,6 +33,8 @@ export const ROUTES = {
     route(`/evaluaciones/${assessmentId}/material-remedial`),
   evaluacionInformeOficial: (assessmentId: string) =>
     route(`/evaluaciones/${assessmentId}/informe-oficial`),
+  evaluacionRespuestasEscritas: (assessmentId: string) =>
+    route(`/evaluaciones/${assessmentId}/respuestas-escritas`),
   evaluacionInformeAlumno: (assessmentId: string, studentId: string) =>
     route(`/evaluaciones/${assessmentId}/informe-alumno/${studentId}`),
   evaluacionInformeAlumnoBase: (assessmentId: string) =>

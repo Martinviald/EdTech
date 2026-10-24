@@ -7,6 +7,7 @@ import {
 } from '@soe/types';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { parseDtoOrBadRequest } from '../common/helpers/parse-dto.helper';
 import { LlmSettingsService } from './llm-settings.service';
 
 /**
@@ -32,8 +33,8 @@ export class LlmSettingsController {
     @Param('feature') feature: string,
     @Body() body: unknown,
   ): Promise<LlmSettingsResponse> {
-    const parsedFeature = llmFeatureSchema.parse(feature);
-    const dto = updateLlmSettingSchema.parse(body);
+    const parsedFeature = parseDtoOrBadRequest(llmFeatureSchema, feature);
+    const dto = parseDtoOrBadRequest(updateLlmSettingSchema, body);
     return this.settings.upsertGlobal(parsedFeature, dto);
   }
 }

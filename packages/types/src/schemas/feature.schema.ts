@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { orgBrandingSchema } from './organization.schema';
 import { omrCalibrationSchema } from './omr-layout.schema';
+import {
+  DEFAULT_ORG_ANSWER_READING_SETTINGS,
+  orgAnswerReadingSettingsSchema,
+  type OrgAnswerReadingSettings,
+} from './answer-reading/settings.schema';
 
 // ── F2 S5 — H18.1 Gating de tier pago ────────────────────────────────────────
 // Las features pagas de F2 se gobiernan por `organizations.config.allowedFeatures`.
@@ -77,9 +82,40 @@ export const orgConfigSchema = z
     omrRetentionDays: z.number().int().positive().optional(),
     /** Cola de revisión de hojas (B1). Ver orgReviewSettingsSchema. */
     review: orgReviewSettingsSchema.optional(),
+    /**
+     * Lectura por visión de respuestas abiertas (D3, D7). Se valida SOLO dentro de
+     * resolveAnswerReadingSettings: un bloque corrupto no debe invalidar el resto de
+     * la configuración de la org (features pagas, presupuesto de IA, retención).
+     */
+    answerReading: z.unknown().optional(),
   })
   .passthrough();
 export type OrgConfig = z.infer<typeof orgConfigSchema>;
+
+export type ResolvedOrgAnswerReadingSettings = typeof DEFAULT_ORG_ANSWER_READING_SETTINGS &
+  Pick<OrgAnswerReadingSettings, 'allowedProviders' | 'monthlyBudgetUsd'>;
+
+/**
+ * Ajustes efectivos de lectura por visión: lo guardado por la org sobre
+ * DEFAULT_ORG_ANSWER_READING_SETTINGS (D3: se envían recortes; D7: dataset solo
+ * interno). Lee solo `config.answerReading`, así que una clave corrupta de otro
+ * dominio no lo afecta.
+ *
+ * ⚠️ Si `answerReading` existe pero no valida, se responde con los defaults y
+ * `allowExternalVision: false`: un JSONB corrupto no puede convertir un "no
+ * enviar imágenes a terceros" en un envío. Lo que no se lee va a revisión humana.
+ */
+export function resolveAnswerReadingSettings(
+  config: OrgConfig | Record<string, unknown> | null | undefined,
+): ResolvedOrgAnswerReadingSettings {
+  const stored: unknown = config?.answerReading;
+  if (stored === undefined) return { ...DEFAULT_ORG_ANSWER_READING_SETTINGS };
+  const parsed = orgAnswerReadingSettingsSchema.safeParse(stored);
+  if (!parsed.success) {
+    return { ...DEFAULT_ORG_ANSWER_READING_SETTINGS, allowExternalVision: false };
+  }
+  return { ...DEFAULT_ORG_ANSWER_READING_SETTINGS, ...parsed.data };
+}
 
 /** Umbral de nula automática de la org (B2), o `null` si está apagada. */
 export function autoAnnulMinConfidence(

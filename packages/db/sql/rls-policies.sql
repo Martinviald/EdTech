@@ -529,3 +529,123 @@ DROP POLICY IF EXISTS "test_tracks_official_read" ON "test_tracks";
 CREATE POLICY "test_tracks_official_read" ON "test_tracks"
   AS PERMISSIVE FOR SELECT
   USING (org_id IS NULL);
+
+-- ── Corrección IA de respuestas ──────────────────────────────────────────────
+-- `ai_grading_jobs` registra cada corrección asistida por IA (recorte, modelo,
+-- puntaje propuesto y costo). Lleva org_id propio para filtrar la cola y el costo
+-- sin join a responses → assessments.
+ALTER TABLE "ai_grading_jobs" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ai_grading_jobs" FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "ai_grading_jobs_tenant_isolation" ON "ai_grading_jobs";
+CREATE POLICY "ai_grading_jobs_tenant_isolation" ON "ai_grading_jobs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+-- ── Lectura por visión de respuestas abiertas ────────────────────────────────
+-- Diseño: docs/diseno-correccion-vision-preguntas-abiertas.md §9. Las transcripciones
+-- y decisiones son la explicación del puntaje de un alumno (Ley 19.628): org_id
+-- NOT NULL directo y toda query dentro de withOrgContext(orgId).
+ALTER TABLE "answer_reading_runs"      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "answer_reading_runs"      FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "answer_readings"          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "answer_readings"          FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "answer_reading_decisions" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "answer_reading_decisions" FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "answer_reviews"           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "answer_reviews"           FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "answer_reading_samples"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "answer_reading_samples"   FORCE  ROW LEVEL SECURITY;
+ALTER TABLE "reading_routes"           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "reading_routes"           FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "answer_reading_runs_tenant_isolation" ON "answer_reading_runs";
+CREATE POLICY "answer_reading_runs_tenant_isolation" ON "answer_reading_runs"
+  AS PERMISSIVE FOR ALL
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+-- answer_readings es EVIDENCIA INMUTABLE (CLAUDE.md §8.3), como decision_calls: solo
+-- hay políticas de SELECT e INSERT, así que UPDATE y DELETE no afectan ninguna fila
+-- para el rol de la API. Un reintento es una fila nueva (attempt + 1). El borrado en
+-- cascada desde sheet_scan_marks no pasa por RLS (lo ejecuta el chequeo de FK).
+DROP POLICY IF EXISTS "answer_readings_tenant_isolation" ON "answer_readings";
+CREATE POLICY "answer_readings_tenant_isolation" ON "answer_readings"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_readings_tenant_insert" ON "answer_readings";
+CREATE POLICY "answer_readings_tenant_insert" ON "answer_readings"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+-- answer_reading_decisions, answer_reviews y answer_reading_samples nunca se borran
+-- (§8.3: la decisión y el override humano son evidencia; la muestra se retira con
+-- `deleted_at`). Necesitan UPDATE para encadenar `superseded_by_id` o marcar
+-- `deleted_at`, pero no tienen política de DELETE: un DELETE desde la API no afecta
+-- ninguna fila.
+DROP POLICY IF EXISTS "answer_reading_decisions_tenant_isolation" ON "answer_reading_decisions";
+CREATE POLICY "answer_reading_decisions_tenant_isolation" ON "answer_reading_decisions"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reading_decisions_tenant_insert" ON "answer_reading_decisions";
+CREATE POLICY "answer_reading_decisions_tenant_insert" ON "answer_reading_decisions"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reading_decisions_tenant_update" ON "answer_reading_decisions";
+CREATE POLICY "answer_reading_decisions_tenant_update" ON "answer_reading_decisions"
+  AS PERMISSIVE FOR UPDATE
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reviews_tenant_isolation" ON "answer_reviews";
+CREATE POLICY "answer_reviews_tenant_isolation" ON "answer_reviews"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reviews_tenant_insert" ON "answer_reviews";
+CREATE POLICY "answer_reviews_tenant_insert" ON "answer_reviews"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reviews_tenant_update" ON "answer_reviews";
+CREATE POLICY "answer_reviews_tenant_update" ON "answer_reviews"
+  AS PERMISSIVE FOR UPDATE
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reading_samples_tenant_isolation" ON "answer_reading_samples";
+CREATE POLICY "answer_reading_samples_tenant_isolation" ON "answer_reading_samples"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reading_samples_tenant_insert" ON "answer_reading_samples";
+CREATE POLICY "answer_reading_samples_tenant_insert" ON "answer_reading_samples"
+  AS PERMISSIVE FOR INSERT
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "answer_reading_samples_tenant_update" ON "answer_reading_samples";
+CREATE POLICY "answer_reading_samples_tenant_update" ON "answer_reading_samples"
+  AS PERMISSIVE FOR UPDATE
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+-- reading_routes: catálogo con org_id NULLABLE, mismo patrón que test_tracks. Las rutas
+-- globales (org_id IS NULL) son config de plataforma sin PII (lectores, prompts por
+-- referencia y política) y las leen todos los tenants. Son dos políticas permisivas: la
+-- de tenant cubre todo comando sobre las filas propias y la global solo agrega LECTURA
+-- de las filas sin org. Así la API sujeta a RLS no puede crear, editar NI BORRAR una
+-- ruta global (con una sola política FOR ALL que admitiera `org_id IS NULL` en USING,
+-- un DELETE sí la alcanzaría). Las globales se escriben con el rol admin (migrate/seed).
+DROP POLICY IF EXISTS "reading_routes_tenant_isolation" ON "reading_routes";
+CREATE POLICY "reading_routes_tenant_isolation" ON "reading_routes"
+  AS PERMISSIVE FOR ALL
+  USING (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid)
+  WITH CHECK (org_id = nullif(current_setting('app.current_org_id', true), '')::uuid);
+
+DROP POLICY IF EXISTS "reading_routes_global_read" ON "reading_routes";
+CREATE POLICY "reading_routes_global_read" ON "reading_routes"
+  AS PERMISSIVE FOR SELECT
+  USING (org_id IS NULL);

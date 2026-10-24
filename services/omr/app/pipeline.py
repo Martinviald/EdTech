@@ -66,6 +66,7 @@ from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeoutError
 from contextlib import contextmanager
+from dataclasses import replace
 from typing import Any
 
 import cv2
@@ -80,16 +81,18 @@ from .classify import (
     page_threshold,
     readability_verdict,
 )
+from .framing import frame_sheet
 from .identity import (
     peek_logical_page_index,
     read_identity,
 )
 from .illumination import flatten_illumination
 from .quality import assess
-from .readers import READERS, sample_bubble_fills_at_spec
+from .readers import READERS, sample_bubble_fills_at_spec, undecided_reading
 from .rectify import (
     FiducialFailure,
     RectifiedPage,
+    fiducial_quad_consistent,
     leave_one_out_rectifications,
     rectify,
     refine_reconstruction,
@@ -211,10 +214,15 @@ def classify_page_debug(
     retry_page, retry_debug = _classify_once(
         flatten_illumination(bgr), page_index, spec, profile, flattened=True
     )
-    if not retry_page["quality"]["ok"]:
+    if not _keeps_flattened_retry(page, retry_page):
         return page, debug
     retry_page["imageSha256"] = page["imageSha256"]
     return retry_page, retry_debug
+
+
+def _frames_phone_captures(profile: dict[str, Any]) -> bool:
+    """Solo una foto de celular se encuadra: un escaneo de bandeja ya trae la hoja a ras."""
+    return profile.get("source") == "phone"
 
 
 def _should_retry_flattened(page: dict[str, Any], profile: dict[str, Any]) -> bool:
@@ -225,9 +233,28 @@ def _should_retry_flattened(page: dict[str, Any], profile: dict[str, Any]) -> bo
     perfil `phone` lo trae en true y el `scanner` en false: un escaneo plano no
     tiene gradiente que aplanar, y no paga el costo.
     """
-    return page["quality"]["rejectReason"] == "no_separable_marks" and bool(
-        profile.get("normalizeIllumination", False)
+    if not profile.get("normalizeIllumination", False):
+        return False
+    quality = page["quality"]
+    return quality["rejectReason"] == "no_separable_marks" or (
+        quality["ok"] and quality.get("marksReadability", MARKS_READABLE) != MARKS_READABLE
     )
+
+
+def _keeps_flattened_retry(original: dict[str, Any], retry: dict[str, Any]) -> bool:
+    """El reintento aplanado se conserva solo si deja la pagina MEJOR que el original.
+
+    Legible siempre gana. Si el original estaba rechazado, basta con que el
+    reintento quede aceptado (aunque sea solo por sus recortes). Si el original
+    ya estaba aceptado con las burbujas sin decidir, el reintento tiene que
+    hacerlas legibles: cambiar un sin-decidir por otro no aporta nada.
+    """
+    retry_quality = retry["quality"]
+    if not retry_quality["ok"]:
+        return False
+    if retry_quality.get("marksReadability", MARKS_READABLE) == MARKS_READABLE:
+        return True
+    return not original["quality"]["ok"]
 
 
 def _classify_once(
@@ -244,7 +271,7 @@ def _classify_once(
 
     with _stage(timings_ms, "rectify"):
         oriented_bgr, rectified, orientation_degrees, orientation_confirmed = _rectify_oriented(
-            bgr, spec, page_index
+            bgr, spec, page_index, frame_sheet_first=_frames_phone_captures(profile)
         )
     oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
 
@@ -288,6 +315,7 @@ def _classify_once(
         "rejectReason": quality["rejectReason"],
         "illuminationFlattened": flattened,
         "fiducialRescue": _rescue_evidence(rectified),
+        "sheetFramed": isinstance(rectified, RectifiedPage) and rectified.framed,
         "stateCounts": {
             state: sum(1 for mark in marks if mark["state"] == state) for state in MARK_STATES
         },
@@ -331,7 +359,7 @@ def assess_page(
         return page
 
     retry = _assess_once(flatten_illumination(bgr), spec, profile, flattened=True)
-    if not retry["quality"]["ok"]:
+    if not _keeps_flattened_retry(page, retry):
         return page
     retry["imageSha256"] = page["imageSha256"]
     return retry
@@ -341,7 +369,9 @@ def _assess_once(
     bgr: np.ndarray, spec: dict[str, Any], profile: dict[str, Any], *, flattened: bool
 ) -> dict[str, Any]:
     image_sha256 = _canonical_png_sha256(bgr)
-    oriented_bgr, rectified, _, orientation_confirmed = _rectify_oriented(bgr, spec, 0)
+    oriented_bgr, rectified, _, orientation_confirmed = _rectify_oriented(
+        bgr, spec, 0, frame_sheet_first=_frames_phone_captures(profile)
+    )
     oriented_gray = cv2.cvtColor(oriented_bgr, cv2.COLOR_BGR2GRAY)
     quality = assess(oriented_gray, rectified, profile)
     quality["illuminationFlattened"] = flattened
@@ -353,16 +383,30 @@ def _assess_once(
         _ambiguity_margin(profile),
     )
     if quality["ok"] and isinstance(rectified, RectifiedPage):
-        verdict = _marks_readability(rectified, spec, identity, 0)[4]
+        readable, _, _, _, verdict, _ = _marks_readability(rectified, spec, identity, 0)
         quality["marksReadability"] = verdict
-        if verdict != MARKS_READABLE:
+        if verdict != MARKS_READABLE and not _has_crop_fields(readable):
             _reject_page(quality, "no_separable_marks")
     return {"imageSha256": image_sha256, "quality": quality, "identity": identity}
 
 
 def _rectify_oriented(
-    bgr: np.ndarray, spec: dict[str, Any], file_page_index: int
+    bgr: np.ndarray,
+    spec: dict[str, Any],
+    file_page_index: int,
+    *,
+    frame_sheet_first: bool = False,
 ) -> tuple[np.ndarray, RectifiedPage | FiducialFailure, int, bool]:
+    """Rectificacion confirmada de la pagina, probando orientaciones y rescates.
+
+    Con `frame_sheet_first` (perfil `phone`), si la primera pasada no quedo
+    confirmada, antes de cualquier rescate se prueba la misma rectificacion
+    sobre la hoja encuadrada (`_rectify_framed`): en una foto donde la hoja no
+    llena el cuadro, el fondo aporta cuadrados mas cerca de la esquina de la
+    imagen que el fiducial, y tanto la pasada estricta como los rescates sobre
+    la imagen entera pueden coronarlos. Una pagina sin burbujas (solo recortes)
+    nunca se confirma por firma, asi que en ella el encuadre corre siempre.
+    """
     logical_page = file_page_index % spec["pageCount"]
     confirmable = spec["identity"]["mode"] in ("qr", "rut_bubbles")
     already_searched: set[int] = set()
@@ -380,11 +424,16 @@ def _rectify_oriented(
         return _rescue_by_signature_search(image, spec, logical_page)
 
     first = rectify(bgr, spec, allow_reconstruction=confirmable)
+    first_confirmed = _homography_confirmed(first, spec, logical_page)
+    if frame_sheet_first and not first_confirmed:
+        framed = _rectify_framed(bgr, spec, file_page_index)
+        if framed is not None:
+            return framed
     if first.fiducials_found < 4:
         rescued = search_once(bgr, 0)
         if rescued is not None:
             return bgr, rescued, 0, True
-    if _homography_confirmed(first, spec, logical_page):
+    if first_confirmed:
         return bgr, _refine_accepted(bgr, spec, first, logical_page), 0, True
     if not confirmable:
         return bgr, first, 0, True
@@ -407,6 +456,64 @@ def _rectify_oriented(
         if rescued is not None:
             return image, rescued, degrees, True
     return bgr, _discard_unconfirmed_reconstruction(bgr, spec, first), 0, False
+
+
+def _rectify_framed(
+    bgr: np.ndarray, spec: dict[str, Any], file_page_index: int
+) -> tuple[np.ndarray, RectifiedPage | FiducialFailure, int, bool] | None:
+    """La rectificacion sobre la hoja encuadrada, si es una hoja coherente.
+
+    `cropped` tiene que significar que FALTA parte de la hoja, no que sobra
+    fondo. El encuadre (app/framing.py) recorta el rectangulo de la hoja y corre
+    el camino completo —estricto, rotaciones, leave-one-out, firma— sobre el
+    recorte, con todos sus gates. Se acepta solo si los 4 puntos de la homografia
+    forman un cuadrilatero que puede ser esta hoja (`fiducial_quad_consistent`)
+    y, si la pagina tiene burbujas (de campos o de la grilla RUT), si la firma la
+    confirmo. Una pagina solo de recortes no tiene con que confirmarse: ahi
+    manda la forma del cuadrilatero, igual que en la pasada estricta de siempre,
+    con la ventaja de que el encuadre deja afuera los cuadrados del fondo. Si no
+    se acepta, quien llama sigue con los rescates sobre la imagen entera, como
+    antes.
+
+    La pagina devuelta es el recorte: miniatura, nitidez e identidad se miden
+    sobre el. `imageSha256` no cambia porque se calcula antes, sobre lo que entro.
+    """
+    framed_bgr = frame_sheet(bgr)
+    if framed_bgr is None:
+        return None
+    result = _rectify_oriented(framed_bgr, spec, file_page_index, frame_sheet_first=False)
+    rectified, confirmed = result[1], result[3]
+    if not isinstance(rectified, RectifiedPage) or rectified.corners is None:
+        return None
+    if not fiducial_quad_consistent(rectified.corners, spec):
+        return None
+    if not confirmed and not _framed_page_confirmed(result[0], rectified, spec, file_page_index):
+        return None
+    return result[0], replace(rectified, framed=True), result[2], result[3]
+
+
+def _framed_page_confirmed(
+    framed_bgr: np.ndarray, rectified: RectifiedPage, spec: dict[str, Any], file_page_index: int
+) -> bool:
+    """Una rectificacion encuadrada no confirmada vale si su pagina no tiene con que confirmarse.
+
+    La firma de la pasada recursiva se mide contra la pagina logica que dice el
+    ORDEN DEL ARCHIVO, y una foto suelta de la pagina 2 llega como la 0: la firma
+    mira burbujas que esa hoja no tiene. Por eso se lee el QR sobre la pagina ya
+    rectificada (lo mismo que hace despues el pipeline para elegir los campos) y
+    se decide con la pagina que el QR declara: si tiene burbujas, la firma de ESA
+    pagina tiene que calzar; si no tiene (pagina solo de recortes), no hay prueba
+    posible y basta la forma del cuadrilatero.
+    """
+    if spec["identity"]["mode"] == "rut_bubbles":
+        return False
+    identity = read_identity(
+        rectified, cv2.cvtColor(framed_bgr, cv2.COLOR_BGR2GRAY), spec, AMBIGUITY_MARGIN
+    )
+    logical_page = peek_logical_page_index(identity["raw"], file_page_index, spec["pageCount"])
+    if not _spec_bubbles(spec, logical_page):
+        return True
+    return _grid_signature_confirmed(rectified, spec, logical_page)
 
 
 def _rescue_evidence(rectified: RectifiedPage | FiducialFailure) -> bool | None:
@@ -724,7 +831,7 @@ def _read_marks(
         marks = [
             READERS[field["kind"]].read(
                 rectified, field, fills, PageThreshold(threshold=0.5, separable=False),
-                ambiguity_margin,
+                ambiguity_margin, page_fields=readable,
             )
             for field, fills in zip(readable, fills_by_field, strict=True)
         ]
@@ -744,15 +851,49 @@ def _read_marks(
         "registration": summarize(registration_log, local_registration_enabled()),
     }
     if verdict != MARKS_READABLE:
-        _reject_page(quality, "no_separable_marks")
-        return [], classify_debug
+        if not _has_crop_fields(readable):
+            _reject_page(quality, "no_separable_marks")
+            return [], classify_debug
+        return _crops_with_undecided_bubbles(rectified, readable, fills_by_field, threshold), (
+            classify_debug
+        )
 
     marks = [
-        READERS[field["kind"]].read(rectified, field, fills, threshold, ambiguity_margin)
+        READERS[field["kind"]].read(
+            rectified, field, fills, threshold, ambiguity_margin, page_fields=readable
+        )
         for field, fills in zip(readable, fills_by_field, strict=True)
     ]
     classify_debug["fieldContrast"] = _field_contrast_summary(readable, fills_by_field, marks)
     return marks, classify_debug
+
+
+def _has_crop_fields(fields: list[dict[str, Any]]) -> bool:
+    return any(field["kind"] == "crop_region" for field in fields)
+
+
+def _crops_with_undecided_bubbles(
+    rectified: RectifiedPage,
+    fields: list[dict[str, Any]],
+    fills_by_field: list[list[float]],
+    threshold: PageThreshold,
+) -> list[dict[str, Any]]:
+    """Las marcas de una pagina valida cuyas burbujas no se separan pero que tiene recortes.
+
+    Un rechazo de pagina tiraba tambien los recortes de sus `crop_region`, que no
+    dependen de las burbujas: la pagina 1 de la prueba de respuestas abiertas (1
+    pregunta de alternativas, 8 recortes) perdia los 8 por una sola pregunta en
+    blanco. La geometria ya esta confirmada y el QR leido, asi que la pagina se
+    conserva: los recortes salen como siempre y cada campo de burbujas sale
+    `ambiguous` con su evidencia (`undecided_reading`), nunca `blank`. Que paso
+    con las burbujas lo dice `quality.marksReadability`.
+    """
+    return [
+        READERS[field["kind"]].read(rectified, field, fills, threshold, page_fields=fields)
+        if field["kind"] == "crop_region"
+        else undecided_reading(rectified, field, fills, threshold)
+        for field, fills in zip(fields, fills_by_field, strict=True)
+    ]
 
 
 def _field_contrast_summary(

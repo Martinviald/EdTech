@@ -1,0 +1,26 @@
+{
+  "model": "gpt-6-luna",
+  "answers": [
+    {
+      "type": "predicate",
+      "name": "instrucciones_completas",
+      "probability": 0.03
+    },
+    {
+      "type": "refusal",
+      "name": "mejor_precursor"
+    }
+  ],
+  "usage": {
+    "input_tokens": 186,
+    "input_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0
+    },
+    "output_tokens": 0,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 186
+  }
+}

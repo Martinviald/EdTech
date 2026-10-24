@@ -14,10 +14,11 @@ import {
 import type { ReviewMarkDto, ReviewMarkModel } from '@soe/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Kbd } from '@/components/ui/kbd';
 import { cn } from '@/lib/utils';
 import { AlertCallout } from '@/components/shared';
 import { isMarkResolved, useResolveMark } from '../../../hooks/use-review-queue';
-import { DOUBT_REASON_LABELS, MARK_STATE_LABELS } from './review-labels';
+import { DOUBT_REASON_LABELS, MARK_STATE_LABELS, markOriginLabel } from './review-labels';
 
 const BLANK_DECISION: ReviewMarkDto = { decision: 'blank' };
 const ANNULLED_DECISION: ReviewMarkDto = { decision: 'annulled' };
@@ -36,14 +37,6 @@ function pickAnnulKey(options: string[]): string | null {
   return ANNUL_KEY_CANDIDATES.find((key) => !options.includes(key)) ?? null;
 }
 
-function Kbd({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-      {children}
-    </kbd>
-  );
-}
-
 interface MarkReviewPanelProps {
   batchId: string;
   marks: ReviewMarkModel[];
@@ -52,9 +45,19 @@ interface MarkReviewPanelProps {
    * del motor se resuelve con Sí/No; al No se abren todas las opciones.
    */
   quickConfirm: boolean;
+  /** Reemplaza la resolución de la cola (corrección tras confirmar). Recibe la decisión del profesor. */
+  onResolve?: (markId: string, decision: ReviewMarkDto) => void;
+  /** `correction`: una marca de un lote ya confirmado; cambia solo los textos del encabezado. */
+  variant?: 'review' | 'correction';
 }
 
-export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPanelProps) {
+export function MarkReviewPanel({
+  batchId,
+  marks,
+  quickConfirm,
+  onResolve,
+  variant = 'review',
+}: MarkReviewPanelProps) {
   const [index, setIndex] = useState(0);
   const [declinedMarkIds, setDeclinedMarkIds] = useState<ReadonlySet<string>>(() => new Set());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -102,12 +105,13 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
   const resolve = useCallback(
     (decision: ReviewMarkDto) => {
       if (!current) return;
-      resolveMark.mutate({ markId: current.markId, decision });
+      if (onResolve) onResolve(current.markId, decision);
+      else resolveMark.mutate({ markId: current.markId, decision });
       const next = findNextUnresolved(safeIndex, current.markId);
       if (next !== null) setIndex(next);
       focusPanel();
     },
-    [current, resolveMark, findNextUnresolved, safeIndex, focusPanel],
+    [current, onResolve, resolveMark, findNextUnresolved, safeIndex, focusPanel],
   );
 
   const declineSuggestion = useCallback(() => {
@@ -177,6 +181,7 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
   if (!current) return null;
 
   const currentResolved = isMarkResolved(current);
+  const originLabel = markOriginLabel(current);
   const blankKeyLabel = current.options.includes('B') ? '0' : 'B / 0';
   const annulKey = pickAnnulKey(current.options);
   const blankSelected = currentResolved && current.reviewedDecision === 'blank';
@@ -187,10 +192,12 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-base">
-            Marcas dudosas{' '}
-            <span className="text-muted-foreground">
-              ({resolvedCount} de {marks.length} revisadas)
-            </span>
+            {variant === 'correction' ? 'Corregir la respuesta' : 'Marcas dudosas'}{' '}
+            {variant === 'review' && (
+              <span className="text-muted-foreground">
+                ({resolvedCount} de {marks.length} revisadas)
+              </span>
+            )}
           </CardTitle>
           <p className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
             {quickMode ? (
@@ -213,12 +220,13 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
           </p>
         </div>
         <CardDescription>
-          Mira el recorte y decide con una tecla. Cada decisión se guarda al instante y pasa a la
-          siguiente marca.
+          {variant === 'correction'
+            ? 'Mira el recorte y elige la respuesta correcta. Al guardar, los resultados del alumno se recalculan.'
+            : 'Mira el recorte y decide con una tecla. Cada decisión se guarda al instante y pasa a la siguiente marca.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {allResolved && (
+        {allResolved && variant === 'review' && (
           <AlertCallout tone="success" className="mb-4" title="Todas las marcas fueron revisadas">
             Puedes recorrerlas con las flechas para verificar, o confirmar el lote.
           </AlertCallout>
@@ -248,10 +256,12 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
               >
                 {MARK_STATE_LABELS[current.state]}
               </span>
-              {current.autoResolved && (
+              {originLabel && (
                 <span className="rounded-full bg-info/10 px-2 py-0.5 text-xs font-medium text-info">
-                  Nula automática
-                  {current.nullConfidence !== null
+                  {originLabel}
+                  {current.autoResolved &&
+                  current.aiResolution === null &&
+                  current.nullConfidence !== null
                     ? ` · confianza ${current.nullConfidence.toFixed(2)}`
                     : ''}
                 </span>
@@ -333,7 +343,7 @@ export function MarkReviewPanel({ batchId, marks, quickConfirm }: MarkReviewPane
                   Lectura de máquina: {current.value ?? 'sin valor'} · no se sobrescribe, tu
                   decisión queda aparte.
                 </p>
-                {current.autoResolved && (
+                {current.autoResolved && current.aiResolution === null && (
                   <p className="text-xs text-muted-foreground">
                     El lector anuló esta doble marca por su cuenta: las dos burbujas están rellenas.
                     Elige otra opción solo si el recorte dice otra cosa.
