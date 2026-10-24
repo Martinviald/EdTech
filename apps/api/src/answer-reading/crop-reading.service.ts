@@ -3,7 +3,24 @@ import { createHash, randomUUID } from 'node:crypto';
 import { and, eq, inArray } from 'drizzle-orm';
 import {
   acceptedAnswersOf,
+  agreedConsensusReadings,
   agreedReadingOf,
+  agreedValue,
+  applyDecisionTiebreak,
+  closedSpaceScoring,
+  confusableFlipsToCorrect,
+  decideAcceptance,
+  finalizeInterpretedConsensus,
+  planInterpretedConsensus,
+  renderInterpretationPrompt,
+  toInterpretedReading,
+  verifyAnswer,
+  type AcceptanceAgreement,
+  type InkEvidence,
+  type InterpretationResult,
+  type InterpretedPlan,
+  type InterpretedReaderResult,
+  type RenderedInterpretationPrompt,
   applyIncorrectVerification,
   applyReadingAudit,
   evaluateConsensus,
@@ -35,6 +52,7 @@ import {
   type VerificationResult,
 } from '@soe/answer-reading';
 import { answerReadings, withOrgContext, type NewAnswerReadingRow } from '@soe/db';
+import { DecisionError } from '@soe/decisions';
 import {
   DEFAULT_CONSENSUS_POLICY,
   readingAuditOutputSchema,
@@ -42,7 +60,9 @@ import {
   verificationOutputSchema,
   type ConsensusPolicy,
   type ConsensusResult,
+  type AnswerSpace,
   type CropEvidence,
+  type InterpretedReading,
   type ReaderSpec,
   type ReadingAuditOutput,
   type ReadingMode,
@@ -56,7 +76,13 @@ import {
 import type { ZodTypeAny } from 'zod';
 import { reportServerError } from '../common/observability/report-error';
 import { InjectDb, type Database } from '../database/database.types';
+import { DecisionsService } from '../decisions/decisions.service';
 import { FilesService } from '../files/files.service';
+import {
+  ANSWER_READING_TIEBREAK_QUESTION_ID,
+  buildAnswerReadingTiebreakDecision,
+  tiebreakChoiceOf,
+} from './answer-reading-tiebreak-decision';
 import { readingScoringOutcome, type ReadingScoringItem } from './answer-reading-scoring.helpers';
 import { ANSWER_READING_OPTIONS, type AnswerReadingOptions } from './answer-reading.constants';
 import type { RouteForCrop } from './reading-routes.service';
@@ -126,6 +152,22 @@ interface StoredReading extends ReuseFingerprint {
   readonly family: string;
   readonly output: TranscriptionOutput | null;
   readonly verificationOutput: VerificationOutput | ReadingAuditOutput | null;
+  readonly interpretation: InterpretedReading | null;
+}
+
+interface InterpretedAttempt {
+  readonly id: string;
+  readonly reader: ReaderSpec;
+  readonly status: TranscriptionStatus;
+  readonly errorCode: string | null;
+  readonly reading: InterpretedReading | null;
+  readonly costUsd: number;
+}
+
+interface InterpretationPlan {
+  readonly reader: ReaderSpec;
+  readonly rendered: RenderedInterpretationPrompt;
+  readonly readingKey: string;
 }
 
 interface ExistingReadings {
@@ -189,6 +231,19 @@ type ReadingInsert = NewAnswerReadingRow & { readonly attempt: number; readonly 
 
 const MAX_READING_INSERT_TRIES = 3;
 
+export const ANSWER_READING_TIEBREAK_KILL_SWITCH_ENV = 'ANSWER_READING_TIEBREAK_AI_DISABLED';
+
+const ANSWER_READING_TIEBREAK_TIMEOUT_MS = 8000;
+
+const READING_STATE_BY_INTERPRETED_STATE: Readonly<
+  Record<InterpretedReading['state'], NonNullable<NewAnswerReadingRow['readingState']>>
+> = {
+  answered: 'answered',
+  ambiguous: 'multiple_answers',
+  blank: 'blank',
+  illegible: 'illegible',
+};
+
 @Injectable()
 export class CropReadingService {
   constructor(
@@ -196,6 +251,7 @@ export class CropReadingService {
     private readonly filesService: FilesService,
     private readonly transcribers: VisionTranscriberRegistry,
     @Inject(ANSWER_READING_OPTIONS) private readonly options: AnswerReadingOptions,
+    private readonly decisions: DecisionsService,
   ) {}
 
   async read(task: CropReadingTask): Promise<CropReadingOutcome> {
@@ -214,6 +270,7 @@ export class CropReadingService {
       return this.withoutReaders(task, policy, scoreOf, 'crop_unavailable');
     }
     const scope: ReadingScope = { task, route: task.route, cropSha256, image };
+    if (policy.readMode === 'interpreted') return this.readInterpreted(scope, policy, scoreOf);
     const plans = this.plansFor(scope);
     const existing = await this.loadExisting(
       task.orgId,
@@ -272,6 +329,282 @@ export class CropReadingService {
       routeId: task.route.route.routeId,
       routeVersion: task.route.route.routeVersion,
     };
+  }
+
+  private async readInterpreted(
+    scope: ReadingScope,
+    policy: ConsensusPolicy,
+    scoreOf: ScoreOf,
+  ): Promise<CropReadingOutcome> {
+    const { task, route } = scope;
+    const space = this.answerSpaceOf(task.item);
+    const attempts = await Promise.all(
+      route.route.readers.map((reader) => this.interpretWithReader(scope, reader, space)),
+    );
+    const readers: InterpretedReaderResult[] = attempts.map((attempt) => ({
+      readingId: attempt.id,
+      provider: attempt.reader.provider,
+      family: attempt.reader.family,
+      minConfidence: attempt.reader.minConfidence ?? policy.minConfidence,
+      reading: attempt.reading,
+    }));
+    const plan = planInterpretedConsensus({
+      readers,
+      verify: verifyAnswer,
+      format: task.format,
+      space,
+      ink: this.inkEvidenceOf(policy, task),
+    });
+    const agreement = plan.agreement ?? (await this.tiebreak(scope, policy, plan, space));
+    const value = agreement ? agreedValue(agreement, task.format) : null;
+    const acceptedAnswers = acceptedAnswersOf({ type: task.item.type, content: task.item.content });
+    const scoring =
+      agreement?.kind === 'answer' && value
+        ? (closedSpaceScoring(agreement, acceptedAnswers, verifyAnswer, task.format, space) ??
+          scoreOf(value))
+        : null;
+    const acceptance = decideAcceptance({
+      verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
+      agreement,
+      scoring,
+      confusableFlipsToCorrect: confusableFlipsToCorrect({
+        agreement,
+        acceptedAnswers,
+        verify: verifyAnswer,
+        format: task.format,
+        space,
+        scoreOf,
+      }),
+      readings: readers.flatMap((reader) => (reader.reading ? [reader.reading] : [])),
+    });
+    const result = finalizeInterpretedConsensus({
+      plan,
+      agreement,
+      value,
+      scoring,
+      decision: acceptance,
+      policy,
+      readingKey: this.consensusKey(task, scope.cropSha256),
+    });
+    const verified =
+      acceptance.action === 'verify_incorrect' && agreement !== null
+        ? await this.verifyIncorrect(
+            scope,
+            policy,
+            result,
+            agreedConsensusReadings(plan, agreement),
+          )
+        : { result, costUsd: 0 };
+    return {
+      result: verified.result,
+      costUsd: attempts.reduce((sum, attempt) => sum + attempt.costUsd, 0) + verified.costUsd,
+      routeId: route.route.routeId,
+      routeVersion: route.route.routeVersion,
+    };
+  }
+
+  private answerSpaceOf(item: ReadingScoringItem): AnswerSpace {
+    const { content } = item;
+    return 'answerSpace' in content && content.answerSpace ? content.answerSpace : { kind: 'open' };
+  }
+
+  private inkEvidenceOf(policy: ConsensusPolicy, task: CropReadingTask): InkEvidence | null {
+    const inkRatio = task.cropEvidence?.inkRatio ?? null;
+    if (inkRatio === null || policy.blankByInkBelow === null) return null;
+    return { hasInk: inkRatio >= policy.blankByInkBelow };
+  }
+
+  private async tiebreak(
+    scope: ReadingScope,
+    policy: ConsensusPolicy,
+    plan: InterpretedPlan,
+    space: AnswerSpace,
+  ): Promise<AcceptanceAgreement | null> {
+    const rule = policy.decisionTiebreak;
+    if (
+      rule === undefined ||
+      plan.tiebreakCandidates.length === 0 ||
+      process.env[ANSWER_READING_TIEBREAK_KILL_SWITCH_ENV] === 'true'
+    ) {
+      return null;
+    }
+    const decision = buildAnswerReadingTiebreakDecision(plan.tiebreakCandidates, {
+      gradeName: scope.task.gradeName,
+      format: scope.task.format,
+      space,
+    });
+    try {
+      const image = await scope.image();
+      const outcome = await this.decisions.evaluate(
+        scope.task.orgId,
+        'answer_reading_tiebreak',
+        {
+          state: decision.state,
+          questions: decision.questions,
+          images: [{ mimeType: image.mimeType, data: image.base64 }],
+          timeoutMs: ANSWER_READING_TIEBREAK_TIMEOUT_MS,
+        },
+        { correlationId: scope.task.markId },
+      );
+      return applyDecisionTiebreak(
+        plan,
+        tiebreakChoiceOf(decision, outcome.answers[ANSWER_READING_TIEBREAK_QUESTION_ID]),
+        rule,
+      );
+    } catch (error) {
+      if (!(error instanceof DecisionError)) {
+        reportServerError(error, { orgId: scope.task.orgId, markId: scope.task.markId });
+      }
+      return null;
+    }
+  }
+
+  private interpretationPlanFor(
+    scope: ReadingScope,
+    reader: ReaderSpec,
+    space: AnswerSpace,
+  ): InterpretationPlan {
+    const { task } = scope;
+    const rendered = renderInterpretationPrompt(reader, task.format, {
+      gradeName: task.gradeName,
+      space,
+    });
+    const readingKey = this.sha256(
+      [
+        scope.cropSha256,
+        task.item.id,
+        rendered.prompt.ref,
+        rendered.prompt.hash,
+        task.cropProfileId,
+      ].join('|'),
+    );
+    return { reader, rendered, readingKey };
+  }
+
+  private async interpretWithReader(
+    scope: ReadingScope,
+    reader: ReaderSpec,
+    space: AnswerSpace,
+  ): Promise<InterpretedAttempt> {
+    const plan = this.interpretationPlanFor(scope, reader, space);
+    const lookupKey = this.lookupKey(plan.readingKey, reader.key, 'primary');
+    const existing = await this.loadExisting(scope.task.orgId, [plan.readingKey]);
+    const reused = existing.reusable.get(
+      this.reuseKey(lookupKey, { ...reader, promptHash: plan.rendered.prompt.hash }),
+    );
+    if (reused?.interpretation) {
+      return {
+        id: reused.id,
+        reader,
+        status: reused.status,
+        errorCode: null,
+        reading: reused.interpretation,
+        costUsd: 0,
+      };
+    }
+    const firstAttempt = (existing.lastAttempt.get(lookupKey) ?? 0) + 1;
+    let attempt = await this.interpretAndPersist(scope, plan, firstAttempt);
+    let costUsd = attempt.costUsd;
+    if (this.isTransient(attempt.status, attempt.errorCode)) {
+      await this.pause(this.options.retryDelayMs);
+      attempt = await this.interpretAndPersist(scope, plan, firstAttempt + 1);
+      costUsd += attempt.costUsd;
+    }
+    return { ...attempt, costUsd };
+  }
+
+  private async interpretAndPersist(
+    scope: ReadingScope,
+    plan: InterpretationPlan,
+    attempt: number,
+  ): Promise<InterpretedAttempt> {
+    const { task } = scope;
+    const { reader, rendered } = plan;
+    const result = await this.interpret(scope, plan);
+    if (result.status === 'error' || result.status === 'timeout') {
+      reportServerError(new Error(`La lectura interpretada terminó en ${result.status}`), {
+        orgId: task.orgId,
+        runId: task.runId,
+        readerKey: reader.key,
+        errorCode: result.errorCode,
+      });
+    }
+    const reading =
+      result.status === 'ok' && result.output ? toInterpretedReading(result.output) : null;
+    const usage = result.usage;
+    const costUsd = result.costUsd ?? 0;
+    const id = randomUUID();
+    await this.insertReading(task.orgId, {
+      id,
+      orgId: task.orgId,
+      runId: task.runId,
+      markId: task.markId,
+      itemId: task.item.id,
+      cropFileId: task.cropFileId,
+      cropSha256: scope.cropSha256,
+      cropProfileId: task.cropProfileId,
+      responseFormat: task.format,
+      readingKey: plan.readingKey,
+      mode: 'primary',
+      attempt,
+      routeId: scope.route.route.routeId,
+      routeVersion: scope.route.route.routeVersion,
+      readerKey: reader.key,
+      transcriberId: reader.transcriberId,
+      provider: reader.provider,
+      family: reader.family,
+      model: reader.model,
+      providerModel: result.providerModel,
+      promptRef: rendered.prompt.ref,
+      promptHash: rendered.prompt.hash,
+      outputSchemaId: rendered.prompt.outputSchemaId,
+      params: reader.params,
+      status: result.status,
+      output: null,
+      verificationOutput: null,
+      interpretation: reading,
+      readingState: reading ? READING_STATE_BY_INTERPRETED_STATE[reading.state] : null,
+      literal: reading?.literal ?? null,
+      confidence: reading === null ? null : reading.confidence.toFixed(3),
+      rawText: result.status === 'invalid_output' ? result.rawText : null,
+      normalized: null,
+      inputTokens: usage?.inputTokens ?? 0,
+      outputTokens: usage?.outputTokens ?? 0,
+      reasoningTokens: usage?.reasoningTokens ?? 0,
+      cachedInputTokens: usage?.cachedInputTokens ?? 0,
+      imageTokens: usage?.imageTokens ?? null,
+      costUsd: costUsd.toFixed(6),
+      latencyMs: result.latencyMs,
+      errorCode: result.errorCode,
+    });
+    return { id, reader, status: result.status, errorCode: result.errorCode, reading, costUsd };
+  }
+
+  private async interpret(
+    scope: ReadingScope,
+    plan: InterpretationPlan,
+  ): Promise<InterpretationResult> {
+    const transcriber = this.transcribers.forReader(plan.reader);
+    if (transcriber === null || transcriber.interpret === undefined) {
+      return this.failedJudgement(plan.reader, TRANSCRIPTION_ERROR_CODES.transcriberNotFound);
+    }
+    try {
+      return await transcriber.interpret({
+        readingKey: plan.readingKey,
+        image: await scope.image(),
+        reader: plan.reader,
+        prompt: plan.rendered.prompt,
+        outputSchema: plan.rendered.outputSchema,
+        outputZodSchema: plan.rendered.outputZodSchema,
+      });
+    } catch (error) {
+      reportServerError(error, {
+        orgId: scope.task.orgId,
+        runId: scope.task.runId,
+        readerKey: plan.reader.key,
+      });
+      return this.failedJudgement(plan.reader, TRANSCRIPTION_ERROR_CODES.providerError);
+    }
   }
 
   private async verifyIncorrect(
@@ -670,6 +1003,7 @@ export class CropReadingService {
           family: answerReadings.family,
           output: answerReadings.output,
           verificationOutput: answerReadings.verificationOutput,
+          interpretation: answerReadings.interpretation,
           provider: answerReadings.provider,
           model: answerReadings.model,
           params: answerReadings.params,
@@ -690,7 +1024,7 @@ export class CropReadingService {
       const current = reusable.get(reuseKey);
       if (
         row.status === 'ok' &&
-        (row.output !== null || row.verificationOutput !== null) &&
+        (row.output !== null || row.verificationOutput !== null || row.interpretation !== null) &&
         (!current || row.attempt > current.attempt)
       ) {
         reusable.set(reuseKey, row);

@@ -51,6 +51,7 @@ export const PROMPT_PURPOSES = [
   'rubric_grading',
   'verification',
   'reading_audit',
+  'interpretation',
 ] as const;
 export type PromptPurpose = (typeof PROMPT_PURPOSES)[number];
 
@@ -69,6 +70,7 @@ export const PROMPT_VARIABLES = [
   'transcription',
   'agreedReading',
   'acceptedAnswers',
+  'answerKind',
 ] as const;
 export type PromptVariable = (typeof PROMPT_VARIABLES)[number];
 
@@ -88,7 +90,9 @@ export const VERIFICATION_ONLY_VARIABLES: readonly PromptVariable[] = [
 
 export function promptVariableAllowed(purpose: PromptPurpose, variable: PromptVariable): boolean {
   if (VERIFICATION_ONLY_VARIABLES.includes(variable)) return purpose === 'verification';
-  if (purpose === 'transcription') return !TRANSCRIPTION_FORBIDDEN_VARIABLES.includes(variable);
+  if (purpose === 'transcription' || purpose === 'interpretation') {
+    return !TRANSCRIPTION_FORBIDDEN_VARIABLES.includes(variable);
+  }
   return true;
 }
 

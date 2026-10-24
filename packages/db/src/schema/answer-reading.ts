@@ -15,6 +15,7 @@ import {
 import { relations, sql } from 'drizzle-orm';
 import type {
   ConsensusPolicy,
+  InterpretedReading,
   NormalizedAnswer,
   ReaderSpec,
   ReadingAuditOutput,
@@ -241,6 +242,11 @@ export const answerReadings = pgTable(
     verificationOutput: jsonb('verification_output').$type<
       VerificationOutput | ReadingAuditOutput
     >(),
+    /**
+     * Solo con un prompt de interpretación (`transcribe.interpret@n`): lo escrito y la
+     * respuesta que el alumno quiso dar, según el lector. `output` queda en null.
+     */
+    interpretation: jsonb('interpretation').$type<InterpretedReading>(),
     readingState: readingStateEnum('reading_state'),
     literal: text('literal'),
     confidence: decimal('confidence', { precision: 4, scale: 3 }),

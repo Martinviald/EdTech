@@ -11,6 +11,11 @@ import type { ZodTypeAny } from 'zod';
 import type { ReadingAuditJsonSchema } from './audit/reading-audit-json-schema';
 import type { TranscriptionJsonSchema } from './formats/transcription-json-schema';
 import type { VerificationJsonSchema } from './verification/verification-json-schema';
+import type {
+  InterpretationJsonSchema,
+  InterpretationOutput,
+  interpretationOutputSchema,
+} from './interpretation/interpretation-output';
 
 // Puerto de transcripción (diseño §4 S4). Las implementaciones reales viven en la
 // API sobre el módulo LLM; aquí solo el contrato y un transcriptor falso.
@@ -66,6 +71,18 @@ export interface ReadingAuditRequest {
 
 export type ReadingAuditResult = StructuredVisionResult<ReadingAuditOutput>;
 
+/** Pedido al lector que interpreta (`transcribe.interpret@n`): nunca lleva la clave. */
+export interface InterpretationRequest {
+  readonly readingKey: string;
+  readonly image: TranscriptionImage;
+  readonly reader: ReaderSpec;
+  readonly prompt: RenderedPrompt;
+  readonly outputSchema: InterpretationJsonSchema;
+  readonly outputZodSchema: typeof interpretationOutputSchema;
+}
+
+export type InterpretationResult = StructuredVisionResult<InterpretationOutput>;
+
 /**
  * `verify` y `audit` son opcionales: un transcriptor que no verifica deja la casilla en
  * revisión, y uno que no audita no acepta nada que no haya aceptado el consenso.
@@ -76,4 +93,5 @@ export interface VisionTranscriber {
   transcribe(request: TranscriptionRequest): Promise<TranscriptionResult>;
   verify?(request: VerificationRequest): Promise<VerificationResult>;
   audit?(request: ReadingAuditRequest): Promise<ReadingAuditResult>;
+  interpret?(request: InterpretationRequest): Promise<InterpretationResult>;
 }

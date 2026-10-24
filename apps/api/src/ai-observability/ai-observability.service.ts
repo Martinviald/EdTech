@@ -138,6 +138,7 @@ const DECISION_FEATURE_LABELS: Record<string, string> = {
   remedial_judge: 'Juez de material remedial',
   mark_disambiguation_jev: 'Desambiguación de marcas (Jev)',
   mark_disambiguation_openai: 'Desambiguación de marcas (OpenAI)',
+  answer_reading_tiebreak: 'Desempate de respuestas escritas (Jev)',
 };
 
 /** Etiqueta única de tipo para los turnos del asistente conversacional. */

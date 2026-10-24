@@ -1,46 +1,48 @@
 import 'reflect-metadata';
-import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { Module, type DynamicModule, type INestApplicationContext } from '@nestjs/common';
+import type { INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { config as loadEnv } from 'dotenv';
-import type { Database } from '@soe/db';
-import type { LlmModel, LlmProviderId, ReaderSpec } from '@soe/types';
+import { decideAcceptance, verifyAnswer, type InkEvidence } from '@soe/answer-reading';
+import { JevDecisionEngine } from '@soe/decisions';
+import { DECISION_FEATURE_DEFAULTS } from '@soe/types';
+import type { ReaderSpec } from '@soe/types';
 import { LlmVisionTranscriber } from '../src/answer-reading/transcribers/llm-vision-transcriber';
-import { LlmConfigService } from '../src/llm/llm.config';
-import { LLM_PROVIDERS } from '../src/llm/llm.constants';
-import { LlmModelsService } from '../src/llm/llm-models.service';
-import { estimateLlmCostUsd, setCatalogTariffs } from '../src/llm/llm.pricing';
-import { LlmService } from '../src/llm/llm.service';
+import { estimateLlmCostUsd } from '../src/llm/llm.pricing';
 import type { LlmProvider } from '../src/llm/llm.types';
 import { AnthropicProvider } from '../src/llm/providers/anthropic.provider';
 import { GeminiProvider } from '../src/llm/providers/gemini.provider';
 import { OpenAiProvider } from '../src/llm/providers/openai.provider';
-import { EVAL_TARIFFS, type EvalTariff } from './answer-reading-eval/tariffs';
+import { EvalLlmModule, applyEvalTariffs } from './answer-reading-eval/llm-context';
 import type { CacheMode } from './answer-reading-eval/reading-cache';
+import {
+  DecisionCache,
+  type HarnessDecider,
+  type HarnessDecisionRequest,
+  type HarnessDecisionResult,
+} from './answer-reading-eval/decision-cache';
 import {
   allRouteReaders,
   loadRouteSet,
   parseReaderMinConfidence,
 } from './answer-reading-eval/route-set';
 import { runEvalCommand, type EvalCommandOptions } from './answer-reading-eval/run-eval';
-import type { HarnessTranscriber } from './answer-reading-eval/simulate';
+import type { HarnessTranscriber, InterpretationSimulation } from './answer-reading-eval/simulate';
 
 const REPO_ROOT = resolve(__dirname, '..', '..', '..');
 const DEFAULT_ROUTES = resolve(__dirname, 'answer-reading-eval', 'routes', 'actual.json');
 const DEFAULT_CACHE_DIR = resolve(REPO_ROOT, '..', 'pruebas-vlm-manuscrito', 'cache-lecturas');
+const DEFAULT_DECISION_CACHE_DIR = resolve(
+  REPO_ROOT,
+  '..',
+  'pruebas-vlm-manuscrito',
+  'cache-decisiones',
+);
+const JEV_INPUT_USD_PER_MTOK = 0.042;
 const ESTIMATED_INPUT_TOKENS = 3000;
 const OBSERVED_COST_MARGIN = 1.25;
-
-const NO_DATABASE = new Proxy(
-  {},
-  {
-    get: () => {
-      throw new Error('El arnés de evaluación no usa la base de datos');
-    },
-  },
-) as Database;
 
 const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [opciones]
 
@@ -57,13 +59,18 @@ const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [o
   --refresh                      Vuelve a pedir todo y reescribe el caché
   --out <dir>                    Carpeta de salida (por defecto una carpeta temporal)
   --dry-run                      Transcriptor falso que lee la etiqueta: no llama a ninguna API
+  --offline                      Solo caché: nunca llama a una API; lo que falta queda como falla
+  --ink <archivo.json>           Evidencia de tinta por muestra ({ id: { hasInk } }) para el
+                                 blanco con evidencia de la lectura interpretada
+  --decision-cache-dir <dir>     Caché del desempate con el motor de decisiones
+                                 (por defecto ../pruebas-vlm-manuscrito/cache-decisiones)
   --compare <informe.json>       Comparación pareada contra un informe v2 anterior
   --injected-escalation          Las lecturas inyectadas (estrés) entran como lecturas dudosas
                                  de los lectores de la ruta (confianza 0) para medir si el
                                  escalamiento (tiebreakOn) las confirma
 `;
 
-const FLAGS = new Set(['dry-run', 'no-cache', 'refresh', 'injected-escalation']);
+const FLAGS = new Set(['dry-run', 'no-cache', 'refresh', 'injected-escalation', 'offline']);
 
 function numberOption(value: string | undefined, name: string, fallback: number): number {
   if (value === undefined) return fallback;
@@ -121,105 +128,82 @@ function parseArgs(argv: readonly string[]): EvalCommandOptions {
     cacheMode: cacheModeOf(flags),
     readerMinConfidence: thresholds ? parseReaderMinConfidence(thresholds) : null,
     injectedEscalation: flags.has('injected-escalation'),
+    offline: flags.has('offline'),
   };
 }
 
-function tariffFor(model: string): EvalTariff {
-  const tariff = EVAL_TARIFFS[model];
-  if (!tariff) throw new Error(`Sin tarifa para ${model}: agrégala a tariffs.ts con su fuente`);
-  return tariff;
+function decisionCacheDirOf(argv: readonly string[]): string {
+  const index = argv.indexOf('--decision-cache-dir');
+  const value = index >= 0 ? argv[index + 1] : undefined;
+  return resolve(value ?? DEFAULT_DECISION_CACHE_DIR);
 }
 
-class EvalModelCatalog extends LlmModelsService {
-  private readonly models: Map<string, LlmModel>;
+class JevHarnessDecider implements HarnessDecider {
+  readonly engine = DECISION_FEATURE_DEFAULTS.answer_reading_tiebreak.engine;
+  readonly model = DECISION_FEATURE_DEFAULTS.answer_reading_tiebreak.model;
+  private readonly jev = new JevDecisionEngine({ experimentalImages: true });
 
-  constructor(readers: readonly ReaderSpec[]) {
-    super(NO_DATABASE);
-    const now = new Date().toISOString();
-    this.models = new Map();
-    for (const reader of readers) {
-      const tariff = tariffFor(reader.model);
-      if (tariff.provider !== reader.provider) {
-        throw new Error(`El lector ${reader.key} pide ${reader.model} a ${reader.provider}`);
-      }
-      this.models.set(`${tariff.provider}:${reader.model}`, {
-        id: randomUUID(),
-        provider: tariff.provider,
-        modelId: reader.model,
-        label: reader.model,
-        maxOutputTokens: tariff.maxOutputTokens,
-        supportsImages: true,
-        supportsStructuredOutput: true,
-        supportsBatch: false,
-        supportsSamplingParams: tariff.supportsSamplingParams,
-        inputUsdPerMtok: tariff.inputUsdPerMtok,
-        outputUsdPerMtok: tariff.outputUsdPerMtok,
-        cachedInputUsdPerMtok: tariff.cachedInputUsdPerMtok,
-        batchDiscount: null,
-        enabled: true,
-        deprecatedAt: null,
-        createdAt: now,
-        updatedAt: now,
+  async decide(request: HarnessDecisionRequest): Promise<HarnessDecisionResult> {
+    const startedAt = Date.now();
+    try {
+      const result = await this.jev.evaluate({
+        state: request.state,
+        images: [{ mimeType: request.image.mimeType, data: request.image.base64 }],
+        questions: request.questions,
+        model: this.model,
       });
+      const answer = Object.values(result.answers)[0];
+      return {
+        answer: answer?.type === 'choice' ? answer : null,
+        model: result.model,
+        usage: result.usage,
+        costUsd: (result.usage.inputTokens * JEV_INPUT_USD_PER_MTOK) / 1e6,
+        latencyMs: result.latencyMs,
+        errorCode: answer?.type === 'choice' ? null : 'unexpected_answer',
+      };
+    } catch (error) {
+      return {
+        answer: null,
+        model: this.model,
+        usage: null,
+        costUsd: 0,
+        latencyMs: Date.now() - startedAt,
+        errorCode: error instanceof Error ? error.name || 'error' : 'error',
+      };
     }
   }
-
-  override async onModuleInit(): Promise<void> {}
-
-  override async findModel(
-    provider: LlmProviderId,
-    modelId: string,
-  ): Promise<LlmModel | undefined> {
-    return this.models.get(`${provider}:${modelId}`);
-  }
-
-  override async findSelectableModel(
-    provider: LlmProviderId,
-    modelId: string,
-  ): Promise<LlmModel | undefined> {
-    return this.findModel(provider, modelId);
-  }
 }
 
-@Module({})
-class EvalLlmModule {
-  static forReaders(readers: readonly ReaderSpec[]): DynamicModule {
-    return {
-      module: EvalLlmModule,
-      providers: [
-        { provide: LlmModelsService, useValue: new EvalModelCatalog(readers) },
-        {
-          provide: LlmConfigService,
-          useFactory: (catalog: LlmModelsService) => new LlmConfigService(NO_DATABASE, catalog),
-          inject: [LlmModelsService],
-        },
-        AnthropicProvider,
-        GeminiProvider,
-        OpenAiProvider,
-        {
-          provide: LLM_PROVIDERS,
-          useFactory: (anthropic: LlmProvider, gemini: LlmProvider, openai: LlmProvider) => [
-            anthropic,
-            gemini,
-            openai,
-          ],
-          inject: [AnthropicProvider, GeminiProvider, OpenAiProvider],
-        },
-        {
-          provide: LlmService,
-          useFactory: (config: LlmConfigService, providers: LlmProvider[]) =>
-            new LlmService(config, providers),
-          inject: [LlmConfigService, LLM_PROVIDERS],
-        },
-        {
-          provide: LlmVisionTranscriber,
-          useFactory: (llm: LlmService) => new LlmVisionTranscriber(llm),
-          inject: [LlmService],
-        },
-      ],
-      exports: [LlmVisionTranscriber],
-    };
-  }
+function argumentOf(argv: readonly string[], name: string): string | null {
+  const index = argv.indexOf(`--${name}`);
+  return index >= 0 ? (argv[index + 1] ?? null) : null;
+}
+
+function inkBySampleOf(file: string | null): ReadonlyMap<string, InkEvidence> | undefined {
+  if (file === null) return undefined;
+  const raw = JSON.parse(readFileSync(resolve(file), 'utf8')) as Record<
+    string,
+    { hasInk: boolean }
+  >;
+  return new Map(Object.entries(raw).map(([id, entry]) => [id, { hasInk: entry.hasInk }]));
+}
+
+function interpretationSimulation(
+  cacheMode: CacheMode,
+  decisionCacheDir: string,
+  offline: boolean,
+  inkBySample: ReadonlyMap<string, InkEvidence> | undefined,
+): InterpretationSimulation {
+  const defaults = DECISION_FEATURE_DEFAULTS.answer_reading_tiebreak;
+  return {
+    verify: verifyAnswer,
+    decideAcceptance,
+    decisionCache: new DecisionCache(cacheMode === 'off' ? null : decisionCacheDir, cacheMode),
+    decider: offline ? null : new JevHarnessDecider(),
+    decisionEngine: defaults.engine,
+    decisionModel: defaults.model,
+    ...(inkBySample ? { inkBySample } : {}),
+  };
 }
 
 function estimateCallUsd(reader: ReaderSpec, observedUsd: readonly number[]): number {
@@ -251,28 +235,24 @@ async function main(): Promise<void> {
   loadEnv({ path: join(REPO_ROOT, '.env') });
   const options = parseArgs(process.argv.slice(2));
   const log = (message: string) => process.stderr.write(`${message}\n`);
-  setCatalogTariffs(
-    new Map(
-      Object.entries(EVAL_TARIFFS).map(([model, tariff]) => [
-        model,
-        {
-          inputUsdPerMtok: tariff.inputUsdPerMtok,
-          outputUsdPerMtok: tariff.outputUsdPerMtok,
-          cachedInputUsdPerMtok: tariff.cachedInputUsdPerMtok,
-        },
-      ]),
-    ),
-  );
-  const context = options.dryRun
-    ? null
-    : await NestFactory.createApplicationContext(
-        EvalLlmModule.forReaders(allRouteReaders(await loadRouteSet(options.routesFile))),
-        { logger: ['error', 'warn'] },
-      );
+  applyEvalTariffs();
+  const context =
+    options.dryRun || options.offline
+      ? null
+      : await NestFactory.createApplicationContext(
+          EvalLlmModule.forReaders(allRouteReaders(await loadRouteSet(options.routesFile))),
+          { logger: ['error', 'warn'] },
+        );
   try {
     const result = await runEvalCommand(options, {
       log,
       estimateCallUsd,
+      interpretation: interpretationSimulation(
+        options.cacheMode,
+        decisionCacheDirOf(process.argv.slice(2)),
+        options.offline === true,
+        inkBySampleOf(argumentOf(process.argv.slice(2), 'ink')),
+      ),
       ...(context ? { transcriberFor: availableTranscriber(context) } : {}),
     });
     const { short, cost } = result.report.metrics;
