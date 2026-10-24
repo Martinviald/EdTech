@@ -1,9 +1,9 @@
 {
-  "description": "Lectura interpretada (diseño v5): gemini-3.8-flash (>= 0,95) y gpt-6-luna low (>= 0,85) con transcribe.interpret@1 devuelven lo escrito y la respuesta que el alumno quiso dar; verifyAnswer la verifica contra el espacio de respuestas y el literal del otro lector; consenso sobre el canónico; sin acuerdo, desempate con Jev (answer_reading_tiebreak) que solo vale si coincide con Gemini y confianza >= 0,9; política de aceptación asimétrica y verificador de incorrectas. Sin gpt-6.1-sol ni auditor de lectura. Desarrollo sin cambio. Ids y versiones del SQL 0057 (siguiente versión de cada ruta de 0055).",
+  "description": "Lectura interpretada (diseño v5): gemini-3.8-flash (>= 0,95) y gpt-6-luna low (>= 0,85) con transcribe.interpret@1 devuelven lo escrito y la respuesta que el alumno quiso dar; verifyAnswer la verifica contra el espacio de respuestas y el literal del otro lector; consenso sobre el canónico; sin acuerdo, desempate con Jev (answer_reading_tiebreak) que solo vale si coincide con Gemini y confianza >= 0,9; política de aceptación asimétrica y verificador de incorrectas. Sin gpt-6.1-sol ni auditor de lectura. Desarrollo sin cambio. Sin acuerdo tras el desempate, reglas de recuperación (policy.recoveryRules: matching_column y key_anchor con Gemini). Ids y versiones del SQL 0058 (siguiente versión de cada ruta de 0057).",
   "routes": [
     {
-      "id": "7ead0000-0000-4000-8000-000000000028",
-      "version": 6,
+      "id": "7ead0000-0000-4000-8000-00000000002e",
+      "version": 7,
       "orgId": null,
       "status": "active",
       "level": "default",
@@ -83,6 +83,10 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
@@ -181,8 +185,8 @@
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-000000000029",
-      "version": 6,
+      "id": "7ead0000-0000-4000-8000-00000000002f",
+      "version": 7,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -262,12 +266,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002a",
-      "version": 6,
+      "id": "7ead0000-0000-4000-8000-000000000030",
+      "version": 7,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -347,12 +355,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002b",
-      "version": 7,
+      "id": "7ead0000-0000-4000-8000-000000000031",
+      "version": 8,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -432,12 +444,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002c",
-      "version": 7,
+      "id": "7ead0000-0000-4000-8000-000000000032",
+      "version": 8,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -517,12 +533,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002d",
-      "version": 7,
+      "id": "7ead0000-0000-4000-8000-000000000033",
+      "version": 8,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -602,6 +622,10 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     }

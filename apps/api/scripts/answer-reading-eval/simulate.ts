@@ -9,6 +9,8 @@ import {
   finalizeInterpretedConsensus,
   isInterpretationPromptFor,
   planInterpretedConsensus,
+  recoverAgreement,
+  recoveryRulesOf,
   renderInterpretationPrompt,
   toInterpretedReading,
   type AcceptanceAgreement,
@@ -62,6 +64,7 @@ import type {
   ReadingAuditor,
   ReadingOutcome,
   ReadingState,
+  RecoveryRule,
   ResponseFormat,
   ResponseFormatKind,
   ReviewMode,
@@ -82,7 +85,6 @@ import {
   readingCacheKey,
   type ReadingCacheKeyInput,
 } from './reading-cache';
-import { recoverAgreement, type RecoveryRule } from './recovery-rules';
 import { resolveSampleRoute, type ReaderMinConfidence, type RouteSet } from './route-set';
 import { textSimilarity } from './statistics';
 
@@ -107,8 +109,6 @@ export interface InterpretationSimulation {
   readonly decisionEngine: string;
   readonly decisionModel: string;
   readonly inkBySample?: ReadonlyMap<string, InkEvidence>;
-  readonly recoveryRules?: ReadonlySet<RecoveryRule>;
-  readonly recoveryAnchorProvider?: string;
 }
 
 export interface DecisionRecord {
@@ -1350,18 +1350,13 @@ async function runInterpretedUnit(
         ) ?? prepared.scorer.outcome(agreedValue(candidate, sample.format)))
       : null;
   const recovered =
-    agreement === null && simulation.recoveryRules && simulation.recoveryRules.size > 0
-      ? recoverAgreement(
-          plan,
-          {
-            verify: simulation.verify,
-            format: sample.format,
-            space,
-            scoreOf: scoreAgreement,
-            anchorProvider: simulation.recoveryAnchorProvider ?? 'gemini',
-          },
-          simulation.recoveryRules,
-        )
+    agreement === null
+      ? recoverAgreement(plan, recoveryRulesOf(policy), {
+          verify: simulation.verify,
+          format: sample.format,
+          space,
+          scoreOf: scoreAgreement,
+        })
       : null;
   if (recovered) agreement = recovered.agreement;
   const value = agreement ? agreedValue(agreement, sample.format) : null;

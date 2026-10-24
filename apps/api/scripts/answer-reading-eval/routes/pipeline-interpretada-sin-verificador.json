@@ -2,8 +2,8 @@
   "description": "Lectura interpretada sin verificador de incorrectas: gemini-3.8-flash (>= 0,95) y gpt-6-luna low (>= 0,85) con transcribe.interpret@1 y desempate con Jev (answer_reading_tiebreak, coincide con Gemini y confianza >= 0,9). Lo que pediría el verificador queda en revisión. Para medir con imágenes nuevas sin el costo del verificador.",
   "routes": [
     {
-      "id": "7ead0000-0000-4000-8000-000000000028",
-      "version": 6,
+      "id": "7ead0000-0000-4000-8000-00000000002e",
+      "version": 7,
       "orgId": null,
       "status": "active",
       "level": "default",
@@ -67,6 +67,10 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
@@ -165,8 +169,8 @@
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-000000000029",
-      "version": 6,
+      "id": "7ead0000-0000-4000-8000-00000000002f",
+      "version": 7,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -230,12 +234,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002a",
-      "version": 6,
+      "id": "7ead0000-0000-4000-8000-000000000030",
+      "version": 7,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -299,12 +307,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002b",
-      "version": 7,
+      "id": "7ead0000-0000-4000-8000-000000000031",
+      "version": 8,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -368,12 +380,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002c",
-      "version": 7,
+      "id": "7ead0000-0000-4000-8000-000000000032",
+      "version": 8,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -437,12 +453,16 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     },
     {
-      "id": "7ead0000-0000-4000-8000-00000000002d",
-      "version": 7,
+      "id": "7ead0000-0000-4000-8000-000000000033",
+      "version": 8,
       "orgId": null,
       "status": "active",
       "level": "format",
@@ -506,6 +526,10 @@
         "decisionTiebreak": {
           "minConfidence": 0.9,
           "agreeWithProvider": "gemini"
+        },
+        "recoveryRules": {
+          "matchingColumn": true,
+          "keyAnchor": { "provider": "gemini" }
         }
       }
     }

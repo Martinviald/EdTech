@@ -17,7 +17,6 @@ import { GeminiProvider } from '../src/llm/providers/gemini.provider';
 import { OpenAiProvider } from '../src/llm/providers/openai.provider';
 import { EvalLlmModule, applyEvalTariffs } from './answer-reading-eval/llm-context';
 import type { CacheMode } from './answer-reading-eval/reading-cache';
-import { RECOVERY_RULES, type RecoveryRule } from './answer-reading-eval/recovery-rules';
 import {
   DecisionCache,
   type HarnessDecider,
@@ -65,9 +64,6 @@ const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [o
   --offline                      Solo caché: nunca llama a una API; lo que falta queda como falla
   --ink <archivo.json>           Evidencia de tinta por muestra ({ id: { hasInk } }) para el
                                  blanco con evidencia de la lectura interpretada
-  --reglas <lista>               Reglas de recuperación sin acuerdo, separadas por coma:
-                                 key_anchor (Gemini lee la clave) y matching_column
-                                 (un solo código de la columna en ambos lectores)
   --decision-cache-dir <dir>     Caché del desempate con el motor de decisiones
                                  (por defecto ../pruebas-vlm-manuscrito/cache-decisiones)
   --compare <informe.json>       Comparación pareada contra un informe v2 anterior
@@ -119,6 +115,11 @@ function parseArgs(argv: readonly string[]): EvalCommandOptions {
     if (value === undefined || value.startsWith('--')) throw new Error(`Falta el valor de ${arg}`);
     values.set(name === 'route' ? 'routes' : name, value);
     index += 1;
+  }
+  if (values.has('reglas')) {
+    throw new Error(
+      '--reglas se retiró: las reglas de recuperación vienen de policy.recoveryRules de la ruta',
+    );
   }
   const dataset = values.get('dataset');
   if (!dataset) throw new Error('Falta --dataset');
@@ -202,20 +203,11 @@ function inkBySampleOf(file: string | null): ReadonlyMap<string, InkEvidence> | 
   return new Map(Object.entries(raw).map(([id, entry]) => [id, { hasInk: entry.hasInk }]));
 }
 
-function recoveryRulesOf(value: string | null): ReadonlySet<RecoveryRule> | undefined {
-  if (value === null) return undefined;
-  const rules = value.split(',').map((rule) => rule.trim());
-  const unknown = rules.filter((rule) => !(RECOVERY_RULES as readonly string[]).includes(rule));
-  if (unknown.length > 0) throw new Error(`Reglas desconocidas: ${unknown.join(', ')}`);
-  return new Set(rules as RecoveryRule[]);
-}
-
 function interpretationSimulation(
   cacheMode: CacheMode,
   decisionCacheDir: string,
   offline: boolean,
   inkBySample: ReadonlyMap<string, InkEvidence> | undefined,
-  recoveryRules: ReadonlySet<RecoveryRule> | undefined,
 ): InterpretationSimulation {
   const defaults = DECISION_FEATURE_DEFAULTS.answer_reading_tiebreak;
   return {
@@ -226,7 +218,6 @@ function interpretationSimulation(
     decisionEngine: defaults.engine,
     decisionModel: defaults.model,
     ...(inkBySample ? { inkBySample } : {}),
-    ...(recoveryRules ? { recoveryRules } : {}),
   };
 }
 
@@ -276,7 +267,6 @@ async function main(): Promise<void> {
         decisionCacheDirOf(process.argv.slice(2)),
         options.offline === true,
         inkBySampleOf(argumentOf(process.argv.slice(2), 'ink')),
-        recoveryRulesOf(argumentOf(process.argv.slice(2), 'reglas')),
       ),
       ...(context ? { transcriberFor: availableTranscriber(context) } : {}),
     });
