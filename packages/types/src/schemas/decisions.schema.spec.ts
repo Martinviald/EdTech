@@ -203,12 +203,16 @@ describe('enums y defaults', () => {
     }
   });
 
-  it('solo la desambiguación de marcas llega prendida; el resto queda en off', () => {
+  it('solo la desambiguación de marcas y el desempate de lectura llegan prendidos; el resto queda en off', () => {
     const live = DECISION_FEATURES.filter(
       (feature) => DECISION_FEATURE_DEFAULTS[feature].mode !== 'off',
     );
 
-    expect(live).toEqual([MARK_DISAMBIGUATION_FEATURES.jev, MARK_DISAMBIGUATION_FEATURES.openai]);
+    expect(live).toEqual([
+      MARK_DISAMBIGUATION_FEATURES.jev,
+      MARK_DISAMBIGUATION_FEATURES.openai,
+      'answer_reading_tiebreak',
+    ]);
     expect(DECISION_FEATURE_DEFAULTS.remedial_judge.mode).toBe('off');
   });
 
