@@ -60,6 +60,8 @@ const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [o
   --refresh                      Vuelve a pedir todo y reescribe el caché
   --out <dir>                    Carpeta de salida (por defecto una carpeta temporal)
   --dry-run                      Transcriptor falso que lee la etiqueta: no llama a ninguna API
+  --parar-en-tope                No rechaza la corrida si el peor caso supera --budget-usd:
+                                 la corrida se detiene antes de gastar más que el tope
   --offline                      Solo caché: nunca llama a una API; lo que falta queda como falla
   --ink <archivo.json>           Evidencia de tinta por muestra ({ id: { hasInk } }) para el
                                  blanco con evidencia de la lectura interpretada
@@ -74,7 +76,14 @@ const HELP = `Uso: pnpm --filter @soe/api answer-reading:eval --dataset <dir> [o
                                  escalamiento (tiebreakOn) las confirma
 `;
 
-const FLAGS = new Set(['dry-run', 'no-cache', 'refresh', 'injected-escalation', 'offline']);
+const FLAGS = new Set([
+  'dry-run',
+  'no-cache',
+  'refresh',
+  'injected-escalation',
+  'offline',
+  'parar-en-tope',
+]);
 
 function numberOption(value: string | undefined, name: string, fallback: number): number {
   if (value === undefined) return fallback;
@@ -133,6 +142,7 @@ function parseArgs(argv: readonly string[]): EvalCommandOptions {
     readerMinConfidence: thresholds ? parseReaderMinConfidence(thresholds) : null,
     injectedEscalation: flags.has('injected-escalation'),
     offline: flags.has('offline'),
+    stopAtBudget: flags.has('parar-en-tope'),
   };
 }
 
