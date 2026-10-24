@@ -82,6 +82,7 @@ import {
   readingCacheKey,
   type ReadingCacheKeyInput,
 } from './reading-cache';
+import { recoverAgreement, type RecoveryRule } from './recovery-rules';
 import { resolveSampleRoute, type ReaderMinConfidence, type RouteSet } from './route-set';
 import { textSimilarity } from './statistics';
 
@@ -106,6 +107,8 @@ export interface InterpretationSimulation {
   readonly decisionEngine: string;
   readonly decisionModel: string;
   readonly inkBySample?: ReadonlyMap<string, InkEvidence>;
+  readonly recoveryRules?: ReadonlySet<RecoveryRule>;
+  readonly recoveryAnchorProvider?: string;
 }
 
 export interface DecisionRecord {
@@ -125,6 +128,7 @@ export interface InterpretationUnitRecord {
   readonly crossSupport: string | null;
   readonly acceptance: string;
   readonly decision: DecisionRecord | null;
+  readonly recovery: RecoveryRule | null;
 }
 
 export interface SimulationBudget {
@@ -1335,17 +1339,33 @@ async function runInterpretedUnit(
     agreement = applyDecisionTiebreak(plan, decision.choice, policy.decisionTiebreak);
     decision = { ...decision, accepted: agreement !== null };
   }
-  const value = agreement ? agreedValue(agreement, sample.format) : null;
-  const scoring =
-    agreement?.kind === 'answer' && value
+  const scoreAgreement = (candidate: AcceptanceAgreement): ScoringOutcome | null =>
+    candidate.kind === 'answer'
       ? (closedSpaceScoring(
-          agreement,
+          candidate,
           acceptedAnswersOfSample(prepared),
           simulation.verify,
           sample.format,
           space,
-        ) ?? prepared.scorer.outcome(value))
+        ) ?? prepared.scorer.outcome(agreedValue(candidate, sample.format)))
       : null;
+  const recovered =
+    agreement === null && simulation.recoveryRules && simulation.recoveryRules.size > 0
+      ? recoverAgreement(
+          plan,
+          {
+            verify: simulation.verify,
+            format: sample.format,
+            space,
+            scoreOf: scoreAgreement,
+            anchorProvider: simulation.recoveryAnchorProvider ?? 'gemini',
+          },
+          simulation.recoveryRules,
+        )
+      : null;
+  if (recovered) agreement = recovered.agreement;
+  const value = agreement ? agreedValue(agreement, sample.format) : null;
+  const scoring = agreement?.kind === 'answer' && value ? scoreAgreement(agreement) : null;
   const acceptance = simulation.decideAcceptance({
     verified: plan.verified.flatMap((entry) => (entry ? [entry] : [])),
     agreement,
@@ -1413,6 +1433,7 @@ async function runInterpretedUnit(
         crossSupport: agreement?.kind === 'answer' ? agreement.crossSupport : null,
         acceptance: acceptance.action,
         decision,
+        recovery: recovered?.rule ?? null,
       },
     },
     readings: runs.map((run) => interpretedReadingRecord(run, prepared, repetition)),
